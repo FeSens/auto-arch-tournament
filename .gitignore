@@ -8,8 +8,11 @@ __pycache__/
 # Toolchain (downloaded by setup.sh)
 .toolchain/
 
-# Vendored as submodule (initialized in Phase 4)
-formal/riscv-formal/
+# Vendored as submodule (initialized in Phase 4). No trailing slash so the
+# pattern matches both the cloned directory in the main repo AND the
+# symlink that worktree.py creates inside each worktree (otherwise git
+# status flags the symlink as untracked and sandbox check trips).
+formal/riscv-formal
 
 # Formal run output (regenerated per run; surfaced via stdout to the orchestrator)
 formal/last_run.log
