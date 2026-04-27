@@ -85,6 +85,10 @@ async def _run(dut, program, dmem_init=None, max_cycles=200):
     dut.reset.value = 1
     dut.io_imemData.value = 0
     dut.io_dmemRData.value = 0
+    # Zero-wait bus model: ready always asserted. The stall-mode tests
+    # live in vex_main.cpp's --istall/--dstall flags, not in cocotb.
+    dut.io_imemReady.value = 1
+    dut.io_dmemReady.value = 1
     for _ in range(3):
         await RisingEdge(dut.clock)
 

@@ -34,8 +34,15 @@ module if_stage (
     next_pc = redirect ? redirect_target : pc + 32'd4;
   end
 
+  // Redirect must override stall: a BRANCH/JAL/JALR in EX may fire
+  // redirect on the same cycle as imem_stall or dmem_stall — without
+  // this priority the redirect target would be silently dropped, the
+  // PC would hold its old (wrong-path) value, and execution would
+  // resume on the wrong path once the bus unstalls. Verified by the
+  // VexRiscv-binary CoreMark sweep with --istall enabled.
   always_ff @(posedge clock) begin
-    if (reset)         pc <= RESET_PC;
+    if      (reset)    pc <= RESET_PC;
+    else if (redirect) pc <= redirect_target;
     else if (!stall)   pc <= next_pc;
   end
 

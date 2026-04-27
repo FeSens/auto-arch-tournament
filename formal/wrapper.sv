@@ -41,11 +41,17 @@ module rvfi_wrapper (
         .reset              (reset),
         .io_imemAddr        (imem_addr),
         .io_imemData        (imem_data),
+        // riscv-formal models a zero-wait imem/dmem (the symbolic stream
+        // is always available). Tying ready high keeps the formal SMT
+        // tractable; modeling random ready=0 would explode the
+        // search space without testing a property the framework checks.
+        .io_imemReady       (1'b1),
         .io_dmemAddr        (dmem_addr),
         .io_dmemWData       (dmem_wdata),
         .io_dmemRData       (dmem[dmem_addr[12:2]]),  // combinational read
         .io_dmemWEn         (dmem_wen),
         .io_dmemREn         (dmem_ren),
+        .io_dmemReady       (1'b1),
         .io_rvfi_valid      (rvfi_valid),
         .io_rvfi_order      (rvfi_order),
         .io_rvfi_insn       (rvfi_insn),

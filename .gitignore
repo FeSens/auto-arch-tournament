@@ -16,6 +16,7 @@ out/
 generated/
 sim_build/
 test/cosim/obj_dir/
+test/cosim/obj_dir_vex/
 test/cosim/sim_build/
 test/**/sim_build/
 test/*.result.xml

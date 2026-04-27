@@ -18,6 +18,15 @@
 module mem_stage (
   input  logic               clock,
   input  logic               reset,
+  // hold_wb: dmem stall is in effect. MEM/WB's data fields are RETAINED
+  // (so the previously-retired LOAD's `rd` / `read_data` / `ctrl.reg_write`
+  // remain visible to forward_unit), but `valid` is cleared so:
+  //   - rvfi_order doesn't increment for held cycles
+  //   - wb_stage doesn't write the regfile twice
+  // Zeroing the whole register would lose the LOAD's load_data, breaking
+  // MEM/WB->EX forwarding for any dependent instruction that's also held
+  // in ID/EX during the stall (e.g. a BNE that consumes a LOAD's result).
+  input  logic               hold_wb,
   // ex_mem_t carries branch_taken / branch_target / pc_next / rs?_val
   // for downstream RVFI use; mem_stage only consumes a subset, so the
   // remaining fields look unused from this module's perspective.
@@ -115,6 +124,12 @@ module mem_stage (
   always_ff @(posedge clock) begin
     if (reset) begin
       reg_q <= '0;
+    end else if (hold_wb) begin
+      // Clear valid (no double-retire / no double-regfile-write), but
+      // KEEP every other field. Forwarding from MEM/WB to a stalled
+      // dependent in ID/EX needs the held LOAD's rd/read_data/ctrl
+      // alive for as many cycles as the dmem stall lasts.
+      reg_q.valid <= 1'b0;
     end else begin
       reg_q.pc         <= in.pc;
       reg_q.alu_result <= in.alu_result;

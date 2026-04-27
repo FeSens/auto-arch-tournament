@@ -24,12 +24,24 @@ module core (
   // imem
   output logic [31:0] io_imemAddr,
   input  logic [31:0] io_imemData,
+  // imem bus backpressure. Drive 1 for zero-wait single-cycle BRAM (the
+  // V0 default). Drive 0 to model bus stall — PC reg holds, IF/ID
+  // payload becomes a NOP, and a pipeline bubble propagates downstream.
+  // Used by test/cosim/vex_main.cpp's --istall mode to match VexRiscv's
+  // random ~22% backpressure model so CoreMark/MHz can be compared
+  // apples-to-apples with their published "full no cache" number.
+  input  logic        io_imemReady,
   // dmem
   output logic [31:0] io_dmemAddr,
   input  logic [31:0] io_dmemRData,
   output logic [31:0] io_dmemWData,
   output logic [3:0]  io_dmemWEn,
   output logic        io_dmemREn,
+  // dmem bus backpressure. Drive 1 for zero-wait. Drive 0 to model
+  // dStall — when there is a memory op in EX/MEM, the entire pipeline
+  // freezes back to MEM; MEM/WB captures a bubble; the LOAD/STORE waits
+  // until the bus delivers.
+  input  logic        io_dmemReady,
   // RVFI
   output logic        io_rvfi_valid,
   output logic [63:0] io_rvfi_order,
@@ -62,6 +74,7 @@ module core (
 
   // hazard / forward
   logic       stall_if, stall_id, flush_if, flush_id;
+  logic       stall_ex_mem, hold_mem_wb;
   logic [1:0] fwd_rs1_sel, fwd_rs2_sel;
 
   // EX redirect
@@ -120,6 +133,7 @@ module core (
   ex_stage u_ex (
     .clock           (clock),
     .reset           (reset),
+    .stall           (stall_ex_mem),
     .in              (id_ex_w),
     .fwd_rs1_sel     (fwd_rs1_sel),
     .fwd_rs2_sel     (fwd_rs2_sel),
@@ -134,6 +148,7 @@ module core (
   mem_stage u_mem (
     .clock      (clock),
     .reset      (reset),
+    .hold_wb    (hold_mem_wb),
     .in         (ex_mem_w),
     .dmem_addr  (io_dmemAddr),
     .dmem_wdata (io_dmemWData),
@@ -158,10 +173,15 @@ module core (
     .if_id_rs1      (if_id_w.instr[19:15]),
     .if_id_rs2      (if_id_w.instr[24:20]),
     .redirect       (redirect),
+    .imem_ready     (io_imemReady),
+    .dmem_ready     (io_dmemReady),
+    .ex_mem_mem_op  (ex_mem_w.ctrl.mem_read | ex_mem_w.ctrl.mem_write),
     .stall_if       (stall_if),
     .stall_id       (stall_id),
     .flush_if       (flush_if),
-    .flush_id       (flush_id)
+    .flush_id       (flush_id),
+    .stall_ex_mem   (stall_ex_mem),
+    .hold_mem_wb    (hold_mem_wb)
   );
 
   forward_unit u_fwd (

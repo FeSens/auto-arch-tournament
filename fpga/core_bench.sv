@@ -67,11 +67,16 @@ module core_bench (
     .reset            (reset),
     .io_imemAddr      (imem_addr),
     .io_imemData      (lfsr),                  // LFSR drives instr fetch
+    // FPGA target uses 1-cycle BRAM, modelled here as zero-wait. The
+    // ready ports exist only so the cosim's stall-mode (vex_main.cpp)
+    // can drive them; on silicon they're permanently asserted.
+    .io_imemReady     (1'b1),
     .io_dmemAddr      (dmem_addr),
     .io_dmemWData     (dmem_wdata),
     .io_dmemRData     (dmem_rdata),
     .io_dmemWEn       (dmem_wen),
     .io_dmemREn       (dmem_ren),
+    .io_dmemReady     (1'b1),
     .io_rvfi_valid    (rvfi_valid),
     .io_rvfi_order    (rvfi_order),
     .io_rvfi_insn     (rvfi_insn),

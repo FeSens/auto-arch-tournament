@@ -69,6 +69,11 @@ int main(int argc, char** argv) {
     Verilated::commandArgs(argc, argv);
     Vcore* top = new Vcore;
     top->reset = 1; top->clock = 0;
+    // Zero-wait BRAM: the bus is always ready. Stall modeling lives in
+    // test/cosim/vex_main.cpp (its --istall / --dstall flags) for the
+    // VexRiscv apples-to-apples comparison.
+    top->io_imemReady = 1;
+    top->io_dmemReady = 1;
     for(int i=0;i<5;i++){top->clock=0;top->eval();top->clock=1;top->eval();}
     top->reset = 0;
 

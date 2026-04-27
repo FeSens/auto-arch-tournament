@@ -15,6 +15,7 @@
 module ex_stage (
   input  logic               clock,
   input  logic               reset,
+  input  logic               stall,         // freeze EX/MEM register (dmem stall)
   input  id_ex_t   in,
   input  logic [1:0]         fwd_rs1_sel,
   input  logic [1:0]         fwd_rs2_sel,
@@ -117,6 +118,10 @@ module ex_stage (
   always_ff @(posedge clock) begin
     if (reset) begin
       reg_q <= '0;
+    end else if (stall) begin
+      // dmem stall: hold the EX/MEM register so the in-flight LOAD/STORE
+      // stays in MEM stage waiting on the bus.
+      reg_q <= reg_q;
     end else begin
       reg_q.pc            <= in.pc;
       // For JAL/JALR, the rd_wdata is PC+4 (return address), not the ALU's
