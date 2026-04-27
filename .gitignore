@@ -18,6 +18,8 @@ sim_build/
 test/cosim/obj_dir/
 test/cosim/sim_build/
 test/**/sim_build/
+test/*.result.xml
+test/results.xml
 *.vcd
 *.fst
 *.gtkw

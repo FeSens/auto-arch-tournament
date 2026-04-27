@@ -22,16 +22,17 @@ help:
 	@echo "  make clean      — remove build artifacts and worktrees"
 
 # verilator lint over rtl/. Empty rtl/ is fine — phase 0 acceptance.
+# -Wno-MULTITOP: until phase 2's core.sv lands and instantiates everything,
+# rtl/ legitimately has multiple top modules. Drop this once phase 2 is in.
 lint:
 	@if ls rtl/*.sv >/dev/null 2>&1; then \
-	  verilator --lint-only -Wall -sv rtl/*.sv; \
+	  verilator --lint-only -Wall -Wno-MULTITOP -sv rtl/*.sv; \
 	else \
 	  echo "lint: no source files in rtl/ (phase 0 — expected)"; \
 	fi
 
 test:
-	@echo "TODO (phase 1+): pytest test/"
-	@false
+	pytest -v test/
 
 cosim:
 	@echo "TODO (phase 3): python3 -m tools.eval.cosim ."
