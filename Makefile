@@ -64,16 +64,13 @@ generated/synth.json: $(wildcard rtl/*.sv) fpga/core_bench.sv fpga/scripts/synth
 	yosys -c fpga/scripts/synth.tcl
 
 next:
-	@echo "TODO (phase 7): python3 -m tools.orchestrator --iterations 1"
-	@false
+	python3 -m tools.orchestrator --iterations 1
 
 loop:
-	@echo "TODO (phase 7): python3 -m tools.orchestrator --iterations $(N)"
-	@false
+	python3 -m tools.orchestrator --iterations $(N)
 
 report:
-	@echo "TODO (phase 7): python3 -m tools.orchestrator --report"
-	@false
+	python3 -m tools.orchestrator --report
 
 clean:
 	rm -rf test/cosim/obj_dir test/cosim/sim_build sim_build out

@@ -15,7 +15,7 @@ import subprocess, json, sys
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-SIM_BIN  = "chisel/test/cosim/obj_dir/cosim_sim"
+SIM_BIN  = "test/cosim/obj_dir/cosim_sim"
 BENCH_DIR = Path("bench/programs")
 
 def run_one(elf: Path, sim_bin: str, worktree: str) -> dict:
@@ -23,7 +23,7 @@ def run_one(elf: Path, sim_bin: str, worktree: str) -> dict:
     try:
         worktree_path = Path(worktree).resolve()
         result = subprocess.run(
-            [sys.executable, str(worktree_path / "chisel/test/cosim/run_cosim.py"),
+            [sys.executable, str(worktree_path / "test/cosim/run_cosim.py"),
              sim_bin, str(elf)],
             capture_output=True, text=True, timeout=120, cwd=worktree_path
         )

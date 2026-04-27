@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["id","title","category","outcome","formal_passed","cosim_passed"],
+  "properties": {
+    "id":       {"type": "string"},
+    "title":    {"type": "string"},
+    "category": {"type": "string"},
+    "outcome":  {"type": "string", "enum": ["improvement","regression","broken","placement_failed"]},
+    "fitness":       {"type": ["number","null"]},
+    "delta_pct":     {"type": ["number","null"]},
+    "vs_baseline":   {"type": ["number","null"]},
+    "fmax_mhz":      {"type": ["number","null"]},
+    "ipc_coremark":  {"type": ["number","null"]},
+    "lut4":          {"type": ["integer","null"]},
+    "ff":            {"type": ["integer","null"]},
+    "seeds":         {"type": ["array","null"]},
+    "formal_passed": {"type": "boolean"},
+    "cosim_passed":  {"type": "boolean"},
+    "error":         {"type": ["string","null"]},
+    "implementation_notes": {"type": ["string","null"]}
+  }
+}
