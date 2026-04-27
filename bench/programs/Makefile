@@ -10,8 +10,12 @@ CC      := $(CROSS)-gcc
 #   harder to inflate via register-resident working sets.
 # - COREMARK_OPT: gcc optimization. -O3 is the standard CoreMark publication
 #   flag; -O2 is what the V0 baseline used.
-COREMARK_SIZE ?= 6000
-COREMARK_OPT  ?= -O2
+# Defaults match VexRiscv's published CoreMark methodology so the
+# orchestrator's fitness number is directly comparable to public CoreMark
+# results. To override (e.g. for the prior 6K -O2 V0 baseline):
+#     make bench/programs/coremark.elf COREMARK_SIZE=6000 COREMARK_OPT=-O2
+COREMARK_SIZE ?= 2000
+COREMARK_OPT  ?= -O3
 
 CFLAGS  := -march=rv32im -mabi=ilp32 $(COREMARK_OPT) -static -nostartfiles \
            -specs=nano.specs -specs=nosys.specs \

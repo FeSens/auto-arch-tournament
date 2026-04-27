@@ -5,19 +5,26 @@ from pathlib import Path
 SEEDS = [1, 2, 3]
 NEXTPNR_SCRIPT = "fpga/scripts/nextpnr_run.sh"
 PORTME_H = "bench/programs/coremark/baremetal/core_portme.h"
-# Canonical 6K-config CoreMark CRCs for our seed config (see core_portme.c
-# seed1=0, seed2=0, seed3=0x66, seed5=7). Mismatches at any of these
-# constitute a benchmark failure regardless of "Correct operation
-# validated." in the UART. crcfinal is the fingerprint of the entire
-# benchmark run; crclist/matrix/state validate the individual algorithm
-# outputs.
+# Canonical 2K-config CoreMark CRCs (the EEMBC-published reporting size,
+# what VexRiscv et al. use). Bench Makefile defaults match: 2K data,
+# -O3, ITERATIONS=10. Verified against VexRiscv's pre-compiled
+# coremark_rv32im.bin — same seedcrc/crclist/crcmatrix/crcstate, same
+# crcfinal. Mismatch at any of these is a benchmark failure.
 COREMARK_EXPECTED = {
-    'seedcrc':   0x8a02,
-    'crclist':   0xd4b0,
-    'crcmatrix': 0xbe52,
-    'crcstate':  0x5e47,
-    'crcfinal':  0x273b,
+    'seedcrc':   0xe9f5,
+    'crclist':   0xe714,
+    'crcmatrix': 0x1fd7,
+    'crcstate':  0x8e3a,
+    'crcfinal':  0xfcaf,
 }
+# CoreMark sim flags: random ~22% imem+dmem backpressure (matching
+# VexRiscv's iStall/dStall regression model — see
+# VexRiscv/src/test/cpp/regression/main.cpp:2079). Without these the
+# fitness number reflects a zero-wait fantasy bus that's impossible to
+# build, and an apples-to-apples comparison with public CoreMark numbers
+# becomes meaningless (cf. our V0 hitting "2.87 CM/MHz" zero-wait vs
+# "2.21" with stalls; the latter is the honest microarch number).
+COREMARK_SIM_FLAGS = ["--bench", "--istall", "--dstall"]
 # Min seed successes needed to call placement "good". V0 runs 3 nextpnr
 # seeds; if 2+ fail to place, the design is fragile/bloated/broken and
 # the median of a single survivor is not a real signal.
@@ -77,11 +84,11 @@ def run_coremark_ipc(worktree: str) -> dict:
     worktree_path = Path(worktree).resolve()
     sim_bin = str(worktree_path / "test/cosim/obj_dir/cosim_sim")
     elf     = str(worktree_path / "bench/programs/coremark.elf")
-    # 500M cycle ceiling: canonical 6K CoreMark needs ~247M cycles for 100 iter
-    # at ~0.85 IPC. 500M gives ~2× headroom for slower candidates.
+    # 50M cycle ceiling: 2K CoreMark with ITERATIONS=10 + iStall+dStall
+    # needs ~5M cycles. 50M gives 10x headroom for slower candidates.
     try:
         result = subprocess.run(
-            [sim_bin, elf, "500000000", "--bench"],
+            [sim_bin, elf, "50000000"] + COREMARK_SIM_FLAGS,
             capture_output=True, text=True, timeout=600
         )
     except (subprocess.TimeoutExpired, OSError) as e:

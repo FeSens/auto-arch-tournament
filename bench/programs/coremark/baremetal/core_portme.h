@@ -2,8 +2,13 @@
 #include <stdint.h>
 #include <stddef.h>
 
+/* ITERATIONS=10 matches VexRiscv's regression default. With our cosim's
+ * deterministic timing, even a single iteration would suffice for a stable
+ * cycle count, but 10 keeps the bracket large enough that any setup-cost
+ * jitter is amortized to noise level. The whole-run cycle budget at 10
+ * iters with iStall+dStall is ~5M cycles. */
 #ifndef ITERATIONS
-#define ITERATIONS    100
+#define ITERATIONS    10
 #endif
 /* TOTAL_DATA_SIZE is overridable from the Makefile via -DTOTAL_DATA_SIZE=…
  * Default here matches V0's "harder" 6K config (~2000 bytes per algorithm).

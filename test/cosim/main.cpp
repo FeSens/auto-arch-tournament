@@ -45,13 +45,41 @@ void ww(uint8_t* m, uint32_t a, uint32_t v, uint8_t mask) {
     for(int i=0;i<4;i++) if((mask>>i)&1) m[a+i]=(v>>(i*8))&0xFF;
 }
 
+// VexRiscv-style random bus backpressure model (regression/main.cpp:2079).
+// xorshift7 LFSR; accept request when (state & 0x7F) < 100 (~78% accept,
+// ~22% stall). Replicating exactly so CoreMark/MHz numbers from this
+// cosim are directly comparable to VexRiscv's published "full no cache,
+// 2.30" — which is measured under iStall+dStall enabled.
+static uint32_t lfsr_state_main = 0xDEADBEEFu;
+static bool bus_accepts_main() {
+    lfsr_state_main ^= lfsr_state_main << 13;
+    lfsr_state_main ^= lfsr_state_main >> 17;
+    lfsr_state_main ^= lfsr_state_main << 5;
+    return (lfsr_state_main & 0x7Fu) < 100u;
+}
+
 int main(int argc, char** argv) {
-    if(argc < 2) { std::cerr << "usage: sim <elf> [maxcycles] [--bench]\n"; return 1; }
+    if(argc < 2) {
+        std::cerr << "usage: sim <elf> [maxcycles] [--bench] [--istall] [--dstall] [--seed N]\n";
+        return 1;
+    }
     uint64_t maxcycles = argc > 2 ? atoll(argv[2]) : 50000000ULL;
-    // --bench: suppress per-retirement output; print only the final record at exit.
-    // Use for performance measurement to avoid pipe-throttling on large runs.
+    // --bench:  suppress per-retirement output; print only the final record.
+    // --istall: random ~22% imem-bus backpressure (VexRiscv-style).
+    // --dstall: same on dmem bus. The orchestrator's fitness eval
+    //           (tools/eval/fpga.py:run_coremark_ipc) passes BOTH so the
+    //           CoreMark/MHz number we score against matches VexRiscv's
+    //           published methodology rather than a zero-wait fantasy bus.
     bool bench_mode = false;
-    for (int i = 1; i < argc; i++) { if (std::strcmp(argv[i], "--bench") == 0) bench_mode = true; }
+    bool istall = false;
+    bool dstall = false;
+    for (int i = 1; i < argc; i++) {
+        if      (std::strcmp(argv[i], "--bench")  == 0) bench_mode = true;
+        else if (std::strcmp(argv[i], "--istall") == 0) istall     = true;
+        else if (std::strcmp(argv[i], "--dstall") == 0) dstall     = true;
+        else if (std::strcmp(argv[i], "--seed")   == 0 && i + 1 < argc)
+            lfsr_state_main = (uint32_t)atoll(argv[++i]);
+    }
 
     ELF elf; elf.load(argv[1]);
     for(int i=0;i<elf.phnum();i++){
@@ -69,9 +97,6 @@ int main(int argc, char** argv) {
     Verilated::commandArgs(argc, argv);
     Vcore* top = new Vcore;
     top->reset = 1; top->clock = 0;
-    // Zero-wait BRAM: the bus is always ready. Stall modeling lives in
-    // test/cosim/vex_main.cpp (its --istall / --dstall flags) for the
-    // VexRiscv apples-to-apples comparison.
     top->io_imemReady = 1;
     top->io_dmemReady = 1;
     for(int i=0;i<5;i++){top->clock=0;top->eval();top->clock=1;top->eval();}
@@ -87,6 +112,12 @@ int main(int argc, char** argv) {
     bool     bench_start_set = false, bench_stop_set = false;
     for(uint64_t cycle=0; cycle<maxcycles; cycle++) {
         top->clock = 0;
+        // Bus backpressure. Same VexRiscv-style ~22% accept-fail rate on
+        // both imem and dmem when the corresponding flag is on. Drives 1
+        // (zero-wait) by default so existing selftest cosim runs aren't
+        // slowed down by unrelated stalls.
+        top->io_imemReady = istall ? bus_accepts_main() : 1;
+        top->io_dmemReady = dstall ? bus_accepts_main() : 1;
         // Bounds checks: silent wraparound used to mask CPU effective-address bugs
         // (both sim and reference aliased identically, so cosim would still pass).
         // Flag OOB so the testbench reports it and returns non-zero.
@@ -98,7 +129,9 @@ int main(int argc, char** argv) {
         //     UART reads flag oob and return 0.
         //   - dmem write: UART range is allowed (TX); BENCH_START/STOP are
         //     allowed (markers); anything else outside dmem is OOB (handled
-        //     in the post-clock write block below).
+        //     in the dmem-write block below — kept BEFORE the clock posedge so
+        //     a STORE that's accepted on the cycle dmem_ready transitions
+        //     0->1 doesn't disappear when EX/MEM advances at posedge).
         if (!in_mem_range(top->io_imemAddr)) oob_access = true;
         top->io_imemData  = rw(imem, top->io_imemAddr);
         if (in_mem_range(top->io_dmemAddr)) {
@@ -108,9 +141,12 @@ int main(int argc, char** argv) {
             if (top->io_dmemREn) oob_access = true;
         }
         top->eval();
-        top->clock = 1; top->eval();
 
-        if(top->io_dmemWEn) {
+        // Process dmem writes BEFORE the clock posedge — see the matching
+        // commit on test/cosim/vex_main.cpp for the timing-bug rationale:
+        // post-posedge sampling drops STOREs that get accepted on the
+        // cycle dmem_ready transitions 0 -> 1.
+        if(top->io_dmemWEn && top->io_dmemReady) {
             // MMIO UART at 0x10000000: capture to uart_buf, don't route to dmem
             // (a non-gated ww() would wrap 0x10000000 to dmem[0] and corrupt it).
             // BENCH_START/BENCH_STOP markers at 0x10000100 / 0x10000104: record
@@ -137,6 +173,8 @@ int main(int argc, char** argv) {
                 oob_access = true;
             }
         }
+
+        top->clock = 1; top->eval();
 
         if(top->io_rvfi_valid) {
             char buf[640];

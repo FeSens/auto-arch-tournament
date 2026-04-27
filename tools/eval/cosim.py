@@ -49,9 +49,13 @@ def run_coremark_crc(coremark_elf: Path, sim_bin: str, worktree: str) -> dict:
     # Late import so fpga.py's asyncio/statistics deps aren't required for
     # projects that only run cosim.
     from tools.eval.fpga import validate_coremark_uart, parse_iterations
+    # Stall flags match the orchestrator's fitness eval so the CRC validation
+    # gate exercises the same workload that fpga.py scores. See
+    # tools/eval/fpga.py:COREMARK_SIM_FLAGS for the rationale.
     try:
         result = subprocess.run(
-            [sim_bin, str(coremark_elf), "500000000", "--bench"],
+            [sim_bin, str(coremark_elf), "50000000",
+             "--bench", "--istall", "--dstall"],
             capture_output=True, text=True, timeout=600,
             cwd=Path(worktree).resolve(),
         )
