@@ -2,7 +2,9 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#ifndef ITERATIONS
 #define ITERATIONS    100
+#endif
 /* TOTAL_DATA_SIZE is overridable from the Makefile via -DTOTAL_DATA_SIZE=…
  * Default here matches V0's "harder" 6K config (~2000 bytes per algorithm).
  * EEMBC's canonical reporting config is 2000 (~666 bytes per algorithm),
