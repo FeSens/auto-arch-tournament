@@ -1,6 +1,11 @@
-"""Invokes claude -p in the worktree to implement a hypothesis."""
-import json, subprocess, threading, yaml
+"""Invokes the active agent runtime (codex by default; claude opt-in via
+AGENT_PROVIDER) in the worktree to implement a hypothesis."""
+import subprocess, yaml
 from pathlib import Path
+from tools.agents._runtime import (
+    build_agent_cmd,
+    run_agent_streaming,
+)
 
 CLAUDE_TIMEOUT_SEC = 600*3  # 10 min watchdog on the implementation agent
 
@@ -86,92 +91,21 @@ Advisory file changes (you may deviate, add, rename, or restructure freely):
 Use your Edit, Write, Read, and Bash tools freely."""
 
 
-def _summarize_event(line: str) -> str | None:
-    """Best-effort one-liner from a stream-json NDJSON event.
-
-    Returns a human-readable summary for tool_use events; None for events
-    we don't want to echo to the orchestrator's terminal (text deltas,
-    system messages, etc.). Failures here MUST NOT raise — the .claude.log
-    file is the authoritative record.
-    """
-    try:
-        ev = json.loads(line)
-    except json.JSONDecodeError:
-        return None
-    if ev.get('type') != 'assistant':
-        return None
-    for c in ev.get('message', {}).get('content', []) or []:
-        if not isinstance(c, dict):
-            continue
-        if c.get('type') == 'tool_use':
-            inp = c.get('input') or {}
-            target = (inp.get('file_path')
-                      or inp.get('command')
-                      or inp.get('description')
-                      or inp.get('pattern')
-                      or '')
-            if isinstance(target, str) and len(target) > 80:
-                target = target[:77] + '...'
-            return f"{c.get('name', '?')}: {target}".rstrip(': ').strip()
-    return None
-
-
-def _run_claude_streaming(cmd: list, cwd: str, log_path: Path,
-                          timeout_sec: int, mode: str = "w") -> tuple[int, bool]:
-    """Run claude -p with NDJSON streaming, watchdog, and one-line summaries.
-
-    Returns (returncode, timed_out). Caller decides retry/fail.
-
-    Duplicated across tools/agents/hypothesis.py and tools/agents/implement.py
-    so neither module imports a private symbol from the other (same rationale
-    as the existing _summarize_event duplication).
-    """
-    proc = subprocess.Popen(
-        cmd, cwd=cwd,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        text=True, bufsize=1,
-    )
-    timed_out = {'flag': False}
-
-    def watchdog():
-        try:
-            proc.wait(timeout=timeout_sec)
-        except subprocess.TimeoutExpired:
-            timed_out['flag'] = True
-            proc.kill()
-
-    threading.Thread(target=watchdog, daemon=True).start()
-
-    with log_path.open(mode) as log:
-        for line in proc.stdout:
-            log.write(line)
-            log.flush()
-            try:
-                summary = _summarize_event(line)
-            except Exception:
-                summary = None
-            if summary:
-                print(f"  [claude] {summary}", flush=True)
-    proc.wait()
-    return proc.returncode, timed_out['flag']
-
-
 def run_implementation_agent(hypothesis_path: str, worktree: str) -> bool:
     """
-    Invokes claude -p in the worktree to implement the hypothesis.
+    Invokes the active agent runtime in the worktree to implement the hypothesis.
 
-    Streams claude's output to <worktree>/.claude.log so phase 2 progress
+    Streams agent output to <worktree>/.agent.log so phase 2 progress
     is observable via `tail -f` from another terminal. The default
     `claude -p` (text mode) buffers everything until the final response,
     which makes a 5-15 minute architectural-change agent look frozen.
     --output-format stream-json emits NDJSON tool-use events as they
     happen, so each Edit/Write/Bash lands in the log within ~1 second
-    of the model dispatching it.
+    of the model dispatching it. Codex streams its output similarly.
 
     A best-effort one-liner per tool_use is also echoed to the
-    orchestrator's terminal — if claude changes the event shape, that
-    echo silently degrades but the raw NDJSON in .claude.log stays
+    orchestrator's terminal — if the provider changes the event shape,
+    that echo silently degrades but the raw log in .agent.log stays
     authoritative.
 
     Returns True if the post-implementation verilator lint succeeds.
@@ -180,28 +114,27 @@ def run_implementation_agent(hypothesis_path: str, worktree: str) -> bool:
         hypothesis = yaml.safe_load(f)
 
     prompt = _build_prompt(hypothesis, worktree)
-    log_path = Path(worktree) / ".claude.log"
-
-    cmd = [
-        "claude", "-p", prompt,
-        "--dangerously-skip-permissions",
-        "--output-format", "stream-json",
-        "--verbose",
-    ]
-    rc, timed_out = _run_claude_streaming(
+    log_path = Path(worktree) / ".agent.log"
+    last_msg = Path(worktree) / ".agent.last"
+    cmd = build_agent_cmd(
+        prompt, cwd=worktree,
+        output_last_message=last_msg,
+        enable_search=False,  # implementation runs in the worktree, no search
+    )
+    rc, timed_out = run_agent_streaming(
         cmd, cwd=worktree, log_path=log_path, timeout_sec=CLAUDE_TIMEOUT_SEC,
     )
     if rc != 0 and not timed_out:
         # See hypothesis.py for the append-on-retry rationale.
-        print(f"  [claude] non-zero exit ({rc}); retrying once", flush=True)
+        print(f"  [agent] non-zero exit ({rc}); retrying once", flush=True)
         with log_path.open("a") as log:
             log.write(f'\n{{"type":"retry_marker","first_rc":{rc}}}\n')
-        rc, timed_out = _run_claude_streaming(
+        rc, timed_out = run_agent_streaming(
             cmd, cwd=worktree, log_path=log_path, timeout_sec=CLAUDE_TIMEOUT_SEC,
             mode="a",
         )
     if timed_out:
-        print(f"  [claude] TIMEOUT after {CLAUDE_TIMEOUT_SEC}s — process killed",
+        print(f"  [agent] TIMEOUT after {CLAUDE_TIMEOUT_SEC}s — process killed",
               flush=True)
 
     # Lint as the smoke gate. Subsequent eval gates (formal, cosim, fpga)

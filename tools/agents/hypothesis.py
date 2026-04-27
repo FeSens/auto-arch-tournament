@@ -1,17 +1,22 @@
-"""Invokes claude -p to generate a hypothesis. Writes experiments/hypotheses/hyp-{id}.yaml.
+"""Invokes the active agent runtime (codex by default; claude opt-in via
+AGENT_PROVIDER) to generate a hypothesis. Writes
+experiments/hypotheses/hyp-{id}.yaml.
 
-The agent runs with --dangerously-skip-permissions in the main repo, so
-this module brackets the call with a sandbox check: any path it touches
+The agent runs with workspace-write sandbox in the main repo, so this
+module brackets the call with a sandbox check: any path it touches
 outside experiments/hypotheses/ is reverted and the run is rejected.
-Without that, a misbehaving hypothesis agent could silently patch tools/,
-schemas/, etc., and those changes would persist into every subsequent
-worktree.
+Without that, a misbehaving agent could silently patch tools/, schemas/,
+etc., and those changes would persist into every subsequent worktree.
 """
-import subprocess, json, re, datetime, hashlib, threading
+import subprocess, json, re, datetime
 from pathlib import Path
+from tools.agents._runtime import (
+    build_agent_cmd,
+    run_agent_streaming,
+)
 
 HYPOTHESES_DIR = Path("experiments/hypotheses")
-HYPOTHESIS_LOG = HYPOTHESES_DIR / ".claude.log"
+HYPOTHESIS_LOG = HYPOTHESES_DIR / ".agent.log"
 
 # Wall-clock cap on hypothesis generation. Same shape as implement.py's
 # CLAUDE_TIMEOUT_SEC. Hypothesis generation reads rtl/ + ARCHITECTURE.md
@@ -21,78 +26,9 @@ HYPOTHESIS_LOG = HYPOTHESES_DIR / ".claude.log"
 HYPOTHESIS_TIMEOUT_SEC = 1200
 
 
-def _summarize_event(line: str) -> str | None:
-    """Best-effort one-liner from a stream-json NDJSON event.
-
-    Mirror of tools/agents/implement.py:_summarize_event — same shape,
-    duplicated so neither module needs to import a private symbol from
-    the other. Failures must NOT raise; .claude.log is authoritative.
-    """
-    try:
-        ev = json.loads(line)
-    except json.JSONDecodeError:
-        return None
-    if ev.get('type') != 'assistant':
-        return None
-    for c in ev.get('message', {}).get('content', []) or []:
-        if not isinstance(c, dict):
-            continue
-        if c.get('type') == 'tool_use':
-            inp = c.get('input') or {}
-            target = (inp.get('file_path')
-                      or inp.get('command')
-                      or inp.get('description')
-                      or inp.get('pattern')
-                      or '')
-            if isinstance(target, str) and len(target) > 80:
-                target = target[:77] + '...'
-            return f"{c.get('name', '?')}: {target}".rstrip(': ').strip()
-    return None
-
 # Same allow-list spirit as orchestrator.path_is_allowed but scoped to the
 # hypothesis-agent's job: it should ONLY add a YAML in experiments/hypotheses/.
 HYP_ALLOWED = re.compile(r"^experiments/hypotheses/[^/]+\.(yaml|yml)$")
-
-
-def _run_claude_streaming(cmd: list, cwd: str, log_path: Path,
-                          timeout_sec: int, mode: str = "w") -> tuple[int, bool]:
-    """Run claude -p with NDJSON streaming, watchdog, and one-line summaries.
-
-    Returns (returncode, timed_out). Caller decides retry/fail.
-
-    Duplicated across tools/agents/hypothesis.py and tools/agents/implement.py
-    so neither module imports a private symbol from the other (same rationale
-    as the existing _summarize_event duplication).
-    """
-    proc = subprocess.Popen(
-        cmd, cwd=cwd,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        text=True, bufsize=1,
-    )
-    timed_out = {'flag': False}
-
-    def watchdog():
-        try:
-            proc.wait(timeout=timeout_sec)
-        except subprocess.TimeoutExpired:
-            timed_out['flag'] = True
-            proc.kill()
-
-    threading.Thread(target=watchdog, daemon=True).start()
-
-    with log_path.open(mode) as log:
-        for line in proc.stdout:
-            log.write(line)
-            log.flush()
-            try:
-                summary = _summarize_event(line)
-            except Exception:
-                summary = None
-            if summary:
-                print(f"  [claude] {summary}", flush=True)
-    proc.wait()
-    return proc.returncode, timed_out['flag']
 
 
 def _whitelist_regex(allowed_yaml_ids: list[str]) -> 're.Pattern':
@@ -199,7 +135,7 @@ def run_hypothesis_agent(log_tail: list, current_fitness: float,
                          hyp_id: str | None = None,
                          allowed_yaml_ids: list[str] | None = None,
                          category_hint: str | None = None) -> str:
-    """Invokes claude -p and returns path to written hypothesis YAML.
+    """Invokes the active agent runtime and returns path to written hypothesis YAML.
 
     Sandbox: if the agent touches anything outside the round's whitelist
     (default: any YAML in experiments/hypotheses/), revert those changes
@@ -221,38 +157,38 @@ def run_hypothesis_agent(log_tail: list, current_fitness: float,
                            hyp_id=hyp_id, category_hint=category_hint)
     allow_re = _whitelist_regex(allowed_yaml_ids or [])
 
-    # Stream claude output to experiments/hypotheses/.claude.log so Phase 1
+    # Stream agent output to experiments/hypotheses/.agent.log so Phase 1
     # progress is observable via `tail -f`. Default `claude -p` (text mode)
     # buffers everything until the final response, which makes hypothesis
     # generation look frozen for ~5-10 minutes while the model reads the
     # full rtl/, ARCHITECTURE.md, CLAUDE.md, and the experiment log. The
-    # file is gitignored by the global `.claude.log` rule so it does not
+    # file is gitignored by the global `.agent.log` rule so it does not
     # trip the sandbox check below.
     HYPOTHESES_DIR.mkdir(parents=True, exist_ok=True)
-    cmd = [
-        "claude", "-p", prompt,
-        "--dangerously-skip-permissions",
-        "--output-format", "stream-json",
-        "--verbose",
-    ]
-    rc, timed_out = _run_claude_streaming(
+    # Codex needs an output-last-message file; claude ignores it.
+    last_msg = HYPOTHESES_DIR / f".agent.{hyp_id}.last" if hyp_id else HYPOTHESES_DIR / ".agent.last"
+    cmd = build_agent_cmd(
+        prompt, cwd=".",
+        output_last_message=last_msg,
+        enable_search=True,  # hypothesis-gen benefits from search
+    )
+    rc, timed_out = run_agent_streaming(
         cmd, cwd=".", log_path=HYPOTHESIS_LOG, timeout_sec=HYPOTHESIS_TIMEOUT_SEC,
     )
     if rc != 0 and not timed_out:
-        # Single retry. 429s and transient API errors are the most common
-        # cause; a stuck-bug or wall-clock overrun (timed_out) we don't retry.
-        # Append (not truncate) on retry so the first attempt's NDJSON —
-        # often the actual 429 evidence we want to debug — is preserved.
-        print(f"  [claude] non-zero exit ({rc}); retrying once", flush=True)
+        # Single retry. Append (not truncate) so the first attempt's stream
+        # — often the actual rate-limit/error evidence we want to debug —
+        # is preserved alongside the retry's.
+        print(f"  [agent] non-zero exit ({rc}); retrying once", flush=True)
         with HYPOTHESIS_LOG.open("a") as log:
             log.write(f'\n{{"type":"retry_marker","first_rc":{rc}}}\n')
-        rc, timed_out = _run_claude_streaming(
+        rc, timed_out = run_agent_streaming(
             cmd, cwd=".", log_path=HYPOTHESIS_LOG, timeout_sec=HYPOTHESIS_TIMEOUT_SEC,
             mode="a",
         )
 
     if timed_out:
-        print(f"  [claude] TIMEOUT after {HYPOTHESIS_TIMEOUT_SEC}s — process killed",
+        print(f"  [agent] TIMEOUT after {HYPOTHESIS_TIMEOUT_SEC}s — process killed",
               flush=True)
     elif rc != 0:
         raise subprocess.CalledProcessError(rc, cmd)
