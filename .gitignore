@@ -11,6 +11,9 @@ __pycache__/
 # Vendored as submodule (initialized in Phase 4)
 formal/riscv-formal/
 
+# Formal run output (regenerated per run; surfaced via stdout to the orchestrator)
+formal/last_run.log
+
 # Build artifacts
 out/
 generated/

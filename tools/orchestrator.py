@@ -202,11 +202,17 @@ def run_iteration(iteration: int, log: list, fixed_hyp_path: str = None) -> dict
     if not emit_verilog(worktree):
         return log_broken("build_failed")
 
-    # 6. Formal gate
+    # 6. Formal gate. On failure, include both the failing check name and
+    # the tail of run_all.sh stdout (which now contains the failing check's
+    # logfile.txt tail, see formal/run_all.sh fail-path) so log.jsonl has
+    # an actual diagnostic instead of just "formal_failed: insn_xor_ch0".
     print("Phase 4: riscv-formal...")
     formal = run_formal(worktree)
     if not formal['passed']:
-        return log_broken("formal_failed", formal.get('failed_check',''))
+        check  = formal.get('failed_check', '')
+        detail = formal.get('detail', '')
+        msg    = f"{check}\n{detail}".strip() if detail else check
+        return log_broken("formal_failed", msg)
 
     # 7. Cosim gate
     print("Phase 5: Cosim...")
