@@ -11,6 +11,36 @@ import subprocess, json, re, datetime, hashlib
 from pathlib import Path
 
 HYPOTHESES_DIR = Path("experiments/hypotheses")
+HYPOTHESIS_LOG = HYPOTHESES_DIR / ".claude.log"
+
+
+def _summarize_event(line: str) -> str | None:
+    """Best-effort one-liner from a stream-json NDJSON event.
+
+    Mirror of tools/agents/implement.py:_summarize_event — same shape,
+    duplicated so neither module needs to import a private symbol from
+    the other. Failures must NOT raise; .claude.log is authoritative.
+    """
+    try:
+        ev = json.loads(line)
+    except json.JSONDecodeError:
+        return None
+    if ev.get('type') != 'assistant':
+        return None
+    for c in ev.get('message', {}).get('content', []) or []:
+        if not isinstance(c, dict):
+            continue
+        if c.get('type') == 'tool_use':
+            inp = c.get('input') or {}
+            target = (inp.get('file_path')
+                      or inp.get('command')
+                      or inp.get('description')
+                      or inp.get('pattern')
+                      or '')
+            if isinstance(target, str) and len(target) > 80:
+                target = target[:77] + '...'
+            return f"{c.get('name', '?')}: {target}".rstrip(': ').strip()
+    return None
 
 # Same allow-list spirit as orchestrator.path_is_allowed but scoped to the
 # hypothesis-agent's job: it should ONLY add a YAML in experiments/hypotheses/.
@@ -97,11 +127,39 @@ def run_hypothesis_agent(log_tail: list, current_fitness: float,
     hyp_id = _next_id()
     prompt = _build_prompt(log_tail, current_fitness, baseline_fitness)
 
-    subprocess.run(
-        ["claude", "-p", prompt, "--dangerously-skip-permissions"],
-        cwd=".",
-        check=True,
+    # Stream claude output to experiments/hypotheses/.claude.log so Phase 1
+    # progress is observable via `tail -f`. Default `claude -p` (text mode)
+    # buffers everything until the final response, which makes hypothesis
+    # generation look frozen for ~5-10 minutes while the model reads the
+    # full rtl/, ARCHITECTURE.md, CLAUDE.md, and the experiment log. The
+    # file is gitignored by the global `.claude.log` rule so it does not
+    # trip the sandbox check below.
+    HYPOTHESES_DIR.mkdir(parents=True, exist_ok=True)
+    cmd = [
+        "claude", "-p", prompt,
+        "--dangerously-skip-permissions",
+        "--output-format", "stream-json",
+        "--verbose",
+    ]
+    proc = subprocess.Popen(
+        cmd, cwd=".",
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True, bufsize=1,
     )
+    with HYPOTHESIS_LOG.open("w") as log:
+        for line in proc.stdout:
+            log.write(line)
+            log.flush()
+            try:
+                summary = _summarize_event(line)
+            except Exception:
+                summary = None
+            if summary:
+                print(f"  [claude] {summary}", flush=True)
+    proc.wait()
+    if proc.returncode != 0:
+        raise subprocess.CalledProcessError(proc.returncode, cmd)
 
     breaches = _git_offlimits_changes()
     if breaches:
