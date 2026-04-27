@@ -63,4 +63,7 @@ def pick_winner(entries: list[dict], current_best: float) -> Optional[dict]:
     ]
     if not candidates:
         return None
-    return max(candidates, key=lambda e: e["fitness"])
+    # Tie-break: highest fitness, lowest slot wins. Without this, equal-fitness
+    # slots would resolve in caller-supplied order — which today is slot-sorted
+    # but shouldn't be a load-bearing contract of the helper.
+    return max(candidates, key=lambda e: (e["fitness"], -e["slot"]))

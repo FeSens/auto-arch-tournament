@@ -1,7 +1,4 @@
 """Unit tests for tools/tournament.py pure helpers (no claude / no FPGA)."""
-import datetime
-import pytest
-
 from tools.tournament import (
     allocate_round_ids,
     category_for_slot,
@@ -68,3 +65,22 @@ def test_pick_winner_all_broken_returns_none():
     ]
     winner = pick_winner(entries, current_best=282.82)
     assert winner is None
+
+
+def test_pick_winner_strict_greater_than():
+    """fitness == current_best is NOT a winner — strict > only.
+
+    The N=1 regression fixture relies on this: a baseline-retest scoring
+    exactly 282.82 against a current_best of 282.82 must log as 'regression',
+    not 'improvement'. If pick_winner ever changes to >=, the fixture's
+    expected outcome would silently flip.
+    """
+    entries = [_entry(0, 282.82)]
+    assert pick_winner(entries, current_best=282.82) is None
+
+
+def test_pick_winner_tie_breaks_to_lowest_slot():
+    """Two slots with identical fitness — the lower slot index wins."""
+    entries = [_entry(0, 290.0), _entry(1, 290.0), _entry(2, 290.0)]
+    winner = pick_winner(entries, current_best=282.82)
+    assert winner["slot"] == 0
