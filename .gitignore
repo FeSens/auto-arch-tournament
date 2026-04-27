@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.mypy_cache/
+
+# Toolchain (downloaded by setup.sh)
+.toolchain/
+
+# Vendored as submodule (initialized in Phase 4)
+formal/riscv-formal/
+
+# Build artifacts
+out/
+generated/
+sim_build/
+test/cosim/obj_dir/
+test/cosim/sim_build/
+test/**/sim_build/
+*.vcd
+*.fst
+*.gtkw
+
+# Bench ELFs (rebuild from sources)
+bench/programs/*.elf
+bench/programs/*.o
+bench/programs/*.bin
+bench/programs/*.hex
+
+# Experiment artifacts (each iteration appends to log.jsonl; per-iter worktrees)
+experiments/worktrees/
+experiments/progress.png
+experiments/log.jsonl
+experiments/hypotheses/*.yml
+experiments/hypotheses/*.yaml
+
+# Editor / OS
+.DS_Store
+*.swp
+.idea/
+.vscode/
+
+# Claude Code workspace
+.claude/
