@@ -18,9 +18,7 @@
 //                 redirect).
 // RVFI fields:    all of them — driven from the MEM/WB register and
 //                 the WB-stage write-data mux.
-module core
-  import core_pkg::*;
-(
+module core (
   input  logic        clock,
   input  logic        reset,
   // imem

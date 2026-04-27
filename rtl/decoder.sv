@@ -19,9 +19,7 @@
 // Latency:        combinational (0 cycles).
 // RVFI fields:    feeds rvfi_trap (= is_illegal at retirement), and all
 //                 control routing into EX/MEM/WB.
-module decoder
-  import core_pkg::*;
-(
+module decoder (
   input  logic [31:0] instr,
   output logic [4:0]  alu_op,
   output logic        alu_src,

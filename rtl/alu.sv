@@ -14,9 +14,7 @@
 //
 // Latency:        combinational (0 cycles).
 // RVFI fields:    feeds rd_wdata (via EX/MEM/WB), branch resolution, mem_addr.
-module alu
-  import core_pkg::*;
-(
+module alu (
   input  logic [4:0]  op,
   input  logic [31:0] a,
   input  logic [31:0] b,
@@ -54,6 +52,23 @@ module alu
       ALU_SRL:    out = a >> shamt;
       ALU_SRA:    out = $unsigned($signed(a) >>> shamt);
       ALU_LUI:    out = b;
+
+      // M-extension. Under RISCV_FORMAL_ALTOPS the hardware operations
+      // are substituted for tractable algebraic stand-ins so bitwuzla
+      // can solve the BMC inside the 20-step depth budget. The same
+      // substitution must appear in the riscv-formal spec (insn_*.v).
+      // The Verilator/cocotb/cosim builds leave ALTOPS undefined and
+      // run the real arithmetic.
+`ifdef RISCV_FORMAL_ALTOPS
+      ALU_MUL:    out = (a + b) ^ 32'h5876063e;
+      ALU_MULH:   out = (a + b) ^ 32'hf6583fb7;
+      ALU_MULHU:  out = (a + b) ^ 32'h949ce5e8;
+      ALU_MULHSU: out = (a - b) ^ 32'hecfbe137;
+      ALU_DIV:    out = (a - b) ^ 32'h7f8529ec;
+      ALU_DIVU:   out = (a - b) ^ 32'h10e8fd70;
+      ALU_REM:    out = (a - b) ^ 32'h8da68fa5;
+      ALU_REMU:   out = (a - b) ^ 32'h3138d0e1;
+`else
       ALU_MUL:    out = mul_uu[31:0];
       ALU_MULH:   out = $unsigned(mul_ss[63:32]);
       ALU_MULHU:  out = mul_uu[63:32];
@@ -76,6 +91,7 @@ module alu
           out = $unsigned($signed(a) % $signed(b));
       end
       ALU_REMU: out = (b == 32'b0) ? a : (a % b);
+`endif
       default:  out = 32'b0;
     endcase
   end

@@ -1,14 +1,21 @@
 // rtl/core_pkg.sv
 //
 // Core-wide constants and pipeline-bundle types.
-//   - AluOp / BranchOp encoded as `localparam logic [N-1:0]` (rather than
-//     an enum) so legacy sby + Verilator + Yosys + nextpnr-himbaechel all
-//     accept it cleanly without typedef-quirk warnings.
-//   - Pipeline bundles are typedef structs imported by every stage.
+//
+// Compilation-unit scope (no `package … endpackage` wrapper) because
+// Yosys's Verilog frontend rejects `import pkg::*;` even though it
+// accepts `pkg::sym` refs and package definitions. A file-scope
+// definition with an `\`ifndef` guard is the lowest common denominator
+// across Verilator, Yosys, sby, and nextpnr-himbaechel.
+//
+// Order matters: this file MUST be the first source passed to any tool
+// (Verilator/cocotb runner / build.sh / formal staging). Subsequent
+// includes hit the guard and become no-ops.
 //
 // Latency:        n/a (declarations only).
-// RVFI fields:    none (the package defines types; no logic).
-package core_pkg;
+// RVFI fields:    none (defines types; no logic).
+`ifndef CORE_PKG_DEFINED
+`define CORE_PKG_DEFINED
 
   // ── ALU operations ──────────────────────────────────────────────────────
   localparam logic [4:0] ALU_ADD    = 5'd0;
@@ -124,4 +131,4 @@ package core_pkg;
     logic        valid;
   } mem_wb_t;
 
-endpackage
+`endif // CORE_PKG_DEFINED

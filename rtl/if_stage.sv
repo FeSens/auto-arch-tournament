@@ -13,18 +13,16 @@
 // Latency:        PC-reg update is synchronous; output is combinational.
 // RVFI fields:    feeds pc_rdata (via ID/EX/MEM/WB) and pc_wdata (via
 //                 EX-stage redirect).
-module if_stage
-  import core_pkg::*;
-(
-  input  logic        clock,
-  input  logic        reset,
-  input  logic        stall,            // hold PC (load-use)
-  input  logic        flush,            // emit NOP into ID this cycle
-  input  logic        redirect,         // EX has resolved a branch/jump
-  input  logic [31:0] redirect_target,
-  output logic [31:0] imem_addr,
-  input  logic [31:0] imem_data,
-  output if_id_t      out
+module if_stage (
+  input  logic              clock,
+  input  logic              reset,
+  input  logic              stall,            // hold PC (load-use)
+  input  logic              flush,            // emit NOP into ID this cycle
+  input  logic              redirect,         // EX has resolved a branch/jump
+  input  logic [31:0]       redirect_target,
+  output logic [31:0]       imem_addr,
+  input  logic [31:0]       imem_data,
+  output if_id_t  out
 );
 
   localparam logic [31:0] RESET_PC = 32'h0000_0000;

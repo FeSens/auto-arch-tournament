@@ -44,8 +44,7 @@ bench/programs/selftest.elf: bench/programs/selftest.S bench/programs/link.ld
 	$(MAKE) -f bench/programs/Makefile bench/programs/selftest.elf
 
 formal:
-	@echo "TODO (phase 4): bash formal/run_all.sh"
-	@false
+	bash formal/run_all.sh
 
 bench:
 	$(MAKE) -f bench/programs/Makefile all

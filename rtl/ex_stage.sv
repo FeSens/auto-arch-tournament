@@ -12,19 +12,17 @@
 // Latency:        1 cycle (EX/MEM register clocked here).
 // RVFI fields:    feeds pc_wdata (= pc_next), the rd_wdata path for
 //                 ALU and JAL/JALR (PC+4), and the branch resolve.
-module ex_stage
-  import core_pkg::*;
-(
-  input  logic        clock,
-  input  logic        reset,
-  input  id_ex_t      in,
-  input  logic [1:0]  fwd_rs1_sel,
-  input  logic [1:0]  fwd_rs2_sel,
-  input  logic [31:0] fwd_ex_mem,    // EX/MEM.alu_result (registered)
-  input  logic [31:0] fwd_mem_wb,    // WB-stage write-data mux output
-  output ex_mem_t     out,
-  output logic        redirect,
-  output logic [31:0] redirect_target
+module ex_stage (
+  input  logic               clock,
+  input  logic               reset,
+  input  id_ex_t   in,
+  input  logic [1:0]         fwd_rs1_sel,
+  input  logic [1:0]         fwd_rs2_sel,
+  input  logic [31:0]        fwd_ex_mem,    // EX/MEM.alu_result (registered)
+  input  logic [31:0]        fwd_mem_wb,    // WB-stage write-data mux output
+  output ex_mem_t  out,
+  output logic               redirect,
+  output logic [31:0]        redirect_target
 );
 
   // ── Operand forwarding muxes ───────────────────────────────────────────
@@ -87,7 +85,30 @@ module ex_stage
                                   : (in.pc + in.imm);
   end
 
-  assign redirect        = branch_taken || in.ctrl.is_jump;
+  // ── Misaligned branch / jump target trap ──────────────────────────────
+  // riscv-formal's spec demands rvfi_trap=1 when next_pc is misaligned
+  // (without C extension that means [1:0] != 0). We trap the offending
+  // instruction, suppress the redirect (PC stays linear), and clear
+  // reg_write so JAL/JALR don't write the return address on trap.
+  logic misalign_branch;
+  logic misalign_jump;
+  logic misalign_fault;
+  ctrl_t ctrl_with_trap;
+
+  always_comb begin
+    misalign_branch = in.ctrl.is_branch && branch_taken
+                      && (branch_target[1:0] != 2'b00);
+    misalign_jump   = in.ctrl.is_jump && (jump_target[1:0] != 2'b00);
+    misalign_fault  = misalign_branch || misalign_jump;
+
+    ctrl_with_trap = in.ctrl;
+    if (misalign_fault) begin
+      ctrl_with_trap.is_illegal = 1'b1;
+      ctrl_with_trap.reg_write  = 1'b0;
+    end
+  end
+
+  assign redirect        = (branch_taken || in.ctrl.is_jump) && !misalign_fault;
   assign redirect_target = in.ctrl.is_jump ? jump_target : branch_target;
 
   // ── EX/MEM register ───────────────────────────────────────────────────
@@ -108,12 +129,16 @@ module ex_stage
       reg_q.rs2_addr      <= in.rs2_addr;
       reg_q.rs1_val       <= rs1;
       reg_q.rs2_val       <= rs2;
-      reg_q.pc_next       <= in.ctrl.is_jump   ? jump_target
-                            : branch_taken     ? branch_target
-                                               : (in.pc + 32'd4);
+      // pc_next reverts to pc+4 on misalign trap so the pc_fwd checker
+      // (asserting next retirement's pc_rdata == this pc_wdata) stays
+      // consistent with the suppressed redirect.
+      reg_q.pc_next       <= misalign_fault     ? (in.pc + 32'd4)
+                            : in.ctrl.is_jump   ? jump_target
+                            : branch_taken      ? branch_target
+                                                : (in.pc + 32'd4);
       reg_q.branch_taken  <= branch_taken;
       reg_q.branch_target <= branch_target;
-      reg_q.ctrl          <= in.ctrl;
+      reg_q.ctrl          <= ctrl_with_trap;
       reg_q.instr         <= in.instr;
       reg_q.valid         <= in.valid;
     end

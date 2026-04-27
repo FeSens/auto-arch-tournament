@@ -8,21 +8,19 @@
 // Latency:        1 cycle (ID/EX register clocked here).
 // RVFI fields:    feeds rs1_addr, rs1_rdata, rs2_addr, rs2_rdata, insn,
 //                 trap (via ctrl.is_illegal).
-module id_stage
-  import core_pkg::*;
-(
-  input  logic        clock,
-  input  logic        reset,
-  input  logic        stall,
-  input  logic        flush,
-  input  if_id_t      in,
+module id_stage (
+  input  logic              clock,
+  input  logic              reset,
+  input  logic              stall,
+  input  logic              flush,
+  input  if_id_t  in,
   // regfile read interface
-  output logic [4:0]  rs1_addr,
-  output logic [4:0]  rs2_addr,
-  input  logic [31:0] rs1_data,
-  input  logic [31:0] rs2_data,
+  output logic [4:0]        rs1_addr,
+  output logic [4:0]        rs2_addr,
+  input  logic [31:0]       rs1_data,
+  input  logic [31:0]       rs2_data,
   // ID/EX register output
-  output id_ex_t      out
+  output id_ex_t  out
 );
 
   // ── Combinational decode ────────────────────────────────────────────────

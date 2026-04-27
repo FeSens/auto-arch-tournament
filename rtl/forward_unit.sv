@@ -21,13 +21,18 @@ module forward_unit (
   output logic [1:0] fwd_rs2
 );
 
-  function automatic logic [1:0] sel(input logic [4:0] rs);
-    if (ex_mem_w_en && ex_mem_rd != 5'b0 && ex_mem_rd == rs) return 2'd1;
-    else if (mem_wb_w_en && mem_wb_rd != 5'b0 && mem_wb_rd == rs) return 2'd2;
-    else return 2'd0;
-  endfunction
+  // Yosys's Verilog frontend rejects SV-style `function … return …`,
+  // so the per-rs selection is open-coded in two always_comb blocks.
+  always_comb begin
+    if      (ex_mem_w_en && ex_mem_rd != 5'b0 && ex_mem_rd == id_ex_rs1) fwd_rs1 = 2'd1;
+    else if (mem_wb_w_en && mem_wb_rd != 5'b0 && mem_wb_rd == id_ex_rs1) fwd_rs1 = 2'd2;
+    else                                                                  fwd_rs1 = 2'd0;
+  end
 
-  assign fwd_rs1 = sel(id_ex_rs1);
-  assign fwd_rs2 = sel(id_ex_rs2);
+  always_comb begin
+    if      (ex_mem_w_en && ex_mem_rd != 5'b0 && ex_mem_rd == id_ex_rs2) fwd_rs2 = 2'd1;
+    else if (mem_wb_w_en && mem_wb_rd != 5'b0 && mem_wb_rd == id_ex_rs2) fwd_rs2 = 2'd2;
+    else                                                                  fwd_rs2 = 2'd0;
+  end
 
 endmodule

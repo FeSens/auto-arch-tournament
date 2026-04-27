@@ -15,25 +15,23 @@
 // Latency:        1 cycle (MEM/WB register clocked here).
 // RVFI fields:    feeds mem_addr, mem_rmask, mem_wmask, mem_rdata,
 //                 mem_wdata, plus rd_wdata via the loaded-data path.
-module mem_stage
-  import core_pkg::*;
-(
-  input  logic        clock,
-  input  logic        reset,
+module mem_stage (
+  input  logic               clock,
+  input  logic               reset,
   // ex_mem_t carries branch_taken / branch_target / pc_next / rs?_val
   // for downstream RVFI use; mem_stage only consumes a subset, so the
   // remaining fields look unused from this module's perspective.
   /* verilator lint_off UNUSEDSIGNAL */
-  input  ex_mem_t     in,
+  input  ex_mem_t  in,
   /* verilator lint_on UNUSEDSIGNAL */
   // dmem interface
-  output logic [31:0] dmem_addr,
-  output logic [31:0] dmem_wdata,
-  input  logic [31:0] dmem_rdata,
-  output logic [3:0]  dmem_wen,
-  output logic        dmem_ren,
+  output logic [31:0]        dmem_addr,
+  output logic [31:0]        dmem_wdata,
+  input  logic [31:0]        dmem_rdata,
+  output logic [3:0]         dmem_wen,
+  output logic               dmem_ren,
   // MEM/WB register output
-  output mem_wb_t     out
+  output mem_wb_t  out
 );
 
   logic [31:0] wdata_rep;
@@ -47,6 +45,15 @@ module mem_stage
   logic [7:0]  byte_val;
   logic [15:0] hword_val;
   logic [31:0] load_data;
+
+  // Misaligned mem-access trap. RV32I requires word-aligned LW/SW and
+  // halfword-aligned LH/LHU/SH; byte ops are always aligned.
+  // riscv-formal's RISCV_FORMAL_ALIGNED_MEM contract demands rvfi_trap=1
+  // when the effective byte address is not aligned to the access width.
+  // On trap, the dmem ports are gated off and ctrl propagates is_illegal.
+  logic mem_misalign;
+  logic mem_op;
+  ctrl_t ctrl_with_trap;
 
   always_comb begin
     // Byte/halfword replication for stores.
@@ -63,11 +70,24 @@ module mem_stage
       default: byte_mask = 4'b1111;
     endcase
 
-    // Combinational dmem outputs.
+    mem_op       = in.ctrl.mem_read || in.ctrl.mem_write;
+    mem_misalign = mem_op && (
+                     (in.ctrl.mem_width == 2'd2 && in.alu_result[1:0] != 2'b00) ||
+                     (in.ctrl.mem_width == 2'd1 && in.alu_result[0]   != 1'b0)
+                     // 2'd0 (byte) is never misaligned.
+                   );
+
+    ctrl_with_trap = in.ctrl;
+    if (mem_misalign) begin
+      ctrl_with_trap.is_illegal = 1'b1;
+      ctrl_with_trap.reg_write  = 1'b0;
+    end
+
+    // Combinational dmem outputs — gated off on misalign.
     dmem_addr  = in.alu_result;
     dmem_wdata = wdata_rep;
-    dmem_wen   = in.ctrl.mem_write ? byte_mask : 4'b0000;
-    dmem_ren   = in.ctrl.mem_read;
+    dmem_wen   = (in.ctrl.mem_write && !mem_misalign) ? byte_mask : 4'b0000;
+    dmem_ren   = in.ctrl.mem_read  && !mem_misalign;
 
     // Load extraction: shift right then sign/zero-extend the low N bits.
     shifted   = dmem_rdata >> (in.alu_result[1:0] * 8);
@@ -84,7 +104,7 @@ module mem_stage
     endcase
 
     // RVFI ALIGNED_MEM expects word-aligned mem_addr; mem_addr=0 if no access.
-    aligned_addr = (in.ctrl.mem_read || in.ctrl.mem_write)
+    aligned_addr = (mem_op && !mem_misalign)
                  ? {in.alu_result[31:2], 2'b00}
                  : 32'b0;
   end
@@ -108,9 +128,9 @@ module mem_stage
       reg_q.mem_addr   <= aligned_addr;
       reg_q.mem_rdata  <= dmem_rdata;
       reg_q.mem_wdata  <= wdata_rep;
-      reg_q.mem_wmask  <= in.ctrl.mem_write ? byte_mask : 4'b0000;
-      reg_q.mem_rmask  <= in.ctrl.mem_read  ? byte_mask : 4'b0000;
-      reg_q.ctrl       <= in.ctrl;
+      reg_q.mem_wmask  <= (in.ctrl.mem_write && !mem_misalign) ? byte_mask : 4'b0000;
+      reg_q.mem_rmask  <= (in.ctrl.mem_read  && !mem_misalign) ? byte_mask : 4'b0000;
+      reg_q.ctrl       <= ctrl_with_trap;
       reg_q.instr      <= in.instr;
       reg_q.valid      <= in.valid;
     end
