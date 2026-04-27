@@ -78,6 +78,17 @@ def append_log(entry: dict):
     LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
     with LOG_PATH.open('a') as f:
         f.write(json.dumps(entry) + '\n')
+    # Auto-commit so the log entry survives in git history. Without this,
+    # rejected and broken iterations never produce an implementation
+    # commit and the only record of them lives in an untracked file —
+    # one `git clean -fdx` away from gone. README.md treats log.jsonl as
+    # authoritative; this makes that real.
+    subprocess.run(["git", "add", str(LOG_PATH)], check=True)
+    subprocess.run(
+        ["git", "commit", "-m",
+         f"log: {entry.get('id','unknown')} {entry.get('outcome','unknown')}"],
+        check=True,
+    )
 
 def validate_hypothesis(hyp_path: str) -> dict:
     with open(hyp_path) as f:
