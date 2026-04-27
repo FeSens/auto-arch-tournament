@@ -24,6 +24,8 @@ formal/last_run.log
 # agent edit. .claude.log kept for back-compat with legacy worktree logs.
 .agent.log
 .agent.last
+.agent.*.log
+.agent.*.last
 .claude.log
 
 # Build artifacts

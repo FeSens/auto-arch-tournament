@@ -73,10 +73,23 @@ def pick_winner(entries: list[dict], current_best: float) -> Optional[dict]:
     return max(candidates, key=lambda e: (e["fitness"], -e["slot"]))
 
 
-# Per-phase capacity. Formal and FPGA each saturate cores (formal uses
-# `make -j`, nextpnr is single-threaded but we already run 3 seeds per
-# slot — N slots × 3 seeds would thrash). Phase 3 (lint/synth/build)
-# and Phase 5 (cosim) are short or already-parallel, so no gate.
+# Per-phase capacity. Two distinct reasons phases are gated:
+#
+# - formal=1 is a CORRECTNESS INVARIANT, not a CPU gate. formal/run_all.sh
+#   stages rtl/*.sv into formal/riscv-formal/cores/auto-arch-researcher/,
+#   which lives in the MAIN repo (the worktree's formal/riscv-formal is a
+#   symlink). Two slots running formal concurrently would corrupt that
+#   shared staging area. NEVER loosen this gate above 1.
+#
+# - fpga=1 is a CPU saturation gate. Each slot's run_fpga_eval already
+#   forks 3 parallel nextpnr seeds; N slots × 3 seeds at once would thrash
+#   on most hardware. Loosening it is a perf trade-off, not a correctness
+#   risk.
+#
+# Phase 3 (lint/synth/build) and Phase 5 (cosim) are not gated: each
+# worktree has its own generated/ + bench/programs/*.elf + obj_dir/, so no
+# shared-state risk; with N=3 they may CPU-thrash but the round still
+# completes correctly.
 PHASE_CAPACITY: dict[str, int] = {
     "formal": 1,
     "fpga":   1,
@@ -333,11 +346,21 @@ def run_tournament_round(
             try:
                 accept_worktree(entry['id'], msg)
             except Exception as e:
-                # Worktree merge failed (shouldn't happen with ff-only) —
-                # downgrade to regression and keep going so the log still lands.
+                # Worktree merge failed (shouldn't happen with ff-only on a
+                # single-coordinator process). Downgrade to regression so the
+                # log still lands, and best-effort cleanup so we don't leak
+                # the branch + worktree dir. The agent's RTL commit on that
+                # branch is intentionally abandoned — losing one slot's work
+                # is preferable to leaving a stale branch that confuses the
+                # next round's `git worktree list`.
                 print(f"  [coordinator] accept_worktree({entry['id']}) failed: {e}",
                       flush=True)
                 entry['outcome'] = 'regression'
+                try:
+                    destroy_worktree(entry['id'])
+                except Exception as cleanup_err:
+                    print(f"  [coordinator] cleanup also failed: {cleanup_err}",
+                          flush=True)
         elif entry.get('fitness') is not None and entry['outcome'] == 'regression':
             destroy_worktree(entry['id'])
         # 'broken' / 'placement_failed' slots already destroyed their worktree.

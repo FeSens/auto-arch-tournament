@@ -157,13 +157,13 @@ def run_hypothesis_agent(log_tail: list, current_fitness: float,
                            hyp_id=hyp_id, category_hint=category_hint)
     allow_re = _whitelist_regex(allowed_yaml_ids or [])
 
-    # Stream agent output to experiments/hypotheses/.agent.log so Phase 1
-    # progress is observable via `tail -f`. Default `claude -p` (text mode)
-    # buffers everything until the final response, which makes hypothesis
-    # generation look frozen for ~5-10 minutes while the model reads the
-    # full rtl/, ARCHITECTURE.md, CLAUDE.md, and the experiment log. The
-    # file is gitignored by the global `.agent.log` rule so it does not
-    # trip the sandbox check below.
+    # Stream agent output to experiments/hypotheses/.agent.{hyp_id}.log
+    # (or .agent.log for the legacy single-slot path) so Phase 1 progress
+    # is observable via `tail -f`. Without streaming, the agent's wall-clock
+    # makes hypothesis generation look frozen for ~5-10 minutes while it
+    # reads the full rtl/, ARCHITECTURE.md, CLAUDE.md, and the experiment
+    # log. The per-slot path is gitignored by the `.agent.*.log` /
+    # `.agent.*.last` rules so it does not trip the sandbox check below.
     HYPOTHESES_DIR.mkdir(parents=True, exist_ok=True)
     # Codex needs an output-last-message file; claude ignores it.
     last_msg = HYPOTHESES_DIR / f".agent.{hyp_id}.last" if hyp_id else HYPOTHESES_DIR / ".agent.last"
