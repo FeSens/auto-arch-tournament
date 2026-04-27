@@ -16,14 +16,33 @@ performance wins over time.
 | Phase | What                                | Done? |
 |-------|-------------------------------------|-------|
 | 0     | Repo skeleton + toolchain           | ✓     |
-| 1     | Combinational core (decoder + ALU)  |       |
-| 2     | Pipeline + Core top                 |       |
-| 3     | Verilator cosim                     |       |
-| 4     | riscv-formal                        |       |
-| 5     | Bench programs + CoreMark           |       |
-| 6     | FPGA fitness                        |       |
-| 7     | Orchestrator                        |       |
-| 8     | Baseline locked                     |       |
+| 1     | Combinational core (decoder + ALU)  | ✓     |
+| 2     | Pipeline + Core top                 | ✓     |
+| 3     | Verilator cosim                     | ✓     |
+| 4     | riscv-formal                        | ✓     |
+| 5     | Bench programs + CoreMark           | ✓     |
+| 6     | FPGA fitness                        | ✓     |
+| 7     | Orchestrator                        | ✓     |
+| 8     | Baseline locked                     | ✓     |
+
+## Baseline (locked)
+
+The first orchestrator iteration on the unmodified hand-SV pipeline:
+
+| Metric                        | Value                                         |
+|-------------------------------|-----------------------------------------------|
+| **Fitness (CoreMark iter/s)** | **53.26**                                     |
+| Fmax (median, 3 nextpnr seeds)| 131.44 MHz (138.03 / 126.49 / 131.44)         |
+| CoreMark iterations           | 100                                           |
+| Bracketed cycles              | 246,775,333                                   |
+| LUT4                          | 10,189                                        |
+| FF                            | 1,873                                         |
+| Formal (riscv-formal)         | 53 / 53 passed                                |
+| Cosim (selftest, RVFI trace)  | 58 retirements byte-identical to Python ISS   |
+| CoreMark CRCs                 | crclist 0xd4b0 · crcmatrix 0xbe52 · crcstate 0x5e47 · crcfinal 0x273b |
+
+Recorded in `experiments/log.jsonl` (entry `hyp-20260427-001`). All
+subsequent hypotheses are scored relative to this fitness.
 
 ## Quickstart
 
