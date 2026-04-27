@@ -34,17 +34,21 @@ lint:
 test:
 	pytest -v test/
 
-cosim:
-	@echo "TODO (phase 3): python3 -m tools.eval.cosim ."
-	@false
+cosim: cosim-build bench/programs/selftest.elf
+	python3 test/cosim/run_cosim.py test/cosim/obj_dir/cosim_sim bench/programs/selftest.elf
+
+cosim-build: $(wildcard rtl/*.sv) test/cosim/main.cpp
+	bash test/cosim/build.sh
+
+bench/programs/selftest.elf: bench/programs/selftest.S bench/programs/link.ld
+	$(MAKE) -f bench/programs/Makefile bench/programs/selftest.elf
 
 formal:
 	@echo "TODO (phase 4): bash formal/run_all.sh"
 	@false
 
 bench:
-	@echo "TODO (phase 5): make -C bench/programs all"
-	@false
+	$(MAKE) -f bench/programs/Makefile all
 
 fpga:
 	@echo "TODO (phase 6): python3 -m tools.eval.fpga ."
@@ -65,5 +69,7 @@ report:
 clean:
 	rm -rf test/cosim/obj_dir test/cosim/sim_build sim_build out
 	rm -rf experiments/worktrees
+	rm -f bench/programs/*.elf
+	rm -f test/*.result.xml
 	find test -name __pycache__ -prune -exec rm -rf {} + 2>/dev/null || true
 	find tools -name __pycache__ -prune -exec rm -rf {} + 2>/dev/null || true
