@@ -47,6 +47,23 @@ def plot_progress():
 
     fig, ax = plt.subplots(figsize=(12, 5))
 
+    # Round-banding: shade vertical regions for entries that share a round_id
+    # (tournament mode). Legacy entries without round_id get no band; this
+    # preserves back-compat with the pre-tournament log shape.
+    round_groups: dict[int, list[int]] = {}
+    for i, e in enumerate(entries):
+        rid = e.get('round_id')
+        if isinstance(rid, int):
+            round_groups.setdefault(rid, []).append(i)
+    for rid, idxs in round_groups.items():
+        if len(idxs) < 2:
+            continue  # single-slot round — no need to band
+        x0, x1 = min(idxs) - 0.4, max(idxs) + 0.4
+        # Faint band; alternate shade by round parity for visual separation
+        # of consecutive rounds.
+        shade = '#3498db' if rid % 2 == 0 else '#9b59b6'
+        ax.axvspan(x0, x1, color=shade, alpha=0.08, zorder=0)
+
     # Scatter all experiments
     for i, e in enumerate(entries):
         if 'fitness' in e and e['fitness'] is not None:
