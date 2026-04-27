@@ -7,11 +7,18 @@ Without that, a misbehaving hypothesis agent could silently patch tools/,
 schemas/, etc., and those changes would persist into every subsequent
 worktree.
 """
-import subprocess, json, re, datetime, hashlib
+import subprocess, json, re, datetime, hashlib, threading
 from pathlib import Path
 
 HYPOTHESES_DIR = Path("experiments/hypotheses")
 HYPOTHESIS_LOG = HYPOTHESES_DIR / ".claude.log"
+
+# Wall-clock cap on hypothesis generation. Same shape as implement.py's
+# CLAUDE_TIMEOUT_SEC. Hypothesis generation reads rtl/ + ARCHITECTURE.md
+# + CLAUDE.md + the recent log and proposes one YAML — typically 1-5 min.
+# 10 min gives 2x headroom; bump if you see legit explorations getting
+# guillotined.
+HYPOTHESIS_TIMEOUT_SEC = 600
 
 
 def _summarize_event(line: str) -> str | None:
@@ -147,6 +154,26 @@ def run_hypothesis_agent(log_tail: list, current_fitness: float,
         stderr=subprocess.STDOUT,
         text=True, bufsize=1,
     )
+
+    # Watchdog. Same pattern as implement.py: the streaming for-loop
+    # below blocks on claude's stdout until claude exits, so a plain
+    # proc.wait(timeout=...) wouldn't fire mid-run. A daemon thread
+    # SIGKILLs the process if it exceeds HYPOTHESIS_TIMEOUT_SEC; the
+    # main loop drains the closed pipe and falls through to the file
+    # check at the bottom — if claude wrote a YAML before being
+    # killed, we use it; if not, FileNotFoundError raises and the
+    # iteration is logged as broken.
+    timed_out = {'flag': False}
+
+    def watchdog():
+        try:
+            proc.wait(timeout=HYPOTHESIS_TIMEOUT_SEC)
+        except subprocess.TimeoutExpired:
+            timed_out['flag'] = True
+            proc.kill()
+
+    threading.Thread(target=watchdog, daemon=True).start()
+
     with HYPOTHESIS_LOG.open("w") as log:
         for line in proc.stdout:
             log.write(line)
@@ -158,7 +185,11 @@ def run_hypothesis_agent(log_tail: list, current_fitness: float,
             if summary:
                 print(f"  [claude] {summary}", flush=True)
     proc.wait()
-    if proc.returncode != 0:
+
+    if timed_out['flag']:
+        print(f"  [claude] TIMEOUT after {HYPOTHESIS_TIMEOUT_SEC}s — process killed",
+              flush=True)
+    elif proc.returncode != 0:
         raise subprocess.CalledProcessError(proc.returncode, cmd)
 
     breaches = _git_offlimits_changes()
