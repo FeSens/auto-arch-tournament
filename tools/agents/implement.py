@@ -2,7 +2,7 @@
 import json, subprocess, threading, yaml
 from pathlib import Path
 
-CLAUDE_TIMEOUT_SEC = 600  # 10 min watchdog on the implementation agent
+CLAUDE_TIMEOUT_SEC = 600*3  # 10 min watchdog on the implementation agent
 
 def _build_prompt(hypothesis: dict, worktree: str) -> str:
     arch = Path(worktree, "ARCHITECTURE.md").read_text()
