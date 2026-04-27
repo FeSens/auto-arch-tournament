@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Hardcoded AutoResearch loop. The LLM never touches this file."""
-import argparse, json, datetime, subprocess, re
+import argparse, json, datetime, subprocess, re, threading
 from pathlib import Path
 
 import jsonschema, yaml
@@ -16,6 +16,13 @@ from tools.plot import plot_progress
 LOG_PATH      = Path("experiments/log.jsonl")
 HYP_SCHEMA    = json.loads(Path("schemas/hypothesis.schema.json").read_text())
 RESULT_SCHEMA = json.loads(Path("schemas/eval_result.schema.json").read_text())
+
+# Serializes append_log across concurrent tournament slots. The body of
+# append_log writes log.jsonl, regenerates progress.png, then git-adds
+# and commits both — three operations that all touch the index. Without
+# this lock, two slots finishing within the same ~second would race on
+# .git/index.lock and crash the round.
+_LOG_LOCK = threading.Lock()
 
 # Don't-touch sandbox: anything outside ALLOWED_PATTERNS that the agent
 # touches is rejected before the eval gates run. Without this an agent
@@ -75,26 +82,27 @@ def baseline_fitness(log: list) -> float:
     return 0.0
 
 def append_log(entry: dict):
-    LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
-    with LOG_PATH.open('a') as f:
-        f.write(json.dumps(entry) + '\n')
-    # Regen progress.png from the updated log so the README chart reflects
-    # every iteration (improvement, regression, broken — see plot.py's
-    # color_map). plot_progress reads LOG_PATH directly, so this picks up
-    # the line we just appended.
-    plot_progress()
-    # Commit log + plot together. One "log: <id> <outcome>" commit per
-    # iteration; for accepts this lands alongside the implementation
-    # merge that accept_worktree already created.
-    subprocess.run(["git", "add", str(LOG_PATH)], check=True)
-    plot_path = Path("experiments/progress.png")
-    if plot_path.exists():
-        subprocess.run(["git", "add", str(plot_path)], check=True)
-    subprocess.run(
-        ["git", "commit", "-m",
-         f"log: {entry.get('id','unknown')} {entry.get('outcome','unknown')}"],
-        check=True,
-    )
+    with _LOG_LOCK:
+        LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
+        with LOG_PATH.open('a') as f:
+            f.write(json.dumps(entry) + '\n')
+        # Regen progress.png from the updated log so the README chart reflects
+        # every iteration (improvement, regression, broken — see plot.py's
+        # color_map). plot_progress reads LOG_PATH directly, so this picks up
+        # the line we just appended.
+        plot_progress()
+        # Commit log + plot together. One "log: <id> <outcome>" commit per
+        # iteration; for accepts this lands alongside the implementation
+        # merge that accept_worktree already created.
+        subprocess.run(["git", "add", str(LOG_PATH)], check=True)
+        plot_path = Path("experiments/progress.png")
+        if plot_path.exists():
+            subprocess.run(["git", "add", str(plot_path)], check=True)
+        subprocess.run(
+            ["git", "commit", "-m",
+             f"log: {entry.get('id','unknown')} {entry.get('outcome','unknown')}"],
+            check=True,
+        )
 
 def validate_hypothesis(hyp_path: str) -> dict:
     with open(hyp_path) as f:
