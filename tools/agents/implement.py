@@ -116,6 +116,47 @@ def _summarize_event(line: str) -> str | None:
     return None
 
 
+def _run_claude_streaming(cmd: list, cwd: str, log_path: Path,
+                          timeout_sec: int) -> tuple[int, bool]:
+    """Run claude -p with NDJSON streaming, watchdog, and one-line summaries.
+
+    Returns (returncode, timed_out). Caller decides retry/fail.
+
+    Duplicated across tools/agents/hypothesis.py and tools/agents/implement.py
+    so neither module imports a private symbol from the other (same rationale
+    as the existing _summarize_event duplication).
+    """
+    proc = subprocess.Popen(
+        cmd, cwd=cwd,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True, bufsize=1,
+    )
+    timed_out = {'flag': False}
+
+    def watchdog():
+        try:
+            proc.wait(timeout=timeout_sec)
+        except subprocess.TimeoutExpired:
+            timed_out['flag'] = True
+            proc.kill()
+
+    threading.Thread(target=watchdog, daemon=True).start()
+
+    with log_path.open("w") as log:
+        for line in proc.stdout:
+            log.write(line)
+            log.flush()
+            try:
+                summary = _summarize_event(line)
+            except Exception:
+                summary = None
+            if summary:
+                print(f"  [claude] {summary}", flush=True)
+    proc.wait()
+    return proc.returncode, timed_out['flag']
+
+
 def run_implementation_agent(hypothesis_path: str, worktree: str) -> bool:
     """
     Invokes claude -p in the worktree to implement the hypothesis.
@@ -147,43 +188,15 @@ def run_implementation_agent(hypothesis_path: str, worktree: str) -> bool:
         "--output-format", "stream-json",
         "--verbose",
     ]
-    proc = subprocess.Popen(
-        cmd, cwd=worktree,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        text=True, bufsize=1,
+    rc, timed_out = _run_claude_streaming(
+        cmd, cwd=worktree, log_path=log_path, timeout_sec=CLAUDE_TIMEOUT_SEC,
     )
-
-    # Watchdog. The streaming for-loop below blocks on claude's stdout
-    # until claude exits, so a plain proc.wait(timeout=...) wouldn't fire
-    # mid-run. A daemon thread watches the wall clock and SIGKILLs the
-    # process if it exceeds CLAUDE_TIMEOUT_SEC; the main loop then drains
-    # the closed pipe and falls through to the lint gate, which fails on
-    # a half-finished tree → "implementation_compile_failed" log entry.
-    timed_out = {'flag': False}
-
-    def watchdog():
-        try:
-            proc.wait(timeout=CLAUDE_TIMEOUT_SEC)
-        except subprocess.TimeoutExpired:
-            timed_out['flag'] = True
-            proc.kill()
-
-    threading.Thread(target=watchdog, daemon=True).start()
-
-    with log_path.open("w") as log:
-        for line in proc.stdout:
-            log.write(line)
-            log.flush()
-            try:
-                summary = _summarize_event(line)
-            except Exception:
-                summary = None
-            if summary:
-                print(f"  [claude] {summary}", flush=True)
-    proc.wait()
-
-    if timed_out['flag']:
+    if rc != 0 and not timed_out:
+        print(f"  [claude] non-zero exit ({rc}); retrying once", flush=True)
+        rc, timed_out = _run_claude_streaming(
+            cmd, cwd=worktree, log_path=log_path, timeout_sec=CLAUDE_TIMEOUT_SEC,
+        )
+    if timed_out:
         print(f"  [claude] TIMEOUT after {CLAUDE_TIMEOUT_SEC}s — process killed",
               flush=True)
 

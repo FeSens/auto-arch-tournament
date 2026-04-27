@@ -54,6 +54,47 @@ def _summarize_event(line: str) -> str | None:
 HYP_ALLOWED = re.compile(r"^experiments/hypotheses/[^/]+\.(yaml|yml)$")
 
 
+def _run_claude_streaming(cmd: list, cwd: str, log_path: Path,
+                          timeout_sec: int) -> tuple[int, bool]:
+    """Run claude -p with NDJSON streaming, watchdog, and one-line summaries.
+
+    Returns (returncode, timed_out). Caller decides retry/fail.
+
+    Duplicated across tools/agents/hypothesis.py and tools/agents/implement.py
+    so neither module imports a private symbol from the other (same rationale
+    as the existing _summarize_event duplication).
+    """
+    proc = subprocess.Popen(
+        cmd, cwd=cwd,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True, bufsize=1,
+    )
+    timed_out = {'flag': False}
+
+    def watchdog():
+        try:
+            proc.wait(timeout=timeout_sec)
+        except subprocess.TimeoutExpired:
+            timed_out['flag'] = True
+            proc.kill()
+
+    threading.Thread(target=watchdog, daemon=True).start()
+
+    with log_path.open("w") as log:
+        for line in proc.stdout:
+            log.write(line)
+            log.flush()
+            try:
+                summary = _summarize_event(line)
+            except Exception:
+                summary = None
+            if summary:
+                print(f"  [claude] {summary}", flush=True)
+    proc.wait()
+    return proc.returncode, timed_out['flag']
+
+
 def _whitelist_regex(allowed_yaml_ids: list[str]) -> 're.Pattern':
     """Build a regex matching ONLY the round's pre-allocated YAML names.
 
@@ -194,49 +235,22 @@ def run_hypothesis_agent(log_tail: list, current_fitness: float,
         "--output-format", "stream-json",
         "--verbose",
     ]
-    proc = subprocess.Popen(
-        cmd, cwd=".",
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        text=True, bufsize=1,
+    rc, timed_out = _run_claude_streaming(
+        cmd, cwd=".", log_path=HYPOTHESIS_LOG, timeout_sec=HYPOTHESIS_TIMEOUT_SEC,
     )
+    if rc != 0 and not timed_out:
+        # Single retry. 429s and transient API errors are the most common
+        # cause; a stuck-bug or wall-clock overrun (timed_out) we don't retry.
+        print(f"  [claude] non-zero exit ({rc}); retrying once", flush=True)
+        rc, timed_out = _run_claude_streaming(
+            cmd, cwd=".", log_path=HYPOTHESIS_LOG, timeout_sec=HYPOTHESIS_TIMEOUT_SEC,
+        )
 
-    # Watchdog. Same pattern as implement.py: the streaming for-loop
-    # below blocks on claude's stdout until claude exits, so a plain
-    # proc.wait(timeout=...) wouldn't fire mid-run. A daemon thread
-    # SIGKILLs the process if it exceeds HYPOTHESIS_TIMEOUT_SEC; the
-    # main loop drains the closed pipe and falls through to the file
-    # check at the bottom — if claude wrote a YAML before being
-    # killed, we use it; if not, FileNotFoundError raises and the
-    # iteration is logged as broken.
-    timed_out = {'flag': False}
-
-    def watchdog():
-        try:
-            proc.wait(timeout=HYPOTHESIS_TIMEOUT_SEC)
-        except subprocess.TimeoutExpired:
-            timed_out['flag'] = True
-            proc.kill()
-
-    threading.Thread(target=watchdog, daemon=True).start()
-
-    with HYPOTHESIS_LOG.open("w") as log:
-        for line in proc.stdout:
-            log.write(line)
-            log.flush()
-            try:
-                summary = _summarize_event(line)
-            except Exception:
-                summary = None
-            if summary:
-                print(f"  [claude] {summary}", flush=True)
-    proc.wait()
-
-    if timed_out['flag']:
+    if timed_out:
         print(f"  [claude] TIMEOUT after {HYPOTHESIS_TIMEOUT_SEC}s — process killed",
               flush=True)
-    elif proc.returncode != 0:
-        raise subprocess.CalledProcessError(proc.returncode, cmd)
+    elif rc != 0:
+        raise subprocess.CalledProcessError(rc, cmd)
 
     breaches = _git_offlimits_changes(allow_re)
     if breaches:
