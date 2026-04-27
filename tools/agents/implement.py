@@ -88,7 +88,8 @@ Advisory file changes (you may deviate, add, rename, or restructure freely):
    - Local formal status (pass / fail-after-N-attempts) and, if it
      failed, what counterexample you saw and what you tried.
 
-Use your Edit, Write, Read, and Bash tools freely."""
+Edit, create, or delete files in the worktree as needed. The eval gates
+will check the result; do not output any other narrative."""
 
 
 def run_implementation_agent(hypothesis_path: str, worktree: str) -> bool:
@@ -119,7 +120,7 @@ def run_implementation_agent(hypothesis_path: str, worktree: str) -> bool:
     cmd = build_agent_cmd(
         prompt, cwd=worktree,
         output_last_message=last_msg,
-        enable_search=False,  # implementation runs in the worktree, no search
+        enable_search=False,  # implementation runs in the worktree, no search needed
     )
     rc, timed_out = run_agent_streaming(
         cmd, cwd=worktree, log_path=log_path, timeout_sec=CLAUDE_TIMEOUT_SEC,

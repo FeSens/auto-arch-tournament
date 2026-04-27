@@ -29,6 +29,29 @@ from typing import Optional
 
 VALID_PROVIDERS = ("codex", "claude")
 
+# Codex's `exec` mode prints a multi-line banner before doing work — model
+# id, sandbox mode, token counters, separator dashes, etc. None of it is
+# orchestrator-relevant signal, so we skip lines matching these prefixes
+# in summarize_event. The full lines still go to the on-disk log; only the
+# console echo is filtered.
+_CODEX_BANNER_PREFIXES = (
+    "Reading additional input from stdin",
+    "OpenAI Codex",
+    "workdir:",
+    "model:",
+    "provider:",
+    "approval:",
+    "sandbox:",
+    "reasoning effort:",
+    "reasoning summaries:",
+    "session id:",
+    "tokens used:",
+    "--------",
+    "----",
+    "user instructions:",
+    "User instructions:",
+)
+
 
 def get_provider() -> str:
     """Return 'codex' (default) or 'claude' from AGENT_PROVIDER env var."""
@@ -65,6 +88,7 @@ def build_agent_cmd(
             "exec",
             "-C", str(cwd),
             "--sandbox", "workspace-write",
+            "--skip-git-repo-check",
             "--output-last-message", str(output_last_message),
         ]
         if model:
@@ -79,8 +103,8 @@ def build_agent_cmd(
             "--verbose",
         ]
         if model:
-            # Insert before --dangerously-skip-permissions so positional `prompt`
-            # stays at index 2.
+            # Insert after the prompt so cmd[2] stays the positional prompt
+            # for any debugging tools that key on argv shape.
             cmd[3:3] = ["--model", model]
         return cmd
     raise ValueError(f"unknown provider {p!r}")
@@ -120,8 +144,8 @@ def summarize_event(line: str, provider: Optional[str] = None) -> Optional[str]:
         s = line.rstrip("\n").strip()
         if not s:
             return None
-        # Codex writes a leading timestamp/banner line; let it through but
-        # truncate so console stays tidy.
+        if any(s.startswith(prefix) for prefix in _CODEX_BANNER_PREFIXES):
+            return None
         if len(s) > 140:
             s = s[:137] + "..."
         return s

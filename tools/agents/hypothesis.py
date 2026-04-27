@@ -119,7 +119,7 @@ The YAML must validate against schemas/hypothesis.schema.json:
 Each `changes[i].file` must be a path under rtl/ (this is an SV-source-
 of-truth project; do NOT propose Chisel/Scala edits).
 
-Write the file now using your Write tool. Do not output anything else."""
+Write the file at experiments/hypotheses/<id>.yaml now. Do not output anything else."""
 
 
 def _next_id() -> str:
@@ -170,7 +170,7 @@ def run_hypothesis_agent(log_tail: list, current_fitness: float,
     cmd = build_agent_cmd(
         prompt, cwd=".",
         output_last_message=last_msg,
-        enable_search=True,  # hypothesis-gen benefits from search
+        enable_search=False,  # prompt has no search instruction; enable when added
     )
     rc, timed_out = run_agent_streaming(
         cmd, cwd=".", log_path=HYPOTHESIS_LOG, timeout_sec=HYPOTHESIS_TIMEOUT_SEC,
