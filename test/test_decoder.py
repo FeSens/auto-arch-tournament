@@ -226,9 +226,45 @@ async def jalr(dut):
 
 @cocotb.test()
 async def jalr_nonzero_funct3_illegal(dut):
-    # JALR with funct3=1 is reserved.
-    await _poke(dut, 0x000110E7)
-    assert int(dut.is_illegal.value) == 1
+    # JALR with any funct3 != 0 is reserved per spec.
+    for f3 in range(1, 8):
+        instr = (f3 << 12) | 0x000000E7  # rd=1 rs1=0 imm=0 funct3=f3 opcode=JALR
+        await _poke(dut, instr)
+        assert int(dut.is_illegal.value) == 1, (
+            f"JALR funct3={f3} should be illegal (instr=0x{instr:08x})"
+        )
+
+
+@cocotb.test()
+async def r_type_funct7_funct3_grid(dut):
+    # Exhaustive sweep over the small (funct7, funct3) space for opcode 0x33.
+    # Valid combos: funct7=0x00 any funct3; funct7=0x20 with funct3 ∈ {0,5};
+    # funct7=0x01 (M-ext) any funct3. Everything else is reserved.
+    for f7 in (0x00, 0x01, 0x20, 0x3F, 0x40, 0x7F):
+        for f3 in range(8):
+            instr = (f7 << 25) | (1 << 20) | (2 << 15) | (f3 << 12) | (1 << 7) | 0x33
+            valid = (f7 == 0x00) or (f7 == 0x20 and f3 in (0, 5)) or (f7 == 0x01)
+            await _poke(dut, instr)
+            got = int(dut.is_illegal.value)
+            expected = 0 if valid else 1
+            assert got == expected, (
+                f"R-type funct7=0x{f7:02x} funct3={f3} expected illegal={expected}, got {got}"
+            )
+
+
+@cocotb.test()
+async def slli_srli_srai_funct7_sweep(dut):
+    # OP-IMM shifts: SLLI must have funct7=0; SRLI/SRAI must have funct7
+    # in {0x00, 0x20}. Anything else reserved.
+    for f3, allowed_f7s in [(1, {0x00}), (5, {0x00, 0x20})]:
+        for f7 in (0x00, 0x01, 0x20, 0x3F, 0x40, 0x7F):
+            instr = (f7 << 25) | (1 << 20) | (0 << 15) | (f3 << 12) | (1 << 7) | 0x13
+            await _poke(dut, instr)
+            got = int(dut.is_illegal.value)
+            expected = 0 if f7 in allowed_f7s else 1
+            assert got == expected, (
+                f"OP-IMM shift funct3={f3} funct7=0x{f7:02x} expected illegal={expected}, got {got}"
+            )
 
 
 @cocotb.test()

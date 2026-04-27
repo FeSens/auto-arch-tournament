@@ -202,55 +202,64 @@ async def load_use_stalls(dut):
 
 @cocotb.test()
 async def branch_taken_skips(dut):
-    """BEQ x0, x0, +8 — the next instruction must NOT retire."""
+    """BEQ x0, x0, +8 — the wrong-path instruction must NOT retire at all,
+    not merely retire with rd_wdata != 99. Asserting only the side effect
+    would let a wrong-path retirement with rd=0 / trap=1 / different data
+    pass silently."""
     program = [
-        BEQ(0, 0, 8),          # taken; skip next
-        ADDI(1, 0, 99),        # SHOULD NOT retire as a real ADDI x1
-        ADDI(2, 0, 42),        # branch target
+        BEQ(0, 0, 8),          # PC=0;  taken; skip the next instr
+        ADDI(1, 0, 99),        # PC=4;  SHOULD NEVER retire
+        ADDI(2, 0, 42),        # PC=8;  branch target
         EBREAK(),
     ]
     rets, _ = await _run(dut, program)
-    # No retirement should write x1=99.
-    skipped = [r for r in rets if r["rd"] == 1 and r["rd_wdata"] == 99]
-    assert not skipped, f"skipped instr leaked: {skipped}"
+    # Strict: no retirement should originate from PC=4.
+    leaked = [r for r in rets if r["pc"] == 4]
+    assert not leaked, f"wrong-path retirement leaked from PC=4: {leaked}"
+    # Strict: no retirement carries the skipped instruction word at all.
+    leaked_insn = [r for r in rets if r["insn"] == ADDI(1, 0, 99)]
+    assert not leaked_insn, f"skipped instr ADDI x1,99 retired: {leaked_insn}"
+    # Sanity: the target instruction and the EBREAK do retire, in order.
+    pcs = [r["pc"] for r in rets]
+    assert pcs == [0, 8, 12], f"unexpected retirement PC sequence: {pcs}"
     [r2] = _by_insn(rets, ADDI(2, 0, 42))
     assert r2["rd_wdata"] == 42
 
 
 @cocotb.test()
 async def jal_writes_pc_plus_4(dut):
-    """JAL x1, +8; verify x1 == PC_of_JAL + 4 and the next instr is the target."""
+    """JAL x1, +8; verify the wrong-path slot does not retire and x1=PC+4."""
     program = [
         JAL(1, 8),             # PC=0; x1 := 4; jump to PC=8
-        ADDI(2, 0, 99),        # PC=4 — skipped
+        ADDI(2, 0, 99),        # PC=4 — wrong-path; must not retire
         ADDI(3, 0, 42),        # PC=8 — target
         EBREAK(),
     ]
     rets, _ = await _run(dut, program)
+    pcs = [r["pc"] for r in rets]
+    assert pcs == [0, 8, 12], f"unexpected retirement PC sequence: {pcs}"
     [rj] = _by_insn(rets, JAL(1, 8))
     assert rj["rd"] == 1
-    assert rj["rd_wdata"] == rj["pc"] + 4, (
-        f"JAL rd_wdata expected pc+4=0x{rj['pc']+4:x}, got 0x{rj['rd_wdata']:x}"
-    )
+    assert rj["rd_wdata"] == rj["pc"] + 4
     [r3] = _by_insn(rets, ADDI(3, 0, 42))
     assert r3["rd_wdata"] == 42
 
 
 @cocotb.test()
 async def jalr_target(dut):
-    """ADDI x5, x0, 12; JALR x1, x5, 0 — jump to address in x5 = 12."""
+    """ADDI x5,x0,12; JALR x1,x5,0; verify wrong-path slot doesn't retire."""
     program = [
         ADDI(5, 0, 12),        # PC=0;  x5 := 12
         JALR(1, 5, 0),         # PC=4;  jump to x5+0 = 12
-        ADDI(6, 0, 99),        # PC=8;  skipped
+        ADDI(6, 0, 99),        # PC=8;  wrong-path
         ADDI(7, 0, 42),        # PC=12; target
         EBREAK(),
     ]
     rets, _ = await _run(dut, program)
+    pcs = [r["pc"] for r in rets]
+    assert pcs == [0, 4, 12, 16], f"unexpected retirement PC sequence: {pcs}"
     [r7] = _by_insn(rets, ADDI(7, 0, 42))
     assert r7["rd_wdata"] == 42
-    skipped = [r for r in rets if r["rd"] == 6 and r["rd_wdata"] == 99]
-    assert not skipped
 
 
 @cocotb.test()
@@ -271,7 +280,16 @@ async def sw_lw_roundtrip(dut):
 
 @cocotb.test()
 async def illegal_traps(dut):
-    """0xFFFFFFFF retires with rvfi_trap=1 and no rd write."""
+    """0xFFFFFFFF retires with rvfi_trap=1 and no rd write.
+
+    Project convention: when reg_write=0 (which the decoder forces on
+    illegal), rvfi_rd_addr and rvfi_rd_wdata are both reported as 0.
+    This is one valid RVFI interpretation (the spec says "for
+    instructions that do not write rd, the value is 0"). Some other
+    cores report rd_addr = instr[11:7] regardless of trap and let the
+    verifier ignore it on trap=1; both are accepted by riscv-formal.
+    Our reference.py and DUT both follow the zeroed-on-trap convention,
+    so cosim stays in lockstep."""
     program = [
         0xFFFFFFFF,
         EBREAK(),
@@ -279,7 +297,7 @@ async def illegal_traps(dut):
     rets, _ = await _run(dut, program)
     bad = next(r for r in rets if r["insn"] == 0xFFFFFFFF)
     assert bad["trap"] == 1
-    assert bad["rd"] == 0       # decoder forces reg_write=0 on illegal
+    assert bad["rd"] == 0
     assert bad["rd_wdata"] == 0
 
 
