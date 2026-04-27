@@ -1,6 +1,8 @@
 """Invokes claude -p in the worktree to implement a hypothesis."""
-import subprocess, yaml
+import json, subprocess, threading, yaml
 from pathlib import Path
+
+CLAUDE_TIMEOUT_SEC = 600  # 10 min watchdog on the implementation agent
 
 def _build_prompt(hypothesis: dict, worktree: str) -> str:
     arch = Path(worktree, "ARCHITECTURE.md").read_text()
@@ -60,21 +62,106 @@ Advisory file changes (you may deviate, add, rename, or restructure freely):
 Use your Edit, Write, Read, and Bash tools freely."""
 
 
+def _summarize_event(line: str) -> str | None:
+    """Best-effort one-liner from a stream-json NDJSON event.
+
+    Returns a human-readable summary for tool_use events; None for events
+    we don't want to echo to the orchestrator's terminal (text deltas,
+    system messages, etc.). Failures here MUST NOT raise — the .claude.log
+    file is the authoritative record.
+    """
+    try:
+        ev = json.loads(line)
+    except json.JSONDecodeError:
+        return None
+    if ev.get('type') != 'assistant':
+        return None
+    for c in ev.get('message', {}).get('content', []) or []:
+        if not isinstance(c, dict):
+            continue
+        if c.get('type') == 'tool_use':
+            inp = c.get('input') or {}
+            target = (inp.get('file_path')
+                      or inp.get('command')
+                      or inp.get('description')
+                      or inp.get('pattern')
+                      or '')
+            if isinstance(target, str) and len(target) > 80:
+                target = target[:77] + '...'
+            return f"{c.get('name', '?')}: {target}".rstrip(': ').strip()
+    return None
+
+
 def run_implementation_agent(hypothesis_path: str, worktree: str) -> bool:
     """
     Invokes claude -p in the worktree to implement the hypothesis.
+
+    Streams claude's output to <worktree>/.claude.log so phase 2 progress
+    is observable via `tail -f` from another terminal. The default
+    `claude -p` (text mode) buffers everything until the final response,
+    which makes a 5-15 minute architectural-change agent look frozen.
+    --output-format stream-json emits NDJSON tool-use events as they
+    happen, so each Edit/Write/Bash lands in the log within ~1 second
+    of the model dispatching it.
+
+    A best-effort one-liner per tool_use is also echoed to the
+    orchestrator's terminal — if claude changes the event shape, that
+    echo silently degrades but the raw NDJSON in .claude.log stays
+    authoritative.
+
     Returns True if the post-implementation verilator lint succeeds.
     """
     with open(hypothesis_path) as f:
         hypothesis = yaml.safe_load(f)
 
     prompt = _build_prompt(hypothesis, worktree)
+    log_path = Path(worktree) / ".claude.log"
 
-    subprocess.run(
-        ["claude", "-p", prompt, "--dangerously-skip-permissions"],
-        cwd=worktree,
-        timeout=600,
+    cmd = [
+        "claude", "-p", prompt,
+        "--dangerously-skip-permissions",
+        "--output-format", "stream-json",
+        "--verbose",
+    ]
+    proc = subprocess.Popen(
+        cmd, cwd=worktree,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True, bufsize=1,
     )
+
+    # Watchdog. The streaming for-loop below blocks on claude's stdout
+    # until claude exits, so a plain proc.wait(timeout=...) wouldn't fire
+    # mid-run. A daemon thread watches the wall clock and SIGKILLs the
+    # process if it exceeds CLAUDE_TIMEOUT_SEC; the main loop then drains
+    # the closed pipe and falls through to the lint gate, which fails on
+    # a half-finished tree → "implementation_compile_failed" log entry.
+    timed_out = {'flag': False}
+
+    def watchdog():
+        try:
+            proc.wait(timeout=CLAUDE_TIMEOUT_SEC)
+        except subprocess.TimeoutExpired:
+            timed_out['flag'] = True
+            proc.kill()
+
+    threading.Thread(target=watchdog, daemon=True).start()
+
+    with log_path.open("w") as log:
+        for line in proc.stdout:
+            log.write(line)
+            log.flush()
+            try:
+                summary = _summarize_event(line)
+            except Exception:
+                summary = None
+            if summary:
+                print(f"  [claude] {summary}", flush=True)
+    proc.wait()
+
+    if timed_out['flag']:
+        print(f"  [claude] TIMEOUT after {CLAUDE_TIMEOUT_SEC}s — process killed",
+              flush=True)
 
     # Lint as the smoke gate. Subsequent eval gates (formal, cosim, fpga)
     # exercise actual behavior; this catches the most basic SV breakage.
