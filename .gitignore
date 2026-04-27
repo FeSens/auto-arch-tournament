@@ -17,6 +17,12 @@ formal/riscv-formal
 # Formal run output (regenerated per run; surfaced via stdout to the orchestrator)
 formal/last_run.log
 
+# Implementation-agent stdout capture, written per-worktree by
+# tools/agents/implement.py for `tail -f` visibility into Phase 2.
+# Untracked so the orchestrator's sandbox check (offlimits_changes,
+# orchestrator.py:42) doesn't see it as an off-limits agent edit.
+.claude.log
+
 # Build artifacts
 out/
 generated/
