@@ -49,9 +49,19 @@ formal:
 bench:
 	$(MAKE) -f bench/programs/Makefile all
 
-fpga:
-	@echo "TODO (phase 6): python3 -m tools.eval.fpga ."
-	@false
+fpga: cosim-build bench/programs/coremark.elf generated/synth.json
+	python3 -m tools.eval.fpga .
+
+bench/programs/coremark.elf: bench/programs/Makefile bench/programs/crt0.S \
+                              $(wildcard bench/programs/coremark/*.c) \
+                              $(wildcard bench/programs/coremark/*.h) \
+                              $(wildcard bench/programs/coremark/baremetal/*.c) \
+                              $(wildcard bench/programs/coremark/baremetal/*.h)
+	$(MAKE) -f bench/programs/Makefile bench/programs/coremark.elf
+
+generated/synth.json: $(wildcard rtl/*.sv) fpga/core_bench.sv fpga/scripts/synth.tcl
+	mkdir -p generated
+	yosys -c fpga/scripts/synth.tcl
 
 next:
 	@echo "TODO (phase 7): python3 -m tools.orchestrator --iterations 1"

@@ -1,0 +1,4 @@
+IO_LOC "clock" 4;
+IO_LOC "reset" 88;
+IO_LOC "led" 15;
+IO_PORT "led" PULL_MODE=NONE DRIVE=8;
