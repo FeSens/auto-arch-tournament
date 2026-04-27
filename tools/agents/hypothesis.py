@@ -259,18 +259,35 @@ def run_hypothesis_agent(log_tail: list, current_fitness: float,
 
     path = HYPOTHESES_DIR / f"{hyp_id}.yaml"
     if not path.exists():
-        # Tournament mode: ID was pre-allocated; the agent may still have
-        # written it under a slightly different name. Look for ANY YAML
-        # matching this run's allowed set — newest wins.
-        candidates = [HYPOTHESES_DIR / f"{i}.yaml" for i in (allowed_yaml_ids or [])]
-        candidates = [c for c in candidates if c.exists()]
+        # Agent may have written under a slightly different name (e.g. a
+        # ".v2" suffix). Accept ONLY files whose name starts with this
+        # slot's hyp_id prefix — never a sibling slot's YAML, which under
+        # concurrent N>1 execution would silently swap one slot's output
+        # for another's. allowed_yaml_ids stays the input to the SANDBOX
+        # check (sibling YAMLs may legitimately appear during a concurrent
+        # write); it is NOT the right input to a path resolver.
+        prefix = hyp_id
+        candidates = sorted(
+            HYPOTHESES_DIR.glob(f"{prefix}*.yaml"),
+            key=lambda f: f.stat().st_mtime,
+        )
         if candidates:
-            path = max(candidates, key=lambda f: f.stat().st_mtime)
-        else:
+            path = candidates[-1]
+        elif not allowed_yaml_ids:
+            # Truly-legacy single-slot caller (no pre-allocated ID set).
+            # Original "newest in dir" fallback is safe here because there
+            # is only one agent in flight.
             files = sorted(HYPOTHESES_DIR.glob("hyp-*.yaml"),
                            key=lambda f: f.stat().st_mtime)
             if files:
                 path = files[-1]
             else:
                 raise FileNotFoundError("Hypothesis agent did not write a hypothesis file.")
+        else:
+            # Tournament mode: agent wrote nothing matching this slot's
+            # prefix. Bail loudly rather than guess from sibling YAMLs.
+            raise FileNotFoundError(
+                f"Hypothesis agent did not write a file for slot {hyp_id} "
+                f"(allowed_yaml_ids={allowed_yaml_ids})"
+            )
     return str(path)
