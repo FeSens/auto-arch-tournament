@@ -9,6 +9,8 @@ from __future__ import annotations
 import contextlib
 import datetime
 import threading
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from pathlib import Path
 from typing import Optional
 
 # The hypothesis schema's `category` enum, in the order the brief specifies.
@@ -105,3 +107,247 @@ def phase_gate(phase: str):
         yield
     finally:
         sem.release()
+
+
+def run_slot(
+    slot: int,
+    hyp_id: str,
+    allowed_yaml_ids: list[str],
+    log_tail: list,
+    current_best: float,
+    baseline: float,
+    fixed_hyp_path: str | None,
+) -> dict:
+    """Run one tournament slot end-to-end. Returns a draft log entry.
+
+    The entry has `outcome` set provisionally:
+      - 'broken' / 'placement_failed' if any gate failed
+      - 'regression' if all gates passed (winner-pick may upgrade to 'improvement')
+    The coordinator decides the final outcome after all slots finish.
+    """
+    # Lazy imports to avoid circular import with tools.orchestrator.
+    import yaml
+    import jsonschema
+    from tools.orchestrator import (
+        emit_verilog, offlimits_changes, _read_notes, validate_hypothesis,
+    )
+    from tools.worktree import create_worktree, destroy_worktree
+    from tools.agents.hypothesis import run_hypothesis_agent
+    from tools.agents.implement import run_implementation_agent
+    from tools.eval.formal import run_formal
+    from tools.eval.cosim import run_cosim
+    from tools.eval.fpga import run_fpga_eval
+
+    category = category_for_slot(slot)
+    print(f"  [slot {slot}] category={category} id={hyp_id}", flush=True)
+
+    # Phase 1: hypothesis.
+    if fixed_hyp_path:
+        hyp_path = fixed_hyp_path
+    else:
+        try:
+            hyp_path = run_hypothesis_agent(
+                log_tail, current_best, baseline,
+                hyp_id=hyp_id,
+                allowed_yaml_ids=allowed_yaml_ids,
+                category_hint=category,
+            )
+        except Exception as e:
+            return {
+                'id': hyp_id, 'title': f'(slot {slot} hypothesis-gen failed)',
+                'category': category, 'outcome': 'broken',
+                'formal_passed': False, 'cosim_passed': False,
+                'error': f'hypothesis_gen_failed: {e}',
+                'slot': slot,
+            }
+
+    # Phase 1b: schema validation.
+    try:
+        hyp = validate_hypothesis(hyp_path)
+    except (jsonschema.ValidationError, FileNotFoundError, yaml.YAMLError) as e:
+        return {
+            'id': hyp_id, 'title': str(hyp_path), 'category': category,
+            'outcome': 'broken', 'formal_passed': False, 'cosim_passed': False,
+            'error': f'schema_error: {e}',
+            'slot': slot,
+        }
+
+    # Phase 2: implement.
+    worktree_id = hyp['id']  # could differ from hyp_id if agent ignored override
+    worktree = create_worktree(worktree_id)
+    print(f"  [slot {slot}] worktree={worktree}", flush=True)
+
+    def broken(reason: str, detail: str = '') -> dict:
+        destroy_worktree(worktree_id)
+        return {
+            **hyp, 'outcome': 'broken', 'formal_passed': False,
+            'cosim_passed': False, 'error': f'{reason}: {detail}',
+            'slot': slot,
+        }
+
+    if fixed_hyp_path and hyp.get('skip_implementation'):
+        pass  # baseline-retest fixture path
+    else:
+        impl_ok = run_implementation_agent(hyp_path, worktree)
+        if not impl_ok:
+            return broken("implementation_compile_failed")
+
+    sandbox_breaches = offlimits_changes(worktree)
+    if sandbox_breaches:
+        return broken("sandbox_violation",
+                      f"agent touched off-limits paths: {sandbox_breaches}")
+
+    # Phase 3: lint + synth + bench + cosim-build (no gate; fast).
+    if not emit_verilog(worktree):
+        return broken("build_failed")
+
+    # Phase 4: formal (gated, formal=1).
+    with phase_gate('formal'):
+        formal = run_formal(worktree)
+    if not formal['passed']:
+        check  = formal.get('failed_check', '')
+        detail = formal.get('detail', '')
+        msg    = f"{check}\n{detail}".strip() if detail else check
+        return broken("formal_failed", msg)
+
+    # Phase 5: cosim (no gate).
+    cosim = run_cosim(worktree)
+    if not cosim['passed']:
+        return broken("cosim_failed", cosim.get('failed_elf', ''))
+
+    # Phase 6: FPGA (gated, fpga=1).
+    with phase_gate('fpga'):
+        fpga = run_fpga_eval(worktree)
+    if fpga.get('placement_failed'):
+        return {
+            **hyp, 'outcome': 'placement_failed', 'formal_passed': True,
+            'cosim_passed': True, 'error': 'placement_failed',
+            'seeds': fpga.get('seeds'),
+            'slot': slot,
+        }
+    if fpga.get('bench_failed'):
+        return broken("coremark_failed", fpga.get('reason', ''))
+
+    fitness = fpga['fitness']
+    delta   = ((fitness - current_best) / current_best * 100) if current_best > 0 else 0.0
+    vs_base = ((fitness - baseline) / baseline * 100) if baseline > 0 else 0.0
+
+    return {
+        **hyp,
+        # Provisional. Coordinator upgrades winner to 'improvement'.
+        'outcome':       'regression',
+        'fitness':       fitness,
+        'delta_pct':     round(delta, 2),
+        'vs_baseline':   round(vs_base, 2),
+        'fmax_mhz':      fpga['fmax_mhz'],
+        'ipc_coremark':  fpga['ipc_coremark'],
+        'cycles':        fpga.get('cycles'),
+        'iterations':    fpga.get('iterations'),
+        'lut4':          fpga['lut4'],
+        'ff':            fpga['ff'],
+        'seeds':         fpga['seeds'],
+        'formal_passed': True,
+        'cosim_passed':  True,
+        'error':         None,
+        'implementation_notes': _read_notes(worktree),
+        'timestamp':     datetime.datetime.utcnow().isoformat(),
+        'slot':          slot,
+    }
+
+
+def run_tournament_round(
+    round_id: int,
+    tournament_size: int,
+    log: list,
+    fixed_hyp_paths: list[str] | None = None,
+) -> list[dict]:
+    """Run one round of N slots in parallel; return list of log entries.
+
+    All Phase 1+2 work (hypothesis + implement) runs concurrently across
+    slots. Phase 4 (formal) and Phase 6 (fpga) are serialized via
+    `phase_gate` semaphores. After all slots return, the coordinator runs
+    winner-pick + accept/destroy + append_log SEQUENTIALLY — no parallel
+    git-index mutation, by design.
+    """
+    from tools.orchestrator import (
+        current_best as _current_best,
+        baseline_fitness as _baseline,
+        append_log,
+    )
+    from tools.worktree import accept_worktree, destroy_worktree
+
+    best     = _current_best(log)
+    baseline = _baseline(log)
+    print(f"\n{'='*60}\nRound {round_id}  |  slots={tournament_size}  |  current best={best:.2f}\n{'='*60}", flush=True)
+
+    today = datetime.date.today().strftime("%Y%m%d")
+    # First-seq picker: continue numbering from existing files in
+    # experiments/hypotheses/ for the day so IDs stay monotonic across
+    # rounds within a single day. _next_id-style logic, hoisted up.
+    HYPOTHESES_DIR = Path("experiments/hypotheses")
+    HYPOTHESES_DIR.mkdir(parents=True, exist_ok=True)
+    existing = list(HYPOTHESES_DIR.glob(f"hyp-{today}-*.yaml"))
+    first_seq = len(existing) + 1
+    hyp_ids = allocate_round_ids(round_id, tournament_size, today=today,
+                                 first_seq=first_seq)
+    print(f"  pre-allocated IDs: {hyp_ids}", flush=True)
+
+    # Validate fixed_hyp_paths shape.
+    if fixed_hyp_paths is not None:
+        if len(fixed_hyp_paths) != tournament_size:
+            raise ValueError(
+                f"--from-hypothesis count {len(fixed_hyp_paths)} != tournament_size {tournament_size}"
+            )
+    else:
+        fixed_hyp_paths = [None] * tournament_size
+
+    # Fan out N slots in parallel (agent calls + worktree builds).
+    entries: list[dict] = []
+    with ThreadPoolExecutor(max_workers=tournament_size) as pool:
+        futures = {
+            pool.submit(
+                run_slot, slot, hyp_ids[slot], hyp_ids,
+                log, best, baseline, fixed_hyp_paths[slot],
+            ): slot
+            for slot in range(tournament_size)
+        }
+        for fut in as_completed(futures):
+            entry = fut.result()
+            entry['round_id'] = round_id
+            entries.append(entry)
+            print(f"  [slot {entry['slot']}] returned outcome={entry['outcome']}", flush=True)
+
+    # Sort by slot for stable log ordering (aesthetic, helps grep).
+    entries.sort(key=lambda e: e['slot'])
+
+    # Winner pick: highest-fitness slot whose fitness > start-of-round best.
+    winner = pick_winner(entries, current_best=best)
+
+    # Apply outcomes + accept/destroy worktrees. Sequential — the coordinator
+    # thread is the ONLY thread mutating main-repo git state from here on.
+    for entry in entries:
+        if entry is winner:
+            entry['outcome'] = 'improvement'
+            msg = (f"{entry['id']}: {entry['title']} "
+                   f"(+{entry.get('delta_pct', 0):.1f}%)")
+            try:
+                accept_worktree(entry['id'], msg)
+            except Exception as e:
+                # Worktree merge failed (shouldn't happen with ff-only) —
+                # downgrade to regression and keep going so the log still lands.
+                print(f"  [coordinator] accept_worktree({entry['id']}) failed: {e}",
+                      flush=True)
+                entry['outcome'] = 'regression'
+        elif entry.get('fitness') is not None and entry['outcome'] == 'regression':
+            destroy_worktree(entry['id'])
+        # 'broken' / 'placement_failed' slots already destroyed their worktree.
+
+    # Append log entries one-by-one through the lock-serialized append_log.
+    for entry in entries:
+        append_log(entry)
+
+    print(f"\n  Round {round_id} complete: " +
+          ", ".join(f"slot {e['slot']}={e['outcome']}" for e in entries) +
+          (f" (winner: slot {winner['slot']})" if winner else " (no winner)"),
+          flush=True)
+    return entries

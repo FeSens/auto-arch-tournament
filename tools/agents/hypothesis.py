@@ -167,23 +167,27 @@ def run_hypothesis_agent(log_tail: list, current_fitness: float,
     HYPOTHESES_DIR.mkdir(parents=True, exist_ok=True)
     # Codex needs an output-last-message file; claude ignores it.
     last_msg = HYPOTHESES_DIR / f".agent.{hyp_id}.last" if hyp_id else HYPOTHESES_DIR / ".agent.last"
+    # Per-slot log path so concurrent N>1 slots don't interleave streams in
+    # the shared `.agent.log`. Falls back to the module-level HYPOTHESIS_LOG
+    # for the legacy single-slot path.
+    hyp_log_path = (HYPOTHESES_DIR / f".agent.{hyp_id}.log") if hyp_id else HYPOTHESIS_LOG
     cmd = build_agent_cmd(
         prompt, cwd=".",
         output_last_message=last_msg,
         enable_search=False,  # prompt has no search instruction; enable when added
     )
     rc, timed_out = run_agent_streaming(
-        cmd, cwd=".", log_path=HYPOTHESIS_LOG, timeout_sec=HYPOTHESIS_TIMEOUT_SEC,
+        cmd, cwd=".", log_path=hyp_log_path, timeout_sec=HYPOTHESIS_TIMEOUT_SEC,
     )
     if rc != 0 and not timed_out:
         # Single retry. Append (not truncate) so the first attempt's stream
         # — often the actual rate-limit/error evidence we want to debug —
         # is preserved alongside the retry's.
         print(f"  [agent] non-zero exit ({rc}); retrying once", flush=True)
-        with HYPOTHESIS_LOG.open("a") as log:
+        with hyp_log_path.open("a") as log:
             log.write(f'\n{{"type":"retry_marker","first_rc":{rc}}}\n')
         rc, timed_out = run_agent_streaming(
-            cmd, cwd=".", log_path=HYPOTHESIS_LOG, timeout_sec=HYPOTHESIS_TIMEOUT_SEC,
+            cmd, cwd=".", log_path=hyp_log_path, timeout_sec=HYPOTHESIS_TIMEOUT_SEC,
             mode="a",
         )
 

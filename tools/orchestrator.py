@@ -12,6 +12,7 @@ from tools.eval.formal import run_formal
 from tools.eval.cosim import run_cosim
 from tools.eval.fpga import run_fpga_eval
 from tools.plot import plot_progress
+from tools.tournament import run_tournament_round
 
 LOG_PATH      = Path("experiments/log.jsonl")
 HYP_SCHEMA    = json.loads(Path("schemas/hypothesis.schema.json").read_text())
@@ -157,144 +158,6 @@ def emit_verilog(worktree: str) -> bool:
     )
     return build.returncode == 0
 
-def run_iteration(iteration: int, log: list, fixed_hyp_path: str = None) -> dict:
-    best = current_best(log)
-    base = baseline_fitness(log)
-    print(f"\n{'='*60}")
-    print(f"Iteration {iteration}  |  Current best: {best:.2f}")
-    print(f"{'='*60}")
-
-    # 1. Hypothesis. If `fixed_hyp_path` is provided, skip the LLM and use
-    # a pre-written YAML — useful for orchestrator integration tests so a
-    # full iteration can run without a recursive claude invocation.
-    if fixed_hyp_path:
-        print(f"Phase 1: Using pre-written hypothesis: {fixed_hyp_path}")
-        hyp_path = fixed_hyp_path
-    else:
-        print("Phase 1: Generating hypothesis...")
-        hyp_path = run_hypothesis_agent(log[-20:], best, base)
-        print(f"  Hypothesis written: {hyp_path}")
-
-    # 2. Validate schema. Catch only the specific exceptions we expect —
-    # an unrelated bug should propagate, not be logged as "schema_error".
-    try:
-        hyp = validate_hypothesis(hyp_path)
-    except (jsonschema.ValidationError, FileNotFoundError, yaml.YAMLError) as e:
-        entry = {'id': 'schema_error', 'title': str(hyp_path), 'category': 'unknown',
-                 'outcome': 'broken', 'formal_passed': False, 'cosim_passed': False,
-                 'error': str(e)}
-        append_log(entry)
-        print(f"  BROKEN: schema validation failed: {e}")
-        return entry
-
-    hyp_id = hyp['id']
-    print(f"  [{hyp_id}] {hyp['title']}")
-
-    # 3. Create worktree
-    worktree = create_worktree(hyp_id)
-    print(f"  Worktree: {worktree}")
-
-    def log_broken(reason: str, detail: str = ''):
-        entry = {**hyp, 'outcome': 'broken', 'formal_passed': False,
-                 'cosim_passed': False, 'error': f"{reason}: {detail}"}
-        append_log(entry)
-        destroy_worktree(hyp_id)
-        print(f"  BROKEN: {reason}")
-        return entry
-
-    # 4. Implement. If a pre-written hypothesis is in use AND it sets the
-    # flag `skip_implementation: true`, the worktree's rtl/ is left
-    # unchanged (used to test the eval gates on the baseline RTL).
-    if fixed_hyp_path and hyp.get('skip_implementation'):
-        print("Phase 2: Skipping implementation agent (test mode).")
-    else:
-        print("Phase 2: Implementing hypothesis...")
-        impl_ok = run_implementation_agent(hyp_path, worktree)
-        if not impl_ok:
-            return log_broken("implementation_compile_failed")
-
-    # 4b. Sandbox check — reject any change outside rtl/ + test/test_*.py.
-    # The agent runs with --dangerously-skip-permissions and could silently
-    # patch tools/, formal/, fpga/, test/cosim/, schemas/, bench/programs/,
-    # etc. to inflate fitness. Detect that here, BEFORE any eval gate runs.
-    sandbox_breaches = offlimits_changes(worktree)
-    if sandbox_breaches:
-        return log_broken("sandbox_violation",
-                          f"agent touched off-limits paths: {sandbox_breaches}")
-
-    # 5. Lint + synth + bench-ELFs + cosim-build
-    print("Phase 3: Lint, synth, bench, cosim-build...")
-    if not emit_verilog(worktree):
-        return log_broken("build_failed")
-
-    # 6. Formal gate. On failure, include both the failing check name and
-    # the tail of run_all.sh stdout (which now contains the failing check's
-    # logfile.txt tail, see formal/run_all.sh fail-path) so log.jsonl has
-    # an actual diagnostic instead of just "formal_failed: insn_xor_ch0".
-    print("Phase 4: riscv-formal...")
-    formal = run_formal(worktree)
-    if not formal['passed']:
-        check  = formal.get('failed_check', '')
-        detail = formal.get('detail', '')
-        msg    = f"{check}\n{detail}".strip() if detail else check
-        return log_broken("formal_failed", msg)
-
-    # 7. Cosim gate
-    print("Phase 5: Cosim...")
-    cosim = run_cosim(worktree)
-    if not cosim['passed']:
-        return log_broken("cosim_failed", cosim.get('failed_elf',''))
-
-    # 8. FPGA fitness
-    print("Phase 6: FPGA evaluation (3 seeds parallel)...")
-    fpga = run_fpga_eval(worktree)
-    if fpga['placement_failed']:
-        return log_broken("placement_failed")
-    if fpga.get('bench_failed'):
-        return log_broken("coremark_failed", fpga.get('reason', ''))
-
-    fitness = fpga['fitness']
-    delta   = ((fitness - best) / best * 100) if best > 0 else 0.0
-    vs_base = ((fitness - base) / base * 100) if base > 0 else 0.0
-    outcome = 'improvement' if fitness > best else 'regression'
-
-    entry = {
-        **hyp,
-        'outcome':         outcome,
-        'fitness':         fitness,
-        'delta_pct':       round(delta, 2),
-        'vs_baseline':     round(vs_base, 2),
-        'fmax_mhz':        fpga['fmax_mhz'],
-        'ipc_coremark':    fpga['ipc_coremark'],
-        'cycles':          fpga.get('cycles'),
-        'iterations':      fpga.get('iterations'),
-        'lut4':            fpga['lut4'],
-        'ff':              fpga['ff'],
-        'seeds':           fpga['seeds'],
-        'formal_passed':   True,
-        'cosim_passed':    True,
-        'error':           None,
-        'implementation_notes': _read_notes(worktree),
-        'timestamp':       datetime.datetime.utcnow().isoformat(),
-    }
-
-    # Order: implementation merge first (only on improvement), THEN log+plot
-    # commit. Reads chronologically as "rtl change → log says improvement".
-    # On regression/broken there's no impl commit; just the log commit.
-    if outcome == 'improvement':
-        msg = f"{hyp_id}: {hyp['title']} (+{delta:.1f}%)"
-        accept_worktree(hyp_id, msg)
-
-    append_log(entry)  # writes log, regens plot, commits both
-
-    if outcome == 'improvement':
-        print(f"  ACCEPTED: {fitness:.2f} ({delta:+.1f}%)")
-    else:
-        destroy_worktree(hyp_id)
-        print(f"  REGRESSION: {fitness:.2f} ({delta:+.1f}%)")
-
-    return entry
-
 def _read_notes(worktree: str) -> str:
     p = Path(worktree) / "implementation_notes.md"
     return p.read_text() if p.exists() else ""
@@ -321,20 +184,35 @@ def run_report():
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--iterations', type=int, default=1)
+    parser.add_argument('--iterations', type=int, default=1,
+                        help='Number of tournament rounds to run.')
+    parser.add_argument('--tournament-size', type=int, default=3,
+                        help='Number of parallel slots per round (N=1 = sequential).')
     parser.add_argument('--report', action='store_true')
     parser.add_argument('--from-hypothesis', metavar='PATH', default=None,
                         help='Skip the LLM hypothesis step and use a pre-written YAML. '
-                             'Useful for integration tests of the eval pipeline.')
+                             'Comma-separated list for tournament-size > 1.')
     args = parser.parse_args()
 
     if args.report:
         run_report()
         return
 
-    for i in range(1, args.iterations + 1):
+    fixed = None
+    if args.from_hypothesis:
+        fixed = [p.strip() for p in args.from_hypothesis.split(',')]
+
+    # Round numbering: continue from the highest round_id in the log + 1
+    # so multiple `make next` invocations don't all label themselves round 1.
+    log = read_log()
+    prior_rounds = [e.get('round_id', 0) for e in log if isinstance(e.get('round_id'), int)]
+    next_round = (max(prior_rounds) + 1) if prior_rounds else 1
+
+    for r in range(args.iterations):
+        round_id = next_round + r
         log = read_log()
-        run_iteration(i, log, fixed_hyp_path=args.from_hypothesis)
+        run_tournament_round(round_id, args.tournament_size, log,
+                             fixed_hyp_paths=fixed)
 
 if __name__ == '__main__':
     main()
