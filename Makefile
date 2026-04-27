@@ -13,7 +13,8 @@ help:
 	@echo "  make lint       — verilator lint over rtl/*.sv"
 	@echo "  make test       — cocotb unit tests under pytest"
 	@echo "  make cosim      — RVFI cosim against Python ISS"
-	@echo "  make formal     — riscv-formal full check suite (sby)"
+	@echo "  make formal     — riscv-formal fast suite (with ALTOPS — bypassing only)"
+	@echo "  make formal-deep— riscv-formal full suite (no ALTOPS — proves M-ext arithmetic; slow)"
 	@echo "  make fpga       — FPGA fitness eval (3-seed nextpnr median Fmax + CoreMark cycles)"
 	@echo "  make next       — one orchestrator iteration (hypothesize -> implement -> eval)"
 	@echo "  make loop N=10  — N orchestrator iterations"
@@ -44,7 +45,15 @@ bench/programs/selftest.elf: bench/programs/selftest.S bench/programs/link.ld
 	$(MAKE) -f bench/programs/Makefile bench/programs/selftest.elf
 
 formal:
-	bash formal/run_all.sh
+	bash formal/run_all.sh formal/checks.cfg
+
+# formal-deep: same checks WITHOUT RISCV_FORMAL_ALTOPS so bitwuzla
+# evaluates the actual MUL/DIV/REM bitvector formulas. SLOW (each
+# M-ext check can take 15+ min wall). Use periodically — the
+# orchestrator's per-iteration formal gate uses fast `make formal`.
+# See formal/checks.cfg comments for the full ALTOPS scope explanation.
+formal-deep:
+	bash formal/run_all.sh formal/checks-deep.cfg
 
 bench:
 	$(MAKE) -f bench/programs/Makefile all

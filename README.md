@@ -37,7 +37,7 @@ The first orchestrator iteration on the unmodified hand-SV pipeline:
 | Bracketed cycles              | 246,775,333                                   |
 | LUT4                          | 10,189                                        |
 | FF                            | 1,873                                         |
-| Formal (riscv-formal)         | 53 / 53 passed                                |
+| Formal (riscv-formal, fast)   | 53 / 53 passed (ALTOPS — see CLAUDE.md caveat)|
 | Cosim (selftest, RVFI trace)  | 115 retirements byte-identical to Python ISS  |
 | CoreMark CRCs                 | crclist 0xd4b0 · crcmatrix 0xbe52 · crcstate 0x5e47 · crcfinal 0x273b |
 

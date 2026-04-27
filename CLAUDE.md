@@ -13,6 +13,7 @@ checks** to make a hypothesis pass.
 | 3 | EBREAK is the *only* SYSTEM (opcode `0x73`) instruction the core treats as valid; ECALL / CSR / MRET trap  | dedicated decoder unit tests                 |
 | 4 | `rvfi_order` strictly monotonic +1 per retirement (no double-retire)                                       | `riscv-formal unique` check                  |
 | 5 | CPU makes forward progress under any symbolic instruction stream                                           | `riscv-formal liveness` check                |
+| 5b | M-extension arithmetic produces RV32M-correct bit results                                                | cocotb `test_alu.py` + `make formal-deep`    |
 | 6 | All memory accesses bounded to `[0x00000000, 0x00100000)` plus UART/markers `[0x10000000, 0x10000200)`     | sim emits `oob:true`, eval treats as failure |
 | 7 | CoreMark CRCs match canonical 6 KB perf run: `crclist=0xd4b0`, `crcmatrix=0xbe52`, `crcstate=0x5e47`       | `validate_coremark_uart` in fpga eval        |
 | 8 | CoreMark timing brackets `start_time` / `stop_time` markers — total elapsed cycles do NOT count            | MMIO writes at `0x10000100` / `0x10000104`   |
@@ -88,3 +89,27 @@ It must not:
 - When in doubt about scope, prefer keeping a hypothesis minimal — a
   one-feature change is easier to explain and easier to revert if
   fitness regresses on the next iteration.
+
+## Caveat: `make formal` runs ALTOPS-mode by default
+
+`formal/checks.cfg` defines `RISCV_FORMAL_ALTOPS`, which substitutes
+the M-extension `MUL/MULH/MULHU/MULHSU/DIV/DIVU/REM/REMU` operations
+with simpler XOR-of-add/sub formulas (riscv-formal docs §7.6). The
+DUT's `alu.sv` mirrors the same substitution under the same `\`ifdef`.
+
+This means the per-iteration formal gate proves **M-ext bypassing,
+operand routing, stall/forwarding behavior, and trap discipline** — but
+it does NOT prove that the actual hardware multiplier and divider
+produce RV32M-correct bit results. M-ext arithmetic correctness is
+covered separately by:
+
+  1. `test/test_alu.py` (30+ vectors per M-ext op, exact bit results)
+  2. cosim against `test/cosim/reference.py` (each retired MUL/DIV/REM
+     diff'd field-by-field with the Python ISS)
+  3. `make formal-deep` (formal without ALTOPS — slow but the only path
+     that proves real arithmetic via SMT). Run periodically, not in
+     the orchestrator loop.
+
+A hypothesis that touches the multiplier/divider must keep both the
+ALTOPS branch and the real branch in `alu.sv` consistent. The cocotb
+suite is the fast guard against arithmetic regressions.

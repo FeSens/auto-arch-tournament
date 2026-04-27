@@ -2,9 +2,14 @@
 # Run riscv-formal checks against the current rtl/*.sv.
 # Requires: formal/riscv-formal cloned (manual clone or `git submodule init`).
 #
-# Stages every rtl/*.sv plus wrapper.sv + checks.cfg under the riscv-formal
-# tree, then runs sby -> bitwuzla via the framework's generated makefile.
-# Tallies PASS/FAIL by inspecting each task's logfile.txt.
+# Stages every rtl/*.sv plus wrapper.sv + the chosen checks config under
+# the riscv-formal tree, then runs sby -> bitwuzla via the framework's
+# generated makefile. Tallies PASS/FAIL by inspecting each task's
+# logfile.txt.
+#
+# Usage: bash formal/run_all.sh [checks-cfg-path]
+#   default: formal/checks.cfg       (fast, ALTOPS, used by orchestrator)
+#   deep   : formal/checks-deep.cfg  (no ALTOPS, proves M-ext arithmetic)
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -12,6 +17,12 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 RISCV_FORMAL="$SCRIPT_DIR/riscv-formal"
 CORE_NAME="auto-arch-researcher"
 CORE_DIR="$RISCV_FORMAL/cores/$CORE_NAME"
+
+CHECKS_CFG="${1:-$SCRIPT_DIR/checks.cfg}"
+if [ ! -f "$CHECKS_CFG" ]; then
+    echo "ERROR: checks.cfg not found at $CHECKS_CFG"
+    exit 1
+fi
 
 if [ ! -d "$RISCV_FORMAL" ]; then
     echo "ERROR: formal/riscv-formal not found. Clone it:"
@@ -26,11 +37,13 @@ if [ -d "$PROJECT_ROOT/.toolchain/oss-cad-suite/bin" ]; then
     export PATH="$PROJECT_ROOT/.toolchain/oss-cad-suite/bin:$PATH"
 fi
 
-# Stage rtl + wrapper + checks.cfg under the framework's expected layout.
+# Stage rtl + wrapper + the chosen checks config under the framework's
+# expected layout. genchecks.py looks for "checks.cfg" by name, so the
+# selected config is always copied to that filename in the core dir.
 mkdir -p "$CORE_DIR"
 cp "$PROJECT_ROOT"/rtl/*.sv     "$CORE_DIR/"
 cp "$SCRIPT_DIR/wrapper.sv"     "$CORE_DIR/wrapper.sv"
-cp "$SCRIPT_DIR/checks.cfg"     "$CORE_DIR/checks.cfg"
+cp "$CHECKS_CFG"                "$CORE_DIR/checks.cfg"
 
 # genchecks.py expects @basedir@ = $RISCV_FORMAL, @core@ = $CORE_NAME.
 cd "$CORE_DIR"
