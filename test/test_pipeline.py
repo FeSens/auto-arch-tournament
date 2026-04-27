@@ -346,7 +346,7 @@ def test_pipeline_runner():
         toplevel="core",
         sources=[
             "core_pkg.sv",
-            "alu.sv", "decoder.sv", "imm_gen.sv", "reg_file.sv",
+            "divu.sv", "alu.sv", "decoder.sv", "imm_gen.sv", "reg_file.sv",
             "if_stage.sv", "id_stage.sv", "ex_stage.sv",
             "mem_stage.sv", "wb_stage.sv",
             "hazard_unit.sv", "forward_unit.sv",

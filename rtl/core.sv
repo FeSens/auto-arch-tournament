@@ -75,6 +75,7 @@ module core (
   // hazard / forward
   logic       stall_if, stall_id, flush_if, flush_id;
   logic       stall_ex_mem, hold_mem_wb;
+  logic       ex_div_busy;
   logic [1:0] fwd_rs1_sel, fwd_rs2_sel;
 
   // EX redirect
@@ -141,7 +142,8 @@ module core (
     .fwd_mem_wb      (wb_w_data),            // WB-stage's write-mux output
     .out             (ex_mem_w),
     .redirect        (redirect),
-    .redirect_target (redirect_target)
+    .redirect_target (redirect_target),
+    .div_busy        (ex_div_busy)
   );
 
   // ── MEM ───────────────────────────────────────────────────────────────
@@ -176,6 +178,7 @@ module core (
     .imem_ready     (io_imemReady),
     .dmem_ready     (io_dmemReady),
     .ex_mem_mem_op  (ex_mem_w.ctrl.mem_read | ex_mem_w.ctrl.mem_write),
+    .div_busy       (ex_div_busy),
     .stall_if       (stall_if),
     .stall_id       (stall_id),
     .flush_if       (flush_if),

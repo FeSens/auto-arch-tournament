@@ -4,18 +4,28 @@
 // MEM/WB), runs the ALU, resolves branches, computes the redirect
 // target. Owns the EX/MEM pipeline register.
 //
+// Multi-cycle divide handshake: when a DIV/DIVU/REM/REMU op enters EX,
+// this stage drives the ALU's start_div for one cycle, then asserts
+// `div_busy` to the hazard unit until the divide completes
+// (combinationally for the b==0 / INT_MIN-÷-1 edge cases, or 33 cycles
+// later for a real iterative divide). The EX/MEM register only captures
+// on the cycle the divide completes — preserving rvfi_order +1
+// monotonicity, since the MEM/WB retirement boundary advances exactly
+// once per divide.
+//
 // Forwarding select encoding (driven by forward_unit):
 //   00 = ID/EX register value (no forward)
 //   01 = EX/MEM aluResult (instruction immediately ahead in MEM)
 //   10 = MEM/WB result (instruction two ahead, post regfile-write mux)
 //
-// Latency:        1 cycle (EX/MEM register clocked here).
+// Latency:        1 cycle for non-div ops; 33 cycles for real divides
+//                 (1 cycle for div edge cases).
 // RVFI fields:    feeds pc_wdata (= pc_next), the rd_wdata path for
 //                 ALU and JAL/JALR (PC+4), and the branch resolve.
 module ex_stage (
   input  logic               clock,
   input  logic               reset,
-  input  logic               stall,         // freeze EX/MEM register (dmem stall)
+  input  logic               stall,         // freeze EX/MEM (dmem stall)
   input  id_ex_t   in,
   input  logic [1:0]         fwd_rs1_sel,
   input  logic [1:0]         fwd_rs2_sel,
@@ -23,7 +33,8 @@ module ex_stage (
   input  logic [31:0]        fwd_mem_wb,    // WB-stage write-data mux output
   output ex_mem_t  out,
   output logic               redirect,
-  output logic [31:0]        redirect_target
+  output logic [31:0]        redirect_target,
+  output logic               div_busy       // -> hazard_unit (stalls IF/ID/EX/MEM)
 );
 
   // ── Operand forwarding muxes ───────────────────────────────────────────
@@ -51,13 +62,75 @@ module ex_stage (
     alu_b = in.ctrl.alu_src  ? in.imm : rs2;
   end
 
+  // ── Divider handshake state ───────────────────────────────────────────
+  // Two flops break the combinational loop between ex_stage's start_div
+  // (drives alu) and alu's div_busy (would otherwise gate start_div):
+  //   div_started_q   : 1 from the posedge after the start pulse, until
+  //                     EX/MEM captures the divide result.
+  //   div_completed_q : remembers div_done seen during a stall cycle so
+  //                     the divide isn't restarted while waiting for a
+  //                     concurrent dmem stall to clear.
+  logic        div_started_q;
+  logic        div_completed_q;
+  logic        is_div_op;
+  logic        start_div_w;
+  logic        alu_div_busy;
+  logic        alu_div_done;
+  logic        div_pipeline_stall;
+  logic        ex_capture;
+
+  always_comb begin
+    is_div_op   = in.valid
+                && (in.ctrl.alu_op == ALU_DIV  || in.ctrl.alu_op == ALU_DIVU
+                 || in.ctrl.alu_op == ALU_REM  || in.ctrl.alu_op == ALU_REMU);
+    // Pulse start exactly once per divide instruction. div_started_q
+    // goes high on the next edge so the pulse self-extinguishes; if a
+    // dmem stall delays capture and the pulse already happened,
+    // div_completed_q latches the done so we don't re-trigger.
+    start_div_w = is_div_op && !div_started_q && !div_completed_q;
+    // Stall while a divide is in flight. Once we've seen done (live or
+    // remembered) the pipeline can advance, subject to the dmem `stall`
+    // input from hazard_unit.
+    div_pipeline_stall = is_div_op && !div_completed_q && !alu_div_done;
+    // EX/MEM register captures only when neither dmem nor divide stalls.
+    ex_capture = !stall && !div_pipeline_stall;
+  end
+
   logic [31:0] alu_result;
   alu u_alu (
-    .op  (in.ctrl.alu_op),
-    .a   (alu_a),
-    .b   (alu_b),
-    .out (alu_result)
+    .clock     (clock),
+    .reset     (reset),
+    .start_div (start_div_w),
+    .op        (in.ctrl.alu_op),
+    .a         (alu_a),
+    .b         (alu_b),
+    .div_busy  (alu_div_busy),
+    .div_done  (alu_div_done),
+    .out       (alu_result)
   );
+
+  // alu_div_busy is exposed for completeness/future debug but ex_stage's
+  // own div_pipeline_stall is the gating-relevant signal.
+  /* verilator lint_off UNUSEDSIGNAL */
+  logic _alu_div_busy_unused;
+  /* verilator lint_on UNUSEDSIGNAL */
+  assign _alu_div_busy_unused = alu_div_busy;
+
+  assign div_busy = div_pipeline_stall;
+
+  always_ff @(posedge clock) begin
+    if (reset) begin
+      div_started_q   <= 1'b0;
+      div_completed_q <= 1'b0;
+    end else if (ex_capture && is_div_op) begin
+      // The divide just retired into EX/MEM — clear both trackers.
+      div_started_q   <= 1'b0;
+      div_completed_q <= 1'b0;
+    end else begin
+      if (alu_div_done)  div_completed_q <= 1'b1;
+      if (start_div_w)   div_started_q   <= 1'b1;
+    end
+  end
 
   // ── Branch resolve ────────────────────────────────────────────────────
   logic        branch_cond;
@@ -118,9 +191,9 @@ module ex_stage (
   always_ff @(posedge clock) begin
     if (reset) begin
       reg_q <= '0;
-    end else if (stall) begin
-      // dmem stall: hold the EX/MEM register so the in-flight LOAD/STORE
-      // stays in MEM stage waiting on the bus.
+    end else if (!ex_capture) begin
+      // dmem stall or divide stall: hold EX/MEM. The in-flight LOAD/STORE
+      // (or DIV/REM) keeps its slot in the pipeline.
       reg_q <= reg_q;
     end else begin
       reg_q.pc            <= in.pc;
