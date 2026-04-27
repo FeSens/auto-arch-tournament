@@ -30,8 +30,20 @@ def create_worktree(hypothesis_id: str) -> str:
 def accept_worktree(hypothesis_id: str, commit_message: str):
     """Merges worktree branch into main and removes the worktree."""
     path = str((WORKTREE_BASE / hypothesis_id).resolve())
-    # Commit any uncommitted changes in worktree (SV is the source of truth).
-    subprocess.run(["git", "-C", path, "add", "rtl/"], check=True)
+    # Commit any uncommitted changes in worktree. Stage exactly the
+    # paths the agent is permitted to modify (rtl/ + test/test_*.py).
+    # The orchestrator's sandbox check runs BEFORE this is reached, so
+    # in practice these are the only dirty paths anyway. -A picks up
+    # adds, modifies, and deletes inside each prefix.
+    subprocess.run(["git", "-C", path, "add", "-A", "rtl/"], check=True)
+    # test/test_*.py specifically (not test/cosim/, _helpers.py, conftest.py)
+    test_changes = subprocess.run(
+        ["git", "-C", path, "ls-files", "--modified", "--others", "--exclude-standard",
+         "test/test_*.py"],
+        capture_output=True, text=True, check=True,
+    ).stdout.split()
+    if test_changes:
+        subprocess.run(["git", "-C", path, "add", "--"] + test_changes, check=True)
     subprocess.run(
         ["git", "-C", path, "commit", "--allow-empty", "-m", commit_message],
         check=True

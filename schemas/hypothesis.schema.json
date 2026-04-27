@@ -22,7 +22,11 @@
         "type": "object",
         "required": ["file","description"],
         "properties": {
-          "file":        {"type": "string"},
+          "file":        {
+            "type": "string",
+            "description": "Must be under rtl/ (any extension) or be a test/test_*.py cocotb suite. Anything else is rejected by the runtime sandbox check.",
+            "pattern": "^(rtl/[^.].*|test/test_[^/]+\\.py)$"
+          },
           "description": {"type": "string"}
         }
       }

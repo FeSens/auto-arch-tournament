@@ -1,8 +1,37 @@
-"""Invokes claude -p to generate a hypothesis. Writes experiments/hypotheses/hyp-{id}.yaml."""
-import subprocess, json, re, datetime
+"""Invokes claude -p to generate a hypothesis. Writes experiments/hypotheses/hyp-{id}.yaml.
+
+The agent runs with --dangerously-skip-permissions in the main repo, so
+this module brackets the call with a sandbox check: any path it touches
+outside experiments/hypotheses/ is reverted and the run is rejected.
+Without that, a misbehaving hypothesis agent could silently patch tools/,
+schemas/, etc., and those changes would persist into every subsequent
+worktree.
+"""
+import subprocess, json, re, datetime, hashlib
 from pathlib import Path
 
 HYPOTHESES_DIR = Path("experiments/hypotheses")
+
+# Same allow-list spirit as orchestrator.path_is_allowed but scoped to the
+# hypothesis-agent's job: it should ONLY add a YAML in experiments/hypotheses/.
+HYP_ALLOWED = re.compile(r"^experiments/hypotheses/[^/]+\.(yaml|yml)$")
+
+
+def _git_offlimits_changes() -> list:
+    """git status --porcelain in the main repo; flag anything not matching
+    the hypothesis-agent allow list."""
+    out = subprocess.run(
+        ["git", "status", "--porcelain"],
+        capture_output=True, text=True, check=True,
+    ).stdout
+    bad = []
+    for line in out.splitlines():
+        if not line:
+            continue
+        for p in (s.strip() for s in line[3:].split(" -> ")):
+            if p and not HYP_ALLOWED.match(p):
+                bad.append(p)
+    return bad
 
 def _build_prompt(log_tail: list, current_fitness: float, baseline_fitness: float) -> str:
     arch = Path("ARCHITECTURE.md").read_text()
@@ -59,7 +88,12 @@ def _next_id() -> str:
 
 def run_hypothesis_agent(log_tail: list, current_fitness: float,
                          baseline_fitness: float) -> str:
-    """Invokes claude -p and returns path to written hypothesis YAML."""
+    """Invokes claude -p and returns path to written hypothesis YAML.
+
+    Sandbox: if the agent touches anything outside experiments/hypotheses/,
+    revert those changes and raise. The orchestrator catches this and logs
+    a 'broken' iteration without ever running the eval gates.
+    """
     hyp_id = _next_id()
     prompt = _build_prompt(log_tail, current_fitness, baseline_fitness)
 
@@ -68,6 +102,25 @@ def run_hypothesis_agent(log_tail: list, current_fitness: float,
         cwd=".",
         check=True,
     )
+
+    breaches = _git_offlimits_changes()
+    if breaches:
+        # Hard-revert anything the agent touched outside its allow list.
+        # `git checkout HEAD --` restores tracked files; new files have to
+        # be removed by hand.
+        for p in breaches:
+            subprocess.run(["git", "checkout", "HEAD", "--", p],
+                           capture_output=True)
+            path = Path(p)
+            if path.exists() and p not in [
+                line.split()[-1] for line in subprocess.run(
+                    ["git", "ls-files"],
+                    capture_output=True, text=True).stdout.splitlines()
+            ]:
+                path.unlink(missing_ok=True)
+        raise PermissionError(
+            f"Hypothesis agent modified off-limits paths and was rolled back: {breaches}"
+        )
 
     path = HYPOTHESES_DIR / f"{hyp_id}.yaml"
     if not path.exists():

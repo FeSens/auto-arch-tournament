@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Hardcoded AutoResearch loop. The LLM never touches this file."""
-import argparse, json, datetime, subprocess
+import argparse, json, datetime, subprocess, re
 from pathlib import Path
 
 import jsonschema, yaml
@@ -16,6 +16,51 @@ from tools.plot import plot_progress
 LOG_PATH      = Path("experiments/log.jsonl")
 HYP_SCHEMA    = json.loads(Path("schemas/hypothesis.schema.json").read_text())
 RESULT_SCHEMA = json.loads(Path("schemas/eval_result.schema.json").read_text())
+
+# Don't-touch sandbox: anything outside ALLOWED_PATTERNS that the agent
+# touches is rejected before the eval gates run. Without this an agent
+# could silently soften checks.cfg, the cosim main.cpp, or the
+# fpga.py CRC table and inflate its own fitness score.
+#
+# Permitted modifications, per CLAUDE.md "What hypotheses MAY change":
+#   - rtl/ (any file)
+#   - test/test_*.py (cocotb suites for new modules)
+#   - implementation_notes.md (the agent's own writeup, untracked)
+#
+# Everything else is off-limits.
+ALLOWED_PATTERNS = (
+    re.compile(r"^rtl/.+"),
+    re.compile(r"^test/test_[^/]+\.py$"),
+    re.compile(r"^implementation_notes\.md$"),
+)
+
+
+def path_is_allowed(path: str) -> bool:
+    return any(p.match(path) for p in ALLOWED_PATTERNS)
+
+
+def offlimits_changes(worktree: str) -> list:
+    """Return paths the agent modified that are NOT on the allow list.
+
+    Reads `git status --porcelain` against the worktree's HEAD. Catches
+    modifications, deletions, additions, and renames. Returns [] if the
+    sandbox is clean.
+    """
+    out = subprocess.run(
+        ["git", "-C", str(worktree), "status", "--porcelain"],
+        capture_output=True, text=True, check=True,
+    ).stdout
+    bad = []
+    for line in out.splitlines():
+        if not line:
+            continue
+        # porcelain format: 2-char status + space + path. For renames the
+        # path is "OLD -> NEW"; flag both ends.
+        rest = line[3:]
+        for p in (s.strip() for s in rest.split(" -> ")):
+            if p and not path_is_allowed(p):
+                bad.append(p)
+    return bad
 
 def read_log() -> list:
     if not LOG_PATH.exists(): return []
@@ -105,10 +150,11 @@ def run_iteration(iteration: int, log: list, fixed_hyp_path: str = None) -> dict
         hyp_path = run_hypothesis_agent(log[-20:], best, base)
         print(f"  Hypothesis written: {hyp_path}")
 
-    # 2. Validate schema
+    # 2. Validate schema. Catch only the specific exceptions we expect —
+    # an unrelated bug should propagate, not be logged as "schema_error".
     try:
         hyp = validate_hypothesis(hyp_path)
-    except (jsonschema.ValidationError, Exception) as e:
+    except (jsonschema.ValidationError, FileNotFoundError, yaml.YAMLError) as e:
         entry = {'id': 'schema_error', 'title': str(hyp_path), 'category': 'unknown',
                  'outcome': 'broken', 'formal_passed': False, 'cosim_passed': False,
                  'error': str(e)}
@@ -141,6 +187,15 @@ def run_iteration(iteration: int, log: list, fixed_hyp_path: str = None) -> dict
         impl_ok = run_implementation_agent(hyp_path, worktree)
         if not impl_ok:
             return log_broken("implementation_compile_failed")
+
+    # 4b. Sandbox check — reject any change outside rtl/ + test/test_*.py.
+    # The agent runs with --dangerously-skip-permissions and could silently
+    # patch tools/, formal/, fpga/, test/cosim/, schemas/, bench/programs/,
+    # etc. to inflate fitness. Detect that here, BEFORE any eval gate runs.
+    sandbox_breaches = offlimits_changes(worktree)
+    if sandbox_breaches:
+        return log_broken("sandbox_violation",
+                          f"agent touched off-limits paths: {sandbox_breaches}")
 
     # 5. Lint + synth + bench-ELFs + cosim-build
     print("Phase 3: Lint, synth, bench, cosim-build...")

@@ -5,12 +5,23 @@ from pathlib import Path
 SEEDS = [1, 2, 3]
 NEXTPNR_SCRIPT = "fpga/scripts/nextpnr_run.sh"
 PORTME_H = "bench/programs/coremark/baremetal/core_portme.h"
+# Canonical 6K-config CoreMark CRCs for our seed config (see core_portme.c
+# seed1=0, seed2=0, seed3=0x66, seed5=7). Mismatches at any of these
+# constitute a benchmark failure regardless of "Correct operation
+# validated." in the UART. crcfinal is the fingerprint of the entire
+# benchmark run; crclist/matrix/state validate the individual algorithm
+# outputs.
 COREMARK_EXPECTED = {
-    'seedcrc': 0x8a02,
-    'crclist': 0xd4b0,
+    'seedcrc':   0x8a02,
+    'crclist':   0xd4b0,
     'crcmatrix': 0xbe52,
-    'crcstate': 0x5e47,
+    'crcstate':  0x5e47,
+    'crcfinal':  0x273b,
 }
+# Min seed successes needed to call placement "good". V0 runs 3 nextpnr
+# seeds; if 2+ fail to place, the design is fragile/bloated/broken and
+# the median of a single survivor is not a real signal.
+MIN_SUCCESSFUL_SEEDS = 2
 
 def parse_iterations(worktree: str) -> int:
     """Read ITERATIONS from portme.h so we can't get out of sync with the ELF."""
@@ -42,11 +53,17 @@ async def run_seed(seed: int, worktree: str, outdir: str) -> dict:
     matches = re.findall(r'Max frequency[^\d]+([\d.]+)\s+MHz', output)
     fmax = float(matches[-1]) if matches else None
 
+    # Treat a non-zero exit from nextpnr (passed through pipefail in the
+    # shell script) as placement failure even if it printed a frequency
+    # line during a partial run.
+    placement_failed = (proc.returncode != 0) or (fmax is None)
+
     return {
         'seed': seed,
-        'fmax_mhz': fmax,
+        'fmax_mhz': fmax if not placement_failed else None,
         'log': output,
-        'placement_failed': fmax is None,
+        'returncode': proc.returncode,
+        'placement_failed': placement_failed,
     }
 
 async def _run_all_seeds(worktree: str) -> list:
@@ -105,30 +122,32 @@ def run_coremark_ipc(worktree: str) -> dict:
         return {'completed': False, 'iter_per_cycle': 0.0, 'cycles': 0, 'iterations': 0,
                 'reason': reason}
 
-    # Prefer bench-bracketed cycles (start_time..stop_time) over total elapsed.
-    # The bracketed window excludes program init, CoreMark's core_init_* setup,
-    # and CRC printing from the timing — matching the canonical CoreMark score
-    # definition. Fall back to total elapsed only if the harness didn't get
-    # both markers (e.g., older ELF, bench crashed mid-run).
-    if marker.get('bench_bracketed', False):
-        elapsed_cycles = int(marker['bench_stop_cycle']) - int(marker['bench_start_cycle'])
-        if elapsed_cycles <= 0:
-            return {'completed': False, 'iter_per_cycle': 0.0, 'cycles': 0, 'iterations': 0,
-                    'reason': f'invalid_bench_bracket: start={marker.get("bench_start_cycle")} stop={marker.get("bench_stop_cycle")}'}
-        bracketed = True
-    else:
-        elapsed_cycles = last_retirement.get('cycle', 0) + 1
-        bracketed = False
-    ipc = iterations / elapsed_cycles if elapsed_cycles > 0 else 0.0
+    # Bracketed cycles (start_time..stop_time) are the contract per
+    # bench/programs/coremark/baremetal/core_portme.c's start/stop_time.
+    # If both markers aren't present, the run is INVALID for fitness
+    # scoring — DO NOT fall back to total elapsed: a CPU/MMIO bug that
+    # drops 0x10000100/0x10000104 writes would silently get scored on
+    # init+CRC-printing overhead too.
+    if not marker.get('bench_bracketed', False):
+        return {'completed': False, 'iter_per_cycle': 0.0, 'cycles': 0, 'iterations': 0,
+                'reason': f'bench_markers_missing: '
+                          f'start={marker.get("bench_start_cycle")} '
+                          f'stop={marker.get("bench_stop_cycle")}'}
+    elapsed_cycles = int(marker['bench_stop_cycle']) - int(marker['bench_start_cycle'])
+    if elapsed_cycles <= 0:
+        return {'completed': False, 'iter_per_cycle': 0.0, 'cycles': 0, 'iterations': 0,
+                'reason': f'invalid_bench_bracket: start={marker.get("bench_start_cycle")} stop={marker.get("bench_stop_cycle")}'}
+    ipc = iterations / elapsed_cycles
     return {'completed': True, 'iter_per_cycle': ipc, 'cycles': elapsed_cycles,
-            'iterations': iterations, 'bracketed_cycles': bracketed}
+            'iterations': iterations, 'bracketed_cycles': True}
 
 def _uart_int(uart: str, pattern: str, base: int = 10):
     m = re.search(pattern, uart)
     return int(m.group(1), base) if m else None
 
 def validate_coremark_uart(uart: str, iterations: int) -> tuple:
-    """Require CoreMark's own validation and exact expected CRC markers."""
+    """Require CoreMark's own validation and exact expected CRC markers,
+    including crcfinal (the fingerprint over the entire run)."""
     if 'Correct operation validated' not in uart:
         if 'Cannot validate operation' in uart:
             return False, f'coremark_unvalidated_seed_or_size: {uart[-500:]}'
@@ -137,10 +156,11 @@ def validate_coremark_uart(uart: str, iterations: int) -> tuple:
         return False, f'coremark_validation_marker_missing: {uart[-500:]}'
 
     checks = [
-        ('seedcrc', _uart_int(uart, r'seedcrc\s*:\s*0x([0-9a-fA-F]+)', 16)),
-        ('crclist', _uart_int(uart, r'\[0\]crclist\s*:\s*0x([0-9a-fA-F]+)', 16)),
+        ('seedcrc',   _uart_int(uart, r'seedcrc\s*:\s*0x([0-9a-fA-F]+)', 16)),
+        ('crclist',   _uart_int(uart, r'\[0\]crclist\s*:\s*0x([0-9a-fA-F]+)', 16)),
         ('crcmatrix', _uart_int(uart, r'\[0\]crcmatrix\s*:\s*0x([0-9a-fA-F]+)', 16)),
-        ('crcstate', _uart_int(uart, r'\[0\]crcstate\s*:\s*0x([0-9a-fA-F]+)', 16)),
+        ('crcstate',  _uart_int(uart, r'\[0\]crcstate\s*:\s*0x([0-9a-fA-F]+)', 16)),
+        ('crcfinal',  _uart_int(uart, r'\[0\]crcfinal\s*:\s*0x([0-9a-fA-F]+)', 16)),
     ]
     for name, got in checks:
         expected = COREMARK_EXPECTED[name]
@@ -170,9 +190,18 @@ def run_fpga_eval(worktree: str) -> dict:
     seed_results = asyncio.run(_run_all_seeds(worktree))
     successful   = [r for r in seed_results if not r['placement_failed']]
     all_fmax     = [r['fmax_mhz'] for r in successful]
+    seeds_log    = [r.get('fmax_mhz') for r in seed_results]
 
-    if not successful:
-        return {'placement_failed': True, 'seeds': [None, None, None]}
+    if len(successful) < MIN_SUCCESSFUL_SEEDS:
+        # 0-of-3 or 1-of-3 placements is itself a quality signal: the
+        # design is unroutable or fragile. Single-seed luck is not a
+        # fitness score we'll commit to.
+        return {
+            'placement_failed': True,
+            'seeds': seeds_log,
+            'successful_seeds': len(successful),
+            'min_required':     MIN_SUCCESSFUL_SEEDS,
+        }
 
     fmax_median = statistics.median(all_fmax)
     cm          = run_coremark_ipc(worktree)

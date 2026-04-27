@@ -1,12 +1,23 @@
 """Runs the real riscv-formal suite via formal/run_all.sh.
 
-The old implementation scanned formal/checks/*.sby, but those were stub files
-that don't instantiate any riscv-formal properties. The real suite is generated
-at runtime by formal/run_all.sh (which invokes genchecks.py against our Core.sv
-+ wrapper.sv + checks.cfg) and runs ~45 I-base + reg/pc/causal checks.
+The real suite is generated at runtime by formal/run_all.sh (which invokes
+genchecks.py against our rtl/*.sv + wrapper.sv + checks.cfg) and runs the
+~45 I-base / M-ext insn checks plus reg / pc_fwd / pc_bwd / causal /
+unique / cover / ill / liveness — 53 total against the V0 baseline.
+
+If genchecks.py crashes mid-run and only emits one .sby task that
+vacuously passes, the old `passed > 0 and failed == 0` rule would
+return success. EXPECTED_MIN_CHECKS prevents that.
 """
-import subprocess, json, re
+import os, subprocess, json, re
 from pathlib import Path
+
+# Floor on how many .sby tasks must pass for a "formal: green" result.
+# V0 baseline produces 53. Allow some slack (≥50) so a future checks.cfg
+# tweak that legitimately drops 1-2 checks doesn't trigger a false alarm,
+# but reject a partial genchecks run that emits 1-2 tasks.
+EXPECTED_MIN_CHECKS = int(os.environ.get("FORMAL_MIN_CHECKS", "50"))
+
 
 def run_formal(worktree: str) -> dict:
     """
@@ -31,14 +42,24 @@ def run_formal(worktree: str) -> dict:
     tally = re.search(r'Formal:\s+(\d+)\s+passed,\s+(\d+)\s+failed', output)
     if tally:
         passed, failed = int(tally.group(1)), int(tally.group(2))
-        if passed > 0 and failed == 0 and result.returncode == 0:
-            return {'passed': True, 'checks_passed': passed}
-        fail_line = re.search(r'Failed:\s+(\S+)', output)
-        return {
-            'passed': False,
-            'failed_check': fail_line.group(1) if fail_line else 'unknown',
-            'detail': output[-4000:],
-        }
+        if failed > 0 or result.returncode != 0:
+            fail_line = re.search(r'Failed:\s+(\S+)', output)
+            return {
+                'passed': False,
+                'failed_check': fail_line.group(1) if fail_line else 'unknown',
+                'checks_passed': passed,
+                'checks_failed': failed,
+                'detail': output[-4000:],
+            }
+        if passed < EXPECTED_MIN_CHECKS:
+            return {
+                'passed': False,
+                'failed_check': 'too_few_checks_generated',
+                'checks_passed': passed,
+                'checks_expected_min': EXPECTED_MIN_CHECKS,
+                'detail': f'genchecks emitted only {passed} tasks (expected ≥ {EXPECTED_MIN_CHECKS})',
+            }
+        return {'passed': True, 'checks_passed': passed}
 
     # Script didn't produce a tally — setup error (missing riscv-formal repo,
     # genchecks.py crash, etc.).
