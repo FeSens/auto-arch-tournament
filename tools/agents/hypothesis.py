@@ -55,7 +55,7 @@ HYP_ALLOWED = re.compile(r"^experiments/hypotheses/[^/]+\.(yaml|yml)$")
 
 
 def _run_claude_streaming(cmd: list, cwd: str, log_path: Path,
-                          timeout_sec: int) -> tuple[int, bool]:
+                          timeout_sec: int, mode: str = "w") -> tuple[int, bool]:
     """Run claude -p with NDJSON streaming, watchdog, and one-line summaries.
 
     Returns (returncode, timed_out). Caller decides retry/fail.
@@ -81,7 +81,7 @@ def _run_claude_streaming(cmd: list, cwd: str, log_path: Path,
 
     threading.Thread(target=watchdog, daemon=True).start()
 
-    with log_path.open("w") as log:
+    with log_path.open(mode) as log:
         for line in proc.stdout:
             log.write(line)
             log.flush()
@@ -241,9 +241,14 @@ def run_hypothesis_agent(log_tail: list, current_fitness: float,
     if rc != 0 and not timed_out:
         # Single retry. 429s and transient API errors are the most common
         # cause; a stuck-bug or wall-clock overrun (timed_out) we don't retry.
+        # Append (not truncate) on retry so the first attempt's NDJSON —
+        # often the actual 429 evidence we want to debug — is preserved.
         print(f"  [claude] non-zero exit ({rc}); retrying once", flush=True)
+        with HYPOTHESIS_LOG.open("a") as log:
+            log.write(f'\n{{"type":"retry_marker","first_rc":{rc}}}\n')
         rc, timed_out = _run_claude_streaming(
             cmd, cwd=".", log_path=HYPOTHESIS_LOG, timeout_sec=HYPOTHESIS_TIMEOUT_SEC,
+            mode="a",
         )
 
     if timed_out:

@@ -117,7 +117,7 @@ def _summarize_event(line: str) -> str | None:
 
 
 def _run_claude_streaming(cmd: list, cwd: str, log_path: Path,
-                          timeout_sec: int) -> tuple[int, bool]:
+                          timeout_sec: int, mode: str = "w") -> tuple[int, bool]:
     """Run claude -p with NDJSON streaming, watchdog, and one-line summaries.
 
     Returns (returncode, timed_out). Caller decides retry/fail.
@@ -143,7 +143,7 @@ def _run_claude_streaming(cmd: list, cwd: str, log_path: Path,
 
     threading.Thread(target=watchdog, daemon=True).start()
 
-    with log_path.open("w") as log:
+    with log_path.open(mode) as log:
         for line in proc.stdout:
             log.write(line)
             log.flush()
@@ -192,9 +192,13 @@ def run_implementation_agent(hypothesis_path: str, worktree: str) -> bool:
         cmd, cwd=worktree, log_path=log_path, timeout_sec=CLAUDE_TIMEOUT_SEC,
     )
     if rc != 0 and not timed_out:
+        # See hypothesis.py for the append-on-retry rationale.
         print(f"  [claude] non-zero exit ({rc}); retrying once", flush=True)
+        with log_path.open("a") as log:
+            log.write(f'\n{{"type":"retry_marker","first_rc":{rc}}}\n')
         rc, timed_out = _run_claude_streaming(
             cmd, cwd=worktree, log_path=log_path, timeout_sec=CLAUDE_TIMEOUT_SEC,
+            mode="a",
         )
     if timed_out:
         print(f"  [claude] TIMEOUT after {CLAUDE_TIMEOUT_SEC}s — process killed",
