@@ -54,9 +54,24 @@ def _summarize_event(line: str) -> str | None:
 HYP_ALLOWED = re.compile(r"^experiments/hypotheses/[^/]+\.(yaml|yml)$")
 
 
-def _git_offlimits_changes() -> list:
+def _whitelist_regex(allowed_yaml_ids: list[str]) -> 're.Pattern':
+    """Build a regex matching ONLY the round's pre-allocated YAML names.
+
+    Concurrent hypothesis agents share `experiments/hypotheses/` in the
+    main repo. Without a per-round whitelist, slot 0's check would see
+    slot 1's YAML as "off-limits" the moment slot 1 finished writing.
+    The pre-allocated IDs are the deterministic, finite set of YAMLs the
+    round is allowed to produce; anything else is a real breach.
+    """
+    if not allowed_yaml_ids:
+        return HYP_ALLOWED  # back-compat: any YAML in experiments/hypotheses/
+    alt = "|".join(re.escape(i) for i in allowed_yaml_ids)
+    return re.compile(rf"^experiments/hypotheses/({alt})\.(yaml|yml)$")
+
+
+def _git_offlimits_changes(allow_re: 're.Pattern' = HYP_ALLOWED) -> list:
     """git status --porcelain in the main repo; flag anything not matching
-    the hypothesis-agent allow list."""
+    the supplied allow regex. Default is the original any-YAML allow list."""
     out = subprocess.run(
         ["git", "status", "--porcelain"],
         capture_output=True, text=True, check=True,
@@ -66,11 +81,13 @@ def _git_offlimits_changes() -> list:
         if not line:
             continue
         for p in (s.strip() for s in line[3:].split(" -> ")):
-            if p and not HYP_ALLOWED.match(p):
+            if p and not allow_re.match(p):
                 bad.append(p)
     return bad
 
-def _build_prompt(log_tail: list, current_fitness: float, baseline_fitness: float) -> str:
+def _build_prompt(log_tail: list, current_fitness: float, baseline_fitness: float,
+                  hyp_id: str | None = None,
+                  category_hint: str | None = None) -> str:
     arch = Path("ARCHITECTURE.md").read_text()
     claude_md = Path("CLAUDE.md").read_text() if Path("CLAUDE.md").exists() else ""
     src_files = sorted(Path("rtl").rglob("*.sv"))
@@ -79,6 +96,20 @@ def _build_prompt(log_tail: list, current_fitness: float, baseline_fitness: floa
     )
     log_str = "\n".join(json.dumps(e) for e in log_tail)
 
+    id_clause = (
+        f"Use exactly this hypothesis ID: {hyp_id}\n"
+        if hyp_id else
+        "The hypothesis ID must follow the format: hyp-YYYYMMDD-NNN\n"
+        "where NNN is a zero-padded sequence number based on existing files.\n"
+    )
+    category_clause = (
+        f"Focus this hypothesis on the category: {category_hint}.\n"
+        f"This is the diversity slot for this tournament round — pick the\n"
+        f"single most promising '{category_hint}' angle, not a hedge across\n"
+        f"categories.\n"
+        if category_hint else ""
+    )
+
     return f"""You are a CPU microarchitecture research agent.
 
 Your job: propose one architectural hypothesis to improve this RV32IM CPU.
@@ -86,6 +117,7 @@ Fitness metric: CoreMark iter/sec = CoreMark iterations/cycle × Fmax_Hz on Tang
 Current best fitness: {current_fitness:.2f}
 Baseline fitness: {baseline_fitness:.2f}
 
+{category_clause}
 ## Architecture
 {arch}
 
@@ -103,9 +135,7 @@ Baseline fitness: {baseline_fitness:.2f}
 2. Identify the most promising architectural improvement.
 3. Write a hypothesis YAML file to: experiments/hypotheses/<id>.yaml
 
-The hypothesis ID must follow the format: hyp-YYYYMMDD-NNN
-where NNN is a zero-padded sequence number based on existing files.
-
+{id_clause}
 The YAML must validate against schemas/hypothesis.schema.json:
   id, title, category, motivation, hypothesis, expected_impact, changes
 
@@ -124,15 +154,31 @@ def _next_id() -> str:
 
 
 def run_hypothesis_agent(log_tail: list, current_fitness: float,
-                         baseline_fitness: float) -> str:
+                         baseline_fitness: float,
+                         hyp_id: str | None = None,
+                         allowed_yaml_ids: list[str] | None = None,
+                         category_hint: str | None = None) -> str:
     """Invokes claude -p and returns path to written hypothesis YAML.
 
-    Sandbox: if the agent touches anything outside experiments/hypotheses/,
-    revert those changes and raise. The orchestrator catches this and logs
-    a 'broken' iteration without ever running the eval gates.
+    Sandbox: if the agent touches anything outside the round's whitelist
+    (default: any YAML in experiments/hypotheses/), revert those changes
+    and raise. The orchestrator catches this and logs a 'broken' iteration
+    without ever running the eval gates.
+
+    Tournament-mode args:
+      hyp_id           — pre-allocated ID. Skips _next_id (racy under N>1).
+      allowed_yaml_ids — round's full pre-allocated ID list; tightens the
+                         sandbox regex so concurrent slots don't flag each
+                         other's legitimate YAMLs.
+      category_hint    — injected into the prompt; the slot's category per
+                         the diversity rotation (micro_opt / structural /
+                         predictor / memory / extension).
     """
-    hyp_id = _next_id()
-    prompt = _build_prompt(log_tail, current_fitness, baseline_fitness)
+    if hyp_id is None:
+        hyp_id = _next_id()
+    prompt = _build_prompt(log_tail, current_fitness, baseline_fitness,
+                           hyp_id=hyp_id, category_hint=category_hint)
+    allow_re = _whitelist_regex(allowed_yaml_ids or [])
 
     # Stream claude output to experiments/hypotheses/.claude.log so Phase 1
     # progress is observable via `tail -f`. Default `claude -p` (text mode)
@@ -192,7 +238,7 @@ def run_hypothesis_agent(log_tail: list, current_fitness: float,
     elif proc.returncode != 0:
         raise subprocess.CalledProcessError(proc.returncode, cmd)
 
-    breaches = _git_offlimits_changes()
+    breaches = _git_offlimits_changes(allow_re)
     if breaches:
         # Hard-revert anything the agent touched outside its allow list.
         # `git checkout HEAD --` restores tracked files; new files have to
@@ -213,10 +259,18 @@ def run_hypothesis_agent(log_tail: list, current_fitness: float,
 
     path = HYPOTHESES_DIR / f"{hyp_id}.yaml"
     if not path.exists():
-        # Agent may have chosen a different ID — find the newest file
-        files = sorted(HYPOTHESES_DIR.glob("hyp-*.yaml"), key=lambda f: f.stat().st_mtime)
-        if files:
-            path = files[-1]
+        # Tournament mode: ID was pre-allocated; the agent may still have
+        # written it under a slightly different name. Look for ANY YAML
+        # matching this run's allowed set — newest wins.
+        candidates = [HYPOTHESES_DIR / f"{i}.yaml" for i in (allowed_yaml_ids or [])]
+        candidates = [c for c in candidates if c.exists()]
+        if candidates:
+            path = max(candidates, key=lambda f: f.stat().st_mtime)
         else:
-            raise FileNotFoundError("Hypothesis agent did not write a hypothesis file.")
+            files = sorted(HYPOTHESES_DIR.glob("hyp-*.yaml"),
+                           key=lambda f: f.stat().st_mtime)
+            if files:
+                path = files[-1]
+            else:
+                raise FileNotFoundError("Hypothesis agent did not write a hypothesis file.")
     return str(path)
