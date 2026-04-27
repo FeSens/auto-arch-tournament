@@ -54,10 +54,34 @@ Advisory file changes (you may deviate, add, rename, or restructure freely):
 3. After implementing, verify the build:
      verilator --lint-only -Wall -Wno-MULTITOP -sv rtl/*.sv
    Fix any errors / warnings before finishing.
-4. Write implementation_notes.md in the current directory describing:
+4. Self-check formal locally before declaring done:
+     bash formal/run_all.sh
+   This is the same gate the orchestrator runs in Phase 4. Catching
+   easy mistakes here (broken decoder arm, missed forwarding case,
+   missing default in a case statement) saves an entire iteration
+   getting marked broken on a one-line fix.
+
+   On failure, run_all.sh prints the failing check's logfile.txt tail
+   to stdout — last 30 lines, which contains the SMT counterexample
+   from sby. Read it, identify the bug class, fix rtl/, re-run.
+
+   CAP: 2 fix attempts. If formal still fails after 2 retries, STOP.
+   Document what you tried and what's still broken in
+   implementation_notes.md and exit. Do not fight a stubborn check —
+   some hypotheses are genuinely wrong and the orchestrator's hard
+   gate is the right place to record that, not your watchdog budget.
+
+   A passing local formal does NOT mean the hypothesis is accepted.
+   The orchestrator still runs cosim (RVFI byte-exact vs Python ISS)
+   and FPGA fitness (3-seed nextpnr median Fmax × CoreMark IPC) after
+   you finish; passing formal locally just means you didn't ship an
+   obvious bug.
+5. Write implementation_notes.md in the current directory describing:
    - What you actually changed (vs. the hypothesis plan)
    - Any deviations and why
    - Any concerns about the implementation
+   - Local formal status (pass / fail-after-N-attempts) and, if it
+     failed, what counterexample you saw and what you tried.
 
 Use your Edit, Write, Read, and Bash tools freely."""
 
