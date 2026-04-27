@@ -79,6 +79,12 @@
   } if_id_t;
 
   // ID/EX register payload.
+  // pc_plus_imm is a value-equivalent pre-computation of `pc + imm`
+  // lifted from EX to ID to shorten the EX redirect cone. It is NOT a
+  // speculative / contract-bearing bit (the discipline that broke
+  // hyp-004/005); it is the same 32-bit sum the EX stage would compute
+  // from `in.pc + in.imm`, captured one cycle earlier alongside `imm`.
+  // Consumed only when valid=1, so reset/flush ('0) is harmless.
   typedef struct packed {
     logic [31:0] pc;
     logic [31:0] rs1_val;
@@ -90,6 +96,7 @@
     ctrl_t       ctrl;
     logic [31:0] instr;
     logic        valid;
+    logic [31:0] pc_plus_imm;
   } id_ex_t;
 
   // EX/MEM register payload.

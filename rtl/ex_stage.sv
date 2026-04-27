@@ -18,6 +18,11 @@
 //   01 = EX/MEM aluResult (instruction immediately ahead in MEM)
 //   10 = MEM/WB result (instruction two ahead, post regfile-write mux)
 //
+// branch_target and the non-JALR branch of jump_target are sourced
+// from the ID-stage-precomputed `in.pc_plus_imm` field, eliminating
+// one 32-bit adder from the EX redirect cone. Latency unchanged; RVFI
+// fields capture identical values to the prior `in.pc + in.imm` form.
+//
 // Latency:        1 cycle for non-div ops; 33 cycles for real divides
 //                 (1 cycle for div edge cases).
 // RVFI fields:    feeds pc_wdata (= pc_next), the rd_wdata path for
@@ -152,11 +157,15 @@ module ex_stage (
       default: branch_cond = 1'b0;
     endcase
     branch_taken  = in.ctrl.is_branch && branch_cond;
-    branch_target = in.pc + in.imm;
+    // pc_plus_imm is the same `in.pc + in.imm` sum, precomputed in ID
+    // and registered into ID/EX. Eliminates one 32-bit carry chain
+    // from the EX redirect cone (was duplicated as branch_target and
+    // the non-JALR jump_target).
+    branch_target = in.pc_plus_imm;
     // JALR clears bit 0 (RV spec); JAL uses imm directly.
     jalr_sum    = rs1 + in.imm;
     jump_target = in.ctrl.is_jalr ? {jalr_sum[31:1], 1'b0}
-                                  : (in.pc + in.imm);
+                                  : in.pc_plus_imm;
   end
 
   // ── Misaligned branch / jump target trap ──────────────────────────────
