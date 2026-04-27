@@ -3,10 +3,16 @@
 #include <stddef.h>
 
 #define ITERATIONS    100
-/* Canonical CoreMark reporting config: 6K total → 2000 bytes per algorithm.
- * The coremark.h default is 2000 total (2K run, 666 bytes/algo) which
- * produces inflated iter/sec because working sets fit in registers. */
+/* TOTAL_DATA_SIZE is overridable from the Makefile via -DTOTAL_DATA_SIZE=…
+ * Default here matches V0's "harder" 6K config (~2000 bytes per algorithm).
+ * EEMBC's canonical reporting config is 2000 (~666 bytes per algorithm),
+ * the default in upstream coremark.h. Pass COREMARK_SIZE=2000 to the
+ * bench Makefile to publish numbers comparable with VexRiscv et al.
+ * The #ifndef guard lets -DTOTAL_DATA_SIZE override us before coremark.h
+ * is included (coremark.h's own #define is also #ifndef-guarded). */
+#ifndef TOTAL_DATA_SIZE
 #define TOTAL_DATA_SIZE 6000
+#endif
 #define CLOCKS_PER_SEC 1
 typedef uint32_t CORE_TICKS;
 typedef uint32_t ee_u32;

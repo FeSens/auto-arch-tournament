@@ -34,8 +34,8 @@ lint:
 test:
 	pytest -v test/
 
-cosim: cosim-build bench/programs/selftest.elf
-	python3 test/cosim/run_cosim.py test/cosim/obj_dir/cosim_sim bench/programs/selftest.elf
+cosim: cosim-build bench/programs/selftest.elf bench/programs/coremark.elf
+	python3 -m tools.eval.cosim .
 
 cosim-build: $(wildcard rtl/*.sv) test/cosim/main.cpp
 	bash test/cosim/build.sh

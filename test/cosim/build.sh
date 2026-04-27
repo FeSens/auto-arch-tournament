@@ -2,16 +2,19 @@
 # Build the Verilator-based cosim binary that drives `core` against an ELF
 # program. Produces test/cosim/obj_dir/cosim_sim.
 #
-# The wrapper main.cpp drives io_imemAddr / io_imemData and io_dmem* by
-# port name; the existing port shape comes from rtl/core.sv directly.
+# rtl/*.sv is globbed dynamically (with core_pkg.sv forced first because
+# its compilation-unit-scope typedefs and localparams must be visible
+# before any module references them). Hypotheses are allowed to add,
+# rename, or delete files inside rtl/, so a hardcoded file list would
+# silently break restructuring hypotheses.
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 COSIM_DIR="$REPO_ROOT/test/cosim"
 OBJ_DIR="$COSIM_DIR/obj_dir"
+RTL_DIR="$REPO_ROOT/rtl"
 
-# Ensure OSS CAD Suite tools are on PATH for non-interactive shells (the
-# parent Makefile already does this, but the script must work standalone).
+# Ensure OSS CAD Suite tools are on PATH for non-interactive shells.
 TOOLCHAIN="$REPO_ROOT/.toolchain"
 if [ -d "$TOOLCHAIN/oss-cad-suite/bin" ]; then
   export PATH="$TOOLCHAIN/oss-cad-suite/bin:$PATH"
@@ -19,24 +22,27 @@ fi
 
 mkdir -p "$OBJ_DIR"
 
-# Build with --build (verilator drives the C++ compiler itself).
+# Glob rtl/*.sv. core_pkg.sv first; the rest in a stable lexicographic
+# order (modulo case-insensitive sort, which Verilator/gcc don't care
+# about). If core_pkg.sv is missing the build will catch that downstream
+# via undefined-typedef errors.
+RTL_FILES=()
+[ -f "$RTL_DIR/core_pkg.sv" ] && RTL_FILES+=("$RTL_DIR/core_pkg.sv")
+for f in "$RTL_DIR"/*.sv; do
+  [ "$(basename "$f")" = "core_pkg.sv" ] && continue
+  RTL_FILES+=("$f")
+done
+
+if [ ${#RTL_FILES[@]} -eq 0 ]; then
+  echo "ERROR: no rtl/*.sv files found." >&2
+  exit 1
+fi
+
 verilator --cc --exe --build \
   -Mdir "$OBJ_DIR" \
   --top-module core \
   -Wall -Wno-fatal -Wno-style \
-  "$REPO_ROOT"/rtl/core_pkg.sv \
-  "$REPO_ROOT"/rtl/alu.sv \
-  "$REPO_ROOT"/rtl/decoder.sv \
-  "$REPO_ROOT"/rtl/imm_gen.sv \
-  "$REPO_ROOT"/rtl/reg_file.sv \
-  "$REPO_ROOT"/rtl/if_stage.sv \
-  "$REPO_ROOT"/rtl/id_stage.sv \
-  "$REPO_ROOT"/rtl/ex_stage.sv \
-  "$REPO_ROOT"/rtl/mem_stage.sv \
-  "$REPO_ROOT"/rtl/wb_stage.sv \
-  "$REPO_ROOT"/rtl/hazard_unit.sv \
-  "$REPO_ROOT"/rtl/forward_unit.sv \
-  "$REPO_ROOT"/rtl/core.sv \
+  "${RTL_FILES[@]}" \
   "$COSIM_DIR/main.cpp" \
   -o cosim_sim
 

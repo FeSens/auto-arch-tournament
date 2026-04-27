@@ -1,27 +1,24 @@
-# Yosys synthesis script: build the deployable Fmax-benchmark wrapper.
+# Yosys synthesis script: build the Fmax-benchmark wrapper.
 #
-# Reads core_pkg.sv (compilation-unit scope, must be first) plus every
-# rtl/*.sv module, then the fpga wrapper. The wrapper instantiates `core`
-# and an LFSR-driven imem so synthesis can't constant-fold pipeline logic.
-#
-# Output: generated/synth.json — fed to nextpnr-himbaechel.
+# rtl/*.sv is globbed dynamically (core_pkg.sv first for compilation-
+# unit-scope typedefs). Hypotheses are allowed to add/rename/delete
+# files inside rtl/, so a hardcoded list would silently break
+# restructuring hypotheses (the orchestrator would log them as
+# build_failed regardless of merit).
 yosys -import
 
-read_verilog -sv \
-  rtl/core_pkg.sv \
-  rtl/alu.sv \
-  rtl/decoder.sv \
-  rtl/imm_gen.sv \
-  rtl/reg_file.sv \
-  rtl/if_stage.sv \
-  rtl/id_stage.sv \
-  rtl/ex_stage.sv \
-  rtl/mem_stage.sv \
-  rtl/wb_stage.sv \
-  rtl/hazard_unit.sv \
-  rtl/forward_unit.sv \
-  rtl/core.sv \
-  fpga/core_bench.sv
+# Ordering: read core_pkg.sv first so its typedefs/localparams are
+# visible to subsequent files.
+read_verilog -sv rtl/core_pkg.sv
+
+# Then everything else under rtl/. glob -nocomplain handles the empty
+# case; we filter core_pkg.sv out to avoid double-include.
+foreach f [lsort [glob -nocomplain rtl/*.sv]] {
+    if {[file tail $f] == "core_pkg.sv"} { continue }
+    read_verilog -sv $f
+}
+
+read_verilog -sv fpga/core_bench.sv
 
 synth_gowin -top core_bench -json generated/synth.json
 

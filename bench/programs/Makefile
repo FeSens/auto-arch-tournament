@@ -1,9 +1,23 @@
 CROSS   := riscv32-unknown-elf
 CC      := $(CROSS)-gcc
-CFLAGS  := -march=rv32im -mabi=ilp32 -O2 -static -nostartfiles \
+
+# CoreMark build knobs. Defaults reproduce the V0 baseline (6K data size,
+# -O2). Override on the command line for canonical EEMBC reporting:
+#     make bench/programs/coremark.elf COREMARK_SIZE=2000 COREMARK_OPT=-O3
+# - COREMARK_SIZE: TOTAL_DATA_SIZE in coremark.h (#ifndef-guarded). 2000 is
+#   the EEMBC canonical reporting config (used by VexRiscv et al.); 6000
+#   makes the matrix/list/state working sets ~3x larger so the score is
+#   harder to inflate via register-resident working sets.
+# - COREMARK_OPT: gcc optimization. -O3 is the standard CoreMark publication
+#   flag; -O2 is what the V0 baseline used.
+COREMARK_SIZE ?= 6000
+COREMARK_OPT  ?= -O2
+
+CFLAGS  := -march=rv32im -mabi=ilp32 $(COREMARK_OPT) -static -nostartfiles \
            -specs=nano.specs -specs=nosys.specs \
            -T bench/programs/link.ld -Ibench/programs/coremark \
-           -Ibench/programs/coremark/baremetal
+           -Ibench/programs/coremark/baremetal \
+           -DTOTAL_DATA_SIZE=$(COREMARK_SIZE)
 
 SRCS := bench/programs/coremark/core_list_join.c \
         bench/programs/coremark/core_main.c \
