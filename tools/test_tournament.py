@@ -84,3 +84,30 @@ def test_pick_winner_tie_breaks_to_lowest_slot():
     entries = [_entry(0, 290.0), _entry(1, 290.0), _entry(2, 290.0)]
     winner = pick_winner(entries, current_best=282.82)
     assert winner["slot"] == 0
+
+
+def test_phase_gate_serializes_under_capacity_one():
+    """Two threads contending on the formal gate must not overlap."""
+    import threading, time
+    from tools.tournament import phase_gate
+
+    overlap = {'count': 0, 'max': 0}
+    in_section = {'n': 0}
+    lock = threading.Lock()
+
+    def worker():
+        with phase_gate('formal'):
+            with lock:
+                in_section['n'] += 1
+                overlap['max'] = max(overlap['max'], in_section['n'])
+            time.sleep(0.05)
+            with lock:
+                in_section['n'] -= 1
+
+    threads = [threading.Thread(target=worker) for _ in range(4)]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+
+    assert overlap['max'] == 1, "phase_gate('formal') failed to serialize"

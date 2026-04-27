@@ -6,7 +6,9 @@ tested without claude or the FPGA toolchain.
 """
 from __future__ import annotations
 
+import contextlib
 import datetime
+import threading
 from typing import Optional
 
 # The hypothesis schema's `category` enum, in the order the brief specifies.
@@ -67,3 +69,39 @@ def pick_winner(entries: list[dict], current_best: float) -> Optional[dict]:
     # slots would resolve in caller-supplied order — which today is slot-sorted
     # but shouldn't be a load-bearing contract of the helper.
     return max(candidates, key=lambda e: (e["fitness"], -e["slot"]))
+
+
+# Per-phase capacity. Formal and FPGA each saturate cores (formal uses
+# `make -j`, nextpnr is single-threaded but we already run 3 seeds per
+# slot — N slots × 3 seeds would thrash). Phase 3 (lint/synth/build)
+# and Phase 5 (cosim) are short or already-parallel, so no gate.
+PHASE_CAPACITY: dict[str, int] = {
+    "formal": 1,
+    "fpga":   1,
+}
+
+# Module-level semaphores so all slots in a process share the same gates.
+# Created lazily so test imports don't allocate them up front.
+_phase_semaphores: dict[str, threading.Semaphore] = {}
+_phase_semaphores_lock = threading.Lock()
+
+
+def _get_phase_sem(phase: str) -> threading.Semaphore:
+    with _phase_semaphores_lock:
+        sem = _phase_semaphores.get(phase)
+        if sem is None:
+            sem = threading.Semaphore(PHASE_CAPACITY.get(phase, 1))
+            _phase_semaphores[phase] = sem
+        return sem
+
+
+@contextlib.contextmanager
+def phase_gate(phase: str):
+    """Acquire the named phase's capacity semaphore. Use as `with phase_gate('formal'):`.
+    A phase not in PHASE_CAPACITY defaults to capacity=1 (conservative)."""
+    sem = _get_phase_sem(phase)
+    sem.acquire()
+    try:
+        yield
+    finally:
+        sem.release()
