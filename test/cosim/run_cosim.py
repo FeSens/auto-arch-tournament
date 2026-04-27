@@ -62,12 +62,17 @@ def compare(ref_trace, sim_trace, ref_completed=True, sim_completed=True,
         ref_wmask  = (ref.get('mem_wmask', 0) << byte_off) & 0xF
         ref_wdata  = (ref.get('mem_wdata', 0) << (byte_off * 8)) & 0xFFFFFFFF
         ref_rdata  = (ref.get('mem_rdata', 0) << (byte_off * 8)) & 0xFFFFFFFF
-        if ref_addr != sim.get('mem_addr', 0):
-            return _mismatch(i, ref, 'mem_addr', ref_addr, sim.get('mem_addr', 0))
+        # Always require ref/sim mem_*mask to agree: that's the source of
+        # truth for whether a memory op happened at all.
         if ref_rmask != sim.get('mem_rmask', 0):
             return _mismatch(i, ref, 'mem_rmask', ref_rmask, sim.get('mem_rmask', 0))
         if ref_wmask != sim.get('mem_wmask', 0):
             return _mismatch(i, ref, 'mem_wmask', ref_wmask, sim.get('mem_wmask', 0))
+        # mem_addr only matters when at least one mask is non-zero. With
+        # both masks 0 (no mem op — common on traps), an addr discrepancy
+        # is meaningless garbage. The trap field itself is checked above.
+        if (ref_rmask | ref_wmask) and ref_addr != sim.get('mem_addr', 0):
+            return _mismatch(i, ref, 'mem_addr', ref_addr, sim.get('mem_addr', 0))
         # Only compare rdata bytes that are actually read. The reference keeps
         # sub-word values unshifted; RVFI ALIGNED_MEM reports the full memory word.
         if ref_rmask:

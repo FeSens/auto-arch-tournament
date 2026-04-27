@@ -86,15 +86,22 @@ int main(int argc, char** argv) {
         // (both sim and reference aliased identically, so cosim would still pass).
         // Flag OOB so the testbench reports it and returns non-zero.
         //   - imem: PC should always be in range; flag every fetch outside.
-        //   - dmem read/write: only on actual memory ops (REn/WEn) so unused
-        //     aluResult garbage doesn't produce false positives.
+        //   - dmem read: ANY read outside [0, MEM_SIZE) is OOB — including
+        //     the UART range, which is write-only. Reads from UART used to
+        //     silently alias to dmem[addr & 0xFFFFC] and not flag oob_access,
+        //     diverging from reference.py which DOES flag them. Now both agree:
+        //     UART reads flag oob and return 0.
+        //   - dmem write: UART range is allowed (TX); BENCH_START/STOP are
+        //     allowed (markers); anything else outside dmem is OOB (handled
+        //     in the post-clock write block below).
         if (!in_mem_range(top->io_imemAddr)) oob_access = true;
         top->io_imemData  = rw(imem, top->io_imemAddr);
-        top->io_dmemRData = rw(dmem, top->io_dmemAddr);
-        if (top->io_dmemREn
-            && !in_mem_range(top->io_dmemAddr)
-            && !in_uart_range(top->io_dmemAddr))
-            oob_access = true;
+        if (in_mem_range(top->io_dmemAddr)) {
+            top->io_dmemRData = rw(dmem, top->io_dmemAddr);
+        } else {
+            top->io_dmemRData = 0;
+            if (top->io_dmemREn) oob_access = true;
+        }
         top->eval();
         top->clock = 1; top->eval();
 
