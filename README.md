@@ -25,24 +25,32 @@ performance wins over time.
 | 7     | Orchestrator                        | ✓     |
 | 8     | Baseline locked                     | ✓     |
 
-## Baseline (locked)
+## Baseline (locked, VexRiscv-comparable)
 
-The first orchestrator iteration on the unmodified hand-SV pipeline:
+![CoreMark progress](experiments/progress.png)
 
-| Metric                        | Value                                         |
-|-------------------------------|-----------------------------------------------|
-| **Fitness (CoreMark iter/s)** | **53.26**                                     |
-| Fmax (median, 3 nextpnr seeds)| 131.44 MHz (138.03 / 126.49 / 131.44)         |
-| CoreMark iterations           | 100                                           |
-| Bracketed cycles              | 246,775,333                                   |
-| LUT4                          | 10,189                                        |
-| FF                            | 1,873                                         |
-| Formal (riscv-formal, fast)   | 53 / 53 passed (ALTOPS — see CLAUDE.md caveat)|
-| Cosim (selftest, RVFI trace)  | 115 retirements byte-identical to Python ISS  |
-| CoreMark CRCs                 | crclist 0xd4b0 · crcmatrix 0xbe52 · crcstate 0x5e47 · crcfinal 0x273b |
+First orchestrator iteration on the unmodified hand-SV pipeline, under
+the same CoreMark methodology VexRiscv reports against ("full no cache,
+2.30 CoreMark/MHz"): 2K data, `-O3`, `ITERATIONS=10`, ~22% iStall+dStall
+random bus backpressure. CRCs verified against VexRiscv's pre-built
+`coremark_rv32im.bin`.
+
+| Metric                        | Value                                                |
+|-------------------------------|------------------------------------------------------|
+| **Fitness (CoreMark iter/s)** | **282.82**                                           |
+| **CoreMark/MHz**              | **~2.23** (vs VexRiscv full-no-cache **2.30**)       |
+| Fmax (median, 3 nextpnr seeds)| 127.03 MHz (128.72 / 127.03 / 123.02)                |
+| LUT4                          | 9,563                                                |
+| FF                            | 1,866                                                |
+| Formal (riscv-formal, fast)   | 53 / 53 passed (ALTOPS — see [CLAUDE.md](CLAUDE.md)) |
+| Cosim (selftest, RVFI trace)  | byte-identical to Python ISS                         |
+| CoreMark CRCs (canonical 2K)  | `0xe714` / `0x1fd7` / `0x8e3a` / `0xfcaf`            |
 
 Recorded in `experiments/log.jsonl` (entry `hyp-20260427-001`). All
-subsequent hypotheses are scored relative to this fitness.
+subsequent hypotheses are scored relative to this fitness. The
+pre-apples-to-apples baseline (6K data, `-O2`, zero-wait bus, 53.26
+iter/sec) is preserved at `experiments/log.pre-vex.jsonl` for
+reference but is not directly comparable.
 
 ## Quickstart
 

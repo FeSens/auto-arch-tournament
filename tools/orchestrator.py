@@ -78,12 +78,18 @@ def append_log(entry: dict):
     LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
     with LOG_PATH.open('a') as f:
         f.write(json.dumps(entry) + '\n')
-    # Auto-commit so the log entry survives in git history. Without this,
-    # rejected and broken iterations never produce an implementation
-    # commit and the only record of them lives in an untracked file —
-    # one `git clean -fdx` away from gone. README.md treats log.jsonl as
-    # authoritative; this makes that real.
+    # Regen progress.png from the updated log so the README chart reflects
+    # every iteration (improvement, regression, broken — see plot.py's
+    # color_map). plot_progress reads LOG_PATH directly, so this picks up
+    # the line we just appended.
+    plot_progress()
+    # Commit log + plot together. One "log: <id> <outcome>" commit per
+    # iteration; for accepts this lands alongside the implementation
+    # merge that accept_worktree already created.
     subprocess.run(["git", "add", str(LOG_PATH)], check=True)
+    plot_path = Path("experiments/progress.png")
+    if plot_path.exists():
+        subprocess.run(["git", "add", str(plot_path)], check=True)
     subprocess.run(
         ["git", "commit", "-m",
          f"log: {entry.get('id','unknown')} {entry.get('outcome','unknown')}"],
@@ -252,6 +258,8 @@ def run_iteration(iteration: int, log: list, fixed_hyp_path: str = None) -> dict
         'vs_baseline':     round(vs_base, 2),
         'fmax_mhz':        fpga['fmax_mhz'],
         'ipc_coremark':    fpga['ipc_coremark'],
+        'cycles':          fpga.get('cycles'),
+        'iterations':      fpga.get('iterations'),
         'lut4':            fpga['lut4'],
         'ff':              fpga['ff'],
         'seeds':           fpga['seeds'],
@@ -261,12 +269,17 @@ def run_iteration(iteration: int, log: list, fixed_hyp_path: str = None) -> dict
         'implementation_notes': _read_notes(worktree),
         'timestamp':       datetime.datetime.utcnow().isoformat(),
     }
-    append_log(entry)
 
+    # Order: implementation merge first (only on improvement), THEN log+plot
+    # commit. Reads chronologically as "rtl change → log says improvement".
+    # On regression/broken there's no impl commit; just the log commit.
     if outcome == 'improvement':
         msg = f"{hyp_id}: {hyp['title']} (+{delta:.1f}%)"
         accept_worktree(hyp_id, msg)
-        plot_progress()
+
+    append_log(entry)  # writes log, regens plot, commits both
+
+    if outcome == 'improvement':
         print(f"  ACCEPTED: {fitness:.2f} ({delta:+.1f}%)")
     else:
         destroy_worktree(hyp_id)

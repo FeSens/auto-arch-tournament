@@ -38,16 +38,16 @@ bench/programs/*.bin
 bench/programs/*.hex
 
 # Experiment artifacts.
-# - log.jsonl IS tracked: it's the orchestrator's authoritative journal of
-#   every iteration (accept/regression/broken), and rejected hypotheses
-#   never produce an implementation commit so the log is the only record.
+# - log.jsonl IS tracked: orchestrator's authoritative journal of every
+#   iteration (accept/regression/broken). Rejected hypotheses never
+#   produce an implementation commit so the log is the only record.
 #   Auto-committed by tools/orchestrator.py:append_log() per iteration.
-# - progress.png is regenerable from log.jsonl via tools/plot.py — no
-#   reason to track a binary that diffs every run.
+# - progress.png IS tracked: it's the chart embedded in README.md, so
+#   the latest state is always viewable from GitHub. Regenerated and
+#   auto-committed alongside log.jsonl.
 # - per-iteration worktrees and per-iteration hypothesis YAMLs are
 #   transient inputs/outputs of the loop, not source of truth.
 experiments/worktrees/
-experiments/progress.png
 experiments/hypotheses/*.yml
 experiments/hypotheses/*.yaml
 
