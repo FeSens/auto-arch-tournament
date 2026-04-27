@@ -15,10 +15,10 @@ HYPOTHESIS_LOG = HYPOTHESES_DIR / ".claude.log"
 
 # Wall-clock cap on hypothesis generation. Same shape as implement.py's
 # CLAUDE_TIMEOUT_SEC. Hypothesis generation reads rtl/ + ARCHITECTURE.md
-# + CLAUDE.md + the recent log and proposes one YAML — typically 1-5 min.
-# 10 min gives 2x headroom; bump if you see legit explorations getting
-# guillotined.
-HYPOTHESIS_TIMEOUT_SEC = 600
+# + CLAUDE.md + the recent log and proposes one YAML — typically 1-5 min,
+# but deeper explorations on later iterations (when easy wins are taken)
+# can run longer. 20 min cap.
+HYPOTHESIS_TIMEOUT_SEC = 1200
 
 
 def _summarize_event(line: str) -> str | None:
