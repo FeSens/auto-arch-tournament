@@ -5,13 +5,6 @@
 // the regfile read data. The ID/EX register is owned by this module so
 // the decoded view of instruction n is latched by end of cycle n+1.
 //
-// pc_plus_imm = in.pc + imm is computed combinationally here and
-// registered into ID/EX, so the EX stage no longer needs a 32-bit
-// adder on its redirect cone (was: branch_target = in.pc + in.imm).
-// The adder runs in parallel with the decoder/regfile-read paths and
-// converges at the ID/EX register input, so ID's critical path is
-// unchanged.
-//
 // Latency:        1 cycle (ID/EX register clocked here).
 // RVFI fields:    feeds rs1_addr, rs1_rdata, rs2_addr, rs2_rdata, insn,
 //                 trap (via ctrl.is_illegal).
@@ -69,11 +62,6 @@ module id_stage (
   logic [31:0] imm;
   imm_gen u_imm (.instr(in.instr), .imm(imm));
 
-  // Pre-computed pc + imm sum, registered into ID/EX. Saves one 32-bit
-  // carry chain from the EX redirect cone.
-  logic [31:0] pc_plus_imm_w;
-  always_comb pc_plus_imm_w = in.pc + imm;
-
   // Regfile read addresses come straight from the IF/ID instruction — these
   // are also wired to the hazard unit at top level for load-use detection.
   assign rs1_addr = in.instr[19:15];
@@ -105,17 +93,16 @@ module id_stage (
     if (reset || flush) begin
       reg_q <= '0;
     end else if (!stall) begin
-      reg_q.pc          <= in.pc;
-      reg_q.rs1_val     <= rs1_data;
-      reg_q.rs2_val     <= rs2_data;
-      reg_q.imm         <= imm;
-      reg_q.rd          <= in.instr[11:7];
-      reg_q.rs1_addr    <= in.instr[19:15];
-      reg_q.rs2_addr    <= in.instr[24:20];
-      reg_q.ctrl        <= ctrl_decoded;
-      reg_q.instr       <= in.instr;
-      reg_q.valid       <= in.valid;
-      reg_q.pc_plus_imm <= pc_plus_imm_w;
+      reg_q.pc       <= in.pc;
+      reg_q.rs1_val  <= rs1_data;
+      reg_q.rs2_val  <= rs2_data;
+      reg_q.imm      <= imm;
+      reg_q.rd       <= in.instr[11:7];
+      reg_q.rs1_addr <= in.instr[19:15];
+      reg_q.rs2_addr <= in.instr[24:20];
+      reg_q.ctrl     <= ctrl_decoded;
+      reg_q.instr    <= in.instr;
+      reg_q.valid    <= in.valid;
     end
   end
 
