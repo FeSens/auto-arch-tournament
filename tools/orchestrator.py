@@ -25,9 +25,10 @@ from tools.eval.fpga import run_fpga_eval
 from tools.plot import plot_progress
 from tools.tournament import run_tournament_round
 
-LOG_PATH      = Path("experiments/log.jsonl")
-HYP_SCHEMA    = json.loads(Path("schemas/hypothesis.schema.json").read_text())
-RESULT_SCHEMA = json.loads(Path("schemas/eval_result.schema.json").read_text())
+LOG_PATH       = Path("experiments/log.jsonl")
+PLOT_PATH      = Path("experiments/progress.png")
+HYP_SCHEMA     = json.loads(Path("schemas/hypothesis.schema.json").read_text())
+RESULT_SCHEMA  = json.loads(Path("schemas/eval_result.schema.json").read_text())
 
 # Serializes append_log across concurrent tournament slots. The body of
 # append_log writes log.jsonl, regenerates progress.png, then git-adds
@@ -93,6 +94,15 @@ def baseline_fitness(log: list) -> float:
     if log: return log[0].get('fitness', 0.0)
     return 0.0
 
+def current_lut(log: list) -> float | None:
+    """LUT4 of the latest accepted improvement. None if no improvements yet."""
+    improvements = [e for e in log if e.get('outcome') == 'improvement']
+    if not improvements:
+        return None
+    last = improvements[-1]
+    val = last.get('lut4')
+    return val if isinstance(val, (int, float)) else None
+
 def append_log(entry: dict):
     with _LOG_LOCK:
         LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
@@ -102,14 +112,13 @@ def append_log(entry: dict):
         # every iteration (improvement, regression, broken — see plot.py's
         # color_map). plot_progress reads LOG_PATH directly, so this picks up
         # the line we just appended.
-        plot_progress()
+        plot_progress(log_path=LOG_PATH, out_path=PLOT_PATH)
         # Commit log + plot together. One "log: <id> <outcome>" commit per
         # iteration; for accepts this lands alongside the implementation
         # merge that accept_worktree already created.
         subprocess.run(["git", "add", str(LOG_PATH)], check=True)
-        plot_path = Path("experiments/progress.png")
-        if plot_path.exists():
-            subprocess.run(["git", "add", str(plot_path)], check=True)
+        if PLOT_PATH.exists():
+            subprocess.run(["git", "add", str(PLOT_PATH)], check=True)
         subprocess.run(
             ["git", "commit", "-m",
              f"log: {entry.get('id','unknown')} {entry.get('outcome','unknown')}"],
@@ -193,6 +202,107 @@ def run_report():
     for e in improvements:
         print(f"  {e['id']:20s}  {e['fitness']:6.2f}  ({e['delta_pct']:+.1f}%)  {e['title']}")
 
+def _resolve_ref(ref: str) -> str:
+    """git rev-parse <ref> -> SHA, or raise SystemExit with a clear message."""
+    try:
+        out = subprocess.run(
+            ["git", "rev-parse", "--verify", ref],
+            capture_output=True, text=True, check=True,
+        )
+        return out.stdout.strip()
+    except subprocess.CalledProcessError:
+        raise SystemExit(f"BASELINE: cannot resolve git ref '{ref}'.")
+
+
+def _branch_exists(name: str) -> bool:
+    return subprocess.run(
+        ["git", "rev-parse", "--verify", f"refs/heads/{name}"],
+        capture_output=True,
+    ).returncode == 0
+
+
+def _ensure_branch(branch: str, baseline: str | None) -> bool:
+    """Create branch from baseline (or main) if missing; error if both branch
+    and baseline are set and the branch already exists. Returns True iff the
+    branch was newly created (caller uses this to decide whether to run a
+    baseline retest)."""
+    exists = _branch_exists(branch)
+    if exists and baseline is not None:
+        raise SystemExit(
+            f"Branch '{branch}' already exists. To start fresh from "
+            f"'{baseline}', run `git branch -D {branch}` first."
+        )
+    if not exists:
+        ref = baseline or "main"
+        sha = _resolve_ref(ref)
+        subprocess.run(["git", "branch", branch, sha], check=True)
+        return True
+    return False
+
+
+def _run_baseline_retest(branch: str):
+    """Run a one-shot eval on the freshly created branch's RTL.
+
+    Writes a single 'baseline' entry to the per-branch log so subsequent
+    hypothesis rounds have a fitness anchor. Aborts the run if any gate
+    fails — the user investigates while the branch is left intact.
+    """
+    from tools.eval.formal import run_formal
+    from tools.eval.cosim import run_cosim
+    from tools.eval.fpga import run_fpga_eval
+
+    # Re-emit verilog + run gates against the main repo's working copy
+    # (the active branch is checked out). We don't create a worktree —
+    # the baseline retest IS the branch tip, not a hypothesis.
+    repo_root = str(Path(".").resolve())
+    if not emit_verilog(repo_root):
+        raise SystemExit(f"baseline retest: emit_verilog failed on '{branch}'.")
+    formal = run_formal(repo_root)
+    if not formal['passed']:
+        raise SystemExit(
+            f"baseline retest: formal failed on '{branch}': "
+            f"{formal.get('failed_check','')}"
+        )
+    cosim = run_cosim(repo_root)
+    if not cosim['passed']:
+        raise SystemExit(
+            f"baseline retest: cosim failed on '{branch}': "
+            f"{cosim.get('failed_elf','')}"
+        )
+    fpga = run_fpga_eval(repo_root)
+    if fpga.get('placement_failed') or fpga.get('bench_failed'):
+        raise SystemExit(f"baseline retest: fpga eval failed on '{branch}'.")
+
+    sha = subprocess.run(
+        ["git", "rev-parse", "--short", "HEAD"],
+        capture_output=True, text=True, check=True,
+    ).stdout.strip()
+    entry = {
+        'id':            f'baseline-{branch}-{sha}',
+        'title':         f'Baseline retest for branch {branch}',
+        'category':      'micro_opt',
+        'outcome':       'improvement',
+        'fitness':       fpga['fitness'],
+        'delta_pct':     0.0,
+        'vs_baseline':   0.0,
+        'fmax_mhz':      fpga['fmax_mhz'],
+        'ipc_coremark':  fpga['ipc_coremark'],
+        'cycles':        fpga.get('cycles'),
+        'iterations':    fpga.get('iterations'),
+        'lut4':          fpga['lut4'],
+        'ff':            fpga['ff'],
+        'seeds':         fpga['seeds'],
+        'formal_passed': True,
+        'cosim_passed':  True,
+        'error':         None,
+        'implementation_notes': '',
+        'timestamp':     datetime.datetime.utcnow().isoformat(),
+        'round_id':      0,
+        'slot':          0,
+    }
+    append_log(entry)
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--iterations', type=int, default=1,
@@ -203,18 +313,60 @@ def main():
     parser.add_argument('--from-hypothesis', metavar='PATH', default=None,
                         help='Skip the LLM hypothesis step and use a pre-written YAML. '
                              'Comma-separated list for tournament-size > 1.')
+    parser.add_argument('--branch', default=None,
+                        help='Sandbox merge target. Default: main.')
+    parser.add_argument('--baseline', default=None,
+                        help='Git ref for fresh-branch RTL fork. Default: main. '
+                             'Requires --branch.')
+    parser.add_argument('--coremark-target', type=int, default=None,
+                        help='CoreMark iter/s target for two-phase Pareto accept.')
+    parser.add_argument('--lut-target', type=int, default=None,
+                        help='LUT4 target for two-phase Pareto accept.')
     args = parser.parse_args()
+
+    # Flag validation.
+    if args.baseline and not args.branch:
+        raise SystemExit("--baseline requires --branch.")
+    if args.coremark_target is not None and args.coremark_target <= 0:
+        raise SystemExit("--coremark-target must be positive.")
+    if args.lut_target is not None and args.lut_target <= 0:
+        raise SystemExit("--lut-target must be positive.")
 
     if args.report:
         run_report()
         return
 
+    targets = {}
+    if args.coremark_target is not None:
+        targets["coremark"] = args.coremark_target
+    if args.lut_target is not None:
+        targets["lut"] = args.lut_target
+
+    # Per-branch log/plot. Default branch (no --branch) keeps writing
+    # to experiments/log.jsonl + experiments/progress.png.
+    target_branch = args.branch or "main"
+    if args.branch:
+        global LOG_PATH, PLOT_PATH
+        LOG_PATH  = Path(f"experiments/log-{args.branch}.jsonl")
+        PLOT_PATH = Path(f"experiments/progress-{args.branch}.png")
+
+    # Branch lifecycle.
+    fresh_branch = False
+    if args.branch:
+        fresh_branch = _ensure_branch(args.branch, args.baseline)
+        subprocess.run(["git", "checkout", args.branch], check=True)
+
+    # First-iteration baseline retest on fresh branches.
+    if fresh_branch:
+        print(f"[orchestrator] fresh branch '{args.branch}' — running baseline retest",
+              flush=True)
+        _run_baseline_retest(args.branch)
+
     fixed = None
     if args.from_hypothesis:
         fixed = [p.strip() for p in args.from_hypothesis.split(',')]
 
-    # Round numbering: continue from the highest round_id in the log + 1
-    # so multiple `make next` invocations don't all label themselves round 1.
+    # Round numbering.
     log = read_log()
     prior_rounds = [e.get('round_id', 0) for e in log if isinstance(e.get('round_id'), int)]
     next_round = (max(prior_rounds) + 1) if prior_rounds else 1
@@ -222,8 +374,12 @@ def main():
     for r in range(args.iterations):
         round_id = next_round + r
         log = read_log()
-        run_tournament_round(round_id, args.tournament_size, log,
-                             fixed_hyp_paths=fixed)
+        run_tournament_round(
+            round_id, args.tournament_size, log,
+            fixed_hyp_paths=fixed,
+            targets=targets or None,
+            target_branch=target_branch,
+        )
 
 if __name__ == '__main__':
     main()
