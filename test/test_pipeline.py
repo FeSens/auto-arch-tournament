@@ -104,7 +104,7 @@ async def _run(dut, program, dmem_init=None, max_cycles=200):
         ia        = int(dut.io_imemAddr.value)
         da        = int(dut.io_dmemAddr.value)
         wen       = int(dut.io_dmemWEn.value)
-        rvfi_v    = int(dut.io_rvfi_valid.value)
+        rvfi_v    = int(dut.io_rvfi_valid_0.value)
 
         # Apply dmem write side effects.
         if wen:
@@ -121,22 +121,22 @@ async def _run(dut, program, dmem_init=None, max_cycles=200):
         # Capture RVFI retirement.
         if rvfi_v:
             r = {
-                "order":     int(dut.io_rvfi_order.value),
-                "insn":      int(dut.io_rvfi_insn.value),
-                "pc":        int(dut.io_rvfi_pc_rdata.value),
-                "pc_next":   int(dut.io_rvfi_pc_wdata.value),
-                "rd":        int(dut.io_rvfi_rd_addr.value),
-                "rd_wdata":  int(dut.io_rvfi_rd_wdata.value),
-                "rs1_addr":  int(dut.io_rvfi_rs1_addr.value),
-                "rs1_rdata": int(dut.io_rvfi_rs1_rdata.value),
-                "rs2_addr":  int(dut.io_rvfi_rs2_addr.value),
-                "rs2_rdata": int(dut.io_rvfi_rs2_rdata.value),
-                "trap":      int(dut.io_rvfi_trap.value),
-                "mem_addr":  int(dut.io_rvfi_mem_addr.value),
-                "mem_wmask": int(dut.io_rvfi_mem_wmask.value),
-                "mem_wdata": int(dut.io_rvfi_mem_wdata.value),
-                "mem_rmask": int(dut.io_rvfi_mem_rmask.value),
-                "mem_rdata": int(dut.io_rvfi_mem_rdata.value),
+                "order":     int(dut.io_rvfi_order_0.value),
+                "insn":      int(dut.io_rvfi_insn_0.value),
+                "pc":        int(dut.io_rvfi_pc_rdata_0.value),
+                "pc_next":   int(dut.io_rvfi_pc_wdata_0.value),
+                "rd":        int(dut.io_rvfi_rd_addr_0.value),
+                "rd_wdata":  int(dut.io_rvfi_rd_wdata_0.value),
+                "rs1_addr":  int(dut.io_rvfi_rs1_addr_0.value),
+                "rs1_rdata": int(dut.io_rvfi_rs1_rdata_0.value),
+                "rs2_addr":  int(dut.io_rvfi_rs2_addr_0.value),
+                "rs2_rdata": int(dut.io_rvfi_rs2_rdata_0.value),
+                "trap":      int(dut.io_rvfi_trap_0.value),
+                "mem_addr":  int(dut.io_rvfi_mem_addr_0.value),
+                "mem_wmask": int(dut.io_rvfi_mem_wmask_0.value),
+                "mem_wdata": int(dut.io_rvfi_mem_wdata_0.value),
+                "mem_rmask": int(dut.io_rvfi_mem_rmask_0.value),
+                "mem_rdata": int(dut.io_rvfi_mem_rdata_0.value),
                 "cycle":     cycle,
             }
             retirements.append(r)

@@ -8,10 +8,10 @@ checks** to make a hypothesis pass.
 
 | # | Invariant                                                                                                  | Enforced by                                  |
 |---|------------------------------------------------------------------------------------------------------------|----------------------------------------------|
-| 1 | Top module `core` exposes the RVFI port set (32 signals, exact names)                                      | cocotb smoke test, `riscv-formal` wrapper    |
+| 1 | Top module `core` exposes a 2-channel RVFI port set: every `io_rvfi_<field>` has `_0` and `_1` variants of the same width as its scalar predecessor. Channel 0 carries the older of two simultaneous retirements; channel 1 the younger. Single-retire cycles MUST place the retirement on channel 0 with `io_rvfi_valid_1 = 0`. All channel-1 ports MUST be driven (no X/Z); tie unused fields to `'0`. | cocotb smoke test, `riscv-formal` wrapper at NRET=2 |
 | 2 | `rvfi_trap = 1` iff the retiring instruction is illegal per RV32IM (decoder default = illegal)             | `riscv-formal ill` check                     |
 | 3 | EBREAK is the *only* SYSTEM (opcode `0x73`) instruction the core treats as valid; ECALL / CSR / MRET trap  | dedicated decoder unit tests                 |
-| 4 | `rvfi_order` strictly monotonic +1 per retirement (no double-retire)                                       | `riscv-formal unique` check                  |
+| 4 | `rvfi_order` strictly monotonic +1 per retirement across both channels combined (no gaps, no duplicates). When both channels retire in the same cycle, channel-0 order = N and channel-1 order = N+1.                                       | `riscv-formal unique` check                  |
 | 5 | CPU makes forward progress under any symbolic instruction stream                                           | `riscv-formal liveness` check                |
 | 5b | M-extension arithmetic produces RV32M-correct bit results                                                | cocotb `test_alu.py` + `make formal-deep`    |
 | 6 | All memory accesses bounded to `[0x00000000, 0x00100000)` plus UART/markers `[0x10000000, 0x10000200)`     | sim emits `oob:true`, eval treats as failure |
@@ -66,8 +66,9 @@ Everything under `rtl/` and the cocotb unit tests under `test/`.
 
 The only top-level invariant on `rtl/core.sv` is that it exposes a port
 named `core` whose IO matches the RVFI wrapper's expectations
-(`io_imemAddr`, `io_imemData`, `io_dmemAddr`, `io_dmemRData`, `io_dmemWData`,
-`io_dmemWEn`, `io_dmemREn`, all `io_rvfi_*` fields, `clock`, `reset`).
+(`io_imemAddr`, `io_imemData`, `io_imemReady`, `io_dmemAddr`, `io_dmemRData`,
+`io_dmemWData`, `io_dmemWEn`, `io_dmemREn`, `io_dmemReady`, all
+`io_rvfi_*_0` and `io_rvfi_*_1` fields, `clock`, `reset`).
 
 A hypothesis may:
 - Merge stages into a single file or split a module across many.
@@ -78,7 +79,7 @@ A hypothesis may:
 - Rewrite any `rtl/` module from scratch.
 
 It must not:
-- Change `core`'s top-level IO shape.
+- Change `core`'s top-level IO shape — specifically: the imem/dmem port set, and the **2-channel** RVFI port set with field naming `io_rvfi_<field>_<n>` for n ∈ {0,1}, channel-0-older convention, and the single-retire-on-channel-0 rule.
 - Weaken any invariant in the table above.
 - Modify any path in the don't-touch list.
 
@@ -89,6 +90,35 @@ It must not:
 - When in doubt about scope, prefer keeping a hypothesis minimal — a
   one-feature change is easier to explain and easier to revert if
   fitness regresses on the next iteration.
+
+### Superscalar / NRET=2 contract
+
+The RVFI port set is fixed at NRET=2 to permit dual-issue hypotheses
+without contract churn. Single-issue cores tie channel 1 off
+(`io_rvfi_valid_1 = 0` plus the rest of channel 1's fields driven to
+`'0`) — about 21 lines of `assign io_rvfi_*_1 = '0;`. Triple-issue or
+wider would be a future contract bump (NRET=K), not a per-hypothesis
+decision.
+
+The contract-side files that this widening touches: `rtl/core.sv`
+(port set), `formal/wrapper.sv` (macro packing), `formal/checks.cfg`
+(`nret 2`), `formal/run_all.sh` (vacuous-pass tally — see below),
+`fpga/core_bench.sv` (bench wiring), `test/cosim/main.cpp`
+(per-channel drain), and `test/test_pipeline.py` (cocotb probes use
+`_0` suffix).
+
+Vacuous-pass on channel 1: `riscv-formal`'s per-channel BMC checks
+assume `rvfi_valid_<ch>=1` to test their property. When a single-issue
+hypothesis hardwires `io_rvfi_valid_1 = 0`, that assumption becomes
+unsatisfiable and SBY exits `Status: PREUNSAT` (rc=16) — technically a
+vacuous pass over the empty set of ch1-valid traces. `formal/run_all.sh`
+counts `*_ch1` PREUNSAT as pass, so single-issue hypotheses pass formal
+naturally and dual-issue hypotheses (where ch1 is sometimes valid) get
+the regular `DONE (PASS` outcome on the same checks. Caveat: a
+hypothesis that *claims* dual-issue but whose channel 1 silently never
+retires would also vacuous-pass these checks; the FPGA-fitness IPC and
+the existing cover statement (which fires on either channel retiring)
+catch the fully-stuck case.
 
 ## Caveat: `make formal` runs ALTOPS-mode by default
 

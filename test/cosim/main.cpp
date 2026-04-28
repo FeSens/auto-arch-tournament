@@ -176,37 +176,72 @@ int main(int argc, char** argv) {
 
         top->clock = 1; top->eval();
 
-        if(top->io_rvfi_valid) {
+        // Drain channel 0 then channel 1 (NRET=2 contract). For V0
+        // single-issue, channel 1's valid is always 0, so the JSON stream
+        // is byte-identical to the pre-NRET=2 baseline.
+        auto emit = [&](uint8_t  v,
+                        uint64_t order,
+                        uint32_t insn,
+                        uint32_t pc_rdata, uint32_t pc_wdata,
+                        uint8_t  rd_addr,  uint32_t rd_wdata,
+                        uint8_t  rs1_addr, uint32_t rs1_rdata,
+                        uint8_t  rs2_addr, uint32_t rs2_rdata,
+                        uint32_t mem_addr,
+                        uint8_t  mem_rmask, uint32_t mem_rdata,
+                        uint8_t  mem_wmask, uint32_t mem_wdata,
+                        uint8_t  trap, uint8_t halt, uint8_t intr,
+                        uint8_t  mode, uint8_t ixl) -> bool {
+            if (!v) return false;
             char buf[640];
-            int n = snprintf(buf, sizeof(buf),
-                   "{\"order\":%llu,\"cycle\":%llu,\"insn\":%u,\"pc_rdata\":%u,\"pc_wdata\":%u,"
-                   "\"rd_addr\":%u,\"rd_wdata\":%u,"
-                   "\"rs1_addr\":%u,\"rs1_rdata\":%u,"
-                   "\"rs2_addr\":%u,\"rs2_rdata\":%u,"
-                   "\"mem_addr\":%u,\"mem_rmask\":%u,\"mem_rdata\":%u,"
-                   "\"mem_wmask\":%u,\"mem_wdata\":%u,"
-                   "\"trap\":%u,\"halt\":%u,\"intr\":%u,\"mode\":%u,\"ixl\":%u}",
-                (unsigned long long)top->io_rvfi_order,
+            snprintf(buf, sizeof(buf),
+                "{\"order\":%llu,\"cycle\":%llu,\"insn\":%u,\"pc_rdata\":%u,\"pc_wdata\":%u,"
+                "\"rd_addr\":%u,\"rd_wdata\":%u,"
+                "\"rs1_addr\":%u,\"rs1_rdata\":%u,"
+                "\"rs2_addr\":%u,\"rs2_rdata\":%u,"
+                "\"mem_addr\":%u,\"mem_rmask\":%u,\"mem_rdata\":%u,"
+                "\"mem_wmask\":%u,\"mem_wdata\":%u,"
+                "\"trap\":%u,\"halt\":%u,\"intr\":%u,\"mode\":%u,\"ixl\":%u}",
+                (unsigned long long)order,
                 (unsigned long long)cycle,
-                top->io_rvfi_insn, top->io_rvfi_pc_rdata, top->io_rvfi_pc_wdata,
-                top->io_rvfi_rd_addr, top->io_rvfi_rd_wdata,
-                top->io_rvfi_rs1_addr, top->io_rvfi_rs1_rdata,
-                top->io_rvfi_rs2_addr, top->io_rvfi_rs2_rdata,
-                top->io_rvfi_mem_addr, top->io_rvfi_mem_rmask, top->io_rvfi_mem_rdata,
-                top->io_rvfi_mem_wmask, top->io_rvfi_mem_wdata,
-                (unsigned)top->io_rvfi_trap,  (unsigned)top->io_rvfi_halt,
-                (unsigned)top->io_rvfi_intr,  (unsigned)top->io_rvfi_mode,
-                (unsigned)top->io_rvfi_ixl);
-            (void)n;
+                insn, pc_rdata, pc_wdata,
+                rd_addr, rd_wdata,
+                rs1_addr, rs1_rdata,
+                rs2_addr, rs2_rdata,
+                mem_addr, mem_rmask, mem_rdata,
+                mem_wmask, mem_wdata,
+                (unsigned)trap, (unsigned)halt, (unsigned)intr,
+                (unsigned)mode, (unsigned)ixl);
             if (bench_mode) {
                 strncpy(bench_last, buf, sizeof(bench_last)-1);
-                if(top->io_rvfi_insn == 0x00100073) { hit_ebreak = true; break; }
+                if (insn == 0x00100073) { hit_ebreak = true; return true; }
             } else {
                 puts(buf);
                 fflush(stdout);
-                if(top->io_rvfi_insn == 0x00100073) { hit_ebreak = true; break; }
+                if (insn == 0x00100073) { hit_ebreak = true; return true; }
             }
-        }
+            return false;
+        };
+
+        if (emit(top->io_rvfi_valid_0, top->io_rvfi_order_0, top->io_rvfi_insn_0,
+                 top->io_rvfi_pc_rdata_0, top->io_rvfi_pc_wdata_0,
+                 top->io_rvfi_rd_addr_0, top->io_rvfi_rd_wdata_0,
+                 top->io_rvfi_rs1_addr_0, top->io_rvfi_rs1_rdata_0,
+                 top->io_rvfi_rs2_addr_0, top->io_rvfi_rs2_rdata_0,
+                 top->io_rvfi_mem_addr_0,
+                 top->io_rvfi_mem_rmask_0, top->io_rvfi_mem_rdata_0,
+                 top->io_rvfi_mem_wmask_0, top->io_rvfi_mem_wdata_0,
+                 top->io_rvfi_trap_0, top->io_rvfi_halt_0, top->io_rvfi_intr_0,
+                 top->io_rvfi_mode_0, top->io_rvfi_ixl_0)) break;
+        if (emit(top->io_rvfi_valid_1, top->io_rvfi_order_1, top->io_rvfi_insn_1,
+                 top->io_rvfi_pc_rdata_1, top->io_rvfi_pc_wdata_1,
+                 top->io_rvfi_rd_addr_1, top->io_rvfi_rd_wdata_1,
+                 top->io_rvfi_rs1_addr_1, top->io_rvfi_rs1_rdata_1,
+                 top->io_rvfi_rs2_addr_1, top->io_rvfi_rs2_rdata_1,
+                 top->io_rvfi_mem_addr_1,
+                 top->io_rvfi_mem_rmask_1, top->io_rvfi_mem_rdata_1,
+                 top->io_rvfi_mem_wmask_1, top->io_rvfi_mem_wdata_1,
+                 top->io_rvfi_trap_1, top->io_rvfi_halt_1, top->io_rvfi_intr_1,
+                 top->io_rvfi_mode_1, top->io_rvfi_ixl_1)) break;
     }
     if (bench_mode) {
         // Emit final record, plus an explicit completion marker. Consumers MUST

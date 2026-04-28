@@ -49,28 +49,52 @@ module core (
   // freezes back to MEM; MEM/WB captures a bubble; the LOAD/STORE waits
   // until the bus delivers.
   input  logic        io_dmemReady,
-  // RVFI
-  output logic        io_rvfi_valid,
-  output logic [63:0] io_rvfi_order,
-  output logic [31:0] io_rvfi_insn,
-  output logic        io_rvfi_trap,
-  output logic        io_rvfi_halt,
-  output logic        io_rvfi_intr,
-  output logic [1:0]  io_rvfi_mode,
-  output logic [1:0]  io_rvfi_ixl,
-  output logic [4:0]  io_rvfi_rs1_addr,
-  output logic [31:0] io_rvfi_rs1_rdata,
-  output logic [4:0]  io_rvfi_rs2_addr,
-  output logic [31:0] io_rvfi_rs2_rdata,
-  output logic [4:0]  io_rvfi_rd_addr,
-  output logic [31:0] io_rvfi_rd_wdata,
-  output logic [31:0] io_rvfi_pc_rdata,
-  output logic [31:0] io_rvfi_pc_wdata,
-  output logic [31:0] io_rvfi_mem_addr,
-  output logic [3:0]  io_rvfi_mem_rmask,
-  output logic [3:0]  io_rvfi_mem_wmask,
-  output logic [31:0] io_rvfi_mem_rdata,
-  output logic [31:0] io_rvfi_mem_wdata
+  // RVFI — 2-channel retirement port set (NRET=2 contract).
+  // Channel 0: older / sole retirement; channel 1: younger.
+  // Single-issue cores tie channel 1 off (rvfi_valid_1=0, others='0).
+  // See CLAUDE.md invariant 1 for the full contract.
+  output logic        io_rvfi_valid_0,
+  output logic [63:0] io_rvfi_order_0,
+  output logic [31:0] io_rvfi_insn_0,
+  output logic        io_rvfi_trap_0,
+  output logic        io_rvfi_halt_0,
+  output logic        io_rvfi_intr_0,
+  output logic [1:0]  io_rvfi_mode_0,
+  output logic [1:0]  io_rvfi_ixl_0,
+  output logic [4:0]  io_rvfi_rs1_addr_0,
+  output logic [31:0] io_rvfi_rs1_rdata_0,
+  output logic [4:0]  io_rvfi_rs2_addr_0,
+  output logic [31:0] io_rvfi_rs2_rdata_0,
+  output logic [4:0]  io_rvfi_rd_addr_0,
+  output logic [31:0] io_rvfi_rd_wdata_0,
+  output logic [31:0] io_rvfi_pc_rdata_0,
+  output logic [31:0] io_rvfi_pc_wdata_0,
+  output logic [31:0] io_rvfi_mem_addr_0,
+  output logic [3:0]  io_rvfi_mem_rmask_0,
+  output logic [3:0]  io_rvfi_mem_wmask_0,
+  output logic [31:0] io_rvfi_mem_rdata_0,
+  output logic [31:0] io_rvfi_mem_wdata_0,
+  output logic        io_rvfi_valid_1,
+  output logic [63:0] io_rvfi_order_1,
+  output logic [31:0] io_rvfi_insn_1,
+  output logic        io_rvfi_trap_1,
+  output logic        io_rvfi_halt_1,
+  output logic        io_rvfi_intr_1,
+  output logic [1:0]  io_rvfi_mode_1,
+  output logic [1:0]  io_rvfi_ixl_1,
+  output logic [4:0]  io_rvfi_rs1_addr_1,
+  output logic [31:0] io_rvfi_rs1_rdata_1,
+  output logic [4:0]  io_rvfi_rs2_addr_1,
+  output logic [31:0] io_rvfi_rs2_rdata_1,
+  output logic [4:0]  io_rvfi_rd_addr_1,
+  output logic [31:0] io_rvfi_rd_wdata_1,
+  output logic [31:0] io_rvfi_pc_rdata_1,
+  output logic [31:0] io_rvfi_pc_wdata_1,
+  output logic [31:0] io_rvfi_mem_addr_1,
+  output logic [3:0]  io_rvfi_mem_rmask_1,
+  output logic [3:0]  io_rvfi_mem_wmask_1,
+  output logic [31:0] io_rvfi_mem_rdata_1,
+  output logic [31:0] io_rvfi_mem_wdata_1
 );
 
   // ── Inter-stage wires ──────────────────────────────────────────────────
@@ -217,27 +241,53 @@ module core (
   always_comb begin
     rd_wen = mem_wb_w.ctrl.reg_write && (mem_wb_w.rd != 5'b0);
 
-    io_rvfi_valid     = mem_wb_w.valid;
-    io_rvfi_order     = rvfi_order_q;
-    io_rvfi_insn      = mem_wb_w.instr;
-    io_rvfi_trap      = mem_wb_w.ctrl.is_illegal;
-    io_rvfi_halt      = 1'b0;
-    io_rvfi_intr      = 1'b0;
-    io_rvfi_mode      = 2'd3;     // M-mode only
-    io_rvfi_ixl       = 2'd1;     // 32-bit ISA
-    io_rvfi_rs1_addr  = mem_wb_w.rs1_addr;
-    io_rvfi_rs1_rdata = mem_wb_w.rs1_val;
-    io_rvfi_rs2_addr  = mem_wb_w.rs2_addr;
-    io_rvfi_rs2_rdata = mem_wb_w.rs2_val;
-    io_rvfi_rd_addr   = rd_wen ? mem_wb_w.rd     : 5'b0;
-    io_rvfi_rd_wdata  = rd_wen ? wb_w_data       : 32'b0;
-    io_rvfi_pc_rdata  = mem_wb_w.pc;
-    io_rvfi_pc_wdata  = mem_wb_w.pc_next;
-    io_rvfi_mem_addr  = mem_wb_w.mem_addr;
-    io_rvfi_mem_rmask = mem_wb_w.mem_rmask;
-    io_rvfi_mem_wmask = mem_wb_w.mem_wmask;
-    io_rvfi_mem_rdata = mem_wb_w.mem_rdata;
-    io_rvfi_mem_wdata = mem_wb_w.mem_wdata;
+    // Channel 0: the only retirement channel for the single-issue baseline.
+    io_rvfi_valid_0     = mem_wb_w.valid;
+    io_rvfi_order_0     = rvfi_order_q;
+    io_rvfi_insn_0      = mem_wb_w.instr;
+    io_rvfi_trap_0      = mem_wb_w.ctrl.is_illegal;
+    io_rvfi_halt_0      = 1'b0;
+    io_rvfi_intr_0      = 1'b0;
+    io_rvfi_mode_0      = 2'd3;     // M-mode only
+    io_rvfi_ixl_0       = 2'd1;     // 32-bit ISA
+    io_rvfi_rs1_addr_0  = mem_wb_w.rs1_addr;
+    io_rvfi_rs1_rdata_0 = mem_wb_w.rs1_val;
+    io_rvfi_rs2_addr_0  = mem_wb_w.rs2_addr;
+    io_rvfi_rs2_rdata_0 = mem_wb_w.rs2_val;
+    io_rvfi_rd_addr_0   = rd_wen ? mem_wb_w.rd : 5'b0;
+    io_rvfi_rd_wdata_0  = rd_wen ? wb_w_data   : 32'b0;
+    io_rvfi_pc_rdata_0  = mem_wb_w.pc;
+    io_rvfi_pc_wdata_0  = mem_wb_w.pc_next;
+    io_rvfi_mem_addr_0  = mem_wb_w.mem_addr;
+    io_rvfi_mem_rmask_0 = mem_wb_w.mem_rmask;
+    io_rvfi_mem_wmask_0 = mem_wb_w.mem_wmask;
+    io_rvfi_mem_rdata_0 = mem_wb_w.mem_rdata;
+    io_rvfi_mem_wdata_0 = mem_wb_w.mem_wdata;
+
+    // Channel 1: tied off — V0 is single-issue. valid=0 is the canonical
+    // "this channel is unused" signature; other fields driven to '0 to
+    // avoid X/Z propagation through the formal harness.
+    io_rvfi_valid_1     = 1'b0;
+    io_rvfi_order_1     = 64'b0;
+    io_rvfi_insn_1      = 32'b0;
+    io_rvfi_trap_1      = 1'b0;
+    io_rvfi_halt_1      = 1'b0;
+    io_rvfi_intr_1      = 1'b0;
+    io_rvfi_mode_1      = 2'b0;
+    io_rvfi_ixl_1       = 2'b0;
+    io_rvfi_rs1_addr_1  = 5'b0;
+    io_rvfi_rs1_rdata_1 = 32'b0;
+    io_rvfi_rs2_addr_1  = 5'b0;
+    io_rvfi_rs2_rdata_1 = 32'b0;
+    io_rvfi_rd_addr_1   = 5'b0;
+    io_rvfi_rd_wdata_1  = 32'b0;
+    io_rvfi_pc_rdata_1  = 32'b0;
+    io_rvfi_pc_wdata_1  = 32'b0;
+    io_rvfi_mem_addr_1  = 32'b0;
+    io_rvfi_mem_rmask_1 = 4'b0;
+    io_rvfi_mem_wmask_1 = 4'b0;
+    io_rvfi_mem_rdata_1 = 32'b0;
+    io_rvfi_mem_wdata_1 = 32'b0;
   end
 
 endmodule

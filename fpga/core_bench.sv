@@ -52,15 +52,25 @@ module core_bench (
   assign dmem_rdata = dmem[dmem_addr[12:2]];
 
   logic [31:0] imem_addr;
-  logic        rvfi_valid;
-  logic [63:0] rvfi_order;
-  logic [31:0] rvfi_insn, rvfi_pc_rdata, rvfi_pc_wdata;
-  logic [31:0] rvfi_rd_wdata, rvfi_rs1_rdata, rvfi_rs2_rdata;
-  logic [31:0] rvfi_mem_addr, rvfi_mem_rdata, rvfi_mem_wdata;
-  logic [4:0]  rvfi_rs1_addr, rvfi_rs2_addr, rvfi_rd_addr;
-  logic [3:0]  rvfi_mem_rmask, rvfi_mem_wmask;
-  logic [1:0]  rvfi_mode, rvfi_ixl;
-  logic        rvfi_trap, rvfi_halt, rvfi_intr;
+  // 2-channel RVFI fan-out (NRET=2 contract). V0 channel 1 is constants
+  // from core, but the parallel decl + XOR include keeps the harness
+  // identical for future dual-issue hypotheses.
+  logic        rvfi_valid_0, rvfi_valid_1;
+  logic [63:0] rvfi_order_0, rvfi_order_1;
+  logic [31:0] rvfi_insn_0, rvfi_pc_rdata_0, rvfi_pc_wdata_0;
+  logic [31:0] rvfi_insn_1, rvfi_pc_rdata_1, rvfi_pc_wdata_1;
+  logic [31:0] rvfi_rd_wdata_0, rvfi_rs1_rdata_0, rvfi_rs2_rdata_0;
+  logic [31:0] rvfi_rd_wdata_1, rvfi_rs1_rdata_1, rvfi_rs2_rdata_1;
+  logic [31:0] rvfi_mem_addr_0, rvfi_mem_rdata_0, rvfi_mem_wdata_0;
+  logic [31:0] rvfi_mem_addr_1, rvfi_mem_rdata_1, rvfi_mem_wdata_1;
+  logic [4:0]  rvfi_rs1_addr_0, rvfi_rs2_addr_0, rvfi_rd_addr_0;
+  logic [4:0]  rvfi_rs1_addr_1, rvfi_rs2_addr_1, rvfi_rd_addr_1;
+  logic [3:0]  rvfi_mem_rmask_0, rvfi_mem_wmask_0;
+  logic [3:0]  rvfi_mem_rmask_1, rvfi_mem_wmask_1;
+  logic [1:0]  rvfi_mode_0, rvfi_ixl_0;
+  logic [1:0]  rvfi_mode_1, rvfi_ixl_1;
+  logic        rvfi_trap_0, rvfi_halt_0, rvfi_intr_0;
+  logic        rvfi_trap_1, rvfi_halt_1, rvfi_intr_1;
 
   core cpu (
     .clock            (clock),
@@ -77,38 +87,64 @@ module core_bench (
     .io_dmemWEn       (dmem_wen),
     .io_dmemREn       (dmem_ren),
     .io_dmemReady     (1'b1),
-    .io_rvfi_valid    (rvfi_valid),
-    .io_rvfi_order    (rvfi_order),
-    .io_rvfi_insn     (rvfi_insn),
-    .io_rvfi_trap     (rvfi_trap),
-    .io_rvfi_halt     (rvfi_halt),
-    .io_rvfi_intr     (rvfi_intr),
-    .io_rvfi_mode     (rvfi_mode),
-    .io_rvfi_ixl      (rvfi_ixl),
-    .io_rvfi_rs1_addr (rvfi_rs1_addr),
-    .io_rvfi_rs1_rdata(rvfi_rs1_rdata),
-    .io_rvfi_rs2_addr (rvfi_rs2_addr),
-    .io_rvfi_rs2_rdata(rvfi_rs2_rdata),
-    .io_rvfi_rd_addr  (rvfi_rd_addr),
-    .io_rvfi_rd_wdata (rvfi_rd_wdata),
-    .io_rvfi_pc_rdata (rvfi_pc_rdata),
-    .io_rvfi_pc_wdata (rvfi_pc_wdata),
-    .io_rvfi_mem_addr (rvfi_mem_addr),
-    .io_rvfi_mem_rmask(rvfi_mem_rmask),
-    .io_rvfi_mem_wmask(rvfi_mem_wmask),
-    .io_rvfi_mem_rdata(rvfi_mem_rdata),
-    .io_rvfi_mem_wdata(rvfi_mem_wdata)
+    .io_rvfi_valid_0    (rvfi_valid_0),
+    .io_rvfi_order_0    (rvfi_order_0),
+    .io_rvfi_insn_0     (rvfi_insn_0),
+    .io_rvfi_trap_0     (rvfi_trap_0),
+    .io_rvfi_halt_0     (rvfi_halt_0),
+    .io_rvfi_intr_0     (rvfi_intr_0),
+    .io_rvfi_mode_0     (rvfi_mode_0),
+    .io_rvfi_ixl_0      (rvfi_ixl_0),
+    .io_rvfi_rs1_addr_0 (rvfi_rs1_addr_0),
+    .io_rvfi_rs1_rdata_0(rvfi_rs1_rdata_0),
+    .io_rvfi_rs2_addr_0 (rvfi_rs2_addr_0),
+    .io_rvfi_rs2_rdata_0(rvfi_rs2_rdata_0),
+    .io_rvfi_rd_addr_0  (rvfi_rd_addr_0),
+    .io_rvfi_rd_wdata_0 (rvfi_rd_wdata_0),
+    .io_rvfi_pc_rdata_0 (rvfi_pc_rdata_0),
+    .io_rvfi_pc_wdata_0 (rvfi_pc_wdata_0),
+    .io_rvfi_mem_addr_0 (rvfi_mem_addr_0),
+    .io_rvfi_mem_rmask_0(rvfi_mem_rmask_0),
+    .io_rvfi_mem_wmask_0(rvfi_mem_wmask_0),
+    .io_rvfi_mem_rdata_0(rvfi_mem_rdata_0),
+    .io_rvfi_mem_wdata_0(rvfi_mem_wdata_0),
+    .io_rvfi_valid_1    (rvfi_valid_1),
+    .io_rvfi_order_1    (rvfi_order_1),
+    .io_rvfi_insn_1     (rvfi_insn_1),
+    .io_rvfi_trap_1     (rvfi_trap_1),
+    .io_rvfi_halt_1     (rvfi_halt_1),
+    .io_rvfi_intr_1     (rvfi_intr_1),
+    .io_rvfi_mode_1     (rvfi_mode_1),
+    .io_rvfi_ixl_1      (rvfi_ixl_1),
+    .io_rvfi_rs1_addr_1 (rvfi_rs1_addr_1),
+    .io_rvfi_rs1_rdata_1(rvfi_rs1_rdata_1),
+    .io_rvfi_rs2_addr_1 (rvfi_rs2_addr_1),
+    .io_rvfi_rs2_rdata_1(rvfi_rs2_rdata_1),
+    .io_rvfi_rd_addr_1  (rvfi_rd_addr_1),
+    .io_rvfi_rd_wdata_1 (rvfi_rd_wdata_1),
+    .io_rvfi_pc_rdata_1 (rvfi_pc_rdata_1),
+    .io_rvfi_pc_wdata_1 (rvfi_pc_wdata_1),
+    .io_rvfi_mem_addr_1 (rvfi_mem_addr_1),
+    .io_rvfi_mem_rmask_1(rvfi_mem_rmask_1),
+    .io_rvfi_mem_wmask_1(rvfi_mem_wmask_1),
+    .io_rvfi_mem_rdata_1(rvfi_mem_rdata_1),
+    .io_rvfi_mem_wdata_1(rvfi_mem_wdata_1)
   );
 
   // XOR-reduce all CPU outputs to a single LED bit. Without this,
   // dead-output elimination would prune the RVFI fan-out (and most of
   // the pipeline registers) since their values aren't visible at the
   // top-level pin list.
-  assign led = ^{rvfi_valid, rvfi_order, rvfi_insn, rvfi_trap, rvfi_halt, rvfi_intr,
-                 rvfi_mode, rvfi_ixl, rvfi_rs1_addr, rvfi_rs1_rdata,
-                 rvfi_rs2_addr, rvfi_rs2_rdata, rvfi_rd_addr, rvfi_rd_wdata,
-                 rvfi_pc_rdata, rvfi_pc_wdata, rvfi_mem_addr,
-                 rvfi_mem_rmask, rvfi_mem_wmask, rvfi_mem_rdata, rvfi_mem_wdata,
+  assign led = ^{rvfi_valid_0, rvfi_order_0, rvfi_insn_0, rvfi_trap_0, rvfi_halt_0, rvfi_intr_0,
+                 rvfi_mode_0, rvfi_ixl_0, rvfi_rs1_addr_0, rvfi_rs1_rdata_0,
+                 rvfi_rs2_addr_0, rvfi_rs2_rdata_0, rvfi_rd_addr_0, rvfi_rd_wdata_0,
+                 rvfi_pc_rdata_0, rvfi_pc_wdata_0, rvfi_mem_addr_0,
+                 rvfi_mem_rmask_0, rvfi_mem_wmask_0, rvfi_mem_rdata_0, rvfi_mem_wdata_0,
+                 rvfi_valid_1, rvfi_order_1, rvfi_insn_1, rvfi_trap_1, rvfi_halt_1, rvfi_intr_1,
+                 rvfi_mode_1, rvfi_ixl_1, rvfi_rs1_addr_1, rvfi_rs1_rdata_1,
+                 rvfi_rs2_addr_1, rvfi_rs2_rdata_1, rvfi_rd_addr_1, rvfi_rd_wdata_1,
+                 rvfi_pc_rdata_1, rvfi_pc_wdata_1, rvfi_mem_addr_1,
+                 rvfi_mem_rmask_1, rvfi_mem_wmask_1, rvfi_mem_rdata_1, rvfi_mem_wdata_1,
                  imem_addr, dmem_rdata};
 
 endmodule
