@@ -20,27 +20,6 @@ checks** to make a hypothesis pass.
 | 9 | "Correct operation validated." literal must appear in CoreMark UART output                                 | `validate_coremark_uart`                     |
 |10 | Decoder defaults `isIllegal = 1`; a bit is only cleared inside a validated opcode/funct match              | decoder unit tests with reserved encodings   |
 
-## Style rules (write these into every commit you author)
-
-- **No `initial` blocks** in synthesizable code. Reset values come from a
-  synchronous reset clause inside `always_ff`.
-- **No latches.** Every `always_comb` covers all branches, every `case` has
-  a `default`, every `if` has an `else`.
-- **Pipeline regs are explicit `always_ff @(posedge clock) if (reset) … else …` blocks.**
-  No clever defaults, no `assign` to next-state-of-a-register.
-- **All RAM declarations carry `(* ram_style = "block" *)`** (and a Gowin
-  equivalent in `synth.tcl`) so BRAM inference is deterministic.
-- **Decoder defaults to `isIllegal = 1`.** A `case` arm clears it only after
-  positively validating both opcode and funct fields.
-- **Every module has a header comment** stating: purpose, latency
-  (combinational vs N-cycle), and which RVFI fields it contributes to.
-- **`logic`, never `reg` or `wire`.** SystemVerilog has unified the type.
-- **No 2-state types (`bit`, `int`) in synthesizable code.** Use `logic`
-  everywhere.
-- **One module per file, named identically to the file** (lowercase).
-- **`import core_pkg::*;` at the top of every RTL file** that uses shared
-  types. No `\`include` for shared headers.
-
 ## Don't-touch list (the orchestrator never modifies these)
 
 These directories are part of the eval contract and are *never* modified by
@@ -85,11 +64,8 @@ It must not:
 
 ## Working notes
 
-- This file is the contract. `docs/bootstrap-prompt.md` is the long-form
-  plan that produced it.
-- When in doubt about scope, prefer keeping a hypothesis minimal — a
-  one-feature change is easier to explain and easier to revert if
-  fitness regresses on the next iteration.
+This file is the contract. `docs/bootstrap-prompt.md` is the long-form
+plan that produced it.
 
 ### Superscalar / NRET=2 contract
 
