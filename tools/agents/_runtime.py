@@ -61,55 +61,74 @@ def _truncate(s: str, n: int = 100) -> str:
 def _summarize_codex_jsonl(ev: dict) -> Optional[str]:
     """One-liner from a codex --json event line.
 
-    Codex wraps items in `{"method": "item/completed", "params": {"item": {...}}}`.
-    We extract `params.item` and pick a short summary based on item type.
-    Defensive — if a field we expect is missing, fall back to just the type
-    name so the user still sees that something happened.
+    Codex --json format (verified via live probe):
+      {"type": "thread.started", "thread_id": "..."}
+      {"type": "turn.started"}
+      {"type": "item.completed", "item": {"id": "...", "type": "<snake_case>", ...}}
+      {"type": "turn.completed", "usage": {...}}
+
+    We only summarize `item.completed` events; everything else is control flow.
+    Inner item types are snake_case. Defensive `.get()` chains so a small
+    schema change doesn't crash; unknown inner types fall back to
+    `codex: <type>` so we know to add a handler.
     """
-    if ev.get("method") != "item/completed":
+    et = ev.get("type")
+    # Skip thread/turn/item.started + turn.completed control events.
+    if et in (None,
+              "thread.started", "thread.completed",
+              "turn.started",   "turn.completed",
+              "item.started"):
         return None
-    item = (ev.get("params") or {}).get("item") or {}
+    if et != "item.completed":
+        # Surface unknown top-level events with their type so we know to
+        # extend the parser.
+        return f"codex/{et}"
+
+    item = ev.get("item") or {}
     if not isinstance(item, dict):
         return None
     t = item.get("type")
-    if t in (None, "userMessage", "hookPrompt", "reasoning"):
-        # userMessage/hookPrompt are our own prompts echoed back; reasoning
-        # is private chain-of-thought. None of these are orchestrator signal.
+    if t in (None, "user_message", "hook_prompt", "reasoning"):
         return None
-    if t == "agentMessage":
+    if t == "agent_message":
         text = item.get("text") or item.get("message") or ""
         first = text.splitlines()[0] if isinstance(text, str) and text else ""
         return _truncate(f"msg: {first}", 120) if first else None
-    if t == "commandExecution":
+    if t == "command_execution":
         cmd = item.get("command") or item.get("cmd") or ""
         if isinstance(cmd, list):
             cmd = " ".join(cmd)
         return _truncate(f"shell: {cmd}", 120)
-    if t == "fileChange":
-        # The outer item "type" is "fileChange"; the inner change kind lives
-        # under a separate field. We check known field names and fall back to
-        # "change" if none are present.
-        change = item.get("change_type") or item.get("subtype") or item.get("kind") or "change"
-        path = item.get("path") or item.get("file_path") or item.get("file") or ""
+    if t == "file_change":
+        # Inner item's type is "file_change"; the add/delete/update kind
+        # lives in a different field — try a few names defensively.
+        change = (item.get("change_type")
+                  or item.get("kind")
+                  or item.get("subtype")
+                  or "change")
+        path = (item.get("path")
+                or item.get("file_path")
+                or item.get("file")
+                or "")
         if path:
             return _truncate(f"file({change}): {path}", 120)
-        return f"fileChange"
-    if t == "webSearch":
+        return f"file_change"
+    if t == "web_search":
         q = item.get("query") or ""
-        return _truncate(f"search: {q}", 120) if q else "webSearch"
+        return _truncate(f"search: {q}", 120) if q else "web_search"
     if t == "plan":
         return "plan: (generated)"
-    if t == "mcpToolCall":
+    if t == "mcp_tool_call":
         name = item.get("name") or item.get("tool") or ""
-        return _truncate(f"mcp: {name}", 120) if name else "mcpToolCall"
-    if t == "dynamicToolCall":
+        return _truncate(f"mcp: {name}", 120) if name else "mcp_tool_call"
+    if t == "dynamic_tool_call":
         name = item.get("name") or item.get("tool") or ""
-        return _truncate(f"tool: {name}", 120) if name else "dynamicToolCall"
-    if t == "collabAgentToolCall":
+        return _truncate(f"tool: {name}", 120) if name else "dynamic_tool_call"
+    if t == "collab_agent_tool_call":
         return "spawn-agent"
-    if t in ("imageView", "imageGeneration"):
+    if t in ("image_view", "image_generation"):
         return t
-    if t in ("enteredReviewMode", "exitedReviewMode", "contextCompaction"):
+    if t in ("entered_review_mode", "exited_review_mode", "context_compaction"):
         return t
     # Unknown item type — surface it so we know to add a handler.
     return f"codex: {t}"
