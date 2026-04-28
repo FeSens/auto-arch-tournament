@@ -61,10 +61,17 @@ make test                 # cocotb unit tests
 make cosim                # RVFI cosim vs Python ISS
 make formal               # riscv-formal full suite
 make fpga                 # 3-seed nextpnr + bracketed CoreMark cycles
-make next                 # one orchestrator iteration
-make loop N=10            # 10 orchestrator iterations
+make next                 # one tournament round (default 3 slots in parallel)
+make loop N=10            # 10 tournament rounds
 make report               # experiment summary
 ```
+
+Each tournament round runs N hypotheses concurrently against the same
+baseline, serializes the heavy eval phases (formal=1, fpga=1) through a
+queue, and accepts only the round's highest-fitness winner; losing slots'
+worktrees are discarded. Configure with `--tournament-size N` (default 3);
+`N=1` reproduces the prior sequential behavior. The agent runtime is
+codex by default; set `AGENT_PROVIDER=claude` to use Claude Code instead.
 
 ## Layout
 
