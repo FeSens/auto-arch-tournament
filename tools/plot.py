@@ -8,7 +8,11 @@ from pathlib import Path
 LOG_PATH = Path("experiments/log.jsonl")
 OUT_PATH = Path("experiments/progress.png")
 
-TARGET = 370  # goal line — dashed red, no annotation
+# VexRiscv "full no cache" reference: 2.57 CoreMark/MHz × 144 MHz median Fmax
+# on this FPGA = ~370 iter/s.
+VEX_CM_PER_MHZ = 2.57
+VEX_FMAX_MHZ   = 144
+VEXRISCV_REF   = VEX_CM_PER_MHZ * VEX_FMAX_MHZ   # ~370 iter/s
 
 def plot_progress():
     if not LOG_PATH.exists():
@@ -66,8 +70,7 @@ def plot_progress():
     fig, ax = plt.subplots(figsize=(12, 5))
 
     # Round-banding: a faint vertical strip at each round's x when 2+ slots
-    # share it. Alternates shade by round parity to separate consecutive
-    # rounds visually.
+    # share it. Alternates shade by round parity for visual separation.
     for rid, x in round_x.items():
         slots_in_round = sum(1 for e in entries if e.get('round_id') == rid)
         if slots_in_round < 2:
@@ -84,9 +87,6 @@ def plot_progress():
                        edgecolors='white', linewidths=0.6)
 
     # Champion path: one (x, best-so-far) point per unique iteration.
-    # Within a tournament round, multiple slots may improve fitness; we
-    # carry forward the best across the round and emit it once per x so
-    # the line is monotonic in x.
     best = 0.0
     champ_x, champ_y = [], []
     for i, e in enumerate(entries):
@@ -102,8 +102,23 @@ def plot_progress():
     if champ_x:
         ax.plot(champ_x, champ_y, color='black', linewidth=1.8, zorder=2)
 
-    # Target line — dashed red, no label or annotation
-    ax.axhline(y=TARGET, color='red', linestyle='--', linewidth=1.2, zorder=1)
+    # Reference lines: baseline (first improvement entry) + VexRiscv-comparable.
+    baseline_fit = next(
+        (e.get('fitness') for e in entries
+         if e.get('outcome') == 'improvement' and isinstance(e.get('fitness'), (int, float))),
+        None,
+    )
+    if baseline_fit:
+        ax.axhline(y=baseline_fit, color='#7f8c8d', linestyle=':',
+                   linewidth=1.2, zorder=1, alpha=0.85)
+        ax.text(next_x - 0.3, baseline_fit, f' baseline {baseline_fit:.0f} iter/s',
+                va='center', ha='right', fontsize=9, color='#7f8c8d')
+
+    ax.axhline(y=VEXRISCV_REF, color='red', linestyle='--',
+               linewidth=1.2, zorder=1)
+    ax.text(next_x - 0.3, VEXRISCV_REF,
+            f' VexRiscv {VEX_CM_PER_MHZ} CM/MHz @ {VEX_FMAX_MHZ} MHz',
+            va='bottom', ha='right', fontsize=9, color='red')
 
     ax.set_xlabel('Iteration')
     ax.set_ylabel('CoreMark iter/sec')

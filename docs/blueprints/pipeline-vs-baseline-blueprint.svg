@@ -1,0 +1,323 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080" role="img" aria-labelledby="title desc">
+  <title id="title">Auto-Arch Tournament pipeline blueprint: baseline versus current champion</title>
+  <desc id="desc">A lecture-style technical blueprint comparing the baseline RV32IM five-stage pipeline to the current optimized Auto-Arch Tournament core.</desc>
+
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#071827"/>
+      <stop offset="0.55" stop-color="#081f33"/>
+      <stop offset="1" stop-color="#04101d"/>
+    </linearGradient>
+    <pattern id="grid" width="24" height="24" patternUnits="userSpaceOnUse">
+      <path d="M 24 0 L 0 0 0 24" fill="none" stroke="#1e4862" stroke-width="1" opacity="0.35"/>
+    </pattern>
+    <pattern id="gridFine" width="120" height="120" patternUnits="userSpaceOnUse">
+      <path d="M 120 0 L 0 0 0 120" fill="none" stroke="#3a6d89" stroke-width="1.5" opacity="0.35"/>
+    </pattern>
+    <marker id="arrowCyan" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto" markerUnits="strokeWidth">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#8bd8ff"/>
+    </marker>
+    <marker id="arrowOrange" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto" markerUnits="strokeWidth">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#ff9f43"/>
+    </marker>
+    <marker id="arrowGreen" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto" markerUnits="strokeWidth">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#60d394"/>
+    </marker>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <style>
+      .bg { fill: url(#bg); }
+      .grid { fill: url(#grid); opacity: 0.9; }
+      .gridFine { fill: url(#gridFine); opacity: 0.7; }
+      .title { font: 700 38px Inter, Arial, sans-serif; fill: #eef8ff; letter-spacing: 2px; }
+      .subtitle { font: 500 18px Inter, Arial, sans-serif; fill: #9ccde6; }
+      .panelTitle { font: 800 34px Inter, Arial, sans-serif; fill: #eef8ff; letter-spacing: 3px; }
+      .stageTitle { font: 800 22px Inter, Arial, sans-serif; fill: #e9f7ff; letter-spacing: 1px; }
+      .label { font: 600 15px Inter, Arial, sans-serif; fill: #d8f1ff; }
+      .small { font: 500 12px Inter, Arial, sans-serif; fill: #b7ddf0; }
+      .tiny { font: 500 10.5px Inter, Arial, sans-serif; fill: #a8cfe2; }
+      .muted { fill: #87b5ca; }
+      .orange { fill: #ffb25c; }
+      .green { fill: #7df3aa; }
+      .metric { font: 800 30px Inter, Arial, sans-serif; fill: #ffffff; }
+      .metricLabel { font: 650 13px Inter, Arial, sans-serif; fill: #a8cfe2; letter-spacing: 0.5px; }
+      .note { font: 600 13px Inter, Arial, sans-serif; fill: #d8f1ff; }
+      .panel { fill: rgba(5, 20, 32, 0.72); stroke: #63c9ff; stroke-width: 2; rx: 12; }
+      .panelCurrent { fill: rgba(7, 21, 32, 0.72); stroke: #ff9f43; stroke-width: 2.2; rx: 12; }
+      .stage { fill: rgba(8, 31, 50, 0.92); stroke: #b7eaff; stroke-width: 2; rx: 10; }
+      .stageAdd { fill: rgba(35, 25, 13, 0.94); stroke: #ff9f43; stroke-width: 2.4; rx: 10; }
+      .subBox { fill: rgba(4, 17, 29, 0.86); stroke: #67cffc; stroke-width: 1.4; rx: 6; }
+      .subAdd { fill: rgba(25, 18, 10, 0.88); stroke: #ff9f43; stroke-width: 1.6; rx: 6; }
+      .dash { fill: none; stroke: #9edbf5; stroke-width: 1.6; stroke-dasharray: 7 5; }
+      .dashOrange { fill: none; stroke: #ff9f43; stroke-width: 1.7; stroke-dasharray: 7 5; }
+      .line { fill: none; stroke: #8bd8ff; stroke-width: 2.2; marker-end: url(#arrowCyan); }
+      .lineNoArrow { fill: none; stroke: #8bd8ff; stroke-width: 2.2; }
+      .lineOrange { fill: none; stroke: #ff9f43; stroke-width: 2.4; marker-end: url(#arrowOrange); }
+      .lineGreen { fill: none; stroke: #60d394; stroke-width: 2.2; marker-end: url(#arrowGreen); }
+      .divider { stroke: #eaf8ff; stroke-width: 2; opacity: 0.7; }
+      .chipPin { stroke: #82d6ff; stroke-width: 1; opacity: 0.8; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="1920" height="1080"/>
+  <rect class="grid" width="1920" height="1080"/>
+  <rect class="gridFine" width="1920" height="1080"/>
+
+  <text x="60" y="58" class="title">AUTO-ARCH TOURNAMENT PIPELINE BLUEPRINT</text>
+  <text x="60" y="88" class="subtitle">Baseline tag: straight 5-stage RV32IM core  |  Current champion: hyp-20260428-054-r20s2  |  Fitness gate: formal + cosim + CoreMark CRC + 3-seed FPGA PnR</text>
+
+  <line x1="960" y1="110" x2="960" y2="1018" class="divider"/>
+
+  <!-- Panel headings -->
+  <rect x="36" y="116" width="888" height="80" class="panel"/>
+  <text x="480" y="168" text-anchor="middle" class="panelTitle">BASELINE</text>
+  <text x="480" y="190" text-anchor="middle" class="subtitle">pc+4 fetch, monolithic ALU, blocking memory stalls</text>
+
+  <rect x="996" y="116" width="888" height="80" class="panelCurrent"/>
+  <text x="1440" y="168" text-anchor="middle" class="panelTitle">CURRENT CHAMPION</text>
+  <text x="1440" y="190" text-anchor="middle" class="subtitle">same 5-stage skeleton, added predictors/replay, hot-path timing cuts, store-slot decoupling</text>
+
+  <!-- Baseline pipeline row -->
+  <g id="baselinePipeline">
+    <text x="91" y="238" class="stageTitle">IF</text>
+    <text x="253" y="238" class="stageTitle">ID</text>
+    <text x="421" y="238" class="stageTitle">EX</text>
+    <text x="606" y="238" class="stageTitle">MEM</text>
+    <text x="780" y="238" class="stageTitle">WB</text>
+
+    <rect x="60" y="256" width="128" height="210" class="stage"/>
+    <rect x="78" y="281" width="92" height="38" class="subBox"/>
+    <text x="124" y="306" text-anchor="middle" class="label">PC</text>
+    <path d="M124 322 L124 362" class="line"/>
+    <rect x="78" y="367" width="92" height="38" class="subBox"/>
+    <text x="124" y="392" text-anchor="middle" class="label">imem</text>
+    <path d="M124 412 L124 444" class="line"/>
+    <rect x="78" y="424" width="92" height="32" class="subBox"/>
+    <text x="124" y="446" text-anchor="middle" class="label">PC+4</text>
+    <path d="M60 361 C20 361 20 444 78 444" class="dash"/>
+    <text x="124" y="482" text-anchor="middle" class="small">sequential only</text>
+
+    <rect x="232" y="256" width="128" height="210" class="stage"/>
+    <text x="296" y="330" text-anchor="middle" class="label">decode</text>
+    <text x="296" y="355" text-anchor="middle" class="label">+</text>
+    <text x="296" y="380" text-anchor="middle" class="label">reg file</text>
+    <text x="296" y="424" text-anchor="middle" class="small">no prediction</text>
+    <text x="296" y="444" text-anchor="middle" class="small">metadata</text>
+
+    <rect x="404" y="256" width="160" height="210" class="stage"/>
+    <text x="484" y="294" text-anchor="middle" class="label">RV32IM ALU</text>
+    <text x="484" y="316" text-anchor="middle" class="small">(monolithic)</text>
+    <text x="484" y="352" text-anchor="middle" class="small">ADD/SUB/logic</text>
+    <text x="484" y="374" text-anchor="middle" class="small">shift/compare</text>
+    <text x="484" y="396" text-anchor="middle" class="small">MUL + DIV + REM</text>
+    <text x="484" y="435" text-anchor="middle" class="small orange">branch/JAL/JALR</text>
+    <text x="484" y="454" text-anchor="middle" class="small orange">redirect from EX</text>
+
+    <rect x="608" y="256" width="130" height="210" class="stage"/>
+    <rect x="626" y="312" width="94" height="44" class="subBox"/>
+    <text x="673" y="340" text-anchor="middle" class="label">dmem</text>
+    <text x="673" y="386" text-anchor="middle" class="small">load/store</text>
+    <text x="673" y="408" text-anchor="middle" class="small">waits on</text>
+    <text x="673" y="430" text-anchor="middle" class="small">dmemReady</text>
+
+    <rect x="780" y="256" width="120" height="210" class="stage"/>
+    <text x="840" y="342" text-anchor="middle" class="label">writeback</text>
+    <text x="840" y="367" text-anchor="middle" class="small">to reg file</text>
+    <text x="840" y="424" text-anchor="middle" class="small">retire at</text>
+    <text x="840" y="444" text-anchor="middle" class="small">MEM/WB</text>
+
+    <path d="M188 361 L232 361" class="line"/>
+    <path d="M360 361 L404 361" class="line"/>
+    <path d="M564 361 L608 361" class="line"/>
+    <path d="M738 361 L780 361" class="line"/>
+  </g>
+
+  <!-- Current pipeline row -->
+  <g id="currentPipeline">
+    <text x="1054" y="238" class="stageTitle">IF</text>
+    <text x="1233" y="238" class="stageTitle">ID</text>
+    <text x="1426" y="238" class="stageTitle">EX</text>
+    <text x="1630" y="238" class="stageTitle">MEM</text>
+    <text x="1804" y="238" class="stageTitle">WB</text>
+
+    <rect x="1016" y="256" width="176" height="308" class="stageAdd"/>
+    <rect x="1032" y="278" width="60" height="36" class="subBox"/>
+    <text x="1062" y="302" text-anchor="middle" class="label">PC</text>
+    <path d="M1062 317 L1062 348" class="line"/>
+    <rect x="1032" y="348" width="60" height="36" class="subBox"/>
+    <text x="1062" y="372" text-anchor="middle" class="label">imem</text>
+    <rect x="1104" y="278" width="72" height="36" class="subAdd"/>
+    <text x="1140" y="302" text-anchor="middle" class="small orange">PC+4</text>
+    <path d="M1093 365 L1110 365" class="line"/>
+    <rect x="1032" y="404" width="144" height="50" class="subAdd"/>
+    <text x="1104" y="425" text-anchor="middle" class="small orange">static backward</text>
+    <text x="1104" y="445" text-anchor="middle" class="small orange">branch predictor</text>
+    <rect x="1032" y="464" width="144" height="46" class="subAdd"/>
+    <text x="1104" y="486" text-anchor="middle" class="small orange">direct JAL</text>
+    <text x="1104" y="504" text-anchor="middle" class="small orange">prediction</text>
+    <text x="1104" y="544" text-anchor="middle" class="small">fetchReady =</text>
+    <text x="1104" y="562" text-anchor="middle" class="small">imemReady or replay hit</text>
+
+    <rect x="1208" y="256" width="152" height="308" class="stageAdd"/>
+    <text x="1284" y="286" text-anchor="middle" class="label orange">2-bank replay</text>
+    <text x="1284" y="307" text-anchor="middle" class="small orange">registered lookahead</text>
+    <rect x="1222" y="328" width="55" height="76" class="subBox"/>
+    <rect x="1290" y="328" width="55" height="76" class="subBox"/>
+    <text x="1249" y="322" text-anchor="middle" class="tiny">bank 0</text>
+    <text x="1318" y="322" text-anchor="middle" class="tiny">bank 1</text>
+    <text x="1249" y="354" text-anchor="middle" class="tiny">128</text>
+    <text x="1249" y="372" text-anchor="middle" class="tiny">entries</text>
+    <text x="1318" y="354" text-anchor="middle" class="tiny">128</text>
+    <text x="1318" y="372" text-anchor="middle" class="tiny">entries</text>
+    <text x="1284" y="430" text-anchor="middle" class="small">idx pc[8:2]</text>
+    <text x="1284" y="450" text-anchor="middle" class="small">tag pc[31:9]</text>
+    <text x="1284" y="474" text-anchor="middle" class="small orange">MRU replacement</text>
+    <text x="1284" y="498" text-anchor="middle" class="small orange">registered candidate</text>
+    <text x="1284" y="528" text-anchor="middle" class="tiny">no same-cycle table read</text>
+
+    <rect x="1388" y="256" width="118" height="308" class="stage"/>
+    <text x="1447" y="342" text-anchor="middle" class="label">decode</text>
+    <text x="1447" y="367" text-anchor="middle" class="label">+</text>
+    <text x="1447" y="392" text-anchor="middle" class="label">reg file</text>
+    <text x="1447" y="435" text-anchor="middle" class="small">carries</text>
+    <text x="1447" y="455" text-anchor="middle" class="small">predicted_taken</text>
+    <text x="1447" y="475" text-anchor="middle" class="small">predicted_target</text>
+
+    <rect x="1536" y="256" width="176" height="308" class="stageAdd"/>
+    <text x="1624" y="288" text-anchor="middle" class="label orange">op[4] ALU split</text>
+    <rect x="1552" y="310" width="144" height="66" class="subBox"/>
+    <text x="1624" y="332" text-anchor="middle" class="small">HOT op[4]=0</text>
+    <text x="1624" y="352" text-anchor="middle" class="tiny">RV32I add/logic</text>
+    <text x="1624" y="368" text-anchor="middle" class="tiny">shift/compare/LUI</text>
+    <rect x="1552" y="386" width="144" height="64" class="subBox"/>
+    <text x="1624" y="408" text-anchor="middle" class="small">COLD M mux</text>
+    <text x="1624" y="428" text-anchor="middle" class="tiny">MUL/MULH combinational</text>
+    <text x="1624" y="444" text-anchor="middle" class="tiny">DIV/REM result = div_unit</text>
+    <rect x="1552" y="462" width="144" height="44" class="subAdd"/>
+    <text x="1624" y="482" text-anchor="middle" class="small orange">iterative DIV/REM</text>
+    <text x="1624" y="499" text-anchor="middle" class="tiny orange">ex_long_busy interlock</text>
+    <rect x="1552" y="516" width="144" height="36" class="subAdd"/>
+    <text x="1624" y="539" text-anchor="middle" class="small orange">prediction mismatch repair</text>
+
+    <rect x="1740" y="256" width="130" height="308" class="stageAdd"/>
+    <rect x="1756" y="278" width="98" height="80" class="subAdd"/>
+    <text x="1805" y="300" text-anchor="middle" class="small orange">1-entry</text>
+    <text x="1805" y="318" text-anchor="middle" class="small orange">pending-store</text>
+    <text x="1805" y="336" text-anchor="middle" class="small orange">slot</text>
+    <text x="1805" y="382" text-anchor="middle" class="tiny">aligned normal-RAM</text>
+    <text x="1805" y="398" text-anchor="middle" class="tiny">stores retire</text>
+    <text x="1805" y="414" text-anchor="middle" class="tiny">then drain later</text>
+    <rect x="1766" y="442" width="78" height="38" class="subBox"/>
+    <text x="1805" y="466" text-anchor="middle" class="label">dmem</text>
+    <text x="1805" y="520" text-anchor="middle" class="small">slot has</text>
+    <text x="1805" y="540" text-anchor="middle" class="small">port priority</text>
+
+    <path d="M1192 410 L1208 410" class="lineOrange"/>
+    <path d="M1360 410 L1388 410" class="line"/>
+    <path d="M1506 410 L1536 410" class="line"/>
+    <path d="M1712 410 L1740 410" class="line"/>
+  </g>
+
+  <!-- Cross-cutting behavior panels -->
+  <g id="baselineDetails">
+    <rect x="60" y="504" width="404" height="276" class="panel"/>
+    <text x="82" y="536" class="stageTitle">Baseline Behavior</text>
+    <text x="82" y="568" class="note">- IF emits pc+4 path unless EX redirects</text>
+    <text x="82" y="594" class="note">- No branch prediction, direct-JAL prediction, or replay</text>
+    <text x="82" y="620" class="note">- Branch/JAL/JALR target known only in EX</text>
+    <text x="82" y="646" class="note">- DIV/REM are in the combinational ALU cone</text>
+    <text x="82" y="672" class="note">- Any dmem wait on a memory op freezes back to MEM</text>
+    <text x="82" y="698" class="note">- Load-use hazard inserts one bubble</text>
+    <text x="82" y="724" class="note">- Forwarding: EX/MEM and MEM/WB back to EX</text>
+    <text x="82" y="750" class="note">- Single issue; RVFI channel 1 tied off</text>
+  </g>
+
+  <g id="currentDetails">
+    <rect x="492" y="504" width="408" height="276" class="panel"/>
+    <text x="514" y="536" class="stageTitle">Current Additions Over Baseline</text>
+    <text x="514" y="568" class="note orange">- IF prediction: backward branch + direct JAL</text>
+    <text x="514" y="594" class="note orange">- IF replay: two 128-entry banks, MRU, registered candidate</text>
+    <text x="514" y="620" class="note orange">- EX repair only when resolved next-PC disagrees</text>
+    <text x="514" y="646" class="note orange">- DIV/REM moved to iterative side unit</text>
+    <text x="514" y="672" class="note orange">- ALU hot path isolated from M-extension mux</text>
+    <text x="514" y="698" class="note orange">- MEM can retire bufferable stores into one slot</text>
+    <text x="514" y="724" class="note orange">- RVFI order counter segmented into 16-bit chunks</text>
+    <text x="514" y="750" class="note orange">- Same top-level IO and single-issue retirement contract</text>
+  </g>
+
+  <!-- RVFI comparison -->
+  <g id="rvfi">
+    <rect x="996" y="604" width="342" height="204" class="panel"/>
+    <text x="1167" y="636" text-anchor="middle" class="stageTitle">RVFI / Retirement</text>
+    <rect x="1034" y="662" width="266" height="38" class="subBox"/>
+    <text x="1167" y="686" text-anchor="middle" class="label">retire at MEM/WB</text>
+    <path d="M1167 702 L1167 732" class="line"/>
+    <rect x="1034" y="732" width="266" height="38" class="subAdd"/>
+    <text x="1167" y="756" text-anchor="middle" class="label orange">segmented 16-bit order counter</text>
+    <path d="M1167 772 L1167 792" class="line"/>
+    <rect x="1034" y="792" width="122" height="32" class="subBox"/>
+    <rect x="1178" y="792" width="122" height="32" class="subBox"/>
+    <text x="1095" y="813" text-anchor="middle" class="small">channel 0 valid</text>
+    <text x="1239" y="813" text-anchor="middle" class="small">channel 1 tied off</text>
+
+    <rect x="1370" y="604" width="226" height="204" class="panelCurrent"/>
+    <text x="1483" y="636" text-anchor="middle" class="stageTitle">Verification Gates</text>
+    <text x="1392" y="670" class="note green">- Verilator lint</text>
+    <text x="1392" y="696" class="note green">- riscv-formal</text>
+    <text x="1392" y="722" class="note green">- Python ISS cosim</text>
+    <text x="1392" y="748" class="note green">- CoreMark CRCs</text>
+    <text x="1392" y="774" class="note green">- 3-seed FPGA PnR</text>
+
+    <rect x="1624" y="604" width="246" height="204" class="panelCurrent"/>
+    <text x="1747" y="636" text-anchor="middle" class="stageTitle">Fitness Formula</text>
+    <text x="1747" y="680" text-anchor="middle" class="label">CoreMark iter/sec</text>
+    <text x="1747" y="707" text-anchor="middle" class="label">= iterations/cycle</text>
+    <text x="1747" y="734" text-anchor="middle" class="label">x median Fmax</text>
+    <text x="1747" y="774" text-anchor="middle" class="small">current: about 2.91 CoreMark/MHz</text>
+  </g>
+
+  <!-- Accepted chain -->
+  <g id="chain">
+    <rect x="60" y="816" width="1810" height="82" class="panelCurrent"/>
+    <text x="82" y="846" class="stageTitle">Accepted Improvement Chain</text>
+    <text x="82" y="876" class="note">BTFNT branch predictor -> direct JAL predictor -> iterative DIV/REM -> store retirement slot -> segmented RVFI counter -> registered I-fetch replay -> compressed resetless tags -> hot/cold ALU split -> banked replay predictor</text>
+  </g>
+
+  <!-- Metrics -->
+  <g id="metrics">
+    <rect x="60" y="924" width="842" height="98" class="panel"/>
+    <text x="82" y="955" class="stageTitle">Baseline Metrics</text>
+    <text x="112" y="998" class="metric">301.04</text>
+    <text x="114" y="1018" class="metricLabel">CoreMark iter/sec</text>
+    <text x="316" y="998" class="metric">135.21</text>
+    <text x="318" y="1018" class="metricLabel">MHz median Fmax</text>
+    <text x="560" y="998" class="metric">9,880</text>
+    <text x="562" y="1018" class="metricLabel">LUT4</text>
+    <text x="718" y="998" class="metric">1,858</text>
+    <text x="720" y="1018" class="metricLabel">FF</text>
+
+    <rect x="996" y="924" width="874" height="98" class="panelCurrent"/>
+    <text x="1018" y="955" class="stageTitle">Current Champion Metrics</text>
+    <text x="1048" y="998" class="metric orange">577.76</text>
+    <text x="1050" y="1018" class="metricLabel">CoreMark iter/sec</text>
+    <text x="1260" y="998" class="metric orange">198.69</text>
+    <text x="1262" y="1018" class="metricLabel">MHz median Fmax</text>
+    <text x="1490" y="998" class="metric orange">5,944</text>
+    <text x="1492" y="1018" class="metricLabel">LUT4</text>
+    <text x="1648" y="998" class="metric orange">2,235</text>
+    <text x="1650" y="1018" class="metricLabel">FF</text>
+    <text x="1798" y="998" text-anchor="middle" class="metric green">+91.9%</text>
+    <text x="1798" y="1018" text-anchor="middle" class="metricLabel">fitness vs baseline</text>
+  </g>
+
+  <!-- Signal annotations -->
+  <path d="M484 466 C484 492 484 492 484 504" class="lineOrange"/>
+  <path d="M673 466 C673 492 673 492 673 504" class="lineOrange"/>
+  <path d="M1624 564 C1624 586 1608 590 1568 604" class="lineOrange"/>
+  <path d="M1805 564 C1805 590 1770 594 1747 604" class="lineOrange"/>
+</svg>

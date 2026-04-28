@@ -4,6 +4,8 @@ What happens when you take an autonomous research loop out of its comfort zone a
 
 I wanted to know if it generalized. So I pointed it at a CPU.
 
+![Side-by-side pipeline diagram of the V0 baseline (5-stage IF/ID/EX/MEM/WB, no predictors, no replay) and the post-tournament champion, with each accepted component highlighted: instruction-replay table + static branch/JAL prediction in IF, hot/cold ALU split and cold iterative DIV/REM in EX, a pending-store retirement slot off MEM, and an NRET=2 RVFI port set with channel 1 tied off. Bottom banner: +91.9% CoreMark vs baseline.](blueprints/pipeline-vs-baseline-image-model.png)
+
 ## The setup
 
 [`auto-arch-tournament`](.) is a 5-stage in-order RV32IM core in SystemVerilog — the textbook pipeline you'd write in a graduate architecture class. No caches, no branch predictor, no multi-issue on day one. Those are research-loop hypotheses, not features.
@@ -23,7 +25,7 @@ A diversity rotation forces each slot to pick a different category (`micro_opt |
 
 ## Show me the results
 
-Baseline locked at the same methodology VexRiscv publishes — full no cache, 2K data, `-O3`, ~22% bus backpressure — at **2.23 CoreMark/MHz, 301 iter/s**. The human benchmark is VexRiscv's published 2.30 CoreMark/MHz.
+Baseline locked at the same methodology VexRiscv publishes — full no cache, 2K data, `-O3`, ~22% bus backpressure — at **2.23 CoreMark/MHz, 301 iter/s**. The human benchmark is VexRiscv's published 2.57 CoreMark/MHz @ 144 MHz.
 
 Then I let it run. **73 hypotheses, 9h 51m wall-clock.**
 
@@ -51,9 +53,9 @@ The 10 accepted winners, in order:
 
 End state: **2.91 CoreMark/MHz, 577 iter/s, 199 MHz Fmax, 5,944 LUT4**.
 
-That is **+92% over the locked baseline, +26% over VexRiscv's published 2.30 CoreMark/MHz, with 40% fewer LUTs**. For context, the gap between VexRiscv's `full no cache` and `linux balanced` configs (their next tier up, with caches) is about 40% on CoreMark/MHz — so 26% of that is closed by an agent loop in under ten hours, on a single FPGA target, against a baseline VexRiscv took years to reach.
+That is **+92% over the locked baseline and +56% over VexRiscv on CoreMark iter/sec (370 → 578), with 40% fewer LUTs**. The win compounds: ~13% of it is architectural efficiency (2.91 vs 2.57 CoreMark/MHz) and the rest is Fmax (199 vs 144 MHz) — a smaller, simpler design that the synthesizer also clocks faster. For context, the CoreMark/MHz gap between VexRiscv's `full no cache` and `linux balanced` configs (their next tier up, with caches) is about 40 percentage points — so the loop closed 13 of those in under ten hours, on a single FPGA target, against a baseline VexRiscv took years to reach.
 
-![CoreMark progress: green dots are accepted winners, orange are rejected, red dashed line is the VexRiscv-equivalent fitness on this FPGA.](experiments/progress.png)
+![CoreMark progress: green dots are accepted winners (the black step-line walks through them), orange are rejected, red dashed line is the VexRiscv-comparable fitness on this FPGA, gray dotted line is the locked baseline.](../experiments/progress.png)
 
 The black step-function is the running best. It crosses the human-tuned VexRiscv line at iteration 6 and never looks back. The interesting move was iteration 3 — pulling DIV/REM out of the single-cycle path. The agent did not know that would also halve the LUT count. It found out by doing it and watching the synthesizer.
 
