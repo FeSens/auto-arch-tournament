@@ -14,11 +14,13 @@ VEX_CM_PER_MHZ = 2.57
 VEX_FMAX_MHZ   = 144
 VEXRISCV_REF   = VEX_CM_PER_MHZ * VEX_FMAX_MHZ   # ~370 iter/s
 
-def plot_progress():
-    if not LOG_PATH.exists():
+def plot_progress(log_path: Path | None = None, out_path: Path | None = None):
+    log_path = log_path or LOG_PATH
+    out_path = out_path or OUT_PATH
+    if not log_path.exists():
         return
 
-    entries = [json.loads(l) for l in LOG_PATH.read_text().splitlines() if l.strip()]
+    entries = [json.loads(l) for l in log_path.read_text().splitlines() if l.strip()]
     if not entries:
         return
 
@@ -133,8 +135,8 @@ def plot_progress():
     ax.spines['right'].set_visible(False)
     fig.tight_layout()
 
-    OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(str(OUT_PATH), dpi=150)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(str(out_path), dpi=150)
     plt.close(fig)
 
 if __name__ == '__main__':
