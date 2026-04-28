@@ -69,7 +69,7 @@ def _targets_clause(targets: dict, current_state: dict | None) -> str:
     may be missing for single-axis mode. `current_state` mirrors the
     same keys with the active branch's champion values.
     """
-    from tools.accept_rule import score, both_met
+    from tools.accept_rule import score
     cs = current_state or {}
     ct = targets.get("coremark")
     lt = targets.get("lut")
