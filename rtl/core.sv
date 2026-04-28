@@ -18,6 +18,13 @@
 //                 redirect).
 // RVFI fields:    all of them — driven from the MEM/WB register and
 //                 the WB-stage write-data mux.
+`ifndef CORE_PKG_DEFINED
+typedef struct if_id_t;
+typedef struct id_ex_t;
+typedef struct ex_mem_t;
+typedef struct mem_wb_t;
+`endif
+
 module core (
   input  logic        clock,
   input  logic        reset,
