@@ -73,9 +73,11 @@
 
   // IF -> ID combinational bundle (no register; PC reg sits in if_stage).
   // instr may be the live imem word or a word supplied by IF's registered
-  // lookahead replay predictor during an external imem stall. predicted_* is
-  // generic next-PC prediction metadata for any IF-resolved control-flow
-  // instruction, not branch-only state.
+  // lookahead replay predictor during an external imem stall. Replay table
+  // entries are tagged by high PC bits plus the direct-mapped pc[9:2] index;
+  // tag/instruction payload arrays are resetless behind replay_valid bits.
+  // predicted_* is generic next-PC prediction metadata for any IF-resolved
+  // control-flow instruction, not branch-only state.
   typedef struct packed {
     logic [31:0] pc;
     logic [31:0] instr;

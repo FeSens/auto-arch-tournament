@@ -15,7 +15,9 @@
 // target is word-aligned. JALR remains unpredicted and resolves in EX.
 // A direct-mapped replay table hides external imem stalls only through a
 // registered lookahead candidate for the current PC; the IF decision path
-// never reads or compares the table combinationally.
+// never reads or compares the table combinationally. Replay entries store
+// only pc[31:10]; pc[9:2] is the direct-mapped index and pc[1:0] is zero
+// for architecturally reachable fetch PCs.
 //
 // Latency:        PC-reg update is synchronous; output is combinational.
 // RVFI fields:    feeds pc_rdata (via ID/EX/MEM/WB) and pc_wdata (via
@@ -38,6 +40,8 @@ module if_stage (
   localparam logic [31:0] NOP      = 32'h0000_0013;
   localparam int unsigned REPLAY_INDEX_BITS = 8;
   localparam int unsigned REPLAY_ENTRIES    = 1 << REPLAY_INDEX_BITS;
+  localparam int unsigned REPLAY_TAG_HI_LSB = REPLAY_INDEX_BITS + 2;
+  localparam int unsigned REPLAY_TAG_HI_BITS = 32 - REPLAY_TAG_HI_LSB;
 
   logic [31:0] pc;
   logic [31:0] next_pc;
@@ -58,10 +62,12 @@ module if_stage (
   logic        predicted_taken;
 
   logic                              replay_valid [0:REPLAY_ENTRIES-1];
-  logic [31:0]                       replay_tag   [0:REPLAY_ENTRIES-1];
+  logic [REPLAY_TAG_HI_BITS-1:0]     replay_tag_hi [0:REPLAY_ENTRIES-1];
   logic [31:0]                       replay_instr [0:REPLAY_ENTRIES-1];
   logic [REPLAY_INDEX_BITS-1:0]      replay_fill_idx;
   logic [REPLAY_INDEX_BITS-1:0]      replay_lookup_idx;
+  logic [REPLAY_TAG_HI_BITS-1:0]     replay_fill_tag_hi;
+  logic [REPLAY_TAG_HI_BITS-1:0]     replay_lookup_tag_hi;
   logic [31:0]                       replay_lookup_pc;
   logic                              replay_cand_valid_q;
   logic [31:0]                       replay_cand_pc_q;
@@ -71,6 +77,8 @@ module if_stage (
 
   assign replay_fill_idx    = pc[REPLAY_INDEX_BITS+1:2];
   assign replay_lookup_idx  = replay_lookup_pc[REPLAY_INDEX_BITS+1:2];
+  assign replay_fill_tag_hi = pc[31:REPLAY_TAG_HI_LSB];
+  assign replay_lookup_tag_hi = replay_lookup_pc[31:REPLAY_TAG_HI_LSB];
   assign replay_current_hit = replay_cand_valid_q && (replay_cand_pc_q == pc);
   assign fetch_ready        = imem_ready || replay_current_hit;
   assign fetch_instr        = imem_ready         ? imem_data :
@@ -107,7 +115,9 @@ module if_stage (
     replay_lookup_pc = redirect ? redirect_target :
                        !stall   ? next_pc :
                                   pc;
-    replay_fill_bypass = imem_ready && (pc == replay_lookup_pc);
+    replay_fill_bypass = imem_ready
+                       && (replay_fill_idx == replay_lookup_idx)
+                       && (replay_fill_tag_hi == replay_lookup_tag_hi);
   end
 
   // Redirect must override stall: a BRANCH/JAL/JALR in EX may fire
@@ -129,13 +139,11 @@ module if_stage (
       replay_cand_instr_q <= NOP;
       for (int i = 0; i < REPLAY_ENTRIES; i++) begin
         replay_valid[i] <= 1'b0;
-        replay_tag[i]   <= 32'b0;
-        replay_instr[i] <= NOP;
       end
     end else begin
       if (imem_ready) begin
         replay_valid[replay_fill_idx] <= 1'b1;
-        replay_tag[replay_fill_idx]   <= pc;
+        replay_tag_hi[replay_fill_idx] <= replay_fill_tag_hi;
         replay_instr[replay_fill_idx] <= imem_data;
       end
 
@@ -145,7 +153,7 @@ module if_stage (
         replay_cand_instr_q <= imem_data;
       end else begin
         replay_cand_valid_q <= replay_valid[replay_lookup_idx]
-                            && (replay_tag[replay_lookup_idx] == replay_lookup_pc);
+                            && (replay_tag_hi[replay_lookup_idx] == replay_lookup_tag_hi);
         replay_cand_instr_q <= replay_instr[replay_lookup_idx];
       end
     end
