@@ -62,9 +62,57 @@ def _git_offlimits_changes(allow_re: 're.Pattern' = HYP_ALLOWED) -> list:
                 bad.append(p)
     return bad
 
+def _targets_clause(targets: dict, current_state: dict | None) -> str:
+    """Generate the 'Optimization targets' prompt block.
+
+    `targets` is a dict like {"coremark": 300, "lut": 3000}; either key
+    may be missing for single-axis mode. `current_state` mirrors the
+    same keys with the active branch's champion values.
+    """
+    from tools.accept_rule import score, both_met
+    cs = current_state or {}
+    ct = targets.get("coremark")
+    lt = targets.get("lut")
+    cur_perf = cs.get("coremark")
+    cur_lut  = cs.get("lut")
+    s = score(cur_perf, cur_lut, ct, lt)
+    parts = ["## Optimization targets", ""]
+    parts.append("This research run targets:")
+    if ct is not None:
+        parts.append(f"  CoreMark = {ct} iter/s")
+    if lt is not None:
+        parts.append(f"  LUT4     = {lt}")
+    parts.append("")
+    parts.append("Current state:")
+    if ct is not None and cur_perf is not None:
+        status = "target met" if cur_perf >= ct else f"{(ct - cur_perf)/ct*100:.1f}% below target"
+        parts.append(f"  CoreMark   = {cur_perf} iter/s   ({status})")
+    if lt is not None and cur_lut is not None:
+        status = "target met" if cur_lut <= lt else f"{(cur_lut - lt)/lt*100:.1f}% above target"
+        parts.append(f"  LUT4       = {cur_lut}           ({status})")
+    parts.append(f"  combined score = {s:+.3f}")
+    parts.append("")
+    if ct is not None and lt is not None:
+        parts.append("Accept rule: deficit-driven in phase 1 (any axis below target);")
+        parts.append("strict Pareto-dominance in phase 2 (both at target).")
+        parts.append("")
+        parts.append("Your hypothesis should attack whichever axis is currently failing.")
+        parts.append("If both targets are met, find a 'free win' that strictly dominates")
+        parts.append("the current design on at least one axis without regressing the other.")
+    elif ct is not None:
+        parts.append("Accept rule: pull CoreMark toward the target while below; once past")
+        parts.append("the target, any CoreMark improvement lands.")
+    else:
+        parts.append("Accept rule: pull LUT4 toward the target while above; once at/under")
+        parts.append("the target, any LUT4 reduction lands.")
+    return "\n".join(parts) + "\n\n"
+
+
 def _build_prompt(log_tail: list, current_fitness: float, baseline_fitness: float,
                   hyp_id: str | None = None,
-                  category_hint: str | None = None) -> str:
+                  category_hint: str | None = None,
+                  targets: dict | None = None,
+                  current_state: dict | None = None) -> str:
     arch = Path("ARCHITECTURE.md").read_text()
     claude_md = Path("CLAUDE.md").read_text() if Path("CLAUDE.md").exists() else ""
     src_files = sorted(Path("rtl").rglob("*.sv"))
@@ -86,6 +134,7 @@ def _build_prompt(log_tail: list, current_fitness: float, baseline_fitness: floa
         f"categories.\n"
         if category_hint else ""
     )
+    targets_clause = _targets_clause(targets, current_state) if targets else ""
 
     return f"""You are a CPU microarchitecture research agent.
 
@@ -94,7 +143,7 @@ Fitness metric: CoreMark iter/sec = CoreMark iterations/cycle × Fmax_Hz on Tang
 Current best fitness: {current_fitness:.2f}
 Baseline fitness: {baseline_fitness:.2f}
 
-{category_clause}
+{category_clause}{targets_clause}
 ## Architecture
 {arch}
 
@@ -134,7 +183,9 @@ def run_hypothesis_agent(log_tail: list, current_fitness: float,
                          baseline_fitness: float,
                          hyp_id: str | None = None,
                          allowed_yaml_ids: list[str] | None = None,
-                         category_hint: str | None = None) -> str:
+                         category_hint: str | None = None,
+                         targets: dict | None = None,
+                         current_state: dict | None = None) -> str:
     """Invokes the active agent runtime and returns path to written hypothesis YAML.
 
     Sandbox: if the agent touches anything outside the round's whitelist
@@ -154,7 +205,8 @@ def run_hypothesis_agent(log_tail: list, current_fitness: float,
     if hyp_id is None:
         hyp_id = _next_id()
     prompt = _build_prompt(log_tail, current_fitness, baseline_fitness,
-                           hyp_id=hyp_id, category_hint=category_hint)
+                           hyp_id=hyp_id, category_hint=category_hint,
+                           targets=targets, current_state=current_state)
     allow_re = _whitelist_regex(allowed_yaml_ids or [])
 
     # Stream agent output to experiments/hypotheses/.agent.{hyp_id}.log
