@@ -53,6 +53,83 @@ _CODEX_BANNER_PREFIXES = (
 )
 
 
+def _truncate(s: str, n: int = 100) -> str:
+    s = s.replace("\n", " ").strip()
+    return s if len(s) <= n else s[:n - 3] + "..."
+
+
+def _summarize_codex_jsonl(ev: dict) -> Optional[str]:
+    """One-liner from a codex --json event line.
+
+    Codex wraps items in `{"method": "item/completed", "params": {"item": {...}}}`.
+    We extract `params.item` and pick a short summary based on item type.
+    Defensive — if a field we expect is missing, fall back to just the type
+    name so the user still sees that something happened.
+    """
+    if ev.get("method") != "item/completed":
+        return None
+    item = (ev.get("params") or {}).get("item") or {}
+    if not isinstance(item, dict):
+        return None
+    t = item.get("type")
+    if t in (None, "userMessage", "hookPrompt", "reasoning"):
+        # userMessage/hookPrompt are our own prompts echoed back; reasoning
+        # is private chain-of-thought. None of these are orchestrator signal.
+        return None
+    if t == "agentMessage":
+        text = item.get("text") or item.get("message") or ""
+        first = text.splitlines()[0] if isinstance(text, str) and text else ""
+        return _truncate(f"msg: {first}", 120) if first else None
+    if t == "commandExecution":
+        cmd = item.get("command") or item.get("cmd") or ""
+        if isinstance(cmd, list):
+            cmd = " ".join(cmd)
+        return _truncate(f"shell: {cmd}", 120)
+    if t == "fileChange":
+        # The outer item "type" is "fileChange"; the inner change kind lives
+        # under a separate field. We check known field names and fall back to
+        # "change" if none are present.
+        change = item.get("change_type") or item.get("subtype") or item.get("kind") or "change"
+        path = item.get("path") or item.get("file_path") or item.get("file") or ""
+        if path:
+            return _truncate(f"file({change}): {path}", 120)
+        return f"fileChange"
+    if t == "webSearch":
+        q = item.get("query") or ""
+        return _truncate(f"search: {q}", 120) if q else "webSearch"
+    if t == "plan":
+        return "plan: (generated)"
+    if t == "mcpToolCall":
+        name = item.get("name") or item.get("tool") or ""
+        return _truncate(f"mcp: {name}", 120) if name else "mcpToolCall"
+    if t == "dynamicToolCall":
+        name = item.get("name") or item.get("tool") or ""
+        return _truncate(f"tool: {name}", 120) if name else "dynamicToolCall"
+    if t == "collabAgentToolCall":
+        return "spawn-agent"
+    if t in ("imageView", "imageGeneration"):
+        return t
+    if t in ("enteredReviewMode", "exitedReviewMode", "contextCompaction"):
+        return t
+    # Unknown item type — surface it so we know to add a handler.
+    return f"codex: {t}"
+
+
+def _summarize_codex_plain(s: str) -> Optional[str]:
+    """Fallback for non-JSON codex lines (banner, errors before --json kicks in).
+
+    Existing logic: skip empty + banner-prefix lines, truncate the rest.
+    """
+    s = s.strip()
+    if not s:
+        return None
+    if any(s.startswith(prefix) for prefix in _CODEX_BANNER_PREFIXES):
+        return None
+    if len(s) > 140:
+        s = s[:137] + "..."
+    return s
+
+
 def get_provider() -> str:
     """Return 'codex' (default) or 'claude' from AGENT_PROVIDER env var."""
     p = os.environ.get("AGENT_PROVIDER", "codex").strip().lower()
@@ -89,6 +166,7 @@ def build_agent_cmd(
             "-C", str(cwd),
             "--sandbox", "workspace-write",
             "--skip-git-repo-check",
+            "--json",
             "--output-last-message", str(output_last_message),
         ]
         if model:
@@ -141,14 +219,18 @@ def summarize_event(line: str, provider: Optional[str] = None) -> Optional[str]:
                 return f"{c.get('name', '?')}: {target}".rstrip(': ').strip()
         return None
     if p == "codex":
-        s = line.rstrip("\n").strip()
-        if not s:
+        s = line.rstrip("\n")
+        if not s.strip():
             return None
-        if any(s.startswith(prefix) for prefix in _CODEX_BANNER_PREFIXES):
-            return None
-        if len(s) > 140:
-            s = s[:137] + "..."
-        return s
+        # Try JSONL first (codex --json mode). Fall back to plain-text +
+        # banner-denylist for any line that doesn't parse — codex may emit
+        # non-JSON banner / error lines (e.g. "ERROR: You've hit your usage
+        # limit").
+        try:
+            ev = json.loads(s)
+        except json.JSONDecodeError:
+            return _summarize_codex_plain(s)
+        return _summarize_codex_jsonl(ev)
     return None
 
 
