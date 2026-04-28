@@ -1,8 +1,9 @@
 // rtl/ex_stage.sv
 //
 // Execute stage. Resolves the operand muxes (forwarding from EX/MEM and
-// MEM/WB), runs the ALU, resolves branches, computes the redirect
-// target. Owns the EX/MEM pipeline register.
+// MEM/WB), runs the ALU, resolves branches, and redirects only when the
+// IF-stage prediction disagrees with the resolved next PC. Owns the EX/MEM
+// pipeline register.
 //
 // Forwarding select encoding (driven by forward_unit):
 //   00 = ID/EX register value (no forward)
@@ -63,6 +64,8 @@ module ex_stage (
   logic        branch_cond;
   logic        branch_taken;
   logic [31:0] branch_target;
+  logic [31:0] branch_next_pc;
+  logic [31:0] predicted_branch_next_pc;
   logic [31:0] jump_target;
   /* verilator lint_off UNUSEDSIGNAL */
   logic [31:0] jalr_sum;  // bit 0 deliberately dropped per RV JALR spec
@@ -80,6 +83,9 @@ module ex_stage (
     endcase
     branch_taken  = in.ctrl.is_branch && branch_cond;
     branch_target = in.pc + in.imm;
+    branch_next_pc = branch_taken ? branch_target : (in.pc + 32'd4);
+    predicted_branch_next_pc = in.predicted_taken ? in.predicted_target
+                                                  : (in.pc + 32'd4);
     // JALR clears bit 0 (RV spec); JAL uses imm directly.
     jalr_sum    = rs1 + in.imm;
     jump_target = in.ctrl.is_jalr ? {jalr_sum[31:1], 1'b0}
@@ -94,6 +100,8 @@ module ex_stage (
   logic misalign_branch;
   logic misalign_jump;
   logic misalign_fault;
+  logic branch_mispredict;
+  logic jump_redirect;
   ctrl_t ctrl_with_trap;
 
   always_comb begin
@@ -107,10 +115,16 @@ module ex_stage (
       ctrl_with_trap.is_illegal = 1'b1;
       ctrl_with_trap.reg_write  = 1'b0;
     end
+
+    branch_mispredict = in.valid
+                     && in.ctrl.is_branch
+                     && !misalign_fault
+                     && (branch_next_pc != predicted_branch_next_pc);
+    jump_redirect     = in.valid && in.ctrl.is_jump && !misalign_fault;
   end
 
-  assign redirect        = (branch_taken || in.ctrl.is_jump) && !misalign_fault;
-  assign redirect_target = in.ctrl.is_jump ? jump_target : branch_target;
+  assign redirect        = branch_mispredict || jump_redirect;
+  assign redirect_target = in.ctrl.is_jump ? jump_target : branch_next_pc;
 
   // ── EX/MEM register ───────────────────────────────────────────────────
   ex_mem_t reg_q;

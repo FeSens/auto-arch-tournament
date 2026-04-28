@@ -8,8 +8,8 @@
 // Outputs:
 //   stall_if / stall_id : freeze the PC reg and the IF/ID combinational
 //                          payload (cleared by ID's flush input).
-//   flush_if / flush_id : on EX redirect, kill the two in-flight
-//                          instructions ahead of the redirect target.
+//   flush_if / flush_id : on EX redirect (branch mispredict or jump), kill
+//                          the in-flight instructions ahead of the target.
 //   flush_id            : also kills ID's own register on load-use to
 //                          inject a single-cycle bubble between LOAD
 //                          and the dependent instruction.
@@ -21,7 +21,7 @@ module hazard_unit (
   input  logic [4:0] id_ex_rd,          // ID/EX.rd            (LOAD's dest)
   input  logic [4:0] if_id_rs1,         // IF/ID instr[19:15]  (next rs1)
   input  logic [4:0] if_id_rs2,         // IF/ID instr[24:20]  (next rs2)
-  input  logic       redirect,          // EX has resolved a branch/jump
+  input  logic       redirect,          // EX branch mispredict or jump redirect
   // Bus backpressure (default-1 in zero-wait testbenches; VexRiscv-style
   // random ~22% stall in vex_main.cpp). When low, the corresponding
   // memory request is NOT serviced this cycle.
@@ -56,8 +56,8 @@ module hazard_unit (
     // PC reg holds on any stall reason.
     stall_if      = load_use_hazard || imem_stall || dmem_stall;
     // IF/ID combinational payload: NOP whenever we wouldn't have a valid
-    // instruction this cycle (redirect target unknown to IF, or imem
-    // didn't deliver).
+    // instruction this cycle (mispredict/jump recovery, or imem didn't
+    // deliver).
     flush_if      = redirect || imem_stall;
     // ID/EX register:
     //   - dmem_stall  -> hold        (preserve in-flight pipeline state)

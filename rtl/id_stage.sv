@@ -102,6 +102,8 @@ module id_stage (
       reg_q.rs2_addr <= in.instr[24:20];
       reg_q.ctrl     <= ctrl_decoded;
       reg_q.instr    <= in.instr;
+      reg_q.predicted_taken  <= in.predicted_taken;
+      reg_q.predicted_target <= in.predicted_target;
       reg_q.valid    <= in.valid;
     end
   end

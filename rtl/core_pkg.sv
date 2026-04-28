@@ -75,6 +75,8 @@
   typedef struct packed {
     logic [31:0] pc;
     logic [31:0] instr;
+    logic        predicted_taken;
+    logic [31:0] predicted_target;
     logic        valid;
   } if_id_t;
 
@@ -89,6 +91,8 @@
     logic [4:0]  rs2_addr;
     ctrl_t       ctrl;
     logic [31:0] instr;
+    logic        predicted_taken;
+    logic [31:0] predicted_target;
     logic        valid;
   } id_ex_t;
 
