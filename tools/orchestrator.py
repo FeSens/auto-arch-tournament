@@ -1,9 +1,20 @@
 #!/usr/bin/env python3
 """Hardcoded AutoResearch loop. The LLM never touches this file."""
-import argparse, json, datetime, subprocess, re, threading
+import argparse, json, datetime, os, subprocess, re, threading
 from pathlib import Path
 
 import jsonschema, yaml
+
+# Disable commit/tag signing for every git subprocess in the orchestrator
+# process tree. With SSH-key signing + a 1Password agent, every
+# administrative commit (worktree accept, log+plot append) prompts for
+# biometric auth, which hangs the loop when running unattended.
+# Affects only orchestrator-spawned git calls; manual `git commit`
+# from a shell still signs normally.
+_SIGN_OFF = "'commit.gpgsign=false' 'tag.gpgsign=false'"
+os.environ["GIT_CONFIG_PARAMETERS"] = (
+    (os.environ.get("GIT_CONFIG_PARAMETERS", "").strip() + " " + _SIGN_OFF).strip()
+)
 
 from tools.worktree import create_worktree, accept_worktree, destroy_worktree
 from tools.agents.hypothesis import run_hypothesis_agent
