@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Hardcoded AutoResearch loop. The LLM never touches this file."""
-import argparse, json, datetime, os, subprocess, re, threading
+import argparse, json, datetime, os, subprocess, re, threading, sys
 from pathlib import Path
 
 import jsonschema, yaml
@@ -24,6 +24,15 @@ from tools.eval.cosim import run_cosim
 from tools.eval.fpga import run_fpga_eval
 from tools.plot import plot_progress
 from tools.tournament import run_tournament_round
+
+# When orchestrator is launched via `python3 -m tools.orchestrator`, Python
+# only registers it under `__main__`, not `tools.orchestrator`. Sub-modules
+# (e.g., tools.tournament's lazy imports of current_lut/current_best) then
+# trigger a fresh disk read of tools/orchestrator.py — which is fatal when
+# git checkout has swapped the on-disk file to an older baseline-tag
+# version. Register the running module under the dotted name so dotted
+# imports always resolve to the in-memory copy.
+sys.modules.setdefault('tools.orchestrator', sys.modules[__name__])
 
 LOG_PATH       = Path("experiments/log.jsonl")
 PLOT_PATH      = Path("experiments/progress.png")
