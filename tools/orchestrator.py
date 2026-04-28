@@ -86,20 +86,42 @@ def read_log() -> list:
     if not LOG_PATH.exists(): return []
     return [json.loads(l) for l in LOG_PATH.read_text().splitlines() if l.strip()]
 
+def _last_improvement(log: list) -> dict | None:
+    """The most recent accepted-improvement entry, or None.
+
+    Both current_best() and current_lut() anchor on this so that in dual-
+    target Pareto mode (where accept() can take a lower-fitness entry to
+    improve the combined score) the comparison anchor is a real design,
+    not a (max-fitness, last-lut4) phantom.
+    """
+    improvements = [e for e in log if e.get('outcome') == 'improvement']
+    return improvements[-1] if improvements else None
+
+
 def current_best(log: list) -> float:
-    improvements = [e['fitness'] for e in log if e.get('outcome') == 'improvement']
-    return max(improvements) if improvements else 0.0
+    """Fitness of the running champion (most recent accepted improvement).
+
+    In no-targets mode, accept is monotonic on fitness so this is also
+    max(fitness). In Pareto mode, lower-fitness improvements that win on
+    score can land, and the champion is whichever entry came last.
+    """
+    last = _last_improvement(log)
+    if last is None:
+        return 0.0
+    val = last.get('fitness')
+    return float(val) if isinstance(val, (int, float)) else 0.0
+
 
 def baseline_fitness(log: list) -> float:
     if log: return log[0].get('fitness', 0.0)
     return 0.0
 
+
 def current_lut(log: list) -> float | None:
-    """LUT4 of the latest accepted improvement. None if no improvements yet."""
-    improvements = [e for e in log if e.get('outcome') == 'improvement']
-    if not improvements:
+    """LUT4 of the running champion (most recent accepted improvement)."""
+    last = _last_improvement(log)
+    if last is None:
         return None
-    last = improvements[-1]
     val = last.get('lut4')
     return val if isinstance(val, (int, float)) else None
 
@@ -211,7 +233,7 @@ def _resolve_ref(ref: str) -> str:
         )
         return out.stdout.strip()
     except subprocess.CalledProcessError:
-        raise SystemExit(f"BASELINE: cannot resolve git ref '{ref}'.")
+        raise SystemExit(f"baseline: cannot resolve git ref '{ref}'.")
 
 
 def _branch_exists(name: str) -> bool:
@@ -247,10 +269,6 @@ def _run_baseline_retest(branch: str):
     hypothesis rounds have a fitness anchor. Aborts the run if any gate
     fails — the user investigates while the branch is left intact.
     """
-    from tools.eval.formal import run_formal
-    from tools.eval.cosim import run_cosim
-    from tools.eval.fpga import run_fpga_eval
-
     # Re-emit verilog + run gates against the main repo's working copy
     # (the active branch is checked out). We don't create a worktree —
     # the baseline retest IS the branch tip, not a hypothesis.
@@ -332,6 +350,15 @@ def main():
     if args.lut_target is not None and args.lut_target <= 0:
         raise SystemExit("--lut-target must be positive.")
 
+    # Per-branch log/plot. Must come before --report so a branch-scoped
+    # report reads the per-branch log file. Default branch (no --branch)
+    # keeps writing to experiments/log.jsonl + experiments/progress.png.
+    target_branch = args.branch or "main"
+    if args.branch:
+        global LOG_PATH, PLOT_PATH
+        LOG_PATH  = Path(f"experiments/log-{args.branch}.jsonl")
+        PLOT_PATH = Path(f"experiments/progress-{args.branch}.png")
+
     if args.report:
         run_report()
         return
@@ -341,14 +368,6 @@ def main():
         targets["coremark"] = args.coremark_target
     if args.lut_target is not None:
         targets["lut"] = args.lut_target
-
-    # Per-branch log/plot. Default branch (no --branch) keeps writing
-    # to experiments/log.jsonl + experiments/progress.png.
-    target_branch = args.branch or "main"
-    if args.branch:
-        global LOG_PATH, PLOT_PATH
-        LOG_PATH  = Path(f"experiments/log-{args.branch}.jsonl")
-        PLOT_PATH = Path(f"experiments/progress-{args.branch}.png")
 
     # Branch lifecycle.
     fresh_branch = False
