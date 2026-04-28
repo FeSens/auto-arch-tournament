@@ -1,8 +1,7 @@
 """Unit tests for rtl/alu.sv.
 
-The ALU is purely combinational (RV32IM). MUL / DIV / REM use the
-SystemVerilog `*`, `/`, `%` operators and resolve in zero cycles, so
-there is no clock, reset, or handshake on this module.
+The ALU is purely combinational for one-cycle RV32I and multiply ops.
+DIV/DIVU/REM/REMU live in rtl/div_unit.sv and are tested separately.
 """
 from __future__ import annotations
 
@@ -14,7 +13,6 @@ from _helpers import (
     ALU_SLT, ALU_SLTU, ALU_SLL, ALU_SRL, ALU_SRA,
     ALU_LUI,
     ALU_MUL, ALU_MULH, ALU_MULHU, ALU_MULHSU,
-    ALU_DIV, ALU_DIVU, ALU_REM, ALU_REMU,
     run_cocotb,
 )
 
@@ -38,12 +36,6 @@ async def _check(dut, op, a, b, expected):
         f"op={op} a=0x{a & MASK32:08x} b=0x{b & MASK32:08x} "
         f"expected=0x{expected & MASK32:08x} got=0x{actual:08x}"
     )
-
-
-async def _check_div(dut, op, a, b, expected):
-    """Combinational div/rem — alias for _check. Was a multi-cycle FSM
-    under hyp-20260427-002, reverted in 6688be7 (v2 reset)."""
-    await _check(dut, op, a, b, expected)
 
 
 @cocotb.test()
@@ -144,91 +136,6 @@ async def mulhsu(dut):
     await _check(dut, ALU_MULHSU, 0x80000000, 0xFFFFFFFF, 0x80000000)
     # (-1) * unsigned -> high half is sign extension
     await _check(dut, ALU_MULHSU, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF)
-
-
-@cocotb.test()
-async def div_signed(dut):
-    await _setup(dut)
-    await _check_div(dut, ALU_DIV, 10, 3, 3)
-    await _check_div(dut, ALU_DIV, 0xFFFFFFFC, 2, 0xFFFFFFFE)      # -4/2 = -2
-    await _check_div(dut, ALU_DIV, 7, 0xFFFFFFFE, 0xFFFFFFFD)      # 7/-2 = -3 (trunc to 0)
-
-
-@cocotb.test()
-async def div_by_zero(dut):
-    await _setup(dut)
-    await _check_div(dut, ALU_DIV, 123, 0, 0xFFFFFFFF)
-    await _check_div(dut, ALU_DIV, 0, 0, 0xFFFFFFFF)
-
-
-@cocotb.test()
-async def div_overflow(dut):
-    await _setup(dut)
-    # INT_MIN / -1 -> INT_MIN  (defined overflow per RV32IM)
-    await _check_div(dut, ALU_DIV, 0x80000000, 0xFFFFFFFF, 0x80000000)
-
-
-@cocotb.test()
-async def divu(dut):
-    await _setup(dut)
-    await _check_div(dut, ALU_DIVU, 0xFFFFFFFF, 2, 0x7FFFFFFF)
-    await _check_div(dut, ALU_DIVU, 100, 7, 14)
-
-
-@cocotb.test()
-async def divu_by_zero(dut):
-    await _setup(dut)
-    await _check_div(dut, ALU_DIVU, 42, 0, 0xFFFFFFFF)
-
-
-@cocotb.test()
-async def rem_signed(dut):
-    await _setup(dut)
-    await _check_div(dut, ALU_REM, 10, 3, 1)
-    # -10 % 3 trunc-to-zero: -10 = (-3)*3 + (-1) -> rem = -1 = 0xFFFFFFFF
-    await _check_div(dut, ALU_REM, 0xFFFFFFF6, 3, 0xFFFFFFFF)
-    # 10 % -3 trunc-to-zero: 10 = (-3)*(-3) + 1 -> rem = 1 (sign of dividend)
-    await _check_div(dut, ALU_REM, 10, 0xFFFFFFFD, 1)
-
-
-@cocotb.test()
-async def rem_by_zero(dut):
-    await _setup(dut)
-    await _check_div(dut, ALU_REM, 0xDEADBEEF, 0, 0xDEADBEEF)
-
-
-@cocotb.test()
-async def rem_overflow(dut):
-    await _setup(dut)
-    # INT_MIN % -1 -> 0
-    await _check_div(dut, ALU_REM, 0x80000000, 0xFFFFFFFF, 0)
-
-
-@cocotb.test()
-async def remu(dut):
-    await _setup(dut)
-    await _check_div(dut, ALU_REMU, 7, 3, 1)
-
-
-@cocotb.test()
-async def remu_by_zero(dut):
-    await _setup(dut)
-    await _check_div(dut, ALU_REMU, 0xCAFEBABE, 0, 0xCAFEBABE)
-
-
-@cocotb.test()
-async def back_to_back_divides(dut):
-    """Verify the FSM resets cleanly between consecutive iterative
-    divides — no carry-over of operands or state from the previous op.
-    """
-    await _setup(dut)
-    # Real divides only (avoid edge-case short-circuit) so each pass
-    # exercises the full 33-cycle FSM.
-    await _check_div(dut, ALU_DIVU, 100, 7, 14)
-    await _check_div(dut, ALU_DIVU, 0xFFFFFFFF, 2, 0x7FFFFFFF)
-    await _check_div(dut, ALU_DIV, 0xFFFFFFFC, 2, 0xFFFFFFFE)  # -4/2 = -2
-    await _check_div(dut, ALU_REM, 10, 3, 1)
-    await _check_div(dut, ALU_REMU, 7, 3, 1)
 
 
 def test_alu_runner():

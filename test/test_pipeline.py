@@ -55,6 +55,9 @@ def _j(imm, rd, opcode):
 
 def ADDI(rd, rs1, imm): return _i(imm & 0xFFF, rs1, 0b000, rd, 0b0010011)
 def ADD (rd, rs1, rs2): return _r(0, rs2, rs1, 0b000, rd, 0b0110011)
+def DIV (rd, rs1, rs2): return _r(1, rs2, rs1, 0b100, rd, 0b0110011)
+def DIVU(rd, rs1, rs2): return _r(1, rs2, rs1, 0b101, rd, 0b0110011)
+def REMU(rd, rs1, rs2): return _r(1, rs2, rs1, 0b111, rd, 0b0110011)
 def LW  (rd, rs1, imm): return _i(imm & 0xFFF, rs1, 0b010, rd, 0b0000011)
 def SW  (rs2, rs1, imm): return _s(imm & 0xFFF, rs2, rs1, 0b010, 0b0100011)
 def BEQ (rs1, rs2, imm): return _b(imm, rs2, rs1, 0b000, 0b1100011)
@@ -181,6 +184,38 @@ async def forwarding_mem_to_ex(dut):
     rets, _ = await _run(dut, program)
     [r2] = _by_insn(rets, ADDI(2, 1, 3))
     assert r2["rd_wdata"] == 8
+
+
+@cocotb.test()
+async def divide_interlock_and_forwarding(dut):
+    """DIV/REM hold ID/IF, retire once, and forward the completed result."""
+    divu = DIVU(3, 1, 2)
+    add = ADD(4, 3, 2)
+    remu = REMU(5, 1, 2)
+    div = DIV(6, 7, 2)
+    program = [
+        ADDI(1, 0, 100),
+        ADDI(2, 0, 7),
+        divu,                 # x3 = 14
+        add,                  # x4 = x3 + x2 = 21, via EX/MEM forward
+        remu,                 # x5 = 2
+        ADDI(7, 0, -14),
+        div,                  # x6 = -2
+        EBREAK(),
+    ]
+    rets, _ = await _run(dut, program, max_cycles=220)
+    [r_divu] = _by_insn(rets, divu)
+    [r_add] = _by_insn(rets, add)
+    [r_remu] = _by_insn(rets, remu)
+    [r_div] = _by_insn(rets, div)
+
+    assert r_divu["rd"] == 3 and r_divu["rd_wdata"] == 14
+    assert r_divu["rs1_rdata"] == 100 and r_divu["rs2_rdata"] == 7
+    assert r_add["rd"] == 4 and r_add["rd_wdata"] == 21
+    assert r_remu["rd"] == 5 and r_remu["rd_wdata"] == 2
+    assert r_div["rd"] == 6 and r_div["rd_wdata"] == 0xFFFFFFFE
+    orders = [r["order"] for r in rets]
+    assert orders == list(range(len(orders))), f"order not monotonic +1: {orders}"
 
 
 @cocotb.test()
@@ -347,7 +382,7 @@ def test_pipeline_runner():
         sources=[
             "core_pkg.sv",
             "alu.sv", "decoder.sv", "imm_gen.sv", "reg_file.sv",
-            "if_stage.sv", "id_stage.sv", "ex_stage.sv",
+            "if_stage.sv", "id_stage.sv", "div_unit.sv", "ex_stage.sv",
             "mem_stage.sv", "wb_stage.sv",
             "hazard_unit.sv", "forward_unit.sv",
             "core.sv",

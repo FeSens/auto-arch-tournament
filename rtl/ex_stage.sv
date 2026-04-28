@@ -23,6 +23,7 @@ module ex_stage (
   input  logic [31:0]        fwd_ex_mem,    // EX/MEM.alu_result (registered)
   input  logic [31:0]        fwd_mem_wb,    // WB-stage write-data mux output
   output ex_mem_t  out,
+  output logic               ex_long_busy,
   output logic               redirect,
   output logic [31:0]        redirect_target
 );
@@ -58,6 +59,51 @@ module ex_stage (
     .a   (alu_a),
     .b   (alu_b),
     .out (alu_result)
+  );
+
+  // ── Cold divide/remainder unit ────────────────────────────────────────
+  logic is_div_op;
+  logic div_request;
+  logic div_start;
+  logic div_busy;
+  logic div_done;
+  logic [31:0] div_result_w;
+  logic        div_active_q;
+  logic        div_result_valid_q;
+  logic [31:0] div_result_q;
+  /* verilator lint_off UNUSEDSIGNAL */
+  id_ex_t      div_in_q;
+  /* verilator lint_on UNUSEDSIGNAL */
+  logic [31:0] div_rs1_q;
+  logic [31:0] div_rs2_q;
+  logic        div_complete;
+  logic [31:0] div_result_selected;
+
+  always_comb begin
+    is_div_op   = (in.ctrl.alu_op == ALU_DIV)
+               || (in.ctrl.alu_op == ALU_DIVU)
+               || (in.ctrl.alu_op == ALU_REM)
+               || (in.ctrl.alu_op == ALU_REMU);
+    div_request = in.valid && is_div_op && !in.ctrl.is_illegal && !div_active_q;
+    div_start   = div_request && !stall;
+    div_complete = div_active_q && (div_result_valid_q || div_done);
+    div_result_selected = div_result_valid_q ? div_result_q : div_result_w;
+    // Asserted on the launch cycle and every busy cycle. It deasserts on the
+    // completion cycle so IF/ID can advance while the completed DIV enters
+    // EX/MEM.
+    ex_long_busy = div_start || div_busy || (div_active_q && !div_complete);
+  end
+
+  div_unit u_div (
+    .clock  (clock),
+    .reset  (reset),
+    .start  (div_start),
+    .op     (in.ctrl.alu_op),
+    .a      (alu_a),
+    .b      (alu_b),
+    .busy   (div_busy),
+    .done   (div_done),
+    .result (div_result_w)
   );
 
   // ── Branch resolve ────────────────────────────────────────────────────
@@ -138,11 +184,56 @@ module ex_stage (
 
   always_ff @(posedge clock) begin
     if (reset) begin
+      div_active_q       <= 1'b0;
+      div_result_valid_q <= 1'b0;
+      div_result_q       <= 32'b0;
+      div_in_q           <= '0;
+      div_rs1_q          <= 32'b0;
+      div_rs2_q          <= 32'b0;
+    end else begin
+      if (div_start) begin
+        div_active_q       <= 1'b1;
+        div_result_valid_q <= 1'b0;
+        div_result_q       <= 32'b0;
+        div_in_q           <= in;
+        div_rs1_q          <= rs1;
+        div_rs2_q          <= rs2;
+      end else if (div_complete && !stall) begin
+        div_active_q       <= 1'b0;
+        div_result_valid_q <= 1'b0;
+      end else if (div_done && div_active_q) begin
+        div_result_q       <= div_result_w;
+        div_result_valid_q <= 1'b1;
+      end
+    end
+  end
+
+  always_ff @(posedge clock) begin
+    if (reset) begin
       reg_q <= '0;
     end else if (stall) begin
       // dmem stall: hold the EX/MEM register so the in-flight LOAD/STORE
       // stays in MEM stage waiting on the bus.
       reg_q <= reg_q;
+    end else if (div_complete) begin
+      reg_q.pc            <= div_in_q.pc;
+      reg_q.alu_result    <= div_result_selected;
+      reg_q.write_data    <= div_rs2_q;
+      reg_q.rd            <= div_in_q.rd;
+      reg_q.rs1_addr      <= div_in_q.rs1_addr;
+      reg_q.rs2_addr      <= div_in_q.rs2_addr;
+      reg_q.rs1_val       <= div_rs1_q;
+      reg_q.rs2_val       <= div_rs2_q;
+      reg_q.pc_next       <= div_in_q.pc + 32'd4;
+      reg_q.branch_taken  <= 1'b0;
+      reg_q.branch_target <= div_in_q.pc + div_in_q.imm;
+      reg_q.ctrl          <= div_in_q.ctrl;
+      reg_q.instr         <= div_in_q.instr;
+      reg_q.valid         <= div_in_q.valid;
+    end else if (div_start || div_active_q) begin
+      // A divide-class instruction occupies EX until completion. EX/MEM gets
+      // bubbles while the unit is busy so older instructions are not replayed.
+      reg_q <= '0;
     end else begin
       reg_q.pc            <= in.pc;
       // For JAL/JALR, the rd_wdata is PC+4 (return address), not the ALU's

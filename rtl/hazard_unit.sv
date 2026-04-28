@@ -27,6 +27,7 @@ module hazard_unit (
   // memory request is NOT serviced this cycle.
   input  logic       imem_ready,
   input  logic       dmem_ready,
+  input  logic       ex_long_busy,      // EX has a multi-cycle op occupying ID/EX
   // EX/MEM has a memory op in flight (the LOAD/STORE the dmem stall
   // would actually be holding up). Computed at top level from the
   // EX/MEM register's ctrl.mem_read | ctrl.mem_write.
@@ -54,7 +55,7 @@ module hazard_unit (
     dmem_stall = !dmem_ready && ex_mem_mem_op;
 
     // PC reg holds on any stall reason.
-    stall_if      = load_use_hazard || imem_stall || dmem_stall;
+    stall_if      = load_use_hazard || imem_stall || dmem_stall || ex_long_busy;
     // IF/ID combinational payload: NOP whenever we wouldn't have a valid
     // instruction this cycle (mispredict/jump recovery, or imem didn't
     // deliver).
@@ -67,7 +68,7 @@ module hazard_unit (
     // dmem_stall takes precedence over load_use's bubble: re-evaluate
     // load_use next cycle when the bus unblocks. flush_id is 1 only when
     // we want bubble (not hold).
-    stall_id      = dmem_stall || load_use_hazard;
+    stall_id      = dmem_stall || load_use_hazard || ex_long_busy;
     flush_id      = (load_use_hazard || redirect) && !dmem_stall;
     // EX/MEM register: holds on dmem_stall (LOAD waits in MEM until the
     // bus delivers).
