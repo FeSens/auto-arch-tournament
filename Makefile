@@ -18,21 +18,46 @@ help:
 	@echo "  make fpga       — FPGA fitness eval (3-seed nextpnr median Fmax + CoreMark cycles)"
 	@echo "  make next       — one orchestrator round (hypothesize -> implement -> eval)"
 	@echo "                    flags: K=<slots> AGENT=codex|claude"
-	@echo "  make loop N=10  — N orchestrator rounds"
-	@echo "                    flags: K=<slots> AGENT=codex|claude"
+	@echo "                           BRANCH=<name> BASELINE=<gitref>"
+	@echo "                           COREMARK=<iter/s> LUT=<count>"
+	@echo "  make loop N=10  — N orchestrator rounds (same flags as next)"
 	@echo "  make report     — print experiment summary"
 	@echo "  make bench      — build selftest.elf / coremark.elf"
 	@echo "  make clean      — remove build artifacts and worktrees"
 
 # Orchestrator knobs (pass-through to tools.orchestrator):
-#   N      — number of rounds for `make loop` (default 10).
-#   K      — tournament size, slots per round (default 1 = sequential).
-#   AGENT  — codex (default) or claude. Honors a pre-existing
-#            AGENT_PROVIDER env var if AGENT isn't set on the make
-#            command line.
-N     ?= 10
-K     ?= 1
-AGENT ?= $(or $(AGENT_PROVIDER),codex)
+#   N        — number of rounds for `make loop` (default 10).
+#   K        — tournament size, slots per round (default 1 = sequential).
+#   AGENT    — codex (default) or claude. Honors a pre-existing
+#              AGENT_PROVIDER env var if AGENT isn't set on the make
+#              command line.
+#   BRANCH   — hypothesis branch name (e.g. 'feat/cache-l1').
+#   BASELINE — git ref for baseline RTL (e.g. 'main').
+#   COREMARK — target CoreMark iterations/sec (e.g. '370').
+#   LUT      — target LUT count (e.g. '3000').
+N        ?= 10
+K        ?= 1
+AGENT    ?= $(or $(AGENT_PROVIDER),codex)
+BRANCH   ?=
+BASELINE ?=
+COREMARK ?=
+LUT      ?=
+
+# Compose optional CLI flags for the orchestrator. Empty vars produce
+# empty strings so the orchestrator falls back to its defaults.
+ORCH_FLAGS  = --iterations $(N) --tournament-size $(K)
+ifneq ($(strip $(BRANCH)),)
+  ORCH_FLAGS += --branch $(BRANCH)
+endif
+ifneq ($(strip $(BASELINE)),)
+  ORCH_FLAGS += --baseline $(BASELINE)
+endif
+ifneq ($(strip $(COREMARK)),)
+  ORCH_FLAGS += --coremark-target $(COREMARK)
+endif
+ifneq ($(strip $(LUT)),)
+  ORCH_FLAGS += --lut-target $(LUT)
+endif
 
 # verilator lint over rtl/. Empty rtl/ is fine — phase 0 acceptance.
 # -Wno-MULTITOP: until phase 2's core.sv lands and instantiates everything,
@@ -85,10 +110,10 @@ generated/synth.json: $(wildcard rtl/*.sv) fpga/core_bench.sv fpga/scripts/synth
 	yosys -c fpga/scripts/synth.tcl
 
 next:
-	AGENT_PROVIDER=$(AGENT) python3 -m tools.orchestrator --iterations 1 --tournament-size $(K)
+	AGENT_PROVIDER=$(AGENT) python3 -m tools.orchestrator $(subst --iterations $(N),--iterations 1,$(ORCH_FLAGS))
 
 loop:
-	AGENT_PROVIDER=$(AGENT) python3 -m tools.orchestrator --iterations $(N) --tournament-size $(K)
+	AGENT_PROVIDER=$(AGENT) python3 -m tools.orchestrator $(ORCH_FLAGS)
 
 report:
 	python3 -m tools.orchestrator --report
