@@ -111,3 +111,53 @@ def test_phase_gate_serializes_under_capacity_one():
         t.join()
 
     assert overlap['max'] == 1, "phase_gate('formal') failed to serialize"
+
+
+# ── target-aware pick_winner ───────────────────────────────────────────────
+def _entry(slot, fitness=None, lut4=None, outcome="regression"):
+    return {"slot": slot, "fitness": fitness, "lut4": lut4, "outcome": outcome}
+
+
+def test_pick_winner_no_targets_legacy_behavior():
+    from tools.tournament import pick_winner
+    entries = [_entry(0, 290), _entry(1, 320), _entry(2, 310)]
+    w = pick_winner(entries, current_best=300)
+    assert w["slot"] == 1
+
+
+def test_pick_winner_dual_target_phase1():
+    # Targets (300, 3000). Champion (200, 5000). Slot 0 closes both
+    # deficits a bit; slot 1 adds LUT but no perf benefit.
+    from tools.tournament import pick_winner
+    entries = [
+        _entry(0, fitness=290, lut4=4500),
+        _entry(1, fitness=205, lut4=5500),
+    ]
+    w = pick_winner(entries, current_best=200, current_lut=5000,
+                    coremark_target=300, lut_target=3000)
+    assert w is not None and w["slot"] == 0
+
+
+def test_pick_winner_dual_target_rejects_no_progress():
+    # Phase 2 (both targets met). Slot 0 trades perf for LUT — strict Pareto
+    # rejects. Slot 1 makes things worse on both axes.
+    from tools.tournament import pick_winner
+    entries = [
+        _entry(0, fitness=340, lut4=2950),
+        _entry(1, fitness=300, lut4=3000),
+    ]
+    w = pick_winner(entries, current_best=320, current_lut=2900,
+                    coremark_target=300, lut_target=3000)
+    assert w is None
+
+
+def test_pick_winner_dual_target_phase2_strict_dominance():
+    # Phase 2, slot 0 strictly dominates (perf up, lut down).
+    from tools.tournament import pick_winner
+    entries = [
+        _entry(0, fitness=340, lut4=2800),
+        _entry(1, fitness=320, lut4=2900),  # equal — fails strict
+    ]
+    w = pick_winner(entries, current_best=320, current_lut=2900,
+                    coremark_target=300, lut_target=3000)
+    assert w is not None and w["slot"] == 0

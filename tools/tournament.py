@@ -53,24 +53,42 @@ def allocate_round_ids(
     ]
 
 
-def pick_winner(entries: list[dict], current_best: float) -> Optional[dict]:
-    """Return the round's winner: highest-fitness slot that beat current_best.
+def pick_winner(entries: list[dict],
+                current_best: float,
+                current_lut: float | None = None,
+                coremark_target: float | None = None,
+                lut_target: float | None = None) -> Optional[dict]:
+    """Return the round's winner via the accept-rule module.
 
-    Slots without a fitness number (broken / placement_failed / cosim_failed)
-    are ignored. Returns None if no slot cleared the bar — in that case the
-    round produces no accept and the cumulative champion stays where it was.
+    With no targets set, behavior is identical to the legacy "highest
+    fitness > current_best" rule. With targets set, accept() is called
+    per-candidate with (perf, lut) tuples.
+
+    Tie-break: among candidates that all pass accept, prefer the one
+    that maximizes (fitness, -lut4, -slot). This degenerates to the
+    legacy "highest fitness, lowest slot" tie-break when LUT is
+    unconstrained.
     """
-    candidates = [
-        e for e in entries
-        if isinstance(e.get("fitness"), (int, float))
-        and e["fitness"] > current_best
-    ]
+    from tools.accept_rule import accept
+
+    valid = [e for e in entries
+             if isinstance(e.get("fitness"), (int, float))]
+    if not valid:
+        return None
+
+    old = (current_best, current_lut)
+
+    candidates = []
+    for e in valid:
+        new = (e["fitness"], e.get("lut4"))
+        if accept(old, new,
+                  coremark_target=coremark_target, lut_target=lut_target):
+            candidates.append(e)
+
     if not candidates:
         return None
-    # Tie-break: highest fitness, lowest slot wins. Without this, equal-fitness
-    # slots would resolve in caller-supplied order — which today is slot-sorted
-    # but shouldn't be a load-bearing contract of the helper.
-    return max(candidates, key=lambda e: (e["fitness"], -e["slot"]))
+    return max(candidates,
+               key=lambda e: (e["fitness"], -(e.get("lut4") or 0), -e["slot"]))
 
 
 # Per-phase capacity. Two distinct reasons phases are gated:
@@ -128,8 +146,10 @@ def run_slot(
     allowed_yaml_ids: list[str],
     log_tail: list,
     current_best: float,
+    current_lut: float | None,
     baseline: float,
     fixed_hyp_path: str | None,
+    targets: dict | None,
 ) -> dict:
     """Run one tournament slot end-to-end. Returns a draft log entry.
 
@@ -159,11 +179,17 @@ def run_slot(
         hyp_path = fixed_hyp_path
     else:
         try:
+            current_state = (
+                {"coremark": current_best, "lut": current_lut}
+                if (targets and current_best > 0) else None
+            )
             hyp_path = run_hypothesis_agent(
                 log_tail, current_best, baseline,
                 hyp_id=hyp_id,
                 allowed_yaml_ids=allowed_yaml_ids,
                 category_hint=category,
+                targets=targets,
+                current_state=current_state,
             )
         except Exception as e:
             return {
@@ -273,6 +299,8 @@ def run_tournament_round(
     tournament_size: int,
     log: list,
     fixed_hyp_paths: list[str] | None = None,
+    targets: dict | None = None,
+    target_branch: str = "main",
 ) -> list[dict]:
     """Run one round of N slots in parallel; return list of log entries.
 
@@ -284,12 +312,14 @@ def run_tournament_round(
     """
     from tools.orchestrator import (
         current_best as _current_best,
+        current_lut as _current_lut,
         baseline_fitness as _baseline,
         append_log,
     )
     from tools.worktree import accept_worktree, destroy_worktree
 
     best     = _current_best(log)
+    cur_lut  = _current_lut(log)
     baseline = _baseline(log)
     print(f"\n{'='*60}\nRound {round_id}  |  slots={tournament_size}  |  current best={best:.2f}\n{'='*60}", flush=True)
 
@@ -320,7 +350,8 @@ def run_tournament_round(
         futures = {
             pool.submit(
                 run_slot, slot, hyp_ids[slot], hyp_ids,
-                log, best, baseline, fixed_hyp_paths[slot],
+                log, best, cur_lut, baseline, fixed_hyp_paths[slot],
+                targets,
             ): slot
             for slot in range(tournament_size)
         }
@@ -334,7 +365,13 @@ def run_tournament_round(
     entries.sort(key=lambda e: e['slot'])
 
     # Winner pick: highest-fitness slot whose fitness > start-of-round best.
-    winner = pick_winner(entries, current_best=best)
+    winner = pick_winner(
+        entries,
+        current_best=best,
+        current_lut=cur_lut,
+        coremark_target=(targets or {}).get("coremark"),
+        lut_target=(targets or {}).get("lut"),
+    )
 
     # Apply outcomes + accept/destroy worktrees. Sequential — the coordinator
     # thread is the ONLY thread mutating main-repo git state from here on.
@@ -344,7 +381,7 @@ def run_tournament_round(
             msg = (f"{entry['id']}: {entry['title']} "
                    f"(+{entry.get('delta_pct', 0):.1f}%)")
             try:
-                accept_worktree(entry['id'], msg)
+                accept_worktree(entry['id'], msg, target_branch=target_branch)
             except Exception as e:
                 # Worktree merge failed (shouldn't happen with ff-only on a
                 # single-coordinator process). Downgrade to regression so the
