@@ -29,14 +29,16 @@
   localparam logic [4:0] ALU_SRL    = 5'd8;
   localparam logic [4:0] ALU_SRA    = 5'd9;
   localparam logic [4:0] ALU_LUI    = 5'd10;
-  localparam logic [4:0] ALU_MUL    = 5'd11;
-  localparam logic [4:0] ALU_MULH   = 5'd12;
-  localparam logic [4:0] ALU_MULHU  = 5'd13;
-  localparam logic [4:0] ALU_MULHSU = 5'd14;
-  localparam logic [4:0] ALU_DIV    = 5'd15;
-  localparam logic [4:0] ALU_DIVU   = 5'd16;
-  localparam logic [4:0] ALU_REM    = 5'd17;
-  localparam logic [4:0] ALU_REMU   = 5'd18;
+  // RV32M ops use op[4]=1 and op[2:0]=funct3, leaving the common RV32I
+  // one-cycle path behind op[4]=0.
+  localparam logic [4:0] ALU_MUL    = 5'b10000;
+  localparam logic [4:0] ALU_MULH   = 5'b10001;
+  localparam logic [4:0] ALU_MULHSU = 5'b10010;
+  localparam logic [4:0] ALU_MULHU  = 5'b10011;
+  localparam logic [4:0] ALU_DIV    = 5'b10100;
+  localparam logic [4:0] ALU_DIVU   = 5'b10101;
+  localparam logic [4:0] ALU_REM    = 5'b10110;
+  localparam logic [4:0] ALU_REMU   = 5'b10111;
 
   // ── Branch operations (encoded = funct3 of BRANCH opcode) ───────────────
   // Phase 1 only references BR_BEQ (decoder default). The rest are
