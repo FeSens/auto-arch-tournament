@@ -50,6 +50,9 @@ def accept_worktree(hypothesis_id: str,
     path = str((WORKTREE_BASE / hypothesis_id).resolve())
     # Commit any uncommitted changes in worktree. Stage exactly the
     # paths the agent is permitted to modify (rtl/ + test/test_*.py).
+    # The orchestrator's sandbox check runs BEFORE this is reached, so
+    # in practice these are the only dirty paths anyway. -A picks up
+    # adds, modifies, and deletes inside each prefix.
     subprocess.run(["git", "-C", path, "add", "-A", "rtl/"], check=True)
     test_changes = subprocess.run(
         ["git", "-C", path, "ls-files", "--modified", "--others", "--exclude-standard",
