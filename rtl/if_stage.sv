@@ -11,9 +11,8 @@
 // a spurious load-use stall after mispredict recovery.
 //
 // A decode-light static predictor recognizes legal B-type conditional
-// branches with a negative immediate and predicts them taken, provided the
-// predicted target is word-aligned. JAL/JALR remain unpredicted and resolve
-// in EX.
+// branches with a negative immediate and direct JALs, provided the predicted
+// target is word-aligned. JALR remains unpredicted and resolves in EX.
 //
 // Latency:        PC-reg update is synchronous; output is combinational.
 // RVFI fields:    feeds pc_rdata (via ID/EX/MEM/WB) and pc_wdata (via
@@ -37,27 +36,42 @@ module if_stage (
   logic [31:0] next_pc;
   logic [31:0] pc_plus4;
   logic [31:0] branch_imm;
+  logic [31:0] jal_imm;
+  logic [31:0] branch_target;
+  logic [31:0] jal_target;
   logic [31:0] predicted_target;
   logic        fetch_kill;
   logic        predict_enable;
   logic        branch_opcode;
   logic        branch_funct_legal;
+  logic        branch_predict_taken;
+  logic        jal_opcode;
+  logic        jal_predict_taken;
   logic        predicted_taken;
 
   always_comb begin
     pc_plus4           = pc + 32'd4;
     branch_imm         = {{19{imem_data[31]}}, imem_data[31], imem_data[7],
                           imem_data[30:25], imem_data[11:8], 1'b0};
-    predicted_target   = pc + branch_imm;
+    jal_imm            = {{11{imem_data[31]}}, imem_data[31], imem_data[19:12],
+                          imem_data[20], imem_data[30:21], 1'b0};
+    branch_target      = pc + branch_imm;
+    jal_target         = pc + jal_imm;
     fetch_kill         = reset || flush || redirect;
     predict_enable     = !fetch_kill && !stall;
     branch_opcode      = (imem_data[6:0] == 7'b1100011);
     branch_funct_legal = (imem_data[14:12] != 3'd2) && (imem_data[14:12] != 3'd3);
-    predicted_taken    = predict_enable
+    branch_predict_taken = predict_enable
                        && branch_opcode
                        && branch_funct_legal
                        && imem_data[31]
-                       && (predicted_target[1:0] == 2'b00);
+                       && (branch_target[1:0] == 2'b00);
+    jal_opcode         = (imem_data[6:0] == 7'b1101111);
+    jal_predict_taken  = predict_enable
+                       && jal_opcode
+                       && (jal_target[1:0] == 2'b00);
+    predicted_taken    = branch_predict_taken || jal_predict_taken;
+    predicted_target   = jal_predict_taken ? jal_target : branch_target;
 
     next_pc = redirect        ? redirect_target :
               predicted_taken ? predicted_target :

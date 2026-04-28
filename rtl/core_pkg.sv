@@ -72,6 +72,8 @@
   } ctrl_t;
 
   // IF -> ID combinational bundle (no register; PC reg sits in if_stage).
+  // predicted_* is generic next-PC prediction metadata for any IF-resolved
+  // control-flow instruction, not branch-only state.
   typedef struct packed {
     logic [31:0] pc;
     logic [31:0] instr;
@@ -81,6 +83,7 @@
   } if_id_t;
 
   // ID/EX register payload.
+  // predicted_* carries the IF next-PC prediction into EX for validation.
   typedef struct packed {
     logic [31:0] pc;
     logic [31:0] rs1_val;
