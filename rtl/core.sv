@@ -6,7 +6,7 @@
 //   |    |     ^
 //   |    +-----+    forward_unit drives EX-stage rs1/rs2 muxes
 //   |               from EX/MEM and MEM/WB
-//   +- stall <- hazard_unit (load-use)
+//   +- stall <- hazard_unit (load-use / precise MEM wait)
 //
 // IO port names use the `io_*` Chisel-emit prefix so the existing
 // formal/wrapper.sv and chisel/test/cosim/main.cpp bindings carry
@@ -39,9 +39,9 @@ module core (
   output logic [3:0]  io_dmemWEn,
   output logic        io_dmemREn,
   // dmem bus backpressure. Drive 1 for zero-wait. Drive 0 to model
-  // dStall — when there is a memory op in EX/MEM, the entire pipeline
-  // freezes back to MEM; MEM/WB captures a bubble; the LOAD/STORE waits
-  // until the bus delivers.
+  // dStall. Loads and nonbufferable stores wait in MEM until the bus
+  // delivers; aligned normal-RAM stores may retire into the one-deep
+  // pending-store slot and drain later.
   input  logic        io_dmemReady,
   // RVFI — 2-channel retirement port set (NRET=2 contract).
   // Channel 0: older / sole retirement; channel 1: younger.
@@ -102,6 +102,21 @@ module core (
   logic       stall_ex_mem, hold_mem_wb;
   logic       ex_long_busy;
   logic [1:0] fwd_rs1_sel, fwd_rs2_sel;
+
+  // Live MEM-stage dmem request plus the one-deep pending-store slot.
+  logic [31:0] live_dmem_addr;
+  logic [31:0] live_dmem_wdata;
+  logic [3:0]  live_dmem_wen;
+  logic        live_dmem_ren;
+  logic        store_slot_valid;
+  logic        store_slot_enqueue;
+  logic [31:0] store_slot_enqueue_addr;
+  logic [31:0] store_slot_enqueue_wdata;
+  logic [3:0]  store_slot_enqueue_wmask;
+  logic [31:0] store_slot_drain_addr;
+  logic [31:0] store_slot_drain_wdata;
+  logic [3:0]  store_slot_drain_wmask;
+  logic        mem_wait;
 
   // EX redirect
   logic        redirect;
@@ -172,18 +187,53 @@ module core (
   );
 
   // ── MEM ───────────────────────────────────────────────────────────────
-  mem_stage u_mem (
-    .clock      (clock),
-    .reset      (reset),
-    .hold_wb    (hold_mem_wb),
-    .in         (ex_mem_w),
-    .dmem_addr  (io_dmemAddr),
-    .dmem_wdata (io_dmemWData),
-    .dmem_rdata (io_dmemRData),
-    .dmem_wen   (io_dmemWEn),
-    .dmem_ren   (io_dmemREn),
-    .out        (mem_wb_w)
+  store_slot u_store_slot (
+    .clock         (clock),
+    .reset         (reset),
+    .enqueue       (store_slot_enqueue),
+    .enqueue_addr  (store_slot_enqueue_addr),
+    .enqueue_wdata (store_slot_enqueue_wdata),
+    .enqueue_wmask (store_slot_enqueue_wmask),
+    .drain_ready   (io_dmemReady),
+    .valid         (store_slot_valid),
+    .drain_addr    (store_slot_drain_addr),
+    .drain_wdata   (store_slot_drain_wdata),
+    .drain_wmask   (store_slot_drain_wmask)
   );
+
+  mem_stage u_mem (
+    .clock              (clock),
+    .reset              (reset),
+    .hold_wb            (hold_mem_wb),
+    .dmem_ready         (io_dmemReady),
+    .store_slot_valid   (store_slot_valid),
+    .in                 (ex_mem_w),
+    .dmem_addr          (live_dmem_addr),
+    .dmem_wdata         (live_dmem_wdata),
+    .dmem_rdata         (io_dmemRData),
+    .dmem_wen           (live_dmem_wen),
+    .dmem_ren           (live_dmem_ren),
+    .store_slot_enqueue (store_slot_enqueue),
+    .store_slot_addr    (store_slot_enqueue_addr),
+    .store_slot_wdata   (store_slot_enqueue_wdata),
+    .store_slot_wmask   (store_slot_enqueue_wmask),
+    .mem_wait           (mem_wait),
+    .out                (mem_wb_w)
+  );
+
+  always_comb begin
+    if (store_slot_valid) begin
+      io_dmemAddr  = store_slot_drain_addr;
+      io_dmemWData = store_slot_drain_wdata;
+      io_dmemWEn   = store_slot_drain_wmask;
+      io_dmemREn   = 1'b0;
+    end else begin
+      io_dmemAddr  = live_dmem_addr;
+      io_dmemWData = live_dmem_wdata;
+      io_dmemWEn   = live_dmem_wen;
+      io_dmemREn   = live_dmem_ren;
+    end
+  end
 
   // ── WB ────────────────────────────────────────────────────────────────
   wb_stage u_wb (
@@ -201,9 +251,8 @@ module core (
     .if_id_rs2      (if_id_w.instr[24:20]),
     .redirect       (redirect),
     .imem_ready     (io_imemReady),
-    .dmem_ready     (io_dmemReady),
     .ex_long_busy   (ex_long_busy),
-    .ex_mem_mem_op  (ex_mem_w.ctrl.mem_read | ex_mem_w.ctrl.mem_write),
+    .mem_wait       (mem_wait),
     .stall_if       (stall_if),
     .stall_id       (stall_id),
     .flush_if       (flush_if),

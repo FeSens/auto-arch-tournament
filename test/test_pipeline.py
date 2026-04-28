@@ -383,7 +383,7 @@ def test_pipeline_runner():
             "core_pkg.sv",
             "alu.sv", "decoder.sv", "imm_gen.sv", "reg_file.sv",
             "if_stage.sv", "id_stage.sv", "div_unit.sv", "ex_stage.sv",
-            "mem_stage.sv", "wb_stage.sv",
+            "mem_stage.sv", "store_slot.sv", "wb_stage.sv",
             "hazard_unit.sv", "forward_unit.sv",
             "core.sv",
         ],
