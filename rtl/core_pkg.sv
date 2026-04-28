@@ -75,9 +75,10 @@
 
   // IF -> ID combinational bundle (no register; PC reg sits in if_stage).
   // instr may be the live imem word or a word supplied by IF's registered
-  // lookahead replay predictor during an external imem stall. Replay table
-  // entries are tagged by high PC bits plus the direct-mapped pc[9:2] index;
-  // tag/instruction payload arrays are resetless behind replay_valid bits.
+  // lookahead replay predictor during an external imem stall. The replay
+  // predictor uses two direct-mapped 128-entry banks indexed by pc[8:2],
+  // tagged by pc[31:9], and replaced with a per-index MRU bit. Tag and
+  // instruction payload arrays are resetless behind bank valid bits.
   // predicted_* is generic next-PC prediction metadata for any IF-resolved
   // control-flow instruction, not branch-only state.
   typedef struct packed {
