@@ -34,6 +34,14 @@ from tools.tournament import run_tournament_round
 # imports always resolve to the in-memory copy.
 sys.modules.setdefault('tools.orchestrator', sys.modules[__name__])
 
+# Pre-import sub-modules that are imported lazily elsewhere (e.g.,
+# tools.tournament's `from tools.accept_rule import accept` inside
+# pick_winner). This forces them into sys.modules at orchestrator
+# startup, so any later git checkout that removes the on-disk file
+# (e.g., when forking a branch from a tag predating the file's commit)
+# doesn't break the lazy import.
+import tools.accept_rule  # noqa: F401
+
 LOG_PATH       = Path("experiments/log.jsonl")
 PLOT_PATH      = Path("experiments/progress.png")
 HYP_SCHEMA     = json.loads(Path("schemas/hypothesis.schema.json").read_text())
