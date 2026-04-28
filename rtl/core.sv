@@ -273,15 +273,46 @@ module core (
   );
 
   // ── RVFI ──────────────────────────────────────────────────────────────
-  // The MEM/WB register is the retirement boundary. rvfi_order increments
-  // every cycle rvfi_valid is high; CLAUDE.md invariant 4 (riscv-formal
-  // unique-check) requires strict +1.
-  logic [63:0] rvfi_order_q;
+  // The MEM/WB register is the retirement boundary. rvfi_order is an exact
+  // segmented +1 counter; CLAUDE.md invariant 4 (riscv-formal unique-check)
+  // requires strict +1 across visible retirements.
+  logic [15:0] rvfi_order_lo_q;
+  logic [15:0] rvfi_order_mid_lo_q;
+  logic [15:0] rvfi_order_mid_hi_q;
+  logic [15:0] rvfi_order_hi_q;
+  logic        rvfi_order_carry_lo;
+  logic        rvfi_order_carry_mid_lo;
+  logic        rvfi_order_carry_mid_hi;
   logic        rd_wen;
 
+  always_comb begin
+    rvfi_order_carry_lo     = mem_wb_w.valid && (rvfi_order_lo_q     == 16'hffff);
+    rvfi_order_carry_mid_lo = rvfi_order_carry_lo
+                           && (rvfi_order_mid_lo_q == 16'hffff);
+    rvfi_order_carry_mid_hi = rvfi_order_carry_mid_lo
+                           && (rvfi_order_mid_hi_q == 16'hffff);
+  end
+
   always_ff @(posedge clock) begin
-    if (reset)                rvfi_order_q <= 64'b0;
-    else if (mem_wb_w.valid)  rvfi_order_q <= rvfi_order_q + 64'b1;
+    if (reset) begin
+      rvfi_order_lo_q     <= 16'b0;
+      rvfi_order_mid_lo_q <= 16'b0;
+      rvfi_order_mid_hi_q <= 16'b0;
+      rvfi_order_hi_q     <= 16'b0;
+    end else begin
+      if (mem_wb_w.valid) begin
+        rvfi_order_lo_q <= rvfi_order_lo_q + 16'd1;
+      end
+      if (rvfi_order_carry_lo) begin
+        rvfi_order_mid_lo_q <= rvfi_order_mid_lo_q + 16'd1;
+      end
+      if (rvfi_order_carry_mid_lo) begin
+        rvfi_order_mid_hi_q <= rvfi_order_mid_hi_q + 16'd1;
+      end
+      if (rvfi_order_carry_mid_hi) begin
+        rvfi_order_hi_q <= rvfi_order_hi_q + 16'd1;
+      end
+    end
   end
 
   always_comb begin
@@ -289,7 +320,8 @@ module core (
 
     // Channel 0: the only retirement channel for the single-issue baseline.
     io_rvfi_valid_0     = mem_wb_w.valid;
-    io_rvfi_order_0     = rvfi_order_q;
+    io_rvfi_order_0     = {rvfi_order_hi_q, rvfi_order_mid_hi_q,
+                           rvfi_order_mid_lo_q, rvfi_order_lo_q};
     io_rvfi_insn_0      = mem_wb_w.instr;
     io_rvfi_trap_0      = mem_wb_w.ctrl.is_illegal;
     io_rvfi_halt_0      = 1'b0;
