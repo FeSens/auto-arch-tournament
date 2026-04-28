@@ -101,6 +101,7 @@ module core (
   logic       stall_if, stall_id, flush_if, flush_id;
   logic       stall_ex_mem, hold_mem_wb;
   logic       ex_long_busy;
+  logic       if_fetch_ready;
   logic [1:0] fwd_rs1_sel, fwd_rs2_sel;
 
   // Live MEM-stage dmem request plus the one-deep pending-store slot.
@@ -141,6 +142,8 @@ module core (
     .redirect_target (redirect_target),
     .imem_addr       (io_imemAddr),
     .imem_data       (io_imemData),
+    .imem_ready      (io_imemReady),
+    .fetch_ready     (if_fetch_ready),
     .out             (if_id_w)
   );
 
@@ -250,7 +253,7 @@ module core (
     .if_id_rs1      (if_id_w.instr[19:15]),
     .if_id_rs2      (if_id_w.instr[24:20]),
     .redirect       (redirect),
-    .imem_ready     (io_imemReady),
+    .imem_ready     (if_fetch_ready),
     .ex_long_busy   (ex_long_busy),
     .mem_wait       (mem_wait),
     .stall_if       (stall_if),

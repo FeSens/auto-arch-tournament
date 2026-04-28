@@ -22,9 +22,8 @@ module hazard_unit (
   input  logic [4:0] if_id_rs1,         // IF/ID instr[19:15]  (next rs1)
   input  logic [4:0] if_id_rs2,         // IF/ID instr[24:20]  (next rs2)
   input  logic       redirect,          // EX branch mispredict or jump redirect
-  // Bus backpressure (default-1 in zero-wait testbenches; VexRiscv-style
-  // random ~22% stall in vex_main.cpp). imem_ready low means fetch did not
-  // deliver this cycle.
+  // Effective fetch availability from IF. It is high for a live imem word
+  // or for a registered replay hit that can stand in for an external stall.
   input  logic       imem_ready,
   input  logic       ex_long_busy,      // EX has a multi-cycle op occupying ID/EX
   // MEM-stage precise wait: live load/nonbufferable store waiting on dmem,
