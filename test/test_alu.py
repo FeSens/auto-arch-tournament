@@ -1,16 +1,13 @@
-"""Unit tests for rtl/alu.sv. Mirrors chisel/test/src/ALUSpec.scala 1:1.
+"""Unit tests for rtl/alu.sv.
 
-After hyp-20260427-002, DIV/DIVU/REM/REMU run on a multi-cycle iterative
-divider exposed via a start_div / div_busy / div_done handshake. Edge
-cases (b == 0; signed INT_MIN / -1) still complete combinationally —
-the ALU short-circuits the FSM and pulses div_done in the same cycle
-start_div is asserted.
+The ALU is purely combinational (RV32IM). MUL / DIV / REM use the
+SystemVerilog `*`, `/`, `%` operators and resolve in zero cycles, so
+there is no clock, reset, or handshake on this module.
 """
 from __future__ import annotations
 
 import cocotb
-from cocotb.clock import Clock
-from cocotb.triggers import RisingEdge, Timer
+from cocotb.triggers import Timer
 
 from _helpers import (
     ALU_ADD, ALU_SUB, ALU_AND, ALU_OR, ALU_XOR,
@@ -22,31 +19,16 @@ from _helpers import (
 )
 
 MASK32 = 0xFFFFFFFF
-DIV_OPS = (ALU_DIV, ALU_DIVU, ALU_REM, ALU_REMU)
-# 33 cycles for a real iterative divide; some headroom for edge cases.
-DIV_TIMEOUT_CYCLES = 40
 
 
 async def _setup(dut):
-    """Start clock + reset divu FSM. Safe to call multiple times — each
-    @cocotb.test entry is a fresh simulation, so we always need the
-    clock and a clean reset before driving inputs.
-    """
-    cocotb.start_soon(Clock(dut.clock, 10, "ns").start())
-    dut.reset.value     = 1
-    dut.start_div.value = 0
-    dut.op.value        = 0
-    dut.a.value         = 0
-    dut.b.value         = 0
-    await RisingEdge(dut.clock)
-    await RisingEdge(dut.clock)
-    dut.reset.value = 0
-    await RisingEdge(dut.clock)
+    """No-op — the ALU has no clock or reset. Kept so each test entry can
+    `await _setup(dut)` for parity with other test files."""
+    return
 
 
 async def _check(dut, op, a, b, expected):
-    """Drive a non-div op and check the combinational result."""
-    dut.start_div.value = 0
+    """Drive op/a/b and check the combinational result."""
     dut.op.value = op
     dut.a.value  = a & MASK32
     dut.b.value  = b & MASK32
@@ -59,51 +41,9 @@ async def _check(dut, op, a, b, expected):
 
 
 async def _check_div(dut, op, a, b, expected):
-    """Drive a DIV/DIVU/REM/REMU op via the start/busy/done handshake.
-
-    Mirrors what ex_stage does: pulse start_div for one cycle, then
-    poll for div_done (with a cycle-bounded timeout). For edge cases the
-    pulse and the done both land combinationally before any clock edge.
-    """
-    assert op in DIV_OPS, f"_check_div called with non-div op {op}"
-
-    # Drive operands and start_div.
-    dut.op.value        = op
-    dut.a.value         = a & MASK32
-    dut.b.value         = b & MASK32
-    dut.start_div.value = 1
-    await Timer(1, "ns")  # let the combinational cone settle
-
-    # Edge cases (b == 0; signed INT_MIN / -1) finish in the same cycle
-    # start_div is asserted. Real divides take 33 cycles; poll up to
-    # DIV_TIMEOUT_CYCLES with a hard ceiling.
-    cycles = 0
-    while int(dut.div_done.value) == 0:
-        if cycles >= DIV_TIMEOUT_CYCLES:
-            raise AssertionError(
-                f"div_done never asserted within {DIV_TIMEOUT_CYCLES} cycles "
-                f"for op={op} a=0x{a & MASK32:08x} b=0x{b & MASK32:08x}"
-            )
-        await RisingEdge(dut.clock)
-        # Drop start_div after the first edge — the FSM has latched the
-        # operands on its IDLE→BUSY transition and start would otherwise
-        # re-trigger when divu returns to IDLE post-DONE.
-        dut.start_div.value = 0
-        await Timer(1, "ns")
-        cycles += 1
-
-    actual = int(dut.out.value) & MASK32
-
-    # Retire: drop start_div (idempotent for edge cases) and clock once
-    # so the divu FSM falls back to IDLE before the next test vector.
-    dut.start_div.value = 0
-    await RisingEdge(dut.clock)
-    await Timer(1, "ns")
-
-    assert actual == (expected & MASK32), (
-        f"op={op} a=0x{a & MASK32:08x} b=0x{b & MASK32:08x} "
-        f"expected=0x{expected & MASK32:08x} got=0x{actual:08x}"
-    )
+    """Combinational div/rem — alias for _check. Was a multi-cycle FSM
+    under hyp-20260427-002, reverted in 6688be7 (v2 reset)."""
+    await _check(dut, op, a, b, expected)
 
 
 @cocotb.test()
