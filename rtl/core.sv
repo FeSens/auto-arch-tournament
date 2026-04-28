@@ -10,21 +10,15 @@
 //
 // IO port names use the `io_*` Chisel-emit prefix so the existing
 // formal/wrapper.sv and chisel/test/cosim/main.cpp bindings carry
-// through byte-for-byte. RVFI port set is the 32 signals listed in
-// CLAUDE.md invariant 1.
+// through byte-for-byte. RVFI port set is the 2-channel set described
+// in CLAUDE.md invariant 1 (NRET=2 contract); V0 single-issue ties
+// channel 1 off.
 //
 // Latency:        full pipeline; instruction n retires at MEM/WB on
 //                 cycle n+4 (no hazards) or later (load-use stall,
 //                 redirect).
 // RVFI fields:    all of them — driven from the MEM/WB register and
 //                 the WB-stage write-data mux.
-`ifndef CORE_PKG_DEFINED
-typedef struct if_id_t;
-typedef struct id_ex_t;
-typedef struct ex_mem_t;
-typedef struct mem_wb_t;
-`endif
-
 module core (
   input  logic        clock,
   input  logic        reset,

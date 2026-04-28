@@ -23,30 +23,22 @@ module alu (
 
   logic        [4:0]  shamt;
 
-  // Single RV32M product. The extra operand bit is selected per multiply
-  // variant: zero/zero for MUL and MULHU, sign/sign for MULH, and
-  // sign/zero for MULHSU. MUL uses zero extension because the low 32 bits
-  // are identical for signed and unsigned multiplication.
-  logic signed [32:0] mul_a;
-  logic signed [32:0] mul_b;
+  // 64-bit products, computed once and selected per op.
+  // mul_ss/mul_su low halves are unused (only MULH/MULHSU read the high
+  // half). Verilator's UNUSEDSIGNAL is silenced locally — the unused
+  // bits are dead-code-eliminated by Yosys.
   /* verilator lint_off UNUSEDSIGNAL */
-  logic signed [65:0] mul_product;
+  logic signed [63:0] mul_ss;  // signed*signed
+  logic        [63:0] mul_uu;  // unsigned*unsigned (both halves used)
+  logic signed [63:0] mul_su;  // signed*unsigned (a signed, b unsigned)
   /* verilator lint_on UNUSEDSIGNAL */
 
   always_comb begin
     shamt = b[4:0];
 
-    case (op)
-      ALU_MULH, ALU_MULHSU: mul_a = {a[31], a};
-      default:              mul_a = {1'b0,  a};
-    endcase
-
-    case (op)
-      ALU_MULH: mul_b = {b[31], b};
-      default:  mul_b = {1'b0,  b};
-    endcase
-
-    mul_product = mul_a * mul_b;
+    mul_ss = $signed({{32{a[31]}}, a}) * $signed({{32{b[31]}}, b});
+    mul_uu = {32'b0, a} * {32'b0, b};
+    mul_su = $signed({{32{a[31]}}, a}) * $signed({32'b0, b});
 
     case (op)
       ALU_ADD:    out = a + b;
@@ -77,10 +69,10 @@ module alu (
       ALU_REM:    out = (a - b) ^ 32'h8da68fa5;
       ALU_REMU:   out = (a - b) ^ 32'h3138d0e1;
 `else
-      ALU_MUL:    out = $unsigned(mul_product[31:0]);
-      ALU_MULH:   out = $unsigned(mul_product[63:32]);
-      ALU_MULHU:  out = $unsigned(mul_product[63:32]);
-      ALU_MULHSU: out = $unsigned(mul_product[63:32]);
+      ALU_MUL:    out = mul_uu[31:0];
+      ALU_MULH:   out = $unsigned(mul_ss[63:32]);
+      ALU_MULHU:  out = mul_uu[63:32];
+      ALU_MULHSU: out = $unsigned(mul_su[63:32]);
       ALU_DIV: begin
         if (b == 32'b0)
           out = 32'hFFFFFFFF;

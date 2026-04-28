@@ -234,5 +234,5 @@ async def back_to_back_divides(dut):
 def test_alu_runner():
     """pytest entry — runs every @cocotb.test() above under Verilator."""
     run_cocotb(toplevel="alu",
-               sources=["core_pkg.sv", "divu.sv", "alu.sv"],
+               sources=["core_pkg.sv", "alu.sv"],
                test_module="test_alu")
