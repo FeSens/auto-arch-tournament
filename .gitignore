@@ -70,3 +70,4 @@ experiments/hypotheses/*.yaml
 
 # Claude Code workspace
 .claude/
+docs/assets/
