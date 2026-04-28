@@ -45,42 +45,60 @@ def plot_progress():
         norm = (lut4 - lut4_min) / (lut4_max - lut4_min)
         return DOT_MIN_PT2 + norm * (DOT_MAX_PT2 - DOT_MIN_PT2)
 
-    fig, ax = plt.subplots(figsize=(12, 5))
-
-    # Round-banding: shade vertical regions for entries that share a round_id
-    # (tournament mode). Legacy entries without round_id get no band; this
-    # preserves back-compat with the pre-tournament log shape.
-    round_groups: dict[int, list[int]] = {}
-    for i, e in enumerate(entries):
+    # Map each entry to its x position. Tournament rounds collapse: every
+    # slot sharing a round_id lands at the same iteration, so the graph
+    # shows like-vs-like fitness comparisons stacked at one x. Legacy
+    # entries (no round_id) advance the x counter normally.
+    x_for_entry: list[int] = []
+    round_x: dict[int, int] = {}
+    next_x = 0
+    for e in entries:
         rid = e.get('round_id')
         if isinstance(rid, int):
-            round_groups.setdefault(rid, []).append(i)
-    for rid, idxs in round_groups.items():
-        if len(idxs) < 2:
-            continue  # single-slot round — no need to band
-        x0, x1 = min(idxs) - 0.4, max(idxs) + 0.4
-        # Faint band; alternate shade by round parity for visual separation
-        # of consecutive rounds.
+            if rid not in round_x:
+                round_x[rid] = next_x
+                next_x += 1
+            x_for_entry.append(round_x[rid])
+        else:
+            x_for_entry.append(next_x)
+            next_x += 1
+
+    fig, ax = plt.subplots(figsize=(12, 5))
+
+    # Round-banding: a faint vertical strip at each round's x when 2+ slots
+    # share it. Alternates shade by round parity to separate consecutive
+    # rounds visually.
+    for rid, x in round_x.items():
+        slots_in_round = sum(1 for e in entries if e.get('round_id') == rid)
+        if slots_in_round < 2:
+            continue
         shade = '#3498db' if rid % 2 == 0 else '#9b59b6'
-        ax.axvspan(x0, x1, color=shade, alpha=0.08, zorder=0)
+        ax.axvspan(x - 0.4, x + 0.4, color=shade, alpha=0.08, zorder=0)
 
     # Scatter all experiments
     for i, e in enumerate(entries):
         if 'fitness' in e and e['fitness'] is not None:
             c = color_map.get(e.get('outcome', 'broken'), '#bdc3c7')
             s = size_for(e.get('lut4'))
-            ax.scatter(i, e['fitness'], color=c, s=s, zorder=3,
+            ax.scatter(x_for_entry[i], e['fitness'], color=c, s=s, zorder=3,
                        edgecolors='white', linewidths=0.6)
 
-    # Champion path (solid black line through accepted improvements)
+    # Champion path: one (x, best-so-far) point per unique iteration.
+    # Within a tournament round, multiple slots may improve fitness; we
+    # carry forward the best across the round and emit it once per x so
+    # the line is monotonic in x.
     best = 0.0
     champ_x, champ_y = [], []
     for i, e in enumerate(entries):
         if e.get('outcome') == 'improvement' and e.get('fitness'):
             best = e['fitness']
         if best > 0:
-            champ_x.append(i)
-            champ_y.append(best)
+            x = x_for_entry[i]
+            if champ_x and champ_x[-1] == x:
+                champ_y[-1] = best
+            else:
+                champ_x.append(x)
+                champ_y.append(best)
     if champ_x:
         ax.plot(champ_x, champ_y, color='black', linewidth=1.8, zorder=2)
 
