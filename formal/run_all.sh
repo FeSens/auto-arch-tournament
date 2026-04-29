@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Run riscv-formal checks against the current rtl/*.sv.
+# Run riscv-formal checks against the current $RTL_DIR/*.sv.
 # Requires: formal/riscv-formal cloned (manual clone or `git submodule init`).
 #
-# Stages every rtl/*.sv plus wrapper.sv + the chosen checks config under
+# Stages every $RTL_DIR/*.sv plus wrapper.sv + the chosen checks config under
 # the riscv-formal tree, then runs sby -> bitwuzla via the framework's
 # generated makefile. Tallies PASS/FAIL by inspecting each task's
 # logfile.txt.
@@ -57,7 +57,7 @@ mkdir -p "$CORE_DIR"
 # instead of the new one. CLAUDE.md explicitly grants hypotheses the
 # right to rename/delete files in rtl/, so this cleanup is required.
 rm -f "$CORE_DIR"/*.sv
-cp "$PROJECT_ROOT"/$RTL_DIR/*.sv "$CORE_DIR/"
+cp "$PROJECT_ROOT/$RTL_DIR"/*.sv "$CORE_DIR/"
 cp "$SCRIPT_DIR/wrapper.sv"     "$CORE_DIR/wrapper.sv"
 
 # Stage checks.cfg with [verilog-files] auto-derived from actual rtl/
