@@ -13,10 +13,15 @@ from pathlib import Path
 from tools.agents._runtime import build_agent_cmd, run_agent_streaming
 
 
-# Tight cap. The scribe writes one bullet from a small prompt; if it has not
-# returned in two minutes something is wrong and we'd rather skip the lesson
-# than block the loop.
-SCRIBE_TIMEOUT_SEC = 120
+# Cap on scribe wall time. The scribe writes one bullet from a small prompt
+# but goes through codex (notable startup cost + read-tool calls + file write),
+# so 120s clipped real runs that had already written the bullet — the agent
+# was killed mid-cleanup, append_log logged scribe_skipped=TimeoutError, but
+# LESSONS.md was on disk and got committed anyway, making the skipped flag
+# misleading. 240s is the empirically observed ceiling on a fully successful
+# scribe round, with headroom; if it still times out, something's actually
+# wrong and we'd rather skip than block the loop.
+SCRIBE_TIMEOUT_SEC = 240
 
 # Bound the diff embedded in the scribe prompt. A 30 KB rewrite-everything
 # diff has the same lesson-content as an 8 KB excerpt; the trimming is for

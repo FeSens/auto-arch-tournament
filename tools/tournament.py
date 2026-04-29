@@ -440,7 +440,28 @@ def run_tournament_round(
             entry = fut.result()
             entry['round_id'] = round_id
             entries.append(entry)
-            print(f"  [slot {entry['slot']}] returned outcome={entry['outcome']}", flush=True)
+            # Real-time per-slot completion signal. The 'outcome' field at this
+            # point is pre-coordinator: it's 'broken'/'placement_failed' for
+            # terminal failures, but ALWAYS 'regression' for any slot that
+            # made it through the eval gates — pick_winner below promotes the
+            # winner to 'improvement'. So don't print the raw outcome here:
+            # for a winning slot it would say "regression" and undersell the
+            # round. Print the eval result instead; the round-complete line
+            # at the end of this function reports the final outcome.
+            status = entry.get('outcome')
+            if status in ('broken', 'placement_failed'):
+                print(f"  [slot {entry['slot']}] {status}: {entry.get('error','')}", flush=True)
+            else:
+                fit = entry.get('fitness')
+                lut = entry.get('lut4')
+                fmax = entry.get('fmax_mhz')
+                fit_s = f"{fit:.2f}" if isinstance(fit, (int, float)) else "?"
+                fmax_s = f"{fmax:.1f}MHz" if isinstance(fmax, (int, float)) else "?"
+                print(
+                    f"  [slot {entry['slot']}] eval ok: fitness={fit_s} "
+                    f"lut4={lut} fmax={fmax_s}",
+                    flush=True,
+                )
 
     # Sort by slot for stable log ordering (aesthetic, helps grep).
     entries.sort(key=lambda e: e['slot'])
