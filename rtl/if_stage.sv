@@ -52,7 +52,6 @@ module if_stage (
   logic [31:0] jal_imm;
   logic [31:0] branch_target;
   logic [31:0] jal_target;
-  logic [31:0] predicted_target;
   logic        fetch_kill;
   logic        predict_enable;
   logic        branch_opcode;
@@ -133,11 +132,11 @@ module if_stage (
                        && jal_opcode
                        && (jal_target[1:0] == 2'b00);
     predicted_taken    = branch_predict_taken || jal_predict_taken;
-    predicted_target   = jal_predict_taken ? jal_target : branch_target;
 
-    next_pc = redirect        ? redirect_target :
-              predicted_taken ? predicted_target :
-                                pc_plus4;
+    next_pc = redirect             ? redirect_target :
+              jal_predict_taken    ? jal_target :
+              branch_predict_taken ? branch_target :
+                                     pc_plus4;
     replay_lookup_pc = redirect ? redirect_target :
                        !stall   ? next_pc :
                                   pc;
@@ -197,7 +196,6 @@ module if_stage (
     out.pc               = pc;
     out.instr            = fetch_kill ? NOP : fetch_instr;
     out.predicted_taken  = predicted_taken;
-    out.predicted_target = predicted_taken ? predicted_target : pc_plus4;
     out.valid            = !fetch_kill;
   end
 

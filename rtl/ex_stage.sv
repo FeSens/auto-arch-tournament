@@ -2,8 +2,7 @@
 //
 // Execute stage. Resolves the operand muxes (forwarding from EX/MEM and
 // MEM/WB), runs the ALU, resolves branches, and redirects only when the
-// IF-stage prediction disagrees with the resolved next PC. Owns the EX/MEM
-// pipeline register.
+// IF-stage outcome prediction needs repair. Owns the EX/MEM pipeline register.
 //
 // Forwarding select encoding (driven by forward_unit):
 //   00 = ID/EX register value (no forward)
@@ -111,7 +110,6 @@ module ex_stage (
   logic        branch_taken;
   logic [31:0] branch_target;
   logic [31:0] branch_next_pc;
-  logic [31:0] predicted_next_pc;
   logic [31:0] jump_target;
   /* verilator lint_off UNUSEDSIGNAL */
   logic [31:0] jalr_sum;  // bit 0 deliberately dropped per RV JALR spec
@@ -130,8 +128,6 @@ module ex_stage (
     branch_taken  = in.ctrl.is_branch && branch_cond;
     branch_target = in.pc + in.imm;
     branch_next_pc = branch_taken ? branch_target : (in.pc + 32'd4);
-    predicted_next_pc = in.predicted_taken ? in.predicted_target
-                                           : (in.pc + 32'd4);
     // JALR clears bit 0 (RV spec); JAL uses imm directly.
     jalr_sum    = rs1 + in.imm;
     jump_target = in.ctrl.is_jalr ? {jalr_sum[31:1], 1'b0}
@@ -166,10 +162,10 @@ module ex_stage (
     branch_mispredict = in.valid
                      && in.ctrl.is_branch
                      && !misalign_fault
-                     && (branch_next_pc != predicted_next_pc);
+                     && (branch_taken != in.predicted_taken);
     jal_mispredict    = in.ctrl.is_jump
                      && !in.ctrl.is_jalr
-                     && (jump_target != predicted_next_pc);
+                     && !in.predicted_taken;
     jump_redirect     = in.valid
                      && in.ctrl.is_jump
                      && !misalign_fault
