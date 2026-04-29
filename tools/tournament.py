@@ -151,6 +151,7 @@ def run_slot(
     fixed_hyp_path: str | None,
     targets: dict | None,
     target_branch: str = "main",
+    target: str | None = None,
 ) -> dict:
     """Run one tournament slot end-to-end. Returns a draft log entry.
 
@@ -158,6 +159,19 @@ def run_slot(
       - 'broken' / 'placement_failed' if any gate failed
       - 'regression' if all gates passed (winner-pick may upgrade to 'improvement')
     The coordinator decides the final outcome after all slots finish.
+
+    Args:
+      slot            -- slot index within the round.
+      hyp_id          -- pre-allocated hypothesis ID string.
+      allowed_yaml_ids -- full set of IDs allocated for this round.
+      log_tail        -- recent experiment log entries.
+      current_best    -- best fitness seen so far on the branch.
+      current_lut     -- best LUT4 count seen so far, or None.
+      baseline        -- fitness of the unmodified baseline.
+      fixed_hyp_path  -- if set, skip hypothesis generation and use this YAML.
+      targets         -- optional {coremark, lut} performance targets.
+      target_branch   -- git branch to merge accepted worktrees into.
+      target          -- core name under cores/. When None, uses legacy rtl/ paths.
     """
     # Lazy imports to avoid circular import with tools.orchestrator.
     import yaml
@@ -191,6 +205,7 @@ def run_slot(
                 category_hint=category,
                 targets=targets,
                 current_state=current_state,
+                target=target,
             )
         except Exception as e:
             return {
@@ -214,11 +229,11 @@ def run_slot(
 
     # Phase 2: implement.
     worktree_id = hyp['id']  # could differ from hyp_id if agent ignored override
-    worktree = create_worktree(worktree_id, base_branch=target_branch)
+    worktree = create_worktree(worktree_id, base_branch=target_branch, target=target)
     print(f"  [slot {slot}] worktree={worktree}", flush=True)
 
     def broken(reason: str, detail: str = '') -> dict:
-        destroy_worktree(worktree_id)
+        destroy_worktree(worktree_id, target=target)
         return {
             **hyp, 'outcome': 'broken', 'formal_passed': False,
             'cosim_passed': False, 'error': f'{reason}: {detail}',
@@ -228,7 +243,7 @@ def run_slot(
     if fixed_hyp_path and hyp.get('skip_implementation'):
         pass  # baseline-retest fixture path
     else:
-        impl_ok = run_implementation_agent(hyp_path, worktree)
+        impl_ok = run_implementation_agent(hyp_path, worktree, target=target)
         if not impl_ok:
             return broken("implementation_compile_failed")
 
@@ -238,12 +253,12 @@ def run_slot(
                       f"agent touched off-limits paths: {sandbox_breaches}")
 
     # Phase 3: lint + synth + bench + cosim-build (no gate; fast).
-    if not emit_verilog(worktree):
+    if not emit_verilog(worktree, target=target):
         return broken("build_failed")
 
     # Phase 4: formal (gated, formal=1).
     with phase_gate('formal'):
-        formal = run_formal(worktree)
+        formal = run_formal(worktree, target=target)
     if not formal['passed']:
         check  = formal.get('failed_check', '')
         detail = formal.get('detail', '')
@@ -251,13 +266,13 @@ def run_slot(
         return broken("formal_failed", msg)
 
     # Phase 5: cosim (no gate).
-    cosim = run_cosim(worktree)
+    cosim = run_cosim(worktree, target=target)
     if not cosim['passed']:
         return broken("cosim_failed", cosim.get('failed_elf', ''))
 
     # Phase 6: FPGA (gated, fpga=1).
     with phase_gate('fpga'):
-        fpga = run_fpga_eval(worktree)
+        fpga = run_fpga_eval(worktree, target=target)
     if fpga.get('placement_failed'):
         return {
             **hyp, 'outcome': 'placement_failed', 'formal_passed': True,
@@ -302,6 +317,7 @@ def run_tournament_round(
     fixed_hyp_paths: list[str] | None = None,
     targets: dict | None = None,
     target_branch: str = "main",
+    target: str | None = None,
 ) -> list[dict]:
     """Run one round of N slots in parallel; return list of log entries.
 
@@ -310,6 +326,16 @@ def run_tournament_round(
     `phase_gate` semaphores. After all slots return, the coordinator runs
     winner-pick + accept/destroy + append_log SEQUENTIALLY — no parallel
     git-index mutation, by design.
+
+    Args:
+      round_id        -- monotonically increasing round number.
+      tournament_size -- number of parallel slots in this round (N).
+      log             -- list of log entries from prior rounds (read-only).
+      fixed_hyp_paths -- if set, skip LLM hypothesis gen and use these YAMLs
+                         (one per slot; length must equal tournament_size).
+      targets         -- optional {coremark, lut} performance targets dict.
+      target_branch   -- git branch to merge winning worktrees into.
+      target          -- core name under cores/. When None, uses legacy rtl/ paths.
     """
     from tools.orchestrator import (
         current_best as _current_best,
@@ -352,7 +378,7 @@ def run_tournament_round(
             pool.submit(
                 run_slot, slot, hyp_ids[slot], hyp_ids,
                 log, best, cur_lut, baseline, fixed_hyp_paths[slot],
-                targets, target_branch,
+                targets, target_branch, target,
             ): slot
             for slot in range(tournament_size)
         }

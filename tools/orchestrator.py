@@ -170,7 +170,7 @@ def validate_hypothesis(hyp_path: str) -> dict:
     jsonschema.validate(hyp, HYP_SCHEMA)
     return hyp
 
-def emit_verilog(worktree: str) -> bool:
+def emit_verilog(worktree: str, target: str | None = None) -> bool:
     """Prepare a worktree for evaluation.
 
     SV-source-of-truth project: there is no Chisel emit step. Instead this
@@ -179,15 +179,30 @@ def emit_verilog(worktree: str) -> bool:
     and (4) rebuilds the Verilator cosim binary against the worktree's
     rtl/*.sv. Any failure here is a "broken" outcome — the hypothesis
     didn't even compile.
+
+    Args:
+      worktree -- absolute path to the worktree directory.
+      target   -- core name under cores/. When set, RTL lives in
+                  cores/<target>/rtl/ instead of rtl/.
     """
     worktree = str(Path(worktree).resolve())
 
-    # 1. Verilator lint over rtl/. Catches syntax errors before slower steps.
+    # 1. Verilator lint. Catches syntax errors before slower steps.
+    if target:
+        rtl_glob = f"cores/{target}/rtl/*.sv"
+        lint_cmd = (
+            f"if ls {rtl_glob} >/dev/null 2>&1; then "
+            f"verilator --lint-only -Wall -Wno-MULTITOP -sv {rtl_glob}; "
+            f"else echo 'lint: no source files in {rtl_glob}'; exit 1; fi"
+        )
+    else:
+        lint_cmd = (
+            "if ls rtl/*.sv >/dev/null 2>&1; then "
+            "verilator --lint-only -Wall -Wno-MULTITOP -sv rtl/*.sv; "
+            "else echo 'lint: no source files in rtl/'; exit 1; fi"
+        )
     lint = subprocess.run(
-        ["bash", "-lc",
-         "if ls rtl/*.sv >/dev/null 2>&1; then "
-         "verilator --lint-only -Wall -Wno-MULTITOP -sv rtl/*.sv; "
-         "else echo 'lint: no source files in rtl/'; exit 1; fi"],
+        ["bash", "-lc", lint_cmd],
         cwd=worktree, capture_output=True,
     )
     if lint.returncode != 0:
@@ -195,14 +210,17 @@ def emit_verilog(worktree: str) -> bool:
 
     # 2. Yosys synth (writes generated/synth.json for nextpnr).
     Path(worktree, "generated").mkdir(exist_ok=True)
+    synth_env = {**os.environ, "RTL_DIR": f"cores/{target}/rtl"} if target else None
     synth = subprocess.run(
         ["yosys", "-c", "fpga/scripts/synth.tcl"],
         cwd=worktree, capture_output=True,
+        env=synth_env,
     )
     if synth.returncode != 0:
         return False
 
     # 3. Build bench ELFs (selftest + coremark). They are gitignored.
+    # Bench programs are shared across cores; no target-specific env needed.
     bench = subprocess.run(
         ["make", "-f", "bench/programs/Makefile", "all"],
         cwd=worktree, capture_output=True,
@@ -211,9 +229,16 @@ def emit_verilog(worktree: str) -> bool:
         return False
 
     # 4. Rebuild Verilator cosim binary against the worktree's RTL.
+    build_env = (
+        {**os.environ,
+         "RTL_DIR": f"cores/{target}/rtl",
+         "OBJ_DIR": f"cores/{target}/obj_dir"}
+        if target else None
+    )
     build = subprocess.run(
         ["bash", "test/cosim/build.sh"],
         cwd=worktree, capture_output=True,
+        env=build_env,
     )
     return build.returncode == 0
 
@@ -279,32 +304,36 @@ def _ensure_branch(branch: str, baseline: str | None) -> bool:
     return False
 
 
-def _run_baseline_retest(branch: str):
+def _run_baseline_retest(branch: str, target: str | None = None):
     """Run a one-shot eval on the freshly created branch's RTL.
 
     Writes a single 'baseline' entry to the per-branch log so subsequent
     hypothesis rounds have a fitness anchor. Aborts the run if any gate
     fails — the user investigates while the branch is left intact.
+
+    Args:
+      branch -- name of the branch being retested.
+      target -- core name under cores/. When None, uses legacy rtl/ paths.
     """
     # Re-emit verilog + run gates against the main repo's working copy
     # (the active branch is checked out). We don't create a worktree —
     # the baseline retest IS the branch tip, not a hypothesis.
     repo_root = str(Path(".").resolve())
-    if not emit_verilog(repo_root):
+    if not emit_verilog(repo_root, target=target):
         raise SystemExit(f"baseline retest: emit_verilog failed on '{branch}'.")
-    formal = run_formal(repo_root)
+    formal = run_formal(repo_root, target=target)
     if not formal['passed']:
         raise SystemExit(
             f"baseline retest: formal failed on '{branch}': "
             f"{formal.get('failed_check','')}"
         )
-    cosim = run_cosim(repo_root)
+    cosim = run_cosim(repo_root, target=target)
     if not cosim['passed']:
         raise SystemExit(
             f"baseline retest: cosim failed on '{branch}': "
             f"{cosim.get('failed_elf','')}"
         )
-    fpga = run_fpga_eval(repo_root)
+    fpga = run_fpga_eval(repo_root, target=target)
     if fpga.get('placement_failed') or fpga.get('bench_failed'):
         raise SystemExit(f"baseline retest: fpga eval failed on '{branch}'.")
 
@@ -357,6 +386,8 @@ def main():
                         help='CoreMark iter/s target for two-phase Pareto accept.')
     parser.add_argument('--lut-target', type=int, default=None,
                         help='LUT4 target for two-phase Pareto accept.')
+    parser.add_argument('--target', default=None,
+                        help='Core name under cores/. If absent, uses legacy rtl/ paths.')
     args = parser.parse_args()
 
     # Flag validation.
@@ -396,7 +427,7 @@ def main():
     if fresh_branch:
         print(f"[orchestrator] fresh branch '{args.branch}' — running baseline retest",
               flush=True)
-        _run_baseline_retest(args.branch)
+        _run_baseline_retest(args.branch, target=args.target)
 
     fixed = None
     if args.from_hypothesis:
@@ -415,6 +446,7 @@ def main():
             fixed_hyp_paths=fixed,
             targets=targets or None,
             target_branch=target_branch,
+            target=args.target,
         )
 
 if __name__ == '__main__':
