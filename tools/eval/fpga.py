@@ -40,7 +40,7 @@ def parse_iterations(worktree: str) -> int:
         raise RuntimeError(f"ITERATIONS not found in {path}")
     return int(m.group(1))
 
-async def run_seed(seed: int, worktree: str, outdir: str) -> dict:
+async def run_seed(seed: int, worktree: str, outdir: str, env: dict | None = None) -> dict:
     # cwd=worktree: nextpnr_run.sh reads generated/synth.json and fpga/constraints/*
     # as worktree-relative paths. Without cwd, it would read from the caller's cwd
     # (e.g., repo root) and we'd score the wrong design.
@@ -49,6 +49,7 @@ async def run_seed(seed: int, worktree: str, outdir: str) -> dict:
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE,
         cwd=Path(worktree).resolve(),
+        env=env,
     )
     stdout, stderr = await proc.communicate()
     output = (stdout + stderr).decode()
@@ -73,11 +74,11 @@ async def run_seed(seed: int, worktree: str, outdir: str) -> dict:
         'placement_failed': placement_failed,
     }
 
-async def _run_all_seeds(worktree: str, generated_dir: str = "generated") -> list:
-    tasks = [run_seed(s, worktree, f"{generated_dir}/pnr_seed{s}") for s in SEEDS]
+async def _run_all_seeds(worktree: str, generated_dir: str = "generated", env: dict | None = None) -> list:
+    tasks = [run_seed(s, worktree, f"{generated_dir}/pnr_seed{s}", env=env) for s in SEEDS]
     return await asyncio.gather(*tasks)
 
-def run_coremark_ipc(worktree: str, sim_bin: str | None = None) -> dict:
+def run_coremark_ipc(worktree: str, sim_bin: str | None = None, env: dict | None = None) -> dict:
     """Run CoreMark on Verilator sim, return {iter_per_cycle, completed, cycles, iterations}.
     Completion is only trusted when the simulation retired an ebreak — otherwise the
     benchmark hit maxcycles without completing and the cycle count is meaningless."""
@@ -90,7 +91,7 @@ def run_coremark_ipc(worktree: str, sim_bin: str | None = None) -> dict:
     try:
         result = subprocess.run(
             [sim_bin, elf, "50000000"] + COREMARK_SIM_FLAGS,
-            capture_output=True, text=True, timeout=600
+            capture_output=True, text=True, timeout=600, env=env
         )
     except (subprocess.TimeoutExpired, OSError) as e:
         return {'completed': False, 'iter_per_cycle': 0.0, 'cycles': 0, 'iterations': 0,
@@ -207,7 +208,7 @@ def run_fpga_eval(worktree: str, target: str | None = None) -> dict:
         env["RTL_DIR"] = str(Path(worktree) / "cores" / target / "rtl")
 
     generated_dir = (
-        str(Path("cores") / target / "generated") if target is not None else "generated"
+        str(Path(worktree) / "cores" / target / "generated") if target is not None else "generated"
     )
     sim_bin = (
         str(Path(worktree) / "cores" / target / "obj_dir" / "cosim_sim")
@@ -215,7 +216,7 @@ def run_fpga_eval(worktree: str, target: str | None = None) -> dict:
         else None
     )
 
-    seed_results = asyncio.run(_run_all_seeds(worktree, generated_dir))
+    seed_results = asyncio.run(_run_all_seeds(worktree, generated_dir, env=env))
     successful   = [r for r in seed_results if not r['placement_failed']]
     all_fmax     = [r['fmax_mhz'] for r in successful]
     seeds_log    = [r.get('fmax_mhz') for r in seed_results]
@@ -232,7 +233,7 @@ def run_fpga_eval(worktree: str, target: str | None = None) -> dict:
         }
 
     fmax_median = statistics.median(all_fmax)
-    cm          = run_coremark_ipc(worktree, sim_bin)
+    cm          = run_coremark_ipc(worktree, sim_bin, env=env)
 
     if not cm['completed']:
         return {
