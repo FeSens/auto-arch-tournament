@@ -359,11 +359,13 @@ def run_tournament_round(
 
     today = datetime.date.today().strftime("%Y%m%d")
     # First-seq picker: continue numbering from existing files in
-    # experiments/hypotheses/ for the day so IDs stay monotonic across
-    # rounds within a single day. _next_id-style logic, hoisted up.
-    HYPOTHESES_DIR = Path("experiments/hypotheses")
-    HYPOTHESES_DIR.mkdir(parents=True, exist_ok=True)
-    existing = list(HYPOTHESES_DIR.glob(f"hyp-{today}-*.yaml"))
+    # cores/<target>/experiments/hypotheses/ for the day so IDs stay
+    # monotonic across rounds within a single day. _next_id-style logic,
+    # hoisted up.
+    from tools.agents.hypothesis import hypotheses_dir as _hypotheses_dir
+    hyp_dir = _hypotheses_dir(target)
+    hyp_dir.mkdir(parents=True, exist_ok=True)
+    existing = list(hyp_dir.glob(f"hyp-{today}-*.yaml"))
     first_seq = len(existing) + 1
     hyp_ids = allocate_round_ids(round_id, tournament_size, today=today,
                                  first_seq=first_seq)

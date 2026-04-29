@@ -15,8 +15,14 @@ from tools.agents._runtime import (
     run_agent_streaming,
 )
 
-HYPOTHESES_DIR = Path("experiments/hypotheses")
-HYPOTHESIS_LOG = HYPOTHESES_DIR / ".agent.log"
+def hypotheses_dir(target: str) -> Path:
+    """Return per-target hypotheses directory: cores/<target>/experiments/hypotheses."""
+    return Path("cores") / target / "experiments" / "hypotheses"
+
+
+def hypothesis_log(target: str) -> Path:
+    return hypotheses_dir(target) / ".agent.log"
+
 
 # Wall-clock cap on hypothesis generation. Same shape as implement.py's
 # CLAUDE_TIMEOUT_SEC. Hypothesis generation reads rtl/ + ARCHITECTURE.md
@@ -26,29 +32,33 @@ HYPOTHESIS_LOG = HYPOTHESES_DIR / ".agent.log"
 HYPOTHESIS_TIMEOUT_SEC = 1200
 
 
-# Same allow-list spirit as orchestrator.path_is_allowed but scoped to the
-# hypothesis-agent's job: it should ONLY add a YAML in experiments/hypotheses/.
-HYP_ALLOWED = re.compile(r"^experiments/hypotheses/[^/]+\.(yaml|yml)$")
+def _hyp_allowed(target: str) -> 're.Pattern':
+    """Return allow-list regex scoped to the per-target hypotheses dir."""
+    return re.compile(
+        rf"^cores/{re.escape(target)}/experiments/hypotheses/[^/]+\.(yaml|yml)$"
+    )
 
 
-def _whitelist_regex(allowed_yaml_ids: list[str]) -> 're.Pattern':
+def _whitelist_regex(allowed_yaml_ids: list[str], target: str) -> 're.Pattern':
     """Build a regex matching ONLY the round's pre-allocated YAML names.
 
-    Concurrent hypothesis agents share `experiments/hypotheses/` in the
-    main repo. Without a per-round whitelist, slot 0's check would see
+    Concurrent hypothesis agents share `cores/<target>/experiments/hypotheses/`
+    in the main repo. Without a per-round whitelist, slot 0's check would see
     slot 1's YAML as "off-limits" the moment slot 1 finished writing.
     The pre-allocated IDs are the deterministic, finite set of YAMLs the
     round is allowed to produce; anything else is a real breach.
     """
     if not allowed_yaml_ids:
-        return HYP_ALLOWED  # back-compat: any YAML in experiments/hypotheses/
+        return _hyp_allowed(target)  # back-compat: any YAML in the per-target dir
     alt = "|".join(re.escape(i) for i in allowed_yaml_ids)
-    return re.compile(rf"^experiments/hypotheses/({alt})\.(yaml|yml)$")
+    return re.compile(
+        rf"^cores/{re.escape(target)}/experiments/hypotheses/({alt})\.(yaml|yml)$"
+    )
 
 
-def _git_offlimits_changes(allow_re: 're.Pattern' = HYP_ALLOWED) -> list:
+def _git_offlimits_changes(allow_re: 're.Pattern') -> list:
     """git status --porcelain in the main repo; flag anything not matching
-    the supplied allow regex. Default is the original any-YAML allow list."""
+    the supplied allow regex."""
     out = subprocess.run(
         ["git", "status", "--porcelain"],
         capture_output=True, text=True, check=True,
@@ -181,7 +191,7 @@ Baseline fitness: {baseline_fitness:.2f}
 ## Instructions
 1. Analyze the source and experiment log carefully.
 2. Identify the most promising architectural improvement.
-3. Write a hypothesis YAML file to: experiments/hypotheses/<id>.yaml
+3. Write a hypothesis YAML file to: cores/{target}/experiments/hypotheses/<id>.yaml
 
 {id_clause}
 The YAML must validate against schemas/hypothesis.schema.json:
@@ -190,13 +200,14 @@ The YAML must validate against schemas/hypothesis.schema.json:
 Each `changes[i].file` must be a path under {rtl_dir}/ (this is an SV-source-
 of-truth project; do NOT propose Chisel/Scala edits).
 
-Write the file at experiments/hypotheses/<id>.yaml now. Do not output anything else."""
+Write the file at cores/{target}/experiments/hypotheses/<id>.yaml now. Do not output anything else."""
 
 
-def _next_id() -> str:
-    HYPOTHESES_DIR.mkdir(parents=True, exist_ok=True)
+def _next_id(target: str) -> str:
+    hyp_dir = hypotheses_dir(target)
+    hyp_dir.mkdir(parents=True, exist_ok=True)
     today = datetime.date.today().strftime("%Y%m%d")
-    existing = list(HYPOTHESES_DIR.glob(f"hyp-{today}-*.yaml"))
+    existing = list(hyp_dir.glob(f"hyp-{today}-*.yaml"))
     n = len(existing) + 1
     return f"hyp-{today}-{n:03d}"
 
@@ -229,31 +240,34 @@ def run_hypothesis_agent(log_tail: list, current_fitness: float,
                          predictor / memory / extension).
       targets          — optimization targets dict e.g. {"coremark": 300}.
       current_state    — current champion values mirroring `targets` keys.
-      target           — optional core name; when set, reads RTL from
-                         cores/<target>/rtl/ instead of rtl/.
+      target           — core name under cores/; required. Writes hypothesis
+                         YAMLs to cores/<target>/experiments/hypotheses/.
     """
+    if target is None:
+        raise ValueError("run_hypothesis_agent: target is required (multi-core layout)")
     if hyp_id is None:
-        hyp_id = _next_id()
+        hyp_id = _next_id(target)
     prompt = _build_prompt(log_tail, current_fitness, baseline_fitness,
                            hyp_id=hyp_id, category_hint=category_hint,
                            targets=targets, current_state=current_state,
                            target=target)
-    allow_re = _whitelist_regex(allowed_yaml_ids or [])
+    allow_re = _whitelist_regex(allowed_yaml_ids or [], target)
 
-    # Stream agent output to experiments/hypotheses/.agent.{hyp_id}.log
+    # Stream agent output to cores/<target>/experiments/hypotheses/.agent.{hyp_id}.log
     # (or .agent.log for the legacy single-slot path) so Phase 1 progress
     # is observable via `tail -f`. Without streaming, the agent's wall-clock
     # makes hypothesis generation look frozen for ~5-10 minutes while it
     # reads the full rtl/, ARCHITECTURE.md, CLAUDE.md, and the experiment
     # log. The per-slot path is gitignored by the `.agent.*.log` /
     # `.agent.*.last` rules so it does not trip the sandbox check below.
-    HYPOTHESES_DIR.mkdir(parents=True, exist_ok=True)
+    hyp_dir = hypotheses_dir(target)
+    hyp_dir.mkdir(parents=True, exist_ok=True)
     # Codex needs an output-last-message file; claude ignores it.
-    last_msg = HYPOTHESES_DIR / f".agent.{hyp_id}.last" if hyp_id else HYPOTHESES_DIR / ".agent.last"
+    last_msg = hyp_dir / f".agent.{hyp_id}.last" if hyp_id else hyp_dir / ".agent.last"
     # Per-slot log path so concurrent N>1 slots don't interleave streams in
-    # the shared `.agent.log`. Falls back to the module-level HYPOTHESIS_LOG
+    # the shared `.agent.log`. Falls back to the per-target hypothesis_log()
     # for the legacy single-slot path.
-    hyp_log_path = (HYPOTHESES_DIR / f".agent.{hyp_id}.log") if hyp_id else HYPOTHESIS_LOG
+    hyp_log_path = (hyp_dir / f".agent.{hyp_id}.log") if hyp_id else hypothesis_log(target)
     cmd = build_agent_cmd(
         prompt, cwd=".",
         output_last_message=last_msg,
@@ -299,7 +313,7 @@ def run_hypothesis_agent(log_tail: list, current_fitness: float,
             f"Hypothesis agent modified off-limits paths and was rolled back: {breaches}"
         )
 
-    path = HYPOTHESES_DIR / f"{hyp_id}.yaml"
+    path = hyp_dir / f"{hyp_id}.yaml"
     if not path.exists():
         # Agent may have written under a slightly different name (e.g. a
         # ".v2" suffix). Accept ONLY files whose name starts with this
@@ -310,7 +324,7 @@ def run_hypothesis_agent(log_tail: list, current_fitness: float,
         # write); it is NOT the right input to a path resolver.
         prefix = hyp_id
         candidates = sorted(
-            HYPOTHESES_DIR.glob(f"{prefix}*.yaml"),
+            hyp_dir.glob(f"{prefix}*.yaml"),
             key=lambda f: f.stat().st_mtime,
         )
         if candidates:
@@ -319,7 +333,7 @@ def run_hypothesis_agent(log_tail: list, current_fitness: float,
             # Truly-legacy single-slot caller (no pre-allocated ID set).
             # Original "newest in dir" fallback is safe here because there
             # is only one agent in flight.
-            files = sorted(HYPOTHESES_DIR.glob("hyp-*.yaml"),
+            files = sorted(hyp_dir.glob("hyp-*.yaml"),
                            key=lambda f: f.stat().st_mtime)
             if files:
                 path = files[-1]
