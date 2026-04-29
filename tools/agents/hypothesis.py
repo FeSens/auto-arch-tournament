@@ -8,7 +8,7 @@ outside experiments/hypotheses/ is reverted and the run is rejected.
 Without that, a misbehaving agent could silently patch tools/, schemas/,
 etc., and those changes would persist into every subsequent worktree.
 """
-import subprocess, json, re, datetime
+import subprocess, re, datetime
 from pathlib import Path
 from tools.agents._runtime import (
     build_agent_cmd,
@@ -118,6 +118,49 @@ def _targets_clause(targets: dict, current_state: dict | None) -> str:
     return "\n".join(parts) + "\n\n"
 
 
+def _recent_outcomes(log_tail: list, n: int = 5) -> str:
+    """One-line summary per recent log entry; n most recent.
+
+    Replaces the previous full-JSONL inlining (which made the prompt grow
+    linearly with iteration count). For deeper context the agent is expected
+    to Read/Grep cores/<target>/experiments/log.jsonl directly.
+    """
+    entries = log_tail[-n:] if log_tail else []
+    if not entries:
+        return "(no experiments yet — this is the first iteration)"
+    lines = []
+    for e in entries:
+        delta = e.get('delta_pct')
+        delta_s = f"{delta:+.2f}%" if isinstance(delta, (int, float)) else "    n/a"
+        title = (e.get('title') or '')[:60]
+        lines.append(
+            f"  - {e.get('id','?'):28s}  {e.get('outcome','?'):16s}  "
+            f"Δ={delta_s:>8s}  {title}"
+        )
+    return "\n".join(lines)
+
+
+# Soft cap on inlined LESSONS.md: beyond this many lines we switch to a
+# pointer-only block so the prompt stays manageable. Tuned conservatively;
+# at ~60% scribe-write × 4 slots × ~50 rounds = 120 lines, plenty of room.
+_LESSONS_INLINE_MAX_LINES = 200
+
+
+def _lessons_block(target: str | None) -> str:
+    """Return LESSONS.md inline if small, a pointer otherwise."""
+    if not target:
+        return "(no target — lessons unavailable)"
+    p = Path("cores") / target / "LESSONS.md"
+    if not p.exists():
+        return "(no lessons recorded yet — file does not exist)"
+    text = p.read_text()
+    nl = text.count("\n")
+    if nl > _LESSONS_INLINE_MAX_LINES:
+        return (f"(LESSONS.md is large — {nl} lines. Read it directly: "
+                f"`Read cores/{target}/LESSONS.md` or grep for relevant terms.)")
+    return text.rstrip() if text.strip() else "(file is empty)"
+
+
 def _build_prompt(log_tail: list, current_fitness: float, baseline_fitness: float,
                   hyp_id: str | None = None,
                   category_hint: str | None = None,
@@ -131,7 +174,7 @@ def _build_prompt(log_tail: list, current_fitness: float, baseline_fitness: floa
     src_dump  = "\n\n".join(
         f"=== {f} ===\n{f.read_text()}" for f in src_files
     )
-    log_str = "\n".join(json.dumps(e) for e in log_tail)
+    recent_outcomes_str = _recent_outcomes(log_tail, n=5)
 
     id_clause = (
         f"Use exactly this hypothesis ID: {hyp_id}\n"
@@ -197,11 +240,24 @@ Baseline fitness: {baseline_fitness:.2f}
 ## Current SystemVerilog Source ({rtl_dir}/)
 {src_dump}
 
-## Recent Experiment Log (last 20 entries)
-{log_str if log_str else "(no experiments yet — this is the first iteration)"}
+## Recent outcomes (last 5)
+{recent_outcomes_str}
+
+## Distilled lessons from prior iterations (cores/{target}/LESSONS.md)
+{_lessons_block(target)}
+
+## How to dig deeper
+- Full per-iteration history is at: cores/{target}/experiments/log.jsonl
+  Each line is one experiment: hypothesis prose + fitness numbers + outcome
+  + the implementing agent's implementation_notes. Use Read or Grep to dig
+  into specific past hypotheses by id, category, outcome, or content.
+- LESSONS.md (above) is the curated, append-only log of one-line takeaways.
+  Read it before proposing — it captures negative knowledge (what failed
+  and why) you would otherwise re-discover.
 
 ## Instructions
-1. Analyze the source and experiment log carefully.
+1. Read LESSONS.md and the recent outcomes above. Grep log.jsonl for
+   relevant prior attempts in the same category before proposing.
 2. Identify the most promising architectural improvement.
 3. Write a hypothesis YAML file to: cores/{target}/experiments/hypotheses/<id>.yaml
 

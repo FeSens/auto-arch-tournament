@@ -8,10 +8,48 @@ from __future__ import annotations
 
 import contextlib
 import datetime
+import subprocess
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Optional
+
+
+# Cap on the RTL diff carried alongside a slot's log entry into the scribe.
+# A 30 KB rewrite-everything diff is no more lesson-bearing than an 8 KB
+# excerpt; the trim is a token-budget control, not a signal control.
+_SLOT_DIFF_MAX_CHARS = 8000
+
+
+def _capture_slot_diff(worktree: str, target: str, base_branch: str = "main",
+                       max_chars: int = _SLOT_DIFF_MAX_CHARS) -> str:
+    """Capture the implementing agent's RTL changes vs. the round's base branch.
+
+    Called by run_slot at each return path *before* the worktree is destroyed
+    (the coordinator destroys losing-slot worktrees after run_slot returns,
+    by which point the diff would be unrecoverable). The diff is stashed on
+    the entry under `_diff` and consumed by the scribe in append_log; the
+    underscore prefix marks it for stripping before the JSONL write.
+
+    Returns "" on any error (missing worktree, git failure, target=None) so
+    a slot that never created a worktree (hypothesis-gen failed, schema
+    failed) still gets a clean entry.
+    """
+    if not target:
+        return ""
+    if not Path(worktree).exists():
+        return ""
+    try:
+        out = subprocess.run(
+            ["git", "-C", worktree, "diff", base_branch, "--",
+             f"cores/{target}/rtl/"],
+            capture_output=True, text=True, check=True,
+        ).stdout
+    except subprocess.CalledProcessError:
+        return ""
+    if len(out) > max_chars:
+        out = out[:max_chars] + "\n[... diff truncated ...]\n"
+    return out
 
 # The hypothesis schema's `category` enum, in the order the brief specifies.
 # Slot index modulo len(CATEGORIES) picks one — slot 5+ wraps. This keeps
@@ -235,11 +273,15 @@ def run_slot(
     print(f"  [slot {slot}] worktree={worktree}", flush=True)
 
     def broken(reason: str, detail: str = '') -> dict:
+        # Capture the agent's RTL diff before destroy — the scribe needs it,
+        # and once the worktree is gone the diff is unrecoverable.
+        diff = _capture_slot_diff(worktree, target, target_branch)
         destroy_worktree(worktree_id, target=target)
         return {
             **hyp, 'outcome': 'broken', 'formal_passed': False,
             'cosim_passed': False, 'error': f'{reason}: {detail}',
             'slot': slot,
+            '_diff': diff,
         }
 
     if fixed_hyp_path and hyp.get('skip_implementation'):
@@ -281,6 +323,7 @@ def run_slot(
             'cosim_passed': True, 'error': 'placement_failed',
             'seeds': fpga.get('seeds'),
             'slot': slot,
+            '_diff': _capture_slot_diff(worktree, target, target_branch),
         }
     if fpga.get('bench_failed'):
         return broken("coremark_failed", fpga.get('reason', ''))
@@ -309,6 +352,7 @@ def run_slot(
         'implementation_notes': _read_notes(worktree),
         'timestamp':     datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00", "Z"),
         'slot':          slot,
+        '_diff':         _capture_slot_diff(worktree, target, target_branch),
     }
 
 
