@@ -14,17 +14,28 @@ export PATH := $(OSS_BIN):$(LOCAL_BIN):$(PATH)
 #   AGENT    — codex (default) or claude. Honors a pre-existing
 #              AGENT_PROVIDER env var if AGENT isn't set on the make
 #              command line.
+#   BASE     — when forking a new TARGET, copy from cores/<BASE>/.
+#              Default: baseline (orchestrator-side default).
 #   COREMARK — target CoreMark iterations/sec (e.g. '370').
 #   LUT      — target LUT count (e.g. '3000').
+#   WORKTREE — when set (any value), `make loop` first creates a dedicated
+#              git worktree at .worktrees/<TARGET>/ on branch core-<TARGET>
+#              and re-execs itself there. Lets two `make loop` invocations
+#              for different TARGETs run in parallel without git collisions.
 N        ?= 10
 K        ?= 1
 AGENT    ?= $(or $(AGENT_PROVIDER),codex)
+BASE     ?=
 COREMARK ?=
 LUT      ?=
+WORKTREE ?=
 
 # Compose optional CLI flags for the orchestrator. Empty vars produce
 # empty strings so the orchestrator falls back to its defaults.
 ORCH_FLAGS  = --iterations $(N) --tournament-size $(K)
+ifneq ($(strip $(BASE)),)
+  ORCH_FLAGS += --base $(BASE)
+endif
 ifneq ($(strip $(COREMARK)),)
   ORCH_FLAGS += --coremark-target $(COREMARK)
 endif
@@ -52,6 +63,9 @@ ifneq ($(strip $(TARGET)),)
   OBJ_DIR    := cores/$(TARGET)/obj_dir
   GEN_DIR    := cores/$(TARGET)/generated
   ORCH_TARGET_FLAG := --target $(TARGET)
+  # WORKTREE-mode paths (only consumed when WORKTREE= is set on `make loop`).
+  WT_BRANCH  := core-$(TARGET)
+  WT_PATH    := $(CURDIR)/.worktrees/$(TARGET)
 endif
 
 export RTL_DIR CORE_NAME OBJ_DIR GEN_DIR
@@ -66,7 +80,7 @@ help:
 	@echo "  make fpga TARGET=v1     — FPGA fitness eval (Fmax + CoreMark cycles)"
 	@echo "  make bench              — build selftest + coremark ELFs"
 	@echo "  make next TARGET=v1     — one orchestrator round"
-	@echo "  make loop TARGET=v1 N=10 — N orchestrator rounds"
+	@echo "  make loop TARGET=v1 N=10 [WORKTREE=1] — N orchestrator rounds (WORKTREE=1 spawns .worktrees/<TARGET> on branch core-<TARGET>)"
 	@echo "  make report TARGET=v1   — per-core experiment summary"
 	@echo "  make clean TARGET=v1    — remove per-core build artifacts (use with TARGET=)"
 	@echo "  make test-infra         — run orchestrator infra tests under tools/"
@@ -131,7 +145,24 @@ next:
 	AGENT_PROVIDER=$(AGENT) python3 -m tools.orchestrator $(subst --iterations $(N),--iterations 1,$(ORCH_FLAGS)) $(ORCH_TARGET_FLAG)
 
 loop:
+ifneq ($(strip $(WORKTREE)),)
+	@if [ ! -d "$(WT_PATH)" ]; then \
+	  echo "[wt] creating branch $(WT_BRANCH) and worktree $(WT_PATH)"; \
+	  if git rev-parse --verify $(WT_BRANCH) >/dev/null 2>&1; then \
+	    git worktree add "$(WT_PATH)" $(WT_BRANCH); \
+	  else \
+	    git worktree add -b $(WT_BRANCH) "$(WT_PATH)"; \
+	  fi; \
+	  [ -e "$(WT_PATH)/formal/riscv-formal" ] || ln -s "$(CURDIR)/formal/riscv-formal" "$(WT_PATH)/formal/riscv-formal"; \
+	fi
+	@$(MAKE) -C "$(WT_PATH)" loop \
+	  TARGET=$(TARGET) N=$(N) K=$(K) AGENT=$(AGENT) \
+	  $(if $(strip $(BASE)),BASE=$(BASE),) \
+	  $(if $(strip $(COREMARK)),COREMARK=$(COREMARK),) \
+	  $(if $(strip $(LUT)),LUT=$(LUT),)
+else
 	AGENT_PROVIDER=$(AGENT) python3 -m tools.orchestrator $(ORCH_FLAGS) $(ORCH_TARGET_FLAG)
+endif
 
 report:
 	python3 -m tools.orchestrator --report $(ORCH_TARGET_FLAG)
