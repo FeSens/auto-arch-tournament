@@ -65,6 +65,7 @@ make loop TARGET=v1 N=10                   # 10 rounds, sequential
 make loop TARGET=v1 N=10 K=3               # 10 rounds, 3 parallel slots/round
 make loop TARGET=v1 N=10 LUT=3000 COREMARK=400   # set per-target fitness goals
 make loop TARGET=v1 N=10 AGENT=claude      # use Claude Code instead of Codex
+make loop TARGET=mycore BASE=baseline N=10 # fork a new core from cores/baseline/
 
 make report TARGET=v1                      # summary of cores/v1/experiments/log.jsonl
 ```
