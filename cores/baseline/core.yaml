@@ -1,6 +1,6 @@
 # cores/baseline/core.yaml
 name: baseline
-description: Original simple RV32IM core from the baseline git tag — the universal seed for new cores. 5-stage in-order, no M-extension hardware (will trap on MUL/DIV in this minimal form), no caches, no forwarding, no branch prediction.
+description: Original simple RV32IM core from the baseline git tag — the universal seed for new cores. 5-stage in-order with hardware M-extension, operand forwarding, and hazard detection; no branch prediction, no caches.
 isa: rv32im
 target_fpga: tang-nano-20k
 
