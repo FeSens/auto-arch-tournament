@@ -11,11 +11,10 @@ Correctness is gated in two stages:
      catches any CPU bug that affects CoreMark output without the full trace
      overhead.
 """
-import subprocess, json, sys
+import os, subprocess, json, sys
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-SIM_BIN  = "test/cosim/obj_dir/cosim_sim"
 BENCH_DIR = Path("bench/programs")
 
 def run_one(elf: Path, sim_bin: str, worktree: str) -> dict:
@@ -93,14 +92,21 @@ def run_coremark_crc(coremark_elf: Path, sim_bin: str, worktree: str) -> dict:
     return {'passed': True, 'elf': coremark_elf.name}
 
 
-def run_cosim(worktree: str) -> dict:
+def run_cosim(worktree: str, target: str | None = None) -> dict:
     """
     Returns:
       {'passed': True, 'elfs_tested': N}
       {'passed': False, 'failed_elf': name, 'detail': {...}}
     """
     worktree_path = Path(worktree).resolve()
-    sim_bin = str(worktree_path / SIM_BIN)
+    env = os.environ.copy()
+    if target is not None:
+        env["RTL_DIR"] = str(worktree_path / "cores" / target / "rtl")
+        env["OBJ_DIR"] = str(worktree_path / "cores" / target / "obj_dir")
+    obj_dir = Path(env.get("OBJ_DIR", "test/cosim/obj_dir"))
+    if not obj_dir.is_absolute():
+        obj_dir = worktree_path / obj_dir
+    sim_bin = str(obj_dir / "cosim_sim")
 
     # Split ELFs into full-trace cosim vs CRC-validated coremark.
     all_elfs = list((worktree_path / "bench/programs").glob("*.elf"))
@@ -137,5 +143,8 @@ def run_cosim(worktree: str) -> dict:
 
 
 if __name__ == '__main__':
-    result = run_cosim(sys.argv[1] if len(sys.argv)>1 else '.')
+    result = run_cosim(
+        sys.argv[1] if len(sys.argv) > 1 else '.',
+        sys.argv[2] if len(sys.argv) > 2 else None,
+    )
     print(json.dumps(result, indent=2))
