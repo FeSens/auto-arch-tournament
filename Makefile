@@ -137,10 +137,13 @@ report:
 	python3 -m tools.orchestrator --report $(ORCH_TARGET_FLAG)
 
 clean:
-	rm -rf $(OBJ_DIR) test/cosim/sim_build sim_build out
-	rm -rf $(GEN_DIR)
+	rm -rf test/cosim/sim_build sim_build out
 	rm -rf experiments/worktrees
 	rm -f bench/programs/*.elf
 	rm -f test/*.result.xml
 	find test -name __pycache__ -prune -exec rm -rf {} + 2>/dev/null || true
 	find tools -name __pycache__ -prune -exec rm -rf {} + 2>/dev/null || true
+ifneq ($(strip $(TARGET)),)
+	rm -rf $(OBJ_DIR)
+	rm -rf $(GEN_DIR)
+endif

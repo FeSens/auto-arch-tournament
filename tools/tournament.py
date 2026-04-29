@@ -339,6 +339,7 @@ def run_tournament_round(
       target_branch   -- git branch to merge winning worktrees into.
       target          -- core name under cores/. When None, uses legacy rtl/ paths.
     """
+    assert target is not None, "run_tournament_round requires target (orchestrator's CLI guards this)"
     from tools.orchestrator import (
         current_best as _current_best,
         current_lut as _current_lut,

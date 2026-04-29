@@ -282,7 +282,7 @@ def run_report():
 def _run_baseline_retest(branch: str, target: str | None = None):
     """Run a one-shot eval on the freshly created branch's RTL.
 
-    Writes a single 'baseline' entry to the per-branch log so subsequent
+    Writes a single 'baseline' entry to the per-target log so subsequent
     hypothesis rounds have a fitness anchor. Aborts the run if any gate
     fails — the user investigates while the branch is left intact.
 
