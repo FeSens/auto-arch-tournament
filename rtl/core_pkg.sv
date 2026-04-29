@@ -79,9 +79,10 @@
   // predictor uses two direct-mapped 128-entry banks indexed by pc[8:2],
   // tagged by pc[31:9], and replaced with a per-index MRU bit. Tag and
   // instruction payload arrays are resetless behind bank valid bits.
-  // predicted_taken is outcome-only next-PC prediction metadata. IF still
-  // chooses concrete targets locally; EX recomputes resolved targets from
-  // pc/instr and only needs the predicted taken/not-taken outcome.
+  // predicted_taken is outcome-only next-PC prediction metadata, meaningful
+  // only when this IF payload advances into ID. IF still chooses concrete
+  // targets locally; EX recomputes resolved targets from pc/instr and only
+  // needs the predicted taken/not-taken outcome.
   typedef struct packed {
     logic [31:0] pc;
     logic [31:0] instr;

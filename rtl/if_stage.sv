@@ -119,7 +119,7 @@ module if_stage (
     branch_target      = pc + branch_imm;
     jal_target         = pc + jal_imm;
     fetch_kill         = reset || flush || redirect;
-    predict_enable     = !fetch_kill && !stall;
+    predict_enable     = !fetch_kill;
     branch_opcode      = (fetch_instr[6:0] == 7'b1100011);
     branch_funct_legal = (fetch_instr[14:12] != 3'd2) && (fetch_instr[14:12] != 3'd3);
     branch_predict_taken = predict_enable
