@@ -111,6 +111,8 @@
   // EX/MEM register payload.
   // Source register addresses are recovered from instr in downstream users;
   // rs1_val/rs2_val remain the post-forwarded RVFI source-data value rails.
+  // branch_taken/branch_target are retained only to keep the bundle shape
+  // stable; EX drives them to constants because downstream stages use pc_next.
   typedef struct packed {
     logic [31:0] pc;
     logic [31:0] alu_result;

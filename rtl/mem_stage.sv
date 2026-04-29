@@ -29,9 +29,9 @@ module mem_stage (
   input  logic               hold_wb,
   input  logic               dmem_ready,
   input  logic               store_slot_valid,
-  // ex_mem_t carries branch_taken / branch_target / pc_next / rs?_val
-  // for downstream RVFI use; mem_stage only consumes a subset, so the
-  // remaining fields look unused from this module's perspective.
+  // ex_mem_t still carries bundle-stable branch metadata fields, but MEM
+  // consumes pc_next and RVFI source rails; the remaining fields look unused
+  // from this module's perspective.
   /* verilator lint_off UNUSEDSIGNAL */
   input  ex_mem_t  in,
   /* verilator lint_on UNUSEDSIGNAL */

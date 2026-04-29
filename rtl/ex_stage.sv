@@ -220,7 +220,7 @@ module ex_stage (
       reg_q.rs2_val       <= div_rs2_q;
       reg_q.pc_next       <= div_in_q.pc + 32'd4;
       reg_q.branch_taken  <= 1'b0;
-      reg_q.branch_target <= div_in_q.pc + div_in_q.imm;
+      reg_q.branch_target <= 32'b0;
       reg_q.ctrl          <= div_in_q.ctrl;
       reg_q.instr         <= div_in_q.instr;
       reg_q.valid         <= div_in_q.valid;
@@ -245,8 +245,8 @@ module ex_stage (
                             : in.ctrl.is_jump   ? jump_target
                             : branch_taken      ? branch_target
                                                 : (in.pc + 32'd4);
-      reg_q.branch_taken  <= branch_taken;
-      reg_q.branch_target <= branch_target;
+      reg_q.branch_taken  <= 1'b0;
+      reg_q.branch_target <= 32'b0;
       reg_q.ctrl          <= ctrl_with_trap;
       reg_q.instr         <= in.instr;
       reg_q.valid         <= in.valid;
