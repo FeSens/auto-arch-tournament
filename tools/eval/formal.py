@@ -19,7 +19,7 @@ from pathlib import Path
 EXPECTED_MIN_CHECKS = int(os.environ.get("FORMAL_MIN_CHECKS", "50"))
 
 
-def run_formal(worktree: str, target=None) -> dict:
+def run_formal(worktree: str, target: str | None = None) -> dict:
     """
     Args:
       worktree: path to the repo root.
@@ -85,5 +85,5 @@ def run_formal(worktree: str, target=None) -> dict:
 
 if __name__ == '__main__':
     import sys
-    result = run_formal(sys.argv[1] if len(sys.argv) > 1 else '.')
+    result = run_formal(sys.argv[1] if len(sys.argv) > 1 else '.', sys.argv[2] if len(sys.argv) > 2 else None)
     print(json.dumps(result, indent=2))
