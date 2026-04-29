@@ -413,10 +413,20 @@ def fork_core(target: str, base: str, repo_root: Path | None = None,
     if interactive:
         sys.stderr.write(
             f"Optional: write the philosophy for cores/{target} (constraints, "
-            f"style, intent).\nPress Ctrl-D / empty + Enter to skip.\n"
+            f"style, intent).\n"
+            f"Press Enter on an empty line to finish (just press Enter now to skip).\n"
         )
         sys.stderr.flush()
-        text = sys.stdin.read()
+        lines: list[str] = []
+        while True:
+            try:
+                line = input()
+            except EOFError:
+                break  # Ctrl-D also accepted
+            if line == "":
+                break
+            lines.append(line)
+        text = ("\n".join(lines) + "\n") if lines else ""
         philo.write_text(text)
     else:
         philo.write_text("")  # silent, headless-safe.
