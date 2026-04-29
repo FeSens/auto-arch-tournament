@@ -1,18 +1,19 @@
 #!/usr/bin/env bash
 # Build the Verilator-based cosim binary that drives `core` against an ELF
-# program. Produces test/cosim/obj_dir/cosim_sim.
+# program. Produces $OBJ_DIR/cosim_sim (default: test/cosim/obj_dir/cosim_sim).
 #
-# rtl/*.sv is globbed dynamically (with core_pkg.sv forced first because
-# its compilation-unit-scope typedefs and localparams must be visible
-# before any module references them). Hypotheses are allowed to add,
+# RTL_DIR (default: rtl/) is globbed dynamically (with core_pkg.sv forced
+# first because its compilation-unit-scope typedefs and localparams must be
+# visible before any module references them). Hypotheses are allowed to add,
 # rename, or delete files inside rtl/, so a hardcoded file list would
 # silently break restructuring hypotheses.
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 COSIM_DIR="$REPO_ROOT/test/cosim"
-OBJ_DIR="$COSIM_DIR/obj_dir"
-RTL_DIR="$REPO_ROOT/rtl"
+# Path-parametrization. Defaults preserve the legacy single-rtl/ behavior.
+RTL_DIR="${RTL_DIR:-$REPO_ROOT/rtl}"
+OBJ_DIR="${OBJ_DIR:-$COSIM_DIR/obj_dir}"
 
 # Ensure OSS CAD Suite tools are on PATH for non-interactive shells.
 TOOLCHAIN="$REPO_ROOT/.toolchain"
