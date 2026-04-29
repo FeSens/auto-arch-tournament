@@ -27,6 +27,8 @@ formal/last_run.log
 .agent.*.log
 .agent.*.last
 .claude.log
+.scribe.log
+.scribe.*.last
 
 # Build artifacts
 out/
