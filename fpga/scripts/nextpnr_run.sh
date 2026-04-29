@@ -11,10 +11,15 @@ SEED=${1:-1}
 OUTDIR=${2:-generated/pnr_seed${SEED}}
 mkdir -p "$OUTDIR"
 
+# Derive synth.json location from OUTDIR: synth.json lives one level up
+# from the per-seed output dir (e.g. generated/synth.json for the legacy
+# path; cores/<target>/generated/synth.json for multi-core).
+SYNTH_JSON="$(dirname "$OUTDIR")/synth.json"
+
 nextpnr-himbaechel \
   --device GW2A-LV18QN88C8/I7 \
   --vopt family=GW2A-18C \
-  --json generated/synth.json \
+  --json "$SYNTH_JSON" \
   --write "$OUTDIR/pnr.json" \
   --vopt cst=fpga/constraints/Tang_Nano_20K.cst \
   --seed "$SEED" \

@@ -1,4 +1,4 @@
-"""Shared cocotb constants and runner helpers for unit tests.
+"""Shared cocotb constants and runner helpers for cores/v1 unit tests.
 
 Constants mirror rtl/core_pkg.sv. If a localparam there changes, change
 the matching value here.
@@ -12,6 +12,7 @@ from pathlib import Path
 from cocotb_tools.runner import get_runner
 
 # ── ALU encodings (rtl/core_pkg.sv) ────────────────────────────────────────
+# RV32I ops use op[4]=0:
 ALU_ADD    = 0
 ALU_SUB    = 1
 ALU_AND    = 2
@@ -23,7 +24,7 @@ ALU_SLL    = 7
 ALU_SRL    = 8
 ALU_SRA    = 9
 ALU_LUI    = 10
-# RV32M ops use op[4]=1 and op[2:0]=funct3 (matches core_pkg.sv):
+# RV32M ops use op[4]=1 and op[2:0]=funct3:
 ALU_MUL    = 0b10000  # 16
 ALU_MULH   = 0b10001  # 17
 ALU_MULHSU = 0b10010  # 18
@@ -42,10 +43,13 @@ BR_BLTU = 6
 BR_BGEU = 7
 
 # ── Paths ──────────────────────────────────────────────────────────────────
-REPO_ROOT = Path(__file__).resolve().parent.parent
-RTL       = REPO_ROOT / "rtl"
-TEST_DIR  = REPO_ROOT / "test"
-SIM_BUILD = REPO_ROOT / "sim_build"
+# __file__ is cores/v1/test/_helpers.py, so:
+#   parent   = cores/v1/test/
+#   parent.parent = cores/v1/
+CORE_DIR  = Path(__file__).resolve().parent.parent
+RTL       = CORE_DIR / "rtl"
+TEST_DIR  = CORE_DIR / "test"
+SIM_BUILD = CORE_DIR / "sim_build"
 
 
 def run_cocotb(toplevel: str, sources: list[str], test_module: str) -> None:

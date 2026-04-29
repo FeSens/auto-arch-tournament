@@ -12,6 +12,10 @@ set rtl_dir "rtl"
 if {[info exists ::env(RTL_DIR)]} {
     set rtl_dir $::env(RTL_DIR)
 }
+set gen_dir "generated"
+if {[info exists ::env(GEN_DIR)]} {
+    set gen_dir $::env(GEN_DIR)
+}
 
 # Ordering: read core_pkg.sv first so its typedefs/localparams are
 # visible to subsequent files.
@@ -26,6 +30,6 @@ foreach f [lsort [glob -nocomplain "$rtl_dir/*.sv"]] {
 
 read_verilog -sv fpga/core_bench.sv
 
-synth_gowin -top core_bench -json generated/synth.json
+synth_gowin -top core_bench -json $gen_dir/synth.json
 
 stat

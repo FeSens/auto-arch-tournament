@@ -63,7 +63,7 @@ else
   ORCH_TARGET_FLAG :=
 endif
 
-export RTL_DIR CORE_NAME OBJ_DIR
+export RTL_DIR CORE_NAME OBJ_DIR GEN_DIR
 
 help:
 	@echo "Targets (most accept TARGET=<core_name>):"
