@@ -297,8 +297,9 @@ def run_slot(
                       f"agent touched off-limits paths: {sandbox_breaches}")
 
     # Phase 3: lint + synth + bench + cosim-build (no gate; fast).
-    if not emit_verilog(worktree, target=target):
-        return broken("build_failed")
+    build_ok, build_reason = emit_verilog(worktree, target=target)
+    if not build_ok:
+        return broken("build_failed", build_reason)
 
     # Phase 4: formal (gated, formal=1).
     with phase_gate('formal'):

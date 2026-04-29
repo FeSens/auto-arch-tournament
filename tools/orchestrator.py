@@ -318,7 +318,7 @@ def validate_hypothesis(hyp_path: str) -> dict:
     jsonschema.validate(hyp, HYP_SCHEMA)
     return hyp
 
-def emit_verilog(worktree: str, target: str | None = None) -> bool:
+def emit_verilog(worktree: str, target: str | None = None) -> tuple[bool, str]:
     """Prepare a worktree for evaluation.
 
     SV-source-of-truth project: there is no Chisel emit step. Instead this
@@ -328,12 +328,29 @@ def emit_verilog(worktree: str, target: str | None = None) -> bool:
     binary against the worktree's RTL. Any failure here is a "broken" outcome
     — the hypothesis didn't even compile.
 
+    Returns (ok, reason). On success: (True, ""). On failure: (False,
+    "<step>: <stderr-or-stdout tail>"), so callers can record *which* step
+    failed and *why* in their broken-outcome detail field. Without this, a
+    build failure surfaces as `error: "build_failed: "` and the worktree is
+    already destroyed by the time anyone notices, leaving no way to diagnose.
+
     Args:
       worktree -- absolute path to the worktree directory.
       target   -- core name under cores/. When set, RTL lives in
                   cores/<target>/rtl/ instead of rtl/.
     """
     worktree = str(Path(worktree).resolve())
+
+    def _fail(step: str, proc: subprocess.CompletedProcess) -> tuple[bool, str]:
+        # Prefer stderr, fall back to stdout. Trim to the last ~800 chars so
+        # JSONL lines stay readable; the error message is upstream of the
+        # stack trace, so the tail is what we want.
+        out = (proc.stderr or b"").decode(errors="replace").strip()
+        if not out:
+            out = (proc.stdout or b"").decode(errors="replace").strip()
+        if len(out) > 800:
+            out = "..." + out[-800:]
+        return (False, f"{step}: {out}" if out else f"{step}: (no output)")
 
     # 1. Verilator lint. Catches syntax errors before slower steps.
     if target:
@@ -355,7 +372,7 @@ def emit_verilog(worktree: str, target: str | None = None) -> bool:
         cwd=worktree, capture_output=True,
     )
     if lint.returncode != 0:
-        return False
+        return _fail("lint", lint)
 
     # 2. Yosys synth (writes generated/synth.json for nextpnr).
     gen_dir = Path(worktree) / "cores" / target / "generated" if target else Path(worktree) / "generated"
@@ -367,7 +384,7 @@ def emit_verilog(worktree: str, target: str | None = None) -> bool:
         env=synth_env,
     )
     if synth.returncode != 0:
-        return False
+        return _fail("yosys synth", synth)
 
     # 3. Build bench ELFs (selftest + coremark). They are gitignored.
     # Bench programs are shared across cores; no target-specific env needed.
@@ -376,7 +393,7 @@ def emit_verilog(worktree: str, target: str | None = None) -> bool:
         cwd=worktree, capture_output=True,
     )
     if bench.returncode != 0:
-        return False
+        return _fail("bench make", bench)
 
     # 4. Rebuild Verilator cosim binary against the worktree's RTL.
     build_env = (
@@ -390,7 +407,9 @@ def emit_verilog(worktree: str, target: str | None = None) -> bool:
         cwd=worktree, capture_output=True,
         env=build_env,
     )
-    return build.returncode == 0
+    if build.returncode != 0:
+        return _fail("cosim build", build)
+    return (True, "")
 
 def _read_notes(worktree: str) -> str:
     p = Path(worktree) / "implementation_notes.md"
@@ -506,8 +525,11 @@ def _run_baseline_retest(target: str):
     # (the active branch is checked out). We don't create a worktree —
     # the baseline retest IS the branch tip, not a hypothesis.
     repo_root = str(Path(".").resolve())
-    if not emit_verilog(repo_root, target=target):
-        raise SystemExit(f"baseline retest: emit_verilog failed for cores/{target}.")
+    build_ok, build_reason = emit_verilog(repo_root, target=target)
+    if not build_ok:
+        raise SystemExit(
+            f"baseline retest: emit_verilog failed for cores/{target}: {build_reason}"
+        )
     formal = run_formal(repo_root, target=target)
     if not formal['passed']:
         raise SystemExit(
