@@ -12,9 +12,11 @@
 #   deep   : formal/checks-deep.cfg  (no ALTOPS, proves M-ext arithmetic)
 set -e
 
-# Path-parametrization. Defaults preserve the legacy single-rtl/ behavior.
-RTL_DIR="${RTL_DIR:-rtl}"
-CORE_NAME="${CORE_NAME:-auto-arch-researcher}"
+if [ -z "${RTL_DIR:-}" ] || [ -z "${CORE_NAME:-}" ]; then
+  echo "ERROR: formal/run_all.sh requires RTL_DIR and CORE_NAME env vars." >&2
+  echo "  Example: RTL_DIR=cores/v1/rtl CORE_NAME=v1 bash formal/run_all.sh formal/checks.cfg" >&2
+  exit 2
+fi
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"

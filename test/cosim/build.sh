@@ -11,9 +11,11 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 COSIM_DIR="$REPO_ROOT/test/cosim"
-# Path-parametrization. Defaults preserve the legacy single-rtl/ behavior.
-RTL_DIR="${RTL_DIR:-$REPO_ROOT/rtl}"
-OBJ_DIR="${OBJ_DIR:-$COSIM_DIR/obj_dir}"
+if [ -z "${RTL_DIR:-}" ] || [ -z "${OBJ_DIR:-}" ]; then
+  echo "ERROR: test/cosim/build.sh requires RTL_DIR and OBJ_DIR env vars." >&2
+  echo "  Example: RTL_DIR=cores/v1/rtl OBJ_DIR=cores/v1/obj_dir bash test/cosim/build.sh" >&2
+  exit 2
+fi
 
 # Ensure OSS CAD Suite tools are on PATH for non-interactive shells.
 TOOLCHAIN="$REPO_ROOT/.toolchain"

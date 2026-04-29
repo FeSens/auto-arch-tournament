@@ -7,15 +7,15 @@
 # build_failed regardless of merit).
 yosys -import
 
-# Path-parametrization. Default preserves the legacy single-rtl/ behavior.
-set rtl_dir "rtl"
-if {[info exists ::env(RTL_DIR)]} {
-    set rtl_dir $::env(RTL_DIR)
+if {![info exists ::env(RTL_DIR)]} {
+    error "synth.tcl requires the RTL_DIR env var (e.g. RTL_DIR=cores/v1/rtl)."
 }
-set gen_dir "generated"
-if {[info exists ::env(GEN_DIR)]} {
-    set gen_dir $::env(GEN_DIR)
+set rtl_dir $::env(RTL_DIR)
+
+if {![info exists ::env(GEN_DIR)]} {
+    error "synth.tcl requires the GEN_DIR env var (e.g. GEN_DIR=cores/v1/generated)."
 }
+set gen_dir $::env(GEN_DIR)
 
 # Ordering: read core_pkg.sv first so its typedefs/localparams are
 # visible to subsequent files.
