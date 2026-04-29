@@ -23,7 +23,7 @@ fi
 
 mkdir -p "$OBJ_DIR"
 
-# Glob rtl/*.sv. core_pkg.sv first; the rest in a stable lexicographic
+# Glob $RTL_DIR/*.sv. core_pkg.sv first; the rest in a stable lexicographic
 # order (modulo case-insensitive sort, which Verilator/gcc don't care
 # about). If core_pkg.sv is missing the build will catch that downstream
 # via undefined-typedef errors.
