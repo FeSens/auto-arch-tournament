@@ -168,6 +168,18 @@ def _build_prompt(log_tail: list, current_fitness: float, baseline_fitness: floa
                 f"```yaml\n{yaml_path.read_text()}```\n\n"
             )
 
+    target_banner = ""
+    if target:
+        target_banner = f"""## ⚠️  TARGET CORE: cores/{target}/
+
+You are proposing a hypothesis for **cores/{target}/** ONLY. The repo
+contains other cores (cores/baseline/, cores/v1/, etc.) — those are
+READ-ONLY REFERENCE, not editing targets. Each `changes[i].file` in
+your hypothesis YAML must be under cores/{target}/rtl/. Anything else
+gets rejected.
+
+"""
+
     return f"""You are a CPU microarchitecture research agent.
 
 Your job: propose one architectural hypothesis to improve this RV32IM CPU.
@@ -175,7 +187,7 @@ Fitness metric: CoreMark iter/sec = CoreMark iterations/cycle × Fmax_Hz on Tang
 Current best fitness: {current_fitness:.2f}
 Baseline fitness: {baseline_fitness:.2f}
 
-{category_clause}{targets_clause}{philosophy}{core_yaml_block}
+{target_banner}{category_clause}{targets_clause}{philosophy}{core_yaml_block}
 ## Architecture
 {arch}
 

@@ -22,6 +22,25 @@ def _worktree_base(target: str | None) -> Path:
     return Path("cores") / target / "worktrees"
 
 
+def _branch_name(hypothesis_id: str, target: str | None) -> str:
+    """Returns the git branch name for a hypothesis run.
+
+    Git refs are shared across all worktrees in a repo, so two parallel
+    `make loop TARGET=mini` and `make loop TARGET=maxperf` runs that each
+    allocate `hyp-20260429-001-r1s0` (independently — _next_id counts files
+    per-target) would collide on the branch ref. Prefixing the branch with
+    the target keeps the namespaces separate.
+
+    The hypothesis_id itself (used as YAML filename, log entry id, and
+    worktree dir name) is left unchanged — it's the human-facing identifier
+    and doesn't need the prefix because the YAML/log paths are already
+    per-target.
+    """
+    if target is None:
+        return hypothesis_id
+    return f"{target}-{hypothesis_id}"
+
+
 def create_worktree(hypothesis_id: str, base_branch: str = "main",
                     target: str | None = None) -> str:
     """Creates a git worktree for hypothesis_id. Returns path.
@@ -43,6 +62,7 @@ def create_worktree(hypothesis_id: str, base_branch: str = "main",
     base = _worktree_base(target)
     base.mkdir(parents=True, exist_ok=True)
     path = str((base / hypothesis_id).resolve())
+    branch = _branch_name(hypothesis_id, target)
     # Defensive: a prior crashed iteration may have left the branch ref
     # behind (worktree removed but `git branch -D` never ran). git refs
     # are shared across all worktrees of the same repo, so the stale ref
@@ -53,11 +73,11 @@ def create_worktree(hypothesis_id: str, base_branch: str = "main",
         check=False, capture_output=True,
     )
     subprocess.run(
-        ["git", "branch", "-D", hypothesis_id],
+        ["git", "branch", "-D", branch],
         check=False, capture_output=True,
     )
     subprocess.run(
-        ["git", "worktree", "add", "-b", hypothesis_id, path, base_branch],
+        ["git", "worktree", "add", "-b", branch, path, base_branch],
         check=True
     )
 
@@ -112,7 +132,7 @@ def accept_worktree(hypothesis_id: str,
     # Merge into the active branch. Idempotent checkout — no-op if already on it.
     subprocess.run(["git", "checkout", target_branch], check=True)
     subprocess.run(
-        ["git", "merge", "--ff-only", hypothesis_id],
+        ["git", "merge", "--ff-only", _branch_name(hypothesis_id, target)],
         check=True
     )
     destroy_worktree(hypothesis_id, target=target)
@@ -126,5 +146,5 @@ def destroy_worktree(hypothesis_id: str, target: str | None = None):
     """
     path = str((_worktree_base(target) / hypothesis_id).resolve())
     subprocess.run(["git", "worktree", "remove", "--force", path], check=False)
-    subprocess.run(["git", "branch", "-D", hypothesis_id], check=False)
+    subprocess.run(["git", "branch", "-D", _branch_name(hypothesis_id, target)], check=False)
     shutil.rmtree(path, ignore_errors=True)

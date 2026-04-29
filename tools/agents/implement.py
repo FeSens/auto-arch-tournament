@@ -38,11 +38,26 @@ def _build_prompt(hypothesis: dict, worktree: str,
                     f"{philo_text}\n\n"
                 )
 
+    target_banner = ""
+    if target:
+        target_banner = f"""## ⚠️  TARGET CORE: cores/{target}/
+
+You are working on **cores/{target}/** ONLY. The repository may contain
+other cores (cores/baseline/, cores/v1/, etc.) that are visible from this
+worktree — they are READ-ONLY REFERENCE, not your editing surface.
+
+Edit ONLY: {rtl_rel}/*.sv  and  cores/{target}/test/test_*.py
+Do NOT edit any other core's directory. The orchestrator's sandbox
+will reject any edits outside cores/{target}/ as 'broken' and discard
+your entire iteration's work.
+
+"""
+
     return f"""You are a CPU RTL implementation agent.
 
 Your job: implement the following architectural hypothesis in SystemVerilog.
 
-{philosophy}## Hypothesis
+{target_banner}{philosophy}## Hypothesis
 Title: {hypothesis['title']}
 Category: {hypothesis['category']}
 
