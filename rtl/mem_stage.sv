@@ -7,8 +7,8 @@
 // Byte-lane discipline:
 //   - Write data is replicated across all four byte lanes; the
 //     byte-mask (mem_wmask) selects the actual destination bytes.
-//   - Load: shift the raw word right by `addr[1:0]*8`, then sign- or
-//     zero-extend the low 8/16 bits per the LB/LBU/LH/LHU encoding.
+//   - Load: select the addressed byte/halfword lane explicitly, then sign-
+//     or zero-extend it per the LB/LBU/LH/LHU encoding.
 //   - For RVFI ALIGNED_MEM, mem_addr is reported word-aligned and the
 //     byte position is captured in mem_rmask / mem_wmask.
 //
@@ -56,11 +56,6 @@ module mem_stage (
   logic [31:0] wdata_rep;
   logic [3:0]  byte_mask;
   logic [31:0] aligned_addr;
-  // shifted[31:16] is dropped on byte/halfword loads; only [15:0] feeds
-  // the sign/zero-extension mux.
-  /* verilator lint_off UNUSEDSIGNAL */
-  logic [31:0] shifted;
-  /* verilator lint_on UNUSEDSIGNAL */
   logic [7:0]  byte_val;
   logic [15:0] hword_val;
   logic [31:0] load_data;
@@ -84,10 +79,17 @@ module mem_stage (
       default: wdata_rep = in.write_data;
     endcase
 
-    // Byte-lane mask shifted to addr[1:0] * 1.
+    // Byte-lane mask selected explicitly from the low address bits.
     case (in.ctrl.mem_width)
-      2'd0:    byte_mask = (4'b0001 << in.alu_result[1:0]);
-      2'd1:    byte_mask = (4'b0011 << in.alu_result[1:0]);
+      2'd0: begin
+        case (in.alu_result[1:0])
+          2'd0:    byte_mask = 4'b0001;
+          2'd1:    byte_mask = 4'b0010;
+          2'd2:    byte_mask = 4'b0100;
+          default: byte_mask = 4'b1000;
+        endcase
+      end
+      2'd1:    byte_mask = in.alu_result[1] ? 4'b1100 : 4'b0011;
       default: byte_mask = 4'b1111;
     endcase
 
@@ -135,10 +137,15 @@ module mem_stage (
       mem_wait = 1'b0;
     end
 
-    // Load extraction: shift right then sign/zero-extend the low N bits.
-    shifted   = dmem_rdata >> (in.alu_result[1:0] * 8);
-    byte_val  = shifted[7:0];
-    hword_val = shifted[15:0];
+    // Load extraction: fixed byte/halfword lane muxes.
+    case (in.alu_result[1:0])
+      2'd0:    byte_val = dmem_rdata[7:0];
+      2'd1:    byte_val = dmem_rdata[15:8];
+      2'd2:    byte_val = dmem_rdata[23:16];
+      default: byte_val = dmem_rdata[31:24];
+    endcase
+    hword_val = in.alu_result[1] ? dmem_rdata[31:16] : dmem_rdata[15:0];
+
     case (in.ctrl.mem_width)
       2'd0:    load_data = in.ctrl.mem_sext
                          ? {{24{byte_val[7]}},  byte_val}
