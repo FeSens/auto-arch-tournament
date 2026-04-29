@@ -19,8 +19,15 @@ from pathlib import Path
 EXPECTED_MIN_CHECKS = int(os.environ.get("FORMAL_MIN_CHECKS", "50"))
 
 
-def run_formal(worktree: str) -> dict:
+def run_formal(worktree: str, target=None) -> dict:
     """
+    Args:
+      worktree: path to the repo root.
+      target:   optional core name (e.g. 'v1').  When set, injects
+                RTL_DIR=cores/<target>/rtl and CORE_NAME=<target> into
+                the subprocess environment so run_all.sh picks up that
+                core's RTL instead of the default rtl/ directory.
+
     Returns:
       {'passed': True, 'checks_passed': N}
       {'passed': False, 'failed_check': name, 'detail': str}
@@ -31,10 +38,16 @@ def run_formal(worktree: str) -> dict:
         return {'passed': False, 'failed_check': 'setup',
                 'detail': f'formal/run_all.sh missing in {worktree}'}
 
+    env = os.environ.copy()
+    if target is not None:
+        env["RTL_DIR"] = f"cores/{target}/rtl"
+        env["CORE_NAME"] = target
+
     result = subprocess.run(
         ["bash", str(run_script)],
         cwd=worktree_path, capture_output=True, text=True,
         timeout=1800,  # 30 min ceiling for all ~45 checks running in parallel via make -j
+        env=env,
     )
     output = result.stdout + result.stderr
 
