@@ -60,7 +60,7 @@ Advisory file changes (you may deviate, add, rename, or restructure freely):
    Do NOT modify anything in tools/, schemas/, formal/, fpga/, test/cosim/,
    bench/, ARCHITECTURE.md, CLAUDE.md, README.md, setup.sh, or Makefile.
 3. After implementing, verify the build:
-     verilator --lint-only -Wall -Wno-MULTITOP -sv {rtl_rel}/*.sv
+     verilator --lint-only -Wall -Wno-MULTITOP -sv +incdir+{rtl_rel} {rtl_rel}/*.sv
    Fix any errors / warnings before finishing.
 4. Self-check formal locally before declaring done:
      bash formal/run_all.sh
@@ -153,7 +153,7 @@ def run_implementation_agent(hypothesis_path: str, worktree: str,
     rtl_glob = f"cores/{target}/rtl/*.sv" if target else "rtl/*.sv"
     rtl_dir_label = f"cores/{target}/rtl" if target else "rtl"
     lint_cmd = (f"if ls {rtl_glob} >/dev/null 2>&1; then "
-                f"verilator --lint-only -Wall -Wno-MULTITOP -sv {rtl_glob}; "
+                f"verilator --lint-only -Wall -Wno-MULTITOP -sv +incdir+{rtl_dir_label} {rtl_glob}; "
                 f"else echo 'lint: no source files in {rtl_dir_label}/'; exit 1; fi")
     lint = subprocess.run(
         ["bash", "-lc", lint_cmd],

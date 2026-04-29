@@ -190,15 +190,16 @@ def emit_verilog(worktree: str, target: str | None = None) -> bool:
     # 1. Verilator lint. Catches syntax errors before slower steps.
     if target:
         rtl_glob = f"cores/{target}/rtl/*.sv"
+        rtl_dir = f"cores/{target}/rtl"
         lint_cmd = (
             f"if ls {rtl_glob} >/dev/null 2>&1; then "
-            f"verilator --lint-only -Wall -Wno-MULTITOP -sv {rtl_glob}; "
+            f"verilator --lint-only -Wall -Wno-MULTITOP -sv +incdir+{rtl_dir} {rtl_glob}; "
             f"else echo 'lint: no source files in {rtl_glob}'; exit 1; fi"
         )
     else:
         lint_cmd = (
             "if ls rtl/*.sv >/dev/null 2>&1; then "
-            "verilator --lint-only -Wall -Wno-MULTITOP -sv rtl/*.sv; "
+            "verilator --lint-only -Wall -Wno-MULTITOP -sv +incdir+rtl rtl/*.sv; "
             "else echo 'lint: no source files in rtl/'; exit 1; fi"
         )
     lint = subprocess.run(
