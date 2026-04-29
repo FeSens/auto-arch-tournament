@@ -408,7 +408,7 @@ def run_tournament_round(
             msg = (f"{entry['id']}: {entry['title']} "
                    f"(+{entry.get('delta_pct', 0):.1f}%)")
             try:
-                accept_worktree(entry['id'], msg, target_branch=target_branch)
+                accept_worktree(entry['id'], msg, target_branch=target_branch, target=target)
             except Exception as e:
                 # Worktree merge failed (shouldn't happen with ff-only on a
                 # single-coordinator process). Downgrade to regression so the
