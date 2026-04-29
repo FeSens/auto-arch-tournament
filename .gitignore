@@ -33,7 +33,6 @@ out/
 generated/
 sim_build/
 test/cosim/obj_dir/
-test/cosim/obj_dir_vex/
 test/cosim/sim_build/
 test/**/sim_build/
 test/*.result.xml
@@ -61,6 +60,12 @@ bench/programs/*.hex
 experiments/worktrees/
 experiments/hypotheses/*.yml
 experiments/hypotheses/*.yaml
+
+# Per-core gitignored paths (Phase C)
+cores/*/worktrees/
+cores/*/generated/
+cores/*/obj_dir/
+cores/*/implementation_notes.md
 
 # Editor / OS
 .DS_Store

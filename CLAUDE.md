@@ -41,7 +41,11 @@ improve fitness", not "what eval relaxations would let this RTL pass".
 
 ## What hypotheses MAY change
 
-Everything under `rtl/` and the cocotb unit tests under `test/`.
+Everything under `cores/<TARGET>/rtl/` and the cocotb unit tests under
+`cores/<TARGET>/test/test_*.py`. The agent's `implementation_notes.md`
+lives at `cores/<TARGET>/implementation_notes.md` (gitignored). The
+orchestrator may also update `cores/<TARGET>/core.yaml` (current:
+section only).
 
 The only top-level invariant on `rtl/core.sv` is that it exposes a port
 named `core` whose IO matches the RVFI wrapper's expectations
@@ -61,6 +65,8 @@ It must not:
 - Change `core`'s top-level IO shape — specifically: the imem/dmem port set, and the **2-channel** RVFI port set with field naming `io_rvfi_<field>_<n>` for n ∈ {0,1}, channel-0-older convention, and the single-retire-on-channel-0 rule.
 - Weaken any invariant in the table above.
 - Modify any path in the don't-touch list.
+- Edit any other core's directory (cores/<other>/...). Each loop is
+  scoped to a single TARGET.
 
 ## Working notes
 
