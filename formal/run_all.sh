@@ -12,10 +12,13 @@
 #   deep   : formal/checks-deep.cfg  (no ALTOPS, proves M-ext arithmetic)
 set -e
 
+# Path-parametrization. Defaults preserve the legacy single-rtl/ behavior.
+RTL_DIR="${RTL_DIR:-rtl}"
+CORE_NAME="${CORE_NAME:-auto-arch-researcher}"
+
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 RISCV_FORMAL="$SCRIPT_DIR/riscv-formal"
-CORE_NAME="auto-arch-researcher"
 CORE_DIR="$RISCV_FORMAL/cores/$CORE_NAME"
 # Full output capture. Everything genchecks + make print lands here, so a
 # silent crash inside genchecks or a yosys error that doesn't match the
@@ -54,7 +57,7 @@ mkdir -p "$CORE_DIR"
 # instead of the new one. CLAUDE.md explicitly grants hypotheses the
 # right to rename/delete files in rtl/, so this cleanup is required.
 rm -f "$CORE_DIR"/*.sv
-cp "$PROJECT_ROOT"/rtl/*.sv     "$CORE_DIR/"
+cp "$PROJECT_ROOT"/$RTL_DIR/*.sv "$CORE_DIR/"
 cp "$SCRIPT_DIR/wrapper.sv"     "$CORE_DIR/wrapper.sv"
 
 # Stage checks.cfg with [verilog-files] auto-derived from actual rtl/
