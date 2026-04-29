@@ -1,5 +1,5 @@
 """Runs 3 nextpnr seeds in parallel, returns median Fmax and CoreMark iter/sec."""
-import asyncio, re, json, subprocess, statistics
+import asyncio, os, re, json, subprocess, statistics
 from pathlib import Path
 
 SEEDS = [1, 2, 3]
@@ -73,16 +73,17 @@ async def run_seed(seed: int, worktree: str, outdir: str) -> dict:
         'placement_failed': placement_failed,
     }
 
-async def _run_all_seeds(worktree: str) -> list:
-    tasks = [run_seed(s, worktree, f"generated/pnr_seed{s}") for s in SEEDS]
+async def _run_all_seeds(worktree: str, generated_dir: str = "generated") -> list:
+    tasks = [run_seed(s, worktree, f"{generated_dir}/pnr_seed{s}") for s in SEEDS]
     return await asyncio.gather(*tasks)
 
-def run_coremark_ipc(worktree: str) -> dict:
+def run_coremark_ipc(worktree: str, sim_bin: str | None = None) -> dict:
     """Run CoreMark on Verilator sim, return {iter_per_cycle, completed, cycles, iterations}.
     Completion is only trusted when the simulation retired an ebreak — otherwise the
     benchmark hit maxcycles without completing and the cycle count is meaningless."""
     worktree_path = Path(worktree).resolve()
-    sim_bin = str(worktree_path / "test/cosim/obj_dir/cosim_sim")
+    if sim_bin is None:
+        sim_bin = str(worktree_path / "test/cosim/obj_dir/cosim_sim")
     elf     = str(worktree_path / "bench/programs/coremark.elf")
     # 50M cycle ceiling: 2K CoreMark with ITERATIONS=10 + iStall+dStall
     # needs ~5M cycles. 50M gives 10x headroom for slower candidates.
@@ -179,8 +180,15 @@ def validate_coremark_uart(uart: str, iterations: int) -> tuple:
         return False, f'coremark_iterations_mismatch: expected {iterations}, got {reported_iterations}'
     return True, None
 
-def run_fpga_eval(worktree: str) -> dict:
+def run_fpga_eval(worktree: str, target: str | None = None) -> dict:
     """
+    Args:
+      worktree: path to the repo root (or worktree).
+      target:   optional core name (e.g. 'v1'). When set, injects
+                RTL_DIR=cores/<target>/rtl into the yosys env and resolves
+                generated/ and cosim_sim from cores/<target>/ instead of
+                the repo-root defaults.
+
     Returns:
       {'placement_failed': True}         — all PnR seeds failed
       {'bench_failed': True, ...}        — bench didn't reach ebreak
@@ -194,7 +202,20 @@ def run_fpga_eval(worktree: str) -> dict:
       }
     """
     worktree = str(Path(worktree).resolve())
-    seed_results = asyncio.run(_run_all_seeds(worktree))
+    env = os.environ.copy()
+    if target is not None:
+        env["RTL_DIR"] = str(Path(worktree) / "cores" / target / "rtl")
+
+    generated_dir = (
+        str(Path("cores") / target / "generated") if target is not None else "generated"
+    )
+    sim_bin = (
+        str(Path(worktree) / "cores" / target / "obj_dir" / "cosim_sim")
+        if target is not None
+        else None
+    )
+
+    seed_results = asyncio.run(_run_all_seeds(worktree, generated_dir))
     successful   = [r for r in seed_results if not r['placement_failed']]
     all_fmax     = [r['fmax_mhz'] for r in successful]
     seeds_log    = [r.get('fmax_mhz') for r in seed_results]
@@ -211,7 +232,7 @@ def run_fpga_eval(worktree: str) -> dict:
         }
 
     fmax_median = statistics.median(all_fmax)
-    cm          = run_coremark_ipc(worktree)
+    cm          = run_coremark_ipc(worktree, sim_bin)
 
     if not cm['completed']:
         return {
@@ -242,5 +263,8 @@ def run_fpga_eval(worktree: str) -> dict:
 
 if __name__ == '__main__':
     import sys
-    result = run_fpga_eval(sys.argv[1] if len(sys.argv)>1 else '.')
+    result = run_fpga_eval(
+        sys.argv[1] if len(sys.argv) > 1 else '.',
+        sys.argv[2] if len(sys.argv) > 2 else None,
+    )
     print(json.dumps(result, indent=2))
