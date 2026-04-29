@@ -150,6 +150,7 @@ def run_slot(
     baseline: float,
     fixed_hyp_path: str | None,
     targets: dict | None,
+    target_branch: str = "main",
 ) -> dict:
     """Run one tournament slot end-to-end. Returns a draft log entry.
 
@@ -213,7 +214,7 @@ def run_slot(
 
     # Phase 2: implement.
     worktree_id = hyp['id']  # could differ from hyp_id if agent ignored override
-    worktree = create_worktree(worktree_id)
+    worktree = create_worktree(worktree_id, base_branch=target_branch)
     print(f"  [slot {slot}] worktree={worktree}", flush=True)
 
     def broken(reason: str, detail: str = '') -> dict:
@@ -351,7 +352,7 @@ def run_tournament_round(
             pool.submit(
                 run_slot, slot, hyp_ids[slot], hyp_ids,
                 log, best, cur_lut, baseline, fixed_hyp_paths[slot],
-                targets,
+                targets, target_branch,
             ): slot
             for slot in range(tournament_size)
         }
