@@ -153,6 +153,30 @@ def _current_target() -> str | None:
     return None
 
 
+def _active_branch(repo_root: Path | str | None = None) -> str:
+    """Return the currently checked-out branch name in repo_root (default cwd).
+
+    The orchestrator's loop forks hypothesis worktrees off this branch and
+    merges accepted ones back into it. In WORKTREE=1 mode (the default for
+    `make loop`), this is `core-<target>`; in WORKTREE=0 mode it's whatever
+    branch the user has checked out (typically `main`).
+
+    Raises SystemExit on detached HEAD — the loop's accept path needs a
+    named branch to fast-forward into.
+    """
+    cwd = str(repo_root) if repo_root is not None else None
+    out = subprocess.run(
+        ["git", "rev-parse", "--abbrev-ref", "HEAD"],
+        cwd=cwd, capture_output=True, text=True, check=True,
+    ).stdout.strip()
+    if out == "HEAD":
+        raise SystemExit(
+            "orchestrator: detached HEAD detected. Check out a branch "
+            "(e.g. main, or core-<target>) before running the loop."
+        )
+    return out
+
+
 def read_log() -> list:
     if not LOG_PATH.exists(): return []
     return [json.loads(l) for l in LOG_PATH.read_text().splitlines() if l.strip()]
@@ -219,6 +243,27 @@ def append_log(entry: dict):
                 except Exception:
                     pass  # malformed YAML — log the entry without hypothesis content
 
+        # Strip private side-channel fields (set by run_slot, consumed here)
+        # before they reach the JSONL on disk. Diffs are too large to keep
+        # per-line in the log and would dwarf the actual outcome record.
+        slot_diff = entry.pop("_diff", "")
+
+        # Scribe step: distill one bullet into cores/<target>/LESSONS.md per
+        # iteration. Runs sequentially under _LOG_LOCK so concurrent slots
+        # never race on the file. A scribe failure MUST NOT fail the
+        # iteration — the JSONL line is the authoritative outcome; the
+        # lesson is decoration the next round's hypothesis agent reads.
+        if target:
+            try:
+                from tools.agents.scribe import run_scribe_agent
+                lesson = run_scribe_agent(entry, slot_diff, target)
+                if lesson:
+                    entry["lesson"] = lesson
+            except Exception as e:
+                entry["scribe_skipped"] = f"{type(e).__name__}: {e}"
+                print(f"  [scribe] skipped for {entry.get('id','?')}: {e}",
+                      flush=True)
+
         LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
         with LOG_PATH.open('a') as f:
             f.write(json.dumps(entry) + '\n')
@@ -233,6 +278,13 @@ def append_log(entry: dict):
         subprocess.run(["git", "add", str(LOG_PATH)], check=True)
         if PLOT_PATH.exists():
             subprocess.run(["git", "add", str(PLOT_PATH)], check=True)
+        # Roll the scribe's LESSONS.md write (if any) into the same commit
+        # as the log line that triggered it, so a `git log cores/<target>/
+        # LESSONS.md` shows knowledge accumulating in lockstep with outcomes.
+        if target:
+            lessons = Path("cores") / target / "LESSONS.md"
+            if lessons.exists():
+                subprocess.run(["git", "add", str(lessons)], check=True)
         if target and entry.get("outcome") == "improvement":
             yaml_path = Path("cores") / target / "core.yaml"
             update_core_yaml_current(
@@ -572,6 +624,12 @@ def main():
     prior_rounds = [e.get('round_id', 0) for e in log if isinstance(e.get('round_id'), int)]
     next_round = (max(prior_rounds) + 1) if prior_rounds else 1
 
+    # Active branch is the loop's fork/merge anchor — see _active_branch
+    # docstring. Hardcoding "main" here breaks WORKTREE=1 mode, where the
+    # orchestrator runs inside .worktrees/<target>/ on branch core-<target>
+    # and the target's RTL only exists on that branch.
+    target_branch = _active_branch()
+
     for r in range(args.iterations):
         round_id = next_round + r
         log = read_log()
@@ -579,7 +637,7 @@ def main():
             round_id, args.tournament_size, log,
             fixed_hyp_paths=fixed,
             targets=targets or None,
-            target_branch="main",
+            target_branch=target_branch,
             target=args.target,
         )
 

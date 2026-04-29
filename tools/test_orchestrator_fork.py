@@ -8,10 +8,22 @@ from pathlib import Path
 import pytest
 
 
+# Common git -c flags for test commits. Disables signing because the
+# user's real gitconfig may have SSH-key signing wired to a 1Password
+# agent that prompts for biometric auth and hangs the test process.
+_GIT_TEST_CFG = [
+    "-c", "user.email=t@t",
+    "-c", "user.name=t",
+    "-c", "commit.gpgsign=false",
+    "-c", "tag.gpgsign=false",
+]
+
+
 def _setup_repo(tmp: Path):
     """Create a minimal cores/baseline structure and init a git repo."""
-    subprocess.run(["git", "init"], cwd=tmp, check=True, capture_output=True)
-    subprocess.run(["git", "-c", "user.email=t@t", "-c", "user.name=t",
+    subprocess.run(["git", "init", "-b", "main"],
+                   cwd=tmp, check=True, capture_output=True)
+    subprocess.run(["git", *_GIT_TEST_CFG,
                     "commit", "--allow-empty", "-m", "init"],
                    cwd=tmp, check=True, capture_output=True)
     bl_rtl = tmp / "cores" / "baseline" / "rtl"
@@ -26,7 +38,7 @@ def _setup_repo(tmp: Path):
     (bl_test / "_helpers.py").write_text("# helpers\n")
     (bl_test / "conftest.py").write_text("# conftest\n")
     subprocess.run(["git", "add", "."], cwd=tmp, check=True, capture_output=True)
-    subprocess.run(["git", "-c", "user.email=t@t", "-c", "user.name=t",
+    subprocess.run(["git", *_GIT_TEST_CFG,
                     "commit", "-m", "seed baseline"],
                    cwd=tmp, check=True, capture_output=True)
 
@@ -73,3 +85,35 @@ def test_fork_errors_if_target_exists(tmp_path):
 
     with pytest.raises(SystemExit, match="already exists"):
         fork_core(target="foo", base="baseline", repo_root=tmp_path, interactive=False)
+
+
+def test_active_branch_returns_per_target_branch(tmp_path):
+    """Regression: orchestrator must fork hypothesis worktrees off the loop's
+    active branch (core-<target> in WORKTREE=1 mode), not from a hardcoded
+    'main'. With main=ab15c6a and core-maxperf carrying the freshly-forked
+    cores/maxperf/, hardcoding 'main' produced empty hypothesis worktrees
+    that confused the codex agent into editing other cores."""
+    _setup_repo(tmp_path)
+    subprocess.run(["git", "checkout", "-b", "core-maxperf"],
+                   cwd=tmp_path, check=True, capture_output=True)
+    import sys
+    sys.path.insert(0, str(Path(__file__).parent.parent))
+    from tools.orchestrator import _active_branch
+
+    assert _active_branch(repo_root=tmp_path) == "core-maxperf"
+
+
+def test_active_branch_rejects_detached_head(tmp_path):
+    _setup_repo(tmp_path)
+    sha = subprocess.run(
+        ["git", "rev-parse", "HEAD"],
+        cwd=tmp_path, capture_output=True, text=True, check=True,
+    ).stdout.strip()
+    subprocess.run(["git", "checkout", "--detach", sha],
+                   cwd=tmp_path, check=True, capture_output=True)
+    import sys
+    sys.path.insert(0, str(Path(__file__).parent.parent))
+    from tools.orchestrator import _active_branch
+
+    with pytest.raises(SystemExit, match="detached HEAD"):
+        _active_branch(repo_root=tmp_path)
