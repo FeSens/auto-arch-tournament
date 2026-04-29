@@ -81,6 +81,53 @@ sets `commit.gpgsign=false` for its own subprocess tree so the loop
 doesn't hang on a 1Password biometric prompt. Manual commits from your
 shell are unaffected.
 
+## Working with multiple cores
+
+The repo holds multiple core architectures under `cores/<name>/`. Each core has
+its own RTL, cocotb tests, experiment log, and progress chart.
+
+**Available cores:**
+- `cores/baseline/` — the original simple RV32IM core (from the `baseline` git
+  tag). The universal seed for new cores.
+- `cores/v1/` — the current evolved 5-stage in-order with M-ext.
+
+**Running the orchestrator on a core:**
+```bash
+make loop TARGET=v1 N=10                        # iterate v1 ten times
+make next TARGET=v1                             # one round
+make report TARGET=v1                           # per-core summary
+```
+
+**Creating a new core (Model A — branch + worktree):**
+```bash
+# 1. Create a feature branch for the new core.
+git checkout -b core-nicebrev
+
+# 2. (Optional) Create a separate working directory if you want to keep
+#    your main checkout free for other cores in parallel.
+git worktree add ../auto-arch-nicebrev core-nicebrev
+cd ../auto-arch-nicebrev
+
+# 3. Run the loop with BASE= to fork from an existing core.
+make loop TARGET=nicebrev BASE=baseline N=20
+
+# 4. When the experiment is done, push the branch and open a PR to main.
+git push -u origin core-nicebrev
+gh pr create
+```
+
+The orchestrator does NOT manage branches — that's all manual. This is
+intentional: it lets you parallelize multiple cores via `git worktree add` and
+review each core's evolution as a single PR diff.
+
+**Per-core artifacts** (under `cores/<name>/`):
+- `rtl/*.sv` — the design.
+- `test/test_*.py` — cocotb tests for this core.
+- `core.yaml` — declared targets + auto-updated `current:`.
+- `CORE_PHILOSOPHY.md` — optional architect's intent (injected into agent prompts).
+- `experiments/log.jsonl` — per-iteration outcomes.
+- `experiments/progress.png` — fitness chart over time.
+
 ## Philosophy
 
 The orchestrator is hardcoded. The model never edits it. What the model
