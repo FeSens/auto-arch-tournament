@@ -14,27 +14,17 @@ export PATH := $(OSS_BIN):$(LOCAL_BIN):$(PATH)
 #   AGENT    — codex (default) or claude. Honors a pre-existing
 #              AGENT_PROVIDER env var if AGENT isn't set on the make
 #              command line.
-#   BRANCH   — hypothesis branch name (e.g. 'feat/cache-l1').
-#   BASELINE — git ref for baseline RTL (e.g. 'main').
 #   COREMARK — target CoreMark iterations/sec (e.g. '370').
 #   LUT      — target LUT count (e.g. '3000').
 N        ?= 10
 K        ?= 1
 AGENT    ?= $(or $(AGENT_PROVIDER),codex)
-BRANCH   ?=
-BASELINE ?=
 COREMARK ?=
 LUT      ?=
 
 # Compose optional CLI flags for the orchestrator. Empty vars produce
 # empty strings so the orchestrator falls back to its defaults.
 ORCH_FLAGS  = --iterations $(N) --tournament-size $(K)
-ifneq ($(strip $(BRANCH)),)
-  ORCH_FLAGS += --branch $(BRANCH)
-endif
-ifneq ($(strip $(BASELINE)),)
-  ORCH_FLAGS += --baseline $(BASELINE)
-endif
 ifneq ($(strip $(COREMARK)),)
   ORCH_FLAGS += --coremark-target $(COREMARK)
 endif
@@ -42,10 +32,18 @@ ifneq ($(strip $(LUT)),)
   ORCH_FLAGS += --lut-target $(LUT)
 endif
 
-# Multi-core: TARGET selects the core under cores/<TARGET>/. Empty TARGET
-# falls back to the legacy single-rtl/ behavior (kept during Phase A/B
-# migration; removed in Phase C).
+# Multi-core: TARGET selects the core under cores/<TARGET>/.
+# TARGET is required for all core-touching targets (enforced below).
 TARGET ?=
+
+# Targets that require TARGET=<core_name>.
+CORE_TARGETS := lint test cosim cosim-build formal formal-deep fpga next loop
+
+ifeq ($(strip $(TARGET)),)
+  ifneq ($(filter $(MAKECMDGOALS),$(CORE_TARGETS)),)
+    $(error TARGET= required. Available cores: $(notdir $(wildcard cores/*)))
+  endif
+endif
 
 ifneq ($(strip $(TARGET)),)
   RTL_DIR    := cores/$(TARGET)/rtl
@@ -54,13 +52,6 @@ ifneq ($(strip $(TARGET)),)
   OBJ_DIR    := cores/$(TARGET)/obj_dir
   GEN_DIR    := cores/$(TARGET)/generated
   ORCH_TARGET_FLAG := --target $(TARGET)
-else
-  RTL_DIR    := rtl
-  TEST_DIR   := test
-  CORE_NAME  := auto-arch-researcher
-  OBJ_DIR    := test/cosim/obj_dir
-  GEN_DIR    := generated
-  ORCH_TARGET_FLAG :=
 endif
 
 export RTL_DIR CORE_NAME OBJ_DIR GEN_DIR
@@ -81,9 +72,9 @@ help:
 	@echo "  make test-infra         — run orchestrator infra tests under tools/"
 	@echo ""
 	@echo "Available cores:"
-	@for d in cores/*/; do echo "  - $$(basename $$d)"; done 2>/dev/null || echo "  (none — falls back to rtl/)"
+	@for d in cores/*/; do echo "  - $$(basename $$d)"; done 2>/dev/null || echo "  (none yet)"
 
-# verilator lint over $(RTL_DIR)/. Empty dir is fine — legacy fallback.
+# verilator lint over $(RTL_DIR)/.
 # -Wno-MULTITOP: until phase 2's core.sv lands and instantiates everything,
 # rtl/ legitimately has multiple top modules. Drop this once phase 2 is in.
 lint:

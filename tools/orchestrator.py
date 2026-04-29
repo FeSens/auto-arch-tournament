@@ -42,10 +42,18 @@ sys.modules.setdefault('tools.orchestrator', sys.modules[__name__])
 # doesn't break the lazy import.
 import tools.accept_rule  # noqa: F401
 
-LOG_PATH       = Path("experiments/log.jsonl")
-PLOT_PATH      = Path("experiments/progress.png")
+LOG_PATH       = Path("experiments/log.jsonl")   # rebound in main() per target
+PLOT_PATH      = Path("experiments/progress.png") # rebound in main() per target
 HYP_SCHEMA     = json.loads(Path("schemas/hypothesis.schema.json").read_text())
 RESULT_SCHEMA  = json.loads(Path("schemas/eval_result.schema.json").read_text())
+
+
+def log_path_for(target: str) -> Path:
+    return Path("cores") / target / "experiments" / "log.jsonl"
+
+
+def plot_path_for(target: str) -> Path:
+    return Path("cores") / target / "experiments" / "progress.png"
 
 # Serializes append_log across concurrent tournament slots. The body of
 # append_log writes log.jsonl, regenerates progress.png, then git-adds
@@ -54,29 +62,33 @@ RESULT_SCHEMA  = json.loads(Path("schemas/eval_result.schema.json").read_text())
 # .git/index.lock and crash the round.
 _LOG_LOCK = threading.Lock()
 
-# Don't-touch sandbox: anything outside ALLOWED_PATTERNS that the agent
-# touches is rejected before the eval gates run. Without this an agent
-# could silently soften checks.cfg, the cosim main.cpp, or the
+# Don't-touch sandbox: anything outside the per-target allowed patterns that
+# the agent touches is rejected before the eval gates run. Without this an
+# agent could silently soften checks.cfg, the cosim main.cpp, or the
 # fpga.py CRC table and inflate its own fitness score.
 #
-# Permitted modifications, per CLAUDE.md "What hypotheses MAY change":
-#   - rtl/ (any file)
-#   - test/test_*.py (cocotb suites for new modules)
-#   - implementation_notes.md (the agent's own writeup, untracked)
+# Permitted modifications per CLAUDE.md "What hypotheses MAY change":
+#   - cores/<target>/rtl/ (any file)
+#   - cores/<target>/test/test_*.py (cocotb suites for new modules)
+#   - cores/<target>/implementation_notes.md (the agent's own writeup)
+#   - cores/<target>/core.yaml
 #
 # Everything else is off-limits.
-ALLOWED_PATTERNS = (
-    re.compile(r"^rtl/.+"),
-    re.compile(r"^test/test_[^/]+\.py$"),
-    re.compile(r"^implementation_notes\.md$"),
-)
+def allowed_patterns_for(target: str) -> tuple:
+    base = re.escape(f"cores/{target}")
+    return (
+        re.compile(rf"^{base}/rtl/.+"),
+        re.compile(rf"^{base}/test/test_[^/]+\.py$"),
+        re.compile(rf"^{base}/implementation_notes\.md$"),
+        re.compile(rf"^{base}/core\.yaml$"),
+    )
 
 
-def path_is_allowed(path: str) -> bool:
-    return any(p.match(path) for p in ALLOWED_PATTERNS)
+def path_is_allowed(path: str, patterns: tuple) -> bool:
+    return any(p.match(path) for p in patterns)
 
 
-def offlimits_changes(worktree: str) -> list:
+def offlimits_changes(worktree: str, patterns: tuple) -> list:
     """Return paths the agent modified that are NOT on the allow list.
 
     Reads `git status --porcelain` against the worktree's HEAD. Catches
@@ -95,7 +107,7 @@ def offlimits_changes(worktree: str) -> list:
         # path is "OLD -> NEW"; flag both ends.
         rest = line[3:]
         for p in (s.strip() for s in rest.split(" -> ")):
-            if p and not path_is_allowed(p):
+            if p and not path_is_allowed(p, patterns):
                 bad.append(p)
     return bad
 
@@ -267,44 +279,6 @@ def run_report():
     for e in improvements:
         print(f"  {e['id']:20s}  {e['fitness']:6.2f}  ({e['delta_pct']:+.1f}%)  {e['title']}")
 
-def _resolve_ref(ref: str) -> str:
-    """git rev-parse <ref> -> SHA, or raise SystemExit with a clear message."""
-    try:
-        out = subprocess.run(
-            ["git", "rev-parse", "--verify", ref],
-            capture_output=True, text=True, check=True,
-        )
-        return out.stdout.strip()
-    except subprocess.CalledProcessError:
-        raise SystemExit(f"baseline: cannot resolve git ref '{ref}'.")
-
-
-def _branch_exists(name: str) -> bool:
-    return subprocess.run(
-        ["git", "rev-parse", "--verify", f"refs/heads/{name}"],
-        capture_output=True,
-    ).returncode == 0
-
-
-def _ensure_branch(branch: str, baseline: str | None) -> bool:
-    """Create branch from baseline (or main) if missing; error if both branch
-    and baseline are set and the branch already exists. Returns True iff the
-    branch was newly created (caller uses this to decide whether to run a
-    baseline retest)."""
-    exists = _branch_exists(branch)
-    if exists and baseline is not None:
-        raise SystemExit(
-            f"Branch '{branch}' already exists. To start fresh from "
-            f"'{baseline}', run `git branch -D {branch}` first."
-        )
-    if not exists:
-        ref = baseline or "main"
-        sha = _resolve_ref(ref)
-        subprocess.run(["git", "branch", branch, sha], check=True)
-        return True
-    return False
-
-
 def _run_baseline_retest(branch: str, target: str | None = None):
     """Run a one-shot eval on the freshly created branch's RTL.
 
@@ -378,35 +352,34 @@ def main():
     parser.add_argument('--from-hypothesis', metavar='PATH', default=None,
                         help='Skip the LLM hypothesis step and use a pre-written YAML. '
                              'Comma-separated list for tournament-size > 1.')
-    parser.add_argument('--branch', default=None,
-                        help='Sandbox merge target. Default: main.')
-    parser.add_argument('--baseline', default=None,
-                        help='Git ref for fresh-branch RTL fork. Default: main. '
-                             'Requires --branch.')
     parser.add_argument('--coremark-target', type=int, default=None,
                         help='CoreMark iter/s target for two-phase Pareto accept.')
     parser.add_argument('--lut-target', type=int, default=None,
                         help='LUT4 target for two-phase Pareto accept.')
     parser.add_argument('--target', default=None,
-                        help='Core name under cores/. If absent, uses legacy rtl/ paths.')
+                        help='Core name under cores/. Required for non-report invocations.')
     args = parser.parse_args()
 
+    # --target is required for all non-report invocations.
+    if not args.report and not args.target:
+        parser.error("--target is required. Available cores: " +
+                     ", ".join(sorted(
+                         p.name for p in Path("cores").iterdir()
+                         if p.is_dir()
+                     ) if Path("cores").exists() else []))
+
     # Flag validation.
-    if args.baseline and not args.branch:
-        raise SystemExit("--baseline requires --branch.")
     if args.coremark_target is not None and args.coremark_target <= 0:
         raise SystemExit("--coremark-target must be positive.")
     if args.lut_target is not None and args.lut_target <= 0:
         raise SystemExit("--lut-target must be positive.")
 
-    # Per-branch log/plot. Must come before --report so a branch-scoped
-    # report reads the per-branch log file. Default branch (no --branch)
-    # keeps writing to experiments/log.jsonl + experiments/progress.png.
-    target_branch = args.branch or "main"
-    if args.branch:
-        global LOG_PATH, PLOT_PATH
-        LOG_PATH  = Path(f"experiments/log-{args.branch}.jsonl")
-        PLOT_PATH = Path(f"experiments/progress-{args.branch}.png")
+    # Per-target log/plot. Rebound as globals so read_log/append_log pick them
+    # up without needing to thread the paths through every call.
+    global LOG_PATH, PLOT_PATH
+    if args.target:
+        LOG_PATH  = log_path_for(args.target)
+        PLOT_PATH = plot_path_for(args.target)
 
     if args.report:
         run_report()
@@ -417,18 +390,6 @@ def main():
         targets["coremark"] = args.coremark_target
     if args.lut_target is not None:
         targets["lut"] = args.lut_target
-
-    # Branch lifecycle.
-    fresh_branch = False
-    if args.branch:
-        fresh_branch = _ensure_branch(args.branch, args.baseline)
-        subprocess.run(["git", "checkout", args.branch], check=True)
-
-    # First-iteration baseline retest on fresh branches.
-    if fresh_branch:
-        print(f"[orchestrator] fresh branch '{args.branch}' — running baseline retest",
-              flush=True)
-        _run_baseline_retest(args.branch, target=args.target)
 
     fixed = None
     if args.from_hypothesis:
@@ -446,7 +407,7 @@ def main():
             round_id, args.tournament_size, log,
             fixed_hyp_paths=fixed,
             targets=targets or None,
-            target_branch=target_branch,
+            target_branch="main",
             target=args.target,
         )
 

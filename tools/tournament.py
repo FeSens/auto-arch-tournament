@@ -152,6 +152,7 @@ def run_slot(
     targets: dict | None,
     target_branch: str = "main",
     target: str | None = None,
+    patterns: tuple = (),
 ) -> dict:
     """Run one tournament slot end-to-end. Returns a draft log entry.
 
@@ -172,6 +173,7 @@ def run_slot(
       targets         -- optional {coremark, lut} performance targets.
       target_branch   -- git branch to merge accepted worktrees into.
       target          -- core name under cores/. When None, uses legacy rtl/ paths.
+      patterns        -- pre-built sandbox allow patterns for this target.
     """
     # Lazy imports to avoid circular import with tools.orchestrator.
     import yaml
@@ -247,7 +249,7 @@ def run_slot(
         if not impl_ok:
             return broken("implementation_compile_failed")
 
-    sandbox_breaches = offlimits_changes(worktree)
+    sandbox_breaches = offlimits_changes(worktree, patterns)
     if sandbox_breaches:
         return broken("sandbox_violation",
                       f"agent touched off-limits paths: {sandbox_breaches}")
@@ -342,6 +344,7 @@ def run_tournament_round(
         current_lut as _current_lut,
         baseline_fitness as _baseline,
         append_log,
+        allowed_patterns_for,
     )
     from tools.worktree import accept_worktree, destroy_worktree
 
@@ -349,6 +352,9 @@ def run_tournament_round(
     cur_lut  = _current_lut(log)
     baseline = _baseline(log)
     print(f"\n{'='*60}\nRound {round_id}  |  slots={tournament_size}  |  current best={best:.2f}\n{'='*60}", flush=True)
+
+    # Build per-target sandbox patterns once for the whole round.
+    patterns = allowed_patterns_for(target) if target else ()
 
     today = datetime.date.today().strftime("%Y%m%d")
     # First-seq picker: continue numbering from existing files in
@@ -378,7 +384,7 @@ def run_tournament_round(
             pool.submit(
                 run_slot, slot, hyp_ids[slot], hyp_ids,
                 log, best, cur_lut, baseline, fixed_hyp_paths[slot],
-                targets, target_branch, target,
+                targets, target_branch, target, patterns,
             ): slot
             for slot in range(tournament_size)
         }
