@@ -9,9 +9,10 @@
 //     and lets the ID stage see WB-stage writes within the same cycle
 //     without an extra forwarding mux.
 //
-// The reset clears all 32 registers. Distributed-LUT or flop inference is
-// fine here; explicit BRAM attribution lives on the larger imem/dmem
-// declarations in soc.sv (phase 5).
+// Reset clears only the valid mask. The data payload is intentionally
+// resetless so synthesis can infer cheap distributed RAM instead of a bank of
+// resettable flops. Invalid nonzero registers read as zero until their first
+// write after reset.
 //
 // Latency:        write = 1 cycle (synchronous), read = combinational.
 // RVFI fields:    feeds rs1_rdata, rs2_rdata, rd_wdata.
@@ -29,13 +30,17 @@ module reg_file (
   input  logic [31:0] w_data
 );
 
-  logic [31:0] regs [0:31];
+  (* ram_style = "distributed" *) logic [31:0] regs_rs1 [0:31];
+  (* ram_style = "distributed" *) logic [31:0] regs_rs2 [0:31];
+  logic [31:0] valid_q;
 
   always_ff @(posedge clock) begin
     if (reset) begin
-      for (int i = 0; i < 32; i++) regs[i] <= 32'b0;
+      valid_q <= 32'b0;
     end else if (w_en && w_addr != 5'b0) begin
-      regs[w_addr] <= w_data;
+      regs_rs1[w_addr] <= w_data;
+      regs_rs2[w_addr] <= w_data;
+      valid_q[w_addr]  <= 1'b1;
     end
   end
 
@@ -44,15 +49,19 @@ module reg_file (
       rs1_data = 32'b0;
     else if (w_en && w_addr == rs1_addr)
       rs1_data = w_data;
+    else if (valid_q[rs1_addr])
+      rs1_data = regs_rs1[rs1_addr];
     else
-      rs1_data = regs[rs1_addr];
+      rs1_data = 32'b0;
 
     if (rs2_addr == 5'b0)
       rs2_data = 32'b0;
     else if (w_en && w_addr == rs2_addr)
       rs2_data = w_data;
+    else if (valid_q[rs2_addr])
+      rs2_data = regs_rs2[rs2_addr];
     else
-      rs2_data = regs[rs2_addr];
+      rs2_data = 32'b0;
   end
 
 endmodule
