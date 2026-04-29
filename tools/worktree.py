@@ -43,6 +43,19 @@ def create_worktree(hypothesis_id: str, base_branch: str = "main",
     base = _worktree_base(target)
     base.mkdir(parents=True, exist_ok=True)
     path = str((base / hypothesis_id).resolve())
+    # Defensive: a prior crashed iteration may have left the branch ref
+    # behind (worktree removed but `git branch -D` never ran). git refs
+    # are shared across all worktrees of the same repo, so the stale ref
+    # would block `git worktree add -b`. Nuke it first if present —
+    # hypothesis branches are per-iteration ephemeral anyway.
+    subprocess.run(
+        ["git", "worktree", "prune"],
+        check=False, capture_output=True,
+    )
+    subprocess.run(
+        ["git", "branch", "-D", hypothesis_id],
+        check=False, capture_output=True,
+    )
     subprocess.run(
         ["git", "worktree", "add", "-b", hypothesis_id, path, base_branch],
         check=True
