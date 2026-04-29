@@ -21,7 +21,7 @@ read_verilog -sv "$rtl_dir/core_pkg.sv"
 # case; we filter core_pkg.sv out to avoid double-include.
 foreach f [lsort [glob -nocomplain "$rtl_dir/*.sv"]] {
     if {[file tail $f] == "core_pkg.sv"} { continue }
-    read_verilog -sv $f
+    read_verilog -sv "$f"
 }
 
 read_verilog -sv fpga/core_bench.sv
