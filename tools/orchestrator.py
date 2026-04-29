@@ -111,6 +111,48 @@ def offlimits_changes(worktree: str, patterns: tuple) -> list:
                 bad.append(p)
     return bad
 
+def update_core_yaml_current(target: str, repo_root: Path | None = None, *,
+                              fmax_mhz: float, lut4: int, ff: int | None,
+                              coremark_iter_s: float, source_id: str) -> None:
+    """Write the `current:` section of cores/<target>/core.yaml.
+
+    Called from the accept path (after run_fpga_eval succeeds and the
+    hypothesis is accepted as an improvement).
+
+    Args:
+      target          -- core name under cores/.
+      repo_root       -- repo root path; defaults to cwd if None.
+      fmax_mhz        -- achieved Fmax in MHz.
+      lut4            -- achieved LUT4 count.
+      ff              -- achieved flip-flop count (may be None).
+      coremark_iter_s -- CoreMark iterations/second.
+      source_id       -- hypothesis ID that produced this result.
+    """
+    repo_root = Path(repo_root or ".").resolve()
+    yaml_path = repo_root / "cores" / target / "core.yaml"
+    if not yaml_path.exists():
+        return  # no yaml to update; older cores may not have one.
+    y = yaml.safe_load(yaml_path.read_text()) or {}
+    y["current"] = {
+        "fmax_mhz": fmax_mhz,
+        "lut4": lut4,
+        "ff": ff,
+        "coremark_iter_s": coremark_iter_s,
+        "coremark_per_mhz": round(coremark_iter_s / fmax_mhz, 4) if fmax_mhz else None,
+        "source_id": source_id,
+        "updated": datetime.datetime.utcnow().isoformat() + "Z",
+    }
+    yaml_path.write_text(yaml.safe_dump(y, sort_keys=False))
+
+
+def _current_target() -> str | None:
+    """Extract target from LOG_PATH (set in main() to cores/<target>/experiments/log.jsonl)."""
+    parts = LOG_PATH.parts
+    if len(parts) >= 2 and parts[0] == "cores":
+        return parts[1]
+    return None
+
+
 def read_log() -> list:
     if not LOG_PATH.exists(): return []
     return [json.loads(l) for l in LOG_PATH.read_text().splitlines() if l.strip()]
@@ -170,6 +212,19 @@ def append_log(entry: dict):
         subprocess.run(["git", "add", str(LOG_PATH)], check=True)
         if PLOT_PATH.exists():
             subprocess.run(["git", "add", str(PLOT_PATH)], check=True)
+        target = _current_target()
+        if target and entry.get("outcome") == "improvement":
+            yaml_path = Path("cores") / target / "core.yaml"
+            update_core_yaml_current(
+                target=target,
+                fmax_mhz=entry["fmax_mhz"],
+                lut4=entry["lut4"],
+                ff=entry.get("ff"),
+                coremark_iter_s=entry.get("coremark_iter_s") or entry.get("ipc_coremark"),
+                source_id=entry["id"],
+            )
+            if yaml_path.exists():
+                subprocess.run(["git", "add", str(yaml_path)], check=True)
         subprocess.run(
             ["git", "commit", "-m",
              f"log: {entry.get('id','unknown')} {entry.get('outcome','unknown')}"],
