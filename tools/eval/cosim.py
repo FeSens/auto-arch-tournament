@@ -17,14 +17,14 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 BENCH_DIR = Path("bench/programs")
 
-def run_one(elf: Path, sim_bin: str, worktree: str) -> dict:
+def run_one(elf: Path, sim_bin: str, worktree: str, env: dict | None = None) -> dict:
     """Run cosim for a single ELF using the run_cosim script."""
     try:
         worktree_path = Path(worktree).resolve()
         result = subprocess.run(
             [sys.executable, str(worktree_path / "test/cosim/run_cosim.py"),
              sim_bin, str(elf)],
-            capture_output=True, text=True, timeout=120, cwd=worktree_path
+            capture_output=True, text=True, timeout=120, cwd=worktree_path, env=env
         )
         if result.returncode == 0:
             return {'passed': True, 'elf': elf.name}
@@ -37,7 +37,7 @@ def run_one(elf: Path, sim_bin: str, worktree: str) -> dict:
         return {'passed': False, 'elf': elf.name, 'field': 'error', 'detail': str(e)}
 
 
-def run_coremark_crc(coremark_elf: Path, sim_bin: str, worktree: str) -> dict:
+def run_coremark_crc(coremark_elf: Path, sim_bin: str, worktree: str, env: dict | None = None) -> dict:
     """Run coremark.elf on the sim and validate UART-reported CRC.
 
     Full-trace cosim would take >30 min; the CRC guard is sensitive to any
@@ -56,7 +56,7 @@ def run_coremark_crc(coremark_elf: Path, sim_bin: str, worktree: str) -> dict:
             [sim_bin, str(coremark_elf), "50000000",
              "--bench", "--istall", "--dstall"],
             capture_output=True, text=True, timeout=600,
-            cwd=Path(worktree).resolve(),
+            cwd=Path(worktree).resolve(), env=env
         )
     except subprocess.TimeoutExpired:
         return {'passed': False, 'elf': coremark_elf.name, 'field': 'timeout'}
@@ -94,6 +94,13 @@ def run_coremark_crc(coremark_elf: Path, sim_bin: str, worktree: str) -> dict:
 
 def run_cosim(worktree: str, target: str | None = None) -> dict:
     """
+    Args:
+      worktree: path to the repo root (or worktree).
+      target:   optional core name (e.g. 'v1'). When set, resolves
+                cosim_sim from cores/<target>/obj_dir/cosim_sim instead of
+                the default test/cosim/obj_dir/cosim_sim, and injects
+                RTL_DIR/OBJ_DIR into the subprocess env.
+
     Returns:
       {'passed': True, 'elfs_tested': N}
       {'passed': False, 'failed_elf': name, 'detail': {...}}
@@ -118,7 +125,7 @@ def run_cosim(worktree: str, target: str | None = None) -> dict:
 
     # 1. Full-trace cosim of small ELFs (parallel).
     with ThreadPoolExecutor() as pool:
-        futures = {pool.submit(run_one, elf, sim_bin, worktree): elf for elf in trace_elfs}
+        futures = {pool.submit(run_one, elf, sim_bin, worktree, env): elf for elf in trace_elfs}
         for future in as_completed(futures):
             result = future.result()
             if not result['passed']:
@@ -130,7 +137,7 @@ def run_cosim(worktree: str, target: str | None = None) -> dict:
 
     # 2. CoreMark CRC validation (sequential — runs the 500M-cycle sim).
     if coremark is not None:
-        cm_result = run_coremark_crc(coremark, sim_bin, worktree)
+        cm_result = run_coremark_crc(coremark, sim_bin, worktree, env)
         if not cm_result['passed']:
             return {
                 'passed': False,
