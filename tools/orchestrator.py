@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Hardcoded AutoResearch loop. The LLM never touches this file."""
-import argparse, json, datetime, os, subprocess, re, threading, sys
+import argparse, json, datetime, os, shutil, subprocess, re, threading, sys
 from pathlib import Path
 
 import jsonschema, yaml
@@ -279,46 +279,111 @@ def run_report():
     for e in improvements:
         print(f"  {e['id']:20s}  {e['fitness']:6.2f}  ({e['delta_pct']:+.1f}%)  {e['title']}")
 
-def _run_baseline_retest(branch: str, target: str | None = None):
-    """Run a one-shot eval on the freshly created branch's RTL.
+def fork_core(target: str, base: str, repo_root: Path | None = None,
+              interactive: bool | None = None) -> None:
+    """Create cores/<target>/ by forking from cores/<base>/.
+
+    Copies rtl/, test/, core.yaml from base. Does NOT copy CORE_PHILOSOPHY.md
+    (always per-core). Does NOT copy experiments/ (new core gets its own log).
+    Resets core.yaml's current: section. Prompts user for philosophy via TTY
+    if interactive (None → auto-detect from sys.stdin.isatty()).
+    """
+    repo_root = Path(repo_root or ".").resolve()
+    tgt = repo_root / "cores" / target
+    src = repo_root / "cores" / base
+
+    if tgt.exists():
+        raise SystemExit(
+            f"cores/{target}/ already exists. Drop BASE= to continue iterating, "
+            f"or `git rm -r cores/{target}` to start over."
+        )
+    if not src.exists():
+        raise SystemExit(f"BASE core 'cores/{base}/' does not exist.")
+
+    tgt.mkdir(parents=True)
+    # Copy rtl/ and test/ trees.
+    if (src / "rtl").exists():
+        shutil.copytree(src / "rtl", tgt / "rtl")
+    (tgt / "test").mkdir(exist_ok=True)
+    if (src / "test").exists():
+        for p in (src / "test").glob("test_*.py"):
+            shutil.copy2(p, tgt / "test" / p.name)
+        # Also copy _helpers.py and conftest.py if present (per-core test infra).
+        for p in (src / "test").glob("_helpers.py"):
+            shutil.copy2(p, tgt / "test" / p.name)
+        for p in (src / "test").glob("conftest.py"):
+            shutil.copy2(p, tgt / "test" / p.name)
+    # Copy and rewrite core.yaml.
+    if (src / "core.yaml").exists():
+        y = yaml.safe_load((src / "core.yaml").read_text()) or {}
+        y["name"] = target
+        y["current"] = {}
+        (tgt / "core.yaml").write_text(yaml.safe_dump(y, sort_keys=False))
+    # Always create an empty experiments/ for the new core.
+    (tgt / "experiments").mkdir(exist_ok=True)
+    # Philosophy prompt (TTY-gated).
+    philo = tgt / "CORE_PHILOSOPHY.md"
+    if interactive is None:
+        interactive = sys.stdin.isatty()
+    if interactive:
+        sys.stderr.write(
+            f"Optional: write the philosophy for cores/{target} (constraints, "
+            f"style, intent).\nPress Ctrl-D / empty + Enter to skip.\n"
+        )
+        sys.stderr.flush()
+        text = sys.stdin.read()
+        philo.write_text(text)
+    else:
+        philo.write_text("")  # silent, headless-safe.
+    # Commit the fork.
+    subprocess.run(["git", "-C", str(repo_root), "add", f"cores/{target}/"],
+                   check=True)
+    subprocess.run(
+        ["git", "-C", str(repo_root), "commit", "-m",
+         f"feat: fork cores/{target} from cores/{base}"],
+        check=True,
+    )
+
+
+def _run_baseline_retest(target: str):
+    """Run a one-shot eval on the freshly created core's RTL.
 
     Writes a single 'baseline' entry to the per-target log so subsequent
     hypothesis rounds have a fitness anchor. Aborts the run if any gate
-    fails — the user investigates while the branch is left intact.
+    fails — the user investigates while the core is left intact.
 
     Args:
-      branch -- name of the branch being retested.
-      target -- core name under cores/. When None, uses legacy rtl/ paths.
+      target -- core name under cores/.
     """
     # Re-emit verilog + run gates against the main repo's working copy
     # (the active branch is checked out). We don't create a worktree —
     # the baseline retest IS the branch tip, not a hypothesis.
     repo_root = str(Path(".").resolve())
     if not emit_verilog(repo_root, target=target):
-        raise SystemExit(f"baseline retest: emit_verilog failed on '{branch}'.")
+        raise SystemExit(f"baseline retest: emit_verilog failed for cores/{target}.")
     formal = run_formal(repo_root, target=target)
     if not formal['passed']:
         raise SystemExit(
-            f"baseline retest: formal failed on '{branch}': "
+            f"baseline retest: formal failed for cores/{target}: "
             f"{formal.get('failed_check','')}"
         )
     cosim = run_cosim(repo_root, target=target)
     if not cosim['passed']:
         raise SystemExit(
-            f"baseline retest: cosim failed on '{branch}': "
+            f"baseline retest: cosim failed for cores/{target}: "
             f"{cosim.get('failed_elf','')}"
         )
     fpga = run_fpga_eval(repo_root, target=target)
     if fpga.get('placement_failed') or fpga.get('bench_failed'):
-        raise SystemExit(f"baseline retest: fpga eval failed on '{branch}'.")
+        raise SystemExit(f"baseline retest: fpga eval failed for cores/{target}.")
 
     sha = subprocess.run(
         ["git", "rev-parse", "--short", "HEAD"],
         capture_output=True, text=True, check=True,
     ).stdout.strip()
     entry = {
-        'id':            f'baseline-{branch}-{sha}',
-        'title':         f'Baseline retest for branch {branch}',
+        'id':            f'baseline-{target}-{sha}',
+        'title':         f'Baseline retest for cores/{target}',
         'category':      'micro_opt',
         'outcome':       'improvement',
         'fitness':       fpga['fitness'],
@@ -358,6 +423,9 @@ def main():
                         help='LUT4 target for two-phase Pareto accept.')
     parser.add_argument('--target', default=None,
                         help='Core name under cores/. Required for non-report invocations.')
+    parser.add_argument('--base', default='baseline',
+                        help='When forking a new --target, copy from cores/<base>/. '
+                             'Default: baseline. Ignored if --target already exists.')
     args = parser.parse_args()
 
     # --target is required for all non-report invocations.
@@ -390,6 +458,15 @@ def main():
         targets["coremark"] = args.coremark_target
     if args.lut_target is not None:
         targets["lut"] = args.lut_target
+
+    # Fork-on-create: if cores/<target>/ is absent, fork from cores/<base>/.
+    target_dir = Path("cores") / args.target
+    if not target_dir.exists():
+        fork_core(args.target, args.base)
+        # Run baseline retest on the freshly forked core.
+        print(f"[orchestrator] freshly forked cores/{args.target} — running baseline retest",
+              flush=True)
+        _run_baseline_retest(args.target)
 
     fixed = None
     if args.from_hypothesis:
