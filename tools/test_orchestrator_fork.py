@@ -23,6 +23,8 @@ def _setup_repo(tmp: Path):
         "name: baseline\nisa: rv32im\ntarget_fpga: x\ntargets: {}\ncurrent: {}\n"
     )
     (tmp / "cores" / "baseline" / "CORE_PHILOSOPHY.md").write_text("")
+    (bl_test / "_helpers.py").write_text("# helpers\n")
+    (bl_test / "conftest.py").write_text("# conftest\n")
     subprocess.run(["git", "add", "."], cwd=tmp, check=True, capture_output=True)
     subprocess.run(["git", "-c", "user.email=t@t", "-c", "user.name=t",
                     "commit", "-m", "seed baseline"],
@@ -49,7 +51,17 @@ def test_fork_creates_target_from_base(tmp_path):
     # core.yaml should have current: cleared but targets: carried.
     yaml_text = (foo / "core.yaml").read_text()
     assert "name: baseline" not in yaml_text  # name should be rewritten to foo
-    assert "name: foo" in yaml_text or "name:" in yaml_text
+    assert "name: foo" in yaml_text
+    # Verify test infra files were copied.
+    assert (foo / "test" / "_helpers.py").exists()
+    assert (foo / "test" / "conftest.py").exists()
+    assert (foo / "test" / "_helpers.py").read_text() == "# helpers\n"
+    # Verify fork was committed.
+    log = subprocess.run(
+        ["git", "log", "--oneline", "-1"],
+        cwd=tmp_path, capture_output=True, text=True, check=True,
+    ).stdout
+    assert "feat: fork cores/foo from cores/baseline" in log
 
 
 def test_fork_errors_if_target_exists(tmp_path):
