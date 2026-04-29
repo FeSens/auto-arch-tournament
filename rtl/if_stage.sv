@@ -50,8 +50,8 @@ module if_stage (
   logic [31:0] fetch_instr;
   logic [31:0] branch_imm;
   logic [31:0] jal_imm;
-  logic [31:0] branch_target;
-  logic [31:0] jal_target;
+  logic [31:0] predict_imm;
+  logic [31:0] predict_target;
   logic        fetch_kill;
   logic        predict_enable;
   logic        branch_opcode;
@@ -116,26 +116,26 @@ module if_stage (
                           fetch_instr[30:25], fetch_instr[11:8], 1'b0};
     jal_imm            = {{11{fetch_instr[31]}}, fetch_instr[31], fetch_instr[19:12],
                           fetch_instr[20], fetch_instr[30:21], 1'b0};
-    branch_target      = pc + branch_imm;
-    jal_target         = pc + jal_imm;
     fetch_kill         = reset || flush || redirect;
     predict_enable     = !fetch_kill;
     branch_opcode      = (fetch_instr[6:0] == 7'b1100011);
+    jal_opcode         = (fetch_instr[6:0] == 7'b1101111);
+    predict_imm        = jal_opcode ? jal_imm : branch_imm;
+    predict_target     = pc + predict_imm;
     branch_funct_legal = (fetch_instr[14:12] != 3'd2) && (fetch_instr[14:12] != 3'd3);
     branch_predict_taken = predict_enable
                        && branch_opcode
                        && branch_funct_legal
                        && fetch_instr[31]
-                       && (branch_target[1:0] == 2'b00);
-    jal_opcode         = (fetch_instr[6:0] == 7'b1101111);
+                       && (predict_target[1:0] == 2'b00);
     jal_predict_taken  = predict_enable
                        && jal_opcode
-                       && (jal_target[1:0] == 2'b00);
+                       && (predict_target[1:0] == 2'b00);
     predicted_taken    = branch_predict_taken || jal_predict_taken;
 
     next_pc = redirect             ? redirect_target :
-              jal_predict_taken    ? jal_target :
-              branch_predict_taken ? branch_target :
+              jal_predict_taken    ? predict_target :
+              branch_predict_taken ? predict_target :
                                      pc_plus4;
     replay_lookup_pc = redirect ? redirect_target :
                        !stall   ? next_pc :

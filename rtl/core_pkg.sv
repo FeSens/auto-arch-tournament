@@ -81,8 +81,9 @@
   // instruction payload arrays are resetless behind bank valid bits.
   // predicted_taken is outcome-only next-PC prediction metadata, meaningful
   // only when this IF payload advances into ID. IF still chooses concrete
-  // targets locally; EX recomputes resolved targets from pc/instr and only
-  // needs the predicted taken/not-taken outcome.
+  // targets locally with one shared static target adder for mutually
+  // exclusive branch/JAL predictions; EX recomputes resolved targets from
+  // pc/instr and only needs the predicted taken/not-taken outcome.
   typedef struct packed {
     logic [31:0] pc;
     logic [31:0] instr;
