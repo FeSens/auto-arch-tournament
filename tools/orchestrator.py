@@ -140,7 +140,7 @@ def update_core_yaml_current(target: str, repo_root: Path | None = None, *,
         "coremark_iter_s": coremark_iter_s,
         "coremark_per_mhz": round(coremark_iter_s / fmax_mhz, 4) if fmax_mhz else None,
         "source_id": source_id,
-        "updated": datetime.datetime.utcnow().isoformat() + "Z",
+        "updated": datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00", "Z"),
     }
     yaml_path.write_text(yaml.safe_dump(y, sort_keys=False))
 
