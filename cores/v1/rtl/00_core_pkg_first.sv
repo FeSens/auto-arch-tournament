@@ -5,5 +5,5 @@
 // core_pkg.sv on this filesystem. Pull core_pkg.sv in early for that command
 // only; normal ordered builds hit the guard and this file becomes a no-op.
 `ifndef CORE_PKG_DEFINED
-`include "cores/v1/rtl/core_pkg.sv"
+`include "core_pkg.sv"
 `endif
