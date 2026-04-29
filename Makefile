@@ -71,10 +71,13 @@ help:
 	@echo "  make test TARGET=v1     — cocotb unit tests under cores/<TARGET>/test/"
 	@echo "  make cosim TARGET=v1    — RVFI cosim against Python ISS"
 	@echo "  make formal TARGET=v1   — riscv-formal fast suite (with ALTOPS)"
+	@echo "  make formal-deep TARGET=v1 — full formal suite without ALTOPS (slow, bitvector-correct)"
 	@echo "  make fpga TARGET=v1     — FPGA fitness eval (Fmax + CoreMark cycles)"
+	@echo "  make bench              — build selftest + coremark ELFs"
 	@echo "  make next TARGET=v1     — one orchestrator round"
 	@echo "  make loop TARGET=v1 N=10 — N orchestrator rounds"
 	@echo "  make report TARGET=v1   — per-core experiment summary"
+	@echo "  make clean TARGET=v1    — remove per-core build artifacts (use with TARGET=)"
 	@echo "  make test-infra         — run orchestrator infra tests under tools/"
 	@echo ""
 	@echo "Available cores:"
@@ -143,7 +146,8 @@ report:
 	python3 -m tools.orchestrator --report $(ORCH_TARGET_FLAG)
 
 clean:
-	rm -rf test/cosim/obj_dir test/cosim/sim_build sim_build out
+	rm -rf $(OBJ_DIR) test/cosim/sim_build sim_build out
+	rm -rf $(GEN_DIR)
 	rm -rf experiments/worktrees
 	rm -f bench/programs/*.elf
 	rm -f test/*.result.xml
