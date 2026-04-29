@@ -174,11 +174,11 @@ def emit_verilog(worktree: str, target: str | None = None) -> bool:
     """Prepare a worktree for evaluation.
 
     SV-source-of-truth project: there is no Chisel emit step. Instead this
-    function (1) lints rtl/*.sv with verilator, (2) synthesizes core_bench
-    via yosys for nextpnr, (3) builds the bench ELFs (selftest + coremark),
-    and (4) rebuilds the Verilator cosim binary against the worktree's
-    rtl/*.sv. Any failure here is a "broken" outcome — the hypothesis
-    didn't even compile.
+    function (1) lints the target's RTL directory (rtl/ or cores/<target>/rtl/)
+    with verilator, (2) synthesizes core_bench via yosys for nextpnr, (3) builds
+    the bench ELFs (selftest + coremark), and (4) rebuilds the Verilator cosim
+    binary against the worktree's RTL. Any failure here is a "broken" outcome
+    — the hypothesis didn't even compile.
 
     Args:
       worktree -- absolute path to the worktree directory.

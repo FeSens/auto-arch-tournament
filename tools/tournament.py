@@ -421,12 +421,12 @@ def run_tournament_round(
                       flush=True)
                 entry['outcome'] = 'regression'
                 try:
-                    destroy_worktree(entry['id'])
+                    destroy_worktree(entry['id'], target=target)
                 except Exception as cleanup_err:
                     print(f"  [coordinator] cleanup also failed: {cleanup_err}",
                           flush=True)
         elif entry.get('fitness') is not None and entry['outcome'] == 'regression':
-            destroy_worktree(entry['id'])
+            destroy_worktree(entry['id'], target=target)
         # 'broken' / 'placement_failed' slots already destroyed their worktree.
 
     # Append log entries one-by-one through the lock-serialized append_log.
