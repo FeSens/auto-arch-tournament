@@ -6,11 +6,18 @@ isolated git worktree, then runs it through riscv-formal + Verilator cosim +
 3-seed FPGA place-and-route. Only hypotheses that beat the current champion
 on CoreMark/MHz get merged.
 
+The repo is multi-core: every architecture lives under `cores/<name>/` with
+its own RTL, tests, log, and `core.yaml`. `make loop TARGET=<name>` runs the
+loop on one core at a time, on a dedicated `core-<name>` git branch inside
+its own worktree, so two cores can iterate in parallel without stomping each
+other.
+
 ## What came out of it
 
-![CoreMark progress: green dots are accepted winners, orange are rejected, blue/purple bands group tournament rounds.](experiments/progress.png)
+![CoreMark progress: green dots are accepted winners, orange are rejected, blue/purple bands group tournament rounds.](cores/v1/experiments/progress.png)
 
-73 hypotheses, 9h 51m wall-clock. Locked baseline → champion went from
+73 hypotheses, 9h 51m wall-clock, on the run that produced `cores/v1/` from
+`cores/baseline/`. Locked baseline → champion went from
 **301 iter/s (2.23 CoreMark/MHz)** to **577 iter/s (2.91 CoreMark/MHz)** —
 +92% on fitness, +26% over VexRiscv's published 2.30 CoreMark/MHz, with
 40% fewer LUTs.
@@ -49,31 +56,58 @@ too — pass `AGENT=claude` to any orchestrator target.
 
 ## Run the loop
 
-```
-make next                         # 1 round, 1 slot, codex — smoke test
-make loop N=10 K=3                # 10 rounds, 3 parallel slots per round
-make loop N=10 K=3 AGENT=claude   # same, but Claude Code
-
-make report                       # summary of experiments/log.jsonl
-```
-
-What each round does:
-
-1. Hypothesis agent emits `experiments/hypotheses/hyp-<id>.yaml`, schema-checked.
-2. Implementation agent edits `rtl/` (and optionally `test/test_*.py`) in an isolated git worktree.
-3. Eval gate runs: `make formal` → `make cosim` → `make fpga` (3-seed P&R + bracketed CoreMark cycles).
-4. Higher fitness → worktree merges into `main`, becomes the new champion. Regression / broken / placement-failed → worktree destroyed, log entry written, next round.
-
-Other useful targets:
+Every core-touching command takes `TARGET=<name>`. The Makefile errors out
+otherwise and lists the cores it found.
 
 ```
-make lint     # verilator lint on rtl/
-make test     # cocotb unit tests
-make cosim    # cosim alone (no orchestrator)
-make formal   # riscv-formal fast suite (ALTOPS — see CLAUDE.md)
-make fpga     # FPGA eval alone
-make bench    # build selftest.elf / coremark.elf
-make clean    # nuke build artifacts and worktrees
+make next TARGET=v1                        # one round, one slot — smoke test
+make loop TARGET=v1 N=10                   # 10 rounds, sequential
+make loop TARGET=v1 N=10 K=3               # 10 rounds, 3 parallel slots/round
+make loop TARGET=v1 N=10 LUT=3000 COREMARK=400   # set per-target fitness goals
+make loop TARGET=v1 N=10 AGENT=claude      # use Claude Code instead of Codex
+
+make report TARGET=v1                      # summary of cores/v1/experiments/log.jsonl
+```
+
+What `make loop TARGET=<name>` does:
+
+1. Creates `.worktrees/<name>/` on branch `core-<name>` if it doesn't exist
+   (subsequent runs reuse it). Re-execs make inside the worktree so two
+   parallel `make loop`s on different TARGETs don't collide on the git index.
+2. For each round:
+   - **Hypothesis agent** writes `cores/<name>/experiments/hypotheses/<id>.yaml`
+     against the JSON schema. The prompt sees: source RTL, recent log entries,
+     `LESSONS.md`, `CORE_PHILOSOPHY.md`, `core.yaml`.
+   - **Implementation agent** edits `cores/<name>/rtl/` (and optionally
+     `cores/<name>/test/test_*.py`) in a per-slot worktree.
+   - **Eval pipeline**: verilator lint → yosys synth → bench `make` → cosim
+     build → riscv-formal → Verilator cosim vs. Python ISS → 3-seed FPGA
+     P&R + CoreMark. Each step is gated; first failure short-circuits with
+     a `broken: <step>: <stderr tail>` outcome.
+   - **Scribe** distills one bullet into `cores/<name>/LESSONS.md` so the
+     next round's hypothesis agent reads what failed and why.
+3. The highest-fitness slot above the current champion merges into
+   `core-<name>`. Regressions / broken / placement-failed → worktree
+   destroyed, log entry written, next round.
+
+The orchestrator never merges to `main`. Each core's evolution is one PR
+diff: `git push -u origin core-<name> && gh pr create --base main`.
+
+To opt out of the worktree wrap (run directly on the current branch):
+`make loop TARGET=v1 WORKTREE=`.
+
+Other useful targets — all accept `TARGET=`:
+
+```
+make lint TARGET=v1          # verilator lint over cores/v1/rtl/
+make test TARGET=v1          # cocotb unit tests under cores/v1/test/
+make cosim TARGET=v1         # cosim alone (no orchestrator)
+make formal TARGET=v1        # riscv-formal fast suite (ALTOPS — see CLAUDE.md)
+make formal-deep TARGET=v1   # full formal suite WITHOUT ALTOPS — slow, real bitvector arithmetic
+make fpga TARGET=v1          # FPGA eval alone (3-seed P&R + CoreMark)
+make bench                   # build selftest.elf / coremark.elf (shared across cores)
+make clean TARGET=v1         # nuke per-core build artifacts
+make test-infra              # pytest under tools/ (no TARGET needed)
 ```
 
 If you SSH-sign your commits and run unattended, `tools/orchestrator.py`
@@ -83,73 +117,89 @@ shell are unaffected.
 
 ## Working with multiple cores
 
-The repo holds multiple core architectures under `cores/<name>/`. Each core has
-its own RTL, cocotb tests, experiment log, and progress chart.
+The repo holds multiple cores under `cores/<name>/`. Each has its own RTL,
+tests, experiment log, `core.yaml`, and `LESSONS.md`. The orchestrator runs
+against one core at a time.
 
-**Available cores:**
-- `cores/baseline/` — the original simple RV32IM core (from the `baseline` git
-  tag). The universal seed for new cores.
-- `cores/v1/` — the current evolved 5-stage in-order with M-ext.
+**Available cores on `main`:**
+- `cores/baseline/` — the original simple RV32IM 5-stage in-order core.
+  Universal seed for new cores.
+- `cores/v1/` — the evolved core from the historical run shown above
+  (branch prediction, banked I-fetch replay, hot/cold ALU split).
 
-**Running the orchestrator on a core:**
-```bash
-make loop TARGET=v1 N=10                        # iterate v1 ten times
-make next TARGET=v1                             # one round
-make report TARGET=v1                           # per-core summary
+Other cores live on their own `core-<name>` branches, not yet merged to
+`main` — that's the normal state for a core mid-evolution.
+
+**Forking a new core:**
+
+```
+make loop TARGET=mycore BASE=baseline N=20 LUT=3000 COREMARK=400
 ```
 
-**Creating a new core (Model A — branch + worktree):**
-```bash
-# 1. Create a feature branch for the new core.
-git checkout -b core-nicebrev
+The orchestrator:
+1. Copies `cores/baseline/` → `cores/mycore/`.
+2. Re-runs the eval gates against the freshly-copied RTL to get a measured
+   `current:` block in `cores/mycore/core.yaml` — the first log entry.
+3. Iterates `N` rounds, with the LUT/CoreMark targets as Pareto goals.
 
-# 2. (Optional) Create a separate working directory if you want to keep
-#    your main checkout free for other cores in parallel.
-git worktree add ../auto-arch-nicebrev core-nicebrev
-cd ../auto-arch-nicebrev
+The work lands on branch `core-mycore` in `.worktrees/mycore/`. To review
+or ship:
 
-# 3. Run the loop with BASE= to fork from an existing core.
-make loop TARGET=nicebrev BASE=baseline N=20
-
-# 4. When the experiment is done, push the branch and open a PR to main.
-git push -u origin core-nicebrev
-gh pr create
+```
+git push -u origin core-mycore
+gh pr create --base main
 ```
 
-The orchestrator does NOT manage branches — that's all manual. This is
-intentional: it lets you parallelize multiple cores via `git worktree add` and
-review each core's evolution as a single PR diff.
+This is intentional: each core's evolution is one reviewable diff, and
+multiple cores can iterate concurrently — `make loop TARGET=mini` and
+`make loop TARGET=maxperf` run side-by-side without colliding because each
+runs in its own worktree on its own branch.
 
 **Per-core artifacts** (under `cores/<name>/`):
-- `rtl/*.sv` — the design.
-- `test/test_*.py` — cocotb tests for this core.
-- `core.yaml` — declared targets + auto-updated `current:`.
-- `CORE_PHILOSOPHY.md` — optional architect's intent (injected into agent prompts).
-- `experiments/log.jsonl` — per-iteration outcomes.
-- `experiments/progress.png` — fitness chart over time.
+
+| File / dir              | Purpose                                                                     |
+|-------------------------|-----------------------------------------------------------------------------|
+| `rtl/*.sv`              | The design. The agent's playground.                                         |
+| `test/test_*.py`        | cocotb tests. The agent may add tests for new modules.                      |
+| `core.yaml`             | Declared targets + auto-updated `current:` (running champion's measured numbers). |
+| `CORE_PHILOSOPHY.md`    | Optional architect intent — injected verbatim into hypothesis prompts.      |
+| `LESSONS.md`            | Append-only one-line lessons from prior iterations (the scribe agent).      |
+| `experiments/log.jsonl` | Per-iteration outcomes: proposal + fitness numbers + verdict + lesson.      |
+| `experiments/progress.png` | Fitness chart over time.                                                 |
 
 ## Philosophy
 
 The orchestrator is hardcoded. The model never edits it. What the model
 can touch is small and explicit:
 
-- `rtl/**` — any SystemVerilog file. Add modules, delete modules, rename, restructure, rewrite from scratch. The only top-level invariant is the I/O contract on `core.sv` (clock/reset, imem/dmem, NRET=2 RVFI).
-- `test/test_*.py` — cocotb suites. Add tests for new modules.
+- `cores/<TARGET>/rtl/**` — any SystemVerilog file. Add modules, delete
+  modules, rename, restructure, rewrite from scratch. The only top-level
+  invariant is the I/O contract on `core.sv` (clock/reset, imem/dmem,
+  NRET=2 RVFI).
+- `cores/<TARGET>/test/test_*.py` — cocotb suites. Add tests for new modules.
 
 Everything else is off-limits. The path sandbox in `tools/orchestrator.py`
 rejects the round *before* any eval runs if the agent touched `formal/`,
-`tools/`, `fpga/`, `test/cosim/main.cpp`, the CRC table, or any other
-contract surface. The agent doesn't get to soften its own grader.
+`tools/`, `fpga/`, `test/cosim/main.cpp`, the CRC table, or any sibling
+core's directory. The agent doesn't get to soften its own grader.
 
 The verifier does the heavy lifting:
 
-- **riscv-formal** — symbolic BMC against RV32IM: decode, traps, ordering, liveness, M-ext discipline. ~105 checks at NRET=2.
-- **Verilator cosim** — random ~22% bus stalls, RVFI byte-identical against a Python ISS on `selftest.elf` and `coremark.elf`.
-- **3-seed P&R** — yosys + nextpnr on a Gowin GW2A-LV18 (Tang Nano 20K). Median Fmax × CoreMark iter/cycle = fitness. One seed is a coin flip; three is comparable across rounds.
-- **CoreMark CRC validation** — the four canonical 2K-config CRCs. CoreMark prints "Correct operation validated." even when it isn't, so the bench re-checks them itself.
-- **Path sandbox** — the agent cannot edit anything outside `rtl/` and `test/test_*.py`.
+- **riscv-formal** — symbolic BMC against RV32IM: decode, traps, ordering,
+  liveness, M-ext discipline. ~105 checks at NRET=2.
+- **Verilator cosim** — random ~22% bus stalls, RVFI byte-identical against
+  a Python ISS on `selftest.elf` and `coremark.elf`.
+- **3-seed P&R** — yosys + nextpnr on a Gowin GW2A-LV18 (Tang Nano 20K).
+  Median Fmax × CoreMark iter/cycle = fitness. One seed is a coin flip;
+  three is comparable across rounds.
+- **CoreMark CRC validation** — the four canonical 2K-config CRCs.
+  CoreMark prints "Correct operation validated." even when it isn't, so
+  the bench re-checks them itself.
+- **Path sandbox** — the agent cannot edit anything outside its target
+  core's `rtl/` and `test/test_*.py`.
 
-Of 73 hypotheses in the run above, 63 were rejected by the verifier. That's the point.
+Of 73 hypotheses in the run shown above, 63 were rejected by the verifier.
+That's the point.
 
 The full contract — invariants, don't-touch list, what may change — is in
 [`CLAUDE.md`](CLAUDE.md). The I/O contract is in [`ARCHITECTURE.md`](ARCHITECTURE.md).
@@ -170,15 +220,23 @@ The full argument is in the [blog post](docs/auto-arch-tournament-blog-post.md).
 ## Layout
 
 ```
-rtl/          # SystemVerilog sources (the design)
-test/         # cocotb unit tests + Verilator cosim harness
-bench/        # selftest.S, crt0.S, link.ld, EEMBC CoreMark
-formal/       # riscv-formal wrapper, checks.cfg, run_all.sh
-fpga/         # core_bench.sv, synth.tcl, nextpnr scripts, constraints
-tools/        # orchestrator, worktree manager, eval gates, plotting
-schemas/      # hypothesis + eval-result JSON schemas
-experiments/  # log.jsonl + per-iteration worktrees + progress.png
-docs/         # design notes, blog post
+cores/                  # per-target architectures
+  <name>/
+    rtl/                # SystemVerilog sources (the design — agent-editable)
+    test/               # cocotb unit tests (agent-editable)
+    experiments/        # log.jsonl + progress.png + transient hypotheses/<id>.yaml
+    core.yaml           # declared targets + auto-updated current:
+    CORE_PHILOSOPHY.md  # optional architect intent (injected into prompts)
+    LESSONS.md          # append-only scribe output
+
+bench/programs/         # selftest.S, crt0.S, link.ld, EEMBC CoreMark — shared, off-limits
+formal/                 # riscv-formal wrapper, checks.cfg, run_all.sh — correctness contract
+fpga/                   # core_bench.sv, synth.tcl, nextpnr scripts, constraints — fitness contract
+test/cosim/             # Verilator cosim harness (main.cpp + reference Python ISS)
+tools/                  # orchestrator, worktree manager, eval gates, scribe, plotting
+schemas/                # hypothesis + eval-result JSON schemas
+docs/                   # design notes, blog post
+.worktrees/             # auto-created by `make loop`, one git worktree per TARGET
 ```
 
 ## Tech stack
