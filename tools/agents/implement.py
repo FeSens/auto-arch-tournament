@@ -9,11 +9,14 @@ from tools.agents._runtime import (
 
 CLAUDE_TIMEOUT_SEC = 600*3  # 10 min watchdog on the implementation agent
 
-def _build_prompt(hypothesis: dict, worktree: str) -> str:
+def _build_prompt(hypothesis: dict, worktree: str,
+                  target: str | None = None) -> str:
     arch = Path(worktree, "ARCHITECTURE.md").read_text()
     claude_md_path = Path(worktree, "CLAUDE.md")
     claude_md = claude_md_path.read_text() if claude_md_path.exists() else ""
-    src_files = sorted(Path(worktree, "rtl").rglob("*.sv"))
+    rtl_dir = Path(worktree, "cores", target, "rtl") if target else Path(worktree, "rtl")
+    rtl_rel = str(rtl_dir.relative_to(worktree))
+    src_files = sorted(rtl_dir.rglob("*.sv"))
     src_dump  = "\n\n".join(
         f"=== {f.relative_to(worktree)} ===\n{f.read_text()}"
         for f in src_files
@@ -51,13 +54,13 @@ Advisory file changes (you may deviate, add, rename, or restructure freely):
 {src_dump}
 
 ## Instructions
-1. Implement the hypothesis by editing, creating, or restructuring files in rtl/.
+1. Implement the hypothesis by editing, creating, or restructuring files in {rtl_rel}/.
    You may create new files, delete files, merge files, or split files.
 2. The top module MUST stay named `core` and expose the io_* RVFI port set.
    Do NOT modify anything in tools/, schemas/, formal/, fpga/, test/cosim/,
    bench/, ARCHITECTURE.md, CLAUDE.md, README.md, setup.sh, or Makefile.
 3. After implementing, verify the build:
-     verilator --lint-only -Wall -Wno-MULTITOP -sv rtl/*.sv
+     verilator --lint-only -Wall -Wno-MULTITOP -sv {rtl_rel}/*.sv
    Fix any errors / warnings before finishing.
 4. Self-check formal locally before declaring done:
      bash formal/run_all.sh
@@ -68,7 +71,7 @@ Advisory file changes (you may deviate, add, rename, or restructure freely):
 
    On failure, run_all.sh prints the failing check's logfile.txt tail
    to stdout — last 30 lines, which contains the SMT counterexample
-   from sby. Read it, identify the bug class, fix rtl/, re-run.
+   from sby. Read it, identify the bug class, fix {rtl_rel}/, re-run.
 
    CAP: 2 fix attempts. If formal still fails after 2 retries, STOP.
    Document what you tried and what's still broken in
@@ -92,7 +95,8 @@ Edit, create, or delete files in the worktree as needed. The eval gates
 will check the result; do not output any other narrative."""
 
 
-def run_implementation_agent(hypothesis_path: str, worktree: str) -> bool:
+def run_implementation_agent(hypothesis_path: str, worktree: str,
+                             target: str | None = None) -> bool:
     """
     Invokes the active agent runtime in the worktree to implement the hypothesis.
 
@@ -109,12 +113,18 @@ def run_implementation_agent(hypothesis_path: str, worktree: str) -> bool:
     that echo silently degrades but the raw log in .agent.log stays
     authoritative.
 
+    Args:
+      hypothesis_path — path to the hypothesis YAML to implement.
+      worktree        — absolute path to the implementation worktree.
+      target          — optional core name; when set, RTL lives in
+                        cores/<target>/rtl/ instead of rtl/.
+
     Returns True if the post-implementation verilator lint succeeds.
     """
     with open(hypothesis_path) as f:
         hypothesis = yaml.safe_load(f)
 
-    prompt = _build_prompt(hypothesis, worktree)
+    prompt = _build_prompt(hypothesis, worktree, target=target)
     log_path = Path(worktree) / ".agent.log"
     last_msg = Path(worktree) / ".agent.last"
     cmd = build_agent_cmd(
@@ -140,9 +150,11 @@ def run_implementation_agent(hypothesis_path: str, worktree: str) -> bool:
 
     # Lint as the smoke gate. Subsequent eval gates (formal, cosim, fpga)
     # exercise actual behavior; this catches the most basic SV breakage.
-    lint_cmd = ("if ls rtl/*.sv >/dev/null 2>&1; then "
-                "verilator --lint-only -Wall -Wno-MULTITOP -sv rtl/*.sv; "
-                "else echo 'lint: no source files in rtl/'; exit 1; fi")
+    rtl_glob = f"cores/{target}/rtl/*.sv" if target else "rtl/*.sv"
+    rtl_dir_label = f"cores/{target}/rtl" if target else "rtl"
+    lint_cmd = (f"if ls {rtl_glob} >/dev/null 2>&1; then "
+                f"verilator --lint-only -Wall -Wno-MULTITOP -sv {rtl_glob}; "
+                f"else echo 'lint: no source files in {rtl_dir_label}/'; exit 1; fi")
     lint = subprocess.run(
         ["bash", "-lc", lint_cmd],
         cwd=worktree, capture_output=True,

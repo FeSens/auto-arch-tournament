@@ -112,10 +112,12 @@ def _build_prompt(log_tail: list, current_fitness: float, baseline_fitness: floa
                   hyp_id: str | None = None,
                   category_hint: str | None = None,
                   targets: dict | None = None,
-                  current_state: dict | None = None) -> str:
+                  current_state: dict | None = None,
+                  target: str | None = None) -> str:
     arch = Path("ARCHITECTURE.md").read_text()
     claude_md = Path("CLAUDE.md").read_text() if Path("CLAUDE.md").exists() else ""
-    src_files = sorted(Path("rtl").rglob("*.sv"))
+    rtl_dir = Path("cores") / target / "rtl" if target else Path("rtl")
+    src_files = sorted(rtl_dir.rglob("*.sv"))
     src_dump  = "\n\n".join(
         f"=== {f} ===\n{f.read_text()}" for f in src_files
     )
@@ -150,7 +152,7 @@ Baseline fitness: {baseline_fitness:.2f}
 ## Hard invariants (do NOT propose changes that weaken these)
 {claude_md}
 
-## Current SystemVerilog Source (rtl/)
+## Current SystemVerilog Source ({rtl_dir}/)
 {src_dump}
 
 ## Recent Experiment Log (last 20 entries)
@@ -165,7 +167,7 @@ Baseline fitness: {baseline_fitness:.2f}
 The YAML must validate against schemas/hypothesis.schema.json:
   id, title, category, motivation, hypothesis, expected_impact, changes
 
-Each `changes[i].file` must be a path under rtl/ (this is an SV-source-
+Each `changes[i].file` must be a path under {rtl_dir}/ (this is an SV-source-
 of-truth project; do NOT propose Chisel/Scala edits).
 
 Write the file at experiments/hypotheses/<id>.yaml now. Do not output anything else."""
@@ -185,7 +187,8 @@ def run_hypothesis_agent(log_tail: list, current_fitness: float,
                          allowed_yaml_ids: list[str] | None = None,
                          category_hint: str | None = None,
                          targets: dict | None = None,
-                         current_state: dict | None = None) -> str:
+                         current_state: dict | None = None,
+                         target: str | None = None) -> str:
     """Invokes the active agent runtime and returns path to written hypothesis YAML.
 
     Sandbox: if the agent touches anything outside the round's whitelist
@@ -193,7 +196,10 @@ def run_hypothesis_agent(log_tail: list, current_fitness: float,
     and raise. The orchestrator catches this and logs a 'broken' iteration
     without ever running the eval gates.
 
-    Tournament-mode args:
+    Args:
+      log_tail         — recent experiment log entries (last 20).
+      current_fitness  — best fitness seen on the current branch.
+      baseline_fitness — fitness of the unmodified baseline.
       hyp_id           — pre-allocated ID. Skips _next_id (racy under N>1).
       allowed_yaml_ids — round's full pre-allocated ID list; tightens the
                          sandbox regex so concurrent slots don't flag each
@@ -201,12 +207,17 @@ def run_hypothesis_agent(log_tail: list, current_fitness: float,
       category_hint    — injected into the prompt; the slot's category per
                          the diversity rotation (micro_opt / structural /
                          predictor / memory / extension).
+      targets          — optimization targets dict e.g. {"coremark": 300}.
+      current_state    — current champion values mirroring `targets` keys.
+      target           — optional core name; when set, reads RTL from
+                         cores/<target>/rtl/ instead of rtl/.
     """
     if hyp_id is None:
         hyp_id = _next_id()
     prompt = _build_prompt(log_tail, current_fitness, baseline_fitness,
                            hyp_id=hyp_id, category_hint=category_hint,
-                           targets=targets, current_state=current_state)
+                           targets=targets, current_state=current_state,
+                           target=target)
     allow_re = _whitelist_regex(allowed_yaml_ids or [])
 
     # Stream agent output to experiments/hypotheses/.agent.{hyp_id}.log
