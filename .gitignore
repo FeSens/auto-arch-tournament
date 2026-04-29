@@ -71,3 +71,6 @@ experiments/hypotheses/*.yaml
 # Claude Code workspace
 .claude/
 docs/assets/
+
+# Local git worktrees (subagent-driven dev; not the orchestrator's experiments/worktrees)
+.worktrees/
