@@ -5,10 +5,12 @@ description: "Original simple RV32IM core from the baseline git tag \u2014 the u
 isa: rv32im
 target_fpga: tang-nano-20k
 targets:
-  fmax_mhz: 70
-  lut4: 2500
-  coremark_iter_s: 250
-  coremark_per_mhz: 3.5
+  # Targets reflect the measured baseline (rounded). Baseline is the fork seed;
+  # forks should aim to beat these — keep these aligned with the actual tag.
+  fmax_mhz: 135
+  lut4: 10000
+  coremark_iter_s: 300
+  coremark_per_mhz: 2.2
 current:
   fmax_mhz: 135.21
   lut4: 9880
