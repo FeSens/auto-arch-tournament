@@ -9,8 +9,6 @@ research branches without state.
 import subprocess, shutil
 from pathlib import Path
 
-WORKTREE_BASE = Path("experiments/worktrees")
-
 
 def _worktree_base(target: str | None) -> Path:
     """Returns the base directory for worktrees.
