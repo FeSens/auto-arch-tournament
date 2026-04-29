@@ -307,7 +307,7 @@ def run_slot(
         'cosim_passed':  True,
         'error':         None,
         'implementation_notes': _read_notes(worktree),
-        'timestamp':     datetime.datetime.utcnow().isoformat(),
+        'timestamp':     datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00", "Z"),
         'slot':          slot,
     }
 

@@ -146,4 +146,5 @@ clean:
 ifneq ($(strip $(TARGET)),)
 	rm -rf $(OBJ_DIR)
 	rm -rf $(GEN_DIR)
+	rm -rf cores/$(TARGET)/sim_build
 endif

@@ -277,8 +277,9 @@ def emit_verilog(worktree: str, target: str | None = None) -> bool:
         return False
 
     # 2. Yosys synth (writes generated/synth.json for nextpnr).
-    Path(worktree, "generated").mkdir(exist_ok=True)
-    synth_env = {**os.environ, "RTL_DIR": f"cores/{target}/rtl"} if target else None
+    gen_dir = Path(worktree) / "cores" / target / "generated" if target else Path(worktree) / "generated"
+    gen_dir.mkdir(parents=True, exist_ok=True)
+    synth_env = {**os.environ, "RTL_DIR": f"cores/{target}/rtl", "GEN_DIR": f"cores/{target}/generated"} if target else None
     synth = subprocess.run(
         ["yosys", "-c", "fpga/scripts/synth.tcl"],
         cwd=worktree, capture_output=True,
@@ -455,7 +456,7 @@ def _run_baseline_retest(target: str):
         'cosim_passed':  True,
         'error':         None,
         'implementation_notes': '',
-        'timestamp':     datetime.datetime.utcnow().isoformat(),
+        'timestamp':     datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00", "Z"),
         'round_id':      0,
         'slot':          0,
     }
