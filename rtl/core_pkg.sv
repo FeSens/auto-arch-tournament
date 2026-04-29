@@ -91,6 +91,8 @@
   } if_id_t;
 
   // ID/EX register payload.
+  // Source register addresses are derived from instr[19:15] / instr[24:20]
+  // where needed; rs1_val/rs2_val carry the register-file data values into EX.
   // predicted_taken carries IF's outcome-only prediction into EX. Targets are
   // recomputed in EX for validation/redirect.
   typedef struct packed {
@@ -99,8 +101,6 @@
     logic [31:0] rs2_val;
     logic [31:0] imm;
     logic [4:0]  rd;
-    logic [4:0]  rs1_addr;
-    logic [4:0]  rs2_addr;
     ctrl_t       ctrl;
     logic [31:0] instr;
     logic        predicted_taken;
@@ -108,13 +108,13 @@
   } id_ex_t;
 
   // EX/MEM register payload.
+  // Source register addresses are recovered from instr in downstream users;
+  // rs1_val/rs2_val remain the post-forwarded RVFI source-data value rails.
   typedef struct packed {
     logic [31:0] pc;
     logic [31:0] alu_result;
     logic [31:0] write_data;     // raw rs2 (post-forward), pre byte replication
     logic [4:0]  rd;
-    logic [4:0]  rs1_addr;
-    logic [4:0]  rs2_addr;
     logic [31:0] rs1_val;        // post-forward rs1 used by EX
     logic [31:0] rs2_val;        // post-forward rs2 used by EX
     logic [31:0] pc_next;        // resolved next-PC (target / pc+4)
@@ -126,13 +126,13 @@
   } ex_mem_t;
 
   // MEM/WB register payload — mirrors the RVFI-feeding contract.
+  // RVFI source register addresses are sliced from instr at retirement;
+  // rs1_val/rs2_val carry the post-forwarded source data values.
   typedef struct packed {
     logic [31:0] pc;
     logic [31:0] alu_result;
     logic [31:0] read_data;      // sign/zero-extended load (for regfile write)
     logic [4:0]  rd;
-    logic [4:0]  rs1_addr;
-    logic [4:0]  rs2_addr;
     logic [31:0] rs1_val;
     logic [31:0] rs2_val;
     logic [31:0] pc_next;

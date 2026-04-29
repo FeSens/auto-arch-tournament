@@ -265,8 +265,8 @@ module core (
   );
 
   forward_unit u_fwd (
-    .id_ex_rs1   (id_ex_w.rs1_addr),
-    .id_ex_rs2   (id_ex_w.rs2_addr),
+    .id_ex_rs1   (id_ex_w.instr[19:15]),
+    .id_ex_rs2   (id_ex_w.instr[24:20]),
     .ex_mem_rd   (ex_mem_w.rd),
     .ex_mem_w_en (ex_mem_w.ctrl.reg_write),
     .mem_wb_rd   (mem_wb_w.rd),
@@ -331,9 +331,9 @@ module core (
     io_rvfi_intr_0      = 1'b0;
     io_rvfi_mode_0      = 2'd3;     // M-mode only
     io_rvfi_ixl_0       = 2'd1;     // 32-bit ISA
-    io_rvfi_rs1_addr_0  = mem_wb_w.rs1_addr;
+    io_rvfi_rs1_addr_0  = mem_wb_w.instr[19:15];
     io_rvfi_rs1_rdata_0 = mem_wb_w.rs1_val;
-    io_rvfi_rs2_addr_0  = mem_wb_w.rs2_addr;
+    io_rvfi_rs2_addr_0  = mem_wb_w.instr[24:20];
     io_rvfi_rs2_rdata_0 = mem_wb_w.rs2_val;
     io_rvfi_rd_addr_0   = rd_wen ? mem_wb_w.rd : 5'b0;
     io_rvfi_rd_wdata_0  = rd_wen ? wb_w_data   : 32'b0;

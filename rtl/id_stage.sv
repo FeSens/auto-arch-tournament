@@ -6,8 +6,9 @@
 // the decoded view of instruction n is latched by end of cycle n+1.
 //
 // Latency:        1 cycle (ID/EX register clocked here).
-// RVFI fields:    feeds rs1_addr, rs1_rdata, rs2_addr, rs2_rdata, insn,
-//                 trap (via ctrl.is_illegal).
+// RVFI fields:    feeds rs1_rdata, rs2_rdata, insn, trap (via
+//                 ctrl.is_illegal). Source register addresses are carried
+//                 implicitly in instr[19:15] / instr[24:20].
 module id_stage (
   input  logic              clock,
   input  logic              reset,
@@ -98,8 +99,6 @@ module id_stage (
       reg_q.rs2_val  <= rs2_data;
       reg_q.imm      <= imm;
       reg_q.rd       <= in.instr[11:7];
-      reg_q.rs1_addr <= in.instr[19:15];
-      reg_q.rs2_addr <= in.instr[24:20];
       reg_q.ctrl     <= ctrl_decoded;
       reg_q.instr    <= in.instr;
       reg_q.predicted_taken  <= in.predicted_taken;

@@ -216,8 +216,6 @@ module ex_stage (
       reg_q.alu_result    <= div_result_selected;
       reg_q.write_data    <= div_rs2_q;
       reg_q.rd            <= div_in_q.rd;
-      reg_q.rs1_addr      <= div_in_q.rs1_addr;
-      reg_q.rs2_addr      <= div_in_q.rs2_addr;
       reg_q.rs1_val       <= div_rs1_q;
       reg_q.rs2_val       <= div_rs2_q;
       reg_q.pc_next       <= div_in_q.pc + 32'd4;
@@ -238,8 +236,6 @@ module ex_stage (
       reg_q.alu_result    <= in.ctrl.is_jump ? (in.pc + 32'd4) : alu_result;
       reg_q.write_data    <= rs2;
       reg_q.rd            <= in.rd;
-      reg_q.rs1_addr      <= in.rs1_addr;
-      reg_q.rs2_addr      <= in.rs2_addr;
       reg_q.rs1_val       <= rs1;
       reg_q.rs2_val       <= rs2;
       // pc_next reverts to pc+4 on misalign trap so the pc_fwd checker

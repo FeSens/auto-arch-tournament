@@ -179,8 +179,6 @@ module mem_stage (
       reg_q.alu_result <= in.alu_result;
       reg_q.read_data  <= load_data;
       reg_q.rd         <= in.rd;
-      reg_q.rs1_addr   <= in.rs1_addr;
-      reg_q.rs2_addr   <= in.rs2_addr;
       reg_q.rs1_val    <= in.rs1_val;
       reg_q.rs2_val    <= in.rs2_val;
       reg_q.pc_next    <= in.pc_next;
