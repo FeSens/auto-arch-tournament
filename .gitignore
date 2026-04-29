@@ -57,15 +57,14 @@ bench/programs/*.hex
 #   auto-committed alongside log.jsonl.
 # - per-iteration worktrees and per-iteration hypothesis YAMLs are
 #   transient inputs/outputs of the loop, not source of truth.
-experiments/worktrees/
-experiments/hypotheses/*.yml
-experiments/hypotheses/*.yaml
 
 # Per-core gitignored paths (Phase C)
 cores/*/worktrees/
 cores/*/generated/
 cores/*/obj_dir/
 cores/*/implementation_notes.md
+cores/*/experiments/hypotheses/*.yml
+cores/*/experiments/hypotheses/*.yaml
 
 # Editor / OS
 .DS_Store
