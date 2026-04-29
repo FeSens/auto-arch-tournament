@@ -138,6 +138,26 @@ def _build_prompt(log_tail: list, current_fitness: float, baseline_fitness: floa
     )
     targets_clause = _targets_clause(targets, current_state) if targets else ""
 
+    philosophy = ""
+    if target:
+        philo_path = Path("cores") / target / "CORE_PHILOSOPHY.md"
+        if philo_path.exists():
+            philo_text = philo_path.read_text()
+            if philo_text.strip():
+                philosophy = (
+                    f"## Core philosophy / architect's hard constraints\n"
+                    f"{philo_text}\n\n"
+                )
+
+    core_yaml_block = ""
+    if target:
+        yaml_path = Path("cores") / target / "core.yaml"
+        if yaml_path.exists():
+            core_yaml_block = (
+                f"## Core spec (cores/{target}/core.yaml)\n"
+                f"```yaml\n{yaml_path.read_text()}```\n\n"
+            )
+
     return f"""You are a CPU microarchitecture research agent.
 
 Your job: propose one architectural hypothesis to improve this RV32IM CPU.
@@ -145,7 +165,7 @@ Fitness metric: CoreMark iter/sec = CoreMark iterations/cycle × Fmax_Hz on Tang
 Current best fitness: {current_fitness:.2f}
 Baseline fitness: {baseline_fitness:.2f}
 
-{category_clause}{targets_clause}
+{category_clause}{targets_clause}{philosophy}{core_yaml_block}
 ## Architecture
 {arch}
 

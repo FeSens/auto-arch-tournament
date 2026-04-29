@@ -27,11 +27,22 @@ def _build_prompt(hypothesis: dict, worktree: str,
         for c in hypothesis.get('changes', [])
     )
 
+    philosophy = ""
+    if target:
+        philo_path = Path(worktree, "cores", target, "CORE_PHILOSOPHY.md")
+        if philo_path.exists():
+            philo_text = philo_path.read_text()
+            if philo_text.strip():
+                philosophy = (
+                    f"## Core philosophy / architect's hard constraints\n"
+                    f"{philo_text}\n\n"
+                )
+
     return f"""You are a CPU RTL implementation agent.
 
 Your job: implement the following architectural hypothesis in SystemVerilog.
 
-## Hypothesis
+{philosophy}## Hypothesis
 Title: {hypothesis['title']}
 Category: {hypothesis['category']}
 
