@@ -1,14 +1,19 @@
-# cores/baseline/core.yaml
 name: baseline
-description: Original simple RV32IM core from the baseline git tag — the universal seed for new cores. 5-stage in-order with hardware M-extension, operand forwarding, and hazard detection; no branch prediction, no caches.
+description: "Original simple RV32IM core from the baseline git tag \u2014 the universal\
+  \ seed for new cores. 5-stage in-order with hardware M-extension, operand forwarding,\
+  \ and hazard detection; no branch prediction, no caches."
 isa: rv32im
 target_fpga: tang-nano-20k
-
 targets:
   fmax_mhz: 70
   lut4: 2500
   coremark_iter_s: 250
   coremark_per_mhz: 3.5
-
 current:
-  # Empty — first orchestrator run on this core will populate via baseline retest.
+  fmax_mhz: 135.21
+  lut4: 9880
+  ff: 1858
+  coremark_iter_s: 301.04
+  coremark_per_mhz: 2.2265
+  source_id: baseline-initial-eval-2026-04-29
+  updated: '2026-04-29T18:29:48.033631Z'
