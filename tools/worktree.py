@@ -11,8 +11,22 @@ from pathlib import Path
 
 WORKTREE_BASE = Path("experiments/worktrees")
 
-def create_worktree(hypothesis_id: str, base_branch: str = "main") -> str:
-    """Creates a git worktree at experiments/worktrees/<id>. Returns path.
+
+def _worktree_base(target: str | None) -> Path:
+    """Returns the base directory for worktrees.
+
+    Args:
+        target -- core target name (e.g. "rv32i"), or None for the default
+                  single-core layout (experiments/worktrees/).
+    """
+    if target is None:
+        return Path("experiments/worktrees")
+    return Path("cores") / target / "worktrees"
+
+
+def create_worktree(hypothesis_id: str, base_branch: str = "main",
+                    target: str | None = None) -> str:
+    """Creates a git worktree for hypothesis_id. Returns path.
 
     The new branch <hypothesis_id> is created from <base_branch>'s tip,
     so accepted hypotheses chain on the active branch (whether that is
@@ -21,9 +35,16 @@ def create_worktree(hypothesis_id: str, base_branch: str = "main") -> str:
     Also symlinks the (gitignored) formal/riscv-formal/ tree into the
     worktree so `make formal` works without a fresh ~200 MiB clone per
     iteration.
+
+    Args:
+        hypothesis_id -- unique identifier for this hypothesis run.
+        base_branch   -- git branch to fork from (default: "main").
+        target        -- core target name, or None for the default layout
+                         (worktree under experiments/worktrees/).
     """
-    WORKTREE_BASE.mkdir(parents=True, exist_ok=True)
-    path = str((WORKTREE_BASE / hypothesis_id).resolve())
+    base = _worktree_base(target)
+    base.mkdir(parents=True, exist_ok=True)
+    path = str((base / hypothesis_id).resolve())
     subprocess.run(
         ["git", "worktree", "add", "-b", hypothesis_id, path, base_branch],
         check=True
@@ -40,23 +61,34 @@ def create_worktree(hypothesis_id: str, base_branch: str = "main") -> str:
 
 def accept_worktree(hypothesis_id: str,
                     commit_message: str,
-                    target_branch: str = "main"):
+                    target_branch: str = "main",
+                    target: str | None = None):
     """Merges worktree branch into target_branch and removes the worktree.
 
     Caller is responsible for ensuring target_branch is the active branch
     of the orchestrator's run. We `git checkout target_branch` first
     (idempotent if already on it), then ff-merge the worktree branch.
+
+    Args:
+        hypothesis_id  -- unique identifier for this hypothesis run.
+        commit_message -- commit message to use when committing worktree changes.
+        target_branch  -- git branch to merge into (default: "main").
+        target         -- core target name, or None for the default layout
+                          (stages rtl/ and test/test_*.py).
     """
-    path = str((WORKTREE_BASE / hypothesis_id).resolve())
+    path = str((_worktree_base(target) / hypothesis_id).resolve())
     # Commit any uncommitted changes in worktree. Stage exactly the
-    # paths the agent is permitted to modify (rtl/ + test/test_*.py).
+    # paths the agent is permitted to modify. For a named target the scope
+    # is cores/<target>/; for the default layout it is rtl/ + test/test_*.py.
     # The orchestrator's sandbox check runs BEFORE this is reached, so
     # in practice these are the only dirty paths anyway. -A picks up
     # adds, modifies, and deletes inside each prefix.
-    subprocess.run(["git", "-C", path, "add", "-A", "rtl/"], check=True)
+    add_path = f"cores/{target}/" if target else "rtl/"
+    subprocess.run(["git", "-C", path, "add", "-A", add_path], check=True)
+    test_glob = f"cores/{target}/test/test_*.py" if target else "test/test_*.py"
     test_changes = subprocess.run(
         ["git", "-C", path, "ls-files", "--modified", "--others", "--exclude-standard",
-         "test/test_*.py"],
+         test_glob],
         capture_output=True, text=True, check=True,
     ).stdout.split()
     if test_changes:
@@ -72,11 +104,16 @@ def accept_worktree(hypothesis_id: str,
         ["git", "merge", "--ff-only", hypothesis_id],
         check=True
     )
-    destroy_worktree(hypothesis_id)
+    destroy_worktree(hypothesis_id, target=target)
 
-def destroy_worktree(hypothesis_id: str):
-    """Removes worktree and deletes the branch."""
-    path = str((WORKTREE_BASE / hypothesis_id).resolve())
+def destroy_worktree(hypothesis_id: str, target: str | None = None):
+    """Removes worktree and deletes the branch.
+
+    Args:
+        hypothesis_id -- unique identifier for this hypothesis run.
+        target        -- core target name, or None for the default layout.
+    """
+    path = str((_worktree_base(target) / hypothesis_id).resolve())
     subprocess.run(["git", "worktree", "remove", "--force", path], check=False)
     subprocess.run(["git", "branch", "-D", hypothesis_id], check=False)
     shutil.rmtree(path, ignore_errors=True)
