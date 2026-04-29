@@ -18,6 +18,16 @@
     "formal_passed": {"type": "boolean"},
     "cosim_passed":  {"type": "boolean"},
     "error":         {"type": ["string","null"]},
-    "implementation_notes": {"type": ["string","null"]}
+    "implementation_notes": {"type": ["string","null"]},
+    "hypothesis": {
+      "type": "object",
+      "description": "Embedded hypothesis content (was previously a separate YAML file).",
+      "properties": {
+        "motivation":      {"type": ["string","null"]},
+        "hypothesis":      {"type": ["string","null"]},
+        "expected_impact": {"type": ["object","null"]},
+        "changes":         {"type": ["array","null"]}
+      }
+    }
   }
 }

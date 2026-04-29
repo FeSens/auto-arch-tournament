@@ -63,6 +63,7 @@ cores/*/worktrees/
 cores/*/generated/
 cores/*/obj_dir/
 cores/*/implementation_notes.md
+cores/*/experiments/hypotheses/
 cores/*/experiments/hypotheses/*.yml
 cores/*/experiments/hypotheses/*.yaml
 

@@ -198,6 +198,27 @@ def current_lut(log: list) -> float | None:
 
 def append_log(entry: dict):
     with _LOG_LOCK:
+        # If a per-iteration hypothesis YAML exists for this entry's id, read
+        # its proposal content and embed it under a 'hypothesis' sub-object
+        # before writing the log line. This keeps log.jsonl as the single
+        # journal of both proposals and outcomes.
+        target = _current_target()
+        hyp_yaml_path: Path | None = None
+        if target:
+            candidate = Path("cores") / target / "experiments" / "hypotheses" / f"{entry.get('id', '')}.yaml"
+            if candidate.exists():
+                hyp_yaml_path = candidate
+                try:
+                    y = yaml.safe_load(candidate.read_text()) or {}
+                    entry["hypothesis"] = {
+                        "motivation": y.get("motivation"),
+                        "hypothesis": y.get("hypothesis"),
+                        "expected_impact": y.get("expected_impact"),
+                        "changes": y.get("changes"),
+                    }
+                except Exception:
+                    pass  # malformed YAML — log the entry without hypothesis content
+
         LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
         with LOG_PATH.open('a') as f:
             f.write(json.dumps(entry) + '\n')
@@ -212,7 +233,6 @@ def append_log(entry: dict):
         subprocess.run(["git", "add", str(LOG_PATH)], check=True)
         if PLOT_PATH.exists():
             subprocess.run(["git", "add", str(PLOT_PATH)], check=True)
-        target = _current_target()
         if target and entry.get("outcome") == "improvement":
             yaml_path = Path("cores") / target / "core.yaml"
             update_core_yaml_current(
@@ -230,6 +250,15 @@ def append_log(entry: dict):
              f"log: {entry.get('id','unknown')} {entry.get('outcome','unknown')}"],
             check=True,
         )
+        # After the commit succeeds, delete the transient hypothesis YAML.
+        # Deletion is intentionally post-commit: if the commit fails, the YAML
+        # stays on disk for debugging. The YAML is untracked (gitignored), so
+        # no git rm needed.
+        if hyp_yaml_path is not None:
+            try:
+                hyp_yaml_path.unlink()
+            except FileNotFoundError:
+                pass
 
 def validate_hypothesis(hyp_path: str) -> dict:
     with open(hyp_path) as f:
