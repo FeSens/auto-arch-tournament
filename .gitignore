@@ -1,0 +1,96 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.mypy_cache/
+
+# Toolchain (downloaded by setup.sh)
+.toolchain/
+
+# Vendored as submodule (initialized in Phase 4). No trailing slash so the
+# pattern matches both the cloned directory in the main repo AND the
+# symlink that worktree.py creates inside each worktree (otherwise git
+# status flags the symlink as untracked and sandbox check trips).
+formal/riscv-formal
+
+# Formal run output (regenerated per run; surfaced via stdout to the orchestrator)
+formal/last_run.log
+
+# Agent stdout capture, written per-worktree by tools/agents/implement.py
+# and per-hypothesis by tools/agents/hypothesis.py for `tail -f` visibility
+# into Phase 1 and Phase 2. Untracked so the orchestrator's sandbox check
+# (offlimits_changes, orchestrator.py:42) doesn't see it as an off-limits
+# agent edit. .claude.log kept for back-compat with legacy worktree logs.
+.agent.log
+.agent.last
+.agent.*.log
+.agent.*.last
+.claude.log
+.scribe.log
+.scribe.*.last
+
+# Build artifacts
+out/
+generated/
+sim_build/
+test/cosim/obj_dir/
+test/cosim/sim_build/
+test/**/sim_build/
+test/*.result.xml
+test/results.xml
+cores/*/test/*.result.xml
+*.vcd
+*.fst
+*.gtkw
+
+# Bench ELFs (rebuild from sources)
+bench/programs/*.elf
+bench/programs/*.o
+bench/programs/*.bin
+bench/programs/*.hex
+
+# Experiment artifacts.
+# - log.jsonl IS tracked: orchestrator's authoritative journal of every
+#   iteration (accept/regression/broken). Rejected hypotheses never
+#   produce an implementation commit so the log is the only record.
+#   Auto-committed by tools/orchestrator.py:append_log() per iteration.
+# - progress.png IS tracked: it's the chart embedded in README.md, so
+#   the latest state is always viewable from GitHub. Regenerated and
+#   auto-committed alongside log.jsonl.
+# - per-iteration worktrees and per-iteration hypothesis YAMLs are
+#   transient inputs/outputs of the loop, not source of truth.
+
+# Per-core gitignored paths (Phase C)
+cores/*/worktrees/
+cores/*/generated/
+cores/*/obj_dir/
+cores/*/implementation_notes.md
+cores/*/experiments/hypotheses/
+cores/*/experiments/hypotheses/*.yml
+cores/*/experiments/hypotheses/*.yaml
+
+# Editor / OS
+.DS_Store
+*.swp
+.idea/
+.vscode/
+
+# Claude Code workspace
+.claude/
+docs/assets/
+
+# Local git worktrees (subagent-driven dev; not the orchestrator's experiments/worktrees)
+.worktrees/
+
+# Node deps for bench-fence pi extension (installed locally for typecheck;
+# pi handles installs at run time so the deps don't need to be committed).
+node_modules/
+
+# Pi-coding-agent session storage inside per-rep clones.
+.pi-sessions/
+
+# Per-rep agent telemetry inside bench/ — large, regenerable.
+# Top-level results.jsonl + LEADERBOARD.md ARE checked in.
+bench/*/rep*/log.jsonl
+bench/*/rep*/agent.log

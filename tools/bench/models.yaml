@@ -1,0 +1,55 @@
+# LLM benchmark model registry.
+#
+# Each entry maps a short benchmark `name` (used in result paths and
+# leaderboard rows) to a pi-coding-agent --model string and the
+# environment variable that holds the API key.
+#
+# The runner enumerates this list × J reps to build the matrix.
+# Add or remove entries to change the model set.
+#
+# Notes:
+#   - Exact pi --model identifiers may need adjustment after running
+#     `pi --list-models` against your local pi install. The `<provider>/<id>`
+#     shape is stable; the post-slash identifier is provider-specific and
+#     occasionally changes (e.g. "claude-opus-4-7" vs "claude-3-opus").
+#   - Native keys (Anthropic, OpenAI, Google, xAI) avoid OpenRouter's
+#     5-10% markup. OpenRouter is used for everything else.
+#   - Place keys in ~/.bench-keys.env (gitignored), one VAR=value per line.
+
+models:
+  # Frontier — native provider keys
+  - name: opus-47
+    pi_model: anthropic/claude-opus-4-7
+    key_env: ANTHROPIC_API_KEY
+  - name: sonnet-46
+    pi_model: anthropic/claude-sonnet-4-6
+    key_env: ANTHROPIC_API_KEY
+  - name: gpt-5
+    pi_model: openai/gpt-5
+    key_env: OPENAI_API_KEY
+  - name: gpt-5-mini
+    pi_model: openai/gpt-5-mini
+    key_env: OPENAI_API_KEY
+  - name: gemini-3-pro
+    pi_model: google/gemini-3-pro
+    key_env: GOOGLE_API_KEY
+  - name: grok-5
+    pi_model: xai/grok-5
+    key_env: XAI_API_KEY
+
+  # Chinese frontier — OpenRouter
+  - name: qwen3-coder
+    pi_model: openrouter/qwen/qwen3-coder
+    key_env: OPENROUTER_API_KEY
+  - name: deepseek-v4
+    pi_model: openrouter/deepseek/deepseek-v4
+    key_env: OPENROUTER_API_KEY
+  - name: kimi-k2
+    pi_model: openrouter/moonshotai/kimi-k2
+    key_env: OPENROUTER_API_KEY
+  - name: glm-4-6
+    pi_model: openrouter/zhipu/glm-4-6
+    key_env: OPENROUTER_API_KEY
+  - name: minimax-m2
+    pi_model: openrouter/minimax/m2
+    key_env: OPENROUTER_API_KEY

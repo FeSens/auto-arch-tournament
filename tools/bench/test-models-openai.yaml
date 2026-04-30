@@ -1,0 +1,40 @@
+# OpenAI Codex subscription models.
+# Auth via pi /login (OAuth, ChatGPT Plus/Pro). No API key env var needed —
+# the runner reads ~/.pi/agent/auth.json shared across all clones.
+#
+# Caveat: pi's docs say "personal use only; for production, use the OpenAI
+# Platform API". Driving long unattended benchmark runs against your
+# subscription quota is technically off-policy, so keep these matrix runs
+# small (low N, low reps).
+
+models:
+  - name: gpt-5_5
+    pi_model: openai-codex/gpt-5.5
+    oauth: true
+  - name: gpt-5_4
+    pi_model: openai-codex/gpt-5.4
+    oauth: true
+  - name: gpt-5_4-mini
+    pi_model: openai-codex/gpt-5.4-mini
+    oauth: true
+  - name: gpt-5_3-codex
+    pi_model: openai-codex/gpt-5.3-codex
+    oauth: true
+  - name: gpt-5_3-codex-spark
+    pi_model: openai-codex/gpt-5.3-codex-spark
+    oauth: true
+  - name: gpt-5_2
+    pi_model: openai-codex/gpt-5.2
+    oauth: true
+  - name: gpt-5_2-codex
+    pi_model: openai-codex/gpt-5.2-codex
+    oauth: true
+  - name: gpt-5_1
+    pi_model: openai-codex/gpt-5.1
+    oauth: true
+  - name: gpt-5_1-codex-max
+    pi_model: openai-codex/gpt-5.1-codex-max
+    oauth: true
+  - name: gpt-5_1-codex-mini
+    pi_model: openai-codex/gpt-5.1-codex-mini
+    oauth: true
