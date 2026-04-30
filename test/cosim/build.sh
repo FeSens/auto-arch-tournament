@@ -43,6 +43,7 @@ fi
 
 verilator --cc --exe --build \
   -Mdir "$OBJ_DIR" \
+  "+incdir+$RTL_DIR" \
   --top-module core \
   -Wall -Wno-fatal -Wno-style \
   "${RTL_FILES[@]}" \

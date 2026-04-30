@@ -95,6 +95,15 @@ Advisory file changes (you may deviate, add, rename, or restructure freely):
    missing default in a case statement) saves an entire iteration
    getting marked broken on a one-line fix.
 
+   The MOST COMMON formal failure is breaking the RVFI channel-0
+   retirement contract: `io_rvfi_valid_0` must stay driven by the
+   actual retirement signal (typically `mem_wb_w.valid`), and every
+   channel-0 field must mirror the retiring instruction. If your
+   change touches the writeback or commit path, re-read CLAUDE.md
+   invariant #1 before declaring done — symptoms of breaking it are
+   `formal_failed: no_checks_generated` or `*_ch0` PREUNSAT in the
+   sby logs.
+
    On failure, run_all.sh prints the failing check's logfile.txt tail
    to stdout — last 30 lines, which contains the SMT counterexample
    from sby. Read it, identify the bug class, fix {rtl_rel}/, re-run.
