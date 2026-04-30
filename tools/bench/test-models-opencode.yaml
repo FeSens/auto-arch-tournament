@@ -1,0 +1,37 @@
+# OpenAI Codex subscription models via opencode (sst/opencode).
+# Auth: `opencode providers login` (OAuth, ChatGPT Plus/Pro). Auth lives
+# at ~/.local/share/opencode/auth.json — shared across all clones.
+#
+# Differences from test-models-openai.yaml (pi runtime):
+#   - provider: opencode  (sets AGENT_PROVIDER=opencode in the runner)
+#   - pi_model is the opencode --model string ("openai/gpt-5.5", not
+#     "openai-codex/gpt-5.5")
+#   - No bench-fence extension; uses opencode.json permission rules
+#     plus the standalone-clone isolation
+#   - No BENCH_FORMAL_AUTOFIX loop — opencode is workflow-trained and
+#     self-checks reliably (like Codex CLI)
+#
+# Models pulled from `opencode models | grep openai/gpt-5`. Not all
+# subscription tiers grant access to every variant.
+
+models:
+  - name: gpt-5_5
+    pi_model: openai/gpt-5.5
+    provider: opencode
+    oauth: true
+  - name: gpt-5_4
+    pi_model: openai/gpt-5.4
+    provider: opencode
+    oauth: true
+  - name: gpt-5_4-mini
+    pi_model: openai/gpt-5.4-mini
+    provider: opencode
+    oauth: true
+  - name: gpt-5_3-codex
+    pi_model: openai/gpt-5.3-codex
+    provider: opencode
+    oauth: true
+  - name: gpt-5_3-codex-spark
+    pi_model: openai/gpt-5.3-codex-spark
+    provider: opencode
+    oauth: true

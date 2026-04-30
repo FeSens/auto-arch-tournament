@@ -1,4 +1,4 @@
-"""Agent-runtime abstraction: codex (default), claude, or pi.
+"""Agent-runtime abstraction: codex, claude, pi, or opencode.
 
 Selected via AGENT_PROVIDER env var. Default `codex`. All runtimes are
 invoked via subprocess and stream stdout to a per-slot log file.
@@ -15,15 +15,22 @@ Claude:
 Pi (@mariozechner/pi-coding-agent):
   pi -p <prompt> --mode json --model <PI_MODEL>
      --tools read,write,edit,bash,grep,find,ls
-  Pi auto-loads any extension in <cwd>/.pi/extensions/. The benchmark
-  runner places `bench-fence` there to enforce path allowlists per run.
-  Model selected via PI_MODEL env var, e.g. `anthropic/claude-opus-4-7`
-  or `openrouter/qwen/qwen3-coder`. API keys come from native env vars
-  (ANTHROPIC_API_KEY, OPENAI_API_KEY, OPENROUTER_API_KEY, ...).
+  Pi auto-loads any extension in <cwd>/.pi/extensions/. Model selected
+  via PI_MODEL env var, e.g. `anthropic/claude-opus-4-7` or
+  `openrouter/qwen/qwen3-coder`. API keys come from native env vars.
 
-All three produce streamed stdout. Claude's NDJSON tool_use and pi's
---mode json events get parsed into one-line "[<provider>] Edit: file.py"
-prints; codex's --json events are similarly summarized.
+OpenCode (sst/opencode):
+  opencode run <prompt> --model <OPENCODE_MODEL> --format json
+           --dangerously-skip-permissions --dir <cwd>
+  Authenticated via `opencode providers login` (OAuth — Codex / Claude
+  Pro / Copilot / Anthropic API key). Tool permissions configured via
+  <cwd>/opencode.json. Like Codex CLI, opencode is workflow-trained
+  for verify-then-declare, so no programmatic formal-fix needed.
+
+All four produce streamed stdout. Claude's NDJSON, pi's --mode json,
+and opencode's --format json events get parsed into one-line
+"[<provider>] Edit: file.py" prints; codex's --json events are
+similarly summarized.
 """
 from __future__ import annotations
 
@@ -35,7 +42,7 @@ from pathlib import Path
 from typing import Optional
 
 
-VALID_PROVIDERS = ("codex", "claude", "pi")
+VALID_PROVIDERS = ("codex", "claude", "pi", "opencode")
 
 # Codex's `exec` mode prints a multi-line banner before doing work — model
 # id, sandbox mode, token counters, separator dashes, etc. None of it is
@@ -158,13 +165,59 @@ def _summarize_codex_plain(s: str) -> Optional[str]:
 
 
 def get_provider() -> str:
-    """Return 'codex' (default), 'claude', or 'pi' from AGENT_PROVIDER env var."""
+    """Return one of {'codex' (default), 'claude', 'pi', 'opencode'} from AGENT_PROVIDER."""
     p = os.environ.get("AGENT_PROVIDER", "codex").strip().lower()
     if p not in VALID_PROVIDERS:
         raise ValueError(
             f"AGENT_PROVIDER must be one of {VALID_PROVIDERS!r}, got {p!r}"
         )
     return p
+
+
+def _summarize_opencode_jsonl(ev: dict) -> Optional[str]:
+    """One-liner from an opencode `--format json` event.
+
+    Verified against opencode 1.14.30. Event shape:
+      {"type": "step_start" | "step_finish" | "text" | "tool_use" | ...,
+       "timestamp": ..., "sessionID": ..., "part": {...}}
+
+    Inner `part` for tool_use:
+      {"type": "tool", "tool": "bash" | "read" | "edit" | ...,
+       "callID": ..., "state": {"input": {...}, "output": ..., "metadata": ...}}
+    """
+    et = ev.get("type")
+    # Skip control events.
+    if et in (None, "step_start", "step_finish",
+              "session_start", "session_idle"):
+        return None
+    part = ev.get("part") or {}
+    if not isinstance(part, dict):
+        return None
+    if et == "text":
+        text = (part.get("text") or "").strip()
+        if not text:
+            return None
+        first = text.splitlines()[0]
+        return _truncate(f"msg: {first}", 120)
+    if et == "tool_use":
+        tool = part.get("tool") or "?"
+        state = part.get("state") or {}
+        inp = state.get("input") or {} if isinstance(state, dict) else {}
+        target = (inp.get("file_path")
+                  or inp.get("path")
+                  or inp.get("filePath")
+                  or inp.get("command")
+                  or inp.get("pattern")
+                  or inp.get("query")
+                  or "")
+        if isinstance(target, str) and len(target) > 100:
+            target = target[:97] + "..."
+        return f"{tool}: {target}".rstrip(": ").strip()
+    if et == "error":
+        msg = ev.get("message") or part.get("message") or "unknown"
+        return _truncate(f"error: {msg}", 140)
+    # Unknown — surface the type so parser drift is visible.
+    return f"opencode: {et}"
 
 
 def _summarize_pi_jsonl(ev: dict) -> Optional[str]:
@@ -298,6 +351,23 @@ def build_agent_cmd(
         if session_dir:
             cmd += ["--session-dir", session_dir]
         return cmd
+    if p == "opencode":
+        # Opencode reads its model from --model; OPENCODE_MODEL env var
+        # is the bench-runner convention. Like pi, no useful default.
+        opencode_model = model or os.environ.get("OPENCODE_MODEL", "").strip()
+        if not opencode_model:
+            raise ValueError(
+                "opencode runtime requires OPENCODE_MODEL env var or model= kwarg "
+                "(e.g. 'openai/gpt-5.5', 'anthropic/claude-sonnet-4.6')"
+            )
+        cmd = [
+            "opencode", "run", prompt,
+            "--model", opencode_model,
+            "--format", "json",
+            "--dangerously-skip-permissions",
+            "--dir", str(cwd),
+        ]
+        return cmd
     raise ValueError(f"unknown provider {p!r}")
 
 
@@ -356,6 +426,18 @@ def summarize_event(line: str, provider: Optional[str] = None) -> Optional[str]:
                 s = s[:137] + "..."
             return s.strip() or None
         return _summarize_pi_jsonl(ev)
+    if p == "opencode":
+        s = line.rstrip("\n")
+        if not s.strip():
+            return None
+        try:
+            ev = json.loads(s)
+        except json.JSONDecodeError:
+            # Plain-text line (banner, error before --format json kicks in).
+            if len(s) > 140:
+                s = s[:137] + "..."
+            return s.strip() or None
+        return _summarize_opencode_jsonl(ev)
     return None
 
 

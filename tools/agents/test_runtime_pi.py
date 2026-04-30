@@ -161,3 +161,73 @@ def test_summarize_event_pi_plain_text_fallback():
 def test_summarize_event_pi_blank_line():
     assert _runtime.summarize_event("\n", provider="pi") is None
     assert _runtime.summarize_event("", provider="pi") is None
+
+
+# --- opencode provider --------------------------------------------------
+
+
+def test_get_provider_accepts_opencode(monkeypatch):
+    monkeypatch.setenv("AGENT_PROVIDER", "opencode")
+    assert _runtime.get_provider() == "opencode"
+
+
+def test_valid_providers_includes_opencode():
+    assert "opencode" in _runtime.VALID_PROVIDERS
+
+
+def test_build_agent_cmd_opencode_argv_shape(monkeypatch):
+    monkeypatch.setenv("OPENCODE_MODEL", "openai/gpt-5.5")
+    cmd = _runtime.build_agent_cmd("hello world", cwd="/tmp/work", provider="opencode")
+    assert cmd[0] == "opencode"
+    assert cmd[1] == "run"
+    assert cmd[2] == "hello world"
+    assert "--model" in cmd and cmd[cmd.index("--model") + 1] == "openai/gpt-5.5"
+    assert "--format" in cmd and cmd[cmd.index("--format") + 1] == "json"
+    assert "--dangerously-skip-permissions" in cmd
+    assert "--dir" in cmd and cmd[cmd.index("--dir") + 1] == "/tmp/work"
+
+
+def test_build_agent_cmd_opencode_requires_model(monkeypatch):
+    monkeypatch.delenv("OPENCODE_MODEL", raising=False)
+    with pytest.raises(ValueError, match="OPENCODE_MODEL"):
+        _runtime.build_agent_cmd("hi", cwd=".", provider="opencode")
+
+
+def test_summarize_opencode_text_event():
+    ev = {"type": "text", "part": {"text": "Running formal/run_all.sh now\nmore content"}}
+    out = _runtime._summarize_opencode_jsonl(ev)
+    assert out is not None
+    assert "Running formal" in out
+    # only first line
+    assert "more content" not in out
+
+
+def test_summarize_opencode_tool_use_bash():
+    ev = {"type": "tool_use", "part": {"type": "tool", "tool": "bash",
+          "state": {"input": {"command": "bash formal/run_all.sh"}}}}
+    out = _runtime._summarize_opencode_jsonl(ev)
+    assert out == "bash: bash formal/run_all.sh"
+
+
+def test_summarize_opencode_tool_use_edit():
+    ev = {"type": "tool_use", "part": {"type": "tool", "tool": "edit",
+          "state": {"input": {"file_path": "cores/bench/rtl/alu.sv"}}}}
+    out = _runtime._summarize_opencode_jsonl(ev)
+    assert out == "edit: cores/bench/rtl/alu.sv"
+
+
+def test_summarize_opencode_step_events_suppressed():
+    for et in ("step_start", "step_finish", "session_start"):
+        assert _runtime._summarize_opencode_jsonl({"type": et}) is None
+
+
+def test_summarize_event_opencode_jsonl_line():
+    line = '{"type":"tool_use","part":{"type":"tool","tool":"edit","state":{"input":{"file_path":"foo.sv"}}}}\n'
+    assert _runtime.summarize_event(line, provider="opencode") == "edit: foo.sv"
+
+
+def test_summarize_event_opencode_plain_text_fallback():
+    line = "Some banner from opencode startup\n"
+    out = _runtime.summarize_event(line, provider="opencode")
+    assert out is not None
+    assert "banner" in out

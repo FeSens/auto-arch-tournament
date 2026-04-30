@@ -57,13 +57,15 @@ class ModelEntry:
     pi_model: str
     # API-key environment variable name. For OAuth subscription providers
     # (Codex, Claude Pro, Copilot) the auth lives in ~/.pi/agent/auth.json
-    # and no env var is needed — set `oauth: true` instead and leave
-    # key_env empty (or a harmless placeholder).
+    # or ~/.local/share/opencode/auth.json and no env var is needed —
+    # set `oauth: true` instead and leave key_env empty.
     key_env: str = ""
     oauth: bool = False
-    # Agent runtime to use. "pi" (default for backwards compat),
-    # "codex", "opencode", or "claude". When "codex", `pi_model` is
-    # interpreted as the codex --model string (e.g. "gpt-5.5").
+    # Agent runtime to use. "pi" (default for backwards compat with
+    # existing model lists), "codex", "opencode", or "claude". When
+    # "codex", `pi_model` is the codex --model string (e.g. "gpt-5.5").
+    # When "opencode", it's the opencode --model string
+    # (e.g. "openai/gpt-5.5", "anthropic/claude-sonnet-4.6").
     provider: str = "pi"
 
 
@@ -266,19 +268,49 @@ def clone_fixture(repo_root: Path, ref: str, dest: Path) -> None:
          "-m", "bench-runner: pre-create experiments dir"],
         cwd=str(dest), check=True, capture_output=True,
     )
-    # Symlink riscv-formal from the main repo. The submodule is ~200 MB
-    # and gitignored, so it isn't in the fixture; without this symlink,
-    # `make formal` fails with "formal/riscv-formal not found" and every
-    # iteration is marked broken at the formal gate. tools/worktree.py
-    # does the equivalent symlink for per-iteration sub-worktrees;
-    # tools/bench/runner.py does it once at the per-rep clone level so
-    # it propagates into each sub-worktree.
+    # Mirror riscv-formal into the clone as a *real* directory. The
+    # submodule is ~200 MB and gitignored, so it isn't in the fixture;
+    # without it, `make formal` fails with "formal/riscv-formal not
+    # found" and every iteration is marked broken at the formal gate.
+    #
+    # Why a copy instead of a symlink: the bench rep is a *standalone*
+    # `git clone`, not a `git worktree add`. Codex's
+    # `--sandbox workspace-write` resolves the workspace root to this
+    # rep clone, and a symlink whose target lives outside that root
+    # (the parent repo's vendored riscv-formal) is read-only from the
+    # agent's perspective. The orchestrator log on a recent broken
+    # bench slot makes this explicit:
+    #     "The repository's formal/riscv-formal/cores/bench staging
+    #      area is read-only in this sandbox, so the direct formal
+    #      script can't write..."
+    # The agent then burns dozens of shell calls building a /tmp
+    # mirror as workaround instead of fixing the RTL, and the
+    # orchestrator's hard formal gate is the first thing to see the
+    # bug. A real in-clone copy keeps riscv-formal inside the
+    # sandboxed root so `bash formal/run_all.sh` works in-loop.
+    # Opencode's permission system has the same workspace-root
+    # property, so the fix benefits both workflow-trained runtimes.
+    #
+    # tools/worktree.py's per-iteration sub-worktree symlink uses
+    # Path("formal/riscv-formal").resolve(), which now resolves to a
+    # path inside this rep clone — so the sub-worktree symlink target
+    # is also inside the workspace root, and no further change is
+    # needed there.
+    #
+    # Cost: ~200 MB and ~5-15 s once per rep at clone time. macOS APFS
+    # users who want this effectively-free can switch to `cp -Rc`
+    # (clonefile(2) — copy-on-write, ~zero extra disk), but the plain
+    # `cp -R` form keeps Linux runners portable since GNU coreutils
+    # has no `-c` flag.
     rf_src = find_riscv_formal()
     if rf_src is not None:
         rf_dest = dest / "formal" / "riscv-formal"
         rf_dest.parent.mkdir(parents=True, exist_ok=True)
         if not rf_dest.exists():
-            rf_dest.symlink_to(rf_src.resolve())
+            subprocess.run(
+                ["cp", "-R", str(rf_src.resolve()), str(rf_dest)],
+                check=True,
+            )
 
 
 def install_fence(clone: Path) -> None:
@@ -295,6 +327,51 @@ def install_fence(clone: Path) -> None:
     cfg.write(target_dir / "bench-fence.config.json")
 
 
+def install_opencode_config(clone: Path) -> None:
+    """Render <clone>/opencode.json with a deny list mirroring the
+    bench-fence's intent — block edits to other cores, prevent
+    history-rewriting git operations, and otherwise allow normal
+    workflow.
+
+    The standalone shallow clone already physically removes other cores
+    (cores/baseline, cores/v1) — these rules are belt-and-suspenders
+    against any path the agent might construct or any future fixture
+    that re-includes other cores.
+    """
+    cfg = {
+        "$schema": "https://opencode.ai/config.json",
+        "permission": {
+            "edit": {
+                "*": "allow",
+                "cores/baseline/**": "deny",
+                "cores/v1/**": "deny",
+                "cores/bench-*/**": "deny",
+                "tools/**": "deny",
+                "schemas/**": "deny",
+                "formal/run_all.sh": "deny",
+                "formal/wrapper.sv": "deny",
+                "formal/checks.cfg": "deny",
+                "fpga/**": "deny",
+                "test/cosim/**": "deny",
+                "Makefile": "deny",
+                "CLAUDE.md": "deny",
+                "ARCHITECTURE.md": "deny",
+            },
+            "bash": {
+                "*": "allow",
+                "git checkout main*": "deny",
+                "git checkout master*": "deny",
+                "git fetch*": "deny",
+                "git stash*": "deny",
+                "git log -p*": "deny",
+                "*cores/baseline*": "deny",
+                "*cores/v1*": "deny",
+            },
+        },
+    }
+    (clone / "opencode.json").write_text(json.dumps(cfg, indent=2) + "\n")
+
+
 def make_env_for_job(job: JobSpec, clone: Path, keys: dict[str, str]) -> dict[str, str]:
     env = os.environ.copy()
     env["TARGET"] = "bench"
@@ -304,6 +381,12 @@ def make_env_for_job(job: JobSpec, clone: Path, keys: dict[str, str]) -> dict[st
         # workspace-write sandbox + clone isolation suffice.
         env["AGENT_PROVIDER"] = "codex"
         env["CODEX_MODEL"] = job.model.pi_model
+    elif job.model.provider == "opencode":
+        # Opencode is also workflow-trained and self-checks reliably,
+        # so no programmatic autofix needed. install_opencode_config
+        # writes the per-clone permission deny rules.
+        env["AGENT_PROVIDER"] = "opencode"
+        env["OPENCODE_MODEL"] = job.model.pi_model
     else:
         # Default: pi runtime.
         env["AGENT_PROVIDER"] = "pi"
@@ -311,15 +394,16 @@ def make_env_for_job(job: JobSpec, clone: Path, keys: dict[str, str]) -> dict[st
         # PI_SESSION_DIR isolates session storage per-clone WITHOUT
         # relocating auth.json (would defeat OAuth-subscription
         # logins). The pi branch in _runtime.py reads this and
-        # forwards as --session-dir.
+        # forwards it as --session-dir. We deliberately do NOT set
+        # PI_CODING_AGENT_DIR, which would override all of
+        # ~/.pi/agent/ (including auth.json).
         env["PI_SESSION_DIR"] = str((clone / ".pi-sessions").resolve())
-    # Pi-via-OpenAI-subscription routinely skips the local formal
-    # self-check that the impl prompt asks for (observed: 0/15 bash
-    # invocations across a K=3 matrix). BENCH_FORMAL_AUTOFIX=1 tells
-    # implement.py to run formal programmatically and re-invoke the
-    # agent with the counterexample tail if it fails. Codex CLI is
-    # workflow-trained and self-checks naturally — no autofix needed.
-    if job.model.provider != "codex":
+        # Pi-via-OAuth routinely skips the impl prompt's local formal
+        # self-check (observed: 0/15 bash invocations across a K=3
+        # matrix). BENCH_FORMAL_AUTOFIX=1 tells implement.py to run
+        # formal programmatically and re-invoke the agent with the
+        # counterexample tail if it fails. Codex/opencode are
+        # workflow-trained and self-check naturally — no autofix.
         env["BENCH_FORMAL_AUTOFIX"] = "1"
     # Apply keys from ~/.bench-keys.env, but only for keys not already in env
     # (so a real shell-exported value wins over a file value).
@@ -330,6 +414,51 @@ def make_env_for_job(job: JobSpec, clone: Path, keys: dict[str, str]) -> dict[st
     env["TMPDIR"] = str((clone / ".tmp").resolve())
     Path(env["TMPDIR"]).mkdir(parents=True, exist_ok=True)
     return env
+
+
+def parse_opencode_cost_from_log(log_path: Path) -> tuple[int, int, float]:
+    """Sum input/output tokens and cost across an opencode --format json log.
+
+    Opencode emits a `step_finish` event after each turn carrying the cumulative
+    `tokens` and `cost` for that step:
+      {"type":"step_finish", ..., "part":{"tokens":{"input":N,"output":N,
+        "reasoning":N,"cache":{"read":N,"write":N}}, "cost":F, ...}}
+
+    `cost: 0` is normal under OAuth subscriptions (no per-token billing); we
+    still tally token counts regardless.
+    """
+    if not log_path.is_file():
+        return (0, 0, 0.0)
+    toks_in = toks_out = 0
+    cost = 0.0
+    for raw in log_path.read_text().splitlines():
+        s = raw.strip()
+        if not s or not s.startswith("{"):
+            continue
+        try:
+            ev = json.loads(s)
+        except json.JSONDecodeError:
+            continue
+        if ev.get("type") != "step_finish":
+            continue
+        part = ev.get("part") or {}
+        if not isinstance(part, dict):
+            continue
+        toks = part.get("tokens") or {}
+        if isinstance(toks, dict):
+            ti = toks.get("input") or 0
+            to = toks.get("output") or 0
+            try:
+                toks_in += int(ti)
+                toks_out += int(to)
+            except (TypeError, ValueError):
+                pass
+        c = part.get("cost", 0)
+        try:
+            cost += float(c or 0)
+        except (TypeError, ValueError):
+            pass
+    return (toks_in, toks_out, cost)
 
 
 def parse_pi_cost_from_log(log_path: Path) -> tuple[int, int, float]:
@@ -452,7 +581,15 @@ def collect_agent_logs(clone: Path) -> Path:
     return out_path
 
 
-def summarize_run(log_jsonl: Path, agent_log: Path) -> dict:
+def parse_cost_from_log(log_path: Path, provider: str = "pi") -> tuple[int, int, float]:
+    """Dispatch to the right cost parser based on provider."""
+    if provider == "opencode":
+        return parse_opencode_cost_from_log(log_path)
+    return parse_pi_cost_from_log(log_path)
+
+
+def summarize_run(log_jsonl: Path, agent_log: Path,
+                  provider: str = "pi") -> dict:
     """Compute the per-rep summary from an experiments/log.jsonl.
 
     Schema mirrors the spec's `bench/results.jsonl` row.
@@ -503,7 +640,7 @@ def summarize_run(log_jsonl: Path, agent_log: Path) -> dict:
     if final_fitness is not None and baseline_fitness:
         delta_pct = (final_fitness - baseline_fitness) / baseline_fitness * 100.0
 
-    toks_in, toks_out, cost = parse_pi_cost_from_log(agent_log)
+    toks_in, toks_out, cost = parse_cost_from_log(agent_log, provider=provider)
     return {
         "iterations": iterations,
         "accepted": accepted,
@@ -576,6 +713,8 @@ def run_one_job(
             # standalone clone already removes other cores. No fence
             # file needed.
             pass
+        elif job.model.provider == "opencode":
+            install_opencode_config(clone)
         else:
             install_fence(clone)
     except Exception as e:
@@ -629,7 +768,7 @@ def run_one_job(
             if now >= next_cost_check:
                 # Peek at the running cost; kill if over budget.
                 concat = collect_agent_logs(clone)
-                _, _, cost_so_far = parse_pi_cost_from_log(concat)
+                _, _, cost_so_far = parse_cost_from_log(concat, provider=job.model.provider)
                 if cost_so_far > max_cost_usd:
                     proc.kill()
                     last_status = "over_budget"
@@ -658,7 +797,8 @@ def run_one_job(
     if agent_concat.is_file():
         shutil.copy2(agent_concat, out_dir / "agent.log")
 
-    summary = summarize_run(out_dir / "log.jsonl", out_dir / "agent.log")
+    summary = summarize_run(out_dir / "log.jsonl", out_dir / "agent.log",
+                            provider=job.model.provider)
     row.update(summary)
     if last_status == "exited" and row["orchestrator_exit"] == 0:
         row["status"] = "done"
