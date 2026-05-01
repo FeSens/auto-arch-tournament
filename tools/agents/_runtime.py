@@ -388,6 +388,16 @@ def build_agent_cmd(
         opencode_variant = os.environ.get("OPENCODE_VARIANT", "xhigh").strip()
         if opencode_variant:
             cmd += ["--variant", opencode_variant]
+        # Use the bench agent prompt that the runner installs into
+        # <clone>/.opencode/agent/bench.md. It's inspired by codex
+        # CLI's own coding-agent prompt — verification discipline,
+        # surgical precision in existing codebases, and an explicit
+        # RVFI channel-0 binding callout for IF-stage hypotheses.
+        # Override with OPENCODE_AGENT — set to "" to fall back to
+        # opencode's default agent.
+        opencode_agent = os.environ.get("OPENCODE_AGENT", "bench").strip()
+        if opencode_agent:
+            cmd += ["--agent", opencode_agent]
         return cmd
     raise ValueError(f"unknown provider {p!r}")
 

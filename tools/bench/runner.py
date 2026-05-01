@@ -44,6 +44,7 @@ DEFAULT_RESULTS_JSONL = REPO_ROOT / "bench" / "results.jsonl"
 DEFAULT_CLONE_BASE = REPO_ROOT / ".claude" / "bench-runs"
 DEFAULT_RESULTS_DIR = REPO_ROOT / "bench"
 EXTENSION_SRC = HERE / "extensions" / "bench-fence"
+OPENCODE_AGENT_PROMPT_SRC = HERE / "opencode-bench-agent.md"
 
 # Per-rep wall-clock ceiling. 9h matches what the design spec documents.
 DEFAULT_REP_TIMEOUT_SEC = 9 * 3600
@@ -239,6 +240,11 @@ def clone_fixture(repo_root: Path, ref: str, dest: Path) -> None:
         # deny rule (in install_opencode_config) is the second layer
         # that prevents the agent from actually editing it.
         "opencode.json\n"
+        # install_opencode_config also drops the bench agent into
+        # .opencode/agent/bench.md, and opencode rewrites session
+        # state under .opencode/ during a run. Excluding the whole
+        # tree keeps both off the sandbox check.
+        ".opencode/\n"
     )
     with exclude_path.open("a") as f:
         f.write(extras)
@@ -389,6 +395,20 @@ def install_opencode_config(clone: Path) -> None:
         },
     }
     (clone / "opencode.json").write_text(json.dumps(cfg, indent=2) + "\n")
+
+    # Drop the bench agent into .opencode/agent/bench.md so opencode
+    # auto-discovers it and `--agent bench` (set by _runtime.py)
+    # activates a verification-discipline-heavy system prompt. Without
+    # this, opencode runs against its default prompt and historically
+    # struggles with the RVFI channel-0 retirement contract on
+    # IF-stage / front-end restructuring hypotheses. The prompt is
+    # inspired by codex CLI's cli_coding_agent.txt sections (Task
+    # execution, Validating your work, Ambition vs. precision) plus
+    # codex's gpt-5 pragmatic personality block, with an added section
+    # specifically calling out the RVFI ch0 binding pitfall.
+    agent_dir = clone / ".opencode" / "agent"
+    agent_dir.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(OPENCODE_AGENT_PROMPT_SRC, agent_dir / "bench.md")
 
 
 def make_env_for_job(job: JobSpec, clone: Path, keys: dict[str, str]) -> dict[str, str]:
