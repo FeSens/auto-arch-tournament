@@ -46,8 +46,13 @@ DEFAULT_RESULTS_DIR = REPO_ROOT / "bench"
 EXTENSION_SRC = HERE / "extensions" / "bench-fence"
 OPENCODE_AGENT_PROMPT_SRC = HERE / "opencode-bench-agent.md"
 
-# Per-rep wall-clock ceiling. 9h matches what the design spec documents.
-DEFAULT_REP_TIMEOUT_SEC = 9 * 3600
+# Per-rep wall-clock ceiling. 0 = no cap (the runner waits for the
+# orchestrator to exit on its own). Originally 9h to bound runaway
+# rounds, but legitimate N=10 K=3 runs at xhigh on premium models
+# routinely run 4-5h and a stuck-but-still-progressing rep was being
+# killed without a clean stop signal. Pass --timeout-sec <N> to
+# re-enable the cap for a specific run.
+DEFAULT_REP_TIMEOUT_SEC = 0
 # Default per-rep cost ceiling (USD).
 DEFAULT_MAX_COST_USD = 30.0
 
@@ -842,7 +847,11 @@ def run_one_job(
     )
 
     log_jsonl_path = clone / "cores" / "bench" / "experiments" / "log.jsonl"
-    deadline = time.time() + timeout_sec
+    # timeout_sec <= 0 means "no cap" — the runner just waits on the
+    # orchestrator. The cost watchdog below is the sole automatic stop
+    # in that mode; pass --timeout-sec <N> to re-enable a wall-clock kill.
+    has_deadline = timeout_sec > 0
+    deadline = time.time() + timeout_sec if has_deadline else None
     cost_check_interval = 60.0
     next_cost_check = time.time() + cost_check_interval
     last_status = "running"
@@ -857,7 +866,7 @@ def run_one_job(
             except subprocess.TimeoutExpired:
                 pass
             now = time.time()
-            if now >= deadline:
+            if has_deadline and now >= deadline:
                 proc.kill()
                 last_status = "timed_out"
                 row["status"] = "timed_out"
