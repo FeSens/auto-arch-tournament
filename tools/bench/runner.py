@@ -212,6 +212,30 @@ def clone_fixture(repo_root: Path, ref: str, dest: Path) -> None:
          str(repo_root), str(dest)],
         check=True, capture_output=True,
     )
+    # CRITICAL: remove any tag with the same name as `ref`. The parent
+    # repo can have BOTH a branch named bench-fixture-v1 AND a tag
+    # named bench-fixture-v1 (the tag pins the original fixture commit;
+    # the branch advances over time). git clone copies both, leaving
+    # an ambiguous ref in the clone.
+    #
+    # Symptom of the ambiguity: `git checkout bench-fixture-v1` in the
+    # orchestrator's accept_worktree (tools/worktree.py:_active_branch)
+    # silently resolves to the TAG (commit at the fixture freeze point),
+    # detaching HEAD and orphaning every log.jsonl commit appended
+    # since the bench-runner pre-create. The orchestrator continues
+    # producing commits on the detached HEAD, but each subsequent
+    # accept_worktree's `git checkout bench-fixture-v1` rewinds again,
+    # so the saved log.jsonl ends up containing only the entries
+    # appended after the FINAL rewind — observed as "iter=9" / "iter=27"
+    # in N=10 K=3 runs that demonstrably executed all 30 slots.
+    #
+    # Deleting the tag locally in the clone is the surgical fix: it
+    # leaves the tag intact in the parent repo (which the user may
+    # still rely on) but disambiguates the ref inside the rep clone.
+    subprocess.run(
+        ["git", "tag", "-d", ref],
+        cwd=str(dest), check=False, capture_output=True,
+    )
     # The runner copies pi extensions into <clone>/.pi/ and pi writes
     # session state under <clone>/.pi-sessions/. Both must be invisible to
     # the orchestrator's `git status --porcelain` sandbox check
