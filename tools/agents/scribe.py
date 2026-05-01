@@ -201,7 +201,16 @@ def run_scribe_agent(entry: dict, diff: str, target: str) -> str | None:
     allow_re = _allowed_re(target)
     breaches = _git_offlimits(allow_re)
     if breaches:
+        # Same log.jsonl protection as in hypothesis.py — the scribe
+        # runs INSIDE append_log right before the new line is written
+        # and committed. If the scribe agent's tool somehow touches
+        # log.jsonl, `git checkout HEAD -- log.jsonl` would discard
+        # any in-flight append in the same transaction. Skip the
+        # restore for log.jsonl so the breach is logged but the
+        # journal is preserved.
         for p in breaches:
+            if p.endswith("/log.jsonl") or p == "log.jsonl":
+                continue
             subprocess.run(["git", "checkout", "HEAD", "--", p],
                            capture_output=True)
             pp = Path(p)

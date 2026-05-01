@@ -465,7 +465,19 @@ def run_hypothesis_agent(log_tail: list, current_fitness: float,
         # Hard-revert anything the agent touched outside its allow list.
         # `git checkout HEAD --` restores tracked files; new files have to
         # be removed by hand.
+        #
+        # NEVER revert the log.jsonl path — it's the orchestrator's own
+        # journal. If an agent's tool somehow leaves a touch-mark on it
+        # (file mtime change, no-content-diff write), the breach check
+        # picks it up and `git checkout HEAD -- log.jsonl` would throw
+        # away in-flight append_log writes, leaving the saved log
+        # truncated to whatever the previous commit was. Observed on
+        # N=10 K=3 runs where the saved log lost rounds 1-8 entries.
+        # Keep the breach reported (the agent shouldn't be touching it)
+        # but don't physically restore the file.
         for p in breaches:
+            if p.endswith("/log.jsonl") or p == "log.jsonl":
+                continue
             subprocess.run(["git", "checkout", "HEAD", "--", p],
                            capture_output=True)
             path = Path(p)
