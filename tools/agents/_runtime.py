@@ -311,6 +311,15 @@ def build_agent_cmd(
         codex_model = model or os.environ.get("CODEX_MODEL", "").strip()
         if codex_model:
             cmd += ["--model", codex_model]
+        # Make reasoning effort explicit so the bench is reproducible
+        # regardless of the user's ~/.codex/config.toml. xhigh matches
+        # what real coding agent users run on the gpt-5 family per
+        # OpenAI's own docs ("xhigh for the hardest asynchronous
+        # agentic tasks or evals that test the bounds of model
+        # intelligence"). Override per-job with CODEX_REASONING_EFFORT.
+        codex_effort = os.environ.get("CODEX_REASONING_EFFORT", "xhigh").strip()
+        if codex_effort:
+            cmd += ["-c", f"model_reasoning_effort={codex_effort}"]
         cmd.append(prompt)
         return cmd
     if p == "claude":
@@ -367,6 +376,18 @@ def build_agent_cmd(
             "--dangerously-skip-permissions",
             "--dir", str(cwd),
         ]
+        # Match codex's xhigh reasoning effort for apples-to-apples
+        # comparison. opencode's --variant flag is documented as
+        # "provider-specific reasoning effort" and the docs explicitly
+        # list `xhigh - Extra high reasoning effort` for OpenAI
+        # variants. Without this, opencode runs at its default
+        # (medium-ish) and looks worse than codex purely because of
+        # the effort gap, not the runtime. Override per-job with
+        # OPENCODE_VARIANT — set it to "" to drop the flag entirely
+        # (e.g. for non-OpenAI models that don't support xhigh).
+        opencode_variant = os.environ.get("OPENCODE_VARIANT", "xhigh").strip()
+        if opencode_variant:
+            cmd += ["--variant", opencode_variant]
         return cmd
     raise ValueError(f"unknown provider {p!r}")
 
