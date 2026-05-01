@@ -435,6 +435,58 @@ def make_env_for_job(job: JobSpec, clone: Path, keys: dict[str, str]) -> dict[st
     return env
 
 
+def parse_codex_cost_from_log(log_path: Path) -> tuple[int, int, float]:
+    """Sum input/output tokens across a codex --json log.
+
+    Codex emits one event per agent turn:
+      {"type":"turn.completed","usage":{"input_tokens":N,
+        "cached_input_tokens":N,"output_tokens":N,"reasoning_output_tokens":N}}
+
+    `cached_input_tokens` is a *subset* of `input_tokens` (the prompt
+    portion already in the model's KV cache). We sum the gross
+    `input_tokens` so the count reflects what the model actually
+    processed — callers who want billable-only tokens can subtract
+    cache reads via the rate card.
+
+    Cost is always 0.0: codex via OAuth subscription doesn't expose
+    per-call billing, and even paid-API codex doesn't emit `cost` in
+    its stream-json schema. Apply pricing externally if needed.
+
+    Dedup: collect_agent_logs concatenates the same hypothesis log
+    multiple times because both the explicit hypotheses dir AND the
+    clone-root rglob pick it up. Without per-line dedup we'd
+    double-count every turn. The fix in collect_agent_logs is to use
+    a set of paths, but the per-line dedup here is a defensive
+    backstop in case any future log path changes re-introduce dupes.
+    """
+    if not log_path.is_file():
+        return (0, 0, 0.0)
+    seen: set[str] = set()
+    toks_in = toks_out = 0
+    for raw in log_path.read_text().splitlines():
+        s = raw.strip()
+        if not s.startswith("{") or '"turn.completed"' not in s:
+            continue
+        if s in seen:
+            continue
+        seen.add(s)
+        try:
+            ev = json.loads(s)
+        except json.JSONDecodeError:
+            continue
+        if ev.get("type") != "turn.completed":
+            continue
+        usage = ev.get("usage") or {}
+        if not isinstance(usage, dict):
+            continue
+        try:
+            toks_in += int(usage.get("input_tokens") or 0)
+            toks_out += int(usage.get("output_tokens") or 0)
+        except (TypeError, ValueError):
+            pass
+    return (toks_in, toks_out, 0.0)
+
+
 def parse_opencode_cost_from_log(log_path: Path) -> tuple[int, int, float]:
     """Sum input/output tokens and cost across an opencode --format json log.
 
@@ -582,15 +634,20 @@ def collect_agent_logs(clone: Path) -> Path:
     """
     out_path = clone / ".tmp" / "agent.concatenated.log"
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    parts: list[Path] = []
+    # Dedup paths: the recursive rglob from `clone` re-finds every
+    # .agent*.log under cores/bench/experiments/hypotheses/, so without
+    # a set the concat lists each hypothesis log twice. Token parsers
+    # also dedup defensively, but fixing it here makes the file shape
+    # what the comments describe.
+    parts: set[Path] = set()
     for sub in (
         clone / "cores" / "bench" / "experiments" / "hypotheses",
         clone,  # implementation worktrees write .agent.log at root of their dir
     ):
         if sub.is_dir():
-            parts.extend(sorted(sub.rglob(".agent*.log")))
+            parts.update(sub.rglob(".agent*.log"))
     with out_path.open("w") as outf:
-        for p in parts:
+        for p in sorted(parts):
             try:
                 outf.write(f"=== {p} ===\n")
                 outf.write(p.read_text())
@@ -604,6 +661,8 @@ def parse_cost_from_log(log_path: Path, provider: str = "pi") -> tuple[int, int,
     """Dispatch to the right cost parser based on provider."""
     if provider == "opencode":
         return parse_opencode_cost_from_log(log_path)
+    if provider == "codex":
+        return parse_codex_cost_from_log(log_path)
     return parse_pi_cost_from_log(log_path)
 
 
