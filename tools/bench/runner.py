@@ -227,6 +227,18 @@ def clone_fixture(repo_root: Path, ref: str, dest: Path) -> None:
         "cores/bench/test/*.result.xml\n"
         "test/results.xml\n"
         "test/*.result.xml\n"
+        # install_opencode_config writes opencode.json into the clone
+        # root and the opencode CLI rewrites it during a session
+        # (config sync / session state). The hypothesis sandbox check
+        # runs `git status --porcelain` and any untracked / modified
+        # path that isn't the round's pre-allocated YAML is treated
+        # as an off-limits write — opencode.json then trips a false
+        # `hypothesis_gen_failed` breach, marking the slot broken even
+        # though the agent never touched it. Excluding it here keeps
+        # opencode.json out of git status entirely. The opencode-side
+        # deny rule (in install_opencode_config) is the second layer
+        # that prevents the agent from actually editing it.
+        "opencode.json\n"
     )
     with exclude_path.open("a") as f:
         f.write(extras)
@@ -356,6 +368,13 @@ def install_opencode_config(clone: Path) -> None:
                 "Makefile": "deny",
                 "CLAUDE.md": "deny",
                 "ARCHITECTURE.md": "deny",
+                # opencode.json is the fence config itself. Without this
+                # rule the agent can grant itself permissions; with it
+                # opencode refuses to write back to its own config from
+                # within a session. Paired with .git/info/exclude in
+                # clone_fixture, which keeps opencode's own session-
+                # state writes from tripping the hypothesis sandbox.
+                "opencode.json": "deny",
             },
             "bash": {
                 "*": "allow",
