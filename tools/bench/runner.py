@@ -54,7 +54,7 @@ OPENCODE_AGENT_PROMPT_SRC = HERE / "opencode-bench-agent.md"
 # re-enable the cap for a specific run.
 DEFAULT_REP_TIMEOUT_SEC = 0
 # Default per-rep cost ceiling (USD).
-DEFAULT_MAX_COST_USD = 30.0
+DEFAULT_MAX_COST_USD = 100.0
 
 
 @dataclass
