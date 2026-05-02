@@ -38,9 +38,9 @@ with these fixed values for the NeurIPS run:
 
 | parameter | value | source |
 |---|---|---|
-| Tournament rounds (N) | 10 | runner CLI `--n 10` |
-| Hypotheses per round (K) | 3 | runner CLI `--k 3` |
-| Reps per (model, provider) (J) | ≥3 | runner CLI `--reps 3` |
+| Tournament rounds (N) | 15 | runner CLI `--n 15` (default) |
+| Hypotheses per round (K) | 3 | runner CLI `--k 3` (default) |
+| Reps per (model, provider) (J) | 3 | runner CLI `--reps 3` (default) |
 | Reasoning effort | xhigh | `_runtime.py` (codex `model_reasoning_effort`, opencode `--variant xhigh`) |
 | Per-rep wall-clock cap | none | `runner.py` `DEFAULT_REP_TIMEOUT_SEC=0` |
 | Per-rep cost cap | $200 | `runner.py` `DEFAULT_MAX_COST_USD=200.0` |
