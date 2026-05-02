@@ -139,3 +139,112 @@ def test_lessons_block_pointer_when_large(tmp_path, monkeypatch):
     assert "Read cores/foo/LESSONS.md" in out
     # Body must NOT be inlined — the whole point of the pointer mode.
     assert "line 250" not in out
+
+
+# ----- normalize_hypothesis_yaml --------------------------------------
+
+def test_normalize_strips_target_prefix_from_rtl_paths(tmp_path):
+    from tools.agents.hypothesis import normalize_hypothesis_yaml
+    p = tmp_path / "hyp.yaml"
+    p.write_text(
+        "id: hyp-20260430-001-r1s0\n"
+        "title: t\ncategory: micro_opt\nmotivation: m\nhypothesis: h\n"
+        "expected_impact: {fitness_delta_pct: 5, confidence: medium}\n"
+        "changes:\n"
+        "  - file: cores/bench/rtl/alu.sv\n    description: x\n"
+        "  - file: cores/bench/test/test_alu.py\n    description: x\n"
+        "  - file: rtl/forward.sv\n    description: x\n"
+    )
+    changed = normalize_hypothesis_yaml(p, target="bench")
+    assert changed is True
+    import yaml as _yaml
+    data = _yaml.safe_load(p.read_text())
+    files = [c["file"] for c in data["changes"]]
+    assert files == ["rtl/alu.sv", "test/test_alu.py", "rtl/forward.sv"]
+
+
+def test_normalize_no_op_when_already_relative(tmp_path):
+    from tools.agents.hypothesis import normalize_hypothesis_yaml
+    p = tmp_path / "hyp.yaml"
+    p.write_text(
+        "changes:\n  - file: rtl/alu.sv\n    description: x\n"
+    )
+    assert normalize_hypothesis_yaml(p, target="bench") is False
+
+
+def test_normalize_leaves_non_rtl_paths_alone(tmp_path):
+    """Don't strip cores/<target>/ from a path that wouldn't satisfy the
+    schema even after stripping (e.g. cores/bench/Makefile)."""
+    from tools.agents.hypothesis import normalize_hypothesis_yaml
+    p = tmp_path / "hyp.yaml"
+    p.write_text(
+        "changes:\n  - file: cores/bench/Makefile\n    description: x\n"
+    )
+    assert normalize_hypothesis_yaml(p, target="bench") is False
+    import yaml as _yaml
+    data = _yaml.safe_load(p.read_text())
+    assert data["changes"][0]["file"] == "cores/bench/Makefile"
+
+
+def test_normalize_handles_missing_file(tmp_path):
+    from tools.agents.hypothesis import normalize_hypothesis_yaml
+    assert normalize_hypothesis_yaml(tmp_path / "absent.yaml", target="bench") is False
+
+
+def test_normalize_handles_invalid_yaml(tmp_path):
+    from tools.agents.hypothesis import normalize_hypothesis_yaml
+    p = tmp_path / "bad.yaml"
+    p.write_text(": : :\n")
+    # Should not raise.
+    normalize_hypothesis_yaml(p, target="bench")
+
+
+def test_normalize_repairs_stray_trailing_brace(tmp_path):
+    """Models occasionally append a stray `}` at the end of a YAML, mixing
+    block style with flow style. Repair by stripping it."""
+    from tools.agents.hypothesis import normalize_hypothesis_yaml
+    p = tmp_path / "hyp.yaml"
+    p.write_text(
+        "id: hyp-20260430-001-r1s0\n"
+        "title: t\ncategory: micro_opt\nmotivation: m\nhypothesis: h\n"
+        "expected_impact: {fitness_delta_pct: 5, confidence: medium}\n"
+        "changes:\n"
+        "  - file: rtl/alu.sv\n    description: x\n"
+        "}\n"  # stray
+    )
+    normalize_hypothesis_yaml(p, target="bench")
+    # File now parses successfully.
+    import yaml as _yaml
+    data = _yaml.safe_load(p.read_text())
+    assert isinstance(data, dict)
+    assert data["changes"][0]["file"] == "rtl/alu.sv"
+
+
+def test_normalize_repairs_stray_trailing_bracket(tmp_path):
+    from tools.agents.hypothesis import normalize_hypothesis_yaml
+    p = tmp_path / "hyp.yaml"
+    p.write_text(
+        "id: hyp-20260430-001-r1s0\n"
+        "title: t\ncategory: micro_opt\nmotivation: m\nhypothesis: h\n"
+        "expected_impact: {fitness_delta_pct: 5, confidence: medium}\n"
+        "changes:\n  - file: rtl/alu.sv\n    description: x\n"
+        "]\n"
+    )
+    normalize_hypothesis_yaml(p, target="bench")
+    import yaml as _yaml
+    data = _yaml.safe_load(p.read_text())
+    assert isinstance(data, dict)
+
+
+def test_prompt_includes_required_yaml_example():
+    p = _build_prompt(**_stub_args(), target="bench")
+    assert "fitness_delta_pct" in p
+    assert "confidence: medium" in p
+    assert "rtl/forward_unit.sv" in p
+    # Banner text and source-dump headings legitimately reference
+    # cores/<target>/rtl/ (that's where files actually live). What we
+    # actually need is an explicit "do NOT write the long form" warning
+    # so models don't put cores/bench/rtl/foo.sv in changes[].file.
+    assert ("Do NOT write the long form" in p
+            or "do NOT write the long form" in p)
+    assert "expected_impact" in p

@@ -9,6 +9,7 @@ Without that, a misbehaving agent could silently patch tools/, schemas/,
 etc., and those changes would persist into every subsequent worktree.
 """
 import subprocess, re, datetime
+import yaml
 from pathlib import Path
 from tools.agents._runtime import (
     build_agent_cmd,
@@ -217,9 +218,14 @@ def _build_prompt(log_tail: list, current_fitness: float, baseline_fitness: floa
 
 You are proposing a hypothesis for **cores/{target}/** ONLY. The repo
 contains other cores (cores/baseline/, cores/v1/, etc.) — those are
-READ-ONLY REFERENCE, not editing targets. Each `changes[i].file` in
-your hypothesis YAML must be under cores/{target}/rtl/. Anything else
-gets rejected.
+READ-ONLY REFERENCE, not editing targets.
+
+In your hypothesis YAML, write `changes[i].file` as `rtl/<filename>`
+(or `test/test_<name>.py`) — the SHORT form, RELATIVE to the rtl
+directory. The orchestrator resolves these against cores/{target}/rtl/
+when it runs the implementation phase. Do NOT write the long form
+`cores/{target}/rtl/<filename>` in changes[i].file — the schema's
+regex rejects it.
 
 """
 
@@ -259,16 +265,108 @@ Baseline fitness: {baseline_fitness:.2f}
 1. Read LESSONS.md and the recent outcomes above. Grep log.jsonl for
    relevant prior attempts in the same category before proposing.
 2. Identify the most promising architectural improvement.
-3. Write a hypothesis YAML file to: cores/{target}/experiments/hypotheses/<id>.yaml
+3. Use the **write** tool to write a hypothesis YAML file at:
+     cores/{target}/experiments/hypotheses/<id>.yaml
+   Do NOT output the YAML as text in your reply — the orchestrator only
+   sees files written via the write tool.
 
 {id_clause}
-The YAML must validate against schemas/hypothesis.schema.json:
-  id, title, category, motivation, hypothesis, expected_impact, changes
 
-Each `changes[i].file` must be a path under {rtl_dir}/ (this is an SV-source-
-of-truth project; do NOT propose Chisel/Scala edits).
+## Required YAML structure (validates against schemas/hypothesis.schema.json)
 
-Write the file at cores/{target}/experiments/hypotheses/<id>.yaml now. Do not output anything else."""
+```yaml
+id: hyp-YYYYMMDD-NNN-rRsS         # exactly the ID above
+title: "Short description ≥5 chars"
+category: micro_opt                # one of: micro_opt | structural | extension | predictor | memory
+motivation: |
+  Why this matters — a few sentences. Minimum 20 chars.
+hypothesis: |
+  What you propose to change and why it should help. Minimum 20 chars.
+expected_impact:
+  fitness_delta_pct: 5             # INTEGER (-50..+50). Schema rejects strings.
+  confidence: medium                # exactly one of: low | medium | high. Schema rejects anything else.
+changes:                            # at least one entry
+  - file: rtl/forward_unit.sv      # IMPORTANT: relative to rtl/, no `cores/<target>/` prefix.
+    description: "What you'll change in this file."
+  - file: rtl/id_stage.sv          # Or `test/test_<name>.py` for cocotb suites.
+    description: "..."
+```
+
+### Common mistakes that make schemas reject the file (do NOT do these)
+
+- `expected_impact: "free-text description"` — schema requires an OBJECT with `fitness_delta_pct` (integer) and `confidence` (enum). Strings are rejected.
+- `expected_impact: {{fitness_delta_pct: 5.0, confidence: "Med"}}` — `fitness_delta_pct` must be a Python integer (not float, not "5"); `confidence` must be lowercase `low`/`medium`/`high`.
+- `changes[i].file: cores/{target}/rtl/alu.sv` — schema's regex requires the `rtl/...` form. Drop the `cores/<target>/` prefix.
+- `changes[i].file: alu.sv` — the regex requires the `rtl/` prefix.
+- Writing the YAML inline in your message instead of using the write tool.
+
+Use the write tool now."""
+
+
+_FILE_PATH_RE = re.compile(r"^cores/[^/]+/(rtl/.+|test/test_[^/]+\.py)$")
+
+
+def normalize_hypothesis_yaml(path: Path, target: str) -> bool:
+    """Best-effort fix-ups on a hypothesis YAML so it matches the schema.
+
+    Mutates the file in place; returns True if any change was made. The
+    schema's `changes[].file` regex only accepts `rtl/...` and
+    `test/test_*.py`, but a model that follows the prompt loosely may
+    emit the longer `cores/<target>/rtl/foo.sv` form. We strip the
+    `cores/<target>/` prefix so validation succeeds.
+
+    Also repairs a small set of common LLM-emitted YAML artifacts:
+      - trailing stray closing braces (`}`) at the very end of the file
+        from a model accidentally mixing block + flow style
+      - trailing stray brackets (`]`) likewise
+
+    We deliberately do NOT coerce `expected_impact` or any other field —
+    those failures are real model-behavior signal that the benchmark
+    should record, not paper over.
+    """
+    if not path.is_file():
+        return False
+    raw = path.read_text()
+    try:
+        data = yaml.safe_load(raw)
+    except yaml.YAMLError:
+        # Try cheap repairs before giving up.
+        repaired = raw
+        # Strip a stray trailing `}` or `]` at end-of-file (after possible
+        # whitespace) — a common artifact of models mixing block/flow style.
+        for _ in range(4):
+            stripped = repaired.rstrip()
+            if stripped and stripped[-1] in "}]" and not stripped.endswith("}}") and not stripped.endswith("]]"):
+                repaired = stripped[:-1].rstrip() + "\n"
+                continue
+            break
+        try:
+            data = yaml.safe_load(repaired)
+        except yaml.YAMLError:
+            return False
+        if isinstance(data, dict):
+            path.write_text(repaired)
+            raw = repaired
+        else:
+            return False
+    if not isinstance(data, dict):
+        return False
+    changed = False
+    prefix = f"cores/{target}/"
+    for c in (data.get("changes") or []):
+        if not isinstance(c, dict):
+            continue
+        f = c.get("file")
+        if not isinstance(f, str):
+            continue
+        if f.startswith(prefix):
+            new_f = f[len(prefix):]
+            if _FILE_PATH_RE.match(f) or new_f.startswith(("rtl/", "test/test_")):
+                c["file"] = new_f
+                changed = True
+    if changed:
+        path.write_text(yaml.safe_dump(data, sort_keys=False))
+    return changed
 
 
 def _next_id(target: str) -> str:
@@ -367,7 +465,19 @@ def run_hypothesis_agent(log_tail: list, current_fitness: float,
         # Hard-revert anything the agent touched outside its allow list.
         # `git checkout HEAD --` restores tracked files; new files have to
         # be removed by hand.
+        #
+        # NEVER revert the log.jsonl path — it's the orchestrator's own
+        # journal. If an agent's tool somehow leaves a touch-mark on it
+        # (file mtime change, no-content-diff write), the breach check
+        # picks it up and `git checkout HEAD -- log.jsonl` would throw
+        # away in-flight append_log writes, leaving the saved log
+        # truncated to whatever the previous commit was. Observed on
+        # N=10 K=3 runs where the saved log lost rounds 1-8 entries.
+        # Keep the breach reported (the agent shouldn't be touching it)
+        # but don't physically restore the file.
         for p in breaches:
+            if p.endswith("/log.jsonl") or p == "log.jsonl":
+                continue
             subprocess.run(["git", "checkout", "HEAD", "--", p],
                            capture_output=True)
             path = Path(p)
@@ -382,6 +492,13 @@ def run_hypothesis_agent(log_tail: list, current_fitness: float,
         )
 
     path = hyp_dir / f"{hyp_id}.yaml"
+    if path.exists():
+        try:
+            normalize_hypothesis_yaml(path, target)
+        except Exception:
+            # Normalization is best-effort; let the schema validator
+            # report the failure if the YAML is genuinely malformed.
+            pass
     if not path.exists():
         # Agent may have written under a slightly different name (e.g. a
         # ".v2" suffix). Accept ONLY files whose name starts with this
@@ -397,6 +514,10 @@ def run_hypothesis_agent(log_tail: list, current_fitness: float,
         )
         if candidates:
             path = candidates[-1]
+            try:
+                normalize_hypothesis_yaml(path, target)
+            except Exception:
+                pass
         elif not allowed_yaml_ids:
             # Truly-legacy single-slot caller (no pre-allocated ID set).
             # Original "newest in dir" fallback is safe here because there

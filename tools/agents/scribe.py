@@ -171,16 +171,46 @@ def run_scribe_agent(entry: dict, diff: str, target: str) -> str | None:
         cmd, cwd=".", log_path=log_path, timeout_sec=SCRIBE_TIMEOUT_SEC,
         mode="a",
     )
+    # Whether the scribe finishes, times out, or errors — its own log
+    # file (.scribe.log) and last-msg file are off-limits per the
+    # sandbox allow-list. Always remove them before propagating success
+    # or failure, so they don't leak into the NEXT round's hypothesis
+    # sandbox check (where they'd be flagged as off-limits modifications
+    # and roll back the next agent's work).
+    def _scrub_scribe_artifacts() -> None:
+        for p in (log_path, last_msg):
+            try:
+                if p.exists() and not p.is_dir():
+                    p.unlink()
+            except OSError:
+                pass
     if timed_out:
+        _scrub_scribe_artifacts()
         raise TimeoutError(f"scribe timed out after {SCRIBE_TIMEOUT_SEC}s")
     if rc != 0:
+        _scrub_scribe_artifacts()
         raise subprocess.CalledProcessError(rc, cmd)
+
+    # Always scrub the scribe's own artifacts BEFORE the sandbox check
+    # — they're off-limits per the allow-list (which only permits
+    # LESSONS.md), so leaving them on disk would trip the check and
+    # mask any real breach.
+    _scrub_scribe_artifacts()
 
     # Sandbox: revert any path the scribe touched outside its allow-list.
     allow_re = _allowed_re(target)
     breaches = _git_offlimits(allow_re)
     if breaches:
+        # Same log.jsonl protection as in hypothesis.py — the scribe
+        # runs INSIDE append_log right before the new line is written
+        # and committed. If the scribe agent's tool somehow touches
+        # log.jsonl, `git checkout HEAD -- log.jsonl` would discard
+        # any in-flight append in the same transaction. Skip the
+        # restore for log.jsonl so the breach is logged but the
+        # journal is preserved.
         for p in breaches:
+            if p.endswith("/log.jsonl") or p == "log.jsonl":
+                continue
             subprocess.run(["git", "checkout", "HEAD", "--", p],
                            capture_output=True)
             pp = Path(p)
