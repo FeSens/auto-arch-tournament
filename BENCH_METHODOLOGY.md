@@ -18,8 +18,8 @@ CoreMark iter/s strictly improves over the current champion.
 
 Distinct from typical LLM coding benchmarks:
 
-- **Long horizon.** Default config is N=10 rounds × K=3 parallel
-  hypothesis slots = 30 hypothesis-implement-eval cycles per agent.
+- **Long horizon.** Default config is N=15 rounds × K=3 parallel
+  hypothesis slots = 45 hypothesis-implement-eval cycles per agent.
   Tests sustained progress, not single-shot generation.
 - **Real correctness gate.** riscv-formal on RV32IM at NRET=2 plus
   Verilator cosim — wrong RTL is rejected even if it compiles.
