@@ -30,12 +30,13 @@ from __future__ import annotations
 import json
 import os
 import subprocess
+import sys
 import threading
 from pathlib import Path
 from typing import Optional
 
 
-VALID_PROVIDERS = ("codex", "claude", "opencode")
+VALID_PROVIDERS = ("codex", "claude", "opencode", "static")
 
 # Codex's `exec` mode prints a multi-line banner before doing work — model
 # id, sandbox mode, token counters, separator dashes, etc. None of it is
@@ -304,6 +305,17 @@ def build_agent_cmd(
         opencode_agent = os.environ.get("OPENCODE_AGENT", "").strip()
         if opencode_agent:
             cmd += ["--agent", opencode_agent]
+        return cmd
+    if p == "static":
+        # No-LLM control. tools/agents/static_agent.py writes a stub
+        # hypothesis YAML or implementation_notes.md depending on
+        # which phase's prompt it sees, makes no RTL changes, exits 0.
+        # Used to characterize the harness's noise floor — any LLM
+        # agent's measured fitness gain above the static-control's
+        # delta is real signal.
+        cmd = [sys.executable, "-m", "tools.agents.static_agent", prompt]
+        if output_last_message is not None:
+            cmd += ["--output-last-message", str(output_last_message)]
         return cmd
     raise ValueError(f"unknown provider {p!r}")
 

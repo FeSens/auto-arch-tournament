@@ -422,10 +422,13 @@ def make_env_for_job(job: JobSpec, clone: Path, keys: dict[str, str]) -> dict[st
         # Claude CLI: --dangerously-skip-permissions + clone isolation.
         env["AGENT_PROVIDER"] = "claude"
         env["ANTHROPIC_MODEL"] = job.model.model
+    elif job.model.provider == "static":
+        # No-LLM control runtime. Reads no API key, drives no model.
+        env["AGENT_PROVIDER"] = "static"
     else:
         raise ValueError(
             f"unsupported provider {job.model.provider!r}; "
-            f"expected one of: codex, opencode, claude"
+            f"expected one of: codex, opencode, claude, static"
         )
     # Apply keys from ~/.bench-keys.env, but only for keys not already in env
     # (so a real shell-exported value wins over a file value).

@@ -1,0 +1,20 @@
+# No-LLM control runtime.
+#
+# Used to characterize the bench harness's noise floor: every slot's
+# hypothesis is a deterministic stub ("make no architectural change"),
+# and the implementation phase makes no RTL edits. The eval gates run
+# against the unchanged fixture, so delta_pct stays ~0% across all
+# rounds (modulo nextpnr-seed measurement variance, which the pinned
+# seeds [1,2,3] in tools/eval/fpga.py keep at exactly 0%).
+#
+# Run alongside any LLM bench at the same N×K to quantify how much of
+# a model's measured fitness gain is the LLM vs the harness pipeline.
+# An LLM agent that doesn't beat the static control on a given metric
+# isn't contributing on that metric.
+#
+# No auth required — `model` is a label only.
+
+models:
+  - name: static
+    provider: static
+    model: noop
