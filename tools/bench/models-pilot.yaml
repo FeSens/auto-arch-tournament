@@ -1,25 +1,25 @@
-# NeurIPS pilot run — 4 opencode-routed models.
+# NeurIPS pilot run — second batch.
 #
-# A focused subset of the full models.yaml for the first paper-grade
-# bench run. Mix of OpenAI subscription (gpt-5.5) and opencode/
-# opencode-go free-tier hosted models (hy3-preview, minimax, kimi)
-# so the fitness floor/ceiling spread is visible before scaling to
-# the full frontier matrix.
+# First batch (gpt-5.5) is already in bench/pilot/results.jsonl with
+# 3 reps complete. The runner's load_done_set skips them on retry,
+# so this YAML can keep gpt-5.5 listed for the leaderboard layout
+# without re-running it. The new entries are the second wave of the
+# pilot:
 #
-# All four are routed through opencode (uniform tool-surface
-# comparison). Auth: opencode's own credentials store at
-# ~/.local/share/opencode/auth.json — `opencode auth list` should
-# show OpenAI (oauth) for gpt-5.5; the opencode/* and opencode-go/*
-# routes piggyback on the same opencode session.
+#   1. opencode-go/deepseek-v4-pro   — premium
+#   2. opencode-go/minimax-m2.7      — frontier MoE
+#   3. opencode-go/kimi-k2.6         — Moonshot frontier
+#
+# All routed via opencode (tools/agents/_runtime.py opencode branch)
+# at xhigh effort. Auth: OpenCode Go API key in
+# ~/.local/share/opencode/auth.json (verified by `opencode auth list`
+# showing "OpenCode Go [api]"). gpt-5.5 stays as the OpenAI/OAuth
+# entry from batch 1.
 
 models:
-  - name: gpt-5_5
+  - name: deepseek-v4-pro
     provider: opencode
-    model: openai/gpt-5.5
-    oauth: true
-  - name: hy3-preview-free
-    provider: opencode
-    model: opencode/hy3-preview-free
+    model: opencode-go/deepseek-v4-pro
     oauth: true
   - name: minimax-m2_7
     provider: opencode
@@ -28,4 +28,8 @@ models:
   - name: kimi-k2_6
     provider: opencode
     model: opencode-go/kimi-k2.6
+    oauth: true
+  - name: gpt-5_5
+    provider: opencode
+    model: openai/gpt-5.5
     oauth: true
