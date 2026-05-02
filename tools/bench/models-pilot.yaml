@@ -1,32 +1,15 @@
-# NeurIPS pilot run — OpenRouter batch.
+# NeurIPS pilot run — Opus 4.7 only.
 #
-# First batch (gpt-5.5) is already in bench/pilot/results.jsonl with
-# 3 reps complete. The runner's load_done_set skips them on retry,
-# so this YAML can keep gpt-5.5 listed for the leaderboard layout
-# without re-running it. The new entries are routed via OpenRouter
-# (auth: OPENROUTER_API_KEY in ~/.bench-keys.env, picked up by opencode):
+# Prior pilot batches preserved in bench/pilot/results.jsonl:
+#   - gpt-5.5 (3 reps, +51%/+51%/+29%)
+# Skipped via load_done_set on retry; this YAML adds only opus.
 #
-#   1. openrouter/moonshotai/kimi-k2.6           — Moonshot frontier
-#   2. openrouter/minimax/minimax-m2.7           — MiniMax frontier MoE
-#   3. openrouter/anthropic/claude-opus-4.7      — Anthropic premium
-#
-# All routed via opencode (tools/agents/_runtime.py opencode branch)
-# at xhigh effort. gpt-5.5 stays as the OpenAI/OAuth entry from batch 1.
+# Routed via opencode → OpenRouter
+# (auth: OPENROUTER_API_KEY in ~/.bench-keys.env, picked up by opencode).
+# xhigh effort.
 
 models:
-  - name: kimi-k2_6
-    provider: opencode
-    model: openrouter/moonshotai/kimi-k2.6
-    oauth: true
-  - name: minimax-m2_7
-    provider: opencode
-    model: openrouter/minimax/minimax-m2.7
-    oauth: true
   - name: opus-4_7
     provider: opencode
     model: openrouter/anthropic/claude-opus-4.7
-    oauth: true
-  - name: gpt-5_5
-    provider: opencode
-    model: openai/gpt-5.5
     oauth: true
