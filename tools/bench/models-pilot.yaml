@@ -1,15 +1,19 @@
-# NeurIPS pilot run — Opus 4.7 only.
+# NeurIPS pilot run — Opus 4.7 (new) + gpt-5.5 (preserved).
 #
-# Prior pilot batches preserved in bench/pilot/results.jsonl:
-#   - gpt-5.5 (3 reps, +51%/+51%/+29%)
-# Skipped via load_done_set on retry; this YAML adds only opus.
+# gpt-5.5 has 3 reps already in bench/pilot/results.jsonl
+# (+51%/+51%/+29%); load_done_set skips them on retry, so it stays
+# in the YAML for leaderboard layout without re-running.
 #
-# Routed via opencode → OpenRouter
-# (auth: OPENROUTER_API_KEY in ~/.bench-keys.env, picked up by opencode).
-# xhigh effort.
+# opus-4.7 is the only model this round will actually execute.
+# All routed via opencode → OpenRouter (auth: OPENROUTER_API_KEY
+# in ~/.bench-keys.env, picked up by opencode). xhigh effort.
 
 models:
   - name: opus-4_7
     provider: opencode
     model: openrouter/anthropic/claude-opus-4.7
+    oauth: true
+  - name: gpt-5_5
+    provider: opencode
+    model: openai/gpt-5.5
     oauth: true
