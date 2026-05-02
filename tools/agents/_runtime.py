@@ -313,7 +313,13 @@ def build_agent_cmd(
         # Used to characterize the harness's noise floor — any LLM
         # agent's measured fitness gain above the static-control's
         # delta is real signal.
-        cmd = [sys.executable, "-m", "tools.agents.static_agent", prompt]
+        # `-B` keeps Python from writing bytecode artifacts into
+        # tools/__pycache__/ inside the sub-worktree (which would be
+        # caught by the orchestrator's sandbox check on tracked-pyc
+        # mtime changes). worktree.py also assume-unchanged's any
+        # tracked pyc paths as defense in depth, but `-B` is the
+        # cleaner local fix.
+        cmd = [sys.executable, "-B", "-m", "tools.agents.static_agent", prompt]
         if output_last_message is not None:
             cmd += ["--output-last-message", str(output_last_message)]
         return cmd

@@ -81,6 +81,29 @@ def create_worktree(hypothesis_id: str, base_branch: str = "main",
         check=True
     )
 
+    # Assume-unchanged any tracked .pyc / __pycache__ paths in the
+    # sub-worktree's index. Some fixture branches accidentally
+    # committed bytecode (legacy bench-fixture-v1 carries
+    # tools/__pycache__/__init__.cpython-313.pyc, etc.). When Python
+    # imports modules from the worktree (e.g. the static-control
+    # agent invokes `python -m tools.agents.static_agent`), it
+    # rewrites the pyc, and `git status --porcelain` flags every
+    # tracked pyc as M — which the orchestrator's sandbox check
+    # then reports as `sandbox_violation: agent touched off-limits
+    # paths`. clone_fixture does the same assume-unchanged on the
+    # rep clone's index; per-worktree indices don't inherit it,
+    # so we re-apply here.
+    tracked = subprocess.run(
+        ["git", "-C", path, "ls-files"],
+        capture_output=True, text=True,
+    ).stdout.splitlines()
+    pyc_paths = [p for p in tracked if p.endswith(".pyc") or "/__pycache__/" in p]
+    if pyc_paths:
+        subprocess.run(
+            ["git", "-C", path, "update-index", "--assume-unchanged", *pyc_paths],
+            capture_output=True,
+        )
+
     main_riscv_formal = Path("formal/riscv-formal").resolve()
     if main_riscv_formal.exists():
         wt_riscv_formal = Path(path) / "formal" / "riscv-formal"
