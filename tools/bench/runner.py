@@ -1002,7 +1002,7 @@ def main() -> int:
     ap.add_argument("--models", type=Path, default=DEFAULT_MODELS_YAML)
     ap.add_argument("--ref", default=DEFAULT_REF)
     ap.add_argument("--reps", type=int, default=3, help="J = reps per model")
-    ap.add_argument("--n", type=int, default=10, help="N = orchestrator rounds per rep")
+    ap.add_argument("--n", type=int, default=15, help="N = orchestrator rounds per rep")
     ap.add_argument("--k", type=int, default=3, help="K = parallel hypothesis slots")
     ap.add_argument("--parallel", type=int, default=1,
                     help="run up to N (model, rep) jobs concurrently")
