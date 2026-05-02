@@ -530,7 +530,14 @@ def parse_codex_cost_from_log(log_path: Path) -> tuple[int, int, float]:
             continue
         try:
             toks_in += int(usage.get("input_tokens") or 0)
+            # OpenAI reasoning models report `output_tokens` (visible
+            # response + tool-call output) separately from
+            # `reasoning_output_tokens` (chain-of-thought, not visible
+            # but billed at the output rate). Sum both so the headline
+            # output number matches actual model work and matches
+            # opencode's normalization (tokens.output + tokens.reasoning).
             toks_out += int(usage.get("output_tokens") or 0)
+            toks_out += int(usage.get("reasoning_output_tokens") or 0)
         except (TypeError, ValueError):
             pass
     return (toks_in, toks_out, 0.0)
@@ -589,9 +596,14 @@ def parse_opencode_cost_from_log(log_path: Path) -> tuple[int, int, float]:
             cache = toks.get("cache") or {}
             cr = cache.get("read", 0) if isinstance(cache, dict) else 0
             cw = cache.get("write", 0) if isinstance(cache, dict) else 0
+            tr = toks.get("reasoning") or 0
             try:
                 toks_in += int(ti) + int(cr or 0) + int(cw or 0)
-                toks_out += int(to)
+                # Sum visible output + reasoning. opencode reports
+                # them separately; both are billed as output. Matches
+                # the codex parser, which sums output_tokens +
+                # reasoning_output_tokens for the same reason.
+                toks_out += int(to) + int(tr or 0)
             except (TypeError, ValueError):
                 pass
         c = part.get("cost", 0)
