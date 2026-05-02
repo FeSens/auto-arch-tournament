@@ -1,33 +1,30 @@
-# NeurIPS pilot run — second batch.
+# NeurIPS pilot run — OpenRouter batch.
 #
 # First batch (gpt-5.5) is already in bench/pilot/results.jsonl with
 # 3 reps complete. The runner's load_done_set skips them on retry,
 # so this YAML can keep gpt-5.5 listed for the leaderboard layout
-# without re-running it. The new entries are the second wave of the
-# pilot:
+# without re-running it. The new entries are routed via OpenRouter
+# (auth: OPENROUTER_API_KEY in ~/.bench-keys.env, picked up by opencode):
 #
-#   1. opencode-go/deepseek-v4-pro   — premium
-#   2. opencode-go/minimax-m2.7      — frontier MoE
-#   3. opencode-go/kimi-k2.6         — Moonshot frontier
+#   1. openrouter/moonshotai/kimi-k2.6           — Moonshot frontier
+#   2. openrouter/minimax/minimax-m2.7           — MiniMax frontier MoE
+#   3. openrouter/anthropic/claude-opus-4.7      — Anthropic premium
 #
 # All routed via opencode (tools/agents/_runtime.py opencode branch)
-# at xhigh effort. Auth: OpenCode Go API key in
-# ~/.local/share/opencode/auth.json (verified by `opencode auth list`
-# showing "OpenCode Go [api]"). gpt-5.5 stays as the OpenAI/OAuth
-# entry from batch 1.
+# at xhigh effort. gpt-5.5 stays as the OpenAI/OAuth entry from batch 1.
 
 models:
-  - name: deepseek-v4-pro
+  - name: kimi-k2_6
     provider: opencode
-    model: opencode-go/deepseek-v4-pro
+    model: openrouter/moonshotai/kimi-k2.6
     oauth: true
   - name: minimax-m2_7
     provider: opencode
-    model: opencode-go/minimax-m2.7
+    model: openrouter/minimax/minimax-m2.7
     oauth: true
-  - name: kimi-k2_6
+  - name: opus-4_7
     provider: opencode
-    model: opencode-go/kimi-k2.6
+    model: openrouter/anthropic/claude-opus-4.7
     oauth: true
   - name: gpt-5_5
     provider: opencode
