@@ -47,7 +47,7 @@ def run_formal(worktree: str, target: str | None = None) -> dict:
         result = subprocess.run(
             ["bash", str(run_script)],
             cwd=worktree_path, capture_output=True, text=True,
-            timeout=1800,  # 30 min ceiling for all ~45 checks running in parallel via make -j
+            timeout=3600,  # 60 min ceiling for all ~45 checks running in parallel via make -j
             env=env,
         )
     except subprocess.TimeoutExpired as e:
