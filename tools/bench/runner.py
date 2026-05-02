@@ -624,6 +624,13 @@ def summarize_run(log_jsonl: Path, agent_log: Path,
     baseline_fitness = None
     best_round = None
     best_fitness = None
+    # Track per-error-class broken counts for the NeurIPS-style report.
+    # Keys are the leading error class (formal_failed / cosim_failed /
+    # hypothesis_gen_failed / build_failed / sandbox_violation /
+    # implementation_compile_failed / placement_failed / ...). The bare
+    # error string after the colon is dropped — class is what matters
+    # for cross-run aggregation.
+    broken_by_class: dict[str, int] = {}
 
     if log_jsonl.is_file():
         for raw in log_jsonl.read_text().splitlines():
@@ -646,6 +653,9 @@ def summarize_run(log_jsonl: Path, agent_log: Path,
                 rejected += 1
             elif outcome == "broken":
                 broken += 1
+                err = (row.get("error") or "").strip()
+                cls = err.split(":", 1)[0] if err else "unknown"
+                broken_by_class[cls] = broken_by_class.get(cls, 0) + 1
             fit = row.get("fitness") or row.get("coremark") or row.get("coremark_iter_s")
             if isinstance(fit, (int, float)):
                 if best_fitness is None or fit > best_fitness:
@@ -654,9 +664,37 @@ def summarize_run(log_jsonl: Path, agent_log: Path,
                 if outcome in ("accepted", "improvement"):
                     final_fitness = float(fit)
             if baseline_fitness is None:
+                # Three resolution paths, in priority order:
+                #   1. Explicit baseline_fitness/baseline field (legacy schema).
+                #   2. The orchestrator-emitted baseline retest entry, which
+                #      lives at round_id=0 with outcome='improvement' and
+                #      delta_pct=0 — its `fitness` IS the run's baseline.
+                #   3. Derive from any row that has both fitness and a
+                #      non-zero delta_pct: baseline = fit / (1 + d/100).
                 bf = row.get("baseline_fitness") or row.get("baseline")
                 if isinstance(bf, (int, float)):
                     baseline_fitness = float(bf)
+                elif (row.get("round_id") == 0
+                      and outcome == "improvement"
+                      and isinstance(fit, (int, float))):
+                    baseline_fitness = float(fit)
+
+    # Last-resort delta-pct derivation, only if (1) and (2) didn't catch.
+    if baseline_fitness is None and log_jsonl.is_file():
+        for raw in log_jsonl.read_text().splitlines():
+            s = raw.strip()
+            if not s:
+                continue
+            try:
+                row = json.loads(s)
+            except json.JSONDecodeError:
+                continue
+            d = row.get("delta_pct")
+            f = row.get("fitness")
+            if (isinstance(d, (int, float)) and d != 0
+                    and isinstance(f, (int, float)) and f > 0):
+                baseline_fitness = float(f) / (1.0 + float(d) / 100.0)
+                break
 
     delta_pct = None
     if final_fitness is not None and baseline_fitness:
@@ -668,6 +706,7 @@ def summarize_run(log_jsonl: Path, agent_log: Path,
         "accepted": accepted,
         "rejected": rejected,
         "broken": broken,
+        "broken_by_class": broken_by_class,
         "final_fitness": final_fitness,
         "baseline_fitness": baseline_fitness,
         "best_fitness": best_fitness,

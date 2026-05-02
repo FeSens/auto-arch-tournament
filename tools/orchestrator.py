@@ -649,6 +649,21 @@ def main():
     if args.from_hypothesis:
         fixed = [p.strip() for p in args.from_hypothesis.split(',')]
 
+    # Always run baseline_retest at the start of a fresh experiment, even
+    # when cores/<target>/ already exists (e.g., the bench fixture). The
+    # entry it writes (round_id=0, outcome='improvement', delta_pct=0.0)
+    # is the fitness anchor every subsequent delta_pct is measured
+    # against. Without it the saved bench results.jsonl row carries
+    # baseline_fitness=null, breaking cross-run comparison and
+    # statistical aggregation. Idempotent: skip if log.jsonl already
+    # has any entries (= the experiment has prior history we shouldn't
+    # disturb).
+    log = read_log()
+    if not log:
+        print(f"[orchestrator] empty log for cores/{args.target} — running baseline retest",
+              flush=True)
+        _run_baseline_retest(args.target)
+
     # Round numbering.
     log = read_log()
     prior_rounds = [e.get('round_id', 0) for e in log if isinstance(e.get('round_id'), int)]
