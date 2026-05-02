@@ -1,0 +1,1463 @@
+{
+  "@context": {
+    "@vocab": "https://schema.org/",
+    "cr": "http://mlcommons.org/croissant/"
+  },
+  "@type": "sc:Dataset",
+  "name": "bench-fixture-v1",
+  "description": "Out-of-distribution code-generation benchmark for LLM coding agents on RV32IM SystemVerilog RTL design, gated by riscv-formal symbolic BMC, Verilator cosim, and 3-seed yosys/nextpnr-himbaechel place-and-route on Gowin GW2AR-LV18.",
+  "license": "Apache-2.0",
+  "url": "https://github.com/<OWNER>/auto-arch-tournament/tree/bench-fixture-v1",
+  "version": "1.0.0",
+  "datePublished": "[ZENODO_DOI_DATE]",
+  "creator": [
+    {
+      "@type": "Person",
+      "name": "Anonymous"
+    }
+  ],
+  "distribution": [
+    {
+      "@type": "cr:FileObject",
+      "@id": ".gitignore",
+      "name": ".gitignore",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/.gitignore",
+      "sha256": "82639626834beb4d8195faa2a7c90cae87e4bdfd50241846df6a8cd48191b121"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "ARCHITECTURE.md",
+      "name": "ARCHITECTURE.md",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/ARCHITECTURE.md",
+      "sha256": "9cce8ede27e85de3f74caff6be55b47eb52c167f8480bcc1ea27270791fe5678"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "CLAUDE.md",
+      "name": "CLAUDE.md",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/CLAUDE.md",
+      "sha256": "77b1f81b7de425f1726e9f32bf912dc469d1c12fe10edf0365c1c1875354ad63"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "Makefile",
+      "name": "Makefile",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/Makefile",
+      "sha256": "5af4063905ea4e10a59422f0ac2ef5e20bf242ae8a4a0ab5d608ff253583cc72"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "README.md",
+      "name": "README.md",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/README.md",
+      "sha256": "c1c84110405bb71a85c6572274350b875c3678a2e2ef1ce395eabe1697e91b67"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/Makefile",
+      "name": "bench/programs/Makefile",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/Makefile",
+      "sha256": "0ed17ec8bde6317b6e6f7f09cf749ad9613b1e5c8335a40df6d1a87f92ebeba1"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/.github/workflows/c-cpp.yml",
+      "name": "bench/programs/coremark/.github/workflows/c-cpp.yml",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/.github/workflows/c-cpp.yml",
+      "sha256": "8e6101d678ee27d1616f4f5dd35ff1e26e125a38073f7bbf9375c514b5e332fc"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/LICENSE.md",
+      "name": "bench/programs/coremark/LICENSE.md",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/LICENSE.md",
+      "sha256": "9577b9c846f61fd69a0d8ac965998c6450c7d8969f71f0bb4a931b91aebad28a"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/Makefile",
+      "name": "bench/programs/coremark/Makefile",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/Makefile",
+      "sha256": "1e4661a40784bba0ab08dd679b0159ddced6611757ae39d0927a83dbe9fabd60"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/README.md",
+      "name": "bench/programs/coremark/README.md",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/README.md",
+      "sha256": "5581fb67dc1609cbd1865f150dbcb1050d96c602987792456850eb96eb0dd08c"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/barebones/core_portme.c",
+      "name": "bench/programs/coremark/barebones/core_portme.c",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/barebones/core_portme.c",
+      "sha256": "3001cfda7cd6ef56adc63590064064d3062220843c389248d00e7e454e4a8e2b"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/barebones/core_portme.h",
+      "name": "bench/programs/coremark/barebones/core_portme.h",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/barebones/core_portme.h",
+      "sha256": "4a789446774e9327126768b2379d7619f8ffd11d9a2afecc37126565486aac5a"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/barebones/core_portme.mak",
+      "name": "bench/programs/coremark/barebones/core_portme.mak",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/barebones/core_portme.mak",
+      "sha256": "565beed1a5f65a701deacd2a7bc6260240f031a4fa28bd364cc62619656ad3cd"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/barebones/cvt.c",
+      "name": "bench/programs/coremark/barebones/cvt.c",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/barebones/cvt.c",
+      "sha256": "7c57eaa23c780cd707db2304365d1ded372fd73dd107f16bdd091d9dd16fd742"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/barebones/ee_printf.c",
+      "name": "bench/programs/coremark/barebones/ee_printf.c",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/barebones/ee_printf.c",
+      "sha256": "535ba1feaa731d69e6f45117b9a79ef58291619248505c67aec916571612abdc"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/barebones_porting.md",
+      "name": "bench/programs/coremark/barebones_porting.md",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/barebones_porting.md",
+      "sha256": "487ab4d058aad127ebad527a314d4c5bea72e093bdd18b9728359a9098e4e8fb"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/baremetal/core_portme.c",
+      "name": "bench/programs/coremark/baremetal/core_portme.c",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/baremetal/core_portme.c",
+      "sha256": "3492f3a8018d836d4256f4418fa34a0c29ccb77ac829add58c1d351f05a7d7d9"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/baremetal/core_portme.h",
+      "name": "bench/programs/coremark/baremetal/core_portme.h",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/baremetal/core_portme.h",
+      "sha256": "a56df8cc3da5c1d5617ab1097c731245019856d608e06929e224707ab7841a97"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/core_list_join.c",
+      "name": "bench/programs/coremark/core_list_join.c",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/core_list_join.c",
+      "sha256": "ca00e4e010ece47d7f040cb92aa50a95345a00d3171b59d088f6b243be06ce7b"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/core_main.c",
+      "name": "bench/programs/coremark/core_main.c",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/core_main.c",
+      "sha256": "17884c93c5b94378eb0ff02b4df3725756cf2addb9b8cbcaa6200a4649ff5ca7"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/core_matrix.c",
+      "name": "bench/programs/coremark/core_matrix.c",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/core_matrix.c",
+      "sha256": "ecdff717b5a5c4907d221a606760e25499899cbf617582c05d40db71c91351e4"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/core_state.c",
+      "name": "bench/programs/coremark/core_state.c",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/core_state.c",
+      "sha256": "f4b84bb0a3452c45a4daa664ab502bfdccbd31cb57d93e9ac490c60937717a4e"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/core_util.c",
+      "name": "bench/programs/coremark/core_util.c",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/core_util.c",
+      "sha256": "a3fbfcb9bb943b638624b8ece01c5836dd56a96d7bcde2697b248d077447327f"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/coremark.h",
+      "name": "bench/programs/coremark/coremark.h",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/coremark.h",
+      "sha256": "42642b9a06c7ed2b3bd9eda971b7c3868c4f5d27bf7ef6c4bba11291a0c2598a"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/coremark.md5",
+      "name": "bench/programs/coremark/coremark.md5",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/coremark.md5",
+      "sha256": "dad92861212f8f012e75974e23ea97f7a275a375e0d3bc1d3b216423ba6b6306"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/cygwin/core_portme.mak",
+      "name": "bench/programs/coremark/cygwin/core_portme.mak",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/cygwin/core_portme.mak",
+      "sha256": "918305286db6b660c0b870f967cb68548ea66f51b254f81f1d9d636102001668"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/READM.md",
+      "name": "bench/programs/coremark/docs/READM.md",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/READM.md",
+      "sha256": "753facb2892985f561227aa134c842209fb2a6d85ee634f2821c1f836d054bb2"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/balance_O0_joined.png",
+      "name": "bench/programs/coremark/docs/balance_O0_joined.png",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/balance_O0_joined.png",
+      "sha256": "8c22df4c8ed91680da079c7163b9698f4b856c7804514982133f9f75ea355a49"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/coremark_profile_o0_joined.png",
+      "name": "bench/programs/coremark/docs/coremark_profile_o0_joined.png",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/coremark_profile_o0_joined.png",
+      "sha256": "3cc9e87bd38a37448bee74d5bc4b1b28042fee8d131d9a3e508f711b1485a1fc"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/files/PIC32/core_portme-mak.html",
+      "name": "bench/programs/coremark/docs/html/files/PIC32/core_portme-mak.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/files/PIC32/core_portme-mak.html",
+      "sha256": "8bd2d4277ab586aeee0fcb114c711cc153f2193ec618664c3f9d3c870e2b2329"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/files/core_list_join-c.html",
+      "name": "bench/programs/coremark/docs/html/files/core_list_join-c.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/files/core_list_join-c.html",
+      "sha256": "9267a2884f627392dc554074616fe93b5b8688a3c7cb7ccaf308120b32c2583d"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/files/core_main-c.html",
+      "name": "bench/programs/coremark/docs/html/files/core_main-c.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/files/core_main-c.html",
+      "sha256": "056ef8608f2d6e3fa63a1183533f9c693affd56ebe59f11e7cb01d15af6cb0b8"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/files/core_matrix-c.html",
+      "name": "bench/programs/coremark/docs/html/files/core_matrix-c.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/files/core_matrix-c.html",
+      "sha256": "dca2640daacca2e84f7e28cbe9ee6ce924c48eade1157d430c813dc2d16c4033"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/files/core_state-c.html",
+      "name": "bench/programs/coremark/docs/html/files/core_state-c.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/files/core_state-c.html",
+      "sha256": "5bc02650c2ccb8671b31ecde9ce90a2fe6db8b952c834dda23a14eec8c1ef189"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/files/core_util-c.html",
+      "name": "bench/programs/coremark/docs/html/files/core_util-c.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/files/core_util-c.html",
+      "sha256": "7dddfc97ef75712e137ed115130148717e909712def12810cf7155d001c243cc"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/files/coremark-h.html",
+      "name": "bench/programs/coremark/docs/html/files/coremark-h.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/files/coremark-h.html",
+      "sha256": "994aace9c55e2d7ec5201e3b3bb5fba2d4f0bef5fd97d54c567b0567acf74bee"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/files/docs/core_state.png",
+      "name": "bench/programs/coremark/docs/html/files/docs/core_state.png",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/files/docs/core_state.png",
+      "sha256": "6c6d6a67adf1b1865fe1ebcc72c354af6def5c0eb15fdaa3f0fc2d636fdfbdf2"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/files/linux/core_portme-c.html",
+      "name": "bench/programs/coremark/docs/html/files/linux/core_portme-c.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/files/linux/core_portme-c.html",
+      "sha256": "622d841d042bbe6daed0513ac128d30a5320a6f69d7aab8768e99a2d3bf58f6b"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/files/linux/core_portme-h.html",
+      "name": "bench/programs/coremark/docs/html/files/linux/core_portme-h.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/files/linux/core_portme-h.html",
+      "sha256": "0ed9e55616ae77c2e44cb441a8b8fb8f8d048c9986930502ec9829f98166e274"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/files/linux/core_portme-mak.html",
+      "name": "bench/programs/coremark/docs/html/files/linux/core_portme-mak.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/files/linux/core_portme-mak.html",
+      "sha256": "cea3510e27f249c55aeb4e3a0b1e56af2acd47a42bb70a34805fd1723f9503ff"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/files/readme-txt.html",
+      "name": "bench/programs/coremark/docs/html/files/readme-txt.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/files/readme-txt.html",
+      "sha256": "4bf1d8cb776c6b61fb65e03d402d45955b053d65f0ec7860716779191274466b"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/files/release_notes-txt.html",
+      "name": "bench/programs/coremark/docs/html/files/release_notes-txt.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/files/release_notes-txt.html",
+      "sha256": "0dd5cd36e30396ae5d8ddf128dc4b3f6cffd2bf5c817df373a593e0c9fb1a1c3"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/index.html",
+      "name": "bench/programs/coremark/docs/html/index.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/index.html",
+      "sha256": "9c5adb81dfd1d207a73054b856e6468f9bddd983fb7e07beb2ab81fca9464fdf"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/index/BuildTargets.html",
+      "name": "bench/programs/coremark/docs/html/index/BuildTargets.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/index/BuildTargets.html",
+      "sha256": "5193ca782c8cb1e556fb92b3308c7a9b549c8e63cdd6511436800dc1d9cb04f4"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/index/Configuration.html",
+      "name": "bench/programs/coremark/docs/html/index/Configuration.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/index/Configuration.html",
+      "sha256": "2bd8be2ee17353c8059855b62d83f149ff4ce5aed421104b8fcdac20c38aeb3e"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/index/Configurations.html",
+      "name": "bench/programs/coremark/docs/html/index/Configurations.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/index/Configurations.html",
+      "sha256": "a5fd16bec23b4dcae8d20ea46392a5d90ae8969b49ad21775e10709e8e116061"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/index/Files.html",
+      "name": "bench/programs/coremark/docs/html/index/Files.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/index/Files.html",
+      "sha256": "91adda7f8ff0d8721cc39600ade2be8d3792a095823acc4463695bd1d69b693c"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/index/Functions.html",
+      "name": "bench/programs/coremark/docs/html/index/Functions.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/index/Functions.html",
+      "sha256": "6f02fcb961a7318784588cdbe12ed05154fb362ac171dfc2ea7d458a30e44895"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/index/General.html",
+      "name": "bench/programs/coremark/docs/html/index/General.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/index/General.html",
+      "sha256": "1f60975083d1fd6a10a7225471ad1870e81e5970b01f2eff9fbf627d917b1e9b"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/index/General2.html",
+      "name": "bench/programs/coremark/docs/html/index/General2.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/index/General2.html",
+      "sha256": "fca8172e7af535ce7c567ca88b7e0a22f7d2bdcb7e19e3f66582a68efa09f281"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/index/Types.html",
+      "name": "bench/programs/coremark/docs/html/index/Types.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/index/Types.html",
+      "sha256": "050fda5d766d4d55d550681069d6730ef474adfeb594478abee386fa45372faf"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/index/Variables.html",
+      "name": "bench/programs/coremark/docs/html/index/Variables.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/index/Variables.html",
+      "sha256": "c401babeab655d3ca575e38ee90f118074f56327fd5a420cb9fc7018105397a6"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/javascript/main.js",
+      "name": "bench/programs/coremark/docs/html/javascript/main.js",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/javascript/main.js",
+      "sha256": "209007a045abccab810e7f66423047cc6a2932227bc5be412056733898b955f9"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/javascript/searchdata.js",
+      "name": "bench/programs/coremark/docs/html/javascript/searchdata.js",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/javascript/searchdata.js",
+      "sha256": "f053fb1c4797be8e5d6750cc9b776a2aac18a8ce34b6b3f2aaf4c26a201b7500"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/search/BuildTargetsP.html",
+      "name": "bench/programs/coremark/docs/html/search/BuildTargetsP.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/search/BuildTargetsP.html",
+      "sha256": "2e19c85e97e98394e3b1cafa6507147ab71c7ac8ba18df3d9c4faca589a47ab1"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/search/ConfigurationC.html",
+      "name": "bench/programs/coremark/docs/html/search/ConfigurationC.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/search/ConfigurationC.html",
+      "sha256": "3f15671e61f94418bb8c960c824a9bd53ddb1835041f9211352fea35f4a5168f"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/search/ConfigurationH.html",
+      "name": "bench/programs/coremark/docs/html/search/ConfigurationH.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/search/ConfigurationH.html",
+      "sha256": "c1fa1996c54c697d9ae0df04b4030f31e1e4c79280a9722ff1c4d896601a9cc0"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/search/ConfigurationM.html",
+      "name": "bench/programs/coremark/docs/html/search/ConfigurationM.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/search/ConfigurationM.html",
+      "sha256": "d36d05a8d42b1fb73564bfe775ccc8e6a50d81f24f3b1bca4868556392349be1"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/search/ConfigurationS.html",
+      "name": "bench/programs/coremark/docs/html/search/ConfigurationS.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/search/ConfigurationS.html",
+      "sha256": "cf7e109c94b8c93a7e863fc8ec54ff56df57ace6e3863530e78629eb56074ac1"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/search/ConfigurationT.html",
+      "name": "bench/programs/coremark/docs/html/search/ConfigurationT.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/search/ConfigurationT.html",
+      "sha256": "97aa9a1d6b79a2fc107af89baa52a2e5f5824bbc05fa5cabaf8d85e0e2c97493"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/search/ConfigurationU.html",
+      "name": "bench/programs/coremark/docs/html/search/ConfigurationU.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/search/ConfigurationU.html",
+      "sha256": "95dfb6d8a0daa9272afb08587ba5eabc98dee65508600eb12a2297365a7c3dd2"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/search/ConfigurationsH.html",
+      "name": "bench/programs/coremark/docs/html/search/ConfigurationsH.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/search/ConfigurationsH.html",
+      "sha256": "8047c557750516f73539496399824216cd039e600c65c6c8df28fb0622721d61"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/search/ConfigurationsM.html",
+      "name": "bench/programs/coremark/docs/html/search/ConfigurationsM.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/search/ConfigurationsM.html",
+      "sha256": "cdf4f2ff684f64ae2c50e4a62e8ead35e04e5567ff4969c732201262157e07a1"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/search/ConfigurationsS.html",
+      "name": "bench/programs/coremark/docs/html/search/ConfigurationsS.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/search/ConfigurationsS.html",
+      "sha256": "7dcf06977d64b1ba0f7423aaaf067cfb96b0a44db9b2dde390470d8a0ecb373a"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/search/ConfigurationsT.html",
+      "name": "bench/programs/coremark/docs/html/search/ConfigurationsT.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/search/ConfigurationsT.html",
+      "sha256": "32900ce1ce0db696eba5c06f5f166b61a88638594972e3a9ab30ee1eb45aedb4"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/search/FilesC.html",
+      "name": "bench/programs/coremark/docs/html/search/FilesC.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/search/FilesC.html",
+      "sha256": "45c543b44078237fa37f689da6589c4cbb3033588a166fccabdf859b45af9388"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/search/FilesR.html",
+      "name": "bench/programs/coremark/docs/html/search/FilesR.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/search/FilesR.html",
+      "sha256": "0ee8125a2b592f767ce624b7910cd04745256db3526eb24f6a6d27070e131b16"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/search/FunctionsC.html",
+      "name": "bench/programs/coremark/docs/html/search/FunctionsC.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/search/FunctionsC.html",
+      "sha256": "e01eed477e1499fb9c20c7110ea972a9cd538e50fa50a54612dd49324d9ae941"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/search/FunctionsG.html",
+      "name": "bench/programs/coremark/docs/html/search/FunctionsG.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/search/FunctionsG.html",
+      "sha256": "925430ef955d6611c6c12483122d23f7d5ab31fdd51e40300b0b69e0aedefc8a"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/search/FunctionsI.html",
+      "name": "bench/programs/coremark/docs/html/search/FunctionsI.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/search/FunctionsI.html",
+      "sha256": "4842f5a8829e0f75f93f2b226a6b18c598050cdc219e78db58daead1d6cf2f62"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/search/FunctionsM.html",
+      "name": "bench/programs/coremark/docs/html/search/FunctionsM.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/search/FunctionsM.html",
+      "sha256": "462dd6e9c7395081d2780eb58b77c3249a7ab0640abffadfb0e4bf8d943958c3"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/search/FunctionsP.html",
+      "name": "bench/programs/coremark/docs/html/search/FunctionsP.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/search/FunctionsP.html",
+      "sha256": "d26ba6d849337466e3cf181523bb33ea4af7998017d8364bb8c494ba8f6c5fca"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/search/FunctionsS.html",
+      "name": "bench/programs/coremark/docs/html/search/FunctionsS.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/search/FunctionsS.html",
+      "sha256": "0115a6fff3f75a77bd766e7271cc20c36a22f1de53e02e91d09d091449fd253f"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/search/FunctionsT.html",
+      "name": "bench/programs/coremark/docs/html/search/FunctionsT.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/search/FunctionsT.html",
+      "sha256": "5df3162836767b2f9ea48e831a93985c1261729b478943d12b8dceab702e19f1"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/search/GeneralB.html",
+      "name": "bench/programs/coremark/docs/html/search/GeneralB.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/search/GeneralB.html",
+      "sha256": "156ef97b1c560208316097f36005d4a6659f20f6cf0a7d730c8237ca271a9640"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/search/GeneralC.html",
+      "name": "bench/programs/coremark/docs/html/search/GeneralC.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/search/GeneralC.html",
+      "sha256": "62646ebd872d42322d1ddcb02c3cd21b53d27ad8858403ad0e0df81bf07475cc"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/search/GeneralD.html",
+      "name": "bench/programs/coremark/docs/html/search/GeneralD.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/search/GeneralD.html",
+      "sha256": "6c37c536cc5bc29af557bb9d83a989342e91c2c06d537d2ffa033bab4642e9bf"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/search/GeneralF.html",
+      "name": "bench/programs/coremark/docs/html/search/GeneralF.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/search/GeneralF.html",
+      "sha256": "0f558bec4f32d51422179c9424f774a3dd9b20c8be13f6f79bb4bc702148b54d"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/search/GeneralG.html",
+      "name": "bench/programs/coremark/docs/html/search/GeneralG.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/search/GeneralG.html",
+      "sha256": "925430ef955d6611c6c12483122d23f7d5ab31fdd51e40300b0b69e0aedefc8a"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/search/GeneralH.html",
+      "name": "bench/programs/coremark/docs/html/search/GeneralH.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/search/GeneralH.html",
+      "sha256": "c1fa1996c54c697d9ae0df04b4030f31e1e4c79280a9722ff1c4d896601a9cc0"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/search/GeneralI.html",
+      "name": "bench/programs/coremark/docs/html/search/GeneralI.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/search/GeneralI.html",
+      "sha256": "4842f5a8829e0f75f93f2b226a6b18c598050cdc219e78db58daead1d6cf2f62"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/search/GeneralL.html",
+      "name": "bench/programs/coremark/docs/html/search/GeneralL.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/search/GeneralL.html",
+      "sha256": "641b2e1b73278cb07c4e9779c00fb687941bdba0ecd959333dc666f4f98f6fc1"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/search/GeneralM.html",
+      "name": "bench/programs/coremark/docs/html/search/GeneralM.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/search/GeneralM.html",
+      "sha256": "d46d397a9064ed45e78bee33ae9b870632f095252139c64c93682309de6e3cde"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/search/GeneralO.html",
+      "name": "bench/programs/coremark/docs/html/search/GeneralO.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/search/GeneralO.html",
+      "sha256": "352dd6a2e050daf5e8fc84d876c22bb0f300090d4639a2bcf9145d72a1d9eb9b"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/search/GeneralP.html",
+      "name": "bench/programs/coremark/docs/html/search/GeneralP.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/search/GeneralP.html",
+      "sha256": "c28c337524c17fbd2b4f14e1fbd39c364039e29ef7e84ccfb8cd216817e66e68"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/search/GeneralR.html",
+      "name": "bench/programs/coremark/docs/html/search/GeneralR.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/search/GeneralR.html",
+      "sha256": "c2fa86f037be5ff30205568e8ecf8d0e13764552b2fc87bcb458d58626b989c9"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/search/GeneralS.html",
+      "name": "bench/programs/coremark/docs/html/search/GeneralS.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/search/GeneralS.html",
+      "sha256": "a8657f15e695e5c4156dd7ce8b04b0926c1d707c67d9d05bbf2ec17f9da6e7db"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/search/GeneralT.html",
+      "name": "bench/programs/coremark/docs/html/search/GeneralT.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/search/GeneralT.html",
+      "sha256": "6d40444b4d31728e0c3e10f49f909d149871b9652cd658f698f5f5da9247e85c"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/search/GeneralU.html",
+      "name": "bench/programs/coremark/docs/html/search/GeneralU.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/search/GeneralU.html",
+      "sha256": "95dfb6d8a0daa9272afb08587ba5eabc98dee65508600eb12a2297365a7c3dd2"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/search/GeneralV.html",
+      "name": "bench/programs/coremark/docs/html/search/GeneralV.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/search/GeneralV.html",
+      "sha256": "aaa661f31655f07580397fe8b0aff88cdadff8381fc3304250c0ea1357423b82"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/search/GeneralW.html",
+      "name": "bench/programs/coremark/docs/html/search/GeneralW.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/search/GeneralW.html",
+      "sha256": "e13684f85451c1ba4a3cb1314f07bb4be51432b4fb7c7b37a11305be2f1aaffe"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/search/NoResults.html",
+      "name": "bench/programs/coremark/docs/html/search/NoResults.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/search/NoResults.html",
+      "sha256": "ec3acc3a313a359bcd860ce05334f2a8835984caf85c67bd872ebebc243925bf"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/search/TypesS.html",
+      "name": "bench/programs/coremark/docs/html/search/TypesS.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/search/TypesS.html",
+      "sha256": "d9bc872afb5b53f6ee17446d68f5c327f8b84a191fb9c2a784e18be860c82820"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/search/VariablesC.html",
+      "name": "bench/programs/coremark/docs/html/search/VariablesC.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/search/VariablesC.html",
+      "sha256": "3df66a1baa179c40e58d0194b2db3d141d91d732a49c6f9278b36187b562e57b"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/search/VariablesD.html",
+      "name": "bench/programs/coremark/docs/html/search/VariablesD.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/search/VariablesD.html",
+      "sha256": "9c76592df799d1a2dd279828081890de1fae7b14f2a2f431147da95e19bc2fa9"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/search/VariablesL.html",
+      "name": "bench/programs/coremark/docs/html/search/VariablesL.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/search/VariablesL.html",
+      "sha256": "7d3c483a9e1f0784baf95ca018b357209b97662f71eb355913e3b11182e880b7"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/search/VariablesO.html",
+      "name": "bench/programs/coremark/docs/html/search/VariablesO.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/search/VariablesO.html",
+      "sha256": "352dd6a2e050daf5e8fc84d876c22bb0f300090d4639a2bcf9145d72a1d9eb9b"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/search/VariablesP.html",
+      "name": "bench/programs/coremark/docs/html/search/VariablesP.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/search/VariablesP.html",
+      "sha256": "af1da0e5e3838b8a4edba864c34af606bea420852f0f80f6a365c6af30cac118"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/search/VariablesR.html",
+      "name": "bench/programs/coremark/docs/html/search/VariablesR.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/search/VariablesR.html",
+      "sha256": "34e82dcb82f44ca5f6ec4b1f08be1f5e7f33bbf088f36802103454dca4304ed4"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/search/VariablesS.html",
+      "name": "bench/programs/coremark/docs/html/search/VariablesS.html",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/search/VariablesS.html",
+      "sha256": "d450ad34ea6b786a1528a9bac59824340a1e01357d5bdb4901a20ed8163e90fc"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/styles/1.css",
+      "name": "bench/programs/coremark/docs/html/styles/1.css",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/styles/1.css",
+      "sha256": "8fc8cfd5a648279178a1ffe17eda2064b67aa053a8e34774bfcc9048ef66e2db"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/styles/2.css",
+      "name": "bench/programs/coremark/docs/html/styles/2.css",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/styles/2.css",
+      "sha256": "f8b65af728c36c5adc8470ba9d93a233214244174c2a17fdd5181249f9a6ccd4"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/docs/html/styles/main.css",
+      "name": "bench/programs/coremark/docs/html/styles/main.css",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/docs/html/styles/main.css",
+      "sha256": "7a5d4e2be1cd42da65b2ac61ab1461667bb93b6f065d34fe7f83d5c4590ef83f"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/freebsd/core_portme.mak",
+      "name": "bench/programs/coremark/freebsd/core_portme.mak",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/freebsd/core_portme.mak",
+      "sha256": "918305286db6b660c0b870f967cb68548ea66f51b254f81f1d9d636102001668"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/linux/core_portme.mak",
+      "name": "bench/programs/coremark/linux/core_portme.mak",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/linux/core_portme.mak",
+      "sha256": "918305286db6b660c0b870f967cb68548ea66f51b254f81f1d9d636102001668"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/macos/core_portme.mak",
+      "name": "bench/programs/coremark/macos/core_portme.mak",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/macos/core_portme.mak",
+      "sha256": "5f7cf97ce80b6c1c45522b06ff5b758476aeef6fe0a05923938a4aa3d14243d4"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/posix/core_portme.c",
+      "name": "bench/programs/coremark/posix/core_portme.c",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/posix/core_portme.c",
+      "sha256": "f2b48f062058d528a5907e339ffd05d98f64d59e7c40d500fe05563eb5247ad0"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/posix/core_portme.h",
+      "name": "bench/programs/coremark/posix/core_portme.h",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/posix/core_portme.h",
+      "sha256": "a40e90ef4c5a5626d438afee1f8da628c2800105d4c3b5318e8810b34be554f2"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/posix/core_portme.mak",
+      "name": "bench/programs/coremark/posix/core_portme.mak",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/posix/core_portme.mak",
+      "sha256": "25a50c96fe353523a331f3589fcda1702d6b622c94428df7766dee3e068940fb"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/posix/core_portme_posix_overrides.h",
+      "name": "bench/programs/coremark/posix/core_portme_posix_overrides.h",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/posix/core_portme_posix_overrides.h",
+      "sha256": "1dc67b5c1b9c773cccc740b911d708333d3bf154c3313f77b8a52e18209eda59"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/rtems/core_portme.mak",
+      "name": "bench/programs/coremark/rtems/core_portme.mak",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/rtems/core_portme.mak",
+      "sha256": "5f7cf97ce80b6c1c45522b06ff5b758476aeef6fe0a05923938a4aa3d14243d4"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/rtems/init.c",
+      "name": "bench/programs/coremark/rtems/init.c",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/rtems/init.c",
+      "sha256": "b2890144bf907f4a4db9a4dfb74979f256cfca912060a842d4a6f911e48ed0ef"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/simple/core_portme.c",
+      "name": "bench/programs/coremark/simple/core_portme.c",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/simple/core_portme.c",
+      "sha256": "11a5d053f32db726ad94b021d7daf4c4307e716152c697809c301ff2eae55e01"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/simple/core_portme.h",
+      "name": "bench/programs/coremark/simple/core_portme.h",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/simple/core_portme.h",
+      "sha256": "6301fd493d4cbbf2dc46121da47f960d7dc96decdc63a57b87dab6353a321037"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/simple/core_portme.mak",
+      "name": "bench/programs/coremark/simple/core_portme.mak",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/simple/core_portme.mak",
+      "sha256": "d730814805279244b434a62489fd377357bb62a8a41cf19843e47960a21250c9"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/coremark/zephyr/module.yml",
+      "name": "bench/programs/coremark/zephyr/module.yml",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/coremark/zephyr/module.yml",
+      "sha256": "641ae90b4cea739ad206bcd0a1e8263ad20e2310e911a474ddfdd6381789628a"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/crt0.S",
+      "name": "bench/programs/crt0.S",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/crt0.S",
+      "sha256": "96c2cc2a3a1bad692511931678cc9c7f99737baa09fe7942c8e4adf89acc4917"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/link.ld",
+      "name": "bench/programs/link.ld",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/link.ld",
+      "sha256": "c05799c5194cdc6544397738ed7c4f0557966e2599ce56c70a75a33732695b28"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "bench/programs/selftest.S",
+      "name": "bench/programs/selftest.S",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/bench/programs/selftest.S",
+      "sha256": "17ea9fde481e93ba142e8298a35a2148736a9ce4429d713b430805f91f293543"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "cores/bench/CORE_PHILOSOPHY.md",
+      "name": "cores/bench/CORE_PHILOSOPHY.md",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/cores/bench/CORE_PHILOSOPHY.md",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "cores/bench/core.yaml",
+      "name": "cores/bench/core.yaml",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/cores/bench/core.yaml",
+      "sha256": "73b315132f3cfeacbf149c857bba9dfc634bbd30159eb201c90cde6d36e5d1f5"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "cores/bench/rtl/alu.sv",
+      "name": "cores/bench/rtl/alu.sv",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/cores/bench/rtl/alu.sv",
+      "sha256": "a573be32c790ea2409694c48f6b3ed024f25dbbafaeaee2e1563a09271d6c630"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "cores/bench/rtl/core.sv",
+      "name": "cores/bench/rtl/core.sv",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/cores/bench/rtl/core.sv",
+      "sha256": "62057ae3f6d64742b537a4e35e2dbb5f6c921ca8f2a4b2dd367be08ea8f77a86"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "cores/bench/rtl/core_pkg.sv",
+      "name": "cores/bench/rtl/core_pkg.sv",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/cores/bench/rtl/core_pkg.sv",
+      "sha256": "840a5925ddba190193593ac15e806bc9ba05062095e0679603e92b6cbecc18f6"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "cores/bench/rtl/decoder.sv",
+      "name": "cores/bench/rtl/decoder.sv",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/cores/bench/rtl/decoder.sv",
+      "sha256": "dcdf0402b952b0460973c7a843d014839c53b66eaf26fa1b7e4e75be082d7011"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "cores/bench/rtl/ex_stage.sv",
+      "name": "cores/bench/rtl/ex_stage.sv",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/cores/bench/rtl/ex_stage.sv",
+      "sha256": "00f2eb24e4620168bbd066bb46bc94d1917e1a07e234f024942f89e26c5a2d66"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "cores/bench/rtl/forward_unit.sv",
+      "name": "cores/bench/rtl/forward_unit.sv",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/cores/bench/rtl/forward_unit.sv",
+      "sha256": "e60a05fa56f561908a1ce4de9c64e3e0e04ccf7f782dc4e2caef2bf7e5d2acfc"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "cores/bench/rtl/hazard_unit.sv",
+      "name": "cores/bench/rtl/hazard_unit.sv",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/cores/bench/rtl/hazard_unit.sv",
+      "sha256": "274646e63386a3995fea65b39d6c5d29ce88f5009007c98010179eba6fc8d840"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "cores/bench/rtl/id_stage.sv",
+      "name": "cores/bench/rtl/id_stage.sv",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/cores/bench/rtl/id_stage.sv",
+      "sha256": "9b1e0e8b1ac875d2d25ea43543f4964ad021245ce0315e934cf47b85deed3786"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "cores/bench/rtl/if_stage.sv",
+      "name": "cores/bench/rtl/if_stage.sv",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/cores/bench/rtl/if_stage.sv",
+      "sha256": "2870162950c328b9c0f9d2b8ea637267dd3c6f66a5d7bc2739c2f76568b6e4f7"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "cores/bench/rtl/imm_gen.sv",
+      "name": "cores/bench/rtl/imm_gen.sv",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/cores/bench/rtl/imm_gen.sv",
+      "sha256": "b44d8c04b2e79720b983a55f11698e22808baa3c7589060c1fa53cc16048d6b2"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "cores/bench/rtl/mem_stage.sv",
+      "name": "cores/bench/rtl/mem_stage.sv",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/cores/bench/rtl/mem_stage.sv",
+      "sha256": "7c8ab041e5dc9ee654ce109f4bb8bc772699f57819411c4fc66797ca727f2e90"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "cores/bench/rtl/reg_file.sv",
+      "name": "cores/bench/rtl/reg_file.sv",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/cores/bench/rtl/reg_file.sv",
+      "sha256": "2b857a07b85a3e0b51c05abd3769c89120aefae2a10572e321d80669f19e848f"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "cores/bench/rtl/wb_stage.sv",
+      "name": "cores/bench/rtl/wb_stage.sv",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/cores/bench/rtl/wb_stage.sv",
+      "sha256": "c8f46c9b03487325e8c24580004eb1a2960be6d5a4452e84aa3e746c626c574b"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "cores/bench/test/_helpers.py",
+      "name": "cores/bench/test/_helpers.py",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/cores/bench/test/_helpers.py",
+      "sha256": "412dc5b35c1bbdb57130f9c620b0266d147cdd261f4665172e488f8fc1937e27"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "cores/bench/test/conftest.py",
+      "name": "cores/bench/test/conftest.py",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/cores/bench/test/conftest.py",
+      "sha256": "1f7c3083bafdf47fd033afcdd8cb3796077d1f4a99dabeeba9a5b7f36dd37640"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "cores/bench/test/test_alu.py",
+      "name": "cores/bench/test/test_alu.py",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/cores/bench/test/test_alu.py",
+      "sha256": "8658ed4040a42613c902374f0bb1aafdd7c7022b0fe102ea3167e365557f2a67"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "cores/bench/test/test_decoder.py",
+      "name": "cores/bench/test/test_decoder.py",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/cores/bench/test/test_decoder.py",
+      "sha256": "99220298507a1a3f703b1d6eed98edd5714ec7a9a31329dd5d1fe5061ff77e5c"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "cores/bench/test/test_imm_gen.py",
+      "name": "cores/bench/test/test_imm_gen.py",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/cores/bench/test/test_imm_gen.py",
+      "sha256": "d1b64cb35d6753fa3b75e0bd7661a06515e9b653c2a866e529b7f717d2ce02c0"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "cores/bench/test/test_pipeline.py",
+      "name": "cores/bench/test/test_pipeline.py",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/cores/bench/test/test_pipeline.py",
+      "sha256": "a9b4888d8dea5cb238b5fc65a1ad3643a47f725bed3c36983967f8f34262e174"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "cores/bench/test/test_reg_file.py",
+      "name": "cores/bench/test/test_reg_file.py",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/cores/bench/test/test_reg_file.py",
+      "sha256": "c1065f77b27d4f16cba67fb349083abd764316f924ae12fed3c9434f2c7a65eb"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "formal/checks-deep.cfg",
+      "name": "formal/checks-deep.cfg",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/formal/checks-deep.cfg",
+      "sha256": "8ad458b6024967b33c4f7ca282a6a5b723c76e056a4b3b498978bdf1c3060401"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "formal/checks.cfg",
+      "name": "formal/checks.cfg",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/formal/checks.cfg",
+      "sha256": "11bd5322367261aa8c12c79792d98ee6fa84223c7e8b2308e1eede1c52c7dce5"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "formal/run_all.sh",
+      "name": "formal/run_all.sh",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/formal/run_all.sh",
+      "sha256": "862367815f452fef7afa0b5405b4842fc2a740be293bbf1ba362aaa727239d30"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "formal/wrapper.sv",
+      "name": "formal/wrapper.sv",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/formal/wrapper.sv",
+      "sha256": "1977a4f07e72941f6e4f0edbc41d594eefa5774234b227789270090d1b8f9bc3"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "fpga/constraints/Tang_Nano_20K.cst",
+      "name": "fpga/constraints/Tang_Nano_20K.cst",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/fpga/constraints/Tang_Nano_20K.cst",
+      "sha256": "7b7204030e94104a48cb8fb8fe74e3c9aa6b94a4860994dee308d60d2bb3ead7"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "fpga/core_bench.sv",
+      "name": "fpga/core_bench.sv",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/fpga/core_bench.sv",
+      "sha256": "e357cfdfa5f13ab671347f4dcea2eb555b29cb7c7751d43453b4f6f6a192b2f0"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "fpga/scripts/nextpnr_run.sh",
+      "name": "fpga/scripts/nextpnr_run.sh",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/fpga/scripts/nextpnr_run.sh",
+      "sha256": "fea74b715959cf8b806e5ed86494063847c16420c5ab5f3a25e37a770ac9c5aa"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "fpga/scripts/synth.tcl",
+      "name": "fpga/scripts/synth.tcl",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/fpga/scripts/synth.tcl",
+      "sha256": "bbc1cb942abc895d10750f74296e76a52bf8a5e60bdcfa6c606fbfe661c7b119"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "schemas/eval_result.schema.json",
+      "name": "schemas/eval_result.schema.json",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/schemas/eval_result.schema.json",
+      "sha256": "8b112ee237ea9205c17ea09bfd9118f21a77d5e05b067bf2ddba616686933a5e"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "schemas/hypothesis.schema.json",
+      "name": "schemas/hypothesis.schema.json",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/schemas/hypothesis.schema.json",
+      "sha256": "2aabc5464ba7c8fdd610464db3609b385b534a6a9e05001727c4391f6d5ab222"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "setup.sh",
+      "name": "setup.sh",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/setup.sh",
+      "sha256": "ad69d7f069c15315d6dd1f694df1853d5563bf619b1d1ee590d59df8377bc5a2"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "test/cosim/build.sh",
+      "name": "test/cosim/build.sh",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/test/cosim/build.sh",
+      "sha256": "ea4d7bc0b9500577defc42c8a8e7f54c9ac446a763208632435d6c4ed77ca048"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "test/cosim/main.cpp",
+      "name": "test/cosim/main.cpp",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/test/cosim/main.cpp",
+      "sha256": "c7012d9c02765533fd4b06934d74127ed648cf1cea8efc53b8943d002c1e859c"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "test/cosim/reference.py",
+      "name": "test/cosim/reference.py",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/test/cosim/reference.py",
+      "sha256": "0b1ec64e97f3da3cbe0076a45651e430049fa8327eabe0491aea5afe73bd7638"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "test/cosim/run_cosim.py",
+      "name": "test/cosim/run_cosim.py",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/test/cosim/run_cosim.py",
+      "sha256": "1bb341283b2ae519675e73455383c34f4c141d25d3d21651c9d3dd852651e911"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "tools/__init__.py",
+      "name": "tools/__init__.py",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/tools/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "tools/__pycache__/__init__.cpython-313.pyc",
+      "name": "tools/__pycache__/__init__.cpython-313.pyc",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/tools/__pycache__/__init__.cpython-313.pyc",
+      "sha256": "2f5e08991bc6ea84ac83fef779fa0565ad1f8e2c9661b94f4a89df0453b5163d"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "tools/accept_rule.py",
+      "name": "tools/accept_rule.py",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/tools/accept_rule.py",
+      "sha256": "2667972189c4338eb878f8c92cd2b0e8661118969a784f77e47dd2aed0fbb4a2"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "tools/agents/__init__.py",
+      "name": "tools/agents/__init__.py",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/tools/agents/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "tools/agents/_runtime.py",
+      "name": "tools/agents/_runtime.py",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/tools/agents/_runtime.py",
+      "sha256": "4e33a478dc0e91a124ce9fdda8f904480b00dae106f2726e8b6df1d65f4da51b"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "tools/agents/hypothesis.py",
+      "name": "tools/agents/hypothesis.py",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/tools/agents/hypothesis.py",
+      "sha256": "55a0be7d855100700d92f7807ad7e34605fd3fd1a4f35969a3da36a40a6a24a0"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "tools/agents/implement.py",
+      "name": "tools/agents/implement.py",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/tools/agents/implement.py",
+      "sha256": "394f8a6885081f24fd88f7238d512f3499a9c24ce2f2c235cac6496da6aaaa27"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "tools/agents/scribe.py",
+      "name": "tools/agents/scribe.py",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/tools/agents/scribe.py",
+      "sha256": "55d3b337d357ee90e62b3232f8622316b1e2f97e52ba5b8872fcf545a06a48c5"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "tools/agents/test_hypothesis.py",
+      "name": "tools/agents/test_hypothesis.py",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/tools/agents/test_hypothesis.py",
+      "sha256": "9428e32b91676a989f21c490f442ffe962a7ff9718d807c739830fd116ef95ae"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "tools/agents/test_runtime_pi.py",
+      "name": "tools/agents/test_runtime_pi.py",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/tools/agents/test_runtime_pi.py",
+      "sha256": "8d51921f66a9f6940f5db1aebd6956968564f2ddc3c42a9d87660c76bc0405d3"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "tools/agents/test_scribe.py",
+      "name": "tools/agents/test_scribe.py",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/tools/agents/test_scribe.py",
+      "sha256": "af2dd18aa4aa944a2c5824443816a4dc9b49fc19018a7492459e6d0281597bf5"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "tools/bench/__init__.py",
+      "name": "tools/bench/__init__.py",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/tools/bench/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "tools/bench/__pycache__/__init__.cpython-313.pyc",
+      "name": "tools/bench/__pycache__/__init__.cpython-313.pyc",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/tools/bench/__pycache__/__init__.cpython-313.pyc",
+      "sha256": "36f02afddcb6d2034db197fab52b4c76a0051dfe876d580462b29b114bdd3a6c"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "tools/bench/__pycache__/build_fixture.cpython-313.pyc",
+      "name": "tools/bench/__pycache__/build_fixture.cpython-313.pyc",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/tools/bench/__pycache__/build_fixture.cpython-313.pyc",
+      "sha256": "65d289c9548fb47c3ecff6d0919b559d0d7b8ddaca54c86e44ac6f9a9585807c"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "tools/bench/__pycache__/fence_validator.cpython-313.pyc",
+      "name": "tools/bench/__pycache__/fence_validator.cpython-313.pyc",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/tools/bench/__pycache__/fence_validator.cpython-313.pyc",
+      "sha256": "744d0eec23a4e661a2582274ec5794052d8a480c9b48a2b8d17f1f90c0c42e41"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "tools/bench/__pycache__/report.cpython-313.pyc",
+      "name": "tools/bench/__pycache__/report.cpython-313.pyc",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/tools/bench/__pycache__/report.cpython-313.pyc",
+      "sha256": "54ba0c470131bb8dce9e811e7c2212d03da05d9dd15e7ddc4fd70cc88cdac32d"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "tools/bench/__pycache__/runner.cpython-313.pyc",
+      "name": "tools/bench/__pycache__/runner.cpython-313.pyc",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/tools/bench/__pycache__/runner.cpython-313.pyc",
+      "sha256": "182d17d886f621974c6badab0923877846af83cc312680233008eda69ca5c508"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "tools/bench/build_fixture.py",
+      "name": "tools/bench/build_fixture.py",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/tools/bench/build_fixture.py",
+      "sha256": "2c1c741eed31a29c3756876ec8ad5ebcb6062c030e5d36ced305c042585e4de7"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "tools/bench/extensions/__init__.py",
+      "name": "tools/bench/extensions/__init__.py",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/tools/bench/extensions/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "tools/bench/extensions/bench-fence/index.ts",
+      "name": "tools/bench/extensions/bench-fence/index.ts",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/tools/bench/extensions/bench-fence/index.ts",
+      "sha256": "f261d77674665462b208a2a4268fe7e9738060f35a85907befb213248a303451"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "tools/bench/extensions/bench-fence/package.json",
+      "name": "tools/bench/extensions/bench-fence/package.json",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/tools/bench/extensions/bench-fence/package.json",
+      "sha256": "b1d1d01267434d64f9dbd42806085a29e269bb40b277cb3c2d9850fecd0b43fe"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "tools/bench/extensions/bench-fence/tsconfig.json",
+      "name": "tools/bench/extensions/bench-fence/tsconfig.json",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/tools/bench/extensions/bench-fence/tsconfig.json",
+      "sha256": "c5200402f4de7004ea0913757a12ba5917a78511c6439b21e1444cea7eb3cd4e"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "tools/bench/fence_validator.py",
+      "name": "tools/bench/fence_validator.py",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/tools/bench/fence_validator.py",
+      "sha256": "f434d6acba30b88a817b38533201ee9f623644efa155b0adf593e86f9b77d360"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "tools/bench/models.yaml",
+      "name": "tools/bench/models.yaml",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/tools/bench/models.yaml",
+      "sha256": "23bb5d239b3bfcaff505c36eb6d8246a215ceb4e0fbeafb14cec2875d7008443"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "tools/bench/preflight.py",
+      "name": "tools/bench/preflight.py",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/tools/bench/preflight.py",
+      "sha256": "6ffb182f68352b204b06db1777fe0e94e5e54620e33bef5c2b9690e929f9ab12"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "tools/bench/report.py",
+      "name": "tools/bench/report.py",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/tools/bench/report.py",
+      "sha256": "73bfd8224e34437c422fc47c1a3ffb0d1167e16a8f1151761db7d90c80cd858c"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "tools/bench/runner.py",
+      "name": "tools/bench/runner.py",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/tools/bench/runner.py",
+      "sha256": "19f527f372126997260774d21c27071427e0c94c124db9c0d00ad6dfd23b8031"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "tools/bench/test-models-codex.yaml",
+      "name": "tools/bench/test-models-codex.yaml",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/tools/bench/test-models-codex.yaml",
+      "sha256": "77b1cee598cf0ce492b70c86d92a5a9f9aa2fb568cd338f65b681408561d665a"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "tools/bench/test-models-final.yaml",
+      "name": "tools/bench/test-models-final.yaml",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/tools/bench/test-models-final.yaml",
+      "sha256": "970be30f0bef244f53066b3e5941b2e8e17d9084c87040ef4bd8f088ef73113b"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "tools/bench/test-models-openai-53plus.yaml",
+      "name": "tools/bench/test-models-openai-53plus.yaml",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/tools/bench/test-models-openai-53plus.yaml",
+      "sha256": "54b09d9cd966d5dc65f3722972ddd16c9e8fdd168794b5ac94adb3c140843ce8"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "tools/bench/test-models-openai.yaml",
+      "name": "tools/bench/test-models-openai.yaml",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/tools/bench/test-models-openai.yaml",
+      "sha256": "78aa163e7059a371303862de27201aa78f660c5f876cdee9eabdd2b2f9408efe"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "tools/bench/test-models-r2.yaml",
+      "name": "tools/bench/test-models-r2.yaml",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/tools/bench/test-models-r2.yaml",
+      "sha256": "22af783479340a3705e5db5321a87dbd4a6315322e0c38dad0a243513f2bd4df"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "tools/bench/test-models.yaml",
+      "name": "tools/bench/test-models.yaml",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/tools/bench/test-models.yaml",
+      "sha256": "2fb3a2335e3395cbf49f20689818166fa65d9f4bb9501d348a75856de260049d"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "tools/bench/test_fence.py",
+      "name": "tools/bench/test_fence.py",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/tools/bench/test_fence.py",
+      "sha256": "e02427acfbfc7bb5120d4da0e32ef92008f9d529a6102e3d636f31a5f44a852c"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "tools/bench/test_report.py",
+      "name": "tools/bench/test_report.py",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/tools/bench/test_report.py",
+      "sha256": "236d11ff460d05ba15d6cfad8fc8f544a3aa88ab30ecaf0e0d583c6f3d7cb98d"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "tools/bench/test_runner.py",
+      "name": "tools/bench/test_runner.py",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/tools/bench/test_runner.py",
+      "sha256": "511a8294ad47232458f445aac4d8b204cabb4af6ac09c923818ed7ff06cd5d15"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "tools/bench/test_smoke.py",
+      "name": "tools/bench/test_smoke.py",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/tools/bench/test_smoke.py",
+      "sha256": "9c596a3aad1ee966e69197cbbf9af9953abf05ac2898e458335bac1a96b550da"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "tools/eval/__init__.py",
+      "name": "tools/eval/__init__.py",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/tools/eval/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "tools/eval/cosim.py",
+      "name": "tools/eval/cosim.py",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/tools/eval/cosim.py",
+      "sha256": "942b2733772e472bd5bf11dee6f4c538e25644d15b0a2b75a6d12e3e5eec8109"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "tools/eval/formal.py",
+      "name": "tools/eval/formal.py",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/tools/eval/formal.py",
+      "sha256": "848510aeffcbece26b81a3d27c118bbd400865eb42c96fe91cf9ab540f7be7f2"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "tools/eval/fpga.py",
+      "name": "tools/eval/fpga.py",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/tools/eval/fpga.py",
+      "sha256": "bf54f2bb93761c6605eb3702fd89a68b775ceae4dd773cf94e629dd472cd819f"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "tools/orchestrator.py",
+      "name": "tools/orchestrator.py",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/tools/orchestrator.py",
+      "sha256": "26406cb32119810514f145ec8ba2bea62c047e1a5383f4674744d0599ce86ae5"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "tools/plot.py",
+      "name": "tools/plot.py",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/tools/plot.py",
+      "sha256": "6f882ee63dc5fef9761dc225cecc6531476e584f615911d36c0280d818ecea8c"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "tools/test_accept_rule.py",
+      "name": "tools/test_accept_rule.py",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/tools/test_accept_rule.py",
+      "sha256": "dc8a0f4dc69b18d79301dfe4033dad5401b63cd47d02f7d024384d61145721fd"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "tools/test_append_log_scribe.py",
+      "name": "tools/test_append_log_scribe.py",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/tools/test_append_log_scribe.py",
+      "sha256": "cf7e9f08a679bb6599a8a623cfcd6b8c6e61da604f862af70bf477d94af86cc0"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "tools/test_core_yaml_update.py",
+      "name": "tools/test_core_yaml_update.py",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/tools/test_core_yaml_update.py",
+      "sha256": "90d88bd24f38bc6de0f9a206692c5c5b0ca0629d7f3016f9f433ac3c6661c7aa"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "tools/test_orchestrator_fork.py",
+      "name": "tools/test_orchestrator_fork.py",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/tools/test_orchestrator_fork.py",
+      "sha256": "58679c67d564fc151b54c9220dfc0f43c7c11a824f4cd07034c170baf5796c3f"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "tools/test_tournament.py",
+      "name": "tools/test_tournament.py",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/tools/test_tournament.py",
+      "sha256": "c096bbb3bb0ade7686d5bccb4c181a9bf24805b8337fa9a2ca9a6badb354dc47"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "tools/tournament.py",
+      "name": "tools/tournament.py",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/tools/tournament.py",
+      "sha256": "10220c837c618ed2f5c70f704d24419e1957bc6b4c1b676d973aeaf3c05d018d"
+    },
+    {
+      "@type": "cr:FileObject",
+      "@id": "tools/worktree.py",
+      "name": "tools/worktree.py",
+      "contentUrl": "https://github.com/<OWNER>/auto-arch-tournament/raw/09f76ef4b1cd4f2bf83f01bf1ac85bccd1265049/tools/worktree.py",
+      "sha256": "ba027bded76f1be1bfb82ffd9464bb515edd557db74399557e149754328a827a"
+    }
+  ]
+}
