@@ -43,12 +43,33 @@ def run_formal(worktree: str, target: str | None = None) -> dict:
         env["RTL_DIR"] = f"cores/{target}/rtl"
         env["CORE_NAME"] = target
 
-    result = subprocess.run(
-        ["bash", str(run_script)],
-        cwd=worktree_path, capture_output=True, text=True,
-        timeout=1800,  # 30 min ceiling for all ~45 checks running in parallel via make -j
-        env=env,
-    )
+    try:
+        result = subprocess.run(
+            ["bash", str(run_script)],
+            cwd=worktree_path, capture_output=True, text=True,
+            timeout=1800,  # 30 min ceiling for all ~45 checks running in parallel via make -j
+            env=env,
+        )
+    except subprocess.TimeoutExpired as e:
+        # The formal harness exceeded its wall-clock ceiling. This MUST
+        # not propagate — an unhandled TimeoutExpired in run_slot kills
+        # the entire ThreadPoolExecutor batch, which kills the rep
+        # (round_id stays at whatever round was in flight, the
+        # orchestrator's main loop dies, and the rep finalizes at iter=N
+        # instead of running its full N=15). Observed live on
+        # deepseek-v4-pro reps where some hypotheses produced SMT
+        # problems that bitwuzla couldn't close in 30 minutes.
+        # Return a slot-broken outcome with a recognizable error class
+        # so the report's broken_by_class table surfaces it cleanly.
+        partial = ((e.stdout or b"").decode("utf-8", errors="replace")
+                   + (e.stderr or b"").decode("utf-8", errors="replace"))
+        return {
+            'passed': False,
+            'failed_check': 'timeout',
+            'detail': (f'run_all.sh exceeded {e.timeout}s wall-clock'
+                       + ('\n--- partial output (tail) ---\n' + partial[-2000:]
+                          if partial else '')),
+        }
     output = result.stdout + result.stderr
 
     # run_all.sh prints a final "Formal: <N> passed, <M> failed" tally line.
