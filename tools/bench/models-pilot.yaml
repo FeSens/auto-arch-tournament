@@ -1,29 +1,31 @@
-# NeurIPS pilot run — 4 opencode models.
+# NeurIPS pilot run — 4 opencode-routed models.
 #
 # A focused subset of the full models.yaml for the first paper-grade
-# bench run. Mix of premium (gpt-5.5, deepseek-v4-pro) and free-tier
-# (hy3-preview:free, ling-2.6-1t:free) so we get a sense of the
-# fitness floor / ceiling spread before committing to the full
-# 11-model J=3 matrix.
+# bench run. Mix of OpenAI subscription (gpt-5.5) and opencode/
+# opencode-go free-tier hosted models (hy3-preview, minimax, kimi)
+# so the fitness floor/ceiling spread is visible before scaling to
+# the full frontier matrix.
 #
-# All routed via opencode for uniform tool-surface comparison.
-# gpt-5.5 uses opencode's OAuth (ChatGPT subscription).
-# OpenRouter entries need OPENROUTER_API_KEY in ~/.bench-keys.env.
+# All four are routed through opencode (uniform tool-surface
+# comparison). Auth: opencode's own credentials store at
+# ~/.local/share/opencode/auth.json — `opencode auth list` should
+# show OpenAI (oauth) for gpt-5.5; the opencode/* and opencode-go/*
+# routes piggyback on the same opencode session.
 
 models:
   - name: gpt-5_5
     provider: opencode
     model: openai/gpt-5.5
     oauth: true
-  - name: hy3-free
+  - name: hy3-preview-free
     provider: opencode
-    model: openrouter/tencent/hy3-preview:free
-    key_env: OPENROUTER_API_KEY
-  - name: deepseek-v4-pro
+    model: opencode/hy3-preview-free
+    oauth: true
+  - name: minimax-m2_7
     provider: opencode
-    model: openrouter/deepseek/deepseek-v4-pro
-    key_env: OPENROUTER_API_KEY
-  - name: ling-2-6-1t-free
+    model: opencode-go/minimax-m2.7
+    oauth: true
+  - name: kimi-k2_6
     provider: opencode
-    model: openrouter/inclusionai/ling-2.6-1t:free
-    key_env: OPENROUTER_API_KEY
+    model: opencode-go/kimi-k2.6
+    oauth: true
