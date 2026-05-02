@@ -1,0 +1,13 @@
+name: picorv32
+description: |
+  picorv32 synth-only reference core; vendored from https://github.com/YosysHQ/picorv32.
+  License: ISC. CoreMark/MHz cited (not measured on this harness).
+synth_only: true
+cited_coremark_per_mhz: 0.516
+cited_coremark_source: https://github.com/YosysHQ/picorv32/blob/87c89acc18994c8cf9a2311e871818e87d304568/README.md
+targets:
+  lut: null
+  fmax_mhz: null
+current:
+  fmax_mhz: null
+  luts: null
