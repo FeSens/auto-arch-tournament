@@ -166,6 +166,137 @@ def fmt_num(x: Optional[float], fmt: str = ".1f") -> str:
     return "—" if x is None else format(x, fmt)
 
 
+def wilcoxon_signed_rank(diffs: list[float]) -> tuple[Optional[float], Optional[float]]:
+    """Two-sided Wilcoxon signed-rank test (no-scipy implementation).
+
+    `diffs` is a list of paired (treatment − control) differences,
+    one per shared rep. Zeros are excluded (Wilcoxon convention).
+    Returns (W, p_two_sided). p is None when n < 5 — at that point the
+    null-distribution table thins out enough that asking for a p-value
+    is misleading; report the effect size and let the reader judge.
+
+    Validity: this is the small-sample exact (or here, normal-
+    approximation-with-continuity-correction) test. For n < 25 a
+    proper exact test is preferable but requires a permutation
+    enumeration we skip; for the J=3..10 reps the bench typically
+    runs the approximation is the best you can do without scipy.
+    """
+    nz = [d for d in diffs if d != 0.0]
+    n = len(nz)
+    if n < 5:
+        return (None, None)
+    abs_d = sorted(((abs(d), 1 if d > 0 else -1) for d in nz),
+                   key=lambda x: x[0])
+    # Average ranks across ties.
+    ranks: list[float] = [0.0] * n
+    i = 0
+    while i < n:
+        j = i
+        while j + 1 < n and abs_d[j + 1][0] == abs_d[i][0]:
+            j += 1
+        avg_rank = (i + j) / 2 + 1
+        for k in range(i, j + 1):
+            ranks[k] = avg_rank
+        i = j + 1
+    w_plus = sum(r for r, (_, s) in zip(ranks, abs_d) if s > 0)
+    w_minus = sum(r for r, (_, s) in zip(ranks, abs_d) if s < 0)
+    w = min(w_plus, w_minus)
+    # Normal approximation with continuity correction.
+    mean = n * (n + 1) / 4
+    var = n * (n + 1) * (2 * n + 1) / 24
+    if var == 0:
+        return (w, None)
+    z = (w - mean - 0.5) / math.sqrt(var) if w < mean else (w - mean + 0.5) / math.sqrt(var)
+    p_two = 2 * (1 - _normal_cdf(abs(z)))
+    return (w, p_two)
+
+
+def _normal_cdf(x: float) -> float:
+    """Standard-normal CDF — pure-python (no scipy)."""
+    return 0.5 * (1 + math.erf(x / math.sqrt(2)))
+
+
+def paired_comparison(rows: list[RepResult],
+                      treatment: str, control: str,
+                      metric: str = "best_fitness") -> dict:
+    """Pair (treatment, rep_n) with (control, rep_n) and compare metric.
+
+    Returns {n_pairs, mean_diff, median_diff, w, p_two_sided, treatment_wins}.
+    Only reps that completed (status='done', metric not None) on BOTH
+    sides count as a pair; the report should disclose how many reps
+    were dropped.
+    """
+    by = {}
+    for r in rows:
+        if r.status != "done":
+            continue
+        v = getattr(r, metric, None)
+        if v is None:
+            continue
+        by.setdefault((r.model, r.rep), v)
+    pairs: list[tuple[float, float]] = []
+    for rep in {k[1] for k in by if k[0] == treatment}:
+        if (treatment, rep) in by and (control, rep) in by:
+            pairs.append((by[(treatment, rep)], by[(control, rep)]))
+    if not pairs:
+        return {"n_pairs": 0}
+    diffs = [t - c for t, c in pairs]
+    w, p = wilcoxon_signed_rank(diffs)
+    return {
+        "n_pairs": len(pairs),
+        "mean_diff": statistics.fmean(diffs),
+        "median_diff": statistics.median(diffs),
+        "w": w,
+        "p_two_sided": p,
+        "treatment_wins": sum(1 for d in diffs if d > 0),
+        "ties": sum(1 for d in diffs if d == 0),
+    }
+
+
+def render_comparison_section(rows: list[RepResult]) -> str:
+    """Render a 'vs static control' comparison table if a static-control
+    set of reps is present in results. Each model is paired with the
+    static control on shared rep numbers and tested for a fitness
+    difference via the paired Wilcoxon signed-rank test.
+    """
+    models = sorted({r.model for r in rows})
+    # Find a control. Convention: model name starts with "static" OR
+    # equals "static". Pick the first match.
+    control = next((m for m in models if m == "static" or m.startswith("static-")), None)
+    if not control:
+        return ""
+    lines = [
+        "",
+        "## Paired vs static control",
+        "",
+        f"Each model paired with `{control}` on shared rep numbers; "
+        "metric is `best_fitness`. p-values are two-sided Wilcoxon "
+        "signed-rank with normal approximation. n<5 reports `—` for p "
+        "(the null distribution is too sparse for a meaningful p-value).",
+        "",
+        "| Model | n_pairs | wins | mean Δ | median Δ | W | p (two-sided) |",
+        "|---|---|---|---|---|---|---|",
+    ]
+    for m in models:
+        if m == control:
+            continue
+        cmp = paired_comparison(rows, treatment=m, control=control)
+        if cmp.get("n_pairs", 0) == 0:
+            continue
+        n = cmp["n_pairs"]
+        w = cmp.get("w")
+        p = cmp.get("p_two_sided")
+        lines.append(
+            f"| `{m}` | {n} | {cmp['treatment_wins']}/{n} | "
+            f"{cmp['mean_diff']:+.2f} | {cmp['median_diff']:+.2f} | "
+            f"{f'{w:.1f}' if w is not None else '—'} | "
+            f"{f'{p:.3f}' if p is not None else '—'} |"
+        )
+    if len(lines) <= 7:  # only header rows, no data
+        return ""
+    return "\n".join(lines) + "\n"
+
+
 def render_markdown(aggs: list[ModelAgg]) -> str:
     lines = [
         "# LLM hardware-development benchmark — leaderboard",
@@ -234,7 +365,8 @@ def main() -> int:
     args.out.mkdir(parents=True, exist_ok=True)
     md_path = args.out / "LEADERBOARD.md"
     csv_path = args.out / "leaderboard.csv"
-    md_path.write_text(render_markdown(aggs))
+    md = render_markdown(aggs) + render_comparison_section(rows)
+    md_path.write_text(md)
     render_csv(aggs, csv_path)
 
     print(f"wrote {md_path}")

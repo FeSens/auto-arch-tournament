@@ -11,8 +11,11 @@ from tools.bench.report import (
     fmt_fitness,
     fmt_pct,
     load_results,
+    paired_comparison,
+    render_comparison_section,
     render_csv,
     render_markdown,
+    wilcoxon_signed_rank,
 )
 
 
@@ -126,3 +129,66 @@ def test_fmt_fitness_handles_none():
 def test_fmt_pct_handles_none():
     assert fmt_pct(None) == "—"
     assert fmt_pct(0.5) == "50%"
+
+
+# ---- paired Wilcoxon + comparison rendering ---------------------------
+
+
+def test_wilcoxon_too_few_reps_returns_none_p():
+    # n=4 — below the 5-pair threshold; p must be None.
+    w, p = wilcoxon_signed_rank([1.0, 2.0, 3.0, 4.0])
+    assert p is None
+
+
+def test_wilcoxon_all_positive_diffs_one_sided_extreme():
+    # 8 strictly-positive paired differences. W_minus = 0, W_plus = 36.
+    # Two-sided p should be very small (~0.012 for n=8).
+    w, p = wilcoxon_signed_rank([1, 2, 3, 4, 5, 6, 7, 8])
+    assert w == 0.0
+    assert p is not None and p < 0.05
+
+
+def test_wilcoxon_excludes_zero_diffs():
+    # A run where some diffs are zero. Wilcoxon convention drops them.
+    # Effective n = 5 (positive diffs only).
+    w, p = wilcoxon_signed_rank([0, 0, 0, 1, 2, 3, 4, 5])
+    assert p is not None  # n_nonzero = 5, just above threshold
+
+
+def test_paired_comparison_pairs_by_rep(tmp_path: Path):
+    rows_path = tmp_path / "results.jsonl"
+    _write_results(rows_path, [
+        {"model": "treatment", "rep": 1, "status": "done",
+         "best_fitness": 100.0, "iterations": 3, "accepted": 1,
+         "rejected": 2, "broken": 0, "wall_clock_sec": 60,
+         "total_cost_usd": 0.0, "total_tokens_in": 0, "total_tokens_out": 0},
+        {"model": "treatment", "rep": 2, "status": "done",
+         "best_fitness": 110.0, "iterations": 3, "accepted": 1,
+         "rejected": 2, "broken": 0, "wall_clock_sec": 60,
+         "total_cost_usd": 0.0, "total_tokens_in": 0, "total_tokens_out": 0},
+        {"model": "static", "rep": 1, "status": "done",
+         "best_fitness": 90.0, "iterations": 3, "accepted": 0,
+         "rejected": 3, "broken": 0, "wall_clock_sec": 60,
+         "total_cost_usd": 0.0, "total_tokens_in": 0, "total_tokens_out": 0},
+        {"model": "static", "rep": 2, "status": "done",
+         "best_fitness": 95.0, "iterations": 3, "accepted": 0,
+         "rejected": 3, "broken": 0, "wall_clock_sec": 60,
+         "total_cost_usd": 0.0, "total_tokens_in": 0, "total_tokens_out": 0},
+    ])
+    rows = load_results(rows_path)
+    cmp = paired_comparison(rows, "treatment", "static")
+    assert cmp["n_pairs"] == 2
+    assert cmp["mean_diff"] == 12.5  # (100-90 + 110-95)/2
+    assert cmp["treatment_wins"] == 2
+
+
+def test_render_comparison_section_omits_when_no_static(tmp_path: Path):
+    rows_path = tmp_path / "results.jsonl"
+    _write_results(rows_path, [
+        {"model": "a", "rep": 1, "status": "done", "best_fitness": 100.0,
+         "iterations": 3, "accepted": 1, "rejected": 2, "broken": 0,
+         "wall_clock_sec": 60, "total_cost_usd": 0.0,
+         "total_tokens_in": 0, "total_tokens_out": 0},
+    ])
+    rows = load_results(rows_path)
+    assert render_comparison_section(rows) == ""
