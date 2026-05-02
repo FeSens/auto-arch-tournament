@@ -539,13 +539,31 @@ def parse_codex_cost_from_log(log_path: Path) -> tuple[int, int, float]:
 def parse_opencode_cost_from_log(log_path: Path) -> tuple[int, int, float]:
     """Sum input/output tokens and cost across an opencode --format json log.
 
-    Opencode emits a `step_finish` event after each turn carrying the cumulative
-    `tokens` and `cost` for that step:
+    Opencode emits a `step_finish` event after each turn carrying the
+    cumulative `tokens` and `cost` for that step:
       {"type":"step_finish", ..., "part":{"tokens":{"input":N,"output":N,
         "reasoning":N,"cache":{"read":N,"write":N}}, "cost":F, ...}}
 
-    `cost: 0` is normal under OAuth subscriptions (no per-token billing); we
-    still tally token counts regardless.
+    `tokens.input` is the *uncached* portion of the prompt; cache hits
+    are reported separately under `tokens.cache.read`. To stay
+    consistent with parse_codex_cost_from_log (which sums codex's gross
+    `input_tokens` per turn — cache included), we count opencode's
+    gross input as `tokens.input + tokens.cache.read + tokens.cache.write`.
+    Without this normalization an apples-to-apples comparison with
+    codex showed a 15× gap that was almost entirely cache-accounting,
+    not actual model work — codex's xhigh n10 run reported 16.3M
+    "input" of which 14M was cached re-reads of the same prompt;
+    opencode at xhigh did the equivalent ~10M (1.1M new + 9.1M cache
+    reads) but the saved row read as 1.1M because cache.read was
+    skipped. Cumulative effect: the bench underreported opencode's
+    token usage by ~10×.
+
+    `cost: 0` is normal under OAuth subscriptions (no per-token
+    billing); we still tally token counts regardless.
+
+    cache.write is normally 0 under OpenAI; including it costs nothing
+    when 0 and keeps the field semantics correct if a model family
+    starts populating it (Anthropic, etc.).
     """
     if not log_path.is_file():
         return (0, 0, 0.0)
@@ -568,8 +586,11 @@ def parse_opencode_cost_from_log(log_path: Path) -> tuple[int, int, float]:
         if isinstance(toks, dict):
             ti = toks.get("input") or 0
             to = toks.get("output") or 0
+            cache = toks.get("cache") or {}
+            cr = cache.get("read", 0) if isinstance(cache, dict) else 0
+            cw = cache.get("write", 0) if isinstance(cache, dict) else 0
             try:
-                toks_in += int(ti)
+                toks_in += int(ti) + int(cr or 0) + int(cw or 0)
                 toks_out += int(to)
             except (TypeError, ValueError):
                 pass
