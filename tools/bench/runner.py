@@ -568,6 +568,85 @@ def parse_opencode_cost_from_log(log_path: Path) -> tuple[int, int, float]:
     return (toks_in, toks_out, cost)
 
 
+def reconstruct_log_from_git(clone: Path, target: str = "bench") -> list[str] | None:
+    """Walk the rep clone's git history (across all reachable refs +
+    reflog) and recover every line ever written to
+    cores/<target>/experiments/log.jsonl.
+
+    Why: orchestrator.append_log auto-commits each iteration's entry
+    as `log: <id> <outcome>`. The commits are append-only and survive
+    HEAD-rewinding bugs (we hit one earlier — the bench-fixture-v1
+    tag/branch ambiguity caused mid-run rewinds that orphaned earlier
+    rounds, but the commits themselves stayed in the object DB).
+    Walking the reflog plus all reachable refs recovers them.
+
+    Strategy:
+      1. List every commit reachable from any ref OR the reflog whose
+         message starts with `log: hyp-` (per the orchestrator's
+         commit-message convention) — use --walk-reflogs and --all.
+      2. For each commit, `git show <sha>:cores/<target>/experiments/
+         log.jsonl` and take the LAST line — append_log writes one
+         entry per commit, so the new line is always at EOF.
+      3. Dedup by hypothesis id (different commits might re-write the
+         same entry).
+      4. Sort by (round_id, slot) so the reconstructed log is in
+         logical order even if the underlying commit graph isn't.
+
+    Returns:
+      list of JSONL lines (one per iteration) or None if no commits
+      matched. Caller compares to the on-disk file and uses whichever
+      is more complete.
+    """
+    log_path = f"cores/{target}/experiments/log.jsonl"
+    cwd = str(clone.resolve())
+    # All commits across refs + reflog with the orchestrator's
+    # canonical commit message prefix. --walk-reflogs covers the
+    # orphaned-by-rewind case.
+    # `^log: ` matches both per-iteration `log: hyp-...` commits and
+    # the orchestrator-emitted `log: baseline-<target>-<sha> improvement`
+    # commit (round_id=0). Including the baseline lets summarize_run's
+    # round_id=0 path produce the canonical baseline_fitness anchor.
+    out = subprocess.run(
+        ["git", "log", "--all", "--reflog", "--format=%H",
+         "--grep=^log: ", "--", log_path],
+        cwd=cwd, capture_output=True, text=True,
+    )
+    if out.returncode != 0 or not out.stdout.strip():
+        return None
+    shas = out.stdout.strip().splitlines()
+    by_id: dict[str, dict] = {}
+    for sha in shas:
+        proc = subprocess.run(
+            ["git", "show", f"{sha}:{log_path}"],
+            cwd=cwd, capture_output=True, text=True,
+        )
+        if proc.returncode != 0:
+            continue
+        # The last non-empty line is the entry this commit added (the
+        # rest are pre-existing). append_log always writes one new line.
+        lines = [ln for ln in proc.stdout.splitlines() if ln.strip()]
+        if not lines:
+            continue
+        try:
+            entry = json.loads(lines[-1])
+        except json.JSONDecodeError:
+            continue
+        eid = entry.get("id")
+        if not eid:
+            continue
+        # Keep the first occurrence per id; commit ordering is not
+        # author-stable, but content stability is what we need.
+        if eid not in by_id:
+            by_id[eid] = entry
+    if not by_id:
+        return None
+    ordered = sorted(
+        by_id.values(),
+        key=lambda e: (e.get("round_id", 0), e.get("slot", 0)),
+    )
+    return [json.dumps(e) for e in ordered]
+
+
 def collect_agent_logs(clone: Path) -> Path:
     """Concatenate every per-iteration .agent.*.log into one stream.
 
@@ -852,8 +931,32 @@ def run_one_job(
     # 4. Finalize: collect logs + summary regardless of how we exited.
     out_dir = results_dir / job.model.name / f"rep{job.rep}"
     out_dir.mkdir(parents=True, exist_ok=True)
+
+    # Reconstruct log.jsonl from the rep clone's git history (commit
+    # messages + tree blobs at each `log: hyp-...` commit). This is
+    # defense-in-depth against any future bug that causes the on-disk
+    # log.jsonl to lose entries — append_log's commits are
+    # append-only and persist across HEAD-rewinding bugs. Use the
+    # reconstruction whenever it covers more entries than the on-disk
+    # file; fall back to the on-disk file otherwise.
+    on_disk_lines: list[str] = []
     if log_jsonl_path.is_file():
+        on_disk_lines = [
+            ln for ln in log_jsonl_path.read_text().splitlines()
+            if ln.strip()
+        ]
+    git_lines = reconstruct_log_from_git(clone, target="bench") or []
+    if len(git_lines) > len(on_disk_lines):
+        # Print which entries we recovered so it's auditable.
+        recovered = len(git_lines) - len(on_disk_lines)
+        print(f"  [bench] reconstructed log.jsonl from git: "
+              f"{len(git_lines)} entries (vs {len(on_disk_lines)} on disk, "
+              f"+{recovered} recovered from orphaned commits)",
+              flush=True)
+        (out_dir / "log.jsonl").write_text("\n".join(git_lines) + "\n")
+    elif log_jsonl_path.is_file():
         shutil.copy2(log_jsonl_path, out_dir / "log.jsonl")
+
     agent_concat = collect_agent_logs(clone)
     if agent_concat.is_file():
         shutil.copy2(agent_concat, out_dir / "agent.log")
