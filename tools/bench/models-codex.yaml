@@ -1,0 +1,23 @@
+# Codex CLI reference benchmark — OpenAI subscription models via the
+# Codex CLI. Used as the "known good" baseline against which opencode
+# (and any other runtime) is compared. Codex is workflow-trained and
+# self-checks via shell tool.
+#
+# Auth: `codex login` (ChatGPT subscription, OAuth — ~/.codex/auth.json).
+#
+# Reasoning effort defaults to xhigh (set in tools/agents/_runtime.py;
+# override per-job with CODEX_REASONING_EFFORT).
+
+models:
+  - name: gpt-5_5
+    provider: codex
+    model: gpt-5.5
+    oauth: true
+  - name: gpt-5_4
+    provider: codex
+    model: gpt-5.4
+    oauth: true
+  - name: gpt-5_3-codex
+    provider: codex
+    model: gpt-5.3-codex
+    oauth: true

@@ -2,16 +2,15 @@
 
 Drives the LLM benchmark: enumerates (model, rep) jobs from
 tools/bench/models.yaml, clones the bench-fixture-v1 ref into an
-isolated per-job directory, copies the bench-fence pi extension into
-.pi/extensions/ of the clone, kicks `make N=<N> K=<K> TARGET=bench`
-with AGENT_PROVIDER=pi, then summarizes the result and appends a row
-to bench/results.jsonl.
+isolated per-job directory, kicks `make N=<N> K=<K> TARGET=bench`
+with the model's runtime AGENT_PROVIDER (codex / opencode / claude),
+then summarizes the result and appends a row to bench/results.jsonl.
 
 Resumable: re-running skips (model, rep) pairs already in results.jsonl.
 
 Usage:
     python -m tools.bench.runner                                  # full matrix
-    python -m tools.bench.runner --reps 1 --models opus-47        # subset
+    python -m tools.bench.runner --reps 1 --only opus-47          # subset
     python -m tools.bench.runner --parallel 3 --max-cost 50       # 3 in parallel
     python -m tools.bench.runner --dry-run                        # plan only
 """
@@ -33,7 +32,6 @@ from typing import Optional
 
 import yaml
 
-from tools.bench.fence_validator import FenceConfig
 
 
 HERE = Path(__file__).parent
@@ -43,7 +41,6 @@ DEFAULT_REF = "bench-fixture-v1"
 DEFAULT_RESULTS_JSONL = REPO_ROOT / "bench" / "results.jsonl"
 DEFAULT_CLONE_BASE = REPO_ROOT / ".claude" / "bench-runs"
 DEFAULT_RESULTS_DIR = REPO_ROOT / "bench"
-EXTENSION_SRC = HERE / "extensions" / "bench-fence"
 
 # Per-rep wall-clock ceiling. 0 = no cap (the runner waits for the
 # orchestrator to exit on its own). Originally 9h to bound runaway
@@ -59,19 +56,19 @@ DEFAULT_MAX_COST_USD = 200.0
 @dataclass
 class ModelEntry:
     name: str
-    pi_model: str
+    # The runtime-specific model identifier. For "codex" it's the codex
+    # --model string (e.g. "gpt-5.5"). For "opencode" it's the opencode
+    # --model string (e.g. "openai/gpt-5.5", "anthropic/claude-sonnet-4.6").
+    # For "claude" it's the claude --model string.
+    model: str
     # API-key environment variable name. For OAuth subscription providers
-    # (Codex, Claude Pro, Copilot) the auth lives in ~/.pi/agent/auth.json
-    # or ~/.local/share/opencode/auth.json and no env var is needed —
-    # set `oauth: true` instead and leave key_env empty.
+    # (Codex, Claude Pro, Copilot) the auth lives at the runtime's own
+    # path (~/.codex/auth.json, ~/.local/share/opencode/auth.json) and no
+    # env var is needed — set `oauth: true` and leave key_env empty.
     key_env: str = ""
     oauth: bool = False
-    # Agent runtime to use. "pi" (default for backwards compat with
-    # existing model lists), "codex", "opencode", or "claude". When
-    # "codex", `pi_model` is the codex --model string (e.g. "gpt-5.5").
-    # When "opencode", it's the opencode --model string
-    # (e.g. "openai/gpt-5.5", "anthropic/claude-sonnet-4.6").
-    provider: str = "pi"
+    # Agent runtime to use. One of "codex", "opencode", "claude".
+    provider: str = "codex"
 
 
 @dataclass
@@ -91,12 +88,20 @@ def load_models(path: Path) -> list[ModelEntry]:
     cfg = yaml.safe_load(path.read_text())
     out: list[ModelEntry] = []
     for m in cfg.get("models", []):
+        # Accept both `model` (canonical) and `pi_model` (legacy alias
+        # from the pi-runtime era). YAMLs migrated incrementally; reject
+        # entries with neither.
+        model = m.get("model") or m.get("pi_model")
+        if not model:
+            raise ValueError(
+                f"{path}: model entry {m.get('name', '?')!r} has no `model` field"
+            )
         out.append(ModelEntry(
             name=m["name"],
-            pi_model=m["pi_model"],
+            model=model,
             key_env=m.get("key_env", "") or "",
             oauth=bool(m.get("oauth", False)),
-            provider=m.get("provider", "pi"),
+            provider=m.get("provider", "codex"),
         ))
     if not out:
         raise ValueError(f"{path}: no models defined")
@@ -146,7 +151,9 @@ def validate_keys(jobs: list[JobSpec], env: dict[str, str]) -> list[str]:
     """Return list of missing env vars (one entry per unique missing var).
 
     OAuth-subscription jobs (oauth=True) don't need an env var — they
-    read credentials from ~/.pi/agent/auth.json — so they're skipped.
+    read credentials from the runtime's own auth file (e.g.
+    ~/.codex/auth.json, ~/.local/share/opencode/auth.json) — so they're
+    skipped.
     """
     needed = sorted({j.model.key_env for j in jobs
                      if not j.model.oauth and j.model.key_env})
@@ -235,19 +242,17 @@ def clone_fixture(repo_root: Path, ref: str, dest: Path) -> None:
         ["git", "tag", "-d", ref],
         cwd=str(dest), check=False, capture_output=True,
     )
-    # The runner copies pi extensions into <clone>/.pi/ and pi writes
-    # session state under <clone>/.pi-sessions/. Both must be invisible to
-    # the orchestrator's `git status --porcelain` sandbox check
-    # (tools/agents/hypothesis.py:_git_offlimits_changes), or the check
-    # treats them as untracked off-limits writes and tries to unlink them
-    # (which fails on directories with EPERM on macOS). Use git's
-    # per-clone exclude file so we don't have to mutate any committed
-    # .gitignore.
+    # Various per-clone artifacts must be invisible to the orchestrator's
+    # `git status --porcelain` sandbox check (tools/agents/hypothesis.py:
+    # _git_offlimits_changes), or the check treats them as untracked
+    # off-limits writes and tries to unlink them (which fails on
+    # directories with EPERM on macOS). Use git's per-clone exclude file
+    # so we don't have to mutate any committed .gitignore.
     exclude_path = dest / ".git" / "info" / "exclude"
     exclude_path.parent.mkdir(parents=True, exist_ok=True)
     extras = (
         "\n# bench runner — keep these out of git status / sandbox\n"
-        ".pi/\n.pi-sessions/\n.tmp/\n__pycache__/\n*.pyc\n"
+        ".tmp/\n__pycache__/\n*.pyc\n"
         # Cocotb pytest writes test/results.xml when the impl agent runs
         # `make test` locally to validate. The orchestrator's sandbox
         # only allows test_*.py changes, so an unignored results.xml
@@ -358,20 +363,6 @@ def clone_fixture(repo_root: Path, ref: str, dest: Path) -> None:
             )
 
 
-def install_fence(clone: Path) -> None:
-    """Copy the bench-fence extension into <clone>/.pi/extensions/ and
-    render the per-clone bench-fence.config.json with the absolute clone
-    path baked in."""
-    target_dir = clone / ".pi" / "extensions" / "bench-fence"
-    target_dir.parent.mkdir(parents=True, exist_ok=True)
-    if target_dir.exists():
-        shutil.rmtree(target_dir)
-    shutil.copytree(EXTENSION_SRC, target_dir)
-
-    cfg = FenceConfig(clone_root=str(clone.resolve()))
-    cfg.write(target_dir / "bench-fence.config.json")
-
-
 def install_opencode_config(clone: Path) -> None:
     """Render <clone>/opencode.json with a deny list mirroring the
     bench-fence's intent — block edits to other cores, prevent
@@ -428,35 +419,22 @@ def make_env_for_job(job: JobSpec, clone: Path, keys: dict[str, str]) -> dict[st
     env = os.environ.copy()
     env["TARGET"] = "bench"
     if job.model.provider == "codex":
-        # Codex CLI reference path. Workflow-trained, self-checks
-        # reliably — no fence/autofix needed, codex's built-in
-        # workspace-write sandbox + clone isolation suffice.
+        # Codex CLI: workspace-write sandbox + clone isolation.
         env["AGENT_PROVIDER"] = "codex"
-        env["CODEX_MODEL"] = job.model.pi_model
+        env["CODEX_MODEL"] = job.model.model
     elif job.model.provider == "opencode":
-        # Opencode is also workflow-trained and self-checks reliably,
-        # so no programmatic autofix needed. install_opencode_config
-        # writes the per-clone permission deny rules.
+        # Opencode: per-clone opencode.json permission rules.
         env["AGENT_PROVIDER"] = "opencode"
-        env["OPENCODE_MODEL"] = job.model.pi_model
+        env["OPENCODE_MODEL"] = job.model.model
+    elif job.model.provider == "claude":
+        # Claude CLI: --dangerously-skip-permissions + clone isolation.
+        env["AGENT_PROVIDER"] = "claude"
+        env["ANTHROPIC_MODEL"] = job.model.model
     else:
-        # Default: pi runtime.
-        env["AGENT_PROVIDER"] = "pi"
-        env["PI_MODEL"] = job.model.pi_model
-        # PI_SESSION_DIR isolates session storage per-clone WITHOUT
-        # relocating auth.json (would defeat OAuth-subscription
-        # logins). The pi branch in _runtime.py reads this and
-        # forwards it as --session-dir. We deliberately do NOT set
-        # PI_CODING_AGENT_DIR, which would override all of
-        # ~/.pi/agent/ (including auth.json).
-        env["PI_SESSION_DIR"] = str((clone / ".pi-sessions").resolve())
-        # Pi-via-OAuth routinely skips the impl prompt's local formal
-        # self-check (observed: 0/15 bash invocations across a K=3
-        # matrix). BENCH_FORMAL_AUTOFIX=1 tells implement.py to run
-        # formal programmatically and re-invoke the agent with the
-        # counterexample tail if it fails. Codex/opencode are
-        # workflow-trained and self-check naturally — no autofix.
-        env["BENCH_FORMAL_AUTOFIX"] = "1"
+        raise ValueError(
+            f"unsupported provider {job.model.provider!r}; "
+            f"expected one of: codex, opencode, claude"
+        )
     # Apply keys from ~/.bench-keys.env, but only for keys not already in env
     # (so a real shell-exported value wins over a file value).
     for k, v in keys.items():
@@ -598,100 +576,6 @@ def parse_opencode_cost_from_log(log_path: Path) -> tuple[int, int, float]:
     return (toks_in, toks_out, cost)
 
 
-def parse_pi_cost_from_log(log_path: Path) -> tuple[int, int, float]:
-    """Sum input_tokens, output_tokens, cost_usd across a pi --mode json log.
-
-    Pi 0.70.6 emits usage data on `message_end`-style events nested under
-    `message.usage`. Pre-0.70 it was a top-level `type:"usage"` event.
-    We walk both shapes; only the FINAL message of each turn carries the
-    authoritative usage (intermediate `message_update` events have
-    partial running totals), so we de-duplicate by responseId.
-    """
-    if not log_path.is_file():
-        return (0, 0, 0.0)
-    seen_response_ids: set[str] = set()
-    toks_in = toks_out = 0
-    cost = 0.0
-
-    def _add(usage: dict) -> None:
-        nonlocal toks_in, toks_out, cost
-        if not isinstance(usage, dict):
-            return
-        ti = usage.get("input") or usage.get("input_tokens") or usage.get("prompt_tokens") or 0
-        to = usage.get("output") or usage.get("output_tokens") or usage.get("completion_tokens") or 0
-        c = usage.get("cost")
-        if isinstance(c, dict):
-            c = c.get("total", 0)
-        c = c or usage.get("cost_usd") or 0
-        try:
-            toks_in += int(ti)
-        except (TypeError, ValueError):
-            pass
-        try:
-            toks_out += int(to)
-        except (TypeError, ValueError):
-            pass
-        try:
-            cost += float(c)
-        except (TypeError, ValueError):
-            pass
-
-    for raw in log_path.read_text().splitlines():
-        s = raw.strip()
-        if not s or not s.startswith("{"):
-            continue
-        try:
-            ev = json.loads(s)
-        except json.JSONDecodeError:
-            continue
-        et = ev.get("type")
-        # Pre-0.70 standalone usage event.
-        if et == "usage":
-            _add(ev)
-            continue
-        # Pi 0.70.6: a `message_end` (or final assistant_message) carries
-        # the authoritative usage. message_update events are partial and
-        # would double-count if summed. Use responseId for dedup.
-        msg = ev.get("message") if isinstance(ev.get("message"), dict) else None
-        if not msg:
-            partial = (ev.get("assistantMessageEvent") or {}).get("partial")
-            if isinstance(partial, dict):
-                msg = partial
-        if not isinstance(msg, dict):
-            continue
-        if msg.get("role") != "assistant":
-            continue
-        resp = msg.get("responseId")
-        # Skip placeholder events: pi emits a message_start with
-        # role=assistant, stopReason="stop", and responseId=null/zero
-        # usage. Without this guard the parser would dedup on None and
-        # silently skip every real terminal event afterward.
-        if not resp:
-            continue
-        if resp in seen_response_ids:
-            continue
-        usage = msg.get("usage")
-        if not isinstance(usage, dict):
-            continue
-        # Only count when the message has a stopReason (i.e. it's terminal)
-        # — partial updates from message_update don't have it set yet.
-        if msg.get("stopReason") in (None, ""):
-            continue
-        # Final guard: skip messages whose usage totals are zero. Pi's
-        # placeholder events also have stopReason='stop' AND a non-null
-        # responseId in some shapes; the only reliable way to tell a
-        # placeholder from a real terminal event is non-zero usage.
-        total_toks = (usage.get("totalTokens") or 0) or (
-            (usage.get("input") or 0) + (usage.get("output") or 0)
-            + (usage.get("input_tokens") or 0) + (usage.get("output_tokens") or 0)
-        )
-        if not total_toks:
-            continue
-        seen_response_ids.add(resp)
-        _add(usage)
-    return (toks_in, toks_out, cost)
-
-
 def collect_agent_logs(clone: Path) -> Path:
     """Concatenate every per-iteration .agent.*.log into one stream.
 
@@ -723,17 +607,19 @@ def collect_agent_logs(clone: Path) -> Path:
     return out_path
 
 
-def parse_cost_from_log(log_path: Path, provider: str = "pi") -> tuple[int, int, float]:
+def parse_cost_from_log(log_path: Path, provider: str = "codex") -> tuple[int, int, float]:
     """Dispatch to the right cost parser based on provider."""
     if provider == "opencode":
         return parse_opencode_cost_from_log(log_path)
     if provider == "codex":
         return parse_codex_cost_from_log(log_path)
-    return parse_pi_cost_from_log(log_path)
+    # Claude has no cost parser yet; return zeros (the runner still
+    # records iterations / outcomes even without token telemetry).
+    return (0, 0, 0.0)
 
 
 def summarize_run(log_jsonl: Path, agent_log: Path,
-                  provider: str = "pi") -> dict:
+                  provider: str = "codex") -> dict:
     """Compute the per-rep summary from an experiments/log.jsonl.
 
     Schema mirrors the spec's `bench/results.jsonl` row.
@@ -852,15 +738,11 @@ def run_one_job(
 
     # 2. Install per-runtime fencing.
     try:
-        if job.model.provider == "codex":
-            # Codex CLI uses its built-in workspace-write sandbox; the
-            # standalone clone already removes other cores. No fence
-            # file needed.
-            pass
-        elif job.model.provider == "opencode":
+        if job.model.provider == "opencode":
             install_opencode_config(clone)
-        else:
-            install_fence(clone)
+        # codex and claude rely on their CLIs' built-in sandbox modes
+        # (workspace-write / --dangerously-skip-permissions) plus the
+        # standalone-clone isolation; no per-clone fence file needed.
     except Exception as e:
         row["notes"] = f"fence install failed: {e}"[:400]
         _finalize(row, started, results_jsonl)
@@ -1013,7 +895,7 @@ def main() -> int:
 
     print(f"[bench] {len(jobs)} job(s) queued ({len(done)} already done)")
     for j in jobs:
-        print(f"        - {j.slug}  ->  {j.model.pi_model}")
+        print(f"        - {j.slug}  ->  {j.model.provider}:{j.model.model}")
     print(f"[bench] config: N={args.n} K={args.k} reps={args.reps} parallel={args.parallel}")
     print(f"[bench] clone base: {args.clone_base}")
     print(f"[bench] results: {args.results_jsonl}")

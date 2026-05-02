@@ -19,7 +19,8 @@ from tools.bench.runner import (
     load_done_set,
     load_keyfile,
     load_models,
-    parse_pi_cost_from_log,
+    parse_codex_cost_from_log,
+    parse_opencode_cost_from_log,
     summarize_run,
     validate_keys,
 )
@@ -28,11 +29,11 @@ from tools.bench.runner import (
 # ---- model loading -----------------------------------------------------
 
 
-def _write_models_yaml(p: Path, n: int) -> None:
+def _write_models_yaml(p: Path, n: int, *, key: str = "model") -> None:
     lines = ["models:"]
     for i in range(n):
         lines.append(f"  - name: m{i}")
-        lines.append(f"    pi_model: prov{i}/m{i}")
+        lines.append(f"    {key}: prov{i}/m{i}")
         lines.append(f"    key_env: KEY{i}")
     p.write_text("\n".join(lines) + "\n")
 
@@ -43,8 +44,17 @@ def test_load_models_round_trip(tmp_path: Path):
     out = load_models(p)
     assert len(out) == 3
     assert out[0].name == "m0"
-    assert out[0].pi_model == "prov0/m0"
+    assert out[0].model == "prov0/m0"
     assert out[0].key_env == "KEY0"
+
+
+def test_load_models_accepts_legacy_pi_model_alias(tmp_path: Path):
+    """Older YAMLs still use `pi_model:` — load_models should accept it."""
+    p = tmp_path / "models.yaml"
+    _write_models_yaml(p, 2, key="pi_model")
+    out = load_models(p)
+    assert out[0].model == "prov0/m0"
+    assert out[1].model == "prov1/m1"
 
 
 def test_load_models_empty_raises(tmp_path: Path):
@@ -80,8 +90,8 @@ def test_load_done_set_missing_file(tmp_path: Path):
 
 def test_enumerate_jobs_skips_done():
     models = [
-        ModelEntry(name="a", pi_model="x/a", key_env="K"),
-        ModelEntry(name="b", pi_model="x/b", key_env="K"),
+        ModelEntry(name="a", model="x/a", key_env="K"),
+        ModelEntry(name="b", model="x/b", key_env="K"),
     ]
     done = {("a", 1), ("a", 2)}
     jobs = enumerate_jobs(models, reps=2, done=done)
@@ -91,8 +101,8 @@ def test_enumerate_jobs_skips_done():
 
 def test_enumerate_jobs_only_filter():
     models = [
-        ModelEntry(name="a", pi_model="x/a", key_env="K"),
-        ModelEntry(name="b", pi_model="x/b", key_env="K"),
+        ModelEntry(name="a", model="x/a", key_env="K"),
+        ModelEntry(name="b", model="x/b", key_env="K"),
     ]
     jobs = enumerate_jobs(models, reps=1, done=set(), only_models=["b"])
     assert len(jobs) == 1
@@ -104,8 +114,8 @@ def test_enumerate_jobs_only_filter():
 
 def test_validate_keys_finds_missing():
     jobs = [
-        JobSpec(ModelEntry(name="a", pi_model="x/a", key_env="HAS_KEY"), 1),
-        JobSpec(ModelEntry(name="b", pi_model="x/b", key_env="MISSING_KEY"), 1),
+        JobSpec(ModelEntry(name="a", model="x/a", key_env="HAS_KEY"), 1),
+        JobSpec(ModelEntry(name="b", model="x/b", key_env="MISSING_KEY"), 1),
     ]
     env = {"HAS_KEY": "yes"}
     missing = validate_keys(jobs, env)
@@ -113,16 +123,16 @@ def test_validate_keys_finds_missing():
 
 
 def test_validate_keys_all_present():
-    jobs = [JobSpec(ModelEntry(name="a", pi_model="x/a", key_env="K"), 1)]
+    jobs = [JobSpec(ModelEntry(name="a", model="x/a", key_env="K"), 1)]
     env = {"K": "v"}
     assert validate_keys(jobs, env) == []
 
 
 def test_validate_keys_skips_oauth_models():
     jobs = [
-        JobSpec(ModelEntry(name="a", pi_model="openai-codex/gpt-5.5",
-                           key_env="", oauth=True), 1),
-        JobSpec(ModelEntry(name="b", pi_model="anthropic/c", key_env="K"), 1),
+        JobSpec(ModelEntry(name="a", model="gpt-5.5",
+                           key_env="", oauth=True, provider="codex"), 1),
+        JobSpec(ModelEntry(name="b", model="anthropic/c", key_env="K"), 1),
     ]
     env = {"K": "v"}
     # OAuth model contributes nothing to needed-keys.
@@ -151,39 +161,67 @@ def test_load_keyfile_missing_returns_empty(tmp_path: Path):
     assert load_keyfile(tmp_path / "absent") == {}
 
 
-# ---- pi cost parsing ---------------------------------------------------
+# ---- codex cost parsing -----------------------------------------------
 
 
-def test_parse_pi_cost_sums_usage_events(tmp_path: Path):
+def test_parse_codex_cost_sums_turn_completed(tmp_path: Path):
+    """Sum input_tokens (gross) + output_tokens + reasoning_output_tokens."""
     p = tmp_path / "agent.log"
     p.write_text(
-        json.dumps({"type": "usage", "input_tokens": 1000,
-                    "output_tokens": 200, "cost_usd": 0.05}) + "\n"
-        + json.dumps({"type": "tool_call", "name": "edit"}) + "\n"
-        + json.dumps({"type": "usage", "input_tokens": 500,
-                    "output_tokens": 100, "cost_usd": 0.025}) + "\n"
+        json.dumps({"type": "turn.completed",
+                    "usage": {"input_tokens": 1000, "cached_input_tokens": 800,
+                              "output_tokens": 200,
+                              "reasoning_output_tokens": 50}}) + "\n"
+        + json.dumps({"type": "command_execution"}) + "\n"
+        + json.dumps({"type": "turn.completed",
+                      "usage": {"input_tokens": 500, "cached_input_tokens": 400,
+                                "output_tokens": 100,
+                                "reasoning_output_tokens": 25}}) + "\n"
     )
-    toks_in, toks_out, cost = parse_pi_cost_from_log(p)
-    assert toks_in == 1500
-    assert toks_out == 300
-    assert abs(cost - 0.075) < 1e-9
+    toks_in, toks_out, cost = parse_codex_cost_from_log(p)
+    assert toks_in == 1500   # gross input (cache included)
+    assert toks_out == 375   # 200+50 + 100+25
+    assert cost == 0.0       # OAuth — no per-call billing
 
 
-def test_parse_pi_cost_handles_missing_file(tmp_path: Path):
-    assert parse_pi_cost_from_log(tmp_path / "absent") == (0, 0, 0.0)
+def test_parse_codex_cost_handles_missing_file(tmp_path: Path):
+    assert parse_codex_cost_from_log(tmp_path / "absent") == (0, 0, 0.0)
 
 
-def test_parse_pi_cost_handles_garbage_lines(tmp_path: Path):
+def test_parse_codex_cost_dedups_repeated_lines(tmp_path: Path):
+    """collect_agent_logs can concatenate the same hypothesis log twice;
+    the parser must dedup by line content."""
+    p = tmp_path / "agent.log"
+    line = json.dumps({"type": "turn.completed",
+                       "usage": {"input_tokens": 1000, "output_tokens": 100,
+                                 "reasoning_output_tokens": 0}})
+    p.write_text(line + "\n" + line + "\n" + line + "\n")
+    toks_in, _toks_out, _cost = parse_codex_cost_from_log(p)
+    assert toks_in == 1000  # counted once, not three times
+
+
+# ---- opencode cost parsing --------------------------------------------
+
+
+def test_parse_opencode_cost_includes_cache_and_reasoning(tmp_path: Path):
+    """Gross input = tokens.input + cache.read + cache.write.
+    Output = tokens.output + tokens.reasoning."""
     p = tmp_path / "agent.log"
     p.write_text(
-        "not json\n"
-        + json.dumps({"type": "usage", "input_tokens": 100,
-                    "output_tokens": 50, "cost_usd": 0.01}) + "\n"
-        + "another garbage line\n"
+        json.dumps({"type": "step_finish",
+                    "part": {"tokens": {"input": 100, "output": 50,
+                                         "reasoning": 200,
+                                         "cache": {"read": 800, "write": 0}},
+                              "cost": 0}}) + "\n"
     )
-    toks_in, toks_out, cost = parse_pi_cost_from_log(p)
-    assert toks_in == 100
-    assert toks_out == 50
+    toks_in, toks_out, cost = parse_opencode_cost_from_log(p)
+    assert toks_in == 900    # 100 + 800 + 0
+    assert toks_out == 250   # 50 + 200
+    assert cost == 0.0
+
+
+def test_parse_opencode_cost_handles_missing_file(tmp_path: Path):
+    assert parse_opencode_cost_from_log(tmp_path / "absent") == (0, 0, 0.0)
 
 
 # ---- summarize_run -----------------------------------------------------
@@ -201,9 +239,12 @@ def test_summarize_run_basic(tmp_path: Path):
                     "baseline_fitness": 300.0}) + "\n"
     )
     agent = tmp_path / "agent.log"
-    agent.write_text(json.dumps({"type": "usage", "input_tokens": 1000,
-                                  "output_tokens": 200, "cost_usd": 0.5}) + "\n")
-    summary = summarize_run(log, agent)
+    agent.write_text(
+        json.dumps({"type": "turn.completed",
+                    "usage": {"input_tokens": 1000, "output_tokens": 200,
+                              "reasoning_output_tokens": 0}}) + "\n"
+    )
+    summary = summarize_run(log, agent, provider="codex")
     assert summary["iterations"] == 4
     assert summary["accepted"] == 2
     assert summary["rejected"] == 1
@@ -214,7 +255,9 @@ def test_summarize_run_basic(tmp_path: Path):
     assert summary["baseline_fitness"] == 300.0
     assert summary["delta_pct"] is not None
     assert abs(summary["delta_pct"] - (20.0 / 300.0 * 100)) < 1e-6
-    assert summary["total_cost_usd"] == 0.5
+    # codex via OAuth has no cost telemetry; just confirm it parsed.
+    assert summary["total_tokens_in"] == 1000
+    assert summary["total_tokens_out"] == 200
 
 
 def test_summarize_run_no_log(tmp_path: Path):

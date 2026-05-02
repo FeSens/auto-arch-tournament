@@ -1,4 +1,4 @@
-"""Agent-runtime abstraction: codex, claude, pi, or opencode.
+"""Agent-runtime abstraction: codex, claude, or opencode.
 
 Selected via AGENT_PROVIDER env var. Default `codex`. All runtimes are
 invoked via subprocess and stream stdout to a per-slot log file.
@@ -12,13 +12,6 @@ Claude:
   claude -p <prompt> --dangerously-skip-permissions
          --output-format stream-json --verbose [--model <m>]
 
-Pi (@mariozechner/pi-coding-agent):
-  pi -p <prompt> --mode json --model <PI_MODEL>
-     --tools read,write,edit,bash,grep,find,ls
-  Pi auto-loads any extension in <cwd>/.pi/extensions/. Model selected
-  via PI_MODEL env var, e.g. `anthropic/claude-opus-4-7` or
-  `openrouter/qwen/qwen3-coder`. API keys come from native env vars.
-
 OpenCode (sst/opencode):
   opencode run <prompt> --model <OPENCODE_MODEL> --format json
            --dangerously-skip-permissions --dir <cwd>
@@ -27,8 +20,8 @@ OpenCode (sst/opencode):
   <cwd>/opencode.json. Like Codex CLI, opencode is workflow-trained
   for verify-then-declare, so no programmatic formal-fix needed.
 
-All four produce streamed stdout. Claude's NDJSON, pi's --mode json,
-and opencode's --format json events get parsed into one-line
+All three produce streamed stdout. Claude's NDJSON and opencode's
+--format json events get parsed into one-line
 "[<provider>] Edit: file.py" prints; codex's --json events are
 similarly summarized.
 """
@@ -42,7 +35,7 @@ from pathlib import Path
 from typing import Optional
 
 
-VALID_PROVIDERS = ("codex", "claude", "pi", "opencode")
+VALID_PROVIDERS = ("codex", "claude", "opencode")
 
 # Codex's `exec` mode prints a multi-line banner before doing work — model
 # id, sandbox mode, token counters, separator dashes, etc. None of it is
@@ -165,7 +158,7 @@ def _summarize_codex_plain(s: str) -> Optional[str]:
 
 
 def get_provider() -> str:
-    """Return one of {'codex' (default), 'claude', 'pi', 'opencode'} from AGENT_PROVIDER."""
+    """Return one of {'codex' (default), 'claude', 'opencode'} from AGENT_PROVIDER."""
     p = os.environ.get("AGENT_PROVIDER", "codex").strip().lower()
     if p not in VALID_PROVIDERS:
         raise ValueError(
@@ -218,62 +211,6 @@ def _summarize_opencode_jsonl(ev: dict) -> Optional[str]:
         return _truncate(f"error: {msg}", 140)
     # Unknown — surface the type so parser drift is visible.
     return f"opencode: {et}"
-
-
-def _summarize_pi_jsonl(ev: dict) -> Optional[str]:
-    """One-liner from a pi --mode json event line.
-
-    Pi's exact event grammar isn't fully nailed down in pi-mono's docs, so
-    this parser is permissive. Recognized event types fall back to
-    `pi: <type>` so unknown shapes surface in the log instead of crashing.
-
-    Common shapes (best-effort):
-      {"type": "tool_call",       "name": "edit", "input": {...}}
-      {"type": "tool_result",     "name": "edit", ...}
-      {"type": "assistant_message", "text": "..."}
-      {"type": "thread.started"}  / "turn.started" / "turn.completed"
-      {"type": "error", "message": "..."}
-    """
-    et = ev.get("type")
-    if et in (None,
-              "thread.started", "thread.completed",
-              "turn.started", "turn.completed",
-              "tool_result"):
-        return None
-    if et == "tool_call":
-        name = ev.get("name") or ev.get("tool") or "?"
-        inp = ev.get("input") or {}
-        target = (inp.get("file_path")
-                  or inp.get("path")
-                  or inp.get("command")
-                  or inp.get("pattern")
-                  or inp.get("query")
-                  or "")
-        if isinstance(target, list):
-            target = " ".join(str(x) for x in target)
-        if isinstance(target, str) and len(target) > 100:
-            target = target[:97] + "..."
-        return f"{name}: {target}".rstrip(": ").strip()
-    if et == "assistant_message":
-        text = ev.get("text") or ev.get("message") or ""
-        if isinstance(text, str) and text.strip():
-            first = text.strip().splitlines()[0]
-            return _truncate(f"msg: {first}", 120)
-        return None
-    if et == "error":
-        msg = ev.get("message") or ev.get("error") or "unknown"
-        return _truncate(f"error: {msg}", 140)
-    if et == "usage":
-        # Per-call token/cost telemetry. Surface compactly so cost watchers
-        # can grep for it.
-        toks_in = ev.get("input_tokens") or ev.get("prompt_tokens")
-        toks_out = ev.get("output_tokens") or ev.get("completion_tokens")
-        cost = ev.get("cost_usd") or ev.get("cost")
-        if toks_in is not None or cost is not None:
-            return f"usage: in={toks_in} out={toks_out} cost={cost}"
-        return None
-    # Unknown event — surface so we know to add a handler.
-    return f"pi: {et}"
 
 
 def build_agent_cmd(
@@ -334,35 +271,9 @@ def build_agent_cmd(
             # for any debugging tools that key on argv shape.
             cmd[3:3] = ["--model", model]
         return cmd
-    if p == "pi":
-        # Pi requires a model — there's no useful default. The runner sets
-        # PI_MODEL per (model, rep) job; an explicit `model=` kwarg
-        # overrides for tests/manual use.
-        pi_model = model or os.environ.get("PI_MODEL", "").strip()
-        if not pi_model:
-            raise ValueError(
-                "pi runtime requires PI_MODEL env var or model= kwarg "
-                "(e.g. 'anthropic/claude-opus-4-7', 'openrouter/qwen/qwen3-coder')"
-            )
-        cmd = [
-            "pi", "-p", prompt,
-            "--mode", "json",
-            "--model", pi_model,
-            "--tools", "read,write,edit,bash,grep,find,ls",
-        ]
-        # PI_SESSION_DIR (if set) is forwarded as --session-dir so the
-        # bench runner can isolate per-clone session storage WITHOUT
-        # also isolating ~/.pi/agent/auth.json (which it would if we
-        # set the broader PI_CODING_AGENT_DIR). Sharing auth.json across
-        # clones is required for OAuth-subscription providers (Codex,
-        # Claude Pro, Copilot) where the user logs in once globally.
-        session_dir = os.environ.get("PI_SESSION_DIR", "").strip()
-        if session_dir:
-            cmd += ["--session-dir", session_dir]
-        return cmd
     if p == "opencode":
         # Opencode reads its model from --model; OPENCODE_MODEL env var
-        # is the bench-runner convention. Like pi, no useful default.
+        # is the bench-runner convention. No useful default.
         opencode_model = model or os.environ.get("OPENCODE_MODEL", "").strip()
         if not opencode_model:
             raise ValueError(
@@ -440,18 +351,6 @@ def summarize_event(line: str, provider: Optional[str] = None) -> Optional[str]:
         except json.JSONDecodeError:
             return _summarize_codex_plain(s)
         return _summarize_codex_jsonl(ev)
-    if p == "pi":
-        s = line.rstrip("\n")
-        if not s.strip():
-            return None
-        try:
-            ev = json.loads(s)
-        except json.JSONDecodeError:
-            # Plain-text line (banner, stack trace, etc). Trim and echo.
-            if len(s) > 140:
-                s = s[:137] + "..."
-            return s.strip() or None
-        return _summarize_pi_jsonl(ev)
     if p == "opencode":
         s = line.rstrip("\n")
         if not s.strip():
