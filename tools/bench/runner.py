@@ -88,17 +88,9 @@ def load_models(path: Path) -> list[ModelEntry]:
     cfg = yaml.safe_load(path.read_text())
     out: list[ModelEntry] = []
     for m in cfg.get("models", []):
-        # Accept both `model` (canonical) and `pi_model` (legacy alias
-        # from the pi-runtime era). YAMLs migrated incrementally; reject
-        # entries with neither.
-        model = m.get("model") or m.get("pi_model")
-        if not model:
-            raise ValueError(
-                f"{path}: model entry {m.get('name', '?')!r} has no `model` field"
-            )
         out.append(ModelEntry(
             name=m["name"],
-            model=model,
+            model=m["model"],
             key_env=m.get("key_env", "") or "",
             oauth=bool(m.get("oauth", False)),
             provider=m.get("provider", "codex"),

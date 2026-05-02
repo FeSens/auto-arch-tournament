@@ -29,11 +29,11 @@ from tools.bench.runner import (
 # ---- model loading -----------------------------------------------------
 
 
-def _write_models_yaml(p: Path, n: int, *, key: str = "model") -> None:
+def _write_models_yaml(p: Path, n: int) -> None:
     lines = ["models:"]
     for i in range(n):
         lines.append(f"  - name: m{i}")
-        lines.append(f"    {key}: prov{i}/m{i}")
+        lines.append(f"    model: prov{i}/m{i}")
         lines.append(f"    key_env: KEY{i}")
     p.write_text("\n".join(lines) + "\n")
 
@@ -46,15 +46,6 @@ def test_load_models_round_trip(tmp_path: Path):
     assert out[0].name == "m0"
     assert out[0].model == "prov0/m0"
     assert out[0].key_env == "KEY0"
-
-
-def test_load_models_accepts_legacy_pi_model_alias(tmp_path: Path):
-    """Older YAMLs still use `pi_model:` — load_models should accept it."""
-    p = tmp_path / "models.yaml"
-    _write_models_yaml(p, 2, key="pi_model")
-    out = load_models(p)
-    assert out[0].model == "prov0/m0"
-    assert out[1].model == "prov1/m1"
 
 
 def test_load_models_empty_raises(tmp_path: Path):
