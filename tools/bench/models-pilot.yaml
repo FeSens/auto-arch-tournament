@@ -1,19 +1,34 @@
-# NeurIPS pilot run — Opus 4.7 (new) + gpt-5.5 (preserved).
+# NeurIPS pilot run — preserved entries + next-batch slots.
 #
-# gpt-5.5 has 3 reps already in bench/pilot/results.jsonl
-# (+51%/+51%/+29%); load_done_set skips them on retry, so it stays
-# in the YAML for leaderboard layout without re-running.
+# Prior pilot rows in bench/pilot/results.jsonl (skipped on retry by
+# load_done_set):
+#   - gpt-5.5 ×3  (+50.89% / +50.85% / +28.96%)
+#   - opus-4.7-rep1 (failed +30.17%, killed by cross-rep pkill at iter 7)
+#   - opus-4.7-rep2 (done +38.04%)
+#   - opus-4.7-rep3 (done +28.88%)
 #
-# opus-4.7 is the only model this round will actually execute.
-# All routed via opencode → OpenRouter (auth: OPENROUTER_API_KEY
-# in ~/.bench-keys.env, picked up by opencode). xhigh effort.
+# `variant:` field plumbs through to the runtime as either
+# OPENCODE_VARIANT or CODEX_REASONING_EFFORT depending on provider.
+# - OpenAI-routed models accept xhigh.
+# - Anthropic / Google routes only accept low/medium/high (opencode
+#   silently drops xhigh for these — the cause of opus reps shipping
+#   at default reasoning instead of the pre-registered high effort).
+# Routing: opencode → OpenRouter for non-OpenAI entries
+# (auth: OPENROUTER_API_KEY in ~/.bench-keys.env).
 
 models:
   - name: opus-4_7
     provider: opencode
     model: openrouter/anthropic/claude-opus-4.7
+    variant: high
+    oauth: true
+  - name: gemini-3_1-pro
+    provider: opencode
+    model: openrouter/google/gemini-3.1-pro-preview
+    variant: high
     oauth: true
   - name: gpt-5_5
     provider: opencode
     model: openai/gpt-5.5
+    variant: xhigh
     oauth: true
