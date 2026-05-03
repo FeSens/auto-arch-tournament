@@ -10,11 +10,19 @@
 # `variant:` field plumbs through to the runtime as either
 # OPENCODE_VARIANT or CODEX_REASONING_EFFORT depending on provider.
 # - OpenAI-routed models accept xhigh.
-# - Anthropic / Google routes only accept low/medium/high (opencode
-#   silently drops xhigh for these — the cause of opus reps shipping
-#   at default reasoning instead of the pre-registered high effort).
-# Routing: opencode → OpenRouter for non-OpenAI entries
-# (auth: OPENROUTER_API_KEY in ~/.bench-keys.env).
+# - Anthropic / Google / Moonshot routes only accept low/medium/high
+#   (opencode silently drops xhigh on these — the cause of the v11
+#   opus reps shipping at default reasoning instead of pre-registered
+#   high effort).
+#
+# Routing notes:
+# - opus-4.7, gemini-3.1-pro: OpenRouter via OPENROUTER_API_KEY.
+# - kimi-k2.6: opencode-go (the user's "Zen" route — the OpenCode Go
+#   API key in ~/.local/share/opencode/auth.json gates this).
+# - gpt-5.5, gpt-5.3-codex: OpenAI direct via OAuth.
+# - gpt-5.3-codex-spark is NOT included: the dedicated `opencode/`
+#   provider Spark hosting isn't reachable from this install ("Model
+#   not found"). Plain gpt-5.3-codex via openai/ stands in.
 
 models:
   - name: opus-4_7
@@ -26,6 +34,16 @@ models:
     provider: opencode
     model: openrouter/google/gemini-3.1-pro-preview
     variant: high
+    oauth: true
+  - name: kimi-k2_6
+    provider: opencode
+    model: opencode-go/kimi-k2.6
+    variant: high
+    oauth: true
+  - name: gpt-5_3-codex
+    provider: opencode
+    model: openai/gpt-5.3-codex
+    variant: xhigh
     oauth: true
   - name: gpt-5_5
     provider: opencode
