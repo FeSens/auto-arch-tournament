@@ -69,6 +69,12 @@ class ModelEntry:
     oauth: bool = False
     # Agent runtime to use. One of "codex", "opencode", "claude".
     provider: str = "codex"
+    # Per-model reasoning effort override. None = use the runtime's
+    # default (xhigh for both opencode and codex). For opencode this
+    # maps to --variant; for codex it maps to model_reasoning_effort.
+    # Set explicitly to "high" for Anthropic/Google routes that don't
+    # accept xhigh (opencode silently drops the unknown variant).
+    variant: str | None = None
 
 
 @dataclass
@@ -94,6 +100,7 @@ def load_models(path: Path) -> list[ModelEntry]:
             key_env=m.get("key_env", "") or "",
             oauth=bool(m.get("oauth", False)),
             provider=m.get("provider", "codex"),
+            variant=m.get("variant"),
         ))
     if not out:
         raise ValueError(f"{path}: no models defined")
@@ -414,10 +421,14 @@ def make_env_for_job(job: JobSpec, clone: Path, keys: dict[str, str]) -> dict[st
         # Codex CLI: workspace-write sandbox + clone isolation.
         env["AGENT_PROVIDER"] = "codex"
         env["CODEX_MODEL"] = job.model.model
+        if job.model.variant is not None:
+            env["CODEX_REASONING_EFFORT"] = job.model.variant
     elif job.model.provider == "opencode":
         # Opencode: per-clone opencode.json permission rules.
         env["AGENT_PROVIDER"] = "opencode"
         env["OPENCODE_MODEL"] = job.model.model
+        if job.model.variant is not None:
+            env["OPENCODE_VARIANT"] = job.model.variant
     elif job.model.provider == "claude":
         # Claude CLI: --dangerously-skip-permissions + clone isolation.
         env["AGENT_PROVIDER"] = "claude"
