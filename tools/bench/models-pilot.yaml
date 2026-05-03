@@ -1,20 +1,16 @@
-# NeurIPS pilot run — gemini-3.1-pro retry + kimi-k2.6 batch.
+# NeurIPS pilot run — gpt-5.4-mini + kimi-k2.6 batch.
 #
 # Prior pilot rows in bench/pilot/results.jsonl (skipped on retry):
 #   - gpt-5.5 ×3        (+50.89% / +50.85% / +28.96%)
 #   - opus-4.7 rep1/2/3 (failed+30 / done+38 / done+29)
 #
-# Per user directive: every OpenRouter-routed entry uses variant=xhigh.
-# (kimi-k2.6 is on opencode-go, not OpenRouter — variant=high.)
-# (gpt-5.5 is OpenAI direct, not OpenRouter — variant=xhigh per the
-#  pre-registered methodology.)
+# gemini-3.1-pro dropped from this YAML — at variant=high it dies at
+# 964s (Bun runtime cap); at variant=xhigh it survives but fails
+# 100% of slots at hypothesis-gen / sandbox stage.
 #
-# Note on the previous gemini failures (v12):
-# Bun runtime caps fetch idleTimeout at 960s; both gemini-rep1 and
-# gemini-rep2 died at exactly 964s with "make: *** [loop] Terminated:
-# 15". This is unrelated to variant choice — it's a streaming-idle
-# limit. Retrying with xhigh as requested; if same 964s death pattern
-# appears, gemini-3.1-pro is not viable on this opencode build.
+# Variant rule: OpenRouter routes use xhigh per user directive;
+# OpenAI-direct also xhigh; opencode-go (kimi) uses high (it's not
+# routed via OpenRouter).
 
 models:
   - name: opus-4_7
@@ -22,9 +18,9 @@ models:
     model: openrouter/anthropic/claude-opus-4.7
     variant: xhigh
     oauth: true
-  - name: gemini-3_1-pro
+  - name: gpt-5_4-mini
     provider: opencode
-    model: openrouter/google/gemini-3.1-pro-preview
+    model: openai/gpt-5.4-mini
     variant: xhigh
     oauth: true
   - name: kimi-k2_6
