@@ -1,28 +1,20 @@
-# NeurIPS pilot run — preserved entries + next-batch slots.
+# NeurIPS pilot run — gemini-3.1-pro + kimi-k2.6 batch.
 #
-# Prior pilot rows in bench/pilot/results.jsonl (skipped on retry by
-# load_done_set):
-#   - gpt-5.5 ×3  (+50.89% / +50.85% / +28.96%)
-#   - opus-4.7-rep1 (failed +30.17%, killed by cross-rep pkill at iter 7)
-#   - opus-4.7-rep2 (done +38.04%)
-#   - opus-4.7-rep3 (done +28.88%)
+# Prior pilot rows in bench/pilot/results.jsonl (skipped by
+# load_done_set on retry — kept in this YAML so the leaderboard
+# layout still includes them):
+#   - gpt-5.5 ×3        (+50.89% / +50.85% / +28.96%, OpenAI/OAuth)
+#   - opus-4.7-rep1     (failed +30.17%, killed by cross-rep pkill at iter 7)
+#   - opus-4.7-rep2     (done +38.04%)
+#   - opus-4.7-rep3     (done +28.88%)
 #
-# `variant:` field plumbs through to the runtime as either
-# OPENCODE_VARIANT or CODEX_REASONING_EFFORT depending on provider.
-# - OpenAI-routed models accept xhigh.
-# - Anthropic / Google / Moonshot routes only accept low/medium/high
-#   (opencode silently drops xhigh on these — the cause of the v11
-#   opus reps shipping at default reasoning instead of pre-registered
-#   high effort).
+# This run will execute:
+#   - gemini-3.1-pro ×3 (OpenRouter, variant=high)
+#   - kimi-k2.6 ×3      (opencode-go aka Zen-Go, variant=high)
 #
-# Routing notes:
-# - opus-4.7, gemini-3.1-pro: OpenRouter via OPENROUTER_API_KEY.
-# - kimi-k2.6: opencode-go (the user's "Zen" route — the OpenCode Go
-#   API key in ~/.local/share/opencode/auth.json gates this).
-# - gpt-5.5, gpt-5.3-codex: OpenAI direct via OAuth.
-# - gpt-5.3-codex-spark is NOT included: the dedicated `opencode/`
-#   provider Spark hosting isn't reachable from this install ("Model
-#   not found"). Plain gpt-5.3-codex via openai/ stands in.
+# `variant:` plumbs through to OPENCODE_VARIANT (or
+# CODEX_REASONING_EFFORT for codex provider). xhigh is OpenAI-only;
+# Anthropic/Google/Moonshot routes accept low/medium/high.
 
 models:
   - name: opus-4_7
@@ -39,11 +31,6 @@ models:
     provider: opencode
     model: opencode-go/kimi-k2.6
     variant: high
-    oauth: true
-  - name: gpt-5_3-codex
-    provider: opencode
-    model: openai/gpt-5.3-codex
-    variant: xhigh
     oauth: true
   - name: gpt-5_5
     provider: opencode
