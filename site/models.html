@@ -61,13 +61,6 @@
         <td><span class="mono">high</span></td>
         <td>scheduled</td>
       </tr>
-      <tr>
-        <td><span class="model-name">GPT-5.6 Terra</span></td>
-        <td><code>gpt-5_6-terra</code></td>
-        <td><code>codex:gpt-5.6-terra</code></td>
-        <td><span class="mono">high</span></td>
-        <td>2 of 3 recorded</td>
-      </tr>
     </tbody>
   </table>
   </div>
@@ -170,8 +163,8 @@
 
   <div class="stats">
     <div class="stat"><div class="label">Best</div><div class="value">515.70</div><div class="sub">+82.3% vs baseline</div></div>
-    <div class="stat"><div class="label">Mean</div><div class="value">473.1</div><div class="sub">+67.3% mean Δ</div></div>
-    <div class="stat"><div class="label">Reps</div><div class="value">2/2</div><div class="sub">completed / total</div></div>
+    <div class="stat"><div class="label">Mean</div><div class="value">442.3</div><div class="sub">+56.4% mean Δ</div></div>
+    <div class="stat"><div class="label">Reps</div><div class="value">3/3</div><div class="sub">completed / total</div></div>
   </div>
 
   <div class="wide">
@@ -209,11 +202,22 @@
         <td class="num">8</td>
         <td class="num">3.7h</td>
       </tr>
+      <tr>
+        <td>rep3</td>
+        <td>done</td>
+        <td class="num">380.62</td>
+        <td class="num">+34.6%</td>
+        <td class="num">7,729</td>
+        <td class="num">158</td>
+        <td class="num">7</td>
+        <td class="num">13</td>
+        <td class="num">1.1h</td>
+      </tr>
     </tbody>
   </table>
   </div>
 
-  <p class="prose"><strong>Broken classes (all reps combined):</strong> <code>formal_failed</code>×16, <code>cosim_failed</code>×7, <code>build_failed</code>×3</p>
+  <p class="prose"><strong>Broken classes (all reps combined):</strong> <code>formal_failed</code>×27, <code>cosim_failed</code>×9, <code>build_failed</code>×3</p>
 
   <div class="prose">
   <h3>rep1 , winning hypotheses</h3>
@@ -231,6 +235,15 @@
 <dt>R4 · Opcode-biased static loop prediction</dt><dd>fitness <span class="mono">365.65</span> (<span class="mono">+1.1%</span>) · area <span class="mono">9.8k</span> LUT4 · Fmax <span class="mono">148 MHz</span></dd>
 <dt>R8 · Class-partitioned ALU control</dt><dd>fitness <span class="mono">390.78</span> (<span class="mono">+6.9%</span>) · area <span class="mono">10.6k</span> LUT4 · Fmax <span class="mono">158 MHz</span></dd>
 <dt>R9 · Fine-grained base ALU partition</dt><dd>fitness <span class="mono">515.70</span> (<span class="mono">+32.0%</span>) · area <span class="mono">10.5k</span> LUT4 · Fmax <span class="mono">209 MHz</span></dd>
+</dl>
+<h3>rep3 , winning hypotheses</h3>
+<dl class="defs">
+<dt>R1 · Compact direct branch predictor</dt><dd>fitness <span class="mono">316.16</span> (<span class="mono">+11.8%</span>) · area <span class="mono">10.6k</span> LUT4 · Fmax <span class="mono">133 MHz</span></dd>
+<dt>R3 · Decode-stage branch resolution</dt><dd>fitness <span class="mono">344.27</span> (<span class="mono">+8.9%</span>) · area <span class="mono">10.5k</span> LUT4 · Fmax <span class="mono">143 MHz</span></dd>
+<dt>R5 · Decode-stage BHT training</dt><dd>fitness <span class="mono">345.35</span> (<span class="mono">+0.3%</span>) · area <span class="mono">10.7k</span> LUT4 · Fmax <span class="mono">143 MHz</span></dd>
+<dt>R6 · Shared magnitude divide datapath</dt><dd>fitness <span class="mono">348.63</span> (<span class="mono">+0.9%</span>) · area <span class="mono">8.0k</span> LUT4 · Fmax <span class="mono">145 MHz</span></dd>
+<dt>R8 · JAL-only fetch predictor</dt><dd>fitness <span class="mono">353.60</span> (<span class="mono">+1.4%</span>) · area <span class="mono">8.1k</span> LUT4 · Fmax <span class="mono">147 MHz</span></dd>
+<dt>R11 · Aligned decode-stage JAL steering</dt><dd>fitness <span class="mono">380.62</span> (<span class="mono">+7.6%</span>) · area <span class="mono">7.7k</span> LUT4 · Fmax <span class="mono">158 MHz</span></dd>
 </dl>
   </div>
 </section>

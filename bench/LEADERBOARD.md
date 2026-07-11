@@ -9,9 +9,9 @@ Best LUT4 / Fmax / IPC are the FPGA-side detail of the **best rep's best entry**
 | Model | Reps | Fitness mean ± std | Best | LUT4 | Fmax MHz | IPC | acc | rej | brk | Iters→best | Pass-rate | $ cost | s/iter |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | `gpt-5_4_xhigh` | 3/3 | 485.8 ± 28.1 | 513.8 | 10108 | 203.3 | 2.53 | 5.0 | 27.7 | 10.7 | 19.7 | 11% | $0.00 | 775 |
-| `gpt-5_6-terra` | 2/2 | 473.1 ± 42.6 | 515.7 | 10525 | 208.5 | 2.47 | 6.0 | 26.0 | 13.0 | 23.0 | 13% | $0.00 | 284 |
 | `gpt-5_5_xhigh` | 3/3 | 468.3 ± 52.8 | 525.0 | 5453 | 220.2 | 2.38 | 5.7 | 37.7 | 2.0 | 28.3 | 12% | $0.00 | 478 |
 | `gpt-5_6-luna` | 3/3 | 452.0 ± 29.0 | 480.9 | 10135 | 208.7 | 2.30 | 3.7 | 26.7 | 14.0 | 18.3 | 8% | $0.00 | 388 |
+| `gpt-5_6-terra` | 3/3 | 442.3 ± 55.8 | 515.7 | 10525 | 208.5 | 2.47 | 6.3 | 25.3 | 13.0 | 26.7 | 14% | $0.00 | 219 |
 | `gpt-5_5_high` | 3/3 | 430.2 ± 23.0 | 461.9 | 9807 | 187.3 | 2.47 | 6.3 | 36.7 | 3.0 | 31.3 | 14% | $0.00 | 578 |
 | `gpt-5_5_medium` | 3/3 | 423.5 ± 11.2 | 431.6 | 7803 | 200.6 | 2.15 | 5.3 | 32.3 | 7.7 | 36.0 | 12% | $0.00 | 513 |
 | `gpt-5_4-mini` | 3/3 | 362.3 ± 23.7 | 395.5 | 10230 | 186.6 | 2.12 | 5.3 | 18.0 | 22.7 | 38.7 | 12% | $0.00 | 1973 |
@@ -33,14 +33,6 @@ Counts each model's broken iterations grouped by the orchestrator's broken-class
 | `cosim_failed` | 13 |
 | `hypothesis_gen_failed` | 3 |
 
-### `gpt-5_6-terra`
-
-| Class | Count |
-|---|---|
-| `formal_failed` | 16 |
-| `cosim_failed` | 7 |
-| `build_failed` | 3 |
-
 ### `gpt-5_5_xhigh`
 
 | Class | Count |
@@ -56,6 +48,14 @@ Counts each model's broken iterations grouped by the orchestrator's broken-class
 | `cosim_failed` | 14 |
 | `build_failed` | 1 |
 | `hypothesis_gen_failed` | 1 |
+
+### `gpt-5_6-terra`
+
+| Class | Count |
+|---|---|
+| `formal_failed` | 27 |
+| `cosim_failed` | 9 |
+| `build_failed` | 3 |
 
 ### `gpt-5_5_high`
 
@@ -140,6 +140,7 @@ Every `(model, rep)` row from `bench/results.jsonl`, before per-model aggregatio
 | `gpt-5_6-luna` | 3 | done | 46 | 3 | 28 | 13 | 282.8 → 412.4 | 46% | 412.4 | 7500 | 185.2 | 2.23 | 295.3 |
 | `gpt-5_6-terra` | 1 | done | 46 | 5 | 23 | 18 | 282.8 → 430.4 | 52% | 430.4 | 5763 | 193.3 | 2.23 | 214.6 |
 | `gpt-5_6-terra` | 2 | done | 46 | 7 | 29 | 8 | 282.8 → 515.7 | 82% | 515.7 | 10525 | 208.5 | 2.47 | 220.3 |
+| `gpt-5_6-terra` | 3 | done | 46 | 7 | 24 | 13 | 282.8 → 380.6 | 35% | 380.6 | 7729 | 157.9 | 2.41 | 68.2 |
 | `kimi-k2_6` | 1 | done | 46 | 3 | 20 | 23 | 282.8 → 347.8 | 23% | 347.8 | 10254 | 146.2 | 2.38 | 542.5 |
 | `kimi-k2_6` | 2 | done | 46 | 3 | 17 | 26 | 282.8 → 331.2 | 17% | 331.2 | 10038 | 140.6 | 2.36 | 515.6 |
 | `kimi-k2_6` | 3 | failed | 31 | 4 | 13 | 14 | 282.8 → 396.1 | 40% | 396.1 | 9927 | 165.5 | 2.39 | 531.2 |
@@ -312,6 +313,15 @@ Each model's accepted-improvement entries (the hypotheses that actually moved th
 - **Opcode-biased static loop prediction** — fitness 365.6 (+1.1%) _predictor_ R4 — LUT4 9780, 147.8 MHz
 - **Class-partitioned ALU control** — fitness 390.8 (+6.9%) _micro_opt_ R8 — LUT4 10620, 158.0 MHz
 - **Fine-grained base ALU partition** — fitness 515.7 (+32.0%) _micro_opt_ R9 — LUT4 10525, 208.5 MHz
+
+### `gpt-5_6-terra` rep 3
+
+- **Compact direct branch predictor** — fitness 316.2 (+11.8%) _predictor_ R1 — LUT4 10561, 133.4 MHz
+- **Decode-stage branch resolution** — fitness 344.3 (+8.9%) _structural_ R3 — LUT4 10518, 142.8 MHz
+- **Decode-stage BHT training** — fitness 345.4 (+0.3%) _predictor_ R5 — LUT4 10700, 143.3 MHz
+- **Shared magnitude divide datapath** — fitness 348.6 (+0.9%) _micro_opt_ R6 — LUT4 8005, 144.6 MHz
+- **JAL-only fetch predictor** — fitness 353.6 (+1.4%) _predictor_ R8 — LUT4 8082, 146.7 MHz
+- **Aligned decode-stage JAL steering** — fitness 380.6 (+7.6%) _predictor_ R11 — LUT4 7729, 157.9 MHz
 
 ### `kimi-k2_6` rep 1
 
