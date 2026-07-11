@@ -1,0 +1,32 @@
+{
+  "model": "gpt-5_6-sol",
+  "rep": 1,
+  "started_at": "2026-07-11T18:54:29+00:00",
+  "ended_at": null,
+  "wall_clock_sec": null,
+  "iterations": 46,
+  "accepted": 7,
+  "rejected": 30,
+  "broken": 8,
+  "final_fitness": 470.8,
+  "baseline_fitness": 282.82,
+  "best_fitness": 470.8,
+  "best_round": 46,
+  "delta_pct": 66.46630365603565,
+  "total_tokens_in": 19369775,
+  "total_tokens_out": 252038,
+  "total_cost_usd": 0.0,
+  "orchestrator_exit": 0,
+  "status": "done",
+  "notes": "",
+  "broken_by_class": {
+    "formal_failed": 4,
+    "cosim_failed": 4
+  },
+  "best_lut4": 10168,
+  "best_ff": 1929,
+  "best_fmax_mhz": 199.92,
+  "best_iterations": 10,
+  "best_cycles": 4246355,
+  "best_ipc_coremark": 2e-06
+}

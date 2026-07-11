@@ -9,6 +9,7 @@ Best LUT4 / Fmax / IPC are the FPGA-side detail of the **best rep's best entry**
 | Model | Reps | Fitness mean ± std | Best | LUT4 | Fmax MHz | IPC | acc | rej | brk | Iters→best | Pass-rate | $ cost | s/iter |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | `gpt-5_4_xhigh` | 3/3 | 485.8 ± 28.1 | 513.8 | 10108 | 203.3 | 2.53 | 5.0 | 27.7 | 10.7 | 19.7 | 11% | $0.00 | 775 |
+| `gpt-5_6-sol` | 1/1 | 470.8 ± 0.0 | 470.8 | 10168 | 199.9 | 2.35 | 7.0 | 30.0 | 8.0 | 46.0 | 15% | $0.00 | 114 |
 | `gpt-5_5_xhigh` | 3/3 | 468.3 ± 52.8 | 525.0 | 5453 | 220.2 | 2.38 | 5.7 | 37.7 | 2.0 | 28.3 | 12% | $0.00 | 478 |
 | `gpt-5_6-luna` | 3/3 | 452.0 ± 29.0 | 480.9 | 10135 | 208.7 | 2.30 | 3.7 | 26.7 | 14.0 | 18.3 | 8% | $0.00 | 388 |
 | `gpt-5_6-terra` | 3/3 | 442.3 ± 55.8 | 515.7 | 10525 | 208.5 | 2.47 | 6.3 | 25.3 | 13.0 | 26.7 | 14% | $0.00 | 219 |
@@ -32,6 +33,13 @@ Counts each model's broken iterations grouped by the orchestrator's broken-class
 | `formal_failed` | 16 |
 | `cosim_failed` | 13 |
 | `hypothesis_gen_failed` | 3 |
+
+### `gpt-5_6-sol`
+
+| Class | Count |
+|---|---|
+| `cosim_failed` | 4 |
+| `formal_failed` | 4 |
 
 ### `gpt-5_5_xhigh`
 
@@ -138,6 +146,7 @@ Every `(model, rep)` row from `bench/results.jsonl`, before per-model aggregatio
 | `gpt-5_6-luna` | 1 | done | 46 | 3 | 20 | 21 | 282.8 → 462.6 | 64% | 462.6 | 10155 | 201.2 | 2.30 | 293.7 |
 | `gpt-5_6-luna` | 2 | done | 46 | 5 | 32 | 8 | 282.8 → 480.9 | 70% | 480.9 | 10135 | 208.7 | 2.30 | 302.9 |
 | `gpt-5_6-luna` | 3 | done | 46 | 3 | 28 | 13 | 282.8 → 412.4 | 46% | 412.4 | 7500 | 185.2 | 2.23 | 295.3 |
+| `gpt-5_6-sol` | 1 | done | 46 | 7 | 30 | 8 | 282.8 → 470.8 | 66% | 470.8 | 10168 | 199.9 | 2.35 | 87.8 |
 | `gpt-5_6-terra` | 1 | done | 46 | 5 | 23 | 18 | 282.8 → 430.4 | 52% | 430.4 | 5763 | 193.3 | 2.23 | 214.6 |
 | `gpt-5_6-terra` | 2 | done | 46 | 7 | 29 | 8 | 282.8 → 515.7 | 82% | 515.7 | 10525 | 208.5 | 2.47 | 220.3 |
 | `gpt-5_6-terra` | 3 | done | 46 | 7 | 24 | 13 | 282.8 → 380.6 | 35% | 380.6 | 7729 | 157.9 | 2.41 | 68.2 |
@@ -297,6 +306,15 @@ Each model's accepted-improvement entries (the hypotheses that actually moved th
 
 - **Fast-path ALU with selective M arithmetic** — fitness 406.9 (+43.9%) _micro_opt_ R1 — LUT4 7513, 182.8 MHz
 - **Shared branch compare flag cone** — fitness 412.4 (+1.4%) _micro_opt_ R10 — LUT4 7500, 185.2 MHz
+
+### `gpt-5_6-sol` rep 1
+
+- **Share one multiplier across all RV32M multiply variants** — fitness 404.7 (+43.1%) _micro_opt_ R1 — LUT4 10073, 181.8 MHz
+- **One-entry taken-target instruction replay buffer** — fitness 406.6 (+0.5%) _predictor_ R3 — LUT4 10508, 172.7 MHz
+- **Explicit memory byte-lane selection** — fitness 431.9 (+6.2%) _micro_opt_ R4 — LUT4 10435, 183.4 MHz
+- **Target-only replay-buffer tag** — fitness 463.9 (+7.4%) _micro_opt_ R8 — LUT4 10217, 197.0 MHz
+- **Protocol-qualified replay fill capture** — fitness 467.9 (+0.9%) _predictor_ R13 — LUT4 10292, 198.7 MHz
+- **Protocol-qualified in-place replay refill** — fitness 470.8 (+0.6%) _predictor_ R15 — LUT4 10168, 199.9 MHz
 
 ### `gpt-5_6-terra` rep 1
 

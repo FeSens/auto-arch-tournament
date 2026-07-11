@@ -59,7 +59,7 @@
         <td><code>gpt-5_6-sol</code></td>
         <td><code>codex:gpt-5.6-sol</code></td>
         <td><span class="mono">high</span></td>
-        <td>scheduled</td>
+        <td>1 of 3 recorded</td>
       </tr>
     </tbody>
   </table>
@@ -416,6 +416,60 @@
 <dl class="defs">
 <dt>R1 · Fast-path ALU with selective M arithmetic</dt><dd>fitness <span class="mono">406.88</span> (<span class="mono">+43.9%</span>) · area <span class="mono">7.5k</span> LUT4 · Fmax <span class="mono">183 MHz</span></dd>
 <dt>R10 · Shared branch compare flag cone</dt><dd>fitness <span class="mono">412.38</span> (<span class="mono">+1.4%</span>) · area <span class="mono">7.5k</span> LUT4 · Fmax <span class="mono">185 MHz</span></dd>
+</dl>
+  </div>
+</section>
+
+
+<section class="section" id="gpt-5_6-sol">
+  <div class="eyebrow">gpt-5_6-sol</div>
+  <h2>gpt 5 6 sol</h2>
+
+  <div class="stats">
+    <div class="stat"><div class="label">Best</div><div class="value">470.80</div><div class="sub">+66.5% vs baseline</div></div>
+    <div class="stat"><div class="label">Mean</div><div class="value">470.8</div><div class="sub">+66.5% mean Δ</div></div>
+    <div class="stat"><div class="label">Reps</div><div class="value">1/1</div><div class="sub">completed / total</div></div>
+  </div>
+
+  <div class="wide">
+  <table class="bench">
+    <caption>per-rep detail</caption>
+    <thead>
+      <tr>
+        <th>Rep</th><th>Status</th>
+        <th class="num">Best</th><th class="num">Δ%</th>
+        <th class="num">Area (LUT4)</th><th class="num">Fmax (MHz)</th>
+        <th class="num">acc</th><th class="num">brk</th>
+        <th class="num">Wall</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>rep1</td>
+        <td>done</td>
+        <td class="num">470.80</td>
+        <td class="num">+66.5%</td>
+        <td class="num">10,168</td>
+        <td class="num">200</td>
+        <td class="num">7</td>
+        <td class="num">8</td>
+        <td class="num">1.5h</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p class="prose"><strong>Broken classes (all reps combined):</strong> <code>formal_failed</code>×4, <code>cosim_failed</code>×4</p>
+
+  <div class="prose">
+  <h3>rep1 , winning hypotheses</h3>
+<dl class="defs">
+<dt>R1 · Share one multiplier across all RV32M multiply variants</dt><dd>fitness <span class="mono">404.74</span> (<span class="mono">+43.1%</span>) · area <span class="mono">10.1k</span> LUT4 · Fmax <span class="mono">182 MHz</span></dd>
+<dt>R3 · One-entry taken-target instruction replay buffer</dt><dd>fitness <span class="mono">406.58</span> (<span class="mono">+0.5%</span>) · area <span class="mono">10.5k</span> LUT4 · Fmax <span class="mono">173 MHz</span></dd>
+<dt>R4 · Explicit memory byte-lane selection</dt><dd>fitness <span class="mono">431.88</span> (<span class="mono">+6.2%</span>) · area <span class="mono">10.4k</span> LUT4 · Fmax <span class="mono">183 MHz</span></dd>
+<dt>R8 · Target-only replay-buffer tag</dt><dd>fitness <span class="mono">463.86</span> (<span class="mono">+7.4%</span>) · area <span class="mono">10.2k</span> LUT4 · Fmax <span class="mono">197 MHz</span></dd>
+<dt>R13 · Protocol-qualified replay fill capture</dt><dd>fitness <span class="mono">467.91</span> (<span class="mono">+0.9%</span>) · area <span class="mono">10.3k</span> LUT4 · Fmax <span class="mono">199 MHz</span></dd>
+<dt>R15 · Protocol-qualified in-place replay refill</dt><dd>fitness <span class="mono">470.80</span> (<span class="mono">+0.6%</span>) · area <span class="mono">10.2k</span> LUT4 · Fmax <span class="mono">200 MHz</span></dd>
 </dl>
   </div>
 </section>
