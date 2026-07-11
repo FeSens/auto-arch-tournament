@@ -21,8 +21,8 @@
     <li><a href="data.html">Data</a></li>
   </ul>
   <div class="meta">
-    <a href="https://github.com/FeSens/auto-arch-tournament" class="repo" aria-label="HWE Bench source on GitHub, click to view repo and star">github <span class="star">★</span> <span class="star-count">118</span></a>
-    <span class="version">v1 · 2026-05</span>
+    <a href="https://github.com/FeSens/auto-arch-tournament" class="repo" aria-label="HWE Bench source on GitHub, click to view repo and star">github <span class="star">★</span> <span class="star-count">129</span></a>
+    <span class="version">v1 · 2026-07</span>
   </div>
 </nav>
 
@@ -35,6 +35,44 @@
     LUT4, and Fmax. The hypothesis titles are exactly what the agent wrote.
   </p>
 </section>
+
+<section class="section" id="gpt-5-6-field">
+  <div class="eyebrow">Scheduled field</div>
+  <h2>GPT-5.6 preview trio</h2>
+  <p class="prose">
+    Sol, Terra, and Luna will each run three independent reps under the same
+    <span class="mono">high</span> reasoning budget. Results move into the
+    leaderboard and per-model detail automatically as each rep completes.
+  </p>
+  <div class="wide">
+  <table class="bench">
+    <caption>High reasoning only · N=3 reps per model</caption>
+    <thead>
+      <tr>
+        <th>Model</th><th>Result ID</th><th>Runtime model</th>
+        <th>Reasoning</th><th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="model-name">GPT-5.6 Sol</span></td>
+        <td><code>gpt-5_6-sol</code></td>
+        <td><code>codex:gpt-5.6-sol</code></td>
+        <td><span class="mono">high</span></td>
+        <td>scheduled</td>
+      </tr>
+      <tr>
+        <td><span class="model-name">GPT-5.6 Terra</span></td>
+        <td><code>gpt-5_6-terra</code></td>
+        <td><code>codex:gpt-5.6-terra</code></td>
+        <td><span class="mono">high</span></td>
+        <td>2 of 3 recorded</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
 
 <section class="section" id="gpt-5_5_xhigh">
   <div class="eyebrow">gpt-5_5_xhigh</div>
@@ -64,7 +102,7 @@
         <td>done</td>
         <td class="num">397.83</td>
         <td class="num">+40.7%</td>
-        <td class="num">6.1k</td>
+        <td class="num">6,052</td>
         <td class="num">182</td>
         <td class="num">5</td>
         <td class="num">2</td>
@@ -75,7 +113,7 @@
         <td>done</td>
         <td class="num">525.04</td>
         <td class="num">+85.6%</td>
-        <td class="num">5.5k</td>
+        <td class="num">5,453</td>
         <td class="num">220</td>
         <td class="num">5</td>
         <td class="num">3</td>
@@ -86,7 +124,7 @@
         <td>done</td>
         <td class="num">482.03</td>
         <td class="num">+70.4%</td>
-        <td class="num">3.2k</td>
+        <td class="num">3,164</td>
         <td class="num">216</td>
         <td class="num">7</td>
         <td class="num">1</td>
@@ -126,14 +164,86 @@
 </section>
 
 
+<section class="section" id="gpt-5_6-terra">
+  <div class="eyebrow">gpt-5_6-terra</div>
+  <h2>gpt 5 6 terra</h2>
+
+  <div class="stats">
+    <div class="stat"><div class="label">Best</div><div class="value">515.70</div><div class="sub">+82.3% vs baseline</div></div>
+    <div class="stat"><div class="label">Mean</div><div class="value">473.1</div><div class="sub">+67.3% mean Δ</div></div>
+    <div class="stat"><div class="label">Reps</div><div class="value">2/2</div><div class="sub">completed / total</div></div>
+  </div>
+
+  <div class="wide">
+  <table class="bench">
+    <caption>per-rep detail</caption>
+    <thead>
+      <tr>
+        <th>Rep</th><th>Status</th>
+        <th class="num">Best</th><th class="num">Δ%</th>
+        <th class="num">Area (LUT4)</th><th class="num">Fmax (MHz)</th>
+        <th class="num">acc</th><th class="num">brk</th>
+        <th class="num">Wall</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>rep1</td>
+        <td>done</td>
+        <td class="num">430.45</td>
+        <td class="num">+52.2%</td>
+        <td class="num">5,763</td>
+        <td class="num">193</td>
+        <td class="num">5</td>
+        <td class="num">18</td>
+        <td class="num">3.6h</td>
+      </tr>
+      <tr>
+        <td>rep2</td>
+        <td>done</td>
+        <td class="num">515.70</td>
+        <td class="num">+82.3%</td>
+        <td class="num">10,525</td>
+        <td class="num">209</td>
+        <td class="num">7</td>
+        <td class="num">8</td>
+        <td class="num">3.7h</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p class="prose"><strong>Broken classes (all reps combined):</strong> <code>formal_failed</code>×16, <code>cosim_failed</code>×7, <code>build_failed</code>×3</p>
+
+  <div class="prose">
+  <h3>rep1 , winning hypotheses</h3>
+<dl class="defs">
+<dt>R1 · Share RV32 multiply datapath</dt><dd>fitness <span class="mono">306.38</span> (<span class="mono">+8.3%</span>) · area <span class="mono">9.8k</span> LUT4 · Fmax <span class="mono">138 MHz</span></dd>
+<dt>R2 · Decoupled iterative divide unit</dt><dd>fitness <span class="mono">405.36</span> (<span class="mono">+32.3%</span>) · area <span class="mono">5.7k</span> LUT4 · Fmax <span class="mono">182 MHz</span></dd>
+<dt>R6 · Shared branch subtract flags</dt><dd>fitness <span class="mono">411.50</span> (<span class="mono">+1.5%</span>) · area <span class="mono">5.8k</span> LUT4 · Fmax <span class="mono">185 MHz</span></dd>
+<dt>R7 · Fixed lane memory extraction</dt><dd>fitness <span class="mono">430.45</span> (<span class="mono">+4.6%</span>) · area <span class="mono">5.8k</span> LUT4 · Fmax <span class="mono">193 MHz</span></dd>
+</dl>
+<h3>rep2 , winning hypotheses</h3>
+<dl class="defs">
+<dt>R1 · Static loop branch prediction</dt><dd>fitness <span class="mono">310.00</span> (<span class="mono">+9.6%</span>) · area <span class="mono">10.5k</span> LUT4 · Fmax <span class="mono">132 MHz</span></dd>
+<dt>R2 · MEM-to-EX load forwarding</dt><dd>fitness <span class="mono">323.71</span> (<span class="mono">+4.4%</span>) · area <span class="mono">10.0k</span> LUT4 · Fmax <span class="mono">131 MHz</span></dd>
+<dt>R3 · Shared sign-configurable multiplier</dt><dd>fitness <span class="mono">361.53</span> (<span class="mono">+11.7%</span>) · area <span class="mono">10.6k</span> LUT4 · Fmax <span class="mono">147 MHz</span></dd>
+<dt>R4 · Opcode-biased static loop prediction</dt><dd>fitness <span class="mono">365.65</span> (<span class="mono">+1.1%</span>) · area <span class="mono">9.8k</span> LUT4 · Fmax <span class="mono">148 MHz</span></dd>
+<dt>R8 · Class-partitioned ALU control</dt><dd>fitness <span class="mono">390.78</span> (<span class="mono">+6.9%</span>) · area <span class="mono">10.6k</span> LUT4 · Fmax <span class="mono">158 MHz</span></dd>
+<dt>R9 · Fine-grained base ALU partition</dt><dd>fitness <span class="mono">515.70</span> (<span class="mono">+32.0%</span>) · area <span class="mono">10.5k</span> LUT4 · Fmax <span class="mono">209 MHz</span></dd>
+</dl>
+  </div>
+</section>
+
+
 <section class="section" id="gpt-5_4_xhigh">
   <div class="eyebrow">gpt-5_4_xhigh</div>
   <h2>gpt 5 4 xhigh</h2>
 
   <div class="stats">
     <div class="stat"><div class="label">Best</div><div class="value">513.84</div><div class="sub">+81.7% vs baseline</div></div>
-    <div class="stat"><div class="label">Mean</div><div class="value">505.0</div><div class="sub">+78.5% mean Δ</div></div>
-    <div class="stat"><div class="label">Reps</div><div class="value">2/2</div><div class="sub">completed / total</div></div>
+    <div class="stat"><div class="label">Mean</div><div class="value">485.8</div><div class="sub">+71.8% mean Δ</div></div>
+    <div class="stat"><div class="label">Reps</div><div class="value">3/3</div><div class="sub">completed / total</div></div>
   </div>
 
   <div class="wide">
@@ -154,7 +264,7 @@
         <td>done</td>
         <td class="num">496.11</td>
         <td class="num">+75.4%</td>
-        <td class="num">3.2k</td>
+        <td class="num">3,164</td>
         <td class="num">221</td>
         <td class="num">5</td>
         <td class="num">7</td>
@@ -165,17 +275,28 @@
         <td>done</td>
         <td class="num">513.84</td>
         <td class="num">+81.7%</td>
-        <td class="num">10.1k</td>
+        <td class="num">10,108</td>
         <td class="num">203</td>
         <td class="num">7</td>
         <td class="num">11</td>
         <td class="num">8.1h</td>
       </tr>
+      <tr>
+        <td>rep3</td>
+        <td>done</td>
+        <td class="num">447.40</td>
+        <td class="num">+58.2%</td>
+        <td class="num">5,847</td>
+        <td class="num">199</td>
+        <td class="num">3</td>
+        <td class="num">14</td>
+        <td class="num">14.4h</td>
+      </tr>
     </tbody>
   </table>
   </div>
 
-  <p class="prose"><strong>Broken classes (all reps combined):</strong> <code>cosim_failed</code>×11, <code>formal_failed</code>×7</p>
+  <p class="prose"><strong>Broken classes (all reps combined):</strong> <code>formal_failed</code>×16, <code>cosim_failed</code>×13, <code>hypothesis_gen_failed</code>×3</p>
 
   <div class="prose">
   <h3>rep1 , winning hypotheses</h3>
@@ -193,6 +314,95 @@
 <dt>R5 · One-entry posted store buffer</dt><dd>fitness <span class="mono">377.60</span> (<span class="mono">+12.8%</span>) · area <span class="mono">10.1k</span> LUT4 · Fmax <span class="mono">151 MHz</span></dd>
 <dt>R6 · EX fast-path add/address bypass</dt><dd>fitness <span class="mono">391.32</span> (<span class="mono">+3.6%</span>) · area <span class="mono">10.0k</span> LUT4 · Fmax <span class="mono">157 MHz</span></dd>
 <dt>R8 · Resolve direct JAL in ID</dt><dd>fitness <span class="mono">513.84</span> (<span class="mono">+31.3%</span>) · area <span class="mono">10.1k</span> LUT4 · Fmax <span class="mono">203 MHz</span></dd>
+</dl>
+<h3>rep3 , winning hypotheses</h3>
+<dl class="defs">
+<dt>R1 · Iterative Cold Divider Off EX Path</dt><dd>fitness <span class="mono">405.07</span> (<span class="mono">+43.2%</span>) · area <span class="mono">5.8k</span> LUT4 · Fmax <span class="mono">182 MHz</span></dd>
+<dt>R2 · One-Deep Store Retirement Slot</dt><dd>fitness <span class="mono">447.40</span> (<span class="mono">+10.4%</span>) · area <span class="mono">5.8k</span> LUT4 · Fmax <span class="mono">199 MHz</span></dd>
+</dl>
+  </div>
+</section>
+
+
+<section class="section" id="gpt-5_6-luna">
+  <div class="eyebrow">gpt-5_6-luna</div>
+  <h2>gpt 5 6 luna</h2>
+
+  <div class="stats">
+    <div class="stat"><div class="label">Best</div><div class="value">480.90</div><div class="sub">+70.0% vs baseline</div></div>
+    <div class="stat"><div class="label">Mean</div><div class="value">452.0</div><div class="sub">+59.8% mean Δ</div></div>
+    <div class="stat"><div class="label">Reps</div><div class="value">3/3</div><div class="sub">completed / total</div></div>
+  </div>
+
+  <div class="wide">
+  <table class="bench">
+    <caption>per-rep detail</caption>
+    <thead>
+      <tr>
+        <th>Rep</th><th>Status</th>
+        <th class="num">Best</th><th class="num">Δ%</th>
+        <th class="num">Area (LUT4)</th><th class="num">Fmax (MHz)</th>
+        <th class="num">acc</th><th class="num">brk</th>
+        <th class="num">Wall</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>rep1</td>
+        <td>done</td>
+        <td class="num">462.59</td>
+        <td class="num">+63.6%</td>
+        <td class="num">10,155</td>
+        <td class="num">201</td>
+        <td class="num">3</td>
+        <td class="num">21</td>
+        <td class="num">4.9h</td>
+      </tr>
+      <tr>
+        <td>rep2</td>
+        <td>done</td>
+        <td class="num">480.90</td>
+        <td class="num">+70.0%</td>
+        <td class="num">10,135</td>
+        <td class="num">209</td>
+        <td class="num">5</td>
+        <td class="num">8</td>
+        <td class="num">5.0h</td>
+      </tr>
+      <tr>
+        <td>rep3</td>
+        <td>done</td>
+        <td class="num">412.38</td>
+        <td class="num">+45.8%</td>
+        <td class="num">7,500</td>
+        <td class="num">185</td>
+        <td class="num">3</td>
+        <td class="num">13</td>
+        <td class="num">4.9h</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p class="prose"><strong>Broken classes (all reps combined):</strong> <code>formal_failed</code>×26, <code>cosim_failed</code>×14, <code>hypothesis_gen_failed</code>×1, <code>build_failed</code>×1</p>
+
+  <div class="prose">
+  <h3>rep1 , winning hypotheses</h3>
+<dl class="defs">
+<dt>R1 · Share the multiplier across RV32M high-half operations</dt><dd>fitness <span class="mono">404.74</span> (<span class="mono">+43.1%</span>) · area <span class="mono">10.1k</span> LUT4 · Fmax <span class="mono">182 MHz</span></dd>
+<dt>R2 · Add a decoupled instruction prefetch queue</dt><dd>fitness <span class="mono">462.59</span> (<span class="mono">+14.3%</span>) · area <span class="mono">10.2k</span> LUT4 · Fmax <span class="mono">201 MHz</span></dd>
+</dl>
+<h3>rep2 , winning hypotheses</h3>
+<dl class="defs">
+<dt>R1 · Early static backward-branch prediction</dt><dd>fitness <span class="mono">310.56</span> (<span class="mono">+9.8%</span>) · area <span class="mono">10.6k</span> LUT4 · Fmax <span class="mono">132 MHz</span></dd>
+<dt>R3 · Share a native-width RV32M multiplier</dt><dd>fitness <span class="mono">317.32</span> (<span class="mono">+2.2%</span>) · area <span class="mono">10.3k</span> LUT4 · Fmax <span class="mono">135 MHz</span></dd>
+<dt>R5 · Retimed two-phase execute pipeline</dt><dd>fitness <span class="mono">396.37</span> (<span class="mono">+24.9%</span>) · area <span class="mono">10.4k</span> LUT4 · Fmax <span class="mono">172 MHz</span></dd>
+<dt>R7 · Remove redundant MEM/WB forwarding leg</dt><dd>fitness <span class="mono">480.90</span> (<span class="mono">+21.3%</span>) · area <span class="mono">10.1k</span> LUT4 · Fmax <span class="mono">209 MHz</span></dd>
+</dl>
+<h3>rep3 , winning hypotheses</h3>
+<dl class="defs">
+<dt>R1 · Fast-path ALU with selective M arithmetic</dt><dd>fitness <span class="mono">406.88</span> (<span class="mono">+43.9%</span>) · area <span class="mono">7.5k</span> LUT4 · Fmax <span class="mono">183 MHz</span></dd>
+<dt>R10 · Shared branch compare flag cone</dt><dd>fitness <span class="mono">412.38</span> (<span class="mono">+1.4%</span>) · area <span class="mono">7.5k</span> LUT4 · Fmax <span class="mono">185 MHz</span></dd>
 </dl>
   </div>
 </section>
@@ -226,7 +436,7 @@
         <td>done</td>
         <td class="num">461.87</td>
         <td class="num">+63.3%</td>
-        <td class="num">9.8k</td>
+        <td class="num">9,807</td>
         <td class="num">187</td>
         <td class="num">7</td>
         <td class="num">3</td>
@@ -237,7 +447,7 @@
         <td>done</td>
         <td class="num">420.61</td>
         <td class="num">+48.7%</td>
-        <td class="num">12.0k</td>
+        <td class="num">11,953</td>
         <td class="num">178</td>
         <td class="num">8</td>
         <td class="num">4</td>
@@ -248,7 +458,7 @@
         <td>done</td>
         <td class="num">408.01</td>
         <td class="num">+44.3%</td>
-        <td class="num">5.6k</td>
+        <td class="num">5,637</td>
         <td class="num">176</td>
         <td class="num">4</td>
         <td class="num">2</td>
@@ -318,7 +528,7 @@
         <td>done</td>
         <td class="num">431.58</td>
         <td class="num">+52.6%</td>
-        <td class="num">7.8k</td>
+        <td class="num">7,803</td>
         <td class="num">201</td>
         <td class="num">7</td>
         <td class="num">5</td>
@@ -329,7 +539,7 @@
         <td>done</td>
         <td class="num">407.55</td>
         <td class="num">+44.1%</td>
-        <td class="num">7.4k</td>
+        <td class="num">7,358</td>
         <td class="num">187</td>
         <td class="num">5</td>
         <td class="num">9</td>
@@ -340,7 +550,7 @@
         <td>done</td>
         <td class="num">431.24</td>
         <td class="num">+52.5%</td>
-        <td class="num">10.0k</td>
+        <td class="num">9,997</td>
         <td class="num">194</td>
         <td class="num">4</td>
         <td class="num">9</td>
@@ -407,7 +617,7 @@
         <td>done</td>
         <td class="num">347.76</td>
         <td class="num">+23.0%</td>
-        <td class="num">10.3k</td>
+        <td class="num">10,254</td>
         <td class="num">146</td>
         <td class="num">3</td>
         <td class="num">23</td>
@@ -418,7 +628,7 @@
         <td>done</td>
         <td class="num">331.22</td>
         <td class="num">+17.1%</td>
-        <td class="num">10.0k</td>
+        <td class="num">10,038</td>
         <td class="num">141</td>
         <td class="num">3</td>
         <td class="num">26</td>
@@ -429,7 +639,7 @@
         <td><span class="mono" title="orchestrator exited non-zero; data preserved">failed ⚠</span></td>
         <td class="num">396.13</td>
         <td class="num">+40.1%</td>
-        <td class="num">9.9k</td>
+        <td class="num">9,927</td>
         <td class="num">166</td>
         <td class="num">4</td>
         <td class="num">14</td>
@@ -457,6 +667,144 @@
 <dt>R1 · Guard ALU multipliers off critical path for non-M ops</dt><dd>fitness <span class="mono">315.22</span> (<span class="mono">+11.5%</span>) · area <span class="mono">10.2k</span> LUT4 · Fmax <span class="mono">142 MHz</span></dd>
 <dt>R5 · 8-entry direct-mapped instruction cache in IF to absorb imem stalls</dt><dd>fitness <span class="mono">334.35</span> (<span class="mono">+6.1%</span>) · area <span class="mono">10.0k</span> LUT4 · Fmax <span class="mono">140 MHz</span></dd>
 <dt>R8 · Split ALU into fast and M-extension paths with final 2:1 mux</dt><dd>fitness <span class="mono">396.13</span> (<span class="mono">+18.5%</span>) · area <span class="mono">9.9k</span> LUT4 · Fmax <span class="mono">166 MHz</span></dd>
+</dl>
+  </div>
+</section>
+
+
+<section class="section" id="gpt-5_4-mini">
+  <div class="eyebrow">gpt-5_4-mini</div>
+  <h2>gpt 5 4 mini</h2>
+
+  <div class="stats">
+    <div class="stat"><div class="label">Best</div><div class="value">395.53</div><div class="sub">+39.9% vs baseline</div></div>
+    <div class="stat"><div class="label">Mean</div><div class="value">362.3</div><div class="sub">+28.1% mean Δ</div></div>
+    <div class="stat"><div class="label">Reps</div><div class="value">3/3</div><div class="sub">completed / total</div></div>
+  </div>
+
+  <div class="wide">
+  <table class="bench">
+    <caption>per-rep detail</caption>
+    <thead>
+      <tr>
+        <th>Rep</th><th>Status</th>
+        <th class="num">Best</th><th class="num">Δ%</th>
+        <th class="num">Area (LUT4)</th><th class="num">Fmax (MHz)</th>
+        <th class="num">acc</th><th class="num">brk</th>
+        <th class="num">Wall</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>rep1</td>
+        <td>done</td>
+        <td class="num">341.86</td>
+        <td class="num">+20.9%</td>
+        <td class="num">9,859</td>
+        <td class="num">152</td>
+        <td class="num">4</td>
+        <td class="num">20</td>
+        <td class="num">15.6h</td>
+      </tr>
+      <tr>
+        <td>rep2</td>
+        <td>done</td>
+        <td class="num">349.46</td>
+        <td class="num">+23.6%</td>
+        <td class="num">9,916</td>
+        <td class="num">157</td>
+        <td class="num">7</td>
+        <td class="num">26</td>
+        <td class="num">29.8h</td>
+      </tr>
+      <tr>
+        <td>rep3</td>
+        <td>done</td>
+        <td class="num">395.53</td>
+        <td class="num">+39.9%</td>
+        <td class="num">10,230</td>
+        <td class="num">187</td>
+        <td class="num">5</td>
+        <td class="num">22</td>
+        <td class="num">30.2h</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p class="prose"><strong>Broken classes (all reps combined):</strong> <code>formal_failed</code>×42, <code>cosim_failed</code>×17, <code>hypothesis_gen_failed</code>×5, <code>implementation_compile_failed</code>×1, <code>sandbox_violation</code>×1, <code>schema_error</code>×1, <code>build_failed</code>×1</p>
+
+  <div class="prose">
+  <h3>rep1 , winning hypotheses</h3>
+<dl class="defs">
+<dt>R1 · Retime branch target generation</dt><dd>fitness <span class="mono">335.70</span> (<span class="mono">+18.7%</span>) · area <span class="mono">9.4k</span> LUT4 · Fmax <span class="mono">151 MHz</span></dd>
+<dt>R6 · Retimed memory lane metadata</dt><dd>fitness <span class="mono">339.60</span> (<span class="mono">+1.2%</span>) · area <span class="mono">10.1k</span> LUT4 · Fmax <span class="mono">153 MHz</span></dd>
+<dt>R11 · JAL fast-path predictor</dt><dd>fitness <span class="mono">341.86</span> (<span class="mono">+0.7%</span>) · area <span class="mono">9.9k</span> LUT4 · Fmax <span class="mono">152 MHz</span></dd>
+</dl>
+<h3>rep2 , winning hypotheses</h3>
+<dl class="defs">
+<dt>R1 · Precompute branch targets in ID</dt><dd>fitness <span class="mono">296.38</span> (<span class="mono">+4.8%</span>) · area <span class="mono">9.8k</span> LUT4 · Fmax <span class="mono">133 MHz</span></dd>
+<dt>R2 · Latch pc+4 in ID</dt><dd>fitness <span class="mono">311.83</span> (<span class="mono">+5.2%</span>) · area <span class="mono">9.9k</span> LUT4 · Fmax <span class="mono">140 MHz</span></dd>
+<dt>R4 · Latch writeback data in MEM</dt><dd>fitness <span class="mono">312.26</span> (<span class="mono">+0.1%</span>) · area <span class="mono">9.9k</span> LUT4 · Fmax <span class="mono">140 MHz</span></dd>
+<dt>R5 · Predecode instruction slices</dt><dd>fitness <span class="mono">322.94</span> (<span class="mono">+3.4%</span>) · area <span class="mono">9.8k</span> LUT4 · Fmax <span class="mono">145 MHz</span></dd>
+<dt>R8 · Move memory lane work earlier</dt><dd>fitness <span class="mono">342.69</span> (<span class="mono">+6.1%</span>) · area <span class="mono">10.4k</span> LUT4 · Fmax <span class="mono">154 MHz</span></dd>
+<dt>R12 · Hoist full decode into fetch</dt><dd>fitness <span class="mono">349.46</span> (<span class="mono">+2.0%</span>) · area <span class="mono">9.9k</span> LUT4 · Fmax <span class="mono">157 MHz</span></dd>
+</dl>
+<h3>rep3 , winning hypotheses</h3>
+<dl class="defs">
+<dt>R1 · Registered Fetch/Decode Cutpoint</dt><dd>fitness <span class="mono">310.94</span> (<span class="mono">+9.9%</span>) · area <span class="mono">10.0k</span> LUT4 · Fmax <span class="mono">154 MHz</span></dd>
+<dt>R9 · Split slow M-extension path</dt><dd>fitness <span class="mono">357.14</span> (<span class="mono">+14.9%</span>) · area <span class="mono">10.7k</span> LUT4 · Fmax <span class="mono">183 MHz</span></dd>
+<dt>R11 · Backward-branch-only predictor</dt><dd>fitness <span class="mono">394.64</span> (<span class="mono">+10.5%</span>) · area <span class="mono">10.2k</span> LUT4 · Fmax <span class="mono">186 MHz</span></dd>
+<dt>R15 · Hot-loop shadow latch</dt><dd>fitness <span class="mono">395.53</span> (<span class="mono">+0.2%</span>) · area <span class="mono">10.2k</span> LUT4 · Fmax <span class="mono">187 MHz</span></dd>
+</dl>
+  </div>
+</section>
+
+
+<section class="section" id="gemini-3_5-flash">
+  <div class="eyebrow">gemini-3_5-flash</div>
+  <h2>gemini 3 5 flash</h2>
+
+  <div class="stats">
+    <div class="stat"><div class="label">Best</div><div class="value">359.04</div><div class="sub">+27.0% vs baseline</div></div>
+    <div class="stat"><div class="label">Mean</div><div class="value">n/a</div><div class="sub">n/a mean Δ</div></div>
+    <div class="stat"><div class="label">Reps</div><div class="value">0/1</div><div class="sub">completed / total</div></div>
+  </div>
+
+  <div class="wide">
+  <table class="bench">
+    <caption>per-rep detail</caption>
+    <thead>
+      <tr>
+        <th>Rep</th><th>Status</th>
+        <th class="num">Best</th><th class="num">Δ%</th>
+        <th class="num">Area (LUT4)</th><th class="num">Fmax (MHz)</th>
+        <th class="num">acc</th><th class="num">brk</th>
+        <th class="num">Wall</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>rep2</td>
+        <td><span class="mono" title="orchestrator exited non-zero; data preserved">failed ⚠</span></td>
+        <td class="num">359.04</td>
+        <td class="num">+27.0%</td>
+        <td class="num">13,773</td>
+        <td class="num">125</td>
+        <td class="num">2</td>
+        <td class="num">1</td>
+        <td class="num">0.9h</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p class="prose"><strong>Broken classes (all reps combined):</strong> <code>hypothesis_gen_failed</code>×1</p>
+
+  <div class="prose">
+  <h3>rep2 , winning hypotheses</h3>
+<dl class="defs">
+<dt>R1 · Two-bank registered lookahead instruction replay predictor with static branch/JAL predecode</dt><dd>fitness <span class="mono">359.04</span> (<span class="mono">+26.9%</span>) · area <span class="mono">13.8k</span> LUT4 · Fmax <span class="mono">125 MHz</span></dd>
 </dl>
   </div>
 </section>
@@ -490,7 +838,7 @@
         <td>done</td>
         <td class="num">354.73</td>
         <td class="num">+25.4%</td>
-        <td class="num">10.2k</td>
+        <td class="num">10,242</td>
         <td class="num">150</td>
         <td class="num">2</td>
         <td class="num">31</td>
@@ -501,7 +849,7 @@
         <td>done</td>
         <td class="num">339.62</td>
         <td class="num">+20.1%</td>
-        <td class="num">11.1k</td>
+        <td class="num">11,068</td>
         <td class="num">142</td>
         <td class="num">3</td>
         <td class="num">29</td>
@@ -512,7 +860,7 @@
         <td>done</td>
         <td class="num">323.92</td>
         <td class="num">+14.5%</td>
-        <td class="num">11.8k</td>
+        <td class="num">11,836</td>
         <td class="num">136</td>
         <td class="num">4</td>
         <td class="num">31</td>

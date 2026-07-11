@@ -1,0 +1,33 @@
+{
+  "model": "gpt-5_6-luna",
+  "rep": 1,
+  "started_at": "2026-07-10T14:32:39+00:00",
+  "ended_at": null,
+  "wall_clock_sec": null,
+  "iterations": 46,
+  "accepted": 3,
+  "rejected": 20,
+  "broken": 21,
+  "final_fitness": 462.59,
+  "baseline_fitness": 282.82,
+  "best_fitness": 462.59,
+  "best_round": 6,
+  "delta_pct": 63.56339721377554,
+  "total_tokens_in": 28610516,
+  "total_tokens_out": 447715,
+  "total_cost_usd": 0.0,
+  "orchestrator_exit": 0,
+  "status": "done",
+  "notes": "",
+  "broken_by_class": {
+    "formal_failed": 9,
+    "cosim_failed": 11,
+    "hypothesis_gen_failed": 1
+  },
+  "best_lut4": 10155,
+  "best_ff": 1990,
+  "best_fmax_mhz": 201.21,
+  "best_iterations": 10,
+  "best_cycles": 4349632,
+  "best_ipc_coremark": 2e-06
+}

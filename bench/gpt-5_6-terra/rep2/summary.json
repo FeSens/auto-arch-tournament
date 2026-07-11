@@ -1,0 +1,33 @@
+{
+  "model": "gpt-5_6-terra",
+  "rep": 2,
+  "started_at": "2026-07-11T00:50:12+00:00",
+  "ended_at": null,
+  "wall_clock_sec": null,
+  "iterations": 46,
+  "accepted": 7,
+  "rejected": 29,
+  "broken": 8,
+  "final_fitness": 515.7,
+  "baseline_fitness": 282.82,
+  "best_fitness": 515.7,
+  "best_round": 26,
+  "delta_pct": 82.34212573368222,
+  "total_tokens_in": 19288024,
+  "total_tokens_out": 301660,
+  "total_cost_usd": 0.0,
+  "orchestrator_exit": 0,
+  "status": "done",
+  "notes": "",
+  "broken_by_class": {
+    "cosim_failed": 5,
+    "formal_failed": 2,
+    "build_failed": 1
+  },
+  "best_lut4": 10525,
+  "best_ff": 1926,
+  "best_fmax_mhz": 208.51,
+  "best_iterations": 10,
+  "best_cycles": 4043217,
+  "best_ipc_coremark": 2e-06
+}

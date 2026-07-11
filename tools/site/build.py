@@ -49,7 +49,35 @@ DEFAULT_RESULTS = REPO / "bench" / "results.jsonl"
 DEFAULT_OUT = REPO / "site"
 
 BASELINE_FITNESS = 282.82
-SITE_VERSION = "v1 · 2026-05"
+SITE_VERSION = "v1 · 2026-07"
+
+# Models registered for the next field but not yet fully represented in
+# bench/results.jsonl. The status table is rendered on the leaderboard and
+# models pages until all expected reps land; partial runs show their progress.
+# Keep the result names in sync with tools/bench/models-gpt56-preview.yaml.
+SCHEDULED_MODELS = (
+    {
+        "name": "gpt-5_6-sol",
+        "label": "GPT-5.6 Sol",
+        "runtime_model": "codex:gpt-5.6-sol",
+        "effort": "high",
+        "expected_reps": 3,
+    },
+    {
+        "name": "gpt-5_6-terra",
+        "label": "GPT-5.6 Terra",
+        "runtime_model": "codex:gpt-5.6-terra",
+        "effort": "high",
+        "expected_reps": 3,
+    },
+    {
+        "name": "gpt-5_6-luna",
+        "label": "GPT-5.6 Luna",
+        "runtime_model": "codex:gpt-5.6-luna",
+        "effort": "high",
+        "expected_reps": 3,
+    },
+)
 
 # Human-engineered reference: VexRiscv synthesized on Gowin GW2A-LV18 (Tang Nano 20K).
 # LUT4 = 3402 (CPU-core only; the syn report's bare 3957 figure included bench
@@ -243,6 +271,57 @@ def fcompact(n):
     if n >= 1_000_000: return f"{n/1_000_000:.1f}M"
     if n >= 1_000: return f"{n/1_000:.1f}k"
     return f"{n}"
+
+def fint(n):
+    """Format an exact integer count for data tables."""
+    return "n/a" if n is None else f"{int(n):,}"
+
+
+def render_scheduled_models(aggs: list[ModelAgg]) -> str:
+    """Render registered models until their full three-rep field is present."""
+    reps_by_model = {a.model: a.n_total for a in aggs}
+    rows = []
+    for model in SCHEDULED_MODELS:
+        observed = reps_by_model.get(model["name"], 0)
+        expected = model["expected_reps"]
+        if observed >= expected:
+            continue
+        status = "scheduled" if observed == 0 else f"{observed} of {expected} recorded"
+        rows.append(f"""
+      <tr>
+        <td><span class="model-name">{model['label']}</span></td>
+        <td><code>{model['name']}</code></td>
+        <td><code>{model['runtime_model']}</code></td>
+        <td><span class="mono">{model['effort']}</span></td>
+        <td>{status}</td>
+      </tr>""")
+    if not rows:
+        return ""
+
+    return f"""
+<section class="section" id="gpt-5-6-field">
+  <div class="eyebrow">Scheduled field</div>
+  <h2>GPT-5.6 preview trio</h2>
+  <p class="prose">
+    Sol, Terra, and Luna will each run three independent reps under the same
+    <span class="mono">high</span> reasoning budget. Results move into the
+    leaderboard and per-model detail automatically as each rep completes.
+  </p>
+  <div class="wide">
+  <table class="bench">
+    <caption>High reasoning only · N=3 reps per model</caption>
+    <thead>
+      <tr>
+        <th>Model</th><th>Result ID</th><th>Runtime model</th>
+        <th>Reasoning</th><th>Status</th>
+      </tr>
+    </thead>
+    <tbody>{''.join(rows)}
+    </tbody>
+  </table>
+  </div>
+</section>
+"""
 
 
 # ── shared HTML fragments ──────────────────────────────────────────
@@ -602,6 +681,7 @@ def render_index(aggs: list[ModelAgg], reps: list[Rep], stars: Optional[int] = N
     chart2_svg = chart_score_vs_round(aggs)
 
     n_above_human = sum(1 for a in aggs if (a.fitness_best or 0) > VEXRISCV_REF["fitness"])
+    scheduled_html = render_scheduled_models(aggs)
 
     return head("HWE Bench · RISC-V CPU design benchmark for LLMs", "index", stars) + f"""
 <section class="hero-block">
@@ -621,6 +701,8 @@ def render_index(aggs: list[ModelAgg], reps: list[Rep], stars: Optional[int] = N
     has room to grow as long as models keep finding it.
   </div>
 </section>
+
+{scheduled_html}
 
 <section class="section">
   <div class="eyebrow">Speed vs size</div>
@@ -839,7 +921,7 @@ def render_models(aggs: list[ModelAgg], stars: Optional[int] = None) -> str:
         <td>{status_str}</td>
         <td class="num">{fnum(r.best_fitness, '.2f')}</td>
         <td class="num">{fpct(r.delta_pct)}</td>
-        <td class="num">{fcompact(r.best_lut4)}</td>
+        <td class="num">{fint(r.best_lut4)}</td>
         <td class="num">{f'{r.best_fmax_mhz:.0f}' if r.best_fmax_mhz else 'n/a'}</td>
         <td class="num">{r.accepted}</td>
         <td class="num">{r.broken}</td>
@@ -915,6 +997,7 @@ def render_models(aggs: list[ModelAgg], stars: Optional[int] = None) -> str:
 </section>
 """)
 
+    scheduled_html = render_scheduled_models(aggs)
     sections_html = "\n".join(sections)
     return head("HWE Bench · Models", "models", stars) + f"""
 <section class="hero-block">
@@ -926,6 +1009,7 @@ def render_models(aggs: list[ModelAgg], stars: Optional[int] = None) -> str:
     LUT4, and Fmax. The hypothesis titles are exactly what the agent wrote.
   </p>
 </section>
+{scheduled_html}
 {sections_html}
 """ + FOOTER
 

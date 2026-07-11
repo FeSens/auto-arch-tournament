@@ -21,8 +21,8 @@
     <li><a href="data.html">Data</a></li>
   </ul>
   <div class="meta">
-    <a href="https://github.com/FeSens/auto-arch-tournament" class="repo" aria-label="HWE Bench source on GitHub, click to view repo and star">github <span class="star">★</span> <span class="star-count">118</span></a>
-    <span class="version">v1 · 2026-05</span>
+    <a href="https://github.com/FeSens/auto-arch-tournament" class="repo" aria-label="HWE Bench source on GitHub, click to view repo and star">github <span class="star">★</span> <span class="star-count">129</span></a>
+    <span class="version">v1 · 2026-07</span>
   </div>
 </nav>
 
@@ -44,6 +44,45 @@
   </div>
 </section>
 
+
+<section class="section" id="gpt-5-6-field">
+  <div class="eyebrow">Scheduled field</div>
+  <h2>GPT-5.6 preview trio</h2>
+  <p class="prose">
+    Sol, Terra, and Luna will each run three independent reps under the same
+    <span class="mono">high</span> reasoning budget. Results move into the
+    leaderboard and per-model detail automatically as each rep completes.
+  </p>
+  <div class="wide">
+  <table class="bench">
+    <caption>High reasoning only · N=3 reps per model</caption>
+    <thead>
+      <tr>
+        <th>Model</th><th>Result ID</th><th>Runtime model</th>
+        <th>Reasoning</th><th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="model-name">GPT-5.6 Sol</span></td>
+        <td><code>gpt-5_6-sol</code></td>
+        <td><code>codex:gpt-5.6-sol</code></td>
+        <td><span class="mono">high</span></td>
+        <td>scheduled</td>
+      </tr>
+      <tr>
+        <td><span class="model-name">GPT-5.6 Terra</span></td>
+        <td><code>gpt-5_6-terra</code></td>
+        <td><code>codex:gpt-5.6-terra</code></td>
+        <td><span class="mono">high</span></td>
+        <td>2 of 3 recorded</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+
 <section class="section">
   <div class="eyebrow">Speed vs size</div>
   <h2>Score × Area</h2>
@@ -55,41 +94,51 @@
   <text class="tick" x="66" y="225.7" text-anchor="end">400</text>
   <line class="grid" x1="76" y1="95.0" x2="654" y2="95.0"/>
   <text class="tick" x="66" y="99.0" text-anchor="end">500</text>
-  <line class="grid" x1="243.4" y1="30" x2="243.4" y2="424"/>
-  <text class="tick" x="243.4" y="442" text-anchor="middle">5.0k</text>
-  <line class="grid" x1="421.8" y1="30" x2="421.8" y2="424"/>
-  <text class="tick" x="421.8" y="442" text-anchor="middle">7.5k</text>
-  <line class="grid" x1="600.2" y1="30" x2="600.2" y2="424"/>
-  <text class="tick" x="600.2" y="442" text-anchor="middle">10.0k</text>
+  <line class="grid" x1="190.9" y1="30" x2="190.9" y2="424"/>
+  <text class="tick" x="190.9" y="442" text-anchor="middle">5.0k</text>
+  <line class="grid" x1="435.6" y1="30" x2="435.6" y2="424"/>
+  <text class="tick" x="435.6" y="442" text-anchor="middle">10.0k</text>
   <line class="axis-line" x1="76" y1="424" x2="654" y2="424"/>
   <line class="axis-line" x1="76" y1="30" x2="76" y2="424"/>
   <line class="baseline" x1="76" y1="370.2" x2="654" y2="370.2"/>
-  <line class="baseline" x1="569.0" y1="30" x2="569.0" y2="424"/>
-  <circle cx="569.0" cy="370.2" r="3.5" fill="var(--bg)" stroke="var(--ink-muted)" stroke-width="1.4"/>
-  <text class="tick" x="579.0" y="363.2" fill="var(--ink-muted)" text-anchor="start">baseline V0 · 283 · 9.6k LUT</text>
+  <line class="baseline" x1="414.2" y1="30" x2="414.2" y2="424"/>
+  <circle cx="414.2" cy="370.2" r="3.5" fill="var(--bg)" stroke="var(--ink-muted)" stroke-width="1.4"/>
+  <text class="tick" x="424.2" y="363.2" fill="var(--ink-muted)" text-anchor="start">baseline V0 · 283 · 9.6k LUT</text>
   <text class="axis-label" x="76" y="18" text-anchor="start">Fitness (CoreMark iter/s)</text>
   <text class="axis-label" x="654" y="466" text-anchor="end">Area · LUT4 count  (← smaller is better)</text>
-  <circle class="point" cx="275.7" cy="63.3" r="6" fill="var(--c1)"/>
-  <circle class="point" cx="607.9" cy="77.5" r="6" fill="var(--c2)"/>
-  <circle class="point" cx="586.4" cy="143.3" r="6" fill="var(--c3)"/>
-  <circle class="point" cx="443.4" cy="181.7" r="6" fill="var(--c4)"/>
-  <circle class="point" cx="595.0" cy="226.6" r="6" fill="var(--c5)"/>
-  <circle class="point" cx="617.5" cy="279.1" r="6" fill="var(--c6)"/>
-  <circle class="point" cx="129.4" cy="259.8" r="6" fill="var(--c-human)"/>
-  <text class="label" x="287.7" y="63.3" fill="var(--c1)">gpt-5_5_xhigh</text>
-  <text class="tick" x="287.7" y="75.3" fill="var(--c1)" fill-opacity="0.7">525 · 5.5k LUT</text>
-  <text class="label" x="619.9" y="87.3" fill="var(--c2)">gpt-5_4_xhigh</text>
-  <text class="tick" x="619.9" y="99.3" fill="var(--c2)" fill-opacity="0.7">514 · 10.1k LUT</text>
-  <text class="label" x="598.4" y="143.3" fill="var(--c3)">gpt-5_5_high</text>
-  <text class="tick" x="598.4" y="155.3" fill="var(--c3)" fill-opacity="0.7">462 · 9.8k LUT</text>
-  <text class="label" x="455.4" y="181.7" fill="var(--c4)">gpt-5_5_medium</text>
-  <text class="tick" x="455.4" y="193.7" fill="var(--c4)" fill-opacity="0.7">432 · 7.8k LUT</text>
-  <text class="label" x="607.0" y="226.6" fill="var(--c5)">kimi-k2_6</text>
-  <text class="tick" x="607.0" y="238.6" fill="var(--c5)" fill-opacity="0.7">396 · 9.9k LUT</text>
-  <text class="label" x="629.5" y="283.8" fill="var(--c6)">gemini-3_1-pro</text>
-  <text class="tick" x="629.5" y="295.8" fill="var(--c6)" fill-opacity="0.7">355 · 10.2k LUT</text>
-  <text class="label" x="141.4" y="259.8" fill="var(--c-human)">VexRiscv</text>
-  <text class="tick" x="141.4" y="271.8" fill="var(--c-human)" fill-opacity="0.7">human ref · 370 · 3.4k LUT</text>
+  <circle class="point" cx="213.0" cy="63.3" r="6" fill="var(--c1)"/>
+  <circle class="point" cx="461.3" cy="75.1" r="6" fill="var(--c2)"/>
+  <circle class="point" cx="440.9" cy="77.5" r="6" fill="var(--c3)"/>
+  <circle class="point" cx="442.2" cy="119.2" r="6" fill="var(--c4)"/>
+  <circle class="point" cx="426.2" cy="143.3" r="6" fill="var(--c5)"/>
+  <circle class="point" cx="328.1" cy="181.7" r="6" fill="var(--c6)"/>
+  <circle class="point" cx="432.0" cy="226.6" r="6" fill="var(--c1)"/>
+  <circle class="point" cx="446.9" cy="227.4" r="6" fill="var(--c2)"/>
+  <circle class="point" cx="620.3" cy="273.6" r="6" fill="var(--c3)"/>
+  <circle class="point" cx="447.5" cy="279.1" r="6" fill="var(--c4)"/>
+  <circle class="point" cx="112.6" cy="259.8" r="6" fill="var(--c-human)"/>
+  <text class="label" x="225.0" y="63.3" fill="var(--c1)">gpt-5_5_xhigh</text>
+  <text class="tick" x="225.0" y="75.3" fill="var(--c1)" fill-opacity="0.7">525 · 5.5k LUT</text>
+  <text class="label" x="473.3" y="87.3" fill="var(--c2)">gpt-5_6-terra</text>
+  <text class="tick" x="473.3" y="99.3" fill="var(--c2)" fill-opacity="0.7">516 · 10.5k LUT</text>
+  <text class="label" x="452.9" y="111.3" fill="var(--c3)">gpt-5_4_xhigh</text>
+  <text class="tick" x="452.9" y="123.3" fill="var(--c3)" fill-opacity="0.7">514 · 10.1k LUT</text>
+  <text class="label" x="454.2" y="135.3" fill="var(--c4)">gpt-5_6-luna</text>
+  <text class="tick" x="454.2" y="147.3" fill="var(--c4)" fill-opacity="0.7">481 · 10.1k LUT</text>
+  <text class="label" x="438.2" y="159.3" fill="var(--c5)">gpt-5_5_high</text>
+  <text class="tick" x="438.2" y="171.3" fill="var(--c5)" fill-opacity="0.7">462 · 9.8k LUT</text>
+  <text class="label" x="340.1" y="183.3" fill="var(--c6)">gpt-5_5_medium</text>
+  <text class="tick" x="340.1" y="195.3" fill="var(--c6)" fill-opacity="0.7">432 · 7.8k LUT</text>
+  <text class="label" x="444.0" y="226.6" fill="var(--c1)">kimi-k2_6</text>
+  <text class="tick" x="444.0" y="238.6" fill="var(--c1)" fill-opacity="0.7">396 · 9.9k LUT</text>
+  <text class="label" x="458.9" y="250.6" fill="var(--c2)">gpt-5_4-mini</text>
+  <text class="tick" x="458.9" y="262.6" fill="var(--c2)" fill-opacity="0.7">396 · 10.2k LUT</text>
+  <text class="label" x="632.3" y="298.6" fill="var(--c3)">gemini-3_5-flash</text>
+  <text class="tick" x="632.3" y="310.6" fill="var(--c3)" fill-opacity="0.7">359 · 13.8k LUT</text>
+  <text class="label" x="459.5" y="322.6" fill="var(--c4)">gemini-3_1-pro</text>
+  <text class="tick" x="459.5" y="334.6" fill="var(--c4)" fill-opacity="0.7">355 · 10.2k LUT</text>
+  <text class="label" x="124.6" y="274.6" fill="var(--c-human)">VexRiscv</text>
+  <text class="tick" x="124.6" y="286.6" fill="var(--c-human)" fill-opacity="0.7">human ref · 370 · 3.4k LUT</text>
 </svg>
     <figcaption>
       Vertical axis: CoreMark fitness (how fast the CPU runs the benchmark).
@@ -105,7 +154,7 @@
   <h2>Peak fitness per model</h2>
   <div class="wide">
   <table class="bench">
-    <caption>Best of N=3 reps per model · 17 reps total · VexRiscv human reference in red · baseline V0 in italic</caption>
+    <caption>Best of N=3 reps per model · 27 reps total · VexRiscv human reference in red · baseline V0 in italic</caption>
     <thead>
       <tr>
         <th class="num">#</th>
@@ -131,16 +180,36 @@
     </tr>
     <tr>
       <td class="num">2</td>
-      <td><span class="model-name">gpt-5_4_xhigh</span></td>
+      <td><span class="model-name">gpt-5_6-terra</span></td>
       <td class="num">2/2</td>
+      <td class="num">515.70</td>
+      <td class="num">+82.3%</td>
+      <td class="num">473.1 ± 42.6</td>
+      <td class="num">10.5k</td>
+      <td class="num">209</td>
+    </tr>
+    <tr>
+      <td class="num">3</td>
+      <td><span class="model-name">gpt-5_4_xhigh</span></td>
+      <td class="num">3/3</td>
       <td class="num">513.84</td>
       <td class="num">+81.7%</td>
-      <td class="num">505.0 ± 8.9</td>
+      <td class="num">485.8 ± 28.1</td>
       <td class="num">10.1k</td>
       <td class="num">203</td>
     </tr>
     <tr>
-      <td class="num">3</td>
+      <td class="num">4</td>
+      <td><span class="model-name">gpt-5_6-luna</span></td>
+      <td class="num">3/3</td>
+      <td class="num">480.90</td>
+      <td class="num">+70.0%</td>
+      <td class="num">452.0 ± 29.0</td>
+      <td class="num">10.1k</td>
+      <td class="num">209</td>
+    </tr>
+    <tr>
+      <td class="num">5</td>
       <td><span class="model-name">gpt-5_5_high</span></td>
       <td class="num">3/3</td>
       <td class="num">461.87</td>
@@ -150,7 +219,7 @@
       <td class="num">187</td>
     </tr>
     <tr>
-      <td class="num">4</td>
+      <td class="num">6</td>
       <td><span class="model-name">gpt-5_5_medium</span></td>
       <td class="num">3/3</td>
       <td class="num">431.58</td>
@@ -160,7 +229,7 @@
       <td class="num">201</td>
     </tr>
     <tr>
-      <td class="num">5</td>
+      <td class="num">7</td>
       <td><span class="model-name">kimi-k2_6</span></td>
       <td class="num">2/3</td>
       <td class="num">396.13</td>
@@ -169,8 +238,18 @@
       <td class="num">9.9k</td>
       <td class="num">166</td>
     </tr>
+    <tr>
+      <td class="num">8</td>
+      <td><span class="model-name">gpt-5_4-mini</span></td>
+      <td class="num">3/3</td>
+      <td class="num">395.53</td>
+      <td class="num">+39.9%</td>
+      <td class="num">362.3 ± 23.7</td>
+      <td class="num">10.2k</td>
+      <td class="num">187</td>
+    </tr>
     <tr class="human-baseline">
-      <td class="num">6</td>
+      <td class="num">9</td>
       <td><span class="model-name">VexRiscv  (human ref)</span></td>
       <td class="num">n/a</td>
       <td class="num">370.00</td>
@@ -180,7 +259,17 @@
       <td class="num">144</td>
     </tr>
     <tr>
-      <td class="num">7</td>
+      <td class="num">10</td>
+      <td><span class="model-name">gemini-3_5-flash</span></td>
+      <td class="num">0/1</td>
+      <td class="num">359.04</td>
+      <td class="num">+27.0%</td>
+      <td class="num">n/a</td>
+      <td class="num">13.8k</td>
+      <td class="num">125</td>
+    </tr>
+    <tr>
+      <td class="num">11</td>
       <td><span class="model-name">gemini-3_1-pro</span></td>
       <td class="num">3/3</td>
       <td class="num">354.73</td>
@@ -190,7 +279,7 @@
       <td class="num">150</td>
     </tr>
     <tr class="baseline-row">
-      <td class="num">8</td>
+      <td class="num">12</td>
       <td><span class="model-name">baseline V0  (fixture)</span></td>
       <td class="num">n/a</td>
       <td class="num">282.82</td>
@@ -204,7 +293,7 @@
   </div>
   <p class="prose">
     The VexRiscv row is the human-engineered reference, a well-known open-source RV32IM CPU
-    synthesized on the same FPGA used for the benchmark. <strong>5</strong>
+    synthesized on the same FPGA used for the benchmark. <strong>8</strong>
     of the LLM-generated designs beat it. See the <a href="methodology.html">methodology page</a>
     for the full procedure.
   </p>
@@ -263,29 +352,45 @@
   <text class="axis-label" x="70" y="24" text-anchor="start">Best fitness so far</text>
   <text class="axis-label" x="680" y="446" text-anchor="end">Round (1 hypothesis × 3 slots each)</text>
   <path d="M 70.0 381.4 L 110.7 381.4 L 110.7 226.9 L 151.3 226.9 L 151.3 226.9 L 192.0 226.9 L 192.0 226.9 L 232.7 226.9 L 232.7 226.9 L 273.3 226.9 L 273.3 226.9 L 314.0 226.9 L 314.0 191.5 L 354.7 191.5 L 354.7 185.4 L 395.3 185.4 L 395.3 185.4 L 436.0 185.4 L 436.0 185.4 L 476.7 185.4 L 476.7 63.6 L 517.3 63.6 L 517.3 63.6 L 558.0 63.6 L 558.0 63.6 L 598.7 63.6 L 598.7 63.6 L 639.3 63.6 L 639.3 63.6 L 680.0 63.6 L 680.0 63.6" stroke="var(--c1)" stroke-width="1.8" fill="none"/>
-  <path d="M 70.0 381.4 L 110.7 381.4 L 110.7 381.4 L 151.3 381.4 L 151.3 337.8 L 192.0 337.8 L 192.0 316.5 L 232.7 316.5 L 232.7 313.1 L 273.3 313.1 L 273.3 257.1 L 314.0 257.1 L 314.0 239.1 L 354.7 239.1 L 354.7 239.1 L 395.3 239.1 L 395.3 78.3 L 436.0 78.3 L 436.0 78.3 L 476.7 78.3 L 476.7 78.3 L 517.3 78.3 L 517.3 78.3 L 558.0 78.3 L 558.0 78.3 L 598.7 78.3 L 598.7 78.3 L 639.3 78.3 L 639.3 78.3 L 680.0 78.3 L 680.0 78.3" stroke="var(--c2)" stroke-width="1.8" fill="none"/>
-  <path d="M 70.0 381.4 L 110.7 381.4 L 110.7 308.2 L 151.3 308.2 L 151.3 308.2 L 192.0 308.2 L 192.0 286.4 L 232.7 286.4 L 232.7 286.4 L 273.3 286.4 L 273.3 286.4 L 314.0 286.4 L 314.0 286.4 L 354.7 286.4 L 354.7 286.4 L 395.3 286.4 L 395.3 272.3 L 436.0 272.3 L 436.0 200.9 L 476.7 200.9 L 476.7 200.9 L 517.3 200.9 L 517.3 200.9 L 558.0 200.9 L 558.0 178.2 L 598.7 178.2 L 598.7 178.2 L 639.3 178.2 L 639.3 146.5 L 680.0 146.5 L 680.0 146.5" stroke="var(--c3)" stroke-width="1.8" fill="none"/>
-  <path d="M 70.0 381.4 L 110.7 381.4 L 110.7 337.6 L 151.3 337.6 L 151.3 284.3 L 192.0 284.3 L 192.0 230.8 L 232.7 230.8 L 232.7 230.8 L 273.3 230.8 L 273.3 220.5 L 314.0 220.5 L 314.0 220.5 L 354.7 220.5 L 354.7 220.5 L 395.3 220.5 L 395.3 220.5 L 436.0 220.5 L 436.0 198.0 L 476.7 198.0 L 476.7 198.0 L 517.3 198.0 L 517.3 198.0 L 558.0 198.0 L 558.0 186.2 L 598.7 186.2 L 598.7 186.2 L 639.3 186.2 L 639.3 186.2 L 680.0 186.2 L 680.0 186.2" stroke="var(--c4)" stroke-width="1.8" fill="none"/>
-  <path d="M 70.0 381.4 L 110.7 381.4 L 110.7 338.9 L 151.3 338.9 L 151.3 338.9 L 192.0 338.9 L 192.0 338.9 L 232.7 338.9 L 232.7 338.9 L 273.3 338.9 L 273.3 313.8 L 314.0 313.8 L 314.0 313.8 L 354.7 313.8 L 354.7 313.8 L 395.3 313.8 L 395.3 232.7 L 436.0 232.7 L 436.0 232.7 L 476.7 232.7 L 476.7 232.7 L 517.3 232.7 L 517.3 232.7 L 558.0 232.7 L 558.0 232.7 L 598.7 232.7 L 598.7 232.7 L 639.3 232.7 L 639.3 232.7 L 680.0 232.7 L 680.0 232.7" stroke="var(--c5)" stroke-width="1.8" fill="none"/>
-  <path d="M 70.0 381.4 L 110.7 381.4 L 110.7 381.4 L 151.3 381.4 L 151.3 381.4 L 192.0 381.4 L 192.0 381.4 L 232.7 381.4 L 232.7 381.4 L 273.3 381.4 L 273.3 287.1 L 314.0 287.1 L 314.0 287.1 L 354.7 287.1 L 354.7 287.1 L 395.3 287.1 L 395.3 287.1 L 436.0 287.1 L 436.0 287.1 L 476.7 287.1 L 476.7 287.1 L 517.3 287.1 L 517.3 287.1 L 558.0 287.1 L 558.0 287.1 L 598.7 287.1 L 598.7 287.1 L 639.3 287.1 L 639.3 287.1 L 680.0 287.1 L 680.0 287.1" stroke="var(--c6)" stroke-width="1.8" fill="none"/>
+  <path d="M 70.0 381.4 L 110.7 381.4 L 110.7 345.8 L 151.3 345.8 L 151.3 327.8 L 192.0 327.8 L 192.0 278.1 L 232.7 278.1 L 232.7 272.7 L 273.3 272.7 L 273.3 272.7 L 314.0 272.7 L 314.0 272.7 L 354.7 272.7 L 354.7 272.7 L 395.3 272.7 L 395.3 239.8 L 436.0 239.8 L 436.0 75.8 L 476.7 75.8 L 476.7 75.8 L 517.3 75.8 L 517.3 75.8 L 558.0 75.8 L 558.0 75.8 L 598.7 75.8 L 598.7 75.8 L 639.3 75.8 L 639.3 75.8 L 680.0 75.8 L 680.0 75.8" stroke="var(--c2)" stroke-width="1.8" fill="none"/>
+  <path d="M 70.0 381.4 L 110.7 381.4 L 110.7 381.4 L 151.3 381.4 L 151.3 337.8 L 192.0 337.8 L 192.0 316.5 L 232.7 316.5 L 232.7 313.1 L 273.3 313.1 L 273.3 257.1 L 314.0 257.1 L 314.0 239.1 L 354.7 239.1 L 354.7 239.1 L 395.3 239.1 L 395.3 78.3 L 436.0 78.3 L 436.0 78.3 L 476.7 78.3 L 476.7 78.3 L 517.3 78.3 L 517.3 78.3 L 558.0 78.3 L 558.0 78.3 L 598.7 78.3 L 598.7 78.3 L 639.3 78.3 L 639.3 78.3 L 680.0 78.3 L 680.0 78.3" stroke="var(--c3)" stroke-width="1.8" fill="none"/>
+  <path d="M 70.0 381.4 L 110.7 381.4 L 110.7 345.0 L 151.3 345.0 L 151.3 345.0 L 192.0 345.0 L 192.0 336.2 L 232.7 336.2 L 232.7 336.2 L 273.3 336.2 L 273.3 232.4 L 314.0 232.4 L 314.0 232.4 L 354.7 232.4 L 354.7 121.5 L 395.3 121.5 L 395.3 121.5 L 436.0 121.5 L 436.0 121.5 L 476.7 121.5 L 476.7 121.5 L 517.3 121.5 L 517.3 121.5 L 558.0 121.5 L 558.0 121.5 L 598.7 121.5 L 598.7 121.5 L 639.3 121.5 L 639.3 121.5 L 680.0 121.5 L 680.0 121.5" stroke="var(--c4)" stroke-width="1.8" fill="none"/>
+  <path d="M 70.0 381.4 L 110.7 381.4 L 110.7 308.2 L 151.3 308.2 L 151.3 308.2 L 192.0 308.2 L 192.0 286.4 L 232.7 286.4 L 232.7 286.4 L 273.3 286.4 L 273.3 286.4 L 314.0 286.4 L 314.0 286.4 L 354.7 286.4 L 354.7 286.4 L 395.3 286.4 L 395.3 272.3 L 436.0 272.3 L 436.0 200.9 L 476.7 200.9 L 476.7 200.9 L 517.3 200.9 L 517.3 200.9 L 558.0 200.9 L 558.0 178.2 L 598.7 178.2 L 598.7 178.2 L 639.3 178.2 L 639.3 146.5 L 680.0 146.5 L 680.0 146.5" stroke="var(--c5)" stroke-width="1.8" fill="none"/>
+  <path d="M 70.0 381.4 L 110.7 381.4 L 110.7 337.6 L 151.3 337.6 L 151.3 284.3 L 192.0 284.3 L 192.0 230.8 L 232.7 230.8 L 232.7 230.8 L 273.3 230.8 L 273.3 220.5 L 314.0 220.5 L 314.0 220.5 L 354.7 220.5 L 354.7 220.5 L 395.3 220.5 L 395.3 220.5 L 436.0 220.5 L 436.0 198.0 L 476.7 198.0 L 476.7 198.0 L 517.3 198.0 L 517.3 198.0 L 558.0 198.0 L 558.0 186.2 L 598.7 186.2 L 598.7 186.2 L 639.3 186.2 L 639.3 186.2 L 680.0 186.2 L 680.0 186.2" stroke="var(--c6)" stroke-width="1.8" fill="none"/>
+  <path d="M 70.0 381.4 L 110.7 381.4 L 110.7 338.9 L 151.3 338.9 L 151.3 338.9 L 192.0 338.9 L 192.0 338.9 L 232.7 338.9 L 232.7 338.9 L 273.3 338.9 L 273.3 313.8 L 314.0 313.8 L 314.0 313.8 L 354.7 313.8 L 354.7 313.8 L 395.3 313.8 L 395.3 232.7 L 436.0 232.7 L 436.0 232.7 L 476.7 232.7 L 476.7 232.7 L 517.3 232.7 L 517.3 232.7 L 558.0 232.7 L 558.0 232.7 L 598.7 232.7 L 598.7 232.7 L 639.3 232.7 L 639.3 232.7 L 680.0 232.7 L 680.0 232.7" stroke="var(--c1)" stroke-width="1.8" fill="none"/>
+  <path d="M 70.0 381.4 L 110.7 381.4 L 110.7 344.5 L 151.3 344.5 L 151.3 344.5 L 192.0 344.5 L 192.0 344.5 L 232.7 344.5 L 232.7 344.5 L 273.3 344.5 L 273.3 344.5 L 314.0 344.5 L 314.0 344.5 L 354.7 344.5 L 354.7 344.5 L 395.3 344.5 L 395.3 344.5 L 436.0 344.5 L 436.0 283.9 L 476.7 283.9 L 476.7 283.9 L 517.3 283.9 L 517.3 234.7 L 558.0 234.7 L 558.0 234.7 L 598.7 234.7 L 598.7 234.7 L 639.3 234.7 L 639.3 234.7 L 680.0 234.7 L 680.0 233.5" stroke="var(--c2)" stroke-width="1.8" fill="none"/>
+  <path d="M 70.0 381.4 L 110.7 381.4 L 110.7 281.4 L 151.3 281.4 L 151.3 281.4 L 192.0 281.4 L 192.0 281.4 L 232.7 281.4 L 232.7 281.4 L 273.3 281.4 L 273.3 281.4 L 314.0 281.4 L 314.0 281.4 L 354.7 281.4 L 354.7 281.4 L 395.3 281.4 L 395.3 281.4 L 436.0 281.4 L 436.0 281.4 L 476.7 281.4 L 476.7 281.4 L 517.3 281.4 L 517.3 281.4 L 558.0 281.4 L 558.0 281.4 L 598.7 281.4 L 598.7 281.4 L 639.3 281.4 L 639.3 281.4 L 680.0 281.4 L 680.0 281.4" stroke="var(--c3)" stroke-width="1.8" fill="none"/>
+  <path d="M 70.0 381.4 L 110.7 381.4 L 110.7 381.4 L 151.3 381.4 L 151.3 381.4 L 192.0 381.4 L 192.0 381.4 L 232.7 381.4 L 232.7 381.4 L 273.3 381.4 L 273.3 287.1 L 314.0 287.1 L 314.0 287.1 L 354.7 287.1 L 354.7 287.1 L 395.3 287.1 L 395.3 287.1 L 436.0 287.1 L 436.0 287.1 L 476.7 287.1 L 476.7 287.1 L 517.3 287.1 L 517.3 287.1 L 558.0 287.1 L 558.0 287.1 L 598.7 287.1 L 598.7 287.1 L 639.3 287.1 L 639.3 287.1 L 680.0 287.1 L 680.0 287.1" stroke="var(--c4)" stroke-width="1.8" fill="none"/>
   <circle cx="680.0" cy="63.6" r="5" fill="var(--c1)" class="point"/>
-  <circle cx="680.0" cy="78.3" r="5" fill="var(--c2)" class="point"/>
-  <circle cx="680.0" cy="146.5" r="5" fill="var(--c3)" class="point"/>
-  <circle cx="680.0" cy="186.2" r="5" fill="var(--c4)" class="point"/>
-  <circle cx="680.0" cy="232.7" r="5" fill="var(--c5)" class="point"/>
-  <circle cx="680.0" cy="287.1" r="5" fill="var(--c6)" class="point"/>
+  <circle cx="680.0" cy="75.8" r="5" fill="var(--c2)" class="point"/>
+  <circle cx="680.0" cy="78.3" r="5" fill="var(--c3)" class="point"/>
+  <circle cx="680.0" cy="121.5" r="5" fill="var(--c4)" class="point"/>
+  <circle cx="680.0" cy="146.5" r="5" fill="var(--c5)" class="point"/>
+  <circle cx="680.0" cy="186.2" r="5" fill="var(--c6)" class="point"/>
+  <circle cx="680.0" cy="232.7" r="5" fill="var(--c1)" class="point"/>
+  <circle cx="680.0" cy="233.5" r="5" fill="var(--c2)" class="point"/>
+  <circle cx="680.0" cy="281.4" r="5" fill="var(--c3)" class="point"/>
+  <circle cx="680.0" cy="287.1" r="5" fill="var(--c4)" class="point"/>
   <text class="label" x="692.0" y="63.6" fill="var(--c1)">gpt-5_5_xhigh</text>
   <text class="tick" x="692.0" y="75.6" fill="var(--c1)" fill-opacity="0.7">525 at R15</text>
-  <text class="label" x="692.0" y="87.6" fill="var(--c2)">gpt-5_4_xhigh</text>
-  <text class="tick" x="692.0" y="99.6" fill="var(--c2)" fill-opacity="0.7">514 at R15</text>
-  <text class="label" x="692.0" y="146.5" fill="var(--c3)">gpt-5_5_high</text>
-  <text class="tick" x="692.0" y="158.5" fill="var(--c3)" fill-opacity="0.7">462 at R15</text>
-  <text class="label" x="692.0" y="186.2" fill="var(--c4)">gpt-5_5_medium</text>
-  <text class="tick" x="692.0" y="198.2" fill="var(--c4)" fill-opacity="0.7">432 at R15</text>
-  <text class="label" x="692.0" y="232.7" fill="var(--c5)">kimi-k2_6</text>
-  <text class="tick" x="692.0" y="244.7" fill="var(--c5)" fill-opacity="0.7">396 at R15</text>
-  <text class="label" x="692.0" y="287.1" fill="var(--c6)">gemini-3_1-pro</text>
-  <text class="tick" x="692.0" y="299.1" fill="var(--c6)" fill-opacity="0.7">355 at R15</text>
+  <text class="label" x="692.0" y="87.6" fill="var(--c2)">gpt-5_6-terra</text>
+  <text class="tick" x="692.0" y="99.6" fill="var(--c2)" fill-opacity="0.7">516 at R15</text>
+  <text class="label" x="692.0" y="111.6" fill="var(--c3)">gpt-5_4_xhigh</text>
+  <text class="tick" x="692.0" y="123.6" fill="var(--c3)" fill-opacity="0.7">514 at R15</text>
+  <text class="label" x="692.0" y="135.6" fill="var(--c4)">gpt-5_6-luna</text>
+  <text class="tick" x="692.0" y="147.6" fill="var(--c4)" fill-opacity="0.7">481 at R15</text>
+  <text class="label" x="692.0" y="159.6" fill="var(--c5)">gpt-5_5_high</text>
+  <text class="tick" x="692.0" y="171.6" fill="var(--c5)" fill-opacity="0.7">462 at R15</text>
+  <text class="label" x="692.0" y="186.2" fill="var(--c6)">gpt-5_5_medium</text>
+  <text class="tick" x="692.0" y="198.2" fill="var(--c6)" fill-opacity="0.7">432 at R15</text>
+  <text class="label" x="692.0" y="232.7" fill="var(--c1)">kimi-k2_6</text>
+  <text class="tick" x="692.0" y="244.7" fill="var(--c1)" fill-opacity="0.7">396 at R15</text>
+  <text class="label" x="692.0" y="256.7" fill="var(--c2)">gpt-5_4-mini</text>
+  <text class="tick" x="692.0" y="268.7" fill="var(--c2)" fill-opacity="0.7">396 at R15</text>
+  <text class="label" x="692.0" y="281.4" fill="var(--c3)">gemini-3_5-flash</text>
+  <text class="tick" x="692.0" y="293.4" fill="var(--c3)" fill-opacity="0.7">359 at R15</text>
+  <text class="label" x="692.0" y="305.4" fill="var(--c4)">gemini-3_1-pro</text>
+  <text class="tick" x="692.0" y="317.4" fill="var(--c4)" fill-opacity="0.7">355 at R15</text>
 </svg>
     <figcaption>
       Running max of CoreMark fitness across the 15 hypothesis rounds for each model's

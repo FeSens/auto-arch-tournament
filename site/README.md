@@ -29,9 +29,27 @@ python -m tools.site.build
 Reads `bench/results.jsonl` and each rep's `log.jsonl` / `summary.json`,
 re-renders the four HTML pages, leaves CSS / fonts untouched.
 
+Models that are registered but do not yet have all expected result rows are
+listed by `SCHEDULED_MODELS` in `tools/site/build.py`. They appear as scheduled
+on the leaderboard and models pages, show partial progress as reps land, and
+drop out of the scheduled table after all expected reps are present.
+
 A GitHub Action (`.github/workflows/pages.yml`) re-runs the build and
 deploys to GitHub Pages on every push to `main` that touches the site
 or the bench data.
+
+While a local GPT-5.6 field is running, the publication watcher can rebuild,
+commit, and push each rep immediately after its final result row and artifact
+directory are written:
+
+```sh
+python -m tools.site.watch_publish
+```
+
+The watcher publishes only `bench/results.jsonl`, the newly finalized rep
+directory, generated leaderboard files, and generated site HTML. It exits after
+all scheduled GPT-5.6 reps have finalized and refuses to run when unrelated
+changes are staged.
 
 ## Design system
 

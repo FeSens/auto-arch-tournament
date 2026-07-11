@@ -1,0 +1,31 @@
+{
+  "model": "gemini-3_5-flash",
+  "rep": 2,
+  "started_at": "2026-05-20T12:23:37+00:00",
+  "ended_at": null,
+  "wall_clock_sec": null,
+  "iterations": 4,
+  "accepted": 2,
+  "rejected": 1,
+  "broken": 1,
+  "final_fitness": 359.04,
+  "baseline_fitness": 282.82,
+  "best_fitness": 359.04,
+  "best_round": 4,
+  "delta_pct": 26.950003535817846,
+  "total_tokens_in": 27831698,
+  "total_tokens_out": 154805,
+  "total_cost_usd": 0.0,
+  "orchestrator_exit": -9,
+  "status": "failed",
+  "notes": " make exit=-9",
+  "broken_by_class": {
+    "hypothesis_gen_failed": 1
+  },
+  "best_lut4": 13773,
+  "best_ff": 3692,
+  "best_fmax_mhz": 124.66,
+  "best_iterations": 10,
+  "best_cycles": 3472016,
+  "best_ipc_coremark": 3e-06
+}
