@@ -22,6 +22,7 @@ import statistics
 import urllib.error
 import urllib.request
 from dataclasses import dataclass, field
+from datetime import date
 from pathlib import Path
 from typing import Optional
 
@@ -78,6 +79,34 @@ SCHEDULED_MODELS = (
         "expected_reps": 3,
     },
 )
+
+# Public model availability dates used by the release-date × score chart.
+# Reasoning-effort variants share their underlying model family's date.
+# Sources:
+# - OpenAI API/Codex changelogs: GPT-5.4 (Mar 5), GPT-5.4 mini (Mar 17),
+#   GPT-5.5 (Apr 23), and the GPT-5.6 launch week ending Jul 10.
+# - Gemini API changelog: Gemini 3.1 Pro Preview (Feb 19) and Gemini 3.5
+#   Flash GA (May 19).
+# - Kimi K2.6 official tech-blog announcement (Apr 20).
+MODEL_RELEASES = {
+    "gemini-3_1-pro":  {"date": "2026-02-19", "label": "Gemini 3.1 Pro",  "provider": "google"},
+    "gpt-5_4_xhigh":  {"date": "2026-03-05", "label": "GPT-5.4 xhigh",   "provider": "openai"},
+    "gpt-5_4-mini":   {"date": "2026-03-17", "label": "GPT-5.4 mini",    "provider": "openai"},
+    "kimi-k2_6":      {"date": "2026-04-20", "label": "Kimi K2.6",       "provider": "kimi"},
+    "gpt-5_5_medium": {"date": "2026-04-23", "label": "GPT-5.5 medium",  "provider": "openai"},
+    "gpt-5_5_high":   {"date": "2026-04-23", "label": "GPT-5.5 high",    "provider": "openai"},
+    "gpt-5_5_xhigh":  {"date": "2026-04-23", "label": "GPT-5.5 xhigh",   "provider": "openai"},
+    "gemini-3_5-flash":{"date": "2026-05-19", "label": "Gemini 3.5 Flash", "provider": "google"},
+    "gpt-5_6-luna":   {"date": "2026-07-10", "label": "GPT-5.6 Luna",    "provider": "openai"},
+    "gpt-5_6-terra":  {"date": "2026-07-10", "label": "GPT-5.6 Terra",   "provider": "openai"},
+    "gpt-5_6-sol":    {"date": "2026-07-10", "label": "GPT-5.6 Sol",     "provider": "openai"},
+}
+
+PROVIDER_COLORS = {
+    "openai": "var(--c2)",
+    "google": "var(--c1)",
+    "kimi": "var(--c3)",
+}
 
 # Human-engineered reference: VexRiscv synthesized on Gowin GW2A-LV18 (Tang Nano 20K).
 # LUT4 = 3402 (CPU-core only; the syn report's bare 3957 figure included bench
@@ -514,6 +543,141 @@ def chart_score_vs_lut4(aggs: list[ModelAgg], baseline_lut: int = 9563,
     return "\n".join(parts)
 
 
+def chart_release_vs_fitness(aggs: list[ModelAgg]) -> str:
+    """METR-inspired scatter: public release date × peak HWE fitness."""
+    items = []
+    for a in aggs:
+        release = MODEL_RELEASES.get(a.model)
+        if not release or a.fitness_best is None:
+            continue
+        released = date.fromisoformat(release["date"])
+        items.append({
+            "model": a.model,
+            "label": release["label"],
+            "provider": release["provider"],
+            "released": released,
+            "day": released.toordinal(),
+            "fit": float(a.fitness_best),
+            "color": PROVIDER_COLORS[release["provider"]],
+        })
+    if not items:
+        return ""
+
+    earliest = min(it["released"] for it in items)
+    latest = max(it["released"] for it in items)
+    xmin = date(earliest.year, earliest.month, 1).toordinal()
+    if latest.month == 12:
+        xmax = date(latest.year + 1, 1, 1).toordinal()
+    else:
+        xmax = date(latest.year, latest.month + 1, 1).toordinal()
+    ymin = min(BASELINE_FITNESS * 0.96, min(it["fit"] for it in items) * 0.94)
+    ymax = max(it["fit"] for it in items) * 1.07
+
+    W, H = 920, 510
+    ml, mr, mt, mb = 84, 196, 34, 62
+    plot_w, plot_h = W - ml - mr, H - mt - mb
+
+    def x(v): return ml + _scale(v, xmin, xmax, 0, plot_w)
+    def y(v): return mt + _scale(v, ymax, ymin, 0, plot_h)
+
+    parts = [f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" role="img" aria-label="Peak HWE fitness by model release date">']
+    # Keep the SVG legible when copied or rendered outside the site stylesheet.
+    parts.append('''  <style>
+    text { font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
+    .axis-line { stroke: var(--rule, #d8d4cf); stroke-width: 1; }
+    .grid { stroke: var(--rule, #d8d4cf); stroke-width: .5; stroke-dasharray: 2 3; }
+    .baseline { stroke: var(--ink-muted, #77716c); stroke-width: 1; stroke-dasharray: 4 3; }
+    .axis-label { font-size: 12px; fill: var(--ink, #262a33); }
+    .tick { font-family: ui-monospace, SFMono-Regular, monospace; font-size: 10px; fill: var(--ink-muted, #77716c); }
+    .point { stroke: var(--bg, #faf9f7); stroke-width: 2; }
+    .label { font-family: ui-monospace, SFMono-Regular, monospace; font-size: 11px; font-weight: 500; }
+  </style>''')
+
+    # Monthly grid, using the first day of each month within the chart window.
+    start = date.fromordinal(xmin)
+    end = date.fromordinal(xmax)
+    year, month = start.year, start.month
+    first_month_label = True
+    while True:
+        tick = date(year, month, 1)
+        if tick > end:
+            break
+        if tick >= start:
+            px = x(tick.toordinal())
+            parts.append(f'  <line class="grid" x1="{px:.1f}" y1="{mt}" x2="{px:.1f}" y2="{mt+plot_h}"/>')
+            label = tick.strftime("%b %Y") if first_month_label or tick.month == 1 else tick.strftime("%b")
+            parts.append(f'  <text class="tick" x="{px:.1f}" y="{mt+plot_h+20}" text-anchor="middle">{label}</text>')
+            first_month_label = False
+        if month == 12:
+            year += 1; month = 1
+        else:
+            month += 1
+
+    for t in _nice_ticks(ymin, ymax, 6):
+        py = y(t)
+        parts.append(f'  <line class="grid" x1="{ml}" y1="{py:.1f}" x2="{ml+plot_w}" y2="{py:.1f}"/>')
+        parts.append(f'  <text class="tick" x="{ml-10}" y="{py+4:.1f}" text-anchor="end">{t:.0f}</text>')
+
+    parts.append(f'  <line class="axis-line" x1="{ml}" y1="{mt+plot_h}" x2="{ml+plot_w}" y2="{mt+plot_h}"/>')
+    parts.append(f'  <line class="axis-line" x1="{ml}" y1="{mt}" x2="{ml}" y2="{mt+plot_h}"/>')
+
+    by = y(BASELINE_FITNESS)
+    parts.append(f'  <line class="baseline" x1="{ml}" y1="{by:.1f}" x2="{ml+plot_w}" y2="{by:.1f}"/>')
+    parts.append(f'  <text class="tick" x="{ml+8}" y="{by-7:.1f}" fill="var(--ink-muted)">baseline V0 · {BASELINE_FITNESS:.0f}</text>')
+
+    # Ordinary least-squares trend. This is descriptive, not a forecast.
+    if len(items) >= 2:
+        xs = [it["day"] for it in items]
+        ys = [it["fit"] for it in items]
+        xmean, ymean = statistics.fmean(xs), statistics.fmean(ys)
+        denom = sum((v - xmean) ** 2 for v in xs)
+        if denom:
+            slope = sum((vx - xmean) * (vy - ymean) for vx, vy in zip(xs, ys)) / denom
+            intercept = ymean - slope * xmean
+            y1, y2 = slope * xmin + intercept, slope * xmax + intercept
+            parts.append(
+                f'  <line x1="{x(xmin):.1f}" y1="{y(y1):.1f}" '
+                f'x2="{x(xmax):.1f}" y2="{y(y2):.1f}" '
+                'stroke="var(--c2)" stroke-width="2" stroke-dasharray="7 6" opacity="0.55"/>'
+            )
+
+    parts.append(f'  <text class="axis-label" x="{ml}" y="{mt-14}" text-anchor="start">Peak HWE fitness · higher is better</text>')
+    parts.append(f'  <text class="axis-label" x="{ml+plot_w}" y="{H-14}" text-anchor="end">Public model release date</text>')
+
+    for it in items:
+        it["px"], it["py"] = x(it["day"]), y(it["fit"])
+        it["y"] = it["py"]
+    _place_labels(items, line_h=22)
+
+    for it in items:
+        parts.append(
+            f'  <circle class="point" cx="{it["px"]:.1f}" cy="{it["py"]:.1f}" '
+            f'r="6.5" fill="{it["color"]}"/>'
+        )
+    for it in items:
+        right_side = it["px"] < ml + plot_w * 0.72
+        lbl_x = it["px"] + 11 if right_side else it["px"] - 11
+        anchor = "start" if right_side else "end"
+        if it["pushed"]:
+            parts.append(
+                f'  <line x1="{it["px"]:.1f}" y1="{it["py"]:.1f}" '
+                f'x2="{it["px"]:.1f}" y2="{it["label_y"]:.1f}" '
+                f'stroke="{it["color"]}" stroke-width="1" opacity="0.35"/>'
+            )
+        parts.append(
+            f'  <text class="label" x="{lbl_x:.1f}" y="{it["label_y"]:.1f}" '
+            f'text-anchor="{anchor}" fill="{it["color"]}">{it["label"]}</text>'
+        )
+        parts.append(
+            f'  <text class="tick" x="{lbl_x:.1f}" y="{it["label_y"]+12:.1f}" '
+            f'text-anchor="{anchor}" fill="{it["color"]}" fill-opacity="0.72">'
+            f'{it["fit"]:.0f} · {it["released"].strftime("%b %d")}</text>'
+        )
+
+    parts.append('</svg>')
+    return "\n".join(parts)
+
+
 def chart_score_vs_round(aggs: list[ModelAgg],
                           baseline_fit: float = BASELINE_FITNESS,
                           n_rounds: int = 15) -> str:
@@ -679,6 +843,7 @@ def render_index(aggs: list[ModelAgg], reps: list[Rep], stars: Optional[int] = N
 
     chart1_svg = chart_score_vs_lut4(aggs)
     chart2_svg = chart_score_vs_round(aggs)
+    release_chart_svg = chart_release_vs_fitness(aggs)
 
     n_above_human = sum(1 for a in aggs if (a.fitness_best or 0) > VEXRISCV_REF["fitness"])
     scheduled_html = render_scheduled_models(aggs)
@@ -703,6 +868,22 @@ def render_index(aggs: list[ModelAgg], reps: list[Rep], stars: Optional[int] = N
 </section>
 
 {scheduled_html}
+
+<section class="section" id="release-curve">
+  <div class="eyebrow">Capability over time</div>
+  <h2>Model release date × peak HWE score</h2>
+  <figure class="chart">
+    {release_chart_svg}
+    <figcaption>
+      Each point is one model configuration's best completed HWE Bench rep;
+      reasoning-effort variants share their underlying model family's public release date.
+      The dashed fit is descriptive, not a forecast. Release dates come from the
+      <a href="https://developers.openai.com/api/docs/changelog" class="ext">OpenAI API / Codex notes</a>,
+      <a href="https://ai.google.dev/gemini-api/docs/changelog" class="ext">Gemini API changelog</a>,
+      and <a href="https://www.kimi.com/blog/kimi-k2-6" class="ext">Kimi K2.6 announcement</a>.
+    </figcaption>
+  </figure>
+</section>
 
 <section class="section">
   <div class="eyebrow">Speed vs size</div>

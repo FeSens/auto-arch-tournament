@@ -1,6 +1,18 @@
 from types import SimpleNamespace
 
-from tools.site.build import ModelAgg, Rep, render_models, render_scheduled_models
+from datetime import date
+
+from tools.site.build import (
+    DEFAULT_RESULTS,
+    MODEL_RELEASES,
+    ModelAgg,
+    Rep,
+    aggregate,
+    chart_release_vs_fitness,
+    load_reps,
+    render_models,
+    render_scheduled_models,
+)
 
 
 def test_scheduled_gpt56_field_tracks_partial_and_complete_models():
@@ -75,3 +87,17 @@ def test_model_rep_table_renders_exact_lut_count():
     html = render_models([agg], stars=0)
     assert '<td class="num">10,155</td>' in html
     assert '<td class="num">10.2k</td>' not in html
+
+
+def test_release_chart_covers_every_scored_model_and_renders_labels():
+    aggs = aggregate(load_reps(DEFAULT_RESULTS, DEFAULT_RESULTS.parent.parent))
+    scored_models = {a.model for a in aggs if a.fitness_best is not None}
+    assert scored_models <= MODEL_RELEASES.keys()
+    assert all(date.fromisoformat(meta["date"]) for meta in MODEL_RELEASES.values())
+
+    html = chart_release_vs_fitness(aggs)
+    assert 'aria-label="Peak HWE fitness by model release date"' in html
+    assert "Gemini 3.1 Pro" in html
+    assert "GPT-5.6 Terra" in html
+    assert "Public model release date" in html
+    assert 'stroke-dasharray="7 6"' in html

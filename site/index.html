@@ -83,6 +83,95 @@
 </section>
 
 
+<section class="section" id="release-curve">
+  <div class="eyebrow">Capability over time</div>
+  <h2>Model release date × peak HWE score</h2>
+  <figure class="chart">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 510" role="img" aria-label="Peak HWE fitness by model release date">
+  <style>
+    text { font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
+    .axis-line { stroke: var(--rule, #d8d4cf); stroke-width: 1; }
+    .grid { stroke: var(--rule, #d8d4cf); stroke-width: .5; stroke-dasharray: 2 3; }
+    .baseline { stroke: var(--ink-muted, #77716c); stroke-width: 1; stroke-dasharray: 4 3; }
+    .axis-label { font-size: 12px; fill: var(--ink, #262a33); }
+    .tick { font-family: ui-monospace, SFMono-Regular, monospace; font-size: 10px; fill: var(--ink-muted, #77716c); }
+    .point { stroke: var(--bg, #faf9f7); stroke-width: 2; }
+    .label { font-family: ui-monospace, SFMono-Regular, monospace; font-size: 11px; font-weight: 500; }
+  </style>
+  <line class="grid" x1="84.0" y1="34" x2="84.0" y2="448"/>
+  <text class="tick" x="84.0" y="468" text-anchor="middle">Feb 2026</text>
+  <line class="grid" x1="183.0" y1="34" x2="183.0" y2="448"/>
+  <text class="tick" x="183.0" y="468" text-anchor="middle">Mar</text>
+  <line class="grid" x1="292.6" y1="34" x2="292.6" y2="448"/>
+  <text class="tick" x="292.6" y="468" text-anchor="middle">Apr</text>
+  <line class="grid" x1="398.7" y1="34" x2="398.7" y2="448"/>
+  <text class="tick" x="398.7" y="468" text-anchor="middle">May</text>
+  <line class="grid" x1="508.3" y1="34" x2="508.3" y2="448"/>
+  <text class="tick" x="508.3" y="468" text-anchor="middle">Jun</text>
+  <line class="grid" x1="614.4" y1="34" x2="614.4" y2="448"/>
+  <text class="tick" x="614.4" y="468" text-anchor="middle">Jul</text>
+  <line class="grid" x1="724.0" y1="34" x2="724.0" y2="448"/>
+  <text class="tick" x="724.0" y="468" text-anchor="middle">Aug</text>
+  <line class="grid" x1="84" y1="407.4" x2="724" y2="407.4"/>
+  <text class="tick" x="74" y="411.4" text-anchor="end">300</text>
+  <line class="grid" x1="84" y1="264.7" x2="724" y2="264.7"/>
+  <text class="tick" x="74" y="268.7" text-anchor="end">400</text>
+  <line class="grid" x1="84" y1="122.1" x2="724" y2="122.1"/>
+  <text class="tick" x="74" y="126.1" text-anchor="end">500</text>
+  <line class="axis-line" x1="84" y1="448" x2="724" y2="448"/>
+  <line class="axis-line" x1="84" y1="34" x2="84" y2="448"/>
+  <line class="baseline" x1="84" y1="431.9" x2="724" y2="431.9"/>
+  <text class="tick" x="92" y="424.9" fill="var(--ink-muted)">baseline V0 · 283</text>
+  <line x1="84.0" y1="263.7" x2="724.0" y2="132.5" stroke="var(--c2)" stroke-width="2" stroke-dasharray="7 6" opacity="0.55"/>
+  <text class="axis-label" x="84" y="20" text-anchor="start">Peak HWE fitness · higher is better</text>
+  <text class="axis-label" x="724" y="496" text-anchor="end">Public model release date</text>
+  <circle class="point" cx="370.4" cy="86.4" r="6.5" fill="var(--c2)"/>
+  <circle class="point" cx="646.2" cy="99.7" r="6.5" fill="var(--c2)"/>
+  <circle class="point" cx="197.1" cy="102.4" r="6.5" fill="var(--c2)"/>
+  <circle class="point" cx="646.2" cy="149.4" r="6.5" fill="var(--c2)"/>
+  <circle class="point" cx="370.4" cy="176.5" r="6.5" fill="var(--c2)"/>
+  <circle class="point" cx="370.4" cy="219.7" r="6.5" fill="var(--c2)"/>
+  <circle class="point" cx="359.8" cy="270.3" r="6.5" fill="var(--c3)"/>
+  <circle class="point" cx="239.6" cy="271.1" r="6.5" fill="var(--c2)"/>
+  <circle class="point" cx="462.3" cy="323.2" r="6.5" fill="var(--c1)"/>
+  <circle class="point" cx="147.6" cy="329.3" r="6.5" fill="var(--c1)"/>
+  <text class="label" x="381.4" y="86.4" text-anchor="start" fill="var(--c2)">GPT-5.5 xhigh</text>
+  <text class="tick" x="381.4" y="98.4" text-anchor="start" fill="var(--c2)" fill-opacity="0.72">525 · Apr 23</text>
+  <line x1="646.2" y1="99.7" x2="646.2" y2="108.4" stroke="var(--c2)" stroke-width="1" opacity="0.35"/>
+  <text class="label" x="635.2" y="108.4" text-anchor="end" fill="var(--c2)">GPT-5.6 Terra</text>
+  <text class="tick" x="635.2" y="120.4" text-anchor="end" fill="var(--c2)" fill-opacity="0.72">516 · Jul 10</text>
+  <line x1="197.1" y1="102.4" x2="197.1" y2="130.4" stroke="var(--c2)" stroke-width="1" opacity="0.35"/>
+  <text class="label" x="208.1" y="130.4" text-anchor="start" fill="var(--c2)">GPT-5.4 xhigh</text>
+  <text class="tick" x="208.1" y="142.4" text-anchor="start" fill="var(--c2)" fill-opacity="0.72">514 · Mar 05</text>
+  <line x1="646.2" y1="149.4" x2="646.2" y2="152.4" stroke="var(--c2)" stroke-width="1" opacity="0.35"/>
+  <text class="label" x="635.2" y="152.4" text-anchor="end" fill="var(--c2)">GPT-5.6 Luna</text>
+  <text class="tick" x="635.2" y="164.4" text-anchor="end" fill="var(--c2)" fill-opacity="0.72">481 · Jul 10</text>
+  <text class="label" x="381.4" y="176.5" text-anchor="start" fill="var(--c2)">GPT-5.5 high</text>
+  <text class="tick" x="381.4" y="188.5" text-anchor="start" fill="var(--c2)" fill-opacity="0.72">462 · Apr 23</text>
+  <text class="label" x="381.4" y="219.7" text-anchor="start" fill="var(--c2)">GPT-5.5 medium</text>
+  <text class="tick" x="381.4" y="231.7" text-anchor="start" fill="var(--c2)" fill-opacity="0.72">432 · Apr 23</text>
+  <text class="label" x="370.8" y="270.3" text-anchor="start" fill="var(--c3)">Kimi K2.6</text>
+  <text class="tick" x="370.8" y="282.3" text-anchor="start" fill="var(--c3)" fill-opacity="0.72">396 · Apr 20</text>
+  <line x1="239.6" y1="271.1" x2="239.6" y2="292.3" stroke="var(--c2)" stroke-width="1" opacity="0.35"/>
+  <text class="label" x="250.6" y="292.3" text-anchor="start" fill="var(--c2)">GPT-5.4 mini</text>
+  <text class="tick" x="250.6" y="304.3" text-anchor="start" fill="var(--c2)" fill-opacity="0.72">396 · Mar 17</text>
+  <text class="label" x="473.3" y="323.2" text-anchor="start" fill="var(--c1)">Gemini 3.5 Flash</text>
+  <text class="tick" x="473.3" y="335.2" text-anchor="start" fill="var(--c1)" fill-opacity="0.72">359 · May 19</text>
+  <line x1="147.6" y1="329.3" x2="147.6" y2="345.2" stroke="var(--c1)" stroke-width="1" opacity="0.35"/>
+  <text class="label" x="158.6" y="345.2" text-anchor="start" fill="var(--c1)">Gemini 3.1 Pro</text>
+  <text class="tick" x="158.6" y="357.2" text-anchor="start" fill="var(--c1)" fill-opacity="0.72">355 · Feb 19</text>
+</svg>
+    <figcaption>
+      Each point is one model configuration's best completed HWE Bench rep;
+      reasoning-effort variants share their underlying model family's public release date.
+      The dashed fit is descriptive, not a forecast. Release dates come from the
+      <a href="https://developers.openai.com/api/docs/changelog" class="ext">OpenAI API / Codex notes</a>,
+      <a href="https://ai.google.dev/gemini-api/docs/changelog" class="ext">Gemini API changelog</a>,
+      and <a href="https://www.kimi.com/blog/kimi-k2-6" class="ext">Kimi K2.6 announcement</a>.
+    </figcaption>
+  </figure>
+</section>
+
 <section class="section">
   <div class="eyebrow">Speed vs size</div>
   <h2>Score × Area</h2>
