@@ -1,4 +1,4 @@
-from tools.site.watch_publish import field_complete, pending_rows
+from tools.site.watch_publish import field_complete, https_push_url, pending_rows
 
 
 def _row(model, rep, status="done", lut=10000):
@@ -37,3 +37,12 @@ def test_field_complete_requires_all_three_reps_for_all_models():
     assert field_complete(rows)
     rows.pop(("gpt-5_6-sol", 3))
     assert not field_complete(rows)
+
+
+def test_https_push_url_converts_github_ssh_remote():
+    assert https_push_url("git@github.com:FeSens/auto-arch-tournament.git") == (
+        "https://github.com/FeSens/auto-arch-tournament.git"
+    )
+    assert https_push_url("https://example.com/repo.git") == (
+        "https://example.com/repo.git"
+    )

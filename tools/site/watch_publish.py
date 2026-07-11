@@ -47,6 +47,14 @@ def _run(*args: str, capture: bool = False) -> subprocess.CompletedProcess[str]:
     )
 
 
+def https_push_url(origin_url: str) -> str:
+    """Return an unattended HTTPS URL for a GitHub SSH remote."""
+    prefix = "git@github.com:"
+    if origin_url.startswith(prefix):
+        return "https://github.com/" + origin_url[len(prefix):]
+    return origin_url
+
+
 def _rows_from_text(text: str) -> dict[tuple[str, int], dict]:
     rows: dict[tuple[str, int], dict] = {}
     for raw in text.splitlines():
@@ -117,7 +125,8 @@ def publish_once(results_path: Path = DEFAULT_RESULTS) -> tuple[bool, bool]:
     _run("git", "add", "--", *paths)
     labels = ", ".join(f"{model} rep{rep}" for model, rep in pending)
     _run("git", "commit", "-m", f"bench: publish {labels}", "--", *paths)
-    _run("git", "push", "origin", "HEAD:main")
+    origin = _run("git", "remote", "get-url", "origin", capture=True).stdout.strip()
+    _run("git", "push", https_push_url(origin), "HEAD:main")
     return True, field_complete(current)
 
 
