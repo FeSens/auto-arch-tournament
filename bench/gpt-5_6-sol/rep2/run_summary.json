@@ -1,0 +1,22 @@
+{
+  "iterations": 34,
+  "accepted": 2,
+  "rejected": 24,
+  "broken": 8,
+  "broken_by_class": {
+    "implementation_compile_failed": 2,
+    "formal_failed": 2,
+    "cosim_failed": 4
+  },
+  "baseline_fitness": 282.82,
+  "final_fitness": 441.11,
+  "best_fitness": 441.11,
+  "best_round": 3,
+  "delta_pct": 55.968460504914795,
+  "best_lut4": 5376,
+  "best_ff": 2085,
+  "best_fmax_mhz": 198.14,
+  "best_iterations": 10,
+  "best_cycles": 4491817,
+  "best_ipc_coremark": 2e-06
+}

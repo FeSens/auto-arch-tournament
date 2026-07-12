@@ -9,7 +9,7 @@ Best LUT4 / Fmax / IPC are the FPGA-side detail of the **best rep's best entry**
 | Model | Reps | Fitness mean ± std | Best | LUT4 | Fmax MHz | IPC | acc | rej | brk | Iters→best | Pass-rate | $ cost | s/iter |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | `gpt-5_4_xhigh` | 3/3 | 485.8 ± 28.1 | 513.8 | 10108 | 203.3 | 2.53 | 5.0 | 27.7 | 10.7 | 19.7 | 11% | $0.00 | 775 |
-| `gpt-5_6-sol` | 1/1 | 470.8 ± 0.0 | 470.8 | 10168 | 199.9 | 2.35 | 7.0 | 30.0 | 8.0 | 46.0 | 15% | $0.00 | 114 |
+| `gpt-5_6-sol` | 1/3 | 470.8 ± 0.0 | 470.8 | 10168 | 199.9 | 2.35 | 4.0 | 25.3 | 6.3 | 46.0 | 15% | $0.00 | 114 |
 | `gpt-5_5_xhigh` | 3/3 | 468.3 ± 52.8 | 525.0 | 5453 | 220.2 | 2.38 | 5.7 | 37.7 | 2.0 | 28.3 | 12% | $0.00 | 478 |
 | `gpt-5_6-luna` | 3/3 | 452.0 ± 29.0 | 480.9 | 10135 | 208.7 | 2.30 | 3.7 | 26.7 | 14.0 | 18.3 | 8% | $0.00 | 388 |
 | `gpt-5_6-terra` | 3/3 | 442.3 ± 55.8 | 515.7 | 10525 | 208.5 | 2.47 | 6.3 | 25.3 | 13.0 | 26.7 | 14% | $0.00 | 219 |
@@ -38,8 +38,9 @@ Counts each model's broken iterations grouped by the orchestrator's broken-class
 
 | Class | Count |
 |---|---|
-| `cosim_failed` | 4 |
-| `formal_failed` | 4 |
+| `cosim_failed` | 10 |
+| `formal_failed` | 7 |
+| `implementation_compile_failed` | 2 |
 
 ### `gpt-5_5_xhigh`
 
@@ -147,6 +148,8 @@ Every `(model, rep)` row from `bench/results.jsonl`, before per-model aggregatio
 | `gpt-5_6-luna` | 2 | done | 46 | 5 | 32 | 8 | 282.8 → 480.9 | 70% | 480.9 | 10135 | 208.7 | 2.30 | 302.9 |
 | `gpt-5_6-luna` | 3 | done | 46 | 3 | 28 | 13 | 282.8 → 412.4 | 46% | 412.4 | 7500 | 185.2 | 2.23 | 295.3 |
 | `gpt-5_6-sol` | 1 | done | 46 | 7 | 30 | 8 | 282.8 → 470.8 | 66% | 470.8 | 10168 | 199.9 | 2.35 | 87.8 |
+| `gpt-5_6-sol` | 2 | failed | 34 | 2 | 24 | 8 | 282.8 → 441.1 | 56% | 441.1 | 5376 | 198.1 | 2.23 | 271.1 |
+| `gpt-5_6-sol` | 3 | failed | 28 | 3 | 22 | 3 | 282.8 → 412.9 | 46% | 412.9 | 5685 | 177.0 | 2.33 | 271.1 |
 | `gpt-5_6-terra` | 1 | done | 46 | 5 | 23 | 18 | 282.8 → 430.4 | 52% | 430.4 | 5763 | 193.3 | 2.23 | 214.6 |
 | `gpt-5_6-terra` | 2 | done | 46 | 7 | 29 | 8 | 282.8 → 515.7 | 82% | 515.7 | 10525 | 208.5 | 2.47 | 220.3 |
 | `gpt-5_6-terra` | 3 | done | 46 | 7 | 24 | 13 | 282.8 → 380.6 | 35% | 380.6 | 7729 | 157.9 | 2.41 | 68.2 |
@@ -315,6 +318,15 @@ Each model's accepted-improvement entries (the hypotheses that actually moved th
 - **Target-only replay-buffer tag** — fitness 463.9 (+7.4%) _micro_opt_ R8 — LUT4 10217, 197.0 MHz
 - **Protocol-qualified replay fill capture** — fitness 467.9 (+0.9%) _predictor_ R13 — LUT4 10292, 198.7 MHz
 - **Protocol-qualified in-place replay refill** — fitness 470.8 (+0.6%) _predictor_ R15 — LUT4 10168, 199.9 MHz
+
+### `gpt-5_6-sol` rep 2
+
+- **Replace combinational division with an iterative M-unit** — fitness 441.1 (+56.0%) _structural_ R1 — LUT4 5376, 198.1 MHz
+
+### `gpt-5_6-sol` rep 3
+
+- **Move DIV and REM into a cold iterative execution unit** — fitness 379.8 (+34.3%) _structural_ R1 — LUT4 5614, 170.6 MHz
+- **Bypass completed loads directly from MEM to EX** — fitness 412.9 (+8.7%) _structural_ R2 — LUT4 5685, 177.0 MHz
 
 ### `gpt-5_6-terra` rep 1
 
