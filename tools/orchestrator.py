@@ -481,23 +481,24 @@ def emit_verilog(worktree: str, target: str | None = None) -> tuple[bool, str]:
             out = "..." + out[-800:]
         return (False, f"{step}: {out}" if out else f"{step}: (no output)")
 
-    # 1. Verilator lint. Catches syntax errors before slower steps.
-    if target:
-        rtl_glob = f"cores/{target}/rtl/*.sv"
-        rtl_dir = f"cores/{target}/rtl"
-        lint_cmd = (
-            f"if ls {rtl_glob} >/dev/null 2>&1; then "
-            f"verilator --lint-only -Wall -Wno-MULTITOP -sv +incdir+{rtl_dir} {rtl_glob}; "
-            f"else echo 'lint: no source files in {rtl_glob}'; exit 1; fi"
-        )
-    else:
-        lint_cmd = (
-            "if ls rtl/*.sv >/dev/null 2>&1; then "
-            "verilator --lint-only -Wall -Wno-MULTITOP -sv +incdir+rtl rtl/*.sv; "
-            "else echo 'lint: no source files in rtl/'; exit 1; fi"
-        )
+    # 1. Verilator lint. Catches syntax errors before slower steps. Keep
+    # core_pkg.sv first: it defines compilation-unit typedefs consumed by the
+    # other sources, and current Verilator rejects forward references when a
+    # shell glob happens to place core.sv before core_pkg.sv.
+    rtl_dir = f"cores/{target}/rtl" if target else "rtl"
+    rtl_path = Path(worktree) / rtl_dir
+    rtl_sources = sorted(rtl_path.glob("*.sv"))
+    core_pkg = rtl_path / "core_pkg.sv"
+    if core_pkg in rtl_sources:
+        rtl_sources = [core_pkg, *(p for p in rtl_sources if p != core_pkg)]
+    if not rtl_sources:
+        return (False, f"lint: no source files in {rtl_dir}/")
     lint = subprocess.run(
-        ["bash", "-lc", lint_cmd],
+        [
+            "verilator", "--lint-only", "-Wall", "-Wno-MULTITOP", "-sv",
+            f"+incdir+{rtl_dir}",
+            *(str(p.relative_to(worktree)) for p in rtl_sources),
+        ],
         cwd=worktree, capture_output=True,
     )
     if lint.returncode != 0:

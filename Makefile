@@ -95,7 +95,9 @@ help:
 # rtl/ legitimately has multiple top modules. Drop this once phase 2 is in.
 lint:
 	@if ls $(RTL_DIR)/*.sv >/dev/null 2>&1; then \
-	  verilator --lint-only -Wall -Wno-MULTITOP -sv +incdir+$(RTL_DIR) $(RTL_DIR)/*.sv; \
+	  verilator --lint-only -Wall -Wno-MULTITOP -sv +incdir+$(RTL_DIR) \
+	    $(if $(wildcard $(RTL_DIR)/core_pkg.sv),$(RTL_DIR)/core_pkg.sv) \
+	    $(filter-out $(RTL_DIR)/core_pkg.sv,$(wildcard $(RTL_DIR)/*.sv)); \
 	else \
 	  echo "lint: no source files in $(RTL_DIR)/"; \
 	fi

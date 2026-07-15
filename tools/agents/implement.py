@@ -195,13 +195,20 @@ def run_implementation_agent(hypothesis_path: str, worktree: str,
 
     # Lint as the smoke gate. Subsequent eval gates (formal, cosim, fpga)
     # exercise actual behavior; this catches the most basic SV breakage.
-    rtl_glob = f"cores/{target}/rtl/*.sv" if target else "rtl/*.sv"
     rtl_dir_label = f"cores/{target}/rtl" if target else "rtl"
-    lint_cmd = (f"if ls {rtl_glob} >/dev/null 2>&1; then "
-                f"verilator --lint-only -Wall -Wno-MULTITOP -sv +incdir+{rtl_dir_label} {rtl_glob}; "
-                f"else echo 'lint: no source files in {rtl_dir_label}/'; exit 1; fi")
+    rtl_dir = Path(worktree) / rtl_dir_label
+    rtl_sources = sorted(rtl_dir.glob("*.sv"))
+    core_pkg = rtl_dir / "core_pkg.sv"
+    if core_pkg in rtl_sources:
+        rtl_sources = [core_pkg, *(p for p in rtl_sources if p != core_pkg)]
+    if not rtl_sources:
+        return False
     lint = subprocess.run(
-        ["bash", "-lc", lint_cmd],
+        [
+            "verilator", "--lint-only", "-Wall", "-Wno-MULTITOP", "-sv",
+            f"+incdir+{rtl_dir_label}",
+            *(str(p.relative_to(worktree)) for p in rtl_sources),
+        ],
         cwd=worktree, capture_output=True,
     )
     return lint.returncode == 0
