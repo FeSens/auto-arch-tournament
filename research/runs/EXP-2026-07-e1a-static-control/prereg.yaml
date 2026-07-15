@@ -3,6 +3,6 @@ question: What does the harness measure when the agent does nothing?
 hypothesis: delta_pct = 0.0 exactly (pinned P&R seeds); 46 rows, 1 accepted (baseline retest), 45 regressions.
 baseline_run_id: paper-snapshot-17rep
 primary_metric: final champion fitness per rep
-seeds: [n/a — deterministic]
+seeds: [n/a, deterministic]
 config: {n: 15, k: 3, reps: 1, ref: bench-v2}
 success_rule: any nonzero delta or broken row = harness bug; block all E1/E2 runs until explained.
