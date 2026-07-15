@@ -37,6 +37,7 @@ from typing import Optional
 
 import yaml
 
+from tools.bench import preflight
 
 
 HERE = Path(__file__).parent
@@ -828,6 +829,11 @@ def run_one_job(
         _finalize(row, started, results_jsonl)
         return row
 
+    # Forensics: snapshot the environment this rep will run under.
+    fp_path = clone / ".tmp" / "env.json"
+    fp_path.parent.mkdir(parents=True, exist_ok=True)
+    fp_path.write_text(json.dumps(preflight.env_fingerprint(), indent=2) + "\n")
+
     # 2. Install per-runtime fencing.
     try:
         if job.model.provider == "opencode":
@@ -972,6 +978,14 @@ def run_one_job(
     if agent_concat.is_file():
         shutil.copy2(agent_concat, out_dir / "agent.log")
 
+    # Forensics survive clone deletion: without this, a failed rep's
+    # orchestrator.log dies with the clone (the sol rep2/3 startup
+    # failures were undiagnosable for exactly this reason).
+    if orch_log_path.is_file():
+        shutil.copy2(orch_log_path, out_dir / "orchestrator.log")
+    if fp_path.is_file():
+        shutil.copy2(fp_path, out_dir / "env.json")
+
     summary = summarize_run(out_dir / "log.jsonl", out_dir / "agent.log",
                             provider=job.model.provider)
     row.update(summary)
@@ -979,7 +993,10 @@ def run_one_job(
         row["status"] = "done"
     elif last_status == "exited":
         row["status"] = "failed"
-        row["notes"] = (row["notes"] or "") + f" make exit={row['orchestrator_exit']}"
+        row["notes"] = (row["notes"] or "") + (
+            f" orchestrator exit={row['orchestrator_exit']}"
+            f" (see rep dir orchestrator.log)"
+        )
 
     # Per-rep summary.json
     (out_dir / "summary.json").write_text(json.dumps(row, indent=2) + "\n")

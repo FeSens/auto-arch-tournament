@@ -1,0 +1,39 @@
+"""Toolchain pre-flight and environment fingerprinting for the bench runner.
+
+Motivated by the 2026-07-11 gpt-5_6-sol rep2/rep3 startup failures: two
+reps died in seconds with orchestrator exit 1 and no surviving evidence.
+A rep costs hours of wall clock; refusing to start against a broken
+toolchain and snapshotting the env are both far cheaper than one wasted rep.
+"""
+from __future__ import annotations
+
+import os
+import shutil
+
+# Every external binary the eval gates shell out to, per grep of
+# Makefile, formal/run_all.sh, and fpga/scripts/ (2026-07-15):
+# verilator (lint + cosim), yosys (synth), nextpnr-himbaechel (P&R),
+# sby + bitwuzla (riscv-formal).
+REQUIRED_TOOLS: tuple[str, ...] = (
+    "verilator", "yosys", "nextpnr-himbaechel", "sby", "bitwuzla",
+)
+
+
+def env_fingerprint() -> dict:
+    """Snapshot of PATH and resolved tool paths, for per-rep forensics."""
+    return {
+        "path": os.environ.get("PATH", ""),
+        "tools": {t: shutil.which(t) for t in REQUIRED_TOOLS},
+    }
+
+
+def missing_tools() -> list[str]:
+    return [t for t in REQUIRED_TOOLS if shutil.which(t) is None]
+
+
+def report() -> str:
+    lines = ["[preflight] toolchain:"]
+    for t in REQUIRED_TOOLS:
+        p = shutil.which(t)
+        lines.append(f"  {t:20s} {p or 'MISSING'}")
+    return "\n".join(lines)
