@@ -19,13 +19,17 @@ is sniffed from prompt text.
 Operator pool (frozen for prereg): op_swap (+/-, &/|, ==/!=),
 ternary_swap, lit_perturb. Guards keep every mutation parse-valid so
 the control is not a lint-fails-instantly strawman; semantic validity
-is exactly what the downstream gates measure.
+is exactly what the downstream gates measure. If verilator is not on
+PATH at implementation time, the agent applies NO mutations and marks
+the slot INVALID in implementation_notes.md, so the final RTL for a
+given seed never depends on toolchain availability.
 """
 from __future__ import annotations
 
 import os
 import random
 import re
+import shutil
 import subprocess
 import sys
 from dataclasses import dataclass
@@ -212,6 +216,24 @@ def _implement(prompt: str) -> None:
     hyp_id = _hyp_id(prompt) or "no-id"
     rng = random.Random(f"{seed_base}:{hyp_id}")
     k = rng.randint(1, 3)
+
+    # Determinism guard: without verilator the redraw loop cannot run,
+    # and submitting an unguided draw would make the final RTL for a
+    # given seed depend on toolchain availability. Refuse loudly and
+    # leave the RTL unchanged instead (the slot evaluates as a no-op,
+    # same as the static control). The runner preflight makes this
+    # unreachable in production runs.
+    if shutil.which("verilator") is None:
+        _git_restore_rtl(worktree, target)
+        notes = Path("cores") / target / "implementation_notes.md"
+        notes.parent.mkdir(parents=True, exist_ok=True)
+        notes.write_text(
+            "Random-mutation control INVALID for this slot: verilator "
+            "unavailable, no mutations applied.\n"
+            f"Seed material: {seed_base}:{hyp_id}; k={k}.\n")
+        print("[random-agent] ERROR: verilator not on PATH; refusing to "
+              "mutate (slot marked INVALID)", file=sys.stderr, flush=True)
+        return
 
     applied: list[Applied] = []
     lint = None

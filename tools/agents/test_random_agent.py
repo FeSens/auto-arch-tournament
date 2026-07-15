@@ -67,3 +67,18 @@ def test_mutate_touches_only_rtl(tmp_path):
     before = (wt / "Makefile").read_text()
     ra.apply_mutations(wt, "bench", random.Random(1), k=3)
     assert (wt / "Makefile").read_text() == before
+
+
+def test_verilator_absent_applies_no_mutations(tmp_path, monkeypatch):
+    wt = _mk_worktree(tmp_path)
+    monkeypatch.setattr("shutil.which", lambda *a, **kw: None)
+    monkeypatch.setenv("RANDOM_AGENT_SEED", "101")
+    monkeypatch.chdir(wt)
+    ra._implement(
+        "TARGET CORE: cores/bench/ "
+        "Edit, create, or delete files in the worktree. "
+        "Hypothesis: hyp-20260101-001-r1s0"
+    )
+    assert (wt / "cores/bench/rtl/alu.sv").read_text() == SV
+    notes = (wt / "cores/bench/implementation_notes.md").read_text()
+    assert "INVALID" in notes
