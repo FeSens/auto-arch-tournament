@@ -1,8 +1,11 @@
 """Unit tests for the bench matrix runner.
 
 Pure-function tests on enumeration, key validation, log parsing, and
-summarization. The actual subprocess-driven `run_one_job` path is
-exercised by test_smoke.py (slow, opt-in).
+summarization. The full subprocess-driven `run_one_job` path (a real
+orchestrator invocation) is exercised by test_smoke.py (slow, opt-in);
+this file also covers run_one_job's early-return forensics behavior
+with clone_fixture stubbed out, since that doesn't need a real
+orchestrator run.
 """
 from __future__ import annotations
 
@@ -26,6 +29,7 @@ from tools.bench.runner import (
     load_models,
     parse_codex_cost_from_log,
     parse_opencode_cost_from_log,
+    run_one_job,
     summarize_run,
     validate_keys,
 )
@@ -423,3 +427,108 @@ def test_main_disk_preflight_measures_clone_base(tmp_path, monkeypatch):
     assert rc == 2
     assert seen["path"] == str(clone_base)
     assert clone_base.is_dir()
+
+
+# ---- run_one_job(): early-return paths must still leave forensics ------
+
+
+def _stub_clone_fixture(monkeypatch):
+    """Stand in for clone_fixture with something that just creates the
+    destination directory, so these tests don't need a real git repo
+    or a real riscv-formal checkout -- they're only exercising the
+    early-return forensics paths, not the clone itself."""
+    def fake_clone_fixture(repo_root, ref, dest):
+        dest.mkdir(parents=True, exist_ok=True)
+    monkeypatch.setattr(runner, "clone_fixture", fake_clone_fixture)
+
+
+def test_run_one_job_fence_fail_preserves_forensics(tmp_path, monkeypatch):
+    """A fence-install failure (install_opencode_config raising) must
+    still leave a rep dir behind with env.json copied into it. Before
+    the fix, this early return happened before out_dir was created and
+    before the finalize copy of env.json, so the clone kept no rep-dir
+    forensics at all -- and, having no rep dir, was never matched by
+    gc's find_stale_clones, so orphan clones accumulated over a
+    campaign."""
+    _stub_clone_fixture(monkeypatch)
+
+    def fake_install_opencode_config(clone):
+        raise RuntimeError("boom")
+
+    monkeypatch.setattr(runner, "install_opencode_config",
+                        fake_install_opencode_config)
+
+    model = ModelEntry(name="m0", model="prov/m0", provider="opencode")
+    job = JobSpec(model=model, rep=1)
+    results_dir = tmp_path / "results"
+
+    row = run_one_job(
+        job,
+        repo_root=tmp_path / "repo",
+        ref="main",
+        clone_base=tmp_path / "clones",
+        results_dir=results_dir,
+        results_jsonl=results_dir / "results.jsonl",
+        keys={},
+        n=1, k=1, timeout_sec=1, max_cost_usd=1.0, keep_clone=False,
+    )
+
+    assert "fence install failed" in row["notes"]
+    out_dir = results_dir / "m0" / "rep1"
+    assert (out_dir / "env.json").is_file()
+
+
+def test_run_one_job_missing_key_preserves_forensics(tmp_path, monkeypatch):
+    """Same forensics requirement as the fence-fail case above, for the
+    missing-API-key early return: env.json must land in the rep dir so
+    the clone isn't an orphan invisible to gc's find_stale_clones."""
+    _stub_clone_fixture(monkeypatch)
+    monkeypatch.delenv("BENCH_TEST_MISSING_KEY_XYZ", raising=False)
+
+    model = ModelEntry(name="m1", model="prov/m1", provider="codex",
+                        key_env="BENCH_TEST_MISSING_KEY_XYZ")
+    job = JobSpec(model=model, rep=1)
+    results_dir = tmp_path / "results"
+
+    row = run_one_job(
+        job,
+        repo_root=tmp_path / "repo",
+        ref="main",
+        clone_base=tmp_path / "clones",
+        results_dir=results_dir,
+        results_jsonl=results_dir / "results.jsonl",
+        keys={},
+        n=1, k=1, timeout_sec=1, max_cost_usd=1.0, keep_clone=False,
+    )
+
+    assert "missing API key env var BENCH_TEST_MISSING_KEY_XYZ" in row["notes"]
+    out_dir = results_dir / "m1" / "rep1"
+    assert (out_dir / "env.json").is_file()
+
+
+# ---- main(): clone_base mkdir must fail the preflight cleanly ----------
+
+
+def test_main_clone_base_mkdir_oserror_fails_cleanly(tmp_path, monkeypatch, capsys):
+    """An unwritable clone-base parent must fail the preflight cleanly
+    with a FATAL message and exit 2, not crash with an uncaught OSError
+    traceback (the preflight block is supposed to be the clean-failure
+    layer for exactly this kind of environment problem)."""
+    monkeypatch.setattr(preflight, "missing_tools", lambda: [])
+
+    clone_base = tmp_path / "clones"
+
+    def fake_mkdir(self, *a, **kw):
+        raise OSError(13, "Permission denied")
+
+    monkeypatch.setattr(Path, "mkdir", fake_mkdir)
+    monkeypatch.setattr(
+        sys, "argv", ["bench-runner", "--clone-base", str(clone_base)])
+
+    rc = runner.main()
+
+    assert rc == 2
+    captured = capsys.readouterr()
+    assert "[bench] FATAL" in captured.err
+    assert str(clone_base) in captured.err
+    assert "Permission denied" in captured.err

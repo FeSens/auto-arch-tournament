@@ -39,6 +39,7 @@ import os
 import re
 import shutil
 import subprocess
+import time
 from pathlib import Path
 
 HERE = Path(__file__).parent
@@ -46,6 +47,13 @@ REPO_ROOT = HERE.parent.parent
 DEFAULT_CLONE_BASE = REPO_ROOT / ".claude" / "bench-runs"
 DEFAULT_RESULTS_DIR = REPO_ROOT / "bench"
 DEFAULT_RISCV_FORMAL_CORES = REPO_ROOT / "formal" / "riscv-formal" / "cores"
+
+# A clone dir this recently modified is skipped by find_stale_clones even
+# if its (model, rep) already has a finalized rep dir: it closes the race
+# where a live re-run of an already-published rep (clone_fixture just
+# rmtree'd + recreated the clone dir) gets swept by a concurrent
+# `gc --delete` that matches on the stale-looking published rep dir alone.
+RECENT_CLONE_GRACE_SEC = 3600
 
 # Matches JobSpec.slug in tools/bench/runner.py: f"{model.name}-rep{rep}".
 # Model names may themselves contain dashes (e.g. "gpt-5_6-sol"), so the
@@ -110,10 +118,15 @@ def _fmt_bytes(n: float) -> str:
 
 def find_stale_clones(clone_base: Path, results_dir: Path) -> list[Path]:
     """`.claude/bench-runs/<slug>` clones whose (model, rep) already has
-    a finalized rep dir under `bench/<model>/rep<N>/`."""
+    a finalized rep dir under `bench/<model>/rep<N>/`.
+
+    Clones modified within RECENT_CLONE_GRACE_SEC are never listed, even
+    if they otherwise match -- see the constant's docstring for the race
+    this closes."""
     if not clone_base.is_dir():
         return []
     stale = []
+    now = time.time()
     for d in sorted(clone_base.iterdir()):
         if not d.is_dir():
             continue
@@ -122,8 +135,11 @@ def find_stale_clones(clone_base: Path, results_dir: Path) -> list[Path]:
             continue
         model, rep = parsed
         rep_dir = results_dir / model / f"rep{rep}"
-        if rep_dir.is_dir():
-            stale.append(d)
+        if not rep_dir.is_dir():
+            continue
+        if now - d.stat().st_mtime < RECENT_CLONE_GRACE_SEC:
+            continue
+        stale.append(d)
     return stale
 
 

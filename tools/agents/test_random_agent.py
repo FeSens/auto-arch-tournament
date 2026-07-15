@@ -1,5 +1,6 @@
 """Tests for the random-mutation control agent."""
 import random
+import subprocess
 from pathlib import Path
 
 from tools.agents import random_agent as ra
@@ -115,6 +116,18 @@ def test_hyp_id_marker_present_but_malformed_returns_none():
         "Use exactly this hypothesis ID: (no valid id here)\n"
     )
     assert ra._hyp_id(prompt) is None
+
+
+def test_lint_ok_returns_false_on_timeout(tmp_path, monkeypatch):
+    # A hung lint (past the 300s cap) must count as a failed lint draw,
+    # not crash the agent with an uncaught TimeoutExpired.
+    wt = _mk_worktree(tmp_path)
+
+    def fake_run(*a, **kw):
+        raise subprocess.TimeoutExpired(cmd="verilator", timeout=300)
+
+    monkeypatch.setattr(subprocess, "run", fake_run)
+    assert ra._lint_ok(wt, "bench") is False
 
 
 def test_verilator_absent_applies_no_mutations(tmp_path, monkeypatch):

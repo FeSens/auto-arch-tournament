@@ -853,6 +853,17 @@ def run_one_job(
         "notes": "",
     }
 
+    # Forensics dirs/paths computed up front (not just at finalize time)
+    # so the early-return paths below (fence install failure, missing
+    # API key) can still leave a rep dir behind: without a rep dir,
+    # those clones kept no env.json/orchestrator.log forensics AND were
+    # invisible to gc's find_stale_clones (which matches clones against
+    # existing rep dirs), so they accumulated as orphan clones over a
+    # campaign instead of being swept.
+    out_dir = results_dir / job.model.name / f"rep{job.rep}"
+    fp_path = clone / ".tmp" / "env.json"
+    orch_log_path = clone / ".tmp" / "orchestrator.log"
+
     # 1. Fresh clone of the fixture.
     try:
         clone_fixture(repo_root, ref, clone)
@@ -862,7 +873,6 @@ def run_one_job(
         return row
 
     # Forensics: snapshot the environment this rep will run under.
-    fp_path = clone / ".tmp" / "env.json"
     fp_path.parent.mkdir(parents=True, exist_ok=True)
     fp_path.write_text(json.dumps(preflight.env_fingerprint(), indent=2) + "\n")
 
@@ -875,6 +885,7 @@ def run_one_job(
         # standalone-clone isolation; no per-clone fence file needed.
     except Exception as e:
         row["notes"] = f"fence install failed: {e}"[:400]
+        _copy_early_forensics(out_dir, fp_path, orch_log_path)
         _finalize(row, started, results_jsonl)
         return row
 
@@ -882,6 +893,7 @@ def run_one_job(
     env = make_env_for_job(job, clone, keys)
     if not job.model.oauth and job.model.key_env and not env.get(job.model.key_env):
         row["notes"] = f"missing API key env var {job.model.key_env}"
+        _copy_early_forensics(out_dir, fp_path, orch_log_path)
         _finalize(row, started, results_jsonl)
         return row
 
@@ -913,7 +925,6 @@ def run_one_job(
     # orchestrator once it fills the OS pipe buffer (~64 KB on macOS),
     # which happens fast on long runs that print summarize_event lines
     # for every pi tool call. A direct file descriptor avoids the issue.
-    orch_log_path = clone / ".tmp" / "orchestrator.log"
     orch_log_path.parent.mkdir(parents=True, exist_ok=True)
     orch_log = orch_log_path.open("w", buffering=1)
     proc = subprocess.Popen(
@@ -971,7 +982,6 @@ def run_one_job(
             pass
 
     # 4. Finalize: collect logs + summary regardless of how we exited.
-    out_dir = results_dir / job.model.name / f"rep{job.rep}"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     # Reconstruct log.jsonl from the rep clone's git history (commit
@@ -1061,6 +1071,21 @@ def run_one_job(
     return row
 
 
+def _copy_early_forensics(out_dir: Path, fp_path: Path, orch_log_path: Path) -> None:
+    """Mirror the finalize-block forensics copy for run_one_job's
+    early-return paths (fence install failure, missing API key). Those
+    exits happen before the normal finalize block runs, so without this
+    the clone kept no rep dir at all: no env.json/orchestrator.log for
+    post-mortem, and no rep dir for gc's find_stale_clones to key off
+    of, so the clone piled up as a gc-invisible orphan.
+    """
+    out_dir.mkdir(parents=True, exist_ok=True)
+    if orch_log_path.is_file():
+        shutil.copy2(orch_log_path, out_dir / "orchestrator.log")
+    if fp_path.is_file():
+        shutil.copy2(fp_path, out_dir / "env.json")
+
+
 def _finalize(row: dict, started: dt.datetime, results_jsonl: Path) -> None:
     ended = dt.datetime.now(dt.timezone.utc)
     row["ended_at"] = ended.isoformat(timespec="seconds")
@@ -1115,8 +1140,17 @@ def main() -> int:
         # bigger disk) -- measure free space there, not at REPO_ROOT.
         # clone_base may not exist yet on a fresh override; create it
         # first (clone_fixture would do so anyway for the first job) so
-        # os.statvfs has a path to measure.
-        args.clone_base.mkdir(parents=True, exist_ok=True)
+        # os.statvfs has a path to measure. An unwritable parent (e.g. a
+        # read-only mount or permission error) must fail the preflight
+        # cleanly, not crash with an uncaught OSError traceback.
+        try:
+            args.clone_base.mkdir(parents=True, exist_ok=True)
+        except OSError as e:
+            print(f"[bench] FATAL: cannot create clone base "
+                  f"{args.clone_base}: {e.strerror or e}", file=sys.stderr)
+            print("[bench] pick a writable --clone-base and retry.",
+                  file=sys.stderr)
+            return 2
         free_gb = preflight.free_disk_gb(str(args.clone_base))
         if free_gb < preflight.MIN_FREE_GB:
             print(f"[bench] FATAL: only {free_gb:.1f} GB free at "

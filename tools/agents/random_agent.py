@@ -158,6 +158,10 @@ def _lint_ok(worktree: Path, target: str) -> bool | None:
             cwd=worktree, capture_output=True, timeout=300)
     except FileNotFoundError:
         return None
+    except subprocess.TimeoutExpired:
+        # A hung lint counts as a failed lint draw, not an unavailable
+        # toolchain -- the caller redraws instead of crashing the agent.
+        return False
     return r.returncode == 0
 
 

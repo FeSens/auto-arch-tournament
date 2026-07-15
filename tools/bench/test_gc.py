@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import os
 import subprocess
+import time
 from pathlib import Path
 
 from tools.bench import gc
@@ -23,6 +24,14 @@ def _make_git_repo(path: Path) -> None:
     _git(["init", "-q"], path)
     _git(["-c", "user.email=t@t", "-c", "user.name=t", "commit",
           "--allow-empty", "-q", "-m", "init"], path)
+
+
+def _age(path: Path, seconds: float) -> None:
+    """Back-date path's mtime (and atime) by `seconds`, so tests can
+    simulate a clone old enough to clear find_stale_clones' recency
+    guard without sleeping."""
+    old = time.time() - seconds
+    os.utime(path, (old, old))
 
 
 # ---------- parse_slug ---------------------------------------------------
@@ -50,12 +59,14 @@ def test_parse_slug_rep_zero():
 def test_find_stale_clones_matches_existing_rep_dir(tmp_path):
     clone_base = tmp_path / "clones"
     results_dir = tmp_path / "bench"
-    (clone_base / "gpt-5_6-sol-rep1").mkdir(parents=True)
+    clone = clone_base / "gpt-5_6-sol-rep1"
+    clone.mkdir(parents=True)
+    _age(clone, 2 * 3600)  # clear the recency guard
     (results_dir / "gpt-5_6-sol" / "rep1").mkdir(parents=True)
 
     stale = gc.find_stale_clones(clone_base, results_dir)
 
-    assert stale == [clone_base / "gpt-5_6-sol-rep1"]
+    assert stale == [clone]
 
 
 def test_find_stale_clones_ignores_clone_without_rep_dir(tmp_path):
@@ -94,7 +105,9 @@ def test_find_stale_clones_multiple(tmp_path):
         ("gpt-5_6-sol-rep2", "gpt-5_6-sol", 2),
         ("gpt-5_6-terra-rep3", "gpt-5_6-terra", 3),
     ]:
-        (clone_base / slug).mkdir(parents=True)
+        clone = clone_base / slug
+        clone.mkdir(parents=True)
+        _age(clone, 2 * 3600)  # clear the recency guard
         (results_dir / model / f"rep{rep}").mkdir(parents=True)
 
     stale = gc.find_stale_clones(clone_base, results_dir)
@@ -102,6 +115,41 @@ def test_find_stale_clones_multiple(tmp_path):
     assert sorted(p.name for p in stale) == [
         "gpt-5_6-sol-rep1", "gpt-5_6-sol-rep2", "gpt-5_6-terra-rep3",
     ]
+
+
+# ---------- find_stale_clones: recency guard ------------------------------
+
+
+def test_find_stale_clones_skips_fresh_mtime(tmp_path):
+    """A clone dir modified within the last hour must be skipped even
+    if its (model, rep) already has a finalized rep dir -- it may be a
+    live re-run of an already-published rep (clone_fixture just
+    recreated the clone dir), and a concurrent `gc --delete` must not
+    sweep it out from under that re-run."""
+    clone_base = tmp_path / "clones"
+    results_dir = tmp_path / "bench"
+    clone = clone_base / "gpt-5_6-sol-rep1"
+    clone.mkdir(parents=True)  # fresh mtime, no _age() call
+    (results_dir / "gpt-5_6-sol" / "rep1").mkdir(parents=True)
+
+    stale = gc.find_stale_clones(clone_base, results_dir)
+
+    assert stale == []
+
+
+def test_find_stale_clones_lists_old_mtime(tmp_path):
+    """A clone dir whose mtime is well past the recency grace window is
+    listed as stale, same as before the guard was added."""
+    clone_base = tmp_path / "clones"
+    results_dir = tmp_path / "bench"
+    clone = clone_base / "gpt-5_6-sol-rep1"
+    clone.mkdir(parents=True)
+    _age(clone, 2 * 3600)  # 2h back, past RECENT_CLONE_GRACE_SEC
+    (results_dir / "gpt-5_6-sol" / "rep1").mkdir(parents=True)
+
+    stale = gc.find_stale_clones(clone_base, results_dir)
+
+    assert stale == [clone]
 
 
 # ---------- find_stale_formal_workdirs -----------------------------------
@@ -276,6 +324,10 @@ def _setup_fabricated_tree(tmp_path):
     (riscv_cores / "bench-1234").mkdir(parents=True)
     (riscv_cores / "nerv").mkdir(parents=True)  # tracked, must survive
 
+    # Clear find_stale_clones' recency guard -- this fixture represents an
+    # already-finished, already-published rep, not a live re-run.
+    _age(clone, 2 * 3600)
+
     return clone_base, results_dir, riscv_cores, clone, rep_dir
 
 
@@ -336,6 +388,7 @@ def test_main_delete_skips_clone_with_no_forensics_source(tmp_path, capsys):
     riscv_cores = tmp_path / "formal" / "riscv-formal" / "cores"
     clone = clone_base / "modelx-rep1"
     clone.mkdir(parents=True)  # not a git repo, no .tmp/
+    _age(clone, 2 * 3600)  # clear the recency guard
     rep_dir = results_dir / "modelx" / "rep1"
     rep_dir.mkdir(parents=True)
 
