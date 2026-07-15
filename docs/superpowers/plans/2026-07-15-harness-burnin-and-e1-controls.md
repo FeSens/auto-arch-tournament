@@ -1059,14 +1059,181 @@ Expected: both reps `status=done` with at least one gate-passing row
 each; no `hypothesis_gen_failed` storms; token counts nonzero in the
 results rows (parity check that both runtimes report usage).
 
-- [ ] **Step 7: Record the burn-in verdict**
+- [ ] **Step 7: Verify disk behavior (requires Task 7 landed first)**
+
+After the Step 4 static pair, measure:
+
+```bash
+du -sh /tmp/bench-burnin/clones/* ; du -sh formal/riscv-formal
+```
+
+Expected: each live clone well under 1.5 GB (CoW copy means riscv-formal
+contributes ~0 real blocks; `du` may still report apparent size, so also
+check `df -h /System/Volumes/Data` free-space delta across the run, which
+must be < 2 GB per rep); the main repo's `formal/riscv-formal` unchanged;
+after runner exit with default flags, `/tmp/bench-burnin/clones/` empty
+(clones removed) while each rep dir retains `orchestrator.log`, `env.json`,
+`log.jsonl`, and `repo.bundle`.
+
+- [ ] **Step 8: Record the burn-in verdict**
 
 Append to `research/diary/2026-07-DD.md` (create if missing): commands,
 results (all `value +/- dispersion` where applicable, n stated), the
-dual-lane contention number from Step 4, and the explicit verdict
-"burn-in gate PASSED/FAILED". Update tracker Task #1 and #2 to
-completed only on PASS; on FAIL, file the failure as an INCIDENT entry
-and stop (do not proceed to the compute matrix).
+dual-lane contention number from Step 4, the disk numbers from Step 7,
+and the explicit verdict "burn-in gate PASSED/FAILED". Update tracker
+Task #1 and #2 to completed only on PASS; on FAIL, file the failure as
+an INCIDENT entry and stop (do not proceed to the compute matrix).
+
+---
+
+### Task 7: Disk hygiene (execute BEFORE Task 6's burn-in runs)
+
+**Files:**
+- Modify: `tools/bench/runner.py` (`clone_fixture` ~line 359-367, `run_one_job` finalize ~line 984-990)
+- Modify: `tools/eval/formal.py` (post-tally workdir cleanup)
+- Modify: `tools/bench/preflight.py` (free-disk check)
+- Create: `tools/bench/gc.py` (stale-run sweeper)
+- Tests: `tools/bench/test_preflight.py`, `tools/eval/` test conventions, `tools/bench/test_gc.py`
+
+**Interfaces:**
+- Consumes: `preflight.REQUIRED_TOOLS` etc. from Task 2/3.
+- Produces: per-rep disk residue of a few hundred MB instead of ~6 GB; `bench/<model>/rep<N>/repo.bundle` (full git history of the rep, replaces keep-clones for forensics); `python -m tools.bench.gc` sweeper; preflight refuses to start with < 30 GB free.
+
+Measured baseline (2026-07-15, 4 surviving clones): 6.1-6.3 GB per rep
+clone, of which `formal/riscv-formal` is 5.4 GB (the main repo's vendored
+checkout carries years of stale SBY work dirs and is copied whole per
+clone with `cp -R`), `cores/bench/worktrees` 394 MB, `cores/bench/generated`
+114 MB. Upstream riscv-formal alone is ~50 MB. 48 planned reps at this
+rate is ~300 GB, which is what the author hit.
+
+- [ ] **Step 1: Prune the main repo's riscv-formal work-dir garbage**
+
+`formal/riscv-formal` is a git checkout; anything untracked under
+`cores/` is our run garbage or our local check configs. Discriminate:
+
+```bash
+cd formal/riscv-formal
+git status --porcelain cores/ | head -40   # untracked = not upstream
+grep -rhoE "cores/[a-zA-Z0-9_-]+" ../run_all.sh ../../Makefile | sort -u
+```
+
+Delete only: (a) PID-suffixed work dirs matching `cores/*-[0-9]*` (e.g.
+`bench-44577`, `baseline-75670`), and (b) untracked dirs NOT referenced by
+`run_all.sh`, the Makefile, or docs (`auto-arch-researcher`,
+`codex-*-maxperf`, `maxperf`, `mini` are expected junk; `bench`,
+`baseline`, `v1` are likely OUR genchecks configs and must survive if
+referenced). Record `du -sh formal/riscv-formal` before and after in the
+report. Expected after: well under 1 GB.
+
+- [ ] **Step 2: Copy-on-write clone of riscv-formal (APFS), with exclusions**
+
+In `clone_fixture` (~line 359), replace the `cp -R` with a darwin
+clonefile fast path plus work-dir exclusion, and update the stale
+"~200 MB" comment (measured: 5.4 GB before Step 1):
+
+```python
+    rf_src = find_riscv_formal()
+    if rf_src is not None:
+        rf_dest = dest / "formal" / "riscv-formal"
+        rf_dest.parent.mkdir(parents=True, exist_ok=True)
+        if not rf_dest.exists():
+            # APFS clonefile (cp -c) is copy-on-write: ~zero extra disk
+            # and ~instant. Fall back to plain cp -R off-macOS.
+            cp_cow = subprocess.run(
+                ["cp", "-Rc", str(rf_src.resolve()), str(rf_dest)],
+                capture_output=True)
+            if cp_cow.returncode != 0:
+                subprocess.run(
+                    ["cp", "-R", str(rf_src.resolve()), str(rf_dest)],
+                    check=True)
+            # Never inherit prior runs' SBY work dirs into a fresh rep.
+            for junk in rf_dest.glob("cores/*-[0-9]*"):
+                shutil.rmtree(junk, ignore_errors=True)
+```
+
+- [ ] **Step 3: Per-iteration SBY workdir cleanup in tools/eval/formal.py**
+
+Read `tools/eval/formal.py` and `formal/run_all.sh` (READ ONLY, it is
+contract) to find how the run's `cores/<core>-<PID>` workdir is named.
+After the tally is parsed and the failing-check log tail captured, add
+a cleanup that removes that workdir (successful and failed runs both;
+the captured tail and `last_run-<PID>.log` stay). Guard with env
+`BENCH_KEEP_FORMAL_WORKDIR=1` for debugging. Add a unit test following
+the existing `tools/eval/test_formal_*.py` conventions (fake workdir,
+assert removed / kept under the env flag).
+
+- [ ] **Step 4: End-of-rep bundle + always-clean clones**
+
+In `run_one_job` finalize, before the clone removal (~line 988), bundle
+the rep's full git history (accepted diffs, log commits) into the rep
+dir so `--keep-clones` is no longer needed for forensics:
+
+```python
+    bundle = subprocess.run(
+        ["git", "bundle", "create", str(out_dir / "repo.bundle"), "--all"],
+        cwd=str(clone), capture_output=True)
+    if bundle.returncode != 0:
+        print(f"  [bench] warn: git bundle failed: "
+              f"{bundle.stderr.decode()[:200]}", flush=True)
+```
+
+Keep the `--keep-clones` flag semantics (debugging), but the default
+path now preserves everything that matters and removes the clone.
+
+- [ ] **Step 5: Disk preflight**
+
+Add to `tools/bench/preflight.py`:
+
+```python
+MIN_FREE_GB = 30
+
+
+def free_disk_gb(path: str = ".") -> float:
+    st = os.statvfs(path)
+    return st.f_bavail * st.f_frsize / 1e9
+```
+
+and a check in `report()`/runner main: if `free_disk_gb() < MIN_FREE_GB`,
+FATAL with the measured number (same style as missing tools; also honors
+`--skip-preflight`). Unit test with monkeypatched `os.statvfs`.
+
+- [ ] **Step 6: Stale-run sweeper**
+
+Create `tools/bench/gc.py`:
+
+```python
+"""Sweep stale bench-run clones and formal work dirs.
+
+Usage:
+    python -m tools.bench.gc            # dry-run: list + sizes
+    python -m tools.bench.gc --delete   # actually remove
+"""
+```
+
+Targets: `.claude/bench-runs/*` whose `(model, rep)` already has a rep
+dir under `bench/` (archive `.tmp/orchestrator.log` + `.tmp/env.json`
+into that rep dir first if absent, and create `repo.bundle` there if
+absent), and `formal/riscv-formal/cores/*-[0-9]*` in the main repo.
+Dry-run by default, `--delete` to act, prints per-target sizes and the
+total reclaimed. Unit test with a fabricated directory tree.
+
+- [ ] **Step 7: Reclaim the current 25 GB**
+
+Run `python -m tools.bench.gc` (dry-run), verify the list is exactly the
+4 surviving sol/terra clones plus main-repo formal junk, then run with
+`--delete`. Record before/after `df -h` in the report. The four clones'
+orchestrator.log/env.json must exist in their `bench/gpt-5_6-*/rep*/`
+dirs before deletion (the sweeper archives them; verify).
+
+- [ ] **Step 8: Full suite + commit**
+
+Run: `python3 -m pytest tools/ -q` -> all pass.
+
+```bash
+git add tools/bench/runner.py tools/eval/formal.py tools/bench/preflight.py \
+  tools/bench/gc.py tools/bench/test_gc.py tools/bench/test_preflight.py
+git commit -m "tools: disk hygiene (CoW riscv-formal, SBY cleanup, rep bundles, gc sweeper, disk preflight)"
+```
 
 ---
 
