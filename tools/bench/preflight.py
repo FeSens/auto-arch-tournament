@@ -37,3 +37,17 @@ def report() -> str:
         p = shutil.which(t)
         lines.append(f"  {t:20s} {p or 'MISSING'}")
     return "\n".join(lines)
+
+
+# Motivated by task-7's disk-hygiene audit (2026-07-15): 48 planned reps
+# at the pre-cleanup ~6 GB/rep residue rate is ~300 GB, which is what the
+# author hit. Even after CoW clones + SBY workdir cleanup shrink per-rep
+# residue to a few hundred MB, a rep that starts with too little headroom
+# can still wedge mid-run (e.g. yosys/bitwuzla scratch files, cocotb
+# sim_build/ dirs). Refuse to start rather than fail hours in.
+MIN_FREE_GB = 30
+
+
+def free_disk_gb(path: str = ".") -> float:
+    st = os.statvfs(path)
+    return st.f_bavail * st.f_frsize / 1e9

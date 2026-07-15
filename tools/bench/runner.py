@@ -356,20 +356,32 @@ def clone_fixture(repo_root: Path, ref: str, dest: Path) -> None:
     # is also inside the workspace root, and no further change is
     # needed there.
     #
-    # Cost: ~200 MB and ~5-15 s once per rep at clone time. macOS APFS
-    # users who want this effectively-free can switch to `cp -Rc`
-    # (clonefile(2) — copy-on-write, ~zero extra disk), but the plain
-    # `cp -R` form keeps Linux runners portable since GNU coreutils
-    # has no `-c` flag.
+    # Cost: measured 5.4 GB (not the originally-estimated ~200 MB) before
+    # the formal/riscv-formal work-dir garbage was pruned (task-7 Step 1) —
+    # years of stale per-PID SBY work dirs accumulate under
+    # riscv-formal/cores/ and get carried into every `cp -R`'d clone. On
+    # macOS APFS, `cp -Rc` (clonefile(2)) is copy-on-write: ~zero extra
+    # disk and ~instant regardless of source size. Fall back to plain
+    # `cp -R` off-macOS (GNU coreutils has no `-c` flag) or if clonefile
+    # isn't supported on the underlying filesystem. Either way, never
+    # inherit a prior run's SBY work dirs into a fresh rep clone.
     rf_src = find_riscv_formal()
     if rf_src is not None:
         rf_dest = dest / "formal" / "riscv-formal"
         rf_dest.parent.mkdir(parents=True, exist_ok=True)
         if not rf_dest.exists():
-            subprocess.run(
-                ["cp", "-R", str(rf_src.resolve()), str(rf_dest)],
-                check=True,
-            )
+            # APFS clonefile (cp -c) is copy-on-write: ~zero extra disk
+            # and ~instant. Fall back to plain cp -R off-macOS.
+            cp_cow = subprocess.run(
+                ["cp", "-Rc", str(rf_src.resolve()), str(rf_dest)],
+                capture_output=True)
+            if cp_cow.returncode != 0:
+                subprocess.run(
+                    ["cp", "-R", str(rf_src.resolve()), str(rf_dest)],
+                    check=True)
+            # Never inherit prior runs' SBY work dirs into a fresh rep.
+            for junk in rf_dest.glob("cores/*-[0-9]*"):
+                shutil.rmtree(junk, ignore_errors=True)
 
 
 def install_opencode_config(clone: Path) -> None:
@@ -1015,6 +1027,19 @@ def run_one_job(
     # Per-rep summary.json
     (out_dir / "summary.json").write_text(json.dumps(row, indent=2) + "\n")
 
+    # Bundle the rep's full git history (accepted diffs, log commits,
+    # any orphaned commits) into the rep dir before the clone is deleted.
+    # Makes --keep-clones unnecessary for forensics: the clone itself was
+    # only ever needed to inspect commits, and a bundle carries the same
+    # history at a few hundred KB-MB instead of a multi-GB working tree
+    # (which also drags along the riscv-formal copy).
+    bundle = subprocess.run(
+        ["git", "bundle", "create", str(out_dir / "repo.bundle"), "--all"],
+        cwd=str(clone), capture_output=True)
+    if bundle.returncode != 0:
+        print(f"  [bench] warn: git bundle failed: "
+              f"{bundle.stderr.decode()[:200]}", flush=True)
+
     _finalize(row, started, results_jsonl)
     if not keep_clone:
         shutil.rmtree(clone, ignore_errors=True)
@@ -1070,6 +1095,14 @@ def main() -> int:
             print(preflight.report(), file=sys.stderr)
             print("[bench] source setup.sh (or fix PATH) and retry; "
                   "--skip-preflight overrides.", file=sys.stderr)
+            return 2
+        free_gb = preflight.free_disk_gb(str(REPO_ROOT))
+        if free_gb < preflight.MIN_FREE_GB:
+            print(f"[bench] FATAL: only {free_gb:.1f} GB free at "
+                  f"{REPO_ROOT} (need >= {preflight.MIN_FREE_GB} GB)",
+                  file=sys.stderr)
+            print("[bench] free up disk (see `python -m tools.bench.gc`) "
+                  "and retry; --skip-preflight overrides.", file=sys.stderr)
             return 2
         print(preflight.report())
 

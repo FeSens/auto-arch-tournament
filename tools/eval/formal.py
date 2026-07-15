@@ -9,7 +9,7 @@ If genchecks.py crashes mid-run and only emits one .sby task that
 vacuously passes, the old `passed > 0 and failed == 0` rule would
 return success. EXPECTED_MIN_CHECKS prevents that.
 """
-import os, subprocess, json, re
+import os, shutil, subprocess, json, re
 from pathlib import Path
 
 import yaml
@@ -85,6 +85,52 @@ def _build_formal_env(worktree: Path, target: str | None,
     return env
 
 
+def _cleanup_formal_workdir(worktree_path: Path, target: str | None) -> None:
+    """Remove this run's per-PID riscv-formal work dir after the tally has
+    been parsed.
+
+    formal/run_all.sh (contract, read-only) names each run's work dir
+    `formal/riscv-formal/cores/<CORE_NAME>-<$$>` and only reaps stale ones
+    itself on the *next* invocation for the same CORE_NAME. A target
+    that's only formal-checked once per orchestrator iteration would
+    otherwise leave one SBY work dir (SMT traces, yosys IR, per-check
+    engine logs -- often 100+ MB) behind per iteration for the life of a
+    rep. formal.py has no way to learn its own bash child's PID through
+    run_pgroup's CompletedProcess return value, so this globs
+    `cores/<target>-*` rather than a single exact path (documented
+    fallback, task-7 brief Step 3).
+
+    Only removes a match whose PID suffix names a process that is no
+    longer alive -- mirroring run_all.sh's own stale-work-dir reaper --
+    so a concurrent invocation (e.g. the agent self-checking via
+    `bash formal/run_all.sh` mid-implementation while the orchestrator's
+    own end-of-iteration eval is also in flight) is never touched.
+
+    Guard: BENCH_KEEP_FORMAL_WORKDIR=1 skips cleanup entirely (debugging).
+    The captured output tail (in the returned dict) and
+    formal/last_run-<PID>.log are untouched either way.
+    """
+    if target is None or os.environ.get("BENCH_KEEP_FORMAL_WORKDIR") == "1":
+        return
+    cores_dir = worktree_path / "formal" / "riscv-formal" / "cores"
+    if not cores_dir.is_dir():
+        return
+    prefix = f"{target}-"
+    for stale in cores_dir.glob(f"{prefix}*"):
+        pid_str = stale.name[len(prefix):]
+        if not pid_str.isdigit():
+            continue
+        pid = int(pid_str)
+        try:
+            os.kill(pid, 0)
+        except ProcessLookupError:
+            shutil.rmtree(stale, ignore_errors=True)
+        except PermissionError:
+            # Process exists (owned by someone else) -- not our dir to
+            # remove while it may still be in use.
+            continue
+
+
 def run_formal(worktree: str, target: str | None = None) -> dict:
     """
     Args:
@@ -110,81 +156,88 @@ def run_formal(worktree: str, target: str | None = None) -> dict:
 
     env = _build_formal_env(worktree_path, target)
 
+    # The per-PID SBY work dir this invocation creates under
+    # formal/riscv-formal/cores/ is cleaned up in `finally` below, once
+    # the tally (or failing-check log tail) has been captured — success
+    # and failure runs both. See _cleanup_formal_workdir's docstring.
     try:
-        result = run_pgroup(
-            ["bash", str(run_script)],
-            cwd=worktree_path, capture_output=True, text=True,
-            timeout=2700,  # 45 min ceiling for all ~45 checks running in parallel via make -j
-            env=env,
-        )
-    except subprocess.TimeoutExpired as e:
-        # The formal harness exceeded its wall-clock ceiling. This MUST
-        # not propagate — an unhandled TimeoutExpired in run_slot kills
-        # the entire ThreadPoolExecutor batch, which kills the rep
-        # (round_id stays at whatever round was in flight, the
-        # orchestrator's main loop dies, and the rep finalizes at iter=N
-        # instead of running its full N=15). Observed live on
-        # deepseek-v4-pro reps where some hypotheses produced SMT
-        # problems that bitwuzla couldn't close in 30 minutes.
-        # Return a slot-broken outcome with a recognizable error class
-        # so the report's broken_by_class table surfaces it cleanly.
-        # run_pgroup preserves text=True, so e.stdout/e.stderr arrive as
-        # str. (subprocess.run with text=True would behave the same way —
-        # the prior .decode() call was always latent, but TimeoutExpired
-        # never fired in practice under the 30-min ceiling so it stayed
-        # hidden until kimi-rep3 hit the bumped 45-min ceiling and an
-        # AttributeError crashed the orchestrator. See commit bfe9f84.)
-        partial = (e.stdout or "") + (e.stderr or "")
+        try:
+            result = run_pgroup(
+                ["bash", str(run_script)],
+                cwd=worktree_path, capture_output=True, text=True,
+                timeout=2700,  # 45 min ceiling for all ~45 checks running in parallel via make -j
+                env=env,
+            )
+        except subprocess.TimeoutExpired as e:
+            # The formal harness exceeded its wall-clock ceiling. This MUST
+            # not propagate — an unhandled TimeoutExpired in run_slot kills
+            # the entire ThreadPoolExecutor batch, which kills the rep
+            # (round_id stays at whatever round was in flight, the
+            # orchestrator's main loop dies, and the rep finalizes at iter=N
+            # instead of running its full N=15). Observed live on
+            # deepseek-v4-pro reps where some hypotheses produced SMT
+            # problems that bitwuzla couldn't close in 30 minutes.
+            # Return a slot-broken outcome with a recognizable error class
+            # so the report's broken_by_class table surfaces it cleanly.
+            # run_pgroup preserves text=True, so e.stdout/e.stderr arrive as
+            # str. (subprocess.run with text=True would behave the same way —
+            # the prior .decode() call was always latent, but TimeoutExpired
+            # never fired in practice under the 30-min ceiling so it stayed
+            # hidden until kimi-rep3 hit the bumped 45-min ceiling and an
+            # AttributeError crashed the orchestrator. See commit bfe9f84.)
+            partial = (e.stdout or "") + (e.stderr or "")
+            return {
+                'passed': False,
+                'failed_check': 'timeout',
+                'detail': (f'run_all.sh exceeded {e.timeout}s wall-clock'
+                           + ('\n--- partial output (tail) ---\n' + partial[-2000:]
+                              if partial else '')),
+            }
+        output = result.stdout + result.stderr
+
+        # run_all.sh prints a final "Formal: <N> passed, <M> failed" tally line.
+        tally = re.search(r'Formal:\s+(\d+)\s+passed,\s+(\d+)\s+failed', output)
+        if tally:
+            passed, failed = int(tally.group(1)), int(tally.group(2))
+            if failed > 0 or result.returncode != 0:
+                fail_line = re.search(r'Failed:\s+(\S+)', output)
+                failed_check = fail_line.group(1) if fail_line else 'unknown'
+                # `no_checks_generated` is run_all.sh's fallback when the
+                # post-run `for sby_file in *.sby` glob finds zero matches.
+                # That can mean genchecks.py crashed (the intended case) OR
+                # that something between genchecks and the tally — most
+                # commonly the implementer agent's bash tool — wiped or
+                # corrupted the checks directory mid-run. Distinguish so
+                # postmortems can tell "tooling never produced checks" from
+                # "real SBY work happened then the directory was molested".
+                if failed_check == 'no_checks_generated':
+                    failed_check = _reclassify_no_checks_generated(output)
+                return {
+                    'passed': False,
+                    'failed_check': failed_check,
+                    'checks_passed': passed,
+                    'checks_failed': failed,
+                    'detail': output[-4000:],
+                }
+            if passed < EXPECTED_MIN_CHECKS:
+                return {
+                    'passed': False,
+                    'failed_check': 'too_few_checks_generated',
+                    'checks_passed': passed,
+                    'checks_expected_min': EXPECTED_MIN_CHECKS,
+                    'detail': f'genchecks emitted only {passed} tasks (expected ≥ {EXPECTED_MIN_CHECKS})',
+                }
+            return {'passed': True, 'checks_passed': passed}
+
+        # Script didn't produce a tally — setup error (missing riscv-formal repo,
+        # genchecks.py crash, etc.).
         return {
             'passed': False,
-            'failed_check': 'timeout',
-            'detail': (f'run_all.sh exceeded {e.timeout}s wall-clock'
-                       + ('\n--- partial output (tail) ---\n' + partial[-2000:]
-                          if partial else '')),
+            'failed_check': 'setup',
+            'detail': output[-4000:],
         }
-    output = result.stdout + result.stderr
-
-    # run_all.sh prints a final "Formal: <N> passed, <M> failed" tally line.
-    tally = re.search(r'Formal:\s+(\d+)\s+passed,\s+(\d+)\s+failed', output)
-    if tally:
-        passed, failed = int(tally.group(1)), int(tally.group(2))
-        if failed > 0 or result.returncode != 0:
-            fail_line = re.search(r'Failed:\s+(\S+)', output)
-            failed_check = fail_line.group(1) if fail_line else 'unknown'
-            # `no_checks_generated` is run_all.sh's fallback when the
-            # post-run `for sby_file in *.sby` glob finds zero matches.
-            # That can mean genchecks.py crashed (the intended case) OR
-            # that something between genchecks and the tally — most
-            # commonly the implementer agent's bash tool — wiped or
-            # corrupted the checks directory mid-run. Distinguish so
-            # postmortems can tell "tooling never produced checks" from
-            # "real SBY work happened then the directory was molested".
-            if failed_check == 'no_checks_generated':
-                failed_check = _reclassify_no_checks_generated(output)
-            return {
-                'passed': False,
-                'failed_check': failed_check,
-                'checks_passed': passed,
-                'checks_failed': failed,
-                'detail': output[-4000:],
-            }
-        if passed < EXPECTED_MIN_CHECKS:
-            return {
-                'passed': False,
-                'failed_check': 'too_few_checks_generated',
-                'checks_passed': passed,
-                'checks_expected_min': EXPECTED_MIN_CHECKS,
-                'detail': f'genchecks emitted only {passed} tasks (expected ≥ {EXPECTED_MIN_CHECKS})',
-            }
-        return {'passed': True, 'checks_passed': passed}
-
-    # Script didn't produce a tally — setup error (missing riscv-formal repo,
-    # genchecks.py crash, etc.).
-    return {
-        'passed': False,
-        'failed_check': 'setup',
-        'detail': output[-4000:],
-    }
+    finally:
+        _cleanup_formal_workdir(worktree_path, target)
 
 
 if __name__ == '__main__':
