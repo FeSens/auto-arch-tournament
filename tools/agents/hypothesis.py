@@ -8,7 +8,7 @@ outside experiments/hypotheses/ is reverted and the run is rejected.
 Without that, a misbehaving agent could silently patch tools/, schemas/,
 etc., and those changes would persist into every subsequent worktree.
 """
-import subprocess, re, datetime
+import subprocess, re, datetime, os
 import yaml
 from pathlib import Path
 from tools.agents._runtime import (
@@ -175,6 +175,15 @@ def _build_prompt(log_tail: list, current_fitness: float, baseline_fitness: floa
                   targets: dict | None = None,
                   current_state: dict | None = None,
                   target: str | None = None) -> str:
+    # E1c attribution control: BENCH_PROMPT_PROFILE=naive strips all
+    # optimization scaffolding (fitness numbers, targets clause,
+    # ARCHITECTURE.md, CORE_PHILOSOPHY.md, recent outcomes, lessons)
+    # while keeping the mechanical contract (pre-allocated id, slot
+    # category, schema block, write fence, source dump, hard
+    # invariants) byte-identical to the full profile. static_agent and
+    # random_agent sniff the retained schema/write-fence strings to
+    # detect the phase; the orchestrator whitelist keys off the id.
+    naive = os.environ.get("BENCH_PROMPT_PROFILE", "full") == "naive"
     arch = Path("ARCHITECTURE.md").read_text()
     claude_md = Path("CLAUDE.md").read_text() if Path("CLAUDE.md").exists() else ""
     rtl_dir = Path("cores") / target / "rtl" if target else Path("rtl")
@@ -197,10 +206,10 @@ def _build_prompt(log_tail: list, current_fitness: float, baseline_fitness: floa
         f"categories.\n"
         if category_hint else ""
     )
-    targets_clause = _targets_clause(targets, current_state) if targets else ""
+    targets_clause = _targets_clause(targets, current_state) if (targets and not naive) else ""
 
     philosophy = ""
-    if target:
+    if target and not naive:
         philo_path = Path("cores") / target / "CORE_PHILOSOPHY.md"
         if philo_path.exists():
             philo_text = philo_path.read_text()
@@ -236,22 +245,12 @@ regex rejects it.
 
 """
 
-    return f"""You are a CPU microarchitecture research agent.
-
-Your job: propose one architectural hypothesis to improve this RV32IM CPU.
-Fitness metric: CoreMark iter/sec = CoreMark iterations/cycle × Fmax_Hz on Tang Nano 20K FPGA.
-Current best fitness: {current_fitness:.2f}
-Baseline fitness: {baseline_fitness:.2f}
-
-{target_banner}{category_clause}{targets_clause}{philosophy}{core_yaml_block}
-## Architecture
-{arch}
-
-## Hard invariants (do NOT propose changes that weaken these)
-{claude_md}
-
-## Current SystemVerilog Source ({rtl_dir}/)
-{src_dump}
+    fitness_lines = "" if naive else (
+        f"Current best fitness: {current_fitness:.2f}\n"
+        f"Baseline fitness: {baseline_fitness:.2f}\n"
+    )
+    arch_section = "" if naive else f"\n## Architecture\n{arch}\n"
+    history_section = "" if naive else f"""
 
 ## Recent outcomes (last 5)
 {recent_outcomes_str}
@@ -266,12 +265,26 @@ Baseline fitness: {baseline_fitness:.2f}
   into specific past hypotheses by id, category, outcome, or content.
 - LESSONS.md (above) is the curated, append-only log of one-line takeaways.
   Read it before proposing — it captures negative knowledge (what failed
-  and why) you would otherwise re-discover.
+  and why) you would otherwise re-discover."""
+    lessons_instruction = "" if naive else (
+        "1. Read LESSONS.md and the recent outcomes above. Grep log.jsonl for\n"
+        "   relevant prior attempts in the same category before proposing.\n"
+    )
+
+    return f"""You are a CPU microarchitecture research agent.
+
+Your job: propose one architectural hypothesis to improve this RV32IM CPU.
+Fitness metric: CoreMark iter/sec = CoreMark iterations/cycle × Fmax_Hz on Tang Nano 20K FPGA.
+{fitness_lines}
+{target_banner}{category_clause}{targets_clause}{philosophy}{core_yaml_block}{arch_section}
+## Hard invariants (do NOT propose changes that weaken these)
+{claude_md}
+
+## Current SystemVerilog Source ({rtl_dir}/)
+{src_dump}{history_section}
 
 ## Instructions
-1. Read LESSONS.md and the recent outcomes above. Grep log.jsonl for
-   relevant prior attempts in the same category before proposing.
-2. Identify the most promising architectural improvement.
+{lessons_instruction}2. Identify the most promising architectural improvement.
 3. Use the **write** tool to write a hypothesis YAML file at:
      cores/{target}/experiments/hypotheses/<id>.yaml
    Do NOT output the YAML as text in your reply — the orchestrator only

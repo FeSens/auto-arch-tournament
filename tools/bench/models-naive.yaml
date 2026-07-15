@@ -1,0 +1,11 @@
+# E1c attribution control: same model/runtime/budget as gpt-5_5_medium,
+# prompt stripped to mechanical requirements only (no lesson log, no
+# outcomes, no metrics, no architecture docs). Isolates the scaffold's
+# contribution from the raw LLM prior.
+models:
+  - name: naive-gpt-5_5_medium
+    provider: opencode
+    model: openai/gpt-5.5
+    variant: medium
+    oauth: true
+    prompt_profile: naive

@@ -248,3 +248,51 @@ def test_prompt_includes_required_yaml_example():
     assert ("Do NOT write the long form" in p
             or "do NOT write the long form" in p)
     assert "expected_impact" in p
+
+
+# ----- BENCH_PROMPT_PROFILE (E1c naive-LLM control) --------------------
+
+def _build_prompt_for_test():
+    """Minimal-args prompt build shared by the E1c profile tests."""
+    return _build_prompt(
+        log_tail=[],
+        current_fitness=282.82,
+        baseline_fitness=282.82,
+        hyp_id="hyp-20260101-001-r1s0",
+    )
+
+
+def test_naive_profile_strips_scaffold(monkeypatch):
+    monkeypatch.setenv("BENCH_PROMPT_PROFILE", "naive")
+    prompt = _build_prompt_for_test()
+    # Phase-detection markers: static_agent and random_agent sniff the
+    # prompt for "## Hypothesis schema" or "hypothesis YAML". This
+    # prompt's actual markers are the "hypothesis YAML" write-fence
+    # sentence and the "## Required YAML structure" schema block; both
+    # must survive the naive strip.
+    assert "## Hypothesis schema" in prompt or "hypothesis YAML" in prompt
+    assert "## Required YAML structure" in prompt
+    assert "schemas/hypothesis.schema.json" in prompt
+    # The pre-allocated id must survive verbatim (the orchestrator's
+    # sandbox whitelist keys off it).
+    assert "hyp-20260101-001-r1s0" in prompt
+    assert "hyp-" in prompt
+    # All optimization scaffolding must be gone.
+    for banned in ("Lessons", "Recent outcomes", "current fitness",
+                   "baseline fitness", "Targets"):
+        assert banned.lower() not in prompt.lower()
+    assert "## Architecture" not in prompt
+
+
+def test_full_profile_unchanged(monkeypatch):
+    monkeypatch.delenv("BENCH_PROMPT_PROFILE", raising=False)
+    prompt = _build_prompt_for_test()
+    assert "## Hypothesis schema" in prompt or "hypothesis YAML" in prompt
+    assert "## Required YAML structure" in prompt
+    # Scaffolding is all present in the default (full) profile.
+    assert "Recent outcomes (last 5)" in prompt
+    assert "Distilled lessons" in prompt
+    assert "Current best fitness: 282.82" in prompt
+    assert "Baseline fitness: 282.82" in prompt
+    assert "## Architecture" in prompt
+    assert "How to dig deeper" in prompt

@@ -81,6 +81,9 @@ class ModelEntry:
     # Set explicitly to "high" for Anthropic/Google routes that don't
     # accept xhigh (opencode silently drops the unknown variant).
     variant: str | None = None
+    # Prompt profile: "full" (default) or "naive" (E1c control: strips
+    # lesson log, outcomes, metrics, and architecture docs from prompts).
+    prompt_profile: str = "full"
 
 
 @dataclass
@@ -107,6 +110,7 @@ def load_models(path: Path) -> list[ModelEntry]:
             oauth=bool(m.get("oauth", False)),
             provider=m.get("provider", "codex"),
             variant=m.get("variant"),
+            prompt_profile=m.get("prompt_profile", "full") or "full",
         ))
     if not out:
         raise ValueError(f"{path}: no models defined")
@@ -452,6 +456,11 @@ def make_env_for_job(job: JobSpec, clone: Path, keys: dict[str, str]) -> dict[st
             f"unsupported provider {job.model.provider!r}; "
             f"expected one of: codex, opencode, claude, static, random"
         )
+    # E1c prompt-profile plumbing: the agents' prompt builders read
+    # BENCH_PROMPT_PROFILE; only set it for non-default profiles so
+    # "full" runs keep an unchanged environment.
+    if job.model.prompt_profile != "full":
+        env["BENCH_PROMPT_PROFILE"] = job.model.prompt_profile
     # Apply keys from ~/.bench-keys.env, but only for keys not already in env
     # (so a real shell-exported value wins over a file value).
     for k, v in keys.items():

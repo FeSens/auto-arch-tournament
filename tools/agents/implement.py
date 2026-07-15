@@ -1,6 +1,6 @@
 """Invokes the active agent runtime (codex by default; claude opt-in via
 AGENT_PROVIDER) in the worktree to implement a hypothesis."""
-import subprocess, yaml
+import os, subprocess, yaml
 from pathlib import Path
 from tools.agents._runtime import (
     build_agent_cmd,
@@ -11,6 +11,11 @@ CLAUDE_TIMEOUT_SEC = 600*3  # 10 min watchdog on the implementation agent
 
 def _build_prompt(hypothesis: dict, worktree: str,
                   target: str | None = None) -> str:
+    # E1c attribution control: BENCH_PROMPT_PROFILE=naive drops the
+    # knowledge sections (ARCHITECTURE.md, CORE_PHILOSOPHY.md) while
+    # keeping the mechanical contract (hypothesis body, source dump,
+    # hard invariants, instructions) identical to the full profile.
+    naive = os.environ.get("BENCH_PROMPT_PROFILE", "full") == "naive"
     arch = Path(worktree, "ARCHITECTURE.md").read_text()
     claude_md_path = Path(worktree, "CLAUDE.md")
     claude_md = claude_md_path.read_text() if claude_md_path.exists() else ""
@@ -28,7 +33,7 @@ def _build_prompt(hypothesis: dict, worktree: str,
     )
 
     philosophy = ""
-    if target:
+    if target and not naive:
         philo_path = Path(worktree, "cores", target, "CORE_PHILOSOPHY.md")
         if philo_path.exists():
             philo_text = philo_path.read_text()
@@ -37,6 +42,8 @@ def _build_prompt(hypothesis: dict, worktree: str,
                     f"## Core philosophy / architect's hard constraints\n"
                     f"{philo_text}\n\n"
                 )
+
+    arch_section = "" if naive else f"## Architecture\n{arch}\n\n"
 
     target_banner = ""
     if target:
@@ -70,10 +77,7 @@ Proposed change:
 Advisory file changes (you may deviate, add, rename, or restructure freely):
 {changes_str}
 
-## Architecture
-{arch}
-
-## Hard invariants and don't-touch list
+{arch_section}## Hard invariants and don't-touch list
 {claude_md}
 
 ## Current SystemVerilog Source (your working directory)
@@ -104,6 +108,9 @@ Advisory file changes (you may deviate, add, rename, or restructure freely):
    easy mistakes here (broken decoder arm, missed forwarding case,
    missing default in a case statement) saves an entire iteration
    getting marked broken on a one-line fix.
+
+   Stage any scratch copies under $TMPDIR or ./.tmp inside the
+   workspace; the sandbox rejects writes to /tmp or /private/tmp.
 
    The MOST COMMON formal failure is breaking the RVFI channel-0
    retirement contract: `io_rvfi_valid_0` must stay driven by the
