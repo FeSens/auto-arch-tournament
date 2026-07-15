@@ -3,7 +3,7 @@
 | Core | Source | Vendored SHA | License | LUTs | Fmax (MHz) | CoreMark/MHz | Citation source | Composite fitness |
 |---|---|---|---|---|---|---|---|---|
 | PicoRV32 | YosysHQ/picorv32 | `87c89acc18994c8cf9a2311e871818e87d304568` | ISC | (pending) | (pending) | 0.516 | github.com/YosysHQ/picorv32 README | (pending) |
-| VexRiscv | SpinalHDL/VexRiscv | `680756065e9e6fc50d8c3d6c58191a16e867d822` | MIT | (pending) | (pending) | 2.30 | github.com/SpinalHDL/VexRiscv README | (pending) |
+| VexRiscv | SpinalHDL/VexRiscv | `680756065e9e6fc50d8c3d6c58191a16e867d822` | MIT | 3402 core / 3957 wrapped | 128.58 (our flow) | 2.30 no-cache / 2.57 maxperf (published) | github.com/SpinalHDL/VexRiscv README | 370 (published, used as paper reference) |
 | Ibex | lowRISC/ibex | `eede2fbbef007d53cafbd85d937b897751c40a54` | Apache-2.0 | (pending) | (pending) | 0.904 (small config) | lowRISC ibex README | (pending) |
 | NEORV32 | stnolting/neorv32 | `a0c2020e57bd363675840da1845e7f8bd6d76702` | BSD-3-Clause | (pending) | (pending) | 0.9523 | NEORV32 README | (pending) |
 
@@ -12,5 +12,6 @@ All Fmax and LUT measurements pending local `make synth + make fpga TARGET=<name
 ## Notes
 
 - **VexRiscv** is `citation_only: true` — no pre-generated Verilog in the upstream repo. Scala demo sources vendored in `cores/vexriscv/rtl/demo_scala/` for documentation. To enable synthesis, run `sbt "runMain vexriscv.demo.GenFullNoMmuMaxPerf"` locally and place the output `.v` in `cores/vexriscv/rtl/`.
+- **VexRiscv area provenance (paper Table 2).** The 3402 / 3957 LUT4 figures were measured by synthesizing the locally generated `GenFullNoMmuMaxPerf` Verilog on the same Yosys + nextpnr Gowin GW2A-LV18 flow as V0 (`syn-vexriscv` on Tang Nano 20K). 3957 is the bare synthesis-report figure and includes the bench wrapper (imem/dmem + RVFI) logic; 3402 is the CPU core alone. The our-flow place-and-route Fmax came out at 128.58 MHz (`VexRiscvBench_report.json`), lower than the 144 MHz published max-performance figure, which is why the paper scores VexRiscv's throughput from the published numbers (2.57 CoreMark/MHz at 144 MHz = 370 iter/s, with 2.30 the published full-no-cache value) and uses our flow only for area. These values are also recorded in `tools/site/build.py` (`VEXRISCV_REF`).
 - **NEORV32** sources are VHDL (not Verilog/SystemVerilog). Yosys synthesis requires `ghdl-yosys-plugin`. If not installed, NEORV32 falls back to citation-only.
 - **Ibex** multiple CoreMark/MHz figures per upstream README: 0.904 (small/RV32EC), 2.47 (mid/RV32IMC 3-cycle mult), 3.13 (maxperf/RV32IMC 1-cycle mult). `core.yaml` records 0.904 as conservative baseline for the small config.
