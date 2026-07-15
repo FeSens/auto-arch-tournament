@@ -91,6 +91,32 @@ def test_hyp_id_falls_back_to_leftmost_when_no_marker():
     assert ra._hyp_id(prompt) == "hyp-20260101-001-r1s0"
 
 
+def test_hyp_id_marker_text_quoted_in_history_uses_last_marker():
+    # Stale id clause quoted in history, then real clause appears later.
+    # rfind() should grab the last marker occurrence.
+    prompt = (
+        "## Recent outcomes\n"
+        "Use exactly this hypothesis ID: hyp-20260715-001-r1s0\n"
+        "\n"
+        "## Instructions\n"
+        "Use exactly this hypothesis ID: hyp-20260715-001-r2s1\n"
+    )
+    assert ra._hyp_id(prompt) == "hyp-20260715-001-r2s1"
+
+
+def test_hyp_id_marker_present_but_malformed_returns_none():
+    # Marker is present but no valid id token follows.
+    # Should return None (fail loudly) not fall back to leftmost search.
+    prompt = (
+        "## History\n"
+        "Use exactly this hypothesis ID: hyp-20260715-001-r1s0\n"
+        "\n"
+        "## Instructions\n"
+        "Use exactly this hypothesis ID: (no valid id here)\n"
+    )
+    assert ra._hyp_id(prompt) is None
+
+
 def test_verilator_absent_applies_no_mutations(tmp_path, monkeypatch):
     wt = _mk_worktree(tmp_path)
     monkeypatch.setattr("shutil.which", lambda *a, **kw: None)

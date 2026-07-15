@@ -171,13 +171,19 @@ def _hyp_id(prompt: str) -> str | None:
     # Prefer the authoritative id clause hypothesis.py emits ("Use exactly
     # this hypothesis ID: <id>"). Round >= 2 prompts also quote prior
     # rounds' ids in the history section, which sits BEFORE this clause,
-    # so a plain leftmost search grabs the wrong (stale) id. Only fall
-    # back to leftmost search for older prompt shapes without the marker.
-    marker_idx = prompt.find(_ID_MARKER)
+    # so use rfind() to grab the LAST marker occurrence. If the marker is
+    # present but malformed (no valid id token follows), fail loudly by
+    # returning None. Only fall back to leftmost search for older prompt
+    # shapes without the marker at all.
+    marker_idx = prompt.rfind(_ID_MARKER)
     if marker_idx != -1:
         m = _HYP_ID.search(prompt, marker_idx + len(_ID_MARKER))
         if m:
             return m.group(0)
+        else:
+            # Marker present but no valid id token follows: fail loudly
+            return None
+    # Marker absent: fall back to leftmost search
     m = _HYP_ID.search(prompt)
     return m.group(0) if m else None
 
