@@ -1,0 +1,15 @@
+run_id: EXP-2026-07-e1c-naive-control
+question: >
+  How much of gpt-5_5_medium's measured gain survives when the scaffold
+  (lesson log, outcomes, metrics, architecture docs) is stripped?
+hypothesis: >
+  Naive mean final fitness lands between E1b (random) and full-scaffold
+  gpt-5_5_medium (423.5 +/- 11.2, n=3).
+baseline_run_id: gpt-5_5_medium reps 1-3 (results.jsonl)
+primary_metric: final champion fitness per rep
+seeds: [provider sampling; reps 1-3]
+config: {n: 15, k: 3, reps: 3, ref: bench-v2, prompt_profile: naive}
+success_rule: >
+  Scaffold contribution is claimed iff full-scaffold mean exceeds naive
+  mean with non-overlapping 95% bootstrap CIs at n=3+3; otherwise
+  reported as "not separated at this n".

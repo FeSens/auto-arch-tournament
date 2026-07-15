@@ -5,20 +5,19 @@
 # (1 P&R seed is insufficient for a defensible fitness median; full matrix
 # uses 3 seeds).
 #
-# Invocation (assuming runner.py supports --config; a parallel agent (Task 16)
-# is adding that flag):
+# Invocation:
 #
-#   python -m tools.bench.runner --config tools/bench/lite.yaml
-#
-# Until --config is wired, run the same effect with:
-#
-#   python -m tools.bench.runner --reps 1 --models gpt-5-mini --n 5
+#   python -m tools.bench.runner --models tools/bench/lite.yaml --reps 1 --n 5 --k 1
 
+# N/K/reps/seeds_per_pnr below are documentation only (runner ignores them;
+# pass --n / --k / --reps on the command line as shown above).
 N: 5
 K: 1
 reps: 1
 seeds_per_pnr: 1
 models:
-  - name: gpt-5-mini
-    pi_model: openai/gpt-5-mini
-    key_env: OPENAI_API_KEY
+  - name: lite-gpt-5_5_medium
+    provider: opencode
+    model: openai/gpt-5.5     # verify against models-gpt55-effort.yaml
+    variant: medium
+    oauth: true

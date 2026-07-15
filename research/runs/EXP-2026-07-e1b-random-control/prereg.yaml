@@ -1,0 +1,23 @@
+run_id: EXP-2026-07-e1b-random-control
+question: >
+  Do blind syntactic mutations through the identical gate chain produce
+  accepted fitness improvements at a rate comparable to LLM agents?
+hypothesis: >
+  Random mutation accepts ~0 strict improvements per 46-row rep; any
+  accepted cumulative delta is < 5%.
+baseline_run_id: paper-snapshot-17rep (bench/results.jsonl status=done)
+primary_metric: final champion fitness (iter/s) per rep
+secondary_metrics: [accepted_count, gate_pass_rate, first_failing_gate_distribution, lint_draws_used]
+operator_set: [op_swap(+/-, "&/|", ==/!=), ternary_swap, lit_perturb]
+mutation_policy: k~U{1,2,3} per slot; lint-guided redraw, max 20 draws; submit last draw if none lint
+seeds: [101, 102, 103]   # RANDOM_AGENT_SEED = 100 + rep
+config: {n: 15, k: 3, reps: 3, ref: bench-v2}
+success_rule: >
+  "Agent editing beats gated random sampling" is claimed iff every LLM
+  config mean exceeds the E1b mean with non-overlapping 95% bootstrap
+  CIs AND E1b mean accepted-count < 1. If E1b acceptance is materially
+  nonzero, reframe per W4 (gated-search benchmark), no goalpost move.
+note: >
+  Operator set is narrower than the superset menu in
+  research/paper_revision_plan.md E1 (parse-safe subset); recorded here
+  before any run, so this is a pre-launch refinement, not an amendment.
