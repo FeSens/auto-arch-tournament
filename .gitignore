@@ -114,6 +114,14 @@ node_modules/
 # (Previously gitignored as "regenerable", but they're only regenerable
 # by re-running the bench at considerable wall time and cost.)
 
+# repo.bundle (each rep's full git history, task-7 disk hygiene) is NOT
+# tracked, unlike orchestrator.log: a bundle runs about 45 MB binary per
+# rep, and at full compute-matrix scale that would bloat the git history
+# by gigabytes. It stays on disk as a local forensics artifact instead,
+# and tools/bench/gc.py archives (or recreates) it before deleting the
+# clone it was bundled from, so the content is not lost.
+bench/**/repo.bundle
+
 # Throwaway harness-verification runs (one-model YAMLs + their output
 # trees). These are reliability checks, not benchmark data — output is
 # regenerable and the YAMLs only encode "rerun this single model to
