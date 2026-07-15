@@ -223,10 +223,35 @@ def _build_prompt(log_tail: list, current_fitness: float, baseline_fitness: floa
     if target:
         yaml_path = Path("cores") / target / "core.yaml"
         if yaml_path.exists():
-            core_yaml_block = (
-                f"## Core spec (cores/{target}/core.yaml)\n"
-                f"```yaml\n{yaml_path.read_text()}```\n\n"
-            )
+            if naive:
+                # core.yaml carries targets:/current: fitness blocks,
+                # which are exactly the optimization scaffold the naive
+                # profile strips. Keep only the mechanical contract keys
+                # (RVFI port shape via nret, ISA, FPGA target) inside
+                # the same block header. Missing or unparseable files
+                # degrade to no block, mirroring the full profile's
+                # missing-file behavior.
+                try:
+                    spec = yaml.safe_load(yaml_path.read_text())
+                except yaml.YAMLError:
+                    spec = None
+                contract = {
+                    k: spec[k]
+                    for k in ("name", "isa", "nret", "target_fpga")
+                    if isinstance(spec, dict) and k in spec
+                }
+                if contract:
+                    dumped = yaml.safe_dump(
+                        contract, default_flow_style=False, sort_keys=False)
+                    core_yaml_block = (
+                        f"## Core spec (cores/{target}/core.yaml)\n"
+                        f"```yaml\n{dumped}```\n\n"
+                    )
+            else:
+                core_yaml_block = (
+                    f"## Core spec (cores/{target}/core.yaml)\n"
+                    f"```yaml\n{yaml_path.read_text()}```\n\n"
+                )
 
     target_banner = ""
     if target:

@@ -296,3 +296,63 @@ def test_full_profile_unchanged(monkeypatch):
     assert "Baseline fitness: 282.82" in prompt
     assert "## Architecture" in prompt
     assert "How to dig deeper" in prompt
+
+
+def _write_core_yaml_fixture(root):
+    """cores/bench/core.yaml with the production shape: contract keys
+    plus the targets:/current: fitness blocks the naive profile must
+    strip. Also writes the ARCHITECTURE.md _build_prompt reads
+    unconditionally from cwd."""
+    core_dir = root / "cores" / "bench"
+    core_dir.mkdir(parents=True)
+    (core_dir / "core.yaml").write_text(
+        "name: bench\n"
+        "isa: rv32im\n"
+        "nret: 1\n"
+        "target_fpga: tang-nano-20k\n"
+        "targets:\n"
+        "  fmax_mhz: 135\n"
+        "  lut4: 10000\n"
+        "  coremark_iter_s: 300\n"
+        "  coremark_per_mhz: 2.2\n"
+        "current:\n"
+        "  fmax_mhz: 135.21\n"
+        "  lut4: 9880\n"
+        "  coremark_iter_s: 301.04\n"
+        "  coremark_per_mhz: 2.2265\n"
+    )
+    (root / "ARCHITECTURE.md").write_text("arch doc\n")
+
+
+def test_naive_profile_with_target_strips_core_yaml_fitness(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    _write_core_yaml_fixture(tmp_path)
+    monkeypatch.setenv("BENCH_PROMPT_PROFILE", "naive")
+    prompt = _build_prompt(
+        log_tail=[], current_fitness=282.82, baseline_fitness=282.82,
+        hyp_id="hyp-20260101-001-r1s0", target="bench",
+    )
+    # The mechanical contract subset survives (RVFI shape via nret,
+    # ISA, FPGA target), inside the same block header.
+    assert "## Core spec (cores/bench/core.yaml)" in prompt
+    assert "nret" in prompt
+    assert "isa: rv32im" in prompt
+    assert "target_fpga: tang-nano-20k" in prompt
+    # core.yaml's fitness scaffold must NOT leak into the naive prompt.
+    for banned in ("targets:", "current:", "coremark_iter_s", "fmax_mhz"):
+        assert banned not in prompt
+
+
+def test_full_profile_with_target_keeps_core_yaml_fitness(tmp_path, monkeypatch):
+    """Guard against overstripping: the full profile keeps the verbatim
+    core.yaml dump, targets:/current: blocks included."""
+    monkeypatch.chdir(tmp_path)
+    _write_core_yaml_fixture(tmp_path)
+    monkeypatch.delenv("BENCH_PROMPT_PROFILE", raising=False)
+    prompt = _build_prompt(
+        log_tail=[], current_fitness=282.82, baseline_fitness=282.82,
+        hyp_id="hyp-20260101-001-r1s0", target="bench",
+    )
+    assert "## Core spec (cores/bench/core.yaml)" in prompt
+    for kept in ("targets:", "current:", "coremark_iter_s", "fmax_mhz"):
+        assert kept in prompt
