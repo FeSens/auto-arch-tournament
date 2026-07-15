@@ -6,6 +6,7 @@ real but local-only (git init + commit), fast enough for a unit test.
 """
 from __future__ import annotations
 
+import os
 import subprocess
 from pathlib import Path
 
@@ -106,7 +107,12 @@ def test_find_stale_clones_multiple(tmp_path):
 # ---------- find_stale_formal_workdirs -----------------------------------
 
 
-def test_find_stale_formal_workdirs_matches_pid_suffixed(tmp_path):
+def test_find_stale_formal_workdirs_matches_pid_suffixed(tmp_path, monkeypatch):
+    # Both PIDs are fixed literals with no relation to any process actually
+    # running on the test host; force the liveness check deterministic
+    # (dead) rather than depend on whatever happens to be at those PIDs.
+    monkeypatch.setattr(gc.os, "kill",
+                        lambda pid, sig: (_ for _ in ()).throw(ProcessLookupError))
     cores = tmp_path / "cores"
     (cores / "bench-44577").mkdir(parents=True)
     (cores / "baseline-75670").mkdir(parents=True)
@@ -114,6 +120,41 @@ def test_find_stale_formal_workdirs_matches_pid_suffixed(tmp_path):
     stale = gc.find_stale_formal_workdirs(cores)
 
     assert sorted(p.name for p in stale) == ["baseline-75670", "bench-44577"]
+
+
+def test_find_stale_formal_workdirs_skips_live_pid(tmp_path):
+    # Real liveness check, no monkeypatch: this test process's own PID is
+    # guaranteed alive for the duration of the test.
+    cores = tmp_path / "cores"
+    live_pid = os.getpid()
+    (cores / f"bench-{live_pid}").mkdir(parents=True)
+
+    stale = gc.find_stale_formal_workdirs(cores)
+
+    assert stale == []
+
+
+def test_find_stale_formal_workdirs_mixed_live_and_dead(tmp_path, monkeypatch):
+    # A live SBY run's workdir (PID still alive) must never be matched for
+    # deletion, even when a dead-PID workdir sits right next to it.
+    cores = tmp_path / "cores"
+    live_pid = os.getpid()
+    dead_pid = 99_999_999
+    (cores / f"bench-{live_pid}").mkdir(parents=True)
+    (cores / f"baseline-{dead_pid}").mkdir(parents=True)
+
+    real_kill = os.kill
+
+    def fake_kill(pid, sig):
+        if pid == dead_pid:
+            raise ProcessLookupError
+        return real_kill(pid, sig)
+
+    monkeypatch.setattr(gc.os, "kill", fake_kill)
+
+    stale = gc.find_stale_formal_workdirs(cores)
+
+    assert [p.name for p in stale] == [f"baseline-{dead_pid}"]
 
 
 def test_find_stale_formal_workdirs_ignores_tracked_upstream_cores(tmp_path):
@@ -238,7 +279,11 @@ def _setup_fabricated_tree(tmp_path):
     return clone_base, results_dir, riscv_cores, clone, rep_dir
 
 
-def test_main_dry_run_does_not_delete_anything(tmp_path, capsys):
+def test_main_dry_run_does_not_delete_anything(tmp_path, capsys, monkeypatch):
+    # bench-1234's PID has no relation to any real process; force the
+    # liveness check deterministic (dead) for this fixture.
+    monkeypatch.setattr(gc.os, "kill",
+                        lambda pid, sig: (_ for _ in ()).throw(ProcessLookupError))
     clone_base, results_dir, riscv_cores, clone, rep_dir = \
         _setup_fabricated_tree(tmp_path)
 
@@ -258,7 +303,11 @@ def test_main_dry_run_does_not_delete_anything(tmp_path, capsys):
     assert "nerv" not in out.split("bench-1234")[0].split("\n")[-1]
 
 
-def test_main_delete_removes_clone_and_workdir(tmp_path, capsys):
+def test_main_delete_removes_clone_and_workdir(tmp_path, capsys, monkeypatch):
+    # bench-1234's PID has no relation to any real process; force the
+    # liveness check deterministic (dead) for this fixture.
+    monkeypatch.setattr(gc.os, "kill",
+                        lambda pid, sig: (_ for _ in ()).throw(ProcessLookupError))
     clone_base, results_dir, riscv_cores, clone, rep_dir = \
         _setup_fabricated_tree(tmp_path)
 

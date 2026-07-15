@@ -357,7 +357,7 @@ def clone_fixture(repo_root: Path, ref: str, dest: Path) -> None:
     # needed there.
     #
     # Cost: measured 5.4 GB (not the originally-estimated ~200 MB) before
-    # the formal/riscv-formal work-dir garbage was pruned (task-7 Step 1) —
+    # the formal/riscv-formal work-dir garbage was pruned (task-7 Step 1):
     # years of stale per-PID SBY work dirs accumulate under
     # riscv-formal/cores/ and get carried into every `cp -R`'d clone. On
     # macOS APFS, `cp -Rc` (clonefile(2)) is copy-on-write: ~zero extra
@@ -376,6 +376,12 @@ def clone_fixture(repo_root: Path, ref: str, dest: Path) -> None:
                 ["cp", "-Rc", str(rf_src.resolve()), str(rf_dest)],
                 capture_output=True)
             if cp_cow.returncode != 0:
+                # cp -Rc may have partially created rf_dest before
+                # failing. `cp -R src dest` treats an existing dest as a
+                # target directory and nests the copy as
+                # dest/<src-basename>/... instead of a flat copy, so
+                # clear any partial result before falling back.
+                shutil.rmtree(rf_dest, ignore_errors=True)
                 subprocess.run(
                     ["cp", "-R", str(rf_src.resolve()), str(rf_dest)],
                     check=True)
@@ -1027,12 +1033,20 @@ def run_one_job(
     # Per-rep summary.json
     (out_dir / "summary.json").write_text(json.dumps(row, indent=2) + "\n")
 
-    # Bundle the rep's full git history (accepted diffs, log commits,
-    # any orphaned commits) into the rep dir before the clone is deleted.
-    # Makes --keep-clones unnecessary for forensics: the clone itself was
-    # only ever needed to inspect commits, and a bundle carries the same
-    # history at a few hundred KB-MB instead of a multi-GB working tree
-    # (which also drags along the riscv-formal copy).
+    # Bundle the rep's full git history (accepted diffs, log commits) into
+    # the rep dir before the clone is deleted. Makes --keep-clones
+    # unnecessary for forensics: the clone itself was only ever needed to
+    # inspect commits, and a bundle carries the same history at a few
+    # hundred KB-MB instead of a multi-GB working tree (which also drags
+    # along the riscv-formal copy).
+    #
+    # `--all` captures every commit reachable from a ref (branch or tag),
+    # not the full object DB: reflog-only orphaned commits (the
+    # bench-fixture-v1 rewind class documented in
+    # reconstruct_log_from_git's docstring above) are NOT included in
+    # this bundle. That class of commit's content survives separately,
+    # via the log.jsonl reconstruction that reconstruct_log_from_git runs
+    # earlier in this same finalize path, before the clone is deleted.
     bundle = subprocess.run(
         ["git", "bundle", "create", str(out_dir / "repo.bundle"), "--all"],
         cwd=str(clone), capture_output=True)
@@ -1096,10 +1110,17 @@ def main() -> int:
             print("[bench] source setup.sh (or fix PATH) and retry; "
                   "--skip-preflight overrides.", file=sys.stderr)
             return 2
-        free_gb = preflight.free_disk_gb(str(REPO_ROOT))
+        # Clones land under args.clone_base, which can be a different
+        # volume than REPO_ROOT (e.g. via --clone-base pointing at a
+        # bigger disk) -- measure free space there, not at REPO_ROOT.
+        # clone_base may not exist yet on a fresh override; create it
+        # first (clone_fixture would do so anyway for the first job) so
+        # os.statvfs has a path to measure.
+        args.clone_base.mkdir(parents=True, exist_ok=True)
+        free_gb = preflight.free_disk_gb(str(args.clone_base))
         if free_gb < preflight.MIN_FREE_GB:
             print(f"[bench] FATAL: only {free_gb:.1f} GB free at "
-                  f"{REPO_ROOT} (need >= {preflight.MIN_FREE_GB} GB)",
+                  f"{args.clone_base} (need >= {preflight.MIN_FREE_GB} GB)",
                   file=sys.stderr)
             print("[bench] free up disk (see `python -m tools.bench.gc`) "
                   "and retry; --skip-preflight overrides.", file=sys.stderr)

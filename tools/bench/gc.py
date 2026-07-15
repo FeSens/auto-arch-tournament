@@ -27,11 +27,15 @@ Two garbage sources, per the task-7 disk-hygiene audit (2026-07-15):
    invocations, interrupted runs, or historical residue predating that
    cleanup still accumulate here; this sweeper is the periodic backstop.
    Tracked upstream reference cores (nerv, picorv32, serv, VexRiscv) are
-   never matched by the PID-suffix glob and are never touched.
+   never matched by the PID-suffix glob and are never touched. Same
+   liveness check as `_cleanup_formal_workdir`: a PID-suffixed dir whose
+   process is still alive is never matched, so a concurrently running
+   SBY invocation's work dir is safe from this sweeper too.
 """
 from __future__ import annotations
 
 import argparse
+import os
 import re
 import shutil
 import subprocess
@@ -51,7 +55,25 @@ _SLUG_RE = re.compile(r"^(?P<model>.+)-rep(?P<rep>\d+)$")
 
 # Same discriminator as formal/run_all.sh's own stale-work-dir reaper:
 # a directory name ending in "-<digits>" is a PID-suffixed SBY work dir.
-_PID_SUFFIXED = re.compile(r"^.+-\d+$")
+# The trailing digits are captured so the PID can be liveness-checked
+# before a match is treated as sweepable (see _is_pid_alive below).
+_PID_SUFFIXED = re.compile(r"^.+-(?P<pid>\d+)$")
+
+
+def _is_pid_alive(pid: int) -> bool:
+    """True iff `pid` names a live process. Mirrors the liveness check in
+    tools/eval/formal.py::_cleanup_formal_workdir (same rationale: a
+    concurrent `bash formal/run_all.sh` invocation's work dir must never
+    be swept out from under it). A PermissionError means the PID exists
+    but is owned by someone else -- treated as alive/untouchable, same as
+    formal.py's handling."""
+    try:
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+    return True
 
 
 def parse_slug(slug: str) -> tuple[str, int] | None:
@@ -107,14 +129,23 @@ def find_stale_clones(clone_base: Path, results_dir: Path) -> list[Path]:
 
 def find_stale_formal_workdirs(riscv_formal_cores: Path) -> list[Path]:
     """PID-suffixed SBY work dirs directly under the main repo's
-    formal/riscv-formal/cores/. Tracked upstream reference cores never
-    match (no numeric suffix)."""
+    formal/riscv-formal/cores/ whose PID is no longer alive. Tracked
+    upstream reference cores never match (no numeric suffix). A live
+    SBY run's work dir (PID still alive) is never matched -- see
+    _is_pid_alive."""
     if not riscv_formal_cores.is_dir():
         return []
-    return sorted(
-        p for p in riscv_formal_cores.iterdir()
-        if p.is_dir() and _PID_SUFFIXED.match(p.name)
-    )
+    stale = []
+    for p in sorted(riscv_formal_cores.iterdir()):
+        if not p.is_dir():
+            continue
+        m = _PID_SUFFIXED.match(p.name)
+        if not m:
+            continue
+        if _is_pid_alive(int(m.group("pid"))):
+            continue
+        stale.append(p)
+    return stale
 
 
 def archive_clone_forensics(clone: Path, rep_dir: Path) -> list[str]:

@@ -7,14 +7,19 @@ exercised by test_smoke.py (slow, opt-in).
 from __future__ import annotations
 
 import json
+import os
+import subprocess
+import sys
 import textwrap
 from pathlib import Path
 
 import pytest
 
+from tools.bench import preflight, runner
 from tools.bench.runner import (
     JobSpec,
     ModelEntry,
+    clone_fixture,
     enumerate_jobs,
     load_done_set,
     load_keyfile,
@@ -320,3 +325,101 @@ def test_summarize_run_missing_summary_includes_best_fpga_fields_none(tmp_path: 
               "best_iterations", "best_cycles", "best_ipc_coremark"):
         assert k in summary, f"missing key {k!r} in summary_missing row"
         assert summary[k] is None
+
+
+# ---- clone_fixture: CoW copy fallback -----------------------------------
+
+
+def _make_fixture_repo(path: Path, ref: str) -> None:
+    """Minimal git repo `clone_fixture` can clone: a single commit on a
+    branch named `ref` (mirrors the real bench-fixture-v1 / main ref)."""
+    path.mkdir(parents=True, exist_ok=True)
+    subprocess.run(["git", "init", "-q", "-b", ref], cwd=str(path),
+                    check=True, capture_output=True)
+    (path / "README.md").write_text("fixture\n")
+    subprocess.run(["git", "add", "README.md"], cwd=str(path),
+                    check=True, capture_output=True)
+    subprocess.run(
+        ["git", "-c", "user.email=t@t", "-c", "user.name=t",
+         "commit", "--no-gpg-sign", "-q", "-m", "init"],
+        cwd=str(path), check=True, capture_output=True,
+    )
+
+
+def test_clone_fixture_cow_fallback_cleans_partial_dest(tmp_path, monkeypatch):
+    """If `cp -Rc` fails after partially creating rf_dest, the `cp -R`
+    fallback must produce a flat copy of rf_src's contents directly under
+    rf_dest -- not a nested rf_dest/<rf_src-basename>/... layout, which is
+    what plain `cp -R` produces when its destination already exists."""
+    ref = "bench-fixture-test"
+    repo_root = tmp_path / "repo"
+    _make_fixture_repo(repo_root, ref)
+
+    rf_src = tmp_path / "rf_src"
+    (rf_src / "cores" / "nerv").mkdir(parents=True)
+    (rf_src / "cores" / "nerv" / "marker.txt").write_text("upstream")
+
+    monkeypatch.setattr(runner, "find_riscv_formal", lambda: rf_src)
+
+    real_run = subprocess.run
+
+    def fake_run(cmd, *args, **kwargs):
+        if len(cmd) >= 2 and cmd[0] == "cp" and cmd[1] == "-Rc":
+            # Simulate clonefile(2) partially materializing the dest dir
+            # before failing partway (e.g. cross-device copy).
+            partial_dest = Path(cmd[-1])
+            partial_dest.mkdir(parents=True, exist_ok=True)
+            (partial_dest / "PARTIAL").write_text("partial cow copy")
+            return subprocess.CompletedProcess(
+                cmd, 1, stdout=b"", stderr=b"cp: clonefile failed")
+        return real_run(cmd, *args, **kwargs)
+
+    monkeypatch.setattr(subprocess, "run", fake_run)
+
+    dest = tmp_path / "clone"
+    clone_fixture(repo_root, ref, dest)
+
+    rf_dest = dest / "formal" / "riscv-formal"
+    # Correct flat layout: rf_dest/cores/nerv/marker.txt.
+    assert (rf_dest / "cores" / "nerv" / "marker.txt").read_text() == "upstream"
+    # Not nested under the source directory's basename.
+    assert not (rf_dest / "rf_src").exists()
+    # The partial CoW leftovers must be gone, not silently merged in.
+    assert not (rf_dest / "PARTIAL").exists()
+
+
+# ---- main(): disk preflight must measure clone_base, not REPO_ROOT ------
+
+
+class _FakeStatvfs:
+    def __init__(self, f_bavail, f_frsize):
+        self.f_bavail = f_bavail
+        self.f_frsize = f_frsize
+
+
+def test_main_disk_preflight_measures_clone_base(tmp_path, monkeypatch):
+    """Clones land under --clone-base, which can be a different volume
+    than REPO_ROOT; the preflight gate must measure free space at
+    clone_base, and must not crash via os.statvfs when clone_base
+    doesn't exist yet (e.g. a fresh --clone-base override)."""
+    monkeypatch.setattr(preflight, "missing_tools", lambda: [])
+
+    seen = {}
+
+    def fake_statvfs(path):
+        seen["path"] = path
+        if not Path(path).is_dir():
+            raise FileNotFoundError(path)
+        return _FakeStatvfs(f_bavail=250_000, f_frsize=4096)  # ~1 GB, below MIN_FREE_GB
+
+    monkeypatch.setattr(os, "statvfs", fake_statvfs)
+
+    clone_base = tmp_path / "does-not-exist-yet" / "clones"
+    monkeypatch.setattr(
+        sys, "argv", ["bench-runner", "--clone-base", str(clone_base)])
+
+    rc = runner.main()
+
+    assert rc == 2
+    assert seen["path"] == str(clone_base)
+    assert clone_base.is_dir()

@@ -158,7 +158,7 @@ def run_formal(worktree: str, target: str | None = None) -> dict:
 
     # The per-PID SBY work dir this invocation creates under
     # formal/riscv-formal/cores/ is cleaned up in `finally` below, once
-    # the tally (or failing-check log tail) has been captured — success
+    # the tally (or failing-check log tail) has been captured, success
     # and failure runs both. See _cleanup_formal_workdir's docstring.
     try:
         try:
@@ -170,7 +170,7 @@ def run_formal(worktree: str, target: str | None = None) -> dict:
             )
         except subprocess.TimeoutExpired as e:
             # The formal harness exceeded its wall-clock ceiling. This MUST
-            # not propagate — an unhandled TimeoutExpired in run_slot kills
+            # not propagate: an unhandled TimeoutExpired in run_slot kills
             # the entire ThreadPoolExecutor batch, which kills the rep
             # (round_id stays at whatever round was in flight, the
             # orchestrator's main loop dies, and the rep finalizes at iter=N
@@ -180,7 +180,7 @@ def run_formal(worktree: str, target: str | None = None) -> dict:
             # Return a slot-broken outcome with a recognizable error class
             # so the report's broken_by_class table surfaces it cleanly.
             # run_pgroup preserves text=True, so e.stdout/e.stderr arrive as
-            # str. (subprocess.run with text=True would behave the same way —
+            # str. (subprocess.run with text=True would behave the same way,
             # the prior .decode() call was always latent, but TimeoutExpired
             # never fired in practice under the 30-min ceiling so it stayed
             # hidden until kimi-rep3 hit the bumped 45-min ceiling and an
@@ -205,8 +205,8 @@ def run_formal(worktree: str, target: str | None = None) -> dict:
                 # `no_checks_generated` is run_all.sh's fallback when the
                 # post-run `for sby_file in *.sby` glob finds zero matches.
                 # That can mean genchecks.py crashed (the intended case) OR
-                # that something between genchecks and the tally — most
-                # commonly the implementer agent's bash tool — wiped or
+                # that something between genchecks and the tally, most
+                # commonly the implementer agent's bash tool, wiped or
                 # corrupted the checks directory mid-run. Distinguish so
                 # postmortems can tell "tooling never produced checks" from
                 # "real SBY work happened then the directory was molested".
@@ -229,7 +229,7 @@ def run_formal(worktree: str, target: str | None = None) -> dict:
                 }
             return {'passed': True, 'checks_passed': passed}
 
-        # Script didn't produce a tally — setup error (missing riscv-formal repo,
+        # Script didn't produce a tally: setup error (missing riscv-formal repo,
         # genchecks.py crash, etc.).
         return {
             'passed': False,
