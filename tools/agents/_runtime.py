@@ -36,7 +36,7 @@ from pathlib import Path
 from typing import Optional
 
 
-VALID_PROVIDERS = ("codex", "claude", "opencode", "static")
+VALID_PROVIDERS = ("codex", "claude", "opencode", "static", "random")
 
 # Codex's `exec` mode prints a multi-line banner before doing work — model
 # id, sandbox mode, token counters, separator dashes, etc. None of it is
@@ -320,6 +320,13 @@ def build_agent_cmd(
         # tracked pyc paths as defense in depth, but `-B` is the
         # cleaner local fix.
         cmd = [sys.executable, "-B", "-m", "tools.agents.static_agent", prompt]
+        if output_last_message is not None:
+            cmd += ["--output-last-message", str(output_last_message)]
+        return cmd
+    if p == "random":
+        # Seeded random-mutation control (E1b). Same invocation contract
+        # as static; RANDOM_AGENT_SEED env drives determinism.
+        cmd = [sys.executable, "-B", "-m", "tools.agents.random_agent", prompt]
         if output_last_message is not None:
             cmd += ["--output-last-message", str(output_last_message)]
         return cmd

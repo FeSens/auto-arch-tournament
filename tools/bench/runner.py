@@ -442,10 +442,15 @@ def make_env_for_job(job: JobSpec, clone: Path, keys: dict[str, str]) -> dict[st
     elif job.model.provider == "static":
         # No-LLM control runtime. Reads no API key, drives no model.
         env["AGENT_PROVIDER"] = "static"
+    elif job.model.provider == "random":
+        # Seeded mutation control. Seed = 100 + rep, so reps 1..3 map to
+        # the preregistered seeds 101..103 and reruns are reproducible.
+        env["AGENT_PROVIDER"] = "random"
+        env["RANDOM_AGENT_SEED"] = str(100 + job.rep)
     else:
         raise ValueError(
             f"unsupported provider {job.model.provider!r}; "
-            f"expected one of: codex, opencode, claude, static"
+            f"expected one of: codex, opencode, claude, static, random"
         )
     # Apply keys from ~/.bench-keys.env, but only for keys not already in env
     # (so a real shell-exported value wins over a file value).

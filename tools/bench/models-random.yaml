@@ -1,0 +1,10 @@
+# E1b attribution control: seeded random mutations, no LLM.
+# Seeds are 100 + rep (runner.make_env_for_job), so --reps 3 gives the
+# preregistered seed list [101, 102, 103].
+# Run (scratch results while validating; real E1 run drops the overrides):
+#   python -m tools.bench.runner --models tools/bench/models-random.yaml \
+#     --reps 3 --n 15 --k 3 --ref bench-v2
+models:
+  - name: random-mutation
+    provider: random
+    model: mutation-v1
