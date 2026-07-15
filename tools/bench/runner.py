@@ -1044,7 +1044,20 @@ def main() -> int:
     ap.add_argument("--keep-clones", action="store_true",
                     help="don't delete per-job clones after run (forensics)")
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--skip-preflight", action="store_true",
+                    help="skip the toolchain pre-flight check (debug only)")
     args = ap.parse_args()
+
+    if not args.skip_preflight:
+        missing = preflight.missing_tools()
+        if missing:
+            print(f"[bench] FATAL: required tools not on PATH: {missing}",
+                  file=sys.stderr)
+            print(preflight.report(), file=sys.stderr)
+            print("[bench] source setup.sh (or fix PATH) and retry; "
+                  "--skip-preflight overrides.", file=sys.stderr)
+            return 2
+        print(preflight.report())
 
     models = load_models(args.models)
     keys = load_keyfile(args.keys_file)
