@@ -69,6 +69,28 @@ def test_mutate_touches_only_rtl(tmp_path):
     assert (wt / "Makefile").read_text() == before
 
 
+def test_hyp_id_uses_authoritative_clause_not_leftmost_match():
+    # Round >= 2 prompt shape: the history section quotes a stale prior
+    # round's id before the authoritative id clause appears later.
+    prompt = (
+        "## Recent outcomes (last 5)\n"
+        "- hyp-20260715-001-r1s0: rejected, formal_failed: ill check\n"
+        "\n"
+        "## Instructions\n"
+        "Use exactly this hypothesis ID: hyp-20260715-001-r2s1\n"
+        "\n"
+        "## Required YAML structure\n"
+    )
+    assert ra._hyp_id(prompt) == "hyp-20260715-001-r2s1"
+
+
+def test_hyp_id_falls_back_to_leftmost_when_no_marker():
+    # Older prompt shapes without the authoritative clause: preserve the
+    # previous leftmost-match behavior.
+    prompt = "Hypothesis: hyp-20260101-001-r1s0\nSome other text.\n"
+    assert ra._hyp_id(prompt) == "hyp-20260101-001-r1s0"
+
+
 def test_verilator_absent_applies_no_mutations(tmp_path, monkeypatch):
     wt = _mk_worktree(tmp_path)
     monkeypatch.setattr("shutil.which", lambda *a, **kw: None)

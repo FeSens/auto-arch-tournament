@@ -39,6 +39,7 @@ MAX_DRAWS = 20
 
 _HYP_ID = re.compile(r"\bhyp-\d{8}-\d{3}-r\d+s\d+\b")
 _TARGET = re.compile(r"cores/([\w\-]+)/")
+_ID_MARKER = "Use exactly this hypothesis ID:"
 
 # op_swap pairs with composite guards:
 #   '+'/'-' only between word/paren/space chars (keeps ++ and unary
@@ -167,6 +168,16 @@ def _git_restore_rtl(worktree: Path, target: str) -> None:
 
 
 def _hyp_id(prompt: str) -> str | None:
+    # Prefer the authoritative id clause hypothesis.py emits ("Use exactly
+    # this hypothesis ID: <id>"). Round >= 2 prompts also quote prior
+    # rounds' ids in the history section, which sits BEFORE this clause,
+    # so a plain leftmost search grabs the wrong (stale) id. Only fall
+    # back to leftmost search for older prompt shapes without the marker.
+    marker_idx = prompt.find(_ID_MARKER)
+    if marker_idx != -1:
+        m = _HYP_ID.search(prompt, marker_idx + len(_ID_MARKER))
+        if m:
+            return m.group(0)
     m = _HYP_ID.search(prompt)
     return m.group(0) if m else None
 
