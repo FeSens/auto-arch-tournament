@@ -1,11 +1,11 @@
-# bench/holdout/Makefile — five bare-metal held-out benchmark kernels
+# bench/holdout/Makefile: five bare-metal held-out benchmark kernels
 # (dhrystone, aha-mont64, crc32, matmult-int, edn). Flags mirror
 # bench/programs/Makefile exactly (same CROSS, same -march/-mabi/-specs/
 # link.ld); see bench/holdout/VENDOR.md for kernel provenance.
 #
 # `make -f bench/holdout/Makefile all` builds bench/holdout/build/<k>.elf
 # for each kernel. HOLDOUT_REPS below is calibrated so each kernel
-# brackets to 1M-10M cycles on V0 (cores/baseline) — see
+# brackets to 1M-10M cycles on V0 (cores/baseline), see
 # .superpowers/sdd/e3-task-1-report.md for the calibration run.
 
 CROSS   := riscv32-unknown-elf
