@@ -108,6 +108,21 @@ PROVIDER_COLORS = {
     "kimi": "var(--c3)",
 }
 
+# Control/ablation arms have no public "release date" (they are not LLMs, or
+# not being scored as one), so they are excluded from the release-date x
+# fitness chart's coverage requirement. Mirrors the informal convention
+# already used in tools/bench/report.py's render_comparison_section (model
+# name equals "static" or starts with "static-"); extended here to cover the
+# E1b random-mutation control and E1c naive-* prompt-ablation arms.
+CONTROL_MODELS = {"static", "random-mutation"}
+
+
+def is_control_model(name: str) -> bool:
+    """True for control/ablation arms (E1a static, E1b random-mutation, E1c
+    naive-*) that are exempt from the release-chart's MODEL_RELEASES coverage
+    assertion."""
+    return name in CONTROL_MODELS or name.startswith("naive-") or name.startswith("static-")
+
 # Human-engineered reference: VexRiscv synthesized on Gowin GW2A-LV18 (Tang Nano 20K).
 # LUT4 = 3402 (CPU-core only; the syn report's bare 3957 figure included bench
 # wrapper logic). Fmax from VexRiscvBench_report.json (128.58 MHz). Fitness 370
@@ -547,6 +562,8 @@ def chart_release_vs_fitness(aggs: list[ModelAgg]) -> str:
     """METR-inspired scatter: public release date × peak HWE fitness."""
     items = []
     for a in aggs:
+        if is_control_model(a.model):
+            continue
         release = MODEL_RELEASES.get(a.model)
         if not release or a.fitness_best is None:
             continue

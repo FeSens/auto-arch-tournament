@@ -9,6 +9,7 @@ from tools.site.build import (
     Rep,
     aggregate,
     chart_release_vs_fitness,
+    is_control_model,
     load_reps,
     render_models,
     render_scheduled_models,
@@ -91,7 +92,8 @@ def test_model_rep_table_renders_exact_lut_count():
 
 def test_release_chart_covers_every_scored_model_and_renders_labels():
     aggs = aggregate(load_reps(DEFAULT_RESULTS, DEFAULT_RESULTS.parent.parent))
-    scored_models = {a.model for a in aggs if a.fitness_best is not None}
+    scored_models = {a.model for a in aggs
+                      if a.fitness_best is not None and not is_control_model(a.model)}
     assert scored_models <= MODEL_RELEASES.keys()
     assert all(date.fromisoformat(meta["date"]) for meta in MODEL_RELEASES.values())
 
@@ -101,3 +103,20 @@ def test_release_chart_covers_every_scored_model_and_renders_labels():
     assert "GPT-5.6 Terra" in html
     assert "Public model release date" in html
     assert 'stroke-dasharray="7 6"' in html
+
+
+def test_is_control_model_matches_known_control_and_ablation_arms():
+    assert is_control_model("static")
+    assert is_control_model("static-foo")
+    assert is_control_model("random-mutation")
+    assert is_control_model("naive-gpt-5_5_medium")
+    assert not is_control_model("gpt-5_5_medium")
+    assert not is_control_model("gemini-3_1-pro")
+
+
+def test_release_chart_skips_control_models_even_with_data():
+    static_agg = SimpleNamespace(model="static", fitness_best=300.0)
+    scored_agg = SimpleNamespace(model="gemini-3_1-pro", fitness_best=400.0)
+    html_with_control = chart_release_vs_fitness([static_agg, scored_agg])
+    html_without_control = chart_release_vs_fitness([scored_agg])
+    assert html_with_control == html_without_control
