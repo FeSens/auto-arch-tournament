@@ -1,0 +1,31 @@
+{
+  "model": "random-mutation",
+  "rep": 3,
+  "started_at": "2026-07-16T15:29:04+00:00",
+  "ended_at": null,
+  "wall_clock_sec": null,
+  "iterations": 46,
+  "accepted": 1,
+  "rejected": 0,
+  "broken": 45,
+  "final_fitness": 282.82,
+  "baseline_fitness": 282.82,
+  "best_fitness": 282.82,
+  "best_round": 1,
+  "delta_pct": 0.0,
+  "total_tokens_in": 0,
+  "total_tokens_out": 0,
+  "total_cost_usd": 0.0,
+  "orchestrator_exit": 0,
+  "status": "done",
+  "notes": "",
+  "broken_by_class": {
+    "formal_failed": 45
+  },
+  "best_lut4": 9563,
+  "best_ff": 1866,
+  "best_fmax_mhz": 127.03,
+  "best_iterations": 10,
+  "best_cycles": 4491485,
+  "best_ipc_coremark": 2e-06
+}
