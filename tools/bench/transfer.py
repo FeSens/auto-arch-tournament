@@ -43,6 +43,14 @@ class MissingBundleError(RuntimeError):
     """Raised when a rep dir has no repo.bundle (predates bundle capture)."""
 
 
+class MissingSummaryError(RuntimeError):
+    """Raised when a rep dir lacks summary.json. A finalized rep always
+    has one (runner.run_one_job writes it, and the orchestrator emits
+    run_summary.json even for --iterations 0), so this only fires on a
+    truncated/partial rep dir; surfaced as a clean CLI error rather than
+    a bare traceback, mirroring MissingBundleError."""
+
+
 def _repo_root() -> Path:
     # tools/bench/transfer.py -> tools/bench -> tools -> repo root
     return Path(__file__).resolve().parents[2]
@@ -81,7 +89,14 @@ def _champion_fmax_mhz(rep_dir: Path) -> float:
     if fmax is not None:
         return fmax
 
-    summary = json.loads((rep_dir / "summary.json").read_text())
+    summary_path = rep_dir / "summary.json"
+    if not summary_path.exists():
+        raise MissingSummaryError(
+            f"{summary_path} not found: rep {rep_dir} has no "
+            f"outcome=='improvement' row in log.jsonl and no summary.json "
+            f"to fall back to, so the champion Fmax cannot be determined."
+        )
+    summary = json.loads(summary_path.read_text())
     fallback = float(summary["best_fmax_mhz"])
     print(
         f"WARNING: no outcome=='improvement' row found in {log_path}; "
@@ -93,7 +108,13 @@ def _champion_fmax_mhz(rep_dir: Path) -> float:
 
 def _coremark_iter_s(rep_dir: Path) -> float:
     """The champion's CoreMark fitness, from summary.json's final_fitness."""
-    summary = json.loads((rep_dir / "summary.json").read_text())
+    summary_path = rep_dir / "summary.json"
+    if not summary_path.exists():
+        raise MissingSummaryError(
+            f"{summary_path} not found: rep {rep_dir} has no summary.json, "
+            f"so its CoreMark final_fitness cannot be read."
+        )
+    summary = json.loads(summary_path.read_text())
     return float(summary["final_fitness"])
 
 
@@ -112,6 +133,11 @@ def _clone_champion(rep_dir: Path, dest: Path) -> None:
         ["git", "clone", str(bundle), str(dest)],
         check=True, capture_output=True,
     )
+    # Defensive: `git clone` already leaves the bundle's tip checked out,
+    # so this is a redundant no-op today. It stays as a guard that the
+    # detached tip is materialized on disk before the build step runs, in
+    # case a future bundle carries a symbolic-ref HEAD or an unusual
+    # default branch. Do not delete it.
     subprocess.run(
         ["git", "checkout", "HEAD"],
         cwd=str(dest), check=True, capture_output=True,
@@ -179,6 +205,9 @@ def main(argv: list[str] | None = None) -> int:
     except MissingBundleError as e:
         print(f"ERROR: {e}", file=sys.stderr)
         return 3
+    except MissingSummaryError as e:
+        print(f"ERROR: {e}", file=sys.stderr)
+        return 4
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
     with args.out.open("a") as f:

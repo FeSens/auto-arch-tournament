@@ -20,6 +20,7 @@ import pytest
 from tools.bench import transfer
 from tools.bench.transfer import (
     MissingBundleError,
+    MissingSummaryError,
     _build_kernels_once,
     _champion_fmax_mhz,
     _clone_champion,
@@ -129,6 +130,21 @@ def test_champion_fmax_picks_last_improvement_not_best(tmp_path, capsys):
     assert capsys.readouterr().err == ""  # no fallback warning needed
 
 
+def test_champion_fmax_missing_summary_raises_clean_error(tmp_path):
+    """A truncated rep dir with a log.jsonl that has no improvement row AND
+    no summary.json must raise MissingSummaryError (a clean, catchable
+    error naming the file) rather than a bare FileNotFoundError traceback."""
+    rep_dir = tmp_path / "rep1"
+    rep_dir.mkdir()
+    _write_log(rep_dir, [
+        {"round_id": 0, "slot": 0, "outcome": "regression", "fmax_mhz": 100.0},
+    ])
+    # no summary.json written
+
+    with pytest.raises(MissingSummaryError, match="summary.json"):
+        _champion_fmax_mhz(rep_dir)
+
+
 def test_champion_fmax_falls_back_to_summary_with_warning(tmp_path, capsys):
     rep_dir = tmp_path / "rep1"
     rep_dir.mkdir()
@@ -155,6 +171,20 @@ def test_coremark_iter_s_reads_final_fitness(tmp_path):
     _write_summary(rep_dir, final_fitness=470.8)
 
     assert _coremark_iter_s(rep_dir) == 470.8
+
+
+def test_coremark_iter_s_missing_summary_raises_clean_error(tmp_path):
+    """A rep dir with a log.jsonl but no summary.json must raise
+    MissingSummaryError naming the file, not a bare FileNotFoundError."""
+    rep_dir = tmp_path / "rep1"
+    rep_dir.mkdir()
+    _write_log(rep_dir, [
+        {"round_id": 1, "slot": 0, "outcome": "improvement", "fmax_mhz": 140.0},
+    ])
+    # no summary.json written
+
+    with pytest.raises(MissingSummaryError, match="summary.json"):
+        _coremark_iter_s(rep_dir)
 
 
 # ---- _clone_champion / missing bundle -------------------------------------
