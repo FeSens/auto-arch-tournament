@@ -33,6 +33,7 @@ from tools.bench.runner import (
     summarize_run,
     validate_keys,
 )
+from tools.worktree import create_worktree
 
 
 # ---- model loading -----------------------------------------------------
@@ -334,18 +335,45 @@ def test_summarize_run_missing_summary_includes_best_fpga_fields_none(tmp_path: 
 # ---- clone_fixture: CoW copy fallback -----------------------------------
 
 
-def _make_fixture_repo(path: Path, ref: str) -> None:
-    """Minimal git repo `clone_fixture` can clone: a single commit on a
-    branch named `ref` (mirrors the real bench-fixture-v1 / main ref)."""
+def _make_fixture_repo(path: Path, ref: str, with_holdout: bool = True) -> None:
+    """Minimal git repo `clone_fixture` can clone: a couple of commits on
+    a branch named `ref` (mirrors the real bench-fixture-v1 / main ref),
+    so the clone's pre-strip history is genuinely multi-commit (the thing
+    the E3 guard must collapse away).
+
+    With `with_holdout=True` (default) it commits a `bench/holdout/x.c`
+    stand-in for the real held-out kernel tree, so tests can assert that
+    `clone_fixture` strips it out of every clone AND that no reachable
+    commit in the clone still carries it. With `with_holdout=False` the
+    ref never had bench/holdout, so tests can assert the guard produces
+    the same single-root shape (no existence leak)."""
     path.mkdir(parents=True, exist_ok=True)
     subprocess.run(["git", "init", "-q", "-b", ref], cwd=str(path),
                     check=True, capture_output=True)
     (path / "README.md").write_text("fixture\n")
-    subprocess.run(["git", "add", "README.md"], cwd=str(path),
-                    check=True, capture_output=True)
+    subprocess.run(["git", "add", "README.md"],
+                    cwd=str(path), check=True, capture_output=True)
     subprocess.run(
         ["git", "-c", "user.email=t@t", "-c", "user.name=t",
          "commit", "--no-gpg-sign", "-q", "-m", "init"],
+        cwd=str(path), check=True, capture_output=True,
+    )
+    if with_holdout:
+        (path / "bench" / "holdout").mkdir(parents=True, exist_ok=True)
+        (path / "bench" / "holdout" / "x.c").write_text("/* holdout */\n")
+        subprocess.run(["git", "add", "bench/holdout/x.c"],
+                        cwd=str(path), check=True, capture_output=True)
+        subprocess.run(
+            ["git", "-c", "user.email=t@t", "-c", "user.name=t",
+             "commit", "--no-gpg-sign", "-q", "-m", "add holdout"],
+            cwd=str(path), check=True, capture_output=True,
+        )
+    # A tag on the ref name reproduces the branch/tag ambiguity the
+    # clone guard must also clear (see clone_fixture's CRITICAL note).
+    # -c tag.gpgSign=false: a lightweight tag regardless of any global
+    # signing config that would otherwise force annotation.
+    subprocess.run(
+        ["git", "-c", "tag.gpgSign=false", "tag", ref],
         cwd=str(path), check=True, capture_output=True,
     )
 
@@ -390,6 +418,100 @@ def test_clone_fixture_cow_fallback_cleans_partial_dest(tmp_path, monkeypatch):
     assert not (rf_dest / "rf_src").exists()
     # The partial CoW leftovers must be gone, not silently merged in.
     assert not (rf_dest / "PARTIAL").exists()
+
+
+def _git_out(args, cwd) -> subprocess.CompletedProcess:
+    return subprocess.run(["git"] + args, cwd=str(cwd),
+                          capture_output=True, text=True)
+
+
+def test_clone_fixture_strips_bench_holdout_structurally(tmp_path, monkeypatch):
+    """Held-out kernels must never be visible to optimization agents (E3
+    prereg guard), and must be UNRECOVERABLE from git history -- not just
+    absent from the working tree. A commit-on-top strip leaves the prior
+    commit (and its blobs) reachable, so any worktree/bundle cut from the
+    clone can `git show HEAD~1:bench/holdout/...` or `git checkout <rev>
+    -- bench/holdout` the kernels back. The guard must instead collapse
+    the clone's pre-run history to a single parentless root that never
+    contained bench/holdout.
+
+    Use ref="main" so the fixture's branch name matches create_worktree's
+    literal base_branch default."""
+    ref = "main"
+    repo_root = tmp_path / "repo"
+    _make_fixture_repo(repo_root, ref, with_holdout=True)
+
+    # Skip the riscv-formal mirror step -- irrelevant to this test and
+    # slow/heavy if it were to run against the real vendored tree.
+    monkeypatch.setattr(runner, "find_riscv_formal", lambda: None)
+
+    dest = tmp_path / "clone"
+    clone_fixture(repo_root, ref, dest)
+
+    # 1. Working tree is clean of holdout.
+    assert not (dest / "bench" / "holdout").exists()
+
+    # 2. Pre-run history is exactly one commit (a single root).
+    count = _git_out(["rev-list", "--count", "HEAD"], dest).stdout.strip()
+    assert count == "1", f"expected single-root history, got {count} commits"
+
+    # 3. That commit is parentless: HEAD~1 does not resolve, so the
+    #    `git show HEAD~1:bench/holdout/...` resurrection path is dead.
+    assert _git_out(["rev-parse", "HEAD~1"], dest).returncode != 0
+    assert _git_out(["show", "HEAD~1:bench/holdout/x.c"], dest).returncode != 0
+
+    # 4. No reachable object anywhere carries a bench/holdout path.
+    objs = _git_out(["rev-list", "--objects", "--all"], dest).stdout
+    assert "bench/holdout" not in objs
+
+    # 5. The origin remote (and its old-history-bearing tracking refs) is
+    #    gone, and no tags survive to keep pre-strip commits reachable.
+    assert _git_out(["remote"], dest).stdout.strip() == ""
+    assert _git_out(["tag", "-l"], dest).stdout.strip() == ""
+
+    # 6. The real hazard: a worktree cut via the *actual* create_worktree
+    #    (cwd-relative, cut straight from the clone's git objects) cannot
+    #    resurrect the kernels by any git path.
+    monkeypatch.chdir(dest)
+    wt = Path(create_worktree("hyp-holdout-test", base_branch="main",
+                              target="bench"))
+    assert not (wt / "bench" / "holdout").exists()
+    assert _git_out(["show", "HEAD~1:bench/holdout/x.c"], wt).returncode != 0
+    assert _git_out(["checkout", "HEAD", "--", "bench/holdout"], wt).returncode != 0
+    assert _git_out(["checkout", "main", "--", "bench/holdout"], wt).returncode != 0
+    assert not (wt / "bench" / "holdout").exists()
+
+
+def test_clone_fixture_uniform_root_without_holdout(tmp_path, monkeypatch):
+    """A ref that never contained bench/holdout must still collapse to the
+    same single neutral root commit -- same shape, same message -- so the
+    guard's existence is not advertised in a clone's `git log` where no
+    kernels were present (the strip-commit-message existence leak)."""
+    ref = "main"
+    with_root = tmp_path / "with"
+    _make_fixture_repo(with_root, ref, with_holdout=True)
+    without_root = tmp_path / "without"
+    _make_fixture_repo(without_root, ref, with_holdout=False)
+
+    monkeypatch.setattr(runner, "find_riscv_formal", lambda: None)
+
+    with_clone = tmp_path / "with_clone"
+    without_clone = tmp_path / "without_clone"
+    clone_fixture(with_root, ref, with_clone)
+    clone_fixture(without_root, ref, without_clone)
+
+    def head_subject(dest: Path) -> str:
+        return _git_out(["log", "-1", "--format=%s"], dest).stdout.strip()
+
+    def head_count(dest: Path) -> str:
+        return _git_out(["rev-list", "--count", "HEAD"], dest).stdout.strip()
+
+    # Both are single-root, and the root subject is identical and neutral
+    # (does not mention holdout).
+    assert head_count(with_clone) == "1"
+    assert head_count(without_clone) == "1"
+    assert head_subject(with_clone) == head_subject(without_clone)
+    assert "holdout" not in head_subject(without_clone).lower()
 
 
 # ---- main(): disk preflight must measure clone_base, not REPO_ROOT ------

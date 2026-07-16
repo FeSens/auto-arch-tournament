@@ -227,28 +227,113 @@ def clone_fixture(repo_root: Path, ref: str, dest: Path) -> None:
          str(repo_root), str(dest)],
         check=True, capture_output=True,
     )
-    # CRITICAL: remove any tag with the same name as `ref`. The parent
-    # repo can have BOTH a branch named bench-fixture-v1 AND a tag
-    # named bench-fixture-v1 (the tag pins the original fixture commit;
-    # the branch advances over time). git clone copies both, leaving
-    # an ambiguous ref in the clone.
+    # Sever every path back to the source's history before rewriting the
+    # branch below. `git clone` copies tags and leaves an `origin` remote
+    # with remote-tracking refs; both keep the pre-strip commits (and any
+    # bench/holdout blobs they carry) reachable inside the clone even
+    # after `git reset --hard` moves the branch. Delete all tags and drop
+    # origin so the local branch we reset is the only surviving ref.
     #
-    # Symptom of the ambiguity: `git checkout bench-fixture-v1` in the
-    # orchestrator's accept_worktree (tools/worktree.py:_active_branch)
-    # silently resolves to the TAG (commit at the fixture freeze point),
-    # detaching HEAD and orphaning every log.jsonl commit appended
-    # since the bench-runner pre-create. The orchestrator continues
-    # producing commits on the detached HEAD, but each subsequent
-    # accept_worktree's `git checkout bench-fixture-v1` rewinds again,
-    # so the saved log.jsonl ends up containing only the entries
-    # appended after the FINAL rewind — observed as "iter=9" / "iter=27"
-    # in N=10 K=3 runs that demonstrably executed all 30 slots.
-    #
-    # Deleting the tag locally in the clone is the surgical fix: it
-    # leaves the tag intact in the parent repo (which the user may
-    # still rely on) but disambiguates the ref inside the rep clone.
+    # Deleting all tags also subsumes the old branch/tag disambiguation
+    # fix: the parent repo can have BOTH a branch named bench-fixture-v1
+    # AND a tag of the same name (the tag pins the fixture freeze commit;
+    # the branch advances). git clone copies both, and `git checkout
+    # <ref>` in accept_worktree (tools/worktree.py:_active_branch) then
+    # silently resolved to the TAG, detaching HEAD and orphaning every
+    # log.jsonl commit appended since the pre-create, observed as
+    # "iter=9" / "iter=27" in N=10 K=3 runs that ran all 30 slots. With
+    # no tags left in the clone, `<ref>` is unambiguous.
+    tags = subprocess.run(
+        ["git", "tag", "-l"], cwd=str(dest), capture_output=True, text=True,
+    ).stdout.split()
+    if tags:
+        subprocess.run(
+            ["git", "tag", "-d", *tags],
+            cwd=str(dest), check=False, capture_output=True,
+        )
     subprocess.run(
-        ["git", "tag", "-d", ref],
+        ["git", "remote", "remove", "origin"],
+        cwd=str(dest), check=False, capture_output=True,
+    )
+    # E3 prereg guard: held-out kernels must never be visible to
+    # optimization agents. bench/holdout/ is a fixture-visible directory
+    # (tracked so bench/holdout/Makefile + evaluator tooling can use it
+    # outside the agent-facing clones), but any clone_fixture output is
+    # handed straight to a hypothesis-implementation agent, so strip it
+    # unconditionally regardless of which ref was cloned.
+    #
+    # A commit-on-top strip is NOT enough. tools/worktree.py's
+    # create_worktree cuts each hypothesis worktree straight from this
+    # clone's git objects (`git worktree add -b <branch> <path>
+    # <base_branch>`), and repo.bundle (`git bundle create --all`, in
+    # run_one_job) captures every reachable commit. If any reachable
+    # commit still carried bench/holdout, a worktree could recover the
+    # kernels with `git show HEAD~1:bench/holdout/...` or `git checkout
+    # <rev> -- bench/holdout`, and the bundle would ship them. So remove
+    # holdout from the index, then collapse the clone's whole pre-run
+    # history to a single PARENTLESS root commit built from the stripped
+    # tree: no reachable commit ever contained bench/holdout, and there
+    # is no HEAD~1 to resurrect.
+    #
+    # --ignore-unmatch keeps the index strip a no-op for refs that never
+    # had bench/holdout; the single-root rebuild still runs for them, so
+    # every clone has the same neutral shape and the guard's existence is
+    # not advertised in a `git log` where no kernels were present.
+    subprocess.run(
+        ["git", "rm", "-r", "--cached", "--ignore-unmatch", "bench/holdout"],
+        cwd=str(dest), check=True, capture_output=True,
+    )
+    shutil.rmtree(dest / "bench" / "holdout", ignore_errors=True)
+    # Pre-create cores/bench/experiments/ as a tracked directory so the
+    # orchestrator can `git add` files into it without the sandbox check
+    # tripping on the untracked parent dir. The fixture stripped this
+    # directory deliberately to keep reps from inheriting each other's
+    # state, so we add it back per-clone with a single .gitkeep file.
+    # Staged now so it lands in the single root commit built below,
+    # keeping the pre-run history at exactly one commit.
+    exp_dir = dest / "cores" / "bench" / "experiments"
+    exp_dir.mkdir(parents=True, exist_ok=True)
+    (exp_dir / ".gitkeep").touch()
+    subprocess.run(
+        ["git", "add", "cores/bench/experiments/.gitkeep"],
+        cwd=str(dest), check=True, capture_output=True,
+    )
+    # Build the parentless root from the current (stripped, gitkeep-added)
+    # index and move the branch onto it. `git write-tree` snapshots the
+    # index; `git commit-tree <tree>` with no -p makes an orphan commit;
+    # `git reset --hard` repoints the checked-out branch (the working
+    # tree already matches, so nothing is touched on disk). commit-tree
+    # does not honor commit.gpgsign, so no signing override is needed; we
+    # still pass the bench-runner committer identity so the commit
+    # succeeds on machines with no global user.name/email. The message is
+    # deliberately neutral ("bench fixture root") and never mentions
+    # holdout.
+    tree = subprocess.run(
+        ["git", "write-tree"],
+        cwd=str(dest), check=True, capture_output=True, text=True,
+    ).stdout.strip()
+    root = subprocess.run(
+        ["git", "-c", "user.email=bench-runner@local",
+         "-c", "user.name=bench-runner",
+         "commit-tree", tree, "-m", "bench fixture root"],
+        cwd=str(dest), check=True, capture_output=True, text=True,
+    ).stdout.strip()
+    subprocess.run(
+        ["git", "reset", "--hard", root],
+        cwd=str(dest), check=True, capture_output=True,
+    )
+    # Prune the now-orphaned pre-strip commits (and their bench/holdout
+    # blobs) from the clone's object store so they cannot be recovered via
+    # the reflog, `git cat-file`, or repo.bundle. A local clone hardlinks
+    # the source's packs; gc here repacks only the clone's reachable
+    # objects and unlinks the old pack. The source repo's own objects are
+    # untouched because it keeps its own refs.
+    subprocess.run(
+        ["git", "reflog", "expire", "--expire=now", "--all"],
+        cwd=str(dest), check=False, capture_output=True,
+    )
+    subprocess.run(
+        ["git", "gc", "--prune=now", "--quiet"],
         cwd=str(dest), check=False, capture_output=True,
     )
     # Various per-clone artifacts must be invisible to the orchestrator's
@@ -303,30 +388,6 @@ def clone_fixture(repo_root: Path, ref: str, dest: Path) -> None:
             ["git", "update-index", "--assume-unchanged", *pyc_paths],
             cwd=str(dest), capture_output=True,
         )
-    # Pre-create cores/bench/experiments/ as a tracked directory so the
-    # orchestrator can `git add` files into it without the sandbox check
-    # tripping on the untracked parent dir. The fixture stripped this
-    # directory deliberately to keep reps from inheriting each other's
-    # state, so we add it back per-clone with a single .gitkeep file.
-    exp_dir = dest / "cores" / "bench" / "experiments"
-    exp_dir.mkdir(parents=True, exist_ok=True)
-    (exp_dir / ".gitkeep").touch()
-    subprocess.run(
-        ["git", "add", "cores/bench/experiments/.gitkeep"],
-        cwd=str(dest), check=True, capture_output=True,
-    )
-    # commit.gpgsign=false disables any global signing helper (e.g. 1Password
-    # ssh-sign) that would prompt interactively or fail non-interactively
-    # inside the runner's subprocess. -c overrides the global config for
-    # this one command only; the user's global signing setup is untouched.
-    subprocess.run(
-        ["git", "-c", "user.email=bench-runner@local",
-         "-c", "user.name=bench-runner",
-         "-c", "commit.gpgsign=false",
-         "commit", "--no-gpg-sign",
-         "-m", "bench-runner: pre-create experiments dir"],
-        cwd=str(dest), check=True, capture_output=True,
-    )
     # Mirror riscv-formal into the clone as a *real* directory. The
     # submodule is ~200 MB and gitignored, so it isn't in the fixture;
     # without it, `make formal` fails with "formal/riscv-formal not

@@ -12,10 +12,10 @@ targets:
   coremark_iter_s: 300
   coremark_per_mhz: 2.2
 current:
-  fmax_mhz: 135.21
-  lut4: 9880
-  ff: 1858
-  coremark_iter_s: 301.04
-  coremark_per_mhz: 2.2265
-  source_id: baseline-initial-eval-2026-04-29
-  updated: '2026-04-29T18:29:48.033631Z'
+  fmax_mhz: 127.03
+  lut4: 9563
+  ff: 1866
+  coremark_iter_s: 282.82
+  coremark_per_mhz: 2.2264
+  source_id: baseline-retest-2026-07-16 (bench/static/rep1, 3-seed median; corrects stale 2026-04-29 one-off per Task 4 review adjudication)
+  updated: '2026-07-16T12:38:00Z'

@@ -1,0 +1,19 @@
+run_id: EXP-2026-07-e3-transfer
+question: How much of the CoreMark fitness gain transfers to workloads
+  the loop never saw?
+hypothesis: Structural and micro_opt gains (Fmax-side) transfer near
+  fully; predictor-class cycle gains transfer partially or not at all.
+primary_metric: geomean held-out fitness gain over V0 per final champion
+baseline_run_id: V0 (bench/holdout/v0_expected.json)
+kernels: [dhrystone, aha-mont64, crc32, matmult-int, edn]
+config: {sim_flags: "--bench --istall --dstall", reps_per_kernel: {dhrystone: 6000, aha-mont64: 200, crc32: 90, matmult-int: 15, edn: 50}}
+success_rule: Report the transfer distribution whatever it is. The
+  "not merely workload overfitting" claim is made iff the median
+  champion keeps >=50% of its CoreMark gain on the held-out geomean.
+  No re-optimization against held-out kernels, ever (they stay held out
+  for future bench versions).
+note: reps_per_kernel sourced from bench/holdout/Makefile (Task 1 calibration,
+  see .superpowers/sdd/e3-task-1-report.md). edn=50, not 25 as paraphrased
+  in the Task 4 dispatch message; corrected against the live V0 gate run
+  (UART line "HOLDOUT edn reps=50 status=PASS") and the Makefile's
+  EDN_REPS value before writing this file.
