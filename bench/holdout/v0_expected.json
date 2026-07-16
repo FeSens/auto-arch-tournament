@@ -1,0 +1,36 @@
+{
+  "kernels": {
+    "dhrystone": {
+      "cycles": 3389923,
+      "reps": 6000,
+      "iter_s": 224836.96532340115,
+      "validated": true
+    },
+    "aha-mont64": {
+      "cycles": 2896973,
+      "reps": 200,
+      "iter_s": 8769.843557395943,
+      "validated": true
+    },
+    "crc32": {
+      "cycles": 3073181,
+      "reps": 90,
+      "iter_s": 3720.151855683085,
+      "validated": true
+    },
+    "matmult-int": {
+      "cycles": 1560047,
+      "reps": 15,
+      "iter_s": 1221.4055089365897,
+      "validated": true
+    },
+    "edn": {
+      "cycles": 2915936,
+      "reps": 50,
+      "iter_s": 2178.2028137791776,
+      "validated": true
+    }
+  },
+  "geomean_iter_s": 7212.331561429864,
+  "all_validated": true
+}
