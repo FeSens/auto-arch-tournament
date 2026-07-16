@@ -66,6 +66,9 @@ bench/programs/*.o
 bench/programs/*.bin
 bench/programs/*.hex
 
+# Held-out benchmark ELFs (rebuild via `make -f bench/holdout/Makefile all`)
+bench/holdout/build/*.elf
+
 # Experiment artifacts.
 # - log.jsonl IS tracked: orchestrator's authoritative journal of every
 #   iteration (accept/regression/broken). Rejected hypotheses never
