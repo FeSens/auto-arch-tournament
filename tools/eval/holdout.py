@@ -130,15 +130,22 @@ def _parse_uart_status(uart: str, kernel: str) -> tuple:
     return int(m.group(2)), m.group(3) == "PASS"
 
 
-def run_kernel(worktree: Path, sim_bin: Path, kernel: str) -> dict:
+def run_kernel(elf_root: Path, sim_bin: Path, kernel: str, *, cwd: Path | None = None) -> dict:
     """Run one held-out kernel ELF on the sim and validate it.
+
+    `elf_root` is where the kernel ELF is looked up (HOLDOUT_BUILD_DIR
+    relative to it); `cwd` is where the sim process runs, defaulting to
+    `elf_root` when not given (the historical worktree-is-everything
+    behavior). run_holdout passes these separately so a bundle-clone
+    scorer can source ELFs from a holdout_dir distinct from the
+    champion worktree the simulator runs from.
 
     Returns {'cycles': int, 'reps': int, 'validated': bool} on success,
     plus {'reason': str} with cycles=reps=0 on any failure -- mirroring
     tools/eval/fpga.py's run_coremark_ipc, which credits nothing on a
     failed run rather than reporting a partial/tainted cycle count.
     """
-    elf = worktree / HOLDOUT_BUILD_DIR / f"{kernel}.elf"
+    elf = elf_root / HOLDOUT_BUILD_DIR / f"{kernel}.elf"
     if not elf.exists():
         return {'cycles': 0, 'reps': 0, 'validated': False,
                 'reason': f'missing_elf: {elf}'}
@@ -146,7 +153,8 @@ def run_kernel(worktree: Path, sim_bin: Path, kernel: str) -> dict:
     try:
         result = run_pgroup(
             [str(sim_bin), str(elf), SIM_CYCLE_CEILING] + SIM_FLAGS,
-            capture_output=True, text=True, timeout=600, cwd=worktree,
+            capture_output=True, text=True, timeout=600,
+            cwd=cwd if cwd is not None else elf_root,
         )
     except (subprocess.TimeoutExpired, OSError) as e:
         return {'cycles': 0, 'reps': 0, 'validated': False,
@@ -185,9 +193,19 @@ def run_kernel(worktree: Path, sim_bin: Path, kernel: str) -> dict:
     return {'cycles': cycles, 'reps': reps, 'validated': True}
 
 
-def run_holdout(worktree: str, target: str, fmax_mhz: float) -> dict:
+def run_holdout(worktree: str, target: str, fmax_mhz: float,
+                 holdout_dir: str | None = None) -> dict:
     """Build (if needed), run, and score all HOLDOUT_KERNELS against
     cores/<target>.
+
+    `holdout_dir`, if given, is where the kernel ELFs are built/looked
+    up (bench/holdout/build/*.elf) instead of `worktree`. The simulator
+    itself (cores/<target>/obj_dir/cosim_sim) always builds/looks up
+    from `worktree`, since it depends on that target's RTL. This split
+    lets a caller score a champion checked out from a bundle clone that
+    lacks bench/holdout (by E3 design) against a shared, core-independent
+    kernel directory. Default (None) is the pre-existing behavior:
+    worktree drives both.
 
     Returns:
       {'kernels': {name: {'cycles': int, 'reps': int, 'iter_s': float,
@@ -197,12 +215,13 @@ def run_holdout(worktree: str, target: str, fmax_mhz: float) -> dict:
        'all_validated': bool}
     """
     worktree_path = Path(worktree).resolve()
-    _build_holdout_elfs(worktree_path)
+    elf_root = Path(holdout_dir).resolve() if holdout_dir is not None else worktree_path
+    _build_holdout_elfs(elf_root)
     sim_bin = _build_sim_binary(worktree_path, target)
 
     kernels = {}
     for kernel in HOLDOUT_KERNELS:
-        r = run_kernel(worktree_path, sim_bin, kernel)
+        r = run_kernel(elf_root, sim_bin, kernel, cwd=worktree_path)
         entry = {
             'cycles': r['cycles'],
             'reps': r['reps'],

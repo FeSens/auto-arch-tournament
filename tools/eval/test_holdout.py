@@ -349,3 +349,76 @@ def test_build_sim_binary_raises_fatal_on_build_failure(tmp_path, monkeypatch):
 
     with pytest.raises(RuntimeError, match="FATAL"):
         _build_sim_binary(tmp_path, "v1")
+
+
+# ---- run_holdout holdout_dir (E3 Task 5 interface extension) --------------
+#
+# Champion clones from repo.bundle lack bench/holdout by design (the E3
+# guard bakes its removal into rep clone history -- see tools/eval's E3
+# Task 2), but the held-out kernels are core-independent, so their ELFs
+# can be built/looked up from a separate source-of-truth directory
+# (holdout_dir) while the simulator, which depends on the champion's RTL,
+# keeps building/running out of worktree.
+
+
+def test_run_holdout_holdout_dir_drives_elf_worktree_drives_sim(tmp_path, monkeypatch):
+    worktree = tmp_path / "worktree"
+    holdout_dir = tmp_path / "holdout"
+    worktree.mkdir()
+    holdout_dir.mkdir()
+
+    obj_dir = worktree / "cores" / "v1" / "obj_dir"
+    obj_dir.mkdir(parents=True)
+    (obj_dir / "cosim_sim").write_bytes(b"")
+
+    for kernel in HOLDOUT_KERNELS:
+        _touch_elf(holdout_dir, kernel)
+
+    seen_cwds = []
+
+    def fake_run_pgroup(args, **kwargs):
+        elf_path = str(args[1])
+        assert str(holdout_dir) in elf_path, elf_path
+        assert str(worktree) not in elf_path, elf_path
+        seen_cwds.append(kwargs.get("cwd"))
+        kernel = next(k for k in HOLDOUT_KERNELS if f"{k}.elf" in elf_path)
+        marker = _marker(
+            bench_start_cycle=0, bench_stop_cycle=1_000_000,
+            uart=f"HOLDOUT {kernel} reps=100 status=PASS\n",
+        )
+        return subprocess.CompletedProcess(args, 0, json.dumps(marker) + "\n", "")
+
+    monkeypatch.setattr(holdout, "run_pgroup", fake_run_pgroup)
+    # ELFs already exist in holdout_dir and cosim_sim already exists in
+    # worktree, so no build should be triggered on either path.
+    monkeypatch.setattr(subprocess, "run",
+                         lambda *a, **k: pytest.fail("no build should happen"))
+
+    result = run_holdout(str(worktree), "v1", 100.0, holdout_dir=str(holdout_dir))
+
+    assert result["all_validated"] is True
+    # Simulator invocation cwd tracks worktree (sim/RTL side), not
+    # holdout_dir (kernel side), regardless of where the ELFs came from.
+    assert seen_cwds and all(cwd == worktree.resolve() for cwd in seen_cwds)
+
+
+def test_run_holdout_default_holdout_dir_is_worktree(tmp_path, monkeypatch):
+    # No holdout_dir given: unchanged behavior, ELFs looked up under
+    # worktree exactly as before this kwarg existed.
+    _setup_worktree(tmp_path)
+
+    def fake_run_pgroup(args, **kwargs):
+        elf_path = str(args[1])
+        assert str(tmp_path) in elf_path
+        kernel = next(k for k in HOLDOUT_KERNELS if f"{k}.elf" in elf_path)
+        marker = _marker(
+            bench_start_cycle=0, bench_stop_cycle=1_000_000,
+            uart=f"HOLDOUT {kernel} reps=100 status=PASS\n",
+        )
+        return subprocess.CompletedProcess(args, 0, json.dumps(marker) + "\n", "")
+
+    monkeypatch.setattr(holdout, "run_pgroup", fake_run_pgroup)
+
+    result = run_holdout(str(tmp_path), "v1", 100.0)
+
+    assert result["all_validated"] is True
