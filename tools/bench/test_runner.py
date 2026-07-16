@@ -401,8 +401,19 @@ def test_clone_fixture_cow_fallback_cleans_partial_dest(tmp_path, monkeypatch):
 def test_clone_fixture_strips_bench_holdout(tmp_path, monkeypatch):
     """Held-out kernels must never be visible to optimization agents (E3
     prereg guard): clone_fixture must strip bench/holdout/ from every
-    clone it produces, even though the fixture repo has it committed."""
-    ref = "bench-fixture-test"
+    clone it produces, even though the fixture repo has it committed.
+
+    Stripping the working tree alone is not enough: tools/worktree.py's
+    create_worktree cuts each hypothesis worktree straight from the
+    clone's git objects (`git worktree add -b <branch> <path>
+    <base_branch>`), independent of the outer clone's current working
+    tree. If the removal isn't also committed into the clone's own
+    history, bench/holdout/x.c silently reappears, fully readable, in
+    every hypothesis-implementation agent's worktree. Use ref="main" so
+    the fixture's branch name matches create_worktree's literal
+    base_branch default, letting this test reproduce that exact
+    command."""
+    ref = "main"
     repo_root = tmp_path / "repo"
     _make_fixture_repo(repo_root, ref)
 
@@ -414,6 +425,15 @@ def test_clone_fixture_strips_bench_holdout(tmp_path, monkeypatch):
     clone_fixture(repo_root, ref, dest)
 
     assert not (dest / "bench" / "holdout").exists()
+
+    # The real hazard: create_worktree's literal command, cut straight
+    # from the clone's git objects rather than its working tree.
+    worktree_path = tmp_path / "wt"
+    subprocess.run(
+        ["git", "worktree", "add", "-b", "t", str(worktree_path), "main"],
+        cwd=str(dest), check=True, capture_output=True,
+    )
+    assert not (worktree_path / "bench" / "holdout").exists()
 
 
 # ---- main(): disk preflight must measure clone_base, not REPO_ROOT ------

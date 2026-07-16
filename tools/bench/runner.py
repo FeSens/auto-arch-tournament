@@ -257,7 +257,33 @@ def clone_fixture(repo_root: Path, ref: str, dest: Path) -> None:
     # outside the agent-facing clones), but any clone_fixture output is
     # handed straight to a hypothesis-implementation agent, so strip it
     # unconditionally regardless of which ref was cloned.
+    #
+    # A plain working-tree delete is NOT enough: tools/worktree.py's
+    # create_worktree cuts each hypothesis worktree straight from this
+    # clone's git objects (`git worktree add -b <branch> <path>
+    # <base_branch>`), independent of this clone's current working
+    # tree. If bench/holdout stayed tracked in the clone's history, it
+    # would silently reappear, fully readable, in every worktree. So
+    # remove it from the index too and commit the removal into the
+    # clone's own history before any worktree is ever cut.
+    # --ignore-unmatch keeps this a no-op (exit 0, nothing staged) for
+    # refs that never had bench/holdout, instead of erroring.
+    subprocess.run(
+        ["git", "rm", "-r", "--cached", "--ignore-unmatch", "bench/holdout"],
+        cwd=str(dest), check=True, capture_output=True,
+    )
     shutil.rmtree(dest / "bench" / "holdout", ignore_errors=True)
+    # --allow-empty: the git rm above may have staged nothing (ref had
+    # no bench/holdout to begin with), and this commit must still
+    # succeed rather than raise on "nothing to commit".
+    subprocess.run(
+        ["git", "-c", "user.email=bench-runner@local",
+         "-c", "user.name=bench-runner",
+         "-c", "commit.gpgsign=false",
+         "commit", "--no-gpg-sign", "--allow-empty",
+         "-m", "bench-runner: strip bench/holdout (E3 held-out guard)"],
+        cwd=str(dest), check=True, capture_output=True,
+    )
     # Various per-clone artifacts must be invisible to the orchestrator's
     # `git status --porcelain` sandbox check (tools/agents/hypothesis.py:
     # _git_offlimits_changes), or the check treats them as untracked
