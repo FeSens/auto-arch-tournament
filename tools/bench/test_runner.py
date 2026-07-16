@@ -336,13 +336,19 @@ def test_summarize_run_missing_summary_includes_best_fpga_fields_none(tmp_path: 
 
 def _make_fixture_repo(path: Path, ref: str) -> None:
     """Minimal git repo `clone_fixture` can clone: a single commit on a
-    branch named `ref` (mirrors the real bench-fixture-v1 / main ref)."""
+    branch named `ref` (mirrors the real bench-fixture-v1 / main ref).
+
+    Also commits a `bench/holdout/x.c` stand-in for the real held-out
+    kernel tree, so tests can assert that `clone_fixture` strips it out
+    of every clone regardless of ref (E3 prereg guard)."""
     path.mkdir(parents=True, exist_ok=True)
     subprocess.run(["git", "init", "-q", "-b", ref], cwd=str(path),
                     check=True, capture_output=True)
     (path / "README.md").write_text("fixture\n")
-    subprocess.run(["git", "add", "README.md"], cwd=str(path),
-                    check=True, capture_output=True)
+    (path / "bench" / "holdout").mkdir(parents=True, exist_ok=True)
+    (path / "bench" / "holdout" / "x.c").write_text("/* holdout */\n")
+    subprocess.run(["git", "add", "README.md", "bench/holdout/x.c"],
+                    cwd=str(path), check=True, capture_output=True)
     subprocess.run(
         ["git", "-c", "user.email=t@t", "-c", "user.name=t",
          "commit", "--no-gpg-sign", "-q", "-m", "init"],
@@ -390,6 +396,24 @@ def test_clone_fixture_cow_fallback_cleans_partial_dest(tmp_path, monkeypatch):
     assert not (rf_dest / "rf_src").exists()
     # The partial CoW leftovers must be gone, not silently merged in.
     assert not (rf_dest / "PARTIAL").exists()
+
+
+def test_clone_fixture_strips_bench_holdout(tmp_path, monkeypatch):
+    """Held-out kernels must never be visible to optimization agents (E3
+    prereg guard): clone_fixture must strip bench/holdout/ from every
+    clone it produces, even though the fixture repo has it committed."""
+    ref = "bench-fixture-test"
+    repo_root = tmp_path / "repo"
+    _make_fixture_repo(repo_root, ref)
+
+    # Skip the riscv-formal mirror step -- irrelevant to this test and
+    # slow/heavy if it were to run against the real vendored tree.
+    monkeypatch.setattr(runner, "find_riscv_formal", lambda: None)
+
+    dest = tmp_path / "clone"
+    clone_fixture(repo_root, ref, dest)
+
+    assert not (dest / "bench" / "holdout").exists()
 
 
 # ---- main(): disk preflight must measure clone_base, not REPO_ROOT ------

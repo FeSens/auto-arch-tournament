@@ -251,6 +251,13 @@ def clone_fixture(repo_root: Path, ref: str, dest: Path) -> None:
         ["git", "tag", "-d", ref],
         cwd=str(dest), check=False, capture_output=True,
     )
+    # E3 prereg guard: held-out kernels must never be visible to
+    # optimization agents. bench/holdout/ is a fixture-visible directory
+    # (tracked so bench/holdout/Makefile + evaluator tooling can use it
+    # outside the agent-facing clones), but any clone_fixture output is
+    # handed straight to a hypothesis-implementation agent, so strip it
+    # unconditionally regardless of which ref was cloned.
+    shutil.rmtree(dest / "bench" / "holdout", ignore_errors=True)
     # Various per-clone artifacts must be invisible to the orchestrator's
     # `git status --porcelain` sandbox check (tools/agents/hypothesis.py:
     # _git_offlimits_changes), or the check treats them as untracked
