@@ -40,15 +40,21 @@ import re
 import sys
 from pathlib import Path
 
+from tools.agents._hyp_parse import parse_hyp_id
+
 
 def _hyp_id_from_prompt(prompt: str) -> str | None:
     """Find the hypothesis id the orchestrator pre-allocated for this slot.
 
-    The hypothesis prompt embeds it as `id: hyp-YYYYMMDD-NNN-rNsM`.
-    Falling back to None tells the caller to skip the YAML write.
+    Delegates to tools.agents._hyp_parse.parse_hyp_id, which anchors on
+    the authoritative "Use exactly this hypothesis ID: <id>" clause
+    (searching from its LAST occurrence via rfind) rather than doing a
+    bare leftmost regex search. Round >= 2 prompts quote prior rounds'
+    ids in the history section BEFORE that clause; a bare leftmost
+    search would grab that stale id instead. Falling back to None tells
+    the caller to skip the YAML write.
     """
-    m = re.search(r"\bhyp-\d{8}-\d{3}-r\d+s\d+\b", prompt)
-    return m.group(0) if m else None
+    return parse_hyp_id(prompt)
 
 
 def _target_from_prompt(prompt: str) -> str:

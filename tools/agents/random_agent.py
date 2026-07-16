@@ -35,11 +35,11 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 
+from tools.agents._hyp_parse import parse_hyp_id
+
 MAX_DRAWS = 20
 
-_HYP_ID = re.compile(r"\bhyp-\d{8}-\d{3}-r\d+s\d+\b")
 _TARGET = re.compile(r"cores/([\w\-]+)/")
-_ID_MARKER = "Use exactly this hypothesis ID:"
 
 # op_swap pairs with composite guards:
 #   '+'/'-' only between word/paren/space chars (keeps ++ and unary
@@ -171,25 +171,11 @@ def _git_restore_rtl(worktree: Path, target: str) -> None:
         cwd=worktree, capture_output=True)
 
 
-def _hyp_id(prompt: str) -> str | None:
-    # Prefer the authoritative id clause hypothesis.py emits ("Use exactly
-    # this hypothesis ID: <id>"). Round >= 2 prompts also quote prior
-    # rounds' ids in the history section, which sits BEFORE this clause,
-    # so use rfind() to grab the LAST marker occurrence. If the marker is
-    # present but malformed (no valid id token follows), fail loudly by
-    # returning None. Only fall back to leftmost search for older prompt
-    # shapes without the marker at all.
-    marker_idx = prompt.rfind(_ID_MARKER)
-    if marker_idx != -1:
-        m = _HYP_ID.search(prompt, marker_idx + len(_ID_MARKER))
-        if m:
-            return m.group(0)
-        else:
-            # Marker present but no valid id token follows: fail loudly
-            return None
-    # Marker absent: fall back to leftmost search
-    m = _HYP_ID.search(prompt)
-    return m.group(0) if m else None
+# Thin alias: the hardened marker-anchored parser now lives in
+# tools/agents/_hyp_parse.py (shared with static_agent.py). Kept as a
+# module-level name so existing tests and call sites (ra._hyp_id(...))
+# keep working unchanged.
+_hyp_id = parse_hyp_id
 
 
 def _target(prompt: str) -> str:
