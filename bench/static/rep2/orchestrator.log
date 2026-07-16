@@ -1,0 +1,472 @@
+[orchestrator] empty log for cores/bench — running baseline retest
+/Users/bonetto/bonetto/auto-arch-tournament/.claude/bench-runs/static-rep2/tools/plot.py:136: UserWarning: Tight layout not applied. The left and right margins cannot be made large enough to accommodate all Axes decorations.
+  fig.tight_layout()
+[bench-v2 02596a3] log: baseline-bench-43db37a improvement
+ 3 files changed, 11 insertions(+), 8 deletions(-)
+ create mode 100644 cores/bench/experiments/log.jsonl
+ create mode 100644 cores/bench/experiments/progress.png
+
+============================================================
+Round 1  |  slots=3  |  current best=282.82
+============================================================
+  pre-allocated IDs: ['hyp-20260716-001-r1s0', 'hyp-20260716-002-r1s1', 'hyp-20260716-003-r1s2']
+  [slot 0] category=micro_opt id=hyp-20260716-001-r1s0
+  [slot 1] category=structural id=hyp-20260716-002-r1s1
+  [slot 2] category=predictor id=hyp-20260716-003-r1s2
+Preparing worktree (new branch 'bench-hyp-20260716-001-r1s0')
+Preparing worktree (new branch 'bench-hyp-20260716-002-r1s1')
+Preparing worktree (new branch 'bench-hyp-20260716-003-r1s2')
+HEAD is now at 02596a3 log: baseline-bench-43db37a improvement
+HEAD is now at 02596a3 log: baseline-bench-43db37a improvement
+HEAD is now at 02596a3 log: baseline-bench-43db37a improvement
+  [slot 1] worktree=/Users/bonetto/bonetto/auto-arch-tournament/.claude/bench-runs/static-rep2/cores/bench/worktrees/hyp-20260716-002-r1s1
+  [slot 0] worktree=/Users/bonetto/bonetto/auto-arch-tournament/.claude/bench-runs/static-rep2/cores/bench/worktrees/hyp-20260716-001-r1s0
+  [slot 2] worktree=/Users/bonetto/bonetto/auto-arch-tournament/.claude/bench-runs/static-rep2/cores/bench/worktrees/hyp-20260716-003-r1s2
+  [slot 0] eval ok: fitness=282.82 lut4=9563 fmax=127.0MHz
+  [slot 1] eval ok: fitness=282.82 lut4=9563 fmax=127.0MHz
+  [slot 2] eval ok: fitness=282.82 lut4=9563 fmax=127.0MHz
+Deleted branch bench-hyp-20260716-001-r1s0 (was 02596a3).
+Deleted branch bench-hyp-20260716-002-r1s1 (was 02596a3).
+Deleted branch bench-hyp-20260716-003-r1s2 (was 02596a3).
+[bench-v2 1e54202] log: hyp-20260716-001-r1s0 regression
+ 2 files changed, 1 insertion(+)
+[bench-v2 1e7e3df] log: hyp-20260716-002-r1s1 regression
+ 2 files changed, 1 insertion(+)
+[bench-v2 f07e0fd] log: hyp-20260716-003-r1s2 regression
+ 2 files changed, 1 insertion(+)
+
+  Round 1 complete: slot 0=regression, slot 1=regression, slot 2=regression (no winner)
+
+============================================================
+Round 2  |  slots=3  |  current best=282.82
+============================================================
+  pre-allocated IDs: ['hyp-20260716-001-r2s0', 'hyp-20260716-002-r2s1', 'hyp-20260716-003-r2s2']
+  [slot 0] category=micro_opt id=hyp-20260716-001-r2s0
+  [slot 1] category=structural id=hyp-20260716-002-r2s1
+  [slot 2] category=predictor id=hyp-20260716-003-r2s2
+Preparing worktree (new branch 'bench-hyp-20260716-001-r2s0')
+Preparing worktree (new branch 'bench-hyp-20260716-002-r2s1')
+Preparing worktree (new branch 'bench-hyp-20260716-003-r2s2')
+HEAD is now at f07e0fd log: hyp-20260716-003-r1s2 regression
+HEAD is now at f07e0fd log: hyp-20260716-003-r1s2 regression
+HEAD is now at f07e0fd log: hyp-20260716-003-r1s2 regression
+  [slot 0] worktree=/Users/bonetto/bonetto/auto-arch-tournament/.claude/bench-runs/static-rep2/cores/bench/worktrees/hyp-20260716-001-r2s0
+  [slot 2] worktree=/Users/bonetto/bonetto/auto-arch-tournament/.claude/bench-runs/static-rep2/cores/bench/worktrees/hyp-20260716-003-r2s2
+  [slot 1] worktree=/Users/bonetto/bonetto/auto-arch-tournament/.claude/bench-runs/static-rep2/cores/bench/worktrees/hyp-20260716-002-r2s1
+  [slot 2] eval ok: fitness=282.82 lut4=9563 fmax=127.0MHz
+  [slot 0] eval ok: fitness=282.82 lut4=9563 fmax=127.0MHz
+  [slot 1] eval ok: fitness=282.82 lut4=9563 fmax=127.0MHz
+Deleted branch bench-hyp-20260716-001-r2s0 (was f07e0fd).
+Deleted branch bench-hyp-20260716-002-r2s1 (was f07e0fd).
+Deleted branch bench-hyp-20260716-003-r2s2 (was f07e0fd).
+[bench-v2 e1c1f69] log: hyp-20260716-001-r2s0 regression
+ 2 files changed, 1 insertion(+)
+[bench-v2 7e59c30] log: hyp-20260716-002-r2s1 regression
+ 2 files changed, 1 insertion(+)
+[bench-v2 30f803a] log: hyp-20260716-003-r2s2 regression
+ 2 files changed, 1 insertion(+)
+
+  Round 2 complete: slot 0=regression, slot 1=regression, slot 2=regression (no winner)
+
+============================================================
+Round 3  |  slots=3  |  current best=282.82
+============================================================
+  pre-allocated IDs: ['hyp-20260716-001-r3s0', 'hyp-20260716-002-r3s1', 'hyp-20260716-003-r3s2']
+  [slot 0] category=micro_opt id=hyp-20260716-001-r3s0
+  [slot 1] category=structural id=hyp-20260716-002-r3s1
+  [slot 2] category=predictor id=hyp-20260716-003-r3s2
+Preparing worktree (new branch 'bench-hyp-20260716-003-r3s2')
+Preparing worktree (new branch 'bench-hyp-20260716-001-r3s0')
+Preparing worktree (new branch 'bench-hyp-20260716-002-r3s1')
+HEAD is now at 30f803a log: hyp-20260716-003-r2s2 regression
+HEAD is now at 30f803a log: hyp-20260716-003-r2s2 regression
+HEAD is now at 30f803a log: hyp-20260716-003-r2s2 regression
+  [slot 1] worktree=/Users/bonetto/bonetto/auto-arch-tournament/.claude/bench-runs/static-rep2/cores/bench/worktrees/hyp-20260716-002-r3s1
+  [slot 0] worktree=/Users/bonetto/bonetto/auto-arch-tournament/.claude/bench-runs/static-rep2/cores/bench/worktrees/hyp-20260716-001-r3s0
+  [slot 2] worktree=/Users/bonetto/bonetto/auto-arch-tournament/.claude/bench-runs/static-rep2/cores/bench/worktrees/hyp-20260716-003-r3s2
+  [slot 0] eval ok: fitness=282.82 lut4=9563 fmax=127.0MHz
+  [slot 1] eval ok: fitness=282.82 lut4=9563 fmax=127.0MHz
+  [slot 2] eval ok: fitness=282.82 lut4=9563 fmax=127.0MHz
+Deleted branch bench-hyp-20260716-001-r3s0 (was 30f803a).
+Deleted branch bench-hyp-20260716-002-r3s1 (was 30f803a).
+Deleted branch bench-hyp-20260716-003-r3s2 (was 30f803a).
+[bench-v2 188aac6] log: hyp-20260716-001-r3s0 regression
+ 2 files changed, 1 insertion(+)
+[bench-v2 c38d634] log: hyp-20260716-002-r3s1 regression
+ 2 files changed, 1 insertion(+)
+[bench-v2 33e285c] log: hyp-20260716-003-r3s2 regression
+ 2 files changed, 1 insertion(+)
+
+  Round 3 complete: slot 0=regression, slot 1=regression, slot 2=regression (no winner)
+
+============================================================
+Round 4  |  slots=3  |  current best=282.82
+============================================================
+  pre-allocated IDs: ['hyp-20260716-001-r4s0', 'hyp-20260716-002-r4s1', 'hyp-20260716-003-r4s2']
+  [slot 0] category=micro_opt id=hyp-20260716-001-r4s0
+  [slot 1] category=structural id=hyp-20260716-002-r4s1
+  [slot 2] category=predictor id=hyp-20260716-003-r4s2
+Preparing worktree (new branch 'bench-hyp-20260716-002-r4s1')
+Preparing worktree (new branch 'bench-hyp-20260716-003-r4s2')
+Preparing worktree (new branch 'bench-hyp-20260716-001-r4s0')
+HEAD is now at 33e285c log: hyp-20260716-003-r3s2 regression
+HEAD is now at 33e285c log: hyp-20260716-003-r3s2 regression
+HEAD is now at 33e285c log: hyp-20260716-003-r3s2 regression
+  [slot 2] worktree=/Users/bonetto/bonetto/auto-arch-tournament/.claude/bench-runs/static-rep2/cores/bench/worktrees/hyp-20260716-003-r4s2
+  [slot 0] worktree=/Users/bonetto/bonetto/auto-arch-tournament/.claude/bench-runs/static-rep2/cores/bench/worktrees/hyp-20260716-001-r4s0
+  [slot 1] worktree=/Users/bonetto/bonetto/auto-arch-tournament/.claude/bench-runs/static-rep2/cores/bench/worktrees/hyp-20260716-002-r4s1
+  [slot 2] eval ok: fitness=282.82 lut4=9563 fmax=127.0MHz
+  [slot 0] eval ok: fitness=282.82 lut4=9563 fmax=127.0MHz
+  [slot 1] eval ok: fitness=282.82 lut4=9563 fmax=127.0MHz
+Deleted branch bench-hyp-20260716-001-r4s0 (was 33e285c).
+Deleted branch bench-hyp-20260716-002-r4s1 (was 33e285c).
+Deleted branch bench-hyp-20260716-003-r4s2 (was 33e285c).
+[bench-v2 ceaa8ac] log: hyp-20260716-001-r4s0 regression
+ 2 files changed, 1 insertion(+)
+[bench-v2 1dca930] log: hyp-20260716-002-r4s1 regression
+ 2 files changed, 1 insertion(+)
+[bench-v2 2fb4f02] log: hyp-20260716-003-r4s2 regression
+ 2 files changed, 1 insertion(+)
+
+  Round 4 complete: slot 0=regression, slot 1=regression, slot 2=regression (no winner)
+
+============================================================
+Round 5  |  slots=3  |  current best=282.82
+============================================================
+  pre-allocated IDs: ['hyp-20260716-001-r5s0', 'hyp-20260716-002-r5s1', 'hyp-20260716-003-r5s2']
+  [slot 0] category=micro_opt id=hyp-20260716-001-r5s0
+  [slot 1] category=structural id=hyp-20260716-002-r5s1
+  [slot 2] category=predictor id=hyp-20260716-003-r5s2
+Preparing worktree (new branch 'bench-hyp-20260716-003-r5s2')
+Preparing worktree (new branch 'bench-hyp-20260716-001-r5s0')
+Preparing worktree (new branch 'bench-hyp-20260716-002-r5s1')
+HEAD is now at 2fb4f02 log: hyp-20260716-003-r4s2 regression
+HEAD is now at 2fb4f02 log: hyp-20260716-003-r4s2 regression
+HEAD is now at 2fb4f02 log: hyp-20260716-003-r4s2 regression
+  [slot 1] worktree=/Users/bonetto/bonetto/auto-arch-tournament/.claude/bench-runs/static-rep2/cores/bench/worktrees/hyp-20260716-002-r5s1
+  [slot 0] worktree=/Users/bonetto/bonetto/auto-arch-tournament/.claude/bench-runs/static-rep2/cores/bench/worktrees/hyp-20260716-001-r5s0
+  [slot 2] worktree=/Users/bonetto/bonetto/auto-arch-tournament/.claude/bench-runs/static-rep2/cores/bench/worktrees/hyp-20260716-003-r5s2
+  [slot 0] eval ok: fitness=282.82 lut4=9563 fmax=127.0MHz
+  [slot 1] eval ok: fitness=282.82 lut4=9563 fmax=127.0MHz
+  [slot 2] eval ok: fitness=282.82 lut4=9563 fmax=127.0MHz
+Deleted branch bench-hyp-20260716-001-r5s0 (was 2fb4f02).
+Deleted branch bench-hyp-20260716-002-r5s1 (was 2fb4f02).
+Deleted branch bench-hyp-20260716-003-r5s2 (was 2fb4f02).
+[bench-v2 a200e19] log: hyp-20260716-001-r5s0 regression
+ 2 files changed, 1 insertion(+)
+[bench-v2 f9bac28] log: hyp-20260716-002-r5s1 regression
+ 2 files changed, 1 insertion(+)
+[bench-v2 dc5f725] log: hyp-20260716-003-r5s2 regression
+ 2 files changed, 1 insertion(+)
+
+  Round 5 complete: slot 0=regression, slot 1=regression, slot 2=regression (no winner)
+
+============================================================
+Round 6  |  slots=3  |  current best=282.82
+============================================================
+  pre-allocated IDs: ['hyp-20260716-001-r6s0', 'hyp-20260716-002-r6s1', 'hyp-20260716-003-r6s2']
+  [slot 0] category=micro_opt id=hyp-20260716-001-r6s0
+  [slot 1] category=structural id=hyp-20260716-002-r6s1
+  [slot 2] category=predictor id=hyp-20260716-003-r6s2
+Preparing worktree (new branch 'bench-hyp-20260716-001-r6s0')
+Preparing worktree (new branch 'bench-hyp-20260716-003-r6s2')
+Preparing worktree (new branch 'bench-hyp-20260716-002-r6s1')
+HEAD is now at dc5f725 log: hyp-20260716-003-r5s2 regression
+HEAD is now at dc5f725 log: hyp-20260716-003-r5s2 regression
+HEAD is now at dc5f725 log: hyp-20260716-003-r5s2 regression
+  [slot 1] worktree=/Users/bonetto/bonetto/auto-arch-tournament/.claude/bench-runs/static-rep2/cores/bench/worktrees/hyp-20260716-002-r6s1
+  [slot 2] worktree=/Users/bonetto/bonetto/auto-arch-tournament/.claude/bench-runs/static-rep2/cores/bench/worktrees/hyp-20260716-003-r6s2
+  [slot 0] worktree=/Users/bonetto/bonetto/auto-arch-tournament/.claude/bench-runs/static-rep2/cores/bench/worktrees/hyp-20260716-001-r6s0
+  [slot 2] eval ok: fitness=282.82 lut4=9563 fmax=127.0MHz
+  [slot 1] eval ok: fitness=282.82 lut4=9563 fmax=127.0MHz
+  [slot 0] eval ok: fitness=282.82 lut4=9563 fmax=127.0MHz
+Deleted branch bench-hyp-20260716-001-r6s0 (was dc5f725).
+Deleted branch bench-hyp-20260716-002-r6s1 (was dc5f725).
+Deleted branch bench-hyp-20260716-003-r6s2 (was dc5f725).
+[bench-v2 60bc471] log: hyp-20260716-001-r6s0 regression
+ 2 files changed, 1 insertion(+)
+[bench-v2 3265042] log: hyp-20260716-002-r6s1 regression
+ 2 files changed, 1 insertion(+)
+[bench-v2 387d98c] log: hyp-20260716-003-r6s2 regression
+ 2 files changed, 1 insertion(+)
+
+  Round 6 complete: slot 0=regression, slot 1=regression, slot 2=regression (no winner)
+
+============================================================
+Round 7  |  slots=3  |  current best=282.82
+============================================================
+  pre-allocated IDs: ['hyp-20260716-001-r7s0', 'hyp-20260716-002-r7s1', 'hyp-20260716-003-r7s2']
+  [slot 0] category=micro_opt id=hyp-20260716-001-r7s0
+  [slot 1] category=structural id=hyp-20260716-002-r7s1
+  [slot 2] category=predictor id=hyp-20260716-003-r7s2
+Preparing worktree (new branch 'bench-hyp-20260716-001-r7s0')
+Preparing worktree (new branch 'bench-hyp-20260716-002-r7s1')
+Preparing worktree (new branch 'bench-hyp-20260716-003-r7s2')
+HEAD is now at 387d98c log: hyp-20260716-003-r6s2 regression
+HEAD is now at 387d98c log: hyp-20260716-003-r6s2 regression
+HEAD is now at 387d98c log: hyp-20260716-003-r6s2 regression
+  [slot 0] worktree=/Users/bonetto/bonetto/auto-arch-tournament/.claude/bench-runs/static-rep2/cores/bench/worktrees/hyp-20260716-001-r7s0
+  [slot 1] worktree=/Users/bonetto/bonetto/auto-arch-tournament/.claude/bench-runs/static-rep2/cores/bench/worktrees/hyp-20260716-002-r7s1
+  [slot 2] worktree=/Users/bonetto/bonetto/auto-arch-tournament/.claude/bench-runs/static-rep2/cores/bench/worktrees/hyp-20260716-003-r7s2
+  [slot 1] eval ok: fitness=282.82 lut4=9563 fmax=127.0MHz
+  [slot 0] eval ok: fitness=282.82 lut4=9563 fmax=127.0MHz
+  [slot 2] eval ok: fitness=282.82 lut4=9563 fmax=127.0MHz
+Deleted branch bench-hyp-20260716-001-r7s0 (was 387d98c).
+Deleted branch bench-hyp-20260716-002-r7s1 (was 387d98c).
+Deleted branch bench-hyp-20260716-003-r7s2 (was 387d98c).
+[bench-v2 cdd6f86] log: hyp-20260716-001-r7s0 regression
+ 2 files changed, 1 insertion(+)
+[bench-v2 21ebbf5] log: hyp-20260716-002-r7s1 regression
+ 2 files changed, 1 insertion(+)
+[bench-v2 7bb4b92] log: hyp-20260716-003-r7s2 regression
+ 2 files changed, 1 insertion(+)
+
+  Round 7 complete: slot 0=regression, slot 1=regression, slot 2=regression (no winner)
+
+============================================================
+Round 8  |  slots=3  |  current best=282.82
+============================================================
+  pre-allocated IDs: ['hyp-20260716-001-r8s0', 'hyp-20260716-002-r8s1', 'hyp-20260716-003-r8s2']
+  [slot 0] category=micro_opt id=hyp-20260716-001-r8s0
+  [slot 1] category=structural id=hyp-20260716-002-r8s1
+  [slot 2] category=predictor id=hyp-20260716-003-r8s2
+Preparing worktree (new branch 'bench-hyp-20260716-002-r8s1')
+Preparing worktree (new branch 'bench-hyp-20260716-001-r8s0')
+Preparing worktree (new branch 'bench-hyp-20260716-003-r8s2')
+HEAD is now at 7bb4b92 log: hyp-20260716-003-r7s2 regression
+HEAD is now at 7bb4b92 log: hyp-20260716-003-r7s2 regression
+HEAD is now at 7bb4b92 log: hyp-20260716-003-r7s2 regression
+  [slot 1] worktree=/Users/bonetto/bonetto/auto-arch-tournament/.claude/bench-runs/static-rep2/cores/bench/worktrees/hyp-20260716-002-r8s1
+  [slot 0] worktree=/Users/bonetto/bonetto/auto-arch-tournament/.claude/bench-runs/static-rep2/cores/bench/worktrees/hyp-20260716-001-r8s0
+  [slot 2] worktree=/Users/bonetto/bonetto/auto-arch-tournament/.claude/bench-runs/static-rep2/cores/bench/worktrees/hyp-20260716-003-r8s2
+  [slot 1] eval ok: fitness=282.82 lut4=9563 fmax=127.0MHz
+  [slot 0] eval ok: fitness=282.82 lut4=9563 fmax=127.0MHz
+  [slot 2] eval ok: fitness=282.82 lut4=9563 fmax=127.0MHz
+Deleted branch bench-hyp-20260716-001-r8s0 (was 7bb4b92).
+Deleted branch bench-hyp-20260716-002-r8s1 (was 7bb4b92).
+Deleted branch bench-hyp-20260716-003-r8s2 (was 7bb4b92).
+[bench-v2 4575dec] log: hyp-20260716-001-r8s0 regression
+ 2 files changed, 1 insertion(+)
+[bench-v2 7610c83] log: hyp-20260716-002-r8s1 regression
+ 2 files changed, 1 insertion(+)
+[bench-v2 a88e666] log: hyp-20260716-003-r8s2 regression
+ 2 files changed, 1 insertion(+)
+
+  Round 8 complete: slot 0=regression, slot 1=regression, slot 2=regression (no winner)
+
+============================================================
+Round 9  |  slots=3  |  current best=282.82
+============================================================
+  pre-allocated IDs: ['hyp-20260716-001-r9s0', 'hyp-20260716-002-r9s1', 'hyp-20260716-003-r9s2']
+  [slot 0] category=micro_opt id=hyp-20260716-001-r9s0
+  [slot 1] category=structural id=hyp-20260716-002-r9s1
+  [slot 2] category=predictor id=hyp-20260716-003-r9s2
+Preparing worktree (new branch 'bench-hyp-20260716-003-r9s2')
+Preparing worktree (new branch 'bench-hyp-20260716-002-r9s1')
+Preparing worktree (new branch 'bench-hyp-20260716-001-r9s0')
+HEAD is now at a88e666 log: hyp-20260716-003-r8s2 regression
+HEAD is now at a88e666 log: hyp-20260716-003-r8s2 regression
+HEAD is now at a88e666 log: hyp-20260716-003-r8s2 regression
+  [slot 2] worktree=/Users/bonetto/bonetto/auto-arch-tournament/.claude/bench-runs/static-rep2/cores/bench/worktrees/hyp-20260716-003-r9s2
+  [slot 1] worktree=/Users/bonetto/bonetto/auto-arch-tournament/.claude/bench-runs/static-rep2/cores/bench/worktrees/hyp-20260716-002-r9s1
+  [slot 0] worktree=/Users/bonetto/bonetto/auto-arch-tournament/.claude/bench-runs/static-rep2/cores/bench/worktrees/hyp-20260716-001-r9s0
+  [slot 0] eval ok: fitness=282.82 lut4=9563 fmax=127.0MHz
+  [slot 1] eval ok: fitness=282.82 lut4=9563 fmax=127.0MHz
+  [slot 2] eval ok: fitness=282.82 lut4=9563 fmax=127.0MHz
+Deleted branch bench-hyp-20260716-001-r9s0 (was a88e666).
+Deleted branch bench-hyp-20260716-002-r9s1 (was a88e666).
+Deleted branch bench-hyp-20260716-003-r9s2 (was a88e666).
+[bench-v2 95ed365] log: hyp-20260716-001-r9s0 regression
+ 2 files changed, 1 insertion(+)
+[bench-v2 e29fbb1] log: hyp-20260716-002-r9s1 regression
+ 2 files changed, 1 insertion(+)
+[bench-v2 2632a3d] log: hyp-20260716-003-r9s2 regression
+ 2 files changed, 1 insertion(+)
+
+  Round 9 complete: slot 0=regression, slot 1=regression, slot 2=regression (no winner)
+
+============================================================
+Round 10  |  slots=3  |  current best=282.82
+============================================================
+  pre-allocated IDs: ['hyp-20260716-001-r10s0', 'hyp-20260716-002-r10s1', 'hyp-20260716-003-r10s2']
+  [slot 0] category=micro_opt id=hyp-20260716-001-r10s0
+  [slot 1] category=structural id=hyp-20260716-002-r10s1
+  [slot 2] category=predictor id=hyp-20260716-003-r10s2
+Preparing worktree (new branch 'bench-hyp-20260716-001-r10s0')
+Preparing worktree (new branch 'bench-hyp-20260716-002-r10s1')
+Preparing worktree (new branch 'bench-hyp-20260716-003-r10s2')
+HEAD is now at 2632a3d log: hyp-20260716-003-r9s2 regression
+HEAD is now at 2632a3d log: hyp-20260716-003-r9s2 regression
+HEAD is now at 2632a3d log: hyp-20260716-003-r9s2 regression
+  [slot 0] worktree=/Users/bonetto/bonetto/auto-arch-tournament/.claude/bench-runs/static-rep2/cores/bench/worktrees/hyp-20260716-001-r10s0
+  [slot 2] worktree=/Users/bonetto/bonetto/auto-arch-tournament/.claude/bench-runs/static-rep2/cores/bench/worktrees/hyp-20260716-003-r10s2
+  [slot 1] worktree=/Users/bonetto/bonetto/auto-arch-tournament/.claude/bench-runs/static-rep2/cores/bench/worktrees/hyp-20260716-002-r10s1
+  [slot 0] eval ok: fitness=282.82 lut4=9563 fmax=127.0MHz
+  [slot 1] eval ok: fitness=282.82 lut4=9563 fmax=127.0MHz
+  [slot 2] eval ok: fitness=282.82 lut4=9563 fmax=127.0MHz
+Deleted branch bench-hyp-20260716-001-r10s0 (was 2632a3d).
+Deleted branch bench-hyp-20260716-002-r10s1 (was 2632a3d).
+Deleted branch bench-hyp-20260716-003-r10s2 (was 2632a3d).
+[bench-v2 2bf2bb8] log: hyp-20260716-001-r10s0 regression
+ 2 files changed, 1 insertion(+)
+[bench-v2 d1c32bd] log: hyp-20260716-002-r10s1 regression
+ 2 files changed, 1 insertion(+)
+[bench-v2 6ce348d] log: hyp-20260716-003-r10s2 regression
+ 2 files changed, 1 insertion(+)
+
+  Round 10 complete: slot 0=regression, slot 1=regression, slot 2=regression (no winner)
+
+============================================================
+Round 11  |  slots=3  |  current best=282.82
+============================================================
+  pre-allocated IDs: ['hyp-20260716-001-r11s0', 'hyp-20260716-002-r11s1', 'hyp-20260716-003-r11s2']
+  [slot 0] category=micro_opt id=hyp-20260716-001-r11s0
+  [slot 1] category=structural id=hyp-20260716-002-r11s1
+  [slot 2] category=predictor id=hyp-20260716-003-r11s2
+Preparing worktree (new branch 'bench-hyp-20260716-003-r11s2')
+Preparing worktree (new branch 'bench-hyp-20260716-002-r11s1')
+Preparing worktree (new branch 'bench-hyp-20260716-001-r11s0')
+HEAD is now at 6ce348d log: hyp-20260716-003-r10s2 regression
+HEAD is now at 6ce348d log: hyp-20260716-003-r10s2 regression
+HEAD is now at 6ce348d log: hyp-20260716-003-r10s2 regression
+  [slot 0] worktree=/Users/bonetto/bonetto/auto-arch-tournament/.claude/bench-runs/static-rep2/cores/bench/worktrees/hyp-20260716-001-r11s0
+  [slot 2] worktree=/Users/bonetto/bonetto/auto-arch-tournament/.claude/bench-runs/static-rep2/cores/bench/worktrees/hyp-20260716-003-r11s2
+  [slot 1] worktree=/Users/bonetto/bonetto/auto-arch-tournament/.claude/bench-runs/static-rep2/cores/bench/worktrees/hyp-20260716-002-r11s1
+  [slot 1] eval ok: fitness=282.82 lut4=9563 fmax=127.0MHz
+  [slot 2] eval ok: fitness=282.82 lut4=9563 fmax=127.0MHz
+  [slot 0] eval ok: fitness=282.82 lut4=9563 fmax=127.0MHz
+Deleted branch bench-hyp-20260716-001-r11s0 (was 6ce348d).
+Deleted branch bench-hyp-20260716-002-r11s1 (was 6ce348d).
+Deleted branch bench-hyp-20260716-003-r11s2 (was 6ce348d).
+[bench-v2 9ee902d] log: hyp-20260716-001-r11s0 regression
+ 2 files changed, 1 insertion(+)
+[bench-v2 d02aee7] log: hyp-20260716-002-r11s1 regression
+ 2 files changed, 1 insertion(+)
+[bench-v2 21fffb6] log: hyp-20260716-003-r11s2 regression
+ 2 files changed, 1 insertion(+)
+
+  Round 11 complete: slot 0=regression, slot 1=regression, slot 2=regression (no winner)
+
+============================================================
+Round 12  |  slots=3  |  current best=282.82
+============================================================
+  pre-allocated IDs: ['hyp-20260716-001-r12s0', 'hyp-20260716-002-r12s1', 'hyp-20260716-003-r12s2']
+  [slot 0] category=micro_opt id=hyp-20260716-001-r12s0
+  [slot 1] category=structural id=hyp-20260716-002-r12s1
+  [slot 2] category=predictor id=hyp-20260716-003-r12s2
+Preparing worktree (new branch 'bench-hyp-20260716-003-r12s2')
+Preparing worktree (new branch 'bench-hyp-20260716-002-r12s1')
+Preparing worktree (new branch 'bench-hyp-20260716-001-r12s0')
+HEAD is now at 21fffb6 log: hyp-20260716-003-r11s2 regression
+HEAD is now at 21fffb6 log: hyp-20260716-003-r11s2 regression
+HEAD is now at 21fffb6 log: hyp-20260716-003-r11s2 regression
+  [slot 0] worktree=/Users/bonetto/bonetto/auto-arch-tournament/.claude/bench-runs/static-rep2/cores/bench/worktrees/hyp-20260716-001-r12s0
+  [slot 1] worktree=/Users/bonetto/bonetto/auto-arch-tournament/.claude/bench-runs/static-rep2/cores/bench/worktrees/hyp-20260716-002-r12s1
+  [slot 2] worktree=/Users/bonetto/bonetto/auto-arch-tournament/.claude/bench-runs/static-rep2/cores/bench/worktrees/hyp-20260716-003-r12s2
+  [slot 0] eval ok: fitness=282.82 lut4=9563 fmax=127.0MHz
+  [slot 1] eval ok: fitness=282.82 lut4=9563 fmax=127.0MHz
+  [slot 2] eval ok: fitness=282.82 lut4=9563 fmax=127.0MHz
+Deleted branch bench-hyp-20260716-001-r12s0 (was 21fffb6).
+Deleted branch bench-hyp-20260716-002-r12s1 (was 21fffb6).
+Deleted branch bench-hyp-20260716-003-r12s2 (was 21fffb6).
+[bench-v2 5d5a921] log: hyp-20260716-001-r12s0 regression
+ 2 files changed, 1 insertion(+)
+[bench-v2 049b2d0] log: hyp-20260716-002-r12s1 regression
+ 2 files changed, 1 insertion(+)
+[bench-v2 91d1b98] log: hyp-20260716-003-r12s2 regression
+ 2 files changed, 1 insertion(+)
+
+  Round 12 complete: slot 0=regression, slot 1=regression, slot 2=regression (no winner)
+
+============================================================
+Round 13  |  slots=3  |  current best=282.82
+============================================================
+  pre-allocated IDs: ['hyp-20260716-001-r13s0', 'hyp-20260716-002-r13s1', 'hyp-20260716-003-r13s2']
+  [slot 0] category=micro_opt id=hyp-20260716-001-r13s0
+  [slot 1] category=structural id=hyp-20260716-002-r13s1
+  [slot 2] category=predictor id=hyp-20260716-003-r13s2
+Preparing worktree (new branch 'bench-hyp-20260716-002-r13s1')
+Preparing worktree (new branch 'bench-hyp-20260716-001-r13s0')
+Preparing worktree (new branch 'bench-hyp-20260716-003-r13s2')
+HEAD is now at 91d1b98 log: hyp-20260716-003-r12s2 regression
+HEAD is now at 91d1b98 log: hyp-20260716-003-r12s2 regression
+HEAD is now at 91d1b98 log: hyp-20260716-003-r12s2 regression
+  [slot 1] worktree=/Users/bonetto/bonetto/auto-arch-tournament/.claude/bench-runs/static-rep2/cores/bench/worktrees/hyp-20260716-002-r13s1
+  [slot 0] worktree=/Users/bonetto/bonetto/auto-arch-tournament/.claude/bench-runs/static-rep2/cores/bench/worktrees/hyp-20260716-001-r13s0
+  [slot 2] worktree=/Users/bonetto/bonetto/auto-arch-tournament/.claude/bench-runs/static-rep2/cores/bench/worktrees/hyp-20260716-003-r13s2
+  [slot 0] eval ok: fitness=282.82 lut4=9563 fmax=127.0MHz
+  [slot 1] eval ok: fitness=282.82 lut4=9563 fmax=127.0MHz
+  [slot 2] eval ok: fitness=282.82 lut4=9563 fmax=127.0MHz
+Deleted branch bench-hyp-20260716-001-r13s0 (was 91d1b98).
+Deleted branch bench-hyp-20260716-002-r13s1 (was 91d1b98).
+Deleted branch bench-hyp-20260716-003-r13s2 (was 91d1b98).
+[bench-v2 49cefa1] log: hyp-20260716-001-r13s0 regression
+ 2 files changed, 1 insertion(+)
+[bench-v2 9d00559] log: hyp-20260716-002-r13s1 regression
+ 2 files changed, 1 insertion(+)
+[bench-v2 481659b] log: hyp-20260716-003-r13s2 regression
+ 2 files changed, 1 insertion(+)
+
+  Round 13 complete: slot 0=regression, slot 1=regression, slot 2=regression (no winner)
+
+============================================================
+Round 14  |  slots=3  |  current best=282.82
+============================================================
+  pre-allocated IDs: ['hyp-20260716-001-r14s0', 'hyp-20260716-002-r14s1', 'hyp-20260716-003-r14s2']
+  [slot 0] category=micro_opt id=hyp-20260716-001-r14s0
+  [slot 1] category=structural id=hyp-20260716-002-r14s1
+  [slot 2] category=predictor id=hyp-20260716-003-r14s2
+Preparing worktree (new branch 'bench-hyp-20260716-001-r14s0')
+Preparing worktree (new branch 'bench-hyp-20260716-003-r14s2')
+Preparing worktree (new branch 'bench-hyp-20260716-002-r14s1')
+HEAD is now at 481659b log: hyp-20260716-003-r13s2 regression
+HEAD is now at 481659b log: hyp-20260716-003-r13s2 regression
+HEAD is now at 481659b log: hyp-20260716-003-r13s2 regression
+  [slot 2] worktree=/Users/bonetto/bonetto/auto-arch-tournament/.claude/bench-runs/static-rep2/cores/bench/worktrees/hyp-20260716-003-r14s2
+  [slot 0] worktree=/Users/bonetto/bonetto/auto-arch-tournament/.claude/bench-runs/static-rep2/cores/bench/worktrees/hyp-20260716-001-r14s0
+  [slot 1] worktree=/Users/bonetto/bonetto/auto-arch-tournament/.claude/bench-runs/static-rep2/cores/bench/worktrees/hyp-20260716-002-r14s1
+  [slot 1] eval ok: fitness=282.82 lut4=9563 fmax=127.0MHz
+  [slot 0] eval ok: fitness=282.82 lut4=9563 fmax=127.0MHz
+  [slot 2] eval ok: fitness=282.82 lut4=9563 fmax=127.0MHz
+Deleted branch bench-hyp-20260716-001-r14s0 (was 481659b).
+Deleted branch bench-hyp-20260716-002-r14s1 (was 481659b).
+Deleted branch bench-hyp-20260716-003-r14s2 (was 481659b).
+[bench-v2 df7f044] log: hyp-20260716-001-r14s0 regression
+ 2 files changed, 1 insertion(+)
+[bench-v2 df1244b] log: hyp-20260716-002-r14s1 regression
+ 2 files changed, 1 insertion(+)
+[bench-v2 2d2069f] log: hyp-20260716-003-r14s2 regression
+ 2 files changed, 1 insertion(+)
+
+  Round 14 complete: slot 0=regression, slot 1=regression, slot 2=regression (no winner)
+
+============================================================
+Round 15  |  slots=3  |  current best=282.82
+============================================================
+  pre-allocated IDs: ['hyp-20260716-001-r15s0', 'hyp-20260716-002-r15s1', 'hyp-20260716-003-r15s2']
+  [slot 0] category=micro_opt id=hyp-20260716-001-r15s0
+  [slot 1] category=structural id=hyp-20260716-002-r15s1
+  [slot 2] category=predictor id=hyp-20260716-003-r15s2
+Preparing worktree (new branch 'bench-hyp-20260716-003-r15s2')
+Preparing worktree (new branch 'bench-hyp-20260716-001-r15s0')
+Preparing worktree (new branch 'bench-hyp-20260716-002-r15s1')
+HEAD is now at 2d2069f log: hyp-20260716-003-r14s2 regression
+HEAD is now at 2d2069f log: hyp-20260716-003-r14s2 regression
+HEAD is now at 2d2069f log: hyp-20260716-003-r14s2 regression
+  [slot 0] worktree=/Users/bonetto/bonetto/auto-arch-tournament/.claude/bench-runs/static-rep2/cores/bench/worktrees/hyp-20260716-001-r15s0
+  [slot 2] worktree=/Users/bonetto/bonetto/auto-arch-tournament/.claude/bench-runs/static-rep2/cores/bench/worktrees/hyp-20260716-003-r15s2
+  [slot 1] worktree=/Users/bonetto/bonetto/auto-arch-tournament/.claude/bench-runs/static-rep2/cores/bench/worktrees/hyp-20260716-002-r15s1
+  [slot 0] eval ok: fitness=282.82 lut4=9563 fmax=127.0MHz
+  [slot 2] eval ok: fitness=282.82 lut4=9563 fmax=127.0MHz
+  [slot 1] eval ok: fitness=282.82 lut4=9563 fmax=127.0MHz
+Deleted branch bench-hyp-20260716-001-r15s0 (was 2d2069f).
+Deleted branch bench-hyp-20260716-002-r15s1 (was 2d2069f).
+Deleted branch bench-hyp-20260716-003-r15s2 (was 2d2069f).
+[bench-v2 130c6ec] log: hyp-20260716-001-r15s0 regression
+ 2 files changed, 1 insertion(+)
+[bench-v2 2ba1be8] log: hyp-20260716-002-r15s1 regression
+ 2 files changed, 1 insertion(+)
+[bench-v2 d670683] log: hyp-20260716-003-r15s2 regression
+ 2 files changed, 1 insertion(+)
+
+  Round 15 complete: slot 0=regression, slot 1=regression, slot 2=regression (no winner)

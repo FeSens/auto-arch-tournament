@@ -125,6 +125,11 @@ node_modules/
 # clone it was bundled from, so the content is not lost.
 bench/**/repo.bundle
 
+# env.json (per-rep environment snapshot: PATH + resolved EDA tool paths)
+# IS tracked, decided at the first v2 rep publish (e1a static, 2026-07-16):
+# it is tiny, contains no secrets, and pins which toolchain binaries
+# produced each rep's numbers.
+
 # Throwaway harness-verification runs (one-model YAMLs + their output
 # trees). These are reliability checks, not benchmark data — output is
 # regenerable and the YAMLs only encode "rerun this single model to

@@ -1,0 +1,304 @@
+[orchestrator] empty log for cores/bench — running baseline retest
+/Users/bonetto/bonetto/auto-arch-tournament/.claude/bench-runs/static-rep1/tools/plot.py:136: UserWarning: Tight layout not applied. The left and right margins cannot be made large enough to accommodate all Axes decorations.
+  fig.tight_layout()
+[bench-v2 d5fc2f8] log: baseline-bench-89897e0 improvement
+ 3 files changed, 11 insertions(+), 8 deletions(-)
+ create mode 100644 cores/bench/experiments/log.jsonl
+ create mode 100644 cores/bench/experiments/progress.png
+
+============================================================
+Round 1  |  slots=3  |  current best=282.82
+============================================================
+  pre-allocated IDs: ['hyp-20260716-001-r1s0', 'hyp-20260716-002-r1s1', 'hyp-20260716-003-r1s2']
+  [slot 0] category=micro_opt id=hyp-20260716-001-r1s0
+  [slot 1] category=structural id=hyp-20260716-002-r1s1
+  [slot 2] category=predictor id=hyp-20260716-003-r1s2
+Preparing worktree (new branch 'bench-hyp-20260716-003-r1s2')
+Preparing worktree (new branch 'bench-hyp-20260716-002-r1s1')
+Preparing worktree (new branch 'bench-hyp-20260716-001-r1s0')
+HEAD is now at d5fc2f8 log: baseline-bench-89897e0 improvement
+HEAD is now at d5fc2f8 log: baseline-bench-89897e0 improvement
+HEAD is now at d5fc2f8 log: baseline-bench-89897e0 improvement
+  [slot 0] worktree=/Users/bonetto/bonetto/auto-arch-tournament/.claude/bench-runs/static-rep1/cores/bench/worktrees/hyp-20260716-001-r1s0
+  [slot 2] worktree=/Users/bonetto/bonetto/auto-arch-tournament/.claude/bench-runs/static-rep1/cores/bench/worktrees/hyp-20260716-003-r1s2
+  [slot 1] worktree=/Users/bonetto/bonetto/auto-arch-tournament/.claude/bench-runs/static-rep1/cores/bench/worktrees/hyp-20260716-002-r1s1
+  [slot 0] eval ok: fitness=282.82 lut4=9563 fmax=127.0MHz
+  [slot 1] eval ok: fitness=282.82 lut4=9563 fmax=127.0MHz
+  [slot 2] eval ok: fitness=282.82 lut4=9563 fmax=127.0MHz
+Deleted branch bench-hyp-20260716-001-r1s0 (was d5fc2f8).
+Deleted branch bench-hyp-20260716-002-r1s1 (was d5fc2f8).
+Deleted branch bench-hyp-20260716-003-r1s2 (was d5fc2f8).
+[bench-v2 f8ea2bb] log: hyp-20260716-001-r1s0 regression
+ 2 files changed, 1 insertion(+)
+[bench-v2 4641cba] log: hyp-20260716-002-r1s1 regression
+ 2 files changed, 1 insertion(+)
+[bench-v2 708f154] log: hyp-20260716-003-r1s2 regression
+ 2 files changed, 1 insertion(+)
+
+  Round 1 complete: slot 0=regression, slot 1=regression, slot 2=regression (no winner)
+
+============================================================
+Round 2  |  slots=3  |  current best=282.82
+============================================================
+  pre-allocated IDs: ['hyp-20260716-001-r2s0', 'hyp-20260716-002-r2s1', 'hyp-20260716-003-r2s2']
+  [slot 0] category=micro_opt id=hyp-20260716-001-r2s0
+  [slot 1] category=structural id=hyp-20260716-002-r2s1
+  [slot 2] category=predictor id=hyp-20260716-003-r2s2
+  [slot 1] broken: hypothesis_gen_failed: Hypothesis agent did not write a file for slot hyp-20260716-002-r2s1 (allowed_yaml_ids=['hyp-20260716-001-r2s0', 'hyp-20260716-002-r2s1', 'hyp-20260716-003-r2s2'])
+  [slot 0] broken: hypothesis_gen_failed: Hypothesis agent did not write a file for slot hyp-20260716-001-r2s0 (allowed_yaml_ids=['hyp-20260716-001-r2s0', 'hyp-20260716-002-r2s1', 'hyp-20260716-003-r2s2'])
+  [slot 2] broken: hypothesis_gen_failed: Hypothesis agent did not write a file for slot hyp-20260716-003-r2s2 (allowed_yaml_ids=['hyp-20260716-001-r2s0', 'hyp-20260716-002-r2s1', 'hyp-20260716-003-r2s2'])
+[bench-v2 be4fc3b] log: hyp-20260716-001-r2s0 broken
+ 2 files changed, 1 insertion(+)
+[bench-v2 b8eb563] log: hyp-20260716-002-r2s1 broken
+ 2 files changed, 1 insertion(+)
+[bench-v2 8063b97] log: hyp-20260716-003-r2s2 broken
+ 1 file changed, 1 insertion(+)
+
+  Round 2 complete: slot 0=broken, slot 1=broken, slot 2=broken (no winner)
+
+============================================================
+Round 3  |  slots=3  |  current best=282.82
+============================================================
+  pre-allocated IDs: ['hyp-20260716-002-r3s0', 'hyp-20260716-003-r3s1', 'hyp-20260716-004-r3s2']
+  [slot 0] category=micro_opt id=hyp-20260716-002-r3s0
+  [slot 1] category=structural id=hyp-20260716-003-r3s1
+  [slot 2] category=predictor id=hyp-20260716-004-r3s2
+  [slot 1] broken: hypothesis_gen_failed: Hypothesis agent did not write a file for slot hyp-20260716-003-r3s1 (allowed_yaml_ids=['hyp-20260716-002-r3s0', 'hyp-20260716-003-r3s1', 'hyp-20260716-004-r3s2'])
+  [slot 0] broken: hypothesis_gen_failed: Hypothesis agent did not write a file for slot hyp-20260716-002-r3s0 (allowed_yaml_ids=['hyp-20260716-002-r3s0', 'hyp-20260716-003-r3s1', 'hyp-20260716-004-r3s2'])
+  [slot 2] broken: hypothesis_gen_failed: Hypothesis agent did not write a file for slot hyp-20260716-004-r3s2 (allowed_yaml_ids=['hyp-20260716-002-r3s0', 'hyp-20260716-003-r3s1', 'hyp-20260716-004-r3s2'])
+[bench-v2 f72e7d0] log: hyp-20260716-002-r3s0 broken
+ 2 files changed, 1 insertion(+)
+[bench-v2 49d4f0f] log: hyp-20260716-003-r3s1 broken
+ 2 files changed, 1 insertion(+)
+[bench-v2 fa93132] log: hyp-20260716-004-r3s2 broken
+ 1 file changed, 1 insertion(+)
+
+  Round 3 complete: slot 0=broken, slot 1=broken, slot 2=broken (no winner)
+
+============================================================
+Round 4  |  slots=3  |  current best=282.82
+============================================================
+  pre-allocated IDs: ['hyp-20260716-003-r4s0', 'hyp-20260716-004-r4s1', 'hyp-20260716-005-r4s2']
+  [slot 0] category=micro_opt id=hyp-20260716-003-r4s0
+  [slot 1] category=structural id=hyp-20260716-004-r4s1
+  [slot 2] category=predictor id=hyp-20260716-005-r4s2
+  [slot 1] broken: hypothesis_gen_failed: Hypothesis agent did not write a file for slot hyp-20260716-004-r4s1 (allowed_yaml_ids=['hyp-20260716-003-r4s0', 'hyp-20260716-004-r4s1', 'hyp-20260716-005-r4s2'])
+  [slot 0] broken: hypothesis_gen_failed: Hypothesis agent did not write a file for slot hyp-20260716-003-r4s0 (allowed_yaml_ids=['hyp-20260716-003-r4s0', 'hyp-20260716-004-r4s1', 'hyp-20260716-005-r4s2'])
+  [slot 2] broken: hypothesis_gen_failed: Hypothesis agent did not write a file for slot hyp-20260716-005-r4s2 (allowed_yaml_ids=['hyp-20260716-003-r4s0', 'hyp-20260716-004-r4s1', 'hyp-20260716-005-r4s2'])
+[bench-v2 403350a] log: hyp-20260716-003-r4s0 broken
+ 2 files changed, 1 insertion(+)
+[bench-v2 bf6a870] log: hyp-20260716-004-r4s1 broken
+ 2 files changed, 1 insertion(+)
+[bench-v2 3acef19] log: hyp-20260716-005-r4s2 broken
+ 1 file changed, 1 insertion(+)
+
+  Round 4 complete: slot 0=broken, slot 1=broken, slot 2=broken (no winner)
+
+============================================================
+Round 5  |  slots=3  |  current best=282.82
+============================================================
+  pre-allocated IDs: ['hyp-20260716-004-r5s0', 'hyp-20260716-005-r5s1', 'hyp-20260716-006-r5s2']
+  [slot 0] category=micro_opt id=hyp-20260716-004-r5s0
+  [slot 1] category=structural id=hyp-20260716-005-r5s1
+  [slot 2] category=predictor id=hyp-20260716-006-r5s2
+  [slot 0] broken: hypothesis_gen_failed: Hypothesis agent did not write a file for slot hyp-20260716-004-r5s0 (allowed_yaml_ids=['hyp-20260716-004-r5s0', 'hyp-20260716-005-r5s1', 'hyp-20260716-006-r5s2'])
+  [slot 2] broken: hypothesis_gen_failed: Hypothesis agent did not write a file for slot hyp-20260716-006-r5s2 (allowed_yaml_ids=['hyp-20260716-004-r5s0', 'hyp-20260716-005-r5s1', 'hyp-20260716-006-r5s2'])
+  [slot 1] broken: hypothesis_gen_failed: Hypothesis agent did not write a file for slot hyp-20260716-005-r5s1 (allowed_yaml_ids=['hyp-20260716-004-r5s0', 'hyp-20260716-005-r5s1', 'hyp-20260716-006-r5s2'])
+[bench-v2 1b90d95] log: hyp-20260716-004-r5s0 broken
+ 2 files changed, 1 insertion(+)
+[bench-v2 1581318] log: hyp-20260716-005-r5s1 broken
+ 2 files changed, 1 insertion(+)
+[bench-v2 9401fc7] log: hyp-20260716-006-r5s2 broken
+ 1 file changed, 1 insertion(+)
+
+  Round 5 complete: slot 0=broken, slot 1=broken, slot 2=broken (no winner)
+
+============================================================
+Round 6  |  slots=3  |  current best=282.82
+============================================================
+  pre-allocated IDs: ['hyp-20260716-005-r6s0', 'hyp-20260716-006-r6s1', 'hyp-20260716-007-r6s2']
+  [slot 0] category=micro_opt id=hyp-20260716-005-r6s0
+  [slot 1] category=structural id=hyp-20260716-006-r6s1
+  [slot 2] category=predictor id=hyp-20260716-007-r6s2
+  [slot 2] broken: hypothesis_gen_failed: Hypothesis agent did not write a file for slot hyp-20260716-007-r6s2 (allowed_yaml_ids=['hyp-20260716-005-r6s0', 'hyp-20260716-006-r6s1', 'hyp-20260716-007-r6s2'])
+  [slot 1] broken: hypothesis_gen_failed: Hypothesis agent did not write a file for slot hyp-20260716-006-r6s1 (allowed_yaml_ids=['hyp-20260716-005-r6s0', 'hyp-20260716-006-r6s1', 'hyp-20260716-007-r6s2'])
+  [slot 0] broken: hypothesis_gen_failed: Hypothesis agent did not write a file for slot hyp-20260716-005-r6s0 (allowed_yaml_ids=['hyp-20260716-005-r6s0', 'hyp-20260716-006-r6s1', 'hyp-20260716-007-r6s2'])
+[bench-v2 5e1ef4e] log: hyp-20260716-005-r6s0 broken
+ 2 files changed, 1 insertion(+)
+[bench-v2 231cd1f] log: hyp-20260716-006-r6s1 broken
+ 2 files changed, 1 insertion(+)
+[bench-v2 8f12a55] log: hyp-20260716-007-r6s2 broken
+ 1 file changed, 1 insertion(+)
+
+  Round 6 complete: slot 0=broken, slot 1=broken, slot 2=broken (no winner)
+
+============================================================
+Round 7  |  slots=3  |  current best=282.82
+============================================================
+  pre-allocated IDs: ['hyp-20260716-006-r7s0', 'hyp-20260716-007-r7s1', 'hyp-20260716-008-r7s2']
+  [slot 0] category=micro_opt id=hyp-20260716-006-r7s0
+  [slot 1] category=structural id=hyp-20260716-007-r7s1
+  [slot 2] category=predictor id=hyp-20260716-008-r7s2
+  [slot 2] broken: hypothesis_gen_failed: Hypothesis agent did not write a file for slot hyp-20260716-008-r7s2 (allowed_yaml_ids=['hyp-20260716-006-r7s0', 'hyp-20260716-007-r7s1', 'hyp-20260716-008-r7s2'])
+  [slot 0] broken: hypothesis_gen_failed: Hypothesis agent did not write a file for slot hyp-20260716-006-r7s0 (allowed_yaml_ids=['hyp-20260716-006-r7s0', 'hyp-20260716-007-r7s1', 'hyp-20260716-008-r7s2'])
+  [slot 1] broken: hypothesis_gen_failed: Hypothesis agent did not write a file for slot hyp-20260716-007-r7s1 (allowed_yaml_ids=['hyp-20260716-006-r7s0', 'hyp-20260716-007-r7s1', 'hyp-20260716-008-r7s2'])
+[bench-v2 6a3586f] log: hyp-20260716-006-r7s0 broken
+ 2 files changed, 1 insertion(+)
+[bench-v2 72f90df] log: hyp-20260716-007-r7s1 broken
+ 2 files changed, 1 insertion(+)
+[bench-v2 938d9f9] log: hyp-20260716-008-r7s2 broken
+ 1 file changed, 1 insertion(+)
+
+  Round 7 complete: slot 0=broken, slot 1=broken, slot 2=broken (no winner)
+
+============================================================
+Round 8  |  slots=3  |  current best=282.82
+============================================================
+  pre-allocated IDs: ['hyp-20260716-007-r8s0', 'hyp-20260716-008-r8s1', 'hyp-20260716-009-r8s2']
+  [slot 0] category=micro_opt id=hyp-20260716-007-r8s0
+  [slot 1] category=structural id=hyp-20260716-008-r8s1
+  [slot 2] category=predictor id=hyp-20260716-009-r8s2
+  [slot 1] broken: hypothesis_gen_failed: Hypothesis agent did not write a file for slot hyp-20260716-008-r8s1 (allowed_yaml_ids=['hyp-20260716-007-r8s0', 'hyp-20260716-008-r8s1', 'hyp-20260716-009-r8s2'])
+  [slot 0] broken: hypothesis_gen_failed: Hypothesis agent did not write a file for slot hyp-20260716-007-r8s0 (allowed_yaml_ids=['hyp-20260716-007-r8s0', 'hyp-20260716-008-r8s1', 'hyp-20260716-009-r8s2'])
+  [slot 2] broken: hypothesis_gen_failed: Hypothesis agent did not write a file for slot hyp-20260716-009-r8s2 (allowed_yaml_ids=['hyp-20260716-007-r8s0', 'hyp-20260716-008-r8s1', 'hyp-20260716-009-r8s2'])
+[bench-v2 034d339] log: hyp-20260716-007-r8s0 broken
+ 2 files changed, 1 insertion(+)
+[bench-v2 3054b1e] log: hyp-20260716-008-r8s1 broken
+ 2 files changed, 1 insertion(+)
+[bench-v2 6252d9d] log: hyp-20260716-009-r8s2 broken
+ 1 file changed, 1 insertion(+)
+
+  Round 8 complete: slot 0=broken, slot 1=broken, slot 2=broken (no winner)
+
+============================================================
+Round 9  |  slots=3  |  current best=282.82
+============================================================
+  pre-allocated IDs: ['hyp-20260716-008-r9s0', 'hyp-20260716-009-r9s1', 'hyp-20260716-010-r9s2']
+  [slot 0] category=micro_opt id=hyp-20260716-008-r9s0
+  [slot 1] category=structural id=hyp-20260716-009-r9s1
+  [slot 2] category=predictor id=hyp-20260716-010-r9s2
+  [slot 1] broken: hypothesis_gen_failed: Hypothesis agent did not write a file for slot hyp-20260716-009-r9s1 (allowed_yaml_ids=['hyp-20260716-008-r9s0', 'hyp-20260716-009-r9s1', 'hyp-20260716-010-r9s2'])
+  [slot 0] broken: hypothesis_gen_failed: Hypothesis agent did not write a file for slot hyp-20260716-008-r9s0 (allowed_yaml_ids=['hyp-20260716-008-r9s0', 'hyp-20260716-009-r9s1', 'hyp-20260716-010-r9s2'])
+  [slot 2] broken: hypothesis_gen_failed: Hypothesis agent did not write a file for slot hyp-20260716-010-r9s2 (allowed_yaml_ids=['hyp-20260716-008-r9s0', 'hyp-20260716-009-r9s1', 'hyp-20260716-010-r9s2'])
+[bench-v2 5606c0e] log: hyp-20260716-008-r9s0 broken
+ 2 files changed, 1 insertion(+)
+[bench-v2 5db01ac] log: hyp-20260716-009-r9s1 broken
+ 2 files changed, 1 insertion(+)
+[bench-v2 ab7bd6a] log: hyp-20260716-010-r9s2 broken
+ 1 file changed, 1 insertion(+)
+
+  Round 9 complete: slot 0=broken, slot 1=broken, slot 2=broken (no winner)
+
+============================================================
+Round 10  |  slots=3  |  current best=282.82
+============================================================
+  pre-allocated IDs: ['hyp-20260716-009-r10s0', 'hyp-20260716-010-r10s1', 'hyp-20260716-011-r10s2']
+  [slot 0] category=micro_opt id=hyp-20260716-009-r10s0
+  [slot 1] category=structural id=hyp-20260716-010-r10s1
+  [slot 2] category=predictor id=hyp-20260716-011-r10s2
+  [slot 2] broken: hypothesis_gen_failed: Hypothesis agent did not write a file for slot hyp-20260716-011-r10s2 (allowed_yaml_ids=['hyp-20260716-009-r10s0', 'hyp-20260716-010-r10s1', 'hyp-20260716-011-r10s2'])
+  [slot 0] broken: hypothesis_gen_failed: Hypothesis agent did not write a file for slot hyp-20260716-009-r10s0 (allowed_yaml_ids=['hyp-20260716-009-r10s0', 'hyp-20260716-010-r10s1', 'hyp-20260716-011-r10s2'])
+  [slot 1] broken: hypothesis_gen_failed: Hypothesis agent did not write a file for slot hyp-20260716-010-r10s1 (allowed_yaml_ids=['hyp-20260716-009-r10s0', 'hyp-20260716-010-r10s1', 'hyp-20260716-011-r10s2'])
+[bench-v2 4bb1a83] log: hyp-20260716-009-r10s0 broken
+ 2 files changed, 1 insertion(+)
+[bench-v2 ab0a55a] log: hyp-20260716-010-r10s1 broken
+ 2 files changed, 1 insertion(+)
+[bench-v2 af689d3] log: hyp-20260716-011-r10s2 broken
+ 1 file changed, 1 insertion(+)
+
+  Round 10 complete: slot 0=broken, slot 1=broken, slot 2=broken (no winner)
+
+============================================================
+Round 11  |  slots=3  |  current best=282.82
+============================================================
+  pre-allocated IDs: ['hyp-20260716-010-r11s0', 'hyp-20260716-011-r11s1', 'hyp-20260716-012-r11s2']
+  [slot 0] category=micro_opt id=hyp-20260716-010-r11s0
+  [slot 1] category=structural id=hyp-20260716-011-r11s1
+  [slot 2] category=predictor id=hyp-20260716-012-r11s2
+  [slot 0] broken: hypothesis_gen_failed: Hypothesis agent did not write a file for slot hyp-20260716-010-r11s0 (allowed_yaml_ids=['hyp-20260716-010-r11s0', 'hyp-20260716-011-r11s1', 'hyp-20260716-012-r11s2'])
+  [slot 2] broken: hypothesis_gen_failed: Hypothesis agent did not write a file for slot hyp-20260716-012-r11s2 (allowed_yaml_ids=['hyp-20260716-010-r11s0', 'hyp-20260716-011-r11s1', 'hyp-20260716-012-r11s2'])
+  [slot 1] broken: hypothesis_gen_failed: Hypothesis agent did not write a file for slot hyp-20260716-011-r11s1 (allowed_yaml_ids=['hyp-20260716-010-r11s0', 'hyp-20260716-011-r11s1', 'hyp-20260716-012-r11s2'])
+[bench-v2 f6558ee] log: hyp-20260716-010-r11s0 broken
+ 2 files changed, 1 insertion(+)
+[bench-v2 49f29de] log: hyp-20260716-011-r11s1 broken
+ 2 files changed, 1 insertion(+)
+[bench-v2 663e43f] log: hyp-20260716-012-r11s2 broken
+ 1 file changed, 1 insertion(+)
+
+  Round 11 complete: slot 0=broken, slot 1=broken, slot 2=broken (no winner)
+
+============================================================
+Round 12  |  slots=3  |  current best=282.82
+============================================================
+  pre-allocated IDs: ['hyp-20260716-011-r12s0', 'hyp-20260716-012-r12s1', 'hyp-20260716-013-r12s2']
+  [slot 0] category=micro_opt id=hyp-20260716-011-r12s0
+  [slot 1] category=structural id=hyp-20260716-012-r12s1
+  [slot 2] category=predictor id=hyp-20260716-013-r12s2
+  [slot 0] broken: hypothesis_gen_failed: Hypothesis agent did not write a file for slot hyp-20260716-011-r12s0 (allowed_yaml_ids=['hyp-20260716-011-r12s0', 'hyp-20260716-012-r12s1', 'hyp-20260716-013-r12s2'])
+  [slot 1] broken: hypothesis_gen_failed: Hypothesis agent did not write a file for slot hyp-20260716-012-r12s1 (allowed_yaml_ids=['hyp-20260716-011-r12s0', 'hyp-20260716-012-r12s1', 'hyp-20260716-013-r12s2'])
+  [slot 2] broken: hypothesis_gen_failed: Hypothesis agent did not write a file for slot hyp-20260716-013-r12s2 (allowed_yaml_ids=['hyp-20260716-011-r12s0', 'hyp-20260716-012-r12s1', 'hyp-20260716-013-r12s2'])
+[bench-v2 056a952] log: hyp-20260716-011-r12s0 broken
+ 2 files changed, 1 insertion(+)
+[bench-v2 069e63b] log: hyp-20260716-012-r12s1 broken
+ 2 files changed, 1 insertion(+)
+[bench-v2 b3a453d] log: hyp-20260716-013-r12s2 broken
+ 1 file changed, 1 insertion(+)
+
+  Round 12 complete: slot 0=broken, slot 1=broken, slot 2=broken (no winner)
+
+============================================================
+Round 13  |  slots=3  |  current best=282.82
+============================================================
+  pre-allocated IDs: ['hyp-20260716-012-r13s0', 'hyp-20260716-013-r13s1', 'hyp-20260716-014-r13s2']
+  [slot 0] category=micro_opt id=hyp-20260716-012-r13s0
+  [slot 1] category=structural id=hyp-20260716-013-r13s1
+  [slot 2] category=predictor id=hyp-20260716-014-r13s2
+  [slot 1] broken: hypothesis_gen_failed: Hypothesis agent did not write a file for slot hyp-20260716-013-r13s1 (allowed_yaml_ids=['hyp-20260716-012-r13s0', 'hyp-20260716-013-r13s1', 'hyp-20260716-014-r13s2'])
+  [slot 0] broken: hypothesis_gen_failed: Hypothesis agent did not write a file for slot hyp-20260716-012-r13s0 (allowed_yaml_ids=['hyp-20260716-012-r13s0', 'hyp-20260716-013-r13s1', 'hyp-20260716-014-r13s2'])
+  [slot 2] broken: hypothesis_gen_failed: Hypothesis agent did not write a file for slot hyp-20260716-014-r13s2 (allowed_yaml_ids=['hyp-20260716-012-r13s0', 'hyp-20260716-013-r13s1', 'hyp-20260716-014-r13s2'])
+[bench-v2 21f6e6e] log: hyp-20260716-012-r13s0 broken
+ 2 files changed, 1 insertion(+)
+[bench-v2 5a1b364] log: hyp-20260716-013-r13s1 broken
+ 2 files changed, 1 insertion(+)
+[bench-v2 2551152] log: hyp-20260716-014-r13s2 broken
+ 1 file changed, 1 insertion(+)
+
+  Round 13 complete: slot 0=broken, slot 1=broken, slot 2=broken (no winner)
+
+============================================================
+Round 14  |  slots=3  |  current best=282.82
+============================================================
+  pre-allocated IDs: ['hyp-20260716-013-r14s0', 'hyp-20260716-014-r14s1', 'hyp-20260716-015-r14s2']
+  [slot 0] category=micro_opt id=hyp-20260716-013-r14s0
+  [slot 1] category=structural id=hyp-20260716-014-r14s1
+  [slot 2] category=predictor id=hyp-20260716-015-r14s2
+  [slot 2] broken: hypothesis_gen_failed: Hypothesis agent did not write a file for slot hyp-20260716-015-r14s2 (allowed_yaml_ids=['hyp-20260716-013-r14s0', 'hyp-20260716-014-r14s1', 'hyp-20260716-015-r14s2'])
+  [slot 0] broken: hypothesis_gen_failed: Hypothesis agent did not write a file for slot hyp-20260716-013-r14s0 (allowed_yaml_ids=['hyp-20260716-013-r14s0', 'hyp-20260716-014-r14s1', 'hyp-20260716-015-r14s2'])
+  [slot 1] broken: hypothesis_gen_failed: Hypothesis agent did not write a file for slot hyp-20260716-014-r14s1 (allowed_yaml_ids=['hyp-20260716-013-r14s0', 'hyp-20260716-014-r14s1', 'hyp-20260716-015-r14s2'])
+[bench-v2 7072b34] log: hyp-20260716-013-r14s0 broken
+ 2 files changed, 1 insertion(+)
+[bench-v2 dd4b875] log: hyp-20260716-014-r14s1 broken
+ 2 files changed, 1 insertion(+)
+[bench-v2 2e46f4e] log: hyp-20260716-015-r14s2 broken
+ 1 file changed, 1 insertion(+)
+
+  Round 14 complete: slot 0=broken, slot 1=broken, slot 2=broken (no winner)
+
+============================================================
+Round 15  |  slots=3  |  current best=282.82
+============================================================
+  pre-allocated IDs: ['hyp-20260716-014-r15s0', 'hyp-20260716-015-r15s1', 'hyp-20260716-016-r15s2']
+  [slot 0] category=micro_opt id=hyp-20260716-014-r15s0
+  [slot 1] category=structural id=hyp-20260716-015-r15s1
+  [slot 2] category=predictor id=hyp-20260716-016-r15s2
+  [slot 0] broken: hypothesis_gen_failed: Hypothesis agent did not write a file for slot hyp-20260716-014-r15s0 (allowed_yaml_ids=['hyp-20260716-014-r15s0', 'hyp-20260716-015-r15s1', 'hyp-20260716-016-r15s2'])
+  [slot 2] broken: hypothesis_gen_failed: Hypothesis agent did not write a file for slot hyp-20260716-016-r15s2 (allowed_yaml_ids=['hyp-20260716-014-r15s0', 'hyp-20260716-015-r15s1', 'hyp-20260716-016-r15s2'])
+  [slot 1] broken: hypothesis_gen_failed: Hypothesis agent did not write a file for slot hyp-20260716-015-r15s1 (allowed_yaml_ids=['hyp-20260716-014-r15s0', 'hyp-20260716-015-r15s1', 'hyp-20260716-016-r15s2'])
+[bench-v2 a03876d] log: hyp-20260716-014-r15s0 broken
+ 2 files changed, 1 insertion(+)
+[bench-v2 39fa105] log: hyp-20260716-015-r15s1 broken
+ 2 files changed, 1 insertion(+)
+[bench-v2 a1dfdfa] log: hyp-20260716-016-r15s2 broken
+ 1 file changed, 1 insertion(+)
+
+  Round 15 complete: slot 0=broken, slot 1=broken, slot 2=broken (no winner)
