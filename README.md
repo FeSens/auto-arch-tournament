@@ -273,3 +273,9 @@ BibTeX:
 ```
 
 Public site: <https://hwebench.com>.
+
+## License
+
+Apache 2.0, see [LICENSE](LICENSE) and [NOTICE](NOTICE). Vendored third-party code keeps its own
+license: `formal/riscv-formal/` (ISC, Claire Xenia Wolf) and
+`bench/programs/coremark/` (see its `LICENSE.md`).
