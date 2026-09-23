@@ -38,6 +38,7 @@ from typing import Optional
 import yaml
 
 from tools.bench import preflight
+from tools.eval._subprocess import install_tree_reaper, kill_process_tree
 
 
 HERE = Path(__file__).parent
@@ -1014,7 +1015,7 @@ def run_one_job(
                 pass
             now = time.time()
             if has_deadline and now >= deadline:
-                proc.kill()
+                kill_process_tree(proc.pid)
                 last_status = "timed_out"
                 row["status"] = "timed_out"
                 row["notes"] = f"wall-clock {timeout_sec}s exceeded"
@@ -1024,7 +1025,7 @@ def run_one_job(
                 concat = collect_agent_logs(clone)
                 _, _, cost_so_far = parse_cost_from_log(concat, provider=job.model.provider)
                 if cost_so_far > max_cost_usd:
-                    proc.kill()
+                    kill_process_tree(proc.pid)
                     last_status = "over_budget"
                     row["status"] = "failed"
                     row["notes"] = (f"cost {cost_so_far:.2f} > "
@@ -1032,7 +1033,7 @@ def run_one_job(
                     break
                 next_cost_check = now + cost_check_interval
     except KeyboardInterrupt:
-        proc.kill()
+        kill_process_tree(proc.pid)
         row["status"] = "failed"
         row["notes"] = "interrupted by user"
         last_status = "interrupted"
@@ -1186,6 +1187,11 @@ def main() -> int:
     ap.add_argument("--skip-preflight", action="store_true",
                     help="skip the toolchain pre-flight check (debug only)")
     args = ap.parse_args()
+
+    # `kill <runner>` must not orphan the orchestrators (and their formal /
+    # PnR / agent trees). SIGINT is left to the KeyboardInterrupt path in
+    # run_one_job, which records the rep as interrupted before tree-killing.
+    install_tree_reaper((signal.SIGTERM, signal.SIGHUP))
 
     if not args.skip_preflight:
         missing = preflight.missing_tools()

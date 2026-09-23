@@ -728,6 +728,11 @@ def main():
                              'Default: baseline. Ignored if --target already exists.')
     args = parser.parse_args()
 
+    # Stopping the loop (Ctrl-C, kill, bench runner timeout) must take the
+    # formal / PnR / agent subprocess trees down with it.
+    from tools.eval._subprocess import install_tree_reaper
+    install_tree_reaper()
+
     # --target is required for all non-report invocations.
     if not args.report and not args.target:
         parser.error("--target is required. Available cores: " +

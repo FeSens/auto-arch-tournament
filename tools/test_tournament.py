@@ -170,3 +170,39 @@ def test_pick_winner_missing_lut4_never_wins_tie_break():
         {"slot": 1, "fitness": 300.0, "lut4": 9000, "outcome": "regression"},
     ]
     assert pick_winner(entries, current_best=282.82)["slot"] == 1
+
+
+def test_machine_lock_serializes_across_open_files(tmp_path, monkeypatch):
+    """Two holders of the formal machine lock never overlap (flock is per
+    open-file description, so this models two orchestrator processes)."""
+    import threading, time
+    from tools.tournament import _machine_lock
+    monkeypatch.setenv("AAT_MACHINE_LOCK_DIR", str(tmp_path))
+    active, peak = [0], [0]
+    guard = threading.Lock()
+
+    def worker():
+        with _machine_lock("formal"):
+            with guard:
+                active[0] += 1
+                peak[0] = max(peak[0], active[0])
+            time.sleep(0.05)
+            with guard:
+                active[0] -= 1
+
+    ts = [threading.Thread(target=worker) for _ in range(3)]
+    for t in ts: t.start()
+    for t in ts: t.join()
+    assert peak[0] == 1
+    assert (tmp_path / "auto-arch-tournament.formal.lock").exists()
+
+
+def test_machine_lock_off_and_unlocked_phases(tmp_path, monkeypatch):
+    from tools.tournament import _machine_lock
+    monkeypatch.setenv("AAT_MACHINE_LOCK_DIR", str(tmp_path))
+    with _machine_lock("fpga"):
+        pass
+    monkeypatch.setenv("AAT_MACHINE_LOCK_DIR", "off")
+    with _machine_lock("formal"):
+        pass
+    assert list(tmp_path.iterdir()) == []

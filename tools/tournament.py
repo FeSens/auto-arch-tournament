@@ -8,6 +8,8 @@ from __future__ import annotations
 
 import contextlib
 import datetime
+import fcntl
+import os
 import subprocess
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -133,18 +135,19 @@ def pick_winner(entries: list[dict],
                key=lambda e: (e["fitness"], -_lut(e), -e["slot"]))
 
 
-# Per-phase capacity. Two distinct reasons phases are gated:
+# Per-phase capacity, per orchestrator process. Both gates are CPU gates:
 #
-# - formal=1 is a CORRECTNESS INVARIANT, not a CPU gate. formal/run_all.sh
-#   stages rtl/*.sv into formal/riscv-formal/cores/auto-arch-researcher/,
-#   which lives in the MAIN repo (the worktree's formal/riscv-formal is a
-#   symlink). Two slots running formal concurrently would corrupt that
-#   shared staging area. NEVER loosen this gate above 1.
+# - formal=1: run_all.sh runs `make -j<ncpu>` over ~50-100 SBY tasks. Each
+#   invocation stages into its own formal/riscv-formal/cores/<core>-<pid>/
+#   dir, so concurrent runs no longer corrupt each other, but two at once
+#   halve each one's CPU and push slow SMT problems past the 45-minute
+#   timeout (recorded as broken). Across processes (bench --parallel reps,
+#   two `make loop`s) the same contention is prevented by the machine-wide
+#   lock in phase_gate below.
 #
-# - fpga=1 is a CPU saturation gate. Each slot's run_fpga_eval already
-#   forks 3 parallel nextpnr seeds; N slots × 3 seeds at once would thrash
-#   on most hardware. Loosening it is a perf trade-off, not a correctness
-#   risk.
+# - fpga=1: each slot's run_fpga_eval already forks 3 parallel nextpnr
+#   seeds; N slots x 3 seeds at once would thrash on most hardware.
+#   nextpnr results depend only on the seed, so this is throughput only.
 #
 # Phase 3 (lint/synth/build) and Phase 5 (cosim) are not gated: each
 # worktree has its own generated/ + bench/programs/*.elf + obj_dir/, so no
@@ -154,6 +157,15 @@ PHASE_CAPACITY: dict[str, int] = {
     "formal": 1,
     "fpga":   1,
 }
+
+# Phases that additionally take a machine-wide advisory lock (fcntl.flock),
+# so separate orchestrator processes on one host run them one at a time.
+# The lock is taken after the in-process semaphore, and before the phase's
+# own timeout starts counting. Set AAT_MACHINE_LOCK_DIR=off to disable,
+# or to a directory to relocate the lock files (TMPDIR is per-rep under
+# the bench runner, so it can't be the default).
+MACHINE_LOCKED_PHASES = frozenset({"formal"})
+_MACHINE_LOCK_DIR_DEFAULT = "/tmp"
 
 # Module-level semaphores so all slots in a process share the same gates.
 # Created lazily so test imports don't allocate them up front.
@@ -171,13 +183,30 @@ def _get_phase_sem(phase: str) -> threading.Semaphore:
 
 
 @contextlib.contextmanager
+def _machine_lock(phase: str):
+    lock_dir = os.environ.get("AAT_MACHINE_LOCK_DIR", _MACHINE_LOCK_DIR_DEFAULT)
+    if phase not in MACHINE_LOCKED_PHASES or lock_dir == "off":
+        yield
+        return
+    path = Path(lock_dir) / f"auto-arch-tournament.{phase}.lock"
+    with open(path, "a") as fh:
+        fcntl.flock(fh, fcntl.LOCK_EX)
+        try:
+            yield
+        finally:
+            fcntl.flock(fh, fcntl.LOCK_UN)
+
+
+@contextlib.contextmanager
 def phase_gate(phase: str):
     """Acquire the named phase's capacity semaphore. Use as `with phase_gate('formal'):`.
-    A phase not in PHASE_CAPACITY defaults to capacity=1 (conservative)."""
+    A phase not in PHASE_CAPACITY defaults to capacity=1 (conservative).
+    Phases in MACHINE_LOCKED_PHASES also serialize across processes."""
     sem = _get_phase_sem(phase)
     sem.acquire()
     try:
-        yield
+        with _machine_lock(phase):
+            yield
     finally:
         sem.release()
 
