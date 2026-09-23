@@ -1,9 +1,9 @@
 CROSS   := riscv32-unknown-elf
 CC      := $(CROSS)-gcc
 
-# CoreMark build knobs. Defaults reproduce the V0 baseline (6K data size,
-# -O2). Override on the command line for canonical EEMBC reporting:
-#     make bench/programs/coremark.elf COREMARK_SIZE=2000 COREMARK_OPT=-O3
+# CoreMark build knobs. Defaults are the canonical EEMBC reporting config
+# (2K data size, -O3); tools/eval/fpga.py's COREMARK_EXPECTED CRCs assume
+# exactly these defaults.
 # - COREMARK_SIZE: TOTAL_DATA_SIZE in coremark.h (#ifndef-guarded). 2000 is
 #   the EEMBC canonical reporting config (used by VexRiscv et al.); 6000
 #   makes the matrix/list/state working sets ~3x larger so the score is

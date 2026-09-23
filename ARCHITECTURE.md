@@ -21,7 +21,8 @@ on both buses to match VexRiscv's published "full no cache" methodology.
 
 ## Fitness
 
-CoreMark/MHz, 6 KB working set, ITERATIONS=10, `-O3`, ~22% iStall+dStall.
+CoreMark iterations/second (median Fmax x iterations/cycle), 2K working set
+(`TOTAL_DATA_SIZE=2000`), ITERATIONS=10, `-O3`, ~22% iStall+dStall.
 Bracketed by MMIO writes to `0x10000100` (start) / `0x10000104` (stop) —
 only cycles between the markers count.
 
