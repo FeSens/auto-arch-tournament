@@ -161,3 +161,12 @@ def test_pick_winner_dual_target_phase2_strict_dominance():
     w = pick_winner(entries, current_best=320, current_lut=2900,
                     coremark_target=300, lut_target=3000)
     assert w is not None and w["slot"] == 0
+
+
+def test_pick_winner_missing_lut4_never_wins_tie_break():
+    from tools.tournament import pick_winner
+    entries = [
+        {"slot": 0, "fitness": 300.0, "lut4": None, "outcome": "regression"},
+        {"slot": 1, "fitness": 300.0, "lut4": 9000, "outcome": "regression"},
+    ]
+    assert pick_winner(entries, current_best=282.82)["slot"] == 1

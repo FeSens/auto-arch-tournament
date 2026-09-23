@@ -125,8 +125,12 @@ def pick_winner(entries: list[dict],
 
     if not candidates:
         return None
+    # A missing LUT4 ranks worst, never best (0 would win the tie-break).
+    def _lut(e):
+        v = e.get("lut4")
+        return v if isinstance(v, (int, float)) else float("inf")
     return max(candidates,
-               key=lambda e: (e["fitness"], -(e.get("lut4") or 0), -e["slot"]))
+               key=lambda e: (e["fitness"], -_lut(e), -e["slot"]))
 
 
 # Per-phase capacity. Two distinct reasons phases are gated:
@@ -343,7 +347,10 @@ def run_slot(
             '_diff': _capture_slot_diff(worktree, target, target_branch),
         }
     if fpga.get('bench_failed'):
-        return broken("coremark_failed", fpga.get('reason', ''))
+        reason = fpga.get('reason', '')
+        if reason.startswith('fpga_report_unparsed'):
+            return broken("fpga_report_unparsed", reason)
+        return broken("coremark_failed", reason)
 
     fitness = fpga['fitness']
     delta   = ((fitness - current_best) / current_best * 100) if current_best > 0 else 0.0
