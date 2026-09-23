@@ -86,9 +86,11 @@ def test_pick_winner_tie_breaks_to_lowest_slot():
     assert winner["slot"] == 0
 
 
-def test_phase_gate_serializes_under_capacity_one():
+def test_phase_gate_serializes_under_capacity_one(tmp_path, monkeypatch):
     """Two threads contending on the formal gate must not overlap."""
     import threading, time
+    # Keep the machine-wide formal lock out of the real /tmp.
+    monkeypatch.setenv("AAT_MACHINE_LOCK_DIR", str(tmp_path))
     from tools.tournament import phase_gate
 
     overlap = {'count': 0, 'max': 0}
