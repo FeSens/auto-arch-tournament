@@ -567,6 +567,15 @@ _CODEX_ISOLATED_CONFIG = """\
 # this very benchmark and personal context that then landed in published
 # transcripts), plugins (browser / computer-use), MCP servers, skills, or
 # project trust entries. Only auth.json is shared, as a symlink.
+#
+# allow_login_shell = false: with a login shell (`zsh -lc`) the agent's
+# PATH is rebuilt from the operator's shell profile, so agents ran
+# ~/.local/bin/sby under a python3 without `click` and could not run
+# their own formal self-checks, while the orchestrator's gates used the
+# runner's PATH. Non-login shells inherit the runner's PATH: agents and
+# gates see the same toolchain.
+allow_login_shell = false
+
 [features]
 memories = false
 

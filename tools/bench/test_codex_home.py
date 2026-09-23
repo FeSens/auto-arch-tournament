@@ -26,6 +26,8 @@ def test_isolated_home_has_only_auth_symlink_and_minimal_config(tmp_path):
     assert (home / "auth.json").resolve() == (user / "auth.json").resolve()
     cfg = (home / "config.toml").read_text()
     assert "memories = false" in cfg and str(clone.resolve()) in cfg
+    # Top-level key (before any table), so it is not scoped to [features].
+    assert cfg.index("allow_login_shell = false") < cfg.index("[features]")
 
 
 def test_isolated_home_is_recreated_fresh(tmp_path):
