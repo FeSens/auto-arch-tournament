@@ -44,6 +44,14 @@ improve fitness", not "what eval relaxations would let this RTL pass".
 - This file (`CLAUDE.md`), `ARCHITECTURE.md`, `README.md`, `setup.sh`,
   `Makefile`.
 
+Enforcement (`tools/tournament.py:run_slot`, `tools/sandbox.py`): the
+worktree's `git status` must only show allowed paths; the main checkout's
+copies of these paths, the shared `formal/riscv-formal` checkout and the
+EDA binaries on PATH are fingerprinted before the agent runs and
+re-checked after it and after the eval; every gitignored file in the
+worktree is deleted before the build, so the eval only consumes artifacts
+it built itself. Any mismatch is `broken: sandbox_violation`.
+
 ## What hypotheses MAY change
 
 Everything under `cores/<TARGET>/rtl/` and the cocotb unit tests under

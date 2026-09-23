@@ -42,19 +42,11 @@ def _allowed_re(target: str) -> 're.Pattern':
     return re.compile(rf"^cores/{re.escape(target)}/LESSONS\.md$")
 
 
-def _git_offlimits(allow_re: 're.Pattern') -> list:
-    out = subprocess.run(
-        ["git", "status", "--porcelain"],
-        capture_output=True, text=True, check=True,
-    ).stdout
-    bad = []
-    for line in out.splitlines():
-        if not line:
-            continue
-        for p in (s.strip() for s in line[3:].split(" -> ")):
-            if p and not allow_re.match(p):
-                bad.append(p)
-    return bad
+def _git_offlimits(allow_re: 're.Pattern', before: dict | None = None) -> list:
+    """Main-repo paths whose dirty state changed since `before` and that
+    don't match the allow regex (see tools.sandbox.changed_since)."""
+    from tools.sandbox import changed_since, dirty_state
+    return changed_since(before or {}, dirty_state("."), allow_re.match)
 
 
 def _truncate_diff(diff: str, max_chars: int = DIFF_MAX_CHARS) -> str:
@@ -167,6 +159,8 @@ def run_scribe_agent(entry: dict, diff: str, target: str) -> str | None:
         output_last_message=last_msg,
         enable_search=False,
     )
+    from tools.sandbox import dirty_state, revert_paths
+    before = dirty_state(".")
     rc, timed_out = run_agent_streaming(
         cmd, cwd=".", log_path=log_path, timeout_sec=SCRIBE_TIMEOUT_SEC,
         mode="a",
@@ -199,7 +193,7 @@ def run_scribe_agent(entry: dict, diff: str, target: str) -> str | None:
 
     # Sandbox: revert any path the scribe touched outside its allow-list.
     allow_re = _allowed_re(target)
-    breaches = _git_offlimits(allow_re)
+    breaches = _git_offlimits(allow_re, before)
     if breaches:
         # Same log.jsonl protection as in hypothesis.py — the scribe
         # runs INSIDE append_log right before the new line is written
@@ -208,18 +202,9 @@ def run_scribe_agent(entry: dict, diff: str, target: str) -> str | None:
         # any in-flight append in the same transaction. Skip the
         # restore for log.jsonl so the breach is logged but the
         # journal is preserved.
-        for p in breaches:
-            if p.endswith("/log.jsonl") or p == "log.jsonl":
-                continue
-            subprocess.run(["git", "checkout", "HEAD", "--", p],
-                           capture_output=True)
-            pp = Path(p)
-            if pp.exists():
-                tracked = subprocess.run(
-                    ["git", "ls-files", p], capture_output=True, text=True,
-                ).stdout.strip()
-                if not tracked:
-                    pp.unlink(missing_ok=True)
+        revert_paths([p for p in breaches
+                      if not (p.endswith("/log.jsonl") or p == "log.jsonl")],
+                     before)
         raise PermissionError(
             f"scribe touched off-limits paths and was rolled back: {breaches}"
         )

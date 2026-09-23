@@ -229,6 +229,9 @@ def run_slot(
     from tools.eval.formal import run_formal
     from tools.eval.cosim import run_cosim
     from tools.eval.fpga import run_fpga_eval
+    from tools.sandbox import (
+        take_snapshot, snapshot_changes, purge_ignored_outputs,
+    )
 
     category = category_for_slot(slot)
     print(f"  [slot {slot}] category={category} id={hyp_id}", flush=True)
@@ -292,6 +295,15 @@ def run_slot(
             '_diff': diff,
         }
 
+    # Fingerprint what lives OUTSIDE the worktree but feeds the eval (the
+    # main checkout's contract paths, the shared riscv-formal checkout, the
+    # EDA binaries). The worktree git-status check below cannot see those.
+    # See tools/sandbox.py.
+    contract_before = take_snapshot(".")
+
+    def contract_breaches() -> list:
+        return snapshot_changes(contract_before, take_snapshot("."))
+
     if fixed_hyp_path and hyp.get('skip_implementation'):
         pass  # baseline-retest fixture path
     else:
@@ -303,6 +315,16 @@ def run_slot(
     if sandbox_breaches:
         return broken("sandbox_violation",
                       f"agent touched off-limits paths: {sandbox_breaches}")
+    outside = contract_breaches()
+    if outside:
+        return broken("sandbox_violation",
+                      f"contract paths changed outside the worktree: {outside}")
+
+    # Gitignored files are invisible to `git status` but the build consumes
+    # some of them (make keeps a planted, newer coremark.elf; run_all.sh
+    # prepends <worktree>/.toolchain to PATH). Delete them all so every
+    # artifact the eval reads is one it built itself.
+    purge_ignored_outputs(worktree, target)
 
     # Phase 3: lint + synth + bench + cosim-build (no gate; fast).
     build_ok, build_reason = emit_verilog(worktree, target=target)
@@ -351,6 +373,16 @@ def run_slot(
         if reason.startswith('fpga_report_unparsed'):
             return broken("fpga_report_unparsed", reason)
         return broken("coremark_failed", reason)
+
+    # Re-check after the eval: another slot's agent runs concurrently with
+    # this slot's gates and could have touched the shared checkouts, or
+    # this worktree, while they ran. Fail closed.
+    late = contract_breaches() + offlimits_changes(worktree, patterns)
+    if (Path(worktree) / ".toolchain").exists():
+        late.append(".toolchain")
+    if late:
+        return broken("sandbox_violation",
+                      f"contract changed while this slot was being evaluated: {late}")
 
     fitness = fpga['fitness']
     delta   = ((fitness - current_best) / current_best * 100) if current_best > 0 else 0.0
