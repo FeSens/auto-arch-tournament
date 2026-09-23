@@ -98,6 +98,18 @@ def field_complete(rows: dict[tuple[str, int], dict]) -> bool:
     )
 
 
+GENERATOR_PATHS = ("tools/site", "tools/bench/report.py")
+
+
+def generator_changes() -> list[str]:
+    """Uncommitted (tracked or untracked) paths in the site/report code."""
+    out = subprocess.run(
+        ["git", "status", "--porcelain", "--", *GENERATOR_PATHS],
+        cwd=REPO, check=True, text=True, capture_output=True,
+    ).stdout
+    return [line[3:] for line in out.splitlines() if line.strip()]
+
+
 def publish_once(results_path: Path = DEFAULT_RESULTS) -> tuple[bool, bool]:
     """Publish pending finalized reps; return (published, field_complete)."""
     current = load_current_rows(results_path)
@@ -111,6 +123,14 @@ def publish_once(results_path: Path = DEFAULT_RESULTS) -> tuple[bool, bool]:
     )
     if staged.returncode != 0:
         raise RuntimeError("index contains staged changes; publication deferred")
+
+    # The published HTML/leaderboard must be reproducible from a commit:
+    # refuse to render them with generator code that isn't committed.
+    dirty = generator_changes()
+    if dirty:
+        raise RuntimeError(
+            "site/report generator has uncommitted changes "
+            f"({', '.join(dirty)}); commit them first. Publication deferred")
 
     rep_paths = []
     for model, rep in pending:

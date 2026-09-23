@@ -217,6 +217,22 @@ def find_riscv_formal() -> Path | None:
     return None
 
 
+def provenance(repo_root: Path, ref: str) -> dict:
+    """Commits behind a rep: the fixture ref it evaluates with, and the
+    runner checkout (cost parsing, summaries) that drove it."""
+    def git(*args: str) -> str:
+        r = subprocess.run(["git", "-C", str(repo_root), *args],
+                           capture_output=True, text=True)
+        return r.stdout.strip() if r.returncode == 0 else ""
+    dirty = git("status", "--porcelain", "--", "tools")
+    return {
+        "fixture_ref": ref,
+        "fixture_commit": git("rev-parse", f"{ref}^{{commit}}") or None,
+        "runner_commit": git("rev-parse", "HEAD") or None,
+        "runner_dirty": bool(dirty),
+    }
+
+
 def clone_fixture(repo_root: Path, ref: str, dest: Path) -> None:
     if dest.exists():
         # Prefer to delete and re-clone for reproducibility — a stale
@@ -925,6 +941,11 @@ def run_one_job(
     out_dir = results_dir / job.model.name / f"rep{job.rep}"
     fp_path = clone / ".tmp" / "env.json"
     orch_log_path = clone / ".tmp" / "orchestrator.log"
+
+    # Provenance: which eval code (the fixture) and which runner/reporting
+    # code produced this row. A dirty runner means the numbers came from
+    # code that is in no commit.
+    row.update(provenance(repo_root, ref))
 
     # 1. Fresh clone of the fixture.
     try:
