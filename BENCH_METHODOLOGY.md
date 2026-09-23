@@ -173,6 +173,27 @@ silently corrupting results:
    independently of the on-disk file. If any future bug causes
    log.jsonl to lose entries, the git history (append-only)
    recovers them.
+3. **Contract integrity outside the worktree** (`tools/sandbox.py`,
+   called from `tournament.run_slot`). The clone's copies of the eval
+   contract, the `formal/riscv-formal` checkout and the EDA binaries
+   on PATH are fingerprinted before each implementation agent runs and
+   re-checked after it and after the gates; every gitignored file in
+   the slot worktree is deleted before the build. A mismatch is
+   `broken: sandbox_violation`. Residual gap: files elsewhere on the
+   host (shell rc, site-packages, compiler runtime) are not covered;
+   that needs OS-level isolation of the agent.
+4. **Provenance on every row.** `results.jsonl` rows carry
+   `fixture_ref` / `fixture_commit` (the eval code) and
+   `runner_commit` / `runner_dirty` (the runner that drove the rep).
+   `tools.site.watch_publish` refuses to render or push while
+   `tools/site/` or `tools/bench/report.py` has uncommitted changes.
+5. **No orphaned solvers.** The runner's timeout, budget and Ctrl-C
+   paths kill the orchestrator's whole process tree, and both
+   processes reap their descendants on SIGTERM/SIGHUP. Formal runs
+   also take a machine-wide lock (`/tmp/auto-arch-tournament.formal.lock`,
+   `AAT_MACHINE_LOCK_DIR=off` disables), so `--parallel` reps don't
+   each run `make -j<ncpu>` at once and push slow checks past the
+   45-minute timeout.
 
 ## Reproducibility recipe
 
