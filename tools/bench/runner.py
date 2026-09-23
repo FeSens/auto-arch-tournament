@@ -242,6 +242,26 @@ def provenance(repo_root: Path, ref: str) -> dict:
     }
 
 
+# Paths in a fixture clone that optimization agents must never see:
+# held-out kernels (E3), plus every published result of this benchmark.
+# bench/ keeps only its eval inputs (programs/, reference-cores.md).
+# Deliberately NOT stripped: README.md and cores/v1/, which the agent
+# prompts present as read-only reference (a design decision, not a leak).
+_BENCH_KEEP = frozenset({"programs", "reference-cores.md"})
+_AGENT_INVISIBLE_TOP = ("research", "docs", "site", "paper")
+
+
+def agent_invisible_paths(dest: Path) -> list[str]:
+    """Repo-relative paths clone_fixture strips from a fixture clone."""
+    paths = ["bench/holdout"]
+    bench = dest / "bench"
+    if bench.is_dir():
+        paths += sorted(f"bench/{p.name}" for p in bench.iterdir()
+                        if p.name not in _BENCH_KEEP and p.name != "holdout")
+    paths += [p for p in _AGENT_INVISIBLE_TOP if (dest / p).exists()]
+    return paths
+
+
 def clone_fixture(repo_root: Path, ref: str, dest: Path) -> None:
     if dest.exists():
         # Prefer to delete and re-clone for reproducibility — a stale
@@ -305,11 +325,23 @@ def clone_fixture(repo_root: Path, ref: str, dest: Path) -> None:
     # had bench/holdout; the single-root rebuild still runs for them, so
     # every clone has the same neutral shape and the guard's existence is
     # not advertised in a `git log` where no kernels were present.
-    subprocess.run(
-        ["git", "rm", "-r", "--cached", "--ignore-unmatch", "bench/holdout"],
-        cwd=str(dest), check=True, capture_output=True,
-    )
-    shutil.rmtree(dest / "bench" / "holdout", ignore_errors=True)
+    #
+    # The same structural strip removes every published result of this
+    # benchmark (agent_invisible_paths): with `--ref main` the fixture
+    # carries bench/<model>/rep*/ journals + transcripts, the leaderboard,
+    # results.jsonl, the research diary, docs and the site. Agents were
+    # observed listing bench/<model>/rep*/log.jsonl with `rg --files`,
+    # i.e. other runs' winning ideas were one `cat` away.
+    for rel in agent_invisible_paths(dest):
+        subprocess.run(
+            ["git", "rm", "-r", "-q", "--cached", "--ignore-unmatch", "--", rel],
+            cwd=str(dest), check=True, capture_output=True,
+        )
+        target = dest / rel
+        if target.is_dir() and not target.is_symlink():
+            shutil.rmtree(target, ignore_errors=True)
+        else:
+            target.unlink(missing_ok=True)
     # Pre-create cores/bench/experiments/ as a tracked directory so the
     # orchestrator can `git add` files into it without the sandbox check
     # tripping on the untracked parent dir. The fixture stripped this

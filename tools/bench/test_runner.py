@@ -654,3 +654,48 @@ def test_main_clone_base_mkdir_oserror_fails_cleanly(tmp_path, monkeypatch, caps
     assert "[bench] FATAL" in captured.err
     assert str(clone_base) in captured.err
     assert "Permission denied" in captured.err
+
+
+def test_clone_fixture_strips_published_results(tmp_path, monkeypatch):
+    """Other runs' results (bench/<model>/rep*/, leaderboard, results.jsonl,
+    research diary, docs, site) must be absent from the clone AND from
+    every reachable object, while eval inputs and deliberate references
+    (bench/programs, bench/reference-cores.md, README.md) survive."""
+    ref = "main"
+    repo_root = tmp_path / "repo"
+    _make_fixture_repo(repo_root, ref, with_holdout=False)
+    files = {
+        "bench/gpt-5_6-luna/rep1/log.jsonl": '{"title": "winning idea"}\n',
+        "bench/gpt-5_6-luna/rep1/agent.log": "transcript\n",
+        "bench/LEADERBOARD.md": "# board\n",
+        "bench/results.jsonl": "{}\n",
+        "research/diary/notes.md": "what worked\n",
+        "docs/blog.md": "winners\n",
+        "site/index.html": "<html>\n",
+        "bench/programs/crt0.S": "_start:\n",
+        "bench/reference-cores.md": "VexRiscv\n",
+    }
+    for rel, body in files.items():
+        f = repo_root / rel
+        f.parent.mkdir(parents=True, exist_ok=True)
+        f.write_text(body)
+    subprocess.run(["git", "add", "-A"], cwd=str(repo_root), check=True)
+    subprocess.run(["git", "-c", "user.email=t@t", "-c", "user.name=t",
+                    "commit", "--no-gpg-sign", "-q", "-m", "results"],
+                   cwd=str(repo_root), check=True)
+    subprocess.run(["git", "-c", "tag.gpgSign=false", "tag", "-f", ref],
+                   cwd=str(repo_root), check=True, capture_output=True)
+    monkeypatch.setattr(runner, "find_riscv_formal", lambda: None)
+
+    dest = tmp_path / "clone"
+    clone_fixture(repo_root, ref, dest)
+
+    for gone in ("bench/gpt-5_6-luna", "bench/LEADERBOARD.md",
+                 "bench/results.jsonl", "research", "docs", "site"):
+        assert not (dest / gone).exists(), gone
+    for kept in ("bench/programs/crt0.S", "bench/reference-cores.md", "README.md"):
+        assert (dest / kept).exists(), kept
+    objs = _git_out(["rev-list", "--objects", "--all"], dest).stdout
+    for leaked in ("gpt-5_6-luna", "LEADERBOARD", "results.jsonl", "research/", "site/"):
+        assert leaked not in objs, leaked
+    assert _git_out(["status", "--porcelain"], dest).stdout.strip() == ""
