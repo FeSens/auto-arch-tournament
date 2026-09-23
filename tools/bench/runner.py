@@ -404,7 +404,7 @@ def clone_fixture(repo_root: Path, ref: str, dest: Path) -> None:
     exclude_path.parent.mkdir(parents=True, exist_ok=True)
     extras = (
         "\n# bench runner — keep these out of git status / sandbox\n"
-        ".tmp/\n__pycache__/\n*.pyc\n"
+        ".tmp/\n.codex-home/\n__pycache__/\n*.pyc\n"
         # Cocotb pytest writes test/results.xml when the impl agent runs
         # `make test` locally to validate. The orchestrator's sandbox
         # only allows test_*.py changes, so an unignored results.xml
@@ -580,15 +580,20 @@ def _user_codex_home() -> Path:
 
 
 def isolated_codex_home(clone: Path, user_home: Path | None = None) -> Path:
-    """Create <clone>/.tmp/codex-home: a CODEX_HOME holding only a
-    minimal config.toml and a symlink to the operator's auth.json.
+    """Create <clone>/.codex-home: a CODEX_HOME holding only a minimal
+    config.toml and a symlink to the operator's auth.json.
+
+    Not under <clone>/.tmp: the runner sets TMPDIR there, and Codex
+    refuses to create its arg0 helper binaries (the `apply_patch` & co.
+    PATH aliases) under a temporary dir, which would give bench agents a
+    different tool environment than the published reps had.
 
     auth.json is symlinked, not copied: ChatGPT OAuth refresh tokens
     rotate, and a refresh landing in a copy would leave the operator's
     own login holding a revoked token. sync_codex_auth_back covers the
     case where Codex replaces the symlink with a file."""
     user_home = user_home or _user_codex_home()
-    home = clone / ".tmp" / "codex-home"
+    home = clone / ".codex-home"
     if home.exists():
         shutil.rmtree(home)
     home.mkdir(parents=True)
@@ -845,7 +850,7 @@ def run_one_job(
         except Exception:
             pass
         if job.model.provider == "codex":
-            if sync_codex_auth_back(clone / ".tmp" / "codex-home"):
+            if sync_codex_auth_back(clone / ".codex-home"):
                 print("  [bench] copied a refreshed Codex auth.json back to "
                       "the operator's CODEX_HOME", flush=True)
 

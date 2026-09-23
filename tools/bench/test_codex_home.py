@@ -20,7 +20,7 @@ def test_isolated_home_has_only_auth_symlink_and_minimal_config(tmp_path):
     clone = tmp_path / "clone"
     clone.mkdir()
     home = isolated_codex_home(clone, user)
-    assert home == clone / ".tmp" / "codex-home"
+    assert home == clone / ".codex-home"
     assert sorted(p.name for p in home.iterdir()) == ["auth.json", "config.toml"]
     assert (home / "auth.json").is_symlink()
     assert (home / "auth.json").resolve() == (user / "auth.json").resolve()
