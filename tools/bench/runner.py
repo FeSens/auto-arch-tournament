@@ -561,15 +561,77 @@ def install_opencode_config(clone: Path) -> None:
     (clone / "opencode.json").write_text(json.dumps(cfg, indent=2) + "\n")
 
 
+_CODEX_ISOLATED_CONFIG = """\
+# Written by tools/bench/runner.py:isolated_codex_home. A bench agent must
+# not inherit the operator's Codex state: memories (which held notes on
+# this very benchmark and personal context that then landed in published
+# transcripts), plugins (browser / computer-use), MCP servers, skills, or
+# project trust entries. Only auth.json is shared, as a symlink.
+[features]
+memories = false
+
+[projects."{clone}"]
+trust_level = "trusted"
+"""
+
+
+def _user_codex_home() -> Path:
+    return Path(os.environ.get("CODEX_HOME") or Path.home() / ".codex")
+
+
+def isolated_codex_home(clone: Path, user_home: Path | None = None) -> Path:
+    """Create <clone>/.tmp/codex-home: a CODEX_HOME holding only a
+    minimal config.toml and a symlink to the operator's auth.json.
+
+    auth.json is symlinked, not copied: ChatGPT OAuth refresh tokens
+    rotate, and a refresh landing in a copy would leave the operator's
+    own login holding a revoked token. sync_codex_auth_back covers the
+    case where Codex replaces the symlink with a file."""
+    user_home = user_home or _user_codex_home()
+    home = clone / ".tmp" / "codex-home"
+    if home.exists():
+        shutil.rmtree(home)
+    home.mkdir(parents=True)
+    auth = user_home / "auth.json"
+    if auth.exists():
+        (home / "auth.json").symlink_to(auth.resolve())
+    (home / "config.toml").write_text(
+        _CODEX_ISOLATED_CONFIG.format(clone=clone.resolve()))
+    return home
+
+
+def sync_codex_auth_back(codex_home: Path, user_home: Path | None = None) -> bool:
+    """If Codex rewrote the isolated auth.json as a regular file with a
+    newer refresh than the operator's, copy it back. Returns True if it did."""
+    user_home = user_home or _user_codex_home()
+    iso, real = codex_home / "auth.json", user_home / "auth.json"
+    if not iso.exists() or iso.is_symlink():
+        return False
+    try:
+        new = json.loads(iso.read_text()).get("last_refresh") or ""
+        old = json.loads(real.read_text()).get("last_refresh") or "" if real.exists() else ""
+    except (OSError, ValueError):
+        return False
+    if new <= old:
+        return False
+    tmp = real.with_name(real.name + ".bench-sync")
+    shutil.copy2(iso, tmp)
+    os.chmod(tmp, 0o600)
+    os.replace(tmp, real)
+    return True
+
+
 def make_env_for_job(job: JobSpec, clone: Path, keys: dict[str, str]) -> dict[str, str]:
     env = os.environ.copy()
     env["TARGET"] = "bench"
     if job.model.provider == "codex":
-        # Codex CLI: workspace-write sandbox + clone isolation.
+        # Codex CLI: workspace-write sandbox + clone isolation, and an
+        # isolated CODEX_HOME (no operator memories/plugins/MCP/skills).
         env["AGENT_PROVIDER"] = "codex"
         env["CODEX_MODEL"] = job.model.model
         if job.model.variant is not None:
             env["CODEX_REASONING_EFFORT"] = job.model.variant
+        env["CODEX_HOME"] = str(isolated_codex_home(clone))
     elif job.model.provider == "opencode":
         # Opencode: per-clone opencode.json permission rules.
         env["AGENT_PROVIDER"] = "opencode"
@@ -782,6 +844,10 @@ def run_one_job(
             orch_log.close()
         except Exception:
             pass
+        if job.model.provider == "codex":
+            if sync_codex_auth_back(clone / ".tmp" / "codex-home"):
+                print("  [bench] copied a refreshed Codex auth.json back to "
+                      "the operator's CODEX_HOME", flush=True)
 
     # 4. Finalize: collect logs + summary regardless of how we exited.
     out_dir.mkdir(parents=True, exist_ok=True)
