@@ -31,6 +31,9 @@ Two garbage sources, per the task-7 disk-hygiene audit (2026-07-15):
    liveness check as `_cleanup_formal_workdir`: a PID-suffixed dir whose
    process is still alive is never matched, so a concurrently running
    SBY invocation's work dir is safe from this sweeper too.
+
+3. `bench/smoke-*/` and `bench/*-verify/` -- gitignored throwaway output
+   from harness-verification runs (see find_throwaway_runs).
 """
 from __future__ import annotations
 
@@ -164,6 +167,28 @@ def find_stale_formal_workdirs(riscv_formal_cores: Path) -> list[Path]:
     return stale
 
 
+# Throwaway harness-verification output under bench/: gitignored by
+# design (.gitignore: "reliability checks, not benchmark data -- output is
+# regenerable"), but a smoke run with --keep-clones parks full rep clones
+# in there (bench/smoke-direct/ reached 5.8 GB). Debug-tagged dirs
+# (*.failed-*, *.validate-*, ...) are deliberately NOT matched: they
+# document a known-broken state the author keeps for postmortems.
+_THROWAWAY_RUN = re.compile(r"^(smoke-.+|.+-verify)$")
+_DEBUG_TAG = re.compile(r"\.(failed|validate|prev|stale|partial)-")
+
+
+def find_throwaway_runs(results_dir: Path) -> list[Path]:
+    """bench/smoke-*/ and bench/*-verify/ dirs not modified within
+    RECENT_CLONE_GRACE_SEC (so a smoke run in progress is never listed)."""
+    if not results_dir.is_dir():
+        return []
+    now = time.time()
+    return [d for d in sorted(results_dir.iterdir())
+            if d.is_dir() and not d.is_symlink()
+            and _THROWAWAY_RUN.match(d.name) and not _DEBUG_TAG.search(d.name)
+            and now - d.stat().st_mtime >= RECENT_CLONE_GRACE_SEC]
+
+
 def archive_clone_forensics(clone: Path, rep_dir: Path) -> list[str]:
     """Backfill `.tmp/orchestrator.log` + `.tmp/env.json` from the clone
     into rep_dir (only if not already present there), and create
@@ -215,6 +240,7 @@ def main(argv: list[str] | None = None) -> int:
 
     clones = find_stale_clones(args.clone_base, args.results_dir)
     workdirs = find_stale_formal_workdirs(args.riscv_formal_cores)
+    throwaway = find_throwaway_runs(args.results_dir)
 
     total_reclaimed = 0
     total_reclaimable = 0
@@ -252,6 +278,20 @@ def main(argv: list[str] | None = None) -> int:
         if not args.delete:
             continue
         shutil.rmtree(workdir, ignore_errors=True)
+        total_reclaimed += size
+        print(f"    removed ({_fmt_bytes(size)})")
+
+    print("\n[gc] throwaway smoke/verify run output "
+          f"(gitignored, under {args.results_dir}):")
+    if not throwaway:
+        print("  (none)")
+    for run in throwaway:
+        size = _du_bytes(run)
+        total_reclaimable += size
+        print(f"  {run}  ({_fmt_bytes(size)})")
+        if not args.delete:
+            continue
+        shutil.rmtree(run, ignore_errors=True)
         total_reclaimed += size
         print(f"    removed ({_fmt_bytes(size)})")
 

@@ -38,6 +38,7 @@ from typing import Optional
 import yaml
 
 from tools.bench import preflight
+from tools.bench.transcript import publish_transcript
 from tools.eval._subprocess import install_tree_reaper, kill_process_tree
 
 
@@ -1099,9 +1100,11 @@ def run_one_job(
     if run_summary_src.is_file():
         shutil.copy2(run_summary_src, out_dir / "run_summary.json")
 
+    # agent.log (tracked) has tool output capped; the verbatim stream is
+    # kept as the gitignored agent.full.log.gz. See tools/bench/transcript.py.
     agent_concat = collect_agent_logs(clone)
     if agent_concat.is_file():
-        shutil.copy2(agent_concat, out_dir / "agent.log")
+        publish_transcript(agent_concat, out_dir)
 
     # Forensics survive clone deletion: without this, a failed rep's
     # orchestrator.log dies with the clone (the sol rep2/3 startup
@@ -1111,7 +1114,10 @@ def run_one_job(
     if fp_path.is_file():
         shutil.copy2(fp_path, out_dir / "env.json")
 
-    summary = summarize_run(out_dir / "log.jsonl", out_dir / "agent.log",
+    # Cost comes from the verbatim transcript, not the compacted copy.
+    summary = summarize_run(out_dir / "log.jsonl",
+                            agent_concat if agent_concat.is_file()
+                            else out_dir / "agent.log",
                             provider=job.model.provider)
     row.update(summary)
     if last_status == "exited" and row["orchestrator_exit"] == 0:

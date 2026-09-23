@@ -402,3 +402,17 @@ def test_main_delete_skips_clone_with_no_forensics_source(tmp_path, capsys):
     assert clone.exists()
     out = capsys.readouterr().out
     assert "SKIP" in out.upper()
+
+
+def test_find_throwaway_runs_skips_debug_tagged_and_recent(tmp_path):
+    import os, time
+    from tools.bench.gc import find_throwaway_runs
+    for name in ("smoke-direct", "gemini-verify", "gpt-5_5.prev-run-verify",
+                 "gpt-5_5.failed-x", "gpt-5_6-sol", "smoke-fresh"):
+        (tmp_path / name).mkdir()
+    old = time.time() - 7200
+    for name in ("smoke-direct", "gemini-verify", "gpt-5_5.prev-run-verify",
+                 "gpt-5_5.failed-x", "gpt-5_6-sol"):
+        os.utime(tmp_path / name, (old, old))
+    assert [p.name for p in find_throwaway_runs(tmp_path)] == [
+        "gemini-verify", "smoke-direct"]
