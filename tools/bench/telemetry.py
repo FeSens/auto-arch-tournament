@@ -10,6 +10,8 @@ import re
 import subprocess
 from pathlib import Path
 
+from tools.agents._runtime import AGENT_LOG_ARCHIVE
+
 
 def parse_codex_cost_from_log(log_path: Path) -> tuple[int, int, float]:
     """Sum input/output tokens across a codex --json log.
@@ -239,7 +241,14 @@ def collect_agent_logs(clone: Path) -> Path:
         clone,  # implementation worktrees write .agent.log at root of their dir
     ):
         if sub.is_dir():
-            parts.update(sub.rglob(".agent*.log"))
+            parts.update(p for p in sub.rglob(".agent*.log")
+                         if AGENT_LOG_ARCHIVE not in p.parts)
+    # Implementer and scribe transcripts: their original files are
+    # deleted with the slot worktree / by the scribe's scrub, so the
+    # agents archive a copy (archive_agent_log).
+    archive = clone / ".tmp" / AGENT_LOG_ARCHIVE
+    if archive.is_dir():
+        parts.update(archive.glob("*.log"))
     with out_path.open("w") as outf:
         for p in sorted(parts):
             try:
@@ -251,14 +260,64 @@ def collect_agent_logs(clone: Path) -> Path:
     return out_path
 
 
+def parse_claude_cost_from_log(log_path: Path) -> tuple[int, int, float]:
+    """Sum tokens and cost across a Claude Code stream-json log.
+
+    Each `claude -p` call ends with one {"type":"result"} event carrying
+    `modelUsage` (per model, subagents included) and `total_cost_usd`.
+    Input is gross, like the Codex parser: uncached + cache reads +
+    cache writes. Output includes thinking. The cost is Claude Code's
+    list-price estimate; on a subscription it is not billed spend.
+    Dedup by the event's uuid (collect_agent_logs may repeat a file)."""
+    if not log_path.is_file():
+        return (0, 0, 0.0)
+    seen: set[str] = set()
+    toks_in = toks_out = 0
+    cost = 0.0
+    for raw in log_path.read_text(errors="replace").splitlines():
+        s = raw.strip()
+        if not s.startswith("{") or '"result"' not in s:
+            continue
+        try:
+            ev = json.loads(s)
+        except json.JSONDecodeError:
+            continue
+        if ev.get("type") != "result":
+            continue
+        key = ev.get("uuid") or s
+        if key in seen:
+            continue
+        seen.add(key)
+        usage = ev.get("modelUsage")
+        if isinstance(usage, dict) and usage:
+            for m in usage.values():
+                if not isinstance(m, dict):
+                    continue
+                toks_in += int(m.get("inputTokens") or 0)
+                toks_in += int(m.get("cacheReadInputTokens") or 0)
+                toks_in += int(m.get("cacheCreationInputTokens") or 0)
+                toks_out += int(m.get("outputTokens") or 0)
+        else:
+            u = ev.get("usage") or {}
+            toks_in += int(u.get("input_tokens") or 0)
+            toks_in += int(u.get("cache_read_input_tokens") or 0)
+            toks_in += int(u.get("cache_creation_input_tokens") or 0)
+            toks_out += int(u.get("output_tokens") or 0)
+        try:
+            cost += float(ev.get("total_cost_usd") or 0.0)
+        except (TypeError, ValueError):
+            pass
+    return (toks_in, toks_out, cost)
+
+
 def parse_cost_from_log(log_path: Path, provider: str = "codex") -> tuple[int, int, float]:
     """Dispatch to the right cost parser based on provider."""
     if provider == "opencode":
         return parse_opencode_cost_from_log(log_path)
     if provider == "codex":
         return parse_codex_cost_from_log(log_path)
-    # Claude has no cost parser yet; return zeros (the runner still
-    # records iterations / outcomes even without token telemetry).
+    if provider == "claude":
+        return parse_claude_cost_from_log(log_path)
     return (0, 0, 0.0)
 
 

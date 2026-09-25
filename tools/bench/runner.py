@@ -25,6 +25,7 @@ import argparse
 import datetime as dt
 import json
 import os
+import re
 import shutil
 import signal
 import subprocess
@@ -635,6 +636,87 @@ def sync_codex_auth_back(codex_home: Path, user_home: Path | None = None) -> boo
     return True
 
 
+def _tool_read_roots() -> list[str]:
+    """Install roots of the EDA/compiler binaries, so sandboxed agent
+    shells can run them while the rest of $HOME stays unreadable."""
+    from tools.sandbox import EVAL_TOOLS
+    roots: set[str] = set()
+    for tool in EVAL_TOOLS:
+        found = shutil.which(tool)
+        if not found:
+            continue
+        for p in (Path(found), Path(found).resolve()):
+            roots.add(str(p.parent.parent))
+    return sorted(roots)
+
+
+def claude_isolation_settings(clone: Path, uid: int | None = None,
+                              home: Path | None = None,
+                              claude_tmp: Path | None = None) -> dict:
+    """Flag-level settings for bench Claude Code agents (see
+    tools/agents/_runtime.py for the CLI flags that go with them).
+
+    Parity with the Codex runs: no web lookup, no operator memory,
+    plugins, hooks, MCP servers or claude.ai connectors. Stricter than
+    Codex on reads: the Bash sandbox denies all of $HOME and /private/tmp
+    except the clone, the toolchain, riscv-formal and Claude's own temp
+    dir, and denies every other Claude session's temp subtree (these
+    hold other sessions' task outputs, including the operator's). File
+    tools are confined to cwd by acceptEdits in -p mode; Read gets
+    explicit allows for the same read roots."""
+    clone = clone.resolve()
+    uid = os.getuid() if uid is None else uid
+    home = home or Path.home()
+    rf = clone / "formal" / "riscv-formal"
+    reads = [str(clone), *_tool_read_roots()]
+    if rf.exists():
+        reads.append(str(rf.resolve()))
+    for f in (home / ".gitconfig", home / ".config" / "git"):
+        if f.exists():
+            reads.append(str(f))
+    claude_tmp = claude_tmp or Path(f"/private/tmp/claude-{uid}")
+    # Claude names each project's temp subtree after its cwd with every
+    # non-alphanumeric turned into '-'; the rep's own (clone root and
+    # slot worktrees) stay readable.
+    own = re.sub(r"[^A-Za-z0-9]", "-", str(clone))
+    other_sessions = sorted(
+        str(p) for p in claude_tmp.glob("*")
+        if p.is_dir() and not p.name.startswith(own)
+    ) if claude_tmp.is_dir() else []
+    return {
+        "disableAllHooks": True,
+        "disableClaudeAiConnectors": True,
+        "autoMemoryEnabled": False,
+        "permissions": {
+            "allow": ["Bash", *(f"Read(/{r}/**)" for r in reads)],
+            "deny": ["WebFetch", "WebSearch"],
+        },
+        "sandbox": {
+            "enabled": True,
+            "autoAllowBashIfSandboxed": True,
+            "allowUnsandboxedCommands": False,
+            "filesystem": {
+                "allowWrite": [str(clone)],
+                "denyRead": [str(home), "/private/tmp", *other_sessions],
+                "allowRead": [*reads, str(claude_tmp)],
+            },
+            "network": {"allowedDomains": []},
+        },
+    }
+
+
+def claude_instruction_ancestors(clone: Path) -> list[Path]:
+    """CLAUDE.md-style files Claude Code would load from the clone's
+    parent directories (it walks up from cwd). A clone under the main
+    checkout would pick up the main repo's CLAUDE.md."""
+    found = []
+    for d in clone.resolve().parents:
+        for name in ("CLAUDE.md", "CLAUDE.local.md"):
+            if (d / name).is_file():
+                found.append(d / name)
+    return found
+
+
 def make_env_for_job(job: JobSpec, clone: Path, keys: dict[str, str]) -> dict[str, str]:
     env = os.environ.copy()
     env["TARGET"] = "bench"
@@ -653,9 +735,18 @@ def make_env_for_job(job: JobSpec, clone: Path, keys: dict[str, str]) -> dict[st
         if job.model.variant is not None:
             env["OPENCODE_VARIANT"] = job.model.variant
     elif job.model.provider == "claude":
-        # Claude CLI: --dangerously-skip-permissions + clone isolation.
+        # Claude Code: operator login (Keychain), but no operator
+        # settings/plugins/hooks/memory/MCP, and an OS sandbox around
+        # Bash. See claude_isolation_settings.
         env["AGENT_PROVIDER"] = "claude"
         env["ANTHROPIC_MODEL"] = job.model.model
+        env["CLAUDE_BENCH_SETTINGS"] = json.dumps(claude_isolation_settings(clone))
+        if job.model.variant is not None:
+            env["CLAUDE_EFFORT"] = job.model.variant
+        env["CLAUDE_CODE_DISABLE_AUTO_MEMORY"] = "1"
+        env["DISABLE_TELEMETRY"] = "1"
+        env["DISABLE_ERROR_REPORTING"] = "1"
+        env["DISABLE_AUTOUPDATER"] = "1"
     elif job.model.provider == "static":
         # No-LLM control runtime. Reads no API key, drives no model.
         env["AGENT_PROVIDER"] = "static"
@@ -758,9 +849,15 @@ def run_one_job(
     try:
         if job.model.provider == "opencode":
             install_opencode_config(clone)
-        # codex and claude rely on their CLIs' built-in sandbox modes
-        # (workspace-write / --dangerously-skip-permissions) plus the
-        # standalone-clone isolation; no per-clone fence file needed.
+        if job.model.provider == "claude":
+            inherited = claude_instruction_ancestors(clone)
+            if inherited:
+                raise RuntimeError(
+                    "claude would load instruction files from the clone's "
+                    f"parents: {', '.join(map(str, inherited))}; "
+                    "use a --clone-base outside any repo")
+        # codex uses its workspace-write sandbox + CODEX_HOME; claude gets
+        # its sandbox/permission settings through the env (make_env_for_job).
     except Exception as e:
         row["notes"] = f"fence install failed: {e}"[:400]
         _copy_early_forensics(out_dir, fp_path, orch_log_path)
@@ -836,7 +933,9 @@ def run_one_job(
                 row["status"] = "timed_out"
                 row["notes"] = f"wall-clock {timeout_sec}s exceeded"
                 break
-            if now >= next_cost_check:
+            # OAuth subscription runs are not billed per token, and Claude
+            # Code's reported cost is an API-list estimate: no dollar cap.
+            if now >= next_cost_check and not job.model.oauth:
                 # Peek at the running cost; kill if over budget.
                 concat = collect_agent_logs(clone)
                 _, _, cost_so_far = parse_cost_from_log(concat, provider=job.model.provider)
@@ -918,6 +1017,12 @@ def run_one_job(
                             else out_dir / "agent.log",
                             provider=job.model.provider)
     row.update(summary)
+    if job.model.oauth and job.model.provider == "claude":
+        # Keep total_cost_usd = billed dollars (0 on a subscription, as
+        # for Codex OAuth rows); Claude Code's own list-price estimate
+        # goes in its own field.
+        row["api_equivalent_cost_usd"] = row.get("total_cost_usd", 0.0)
+        row["total_cost_usd"] = 0.0
     if last_status == "exited" and row["orchestrator_exit"] == 0:
         row["status"] = "done"
     elif last_status == "exited":

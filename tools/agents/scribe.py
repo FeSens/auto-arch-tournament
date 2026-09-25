@@ -10,7 +10,7 @@ import re
 import subprocess
 from pathlib import Path
 
-from tools.agents._runtime import build_agent_cmd, run_agent_streaming
+from tools.agents._runtime import archive_agent_log, build_agent_cmd, run_agent_streaming
 
 
 # Cap on scribe wall time. The scribe writes one bullet from a small prompt
@@ -172,6 +172,8 @@ def run_scribe_agent(entry: dict, diff: str, target: str) -> str | None:
     # sandbox check (where they'd be flagged as off-limits modifications
     # and roll back the next agent's work).
     def _scrub_scribe_artifacts() -> None:
+        # Keep a copy for the rep's transcript and token totals first.
+        archive_agent_log(log_path, f"scribe.{entry.get('id', 'unknown')}")
         for p in (log_path, last_msg):
             try:
                 if p.exists() and not p.is_dir():

@@ -34,12 +34,21 @@ _TAIL = 1024
 #   opencode / pi:    part.state.output, part.state.metadata.{output,preview}
 #   openrouter:       part.metadata.openrouter.reasoning_details[].data
 #                     (encrypted reasoning; the readable .text is kept)
+#   claude:           tool results in user events (message.content[].content
+#                     as a string or a list of text parts, plus the
+#                     tool_use_result mirror) and opaque thinking signatures
 _CAPPED_PATHS = frozenset({
     ("item", "aggregated_output"),
     ("part", "state", "output"),
     ("part", "state", "metadata", "output"),
     ("part", "state", "metadata", "preview"),
     ("part", "metadata", "openrouter", "reasoning_details", "[]", "data"),
+    ("message", "content", "[]", "content"),
+    ("message", "content", "[]", "content", "[]", "text"),
+    ("message", "content", "[]", "signature"),
+    ("tool_use_result", "stdout"),
+    ("tool_use_result", "stderr"),
+    ("tool_use_result", "file", "content"),
 })
 
 

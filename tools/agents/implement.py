@@ -3,6 +3,7 @@ AGENT_PROVIDER) in the worktree to implement a hypothesis."""
 import os, subprocess, yaml
 from pathlib import Path
 from tools.agents._runtime import (
+    archive_agent_log,
     build_agent_cmd,
     run_agent_streaming,
 )
@@ -196,6 +197,9 @@ def run_implementation_agent(hypothesis_path: str, worktree: str,
             cmd, cwd=worktree, log_path=log_path, timeout_sec=CLAUDE_TIMEOUT_SEC,
             mode="a",
         )
+    # The worktree (and this log) is deleted after the slot; keep a copy
+    # for the rep's transcript and token totals.
+    archive_agent_log(log_path, f"impl.{Path(worktree).name}")
     if timed_out:
         print(f"  [agent] TIMEOUT after {CLAUDE_TIMEOUT_SEC}s — process killed",
               flush=True)

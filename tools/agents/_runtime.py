@@ -29,6 +29,7 @@ from __future__ import annotations
 
 import json
 import os
+import shutil
 import subprocess
 import sys
 import threading
@@ -37,6 +38,18 @@ from typing import Optional
 
 
 VALID_PROVIDERS = ("codex", "claude", "opencode", "static", "random")
+
+# Claude Code tools a bench agent must not have. Web lookup matches the
+# Codex runs (no --search). The rest reach outside the rep: messaging
+# other local Claude sessions, phone notifications, remote triggers,
+# jobs that outlive the process, multi-agent workflows, and worktrees
+# the harness doesn't manage.
+CLAUDE_BENCH_DISALLOWED_TOOLS = (
+    "WebFetch", "WebSearch",
+    "SendMessage", "ListAgents", "PushNotification", "RemoteTrigger",
+    "CronCreate", "CronDelete", "CronList", "ScheduleWakeup",
+    "Workflow", "DesignSync", "EnterWorktree", "ExitWorktree",
+)
 
 # Codex's `exec` mode prints a multi-line banner before doing work — model
 # id, sandbox mode, token counters, separator dashes, etc. None of it is
@@ -214,6 +227,26 @@ def _summarize_opencode_jsonl(ev: dict) -> Optional[str]:
     return f"opencode: {et}"
 
 
+# Directory under <clone>/.tmp where implementer and scribe transcripts
+# are copied before the harness deletes them.
+AGENT_LOG_ARCHIVE = "agent-logs"
+
+
+def archive_agent_log(log_path: Path, name: str, repo: Path = Path(".")) -> None:
+    """Copy one agent transcript into <repo>/.tmp/agent-logs/<name>.log
+    (appending, so a retried or repeated agent keeps every attempt).
+    Never raises: telemetry must not fail a slot."""
+    try:
+        if not log_path.is_file():
+            return
+        dest = repo / ".tmp" / AGENT_LOG_ARCHIVE / f"{name}.log"
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        with open(log_path, "rb") as src, open(dest, "ab") as out:
+            shutil.copyfileobj(src, out)
+    except OSError:
+        pass
+
+
 def build_agent_cmd(
     prompt: str,
     cwd: str,
@@ -261,12 +294,33 @@ def build_agent_cmd(
         cmd.append(prompt)
         return cmd
     if p == "claude":
-        cmd = [
-            "claude", "-p", prompt,
-            "--dangerously-skip-permissions",
-            "--output-format", "stream-json",
-            "--verbose",
-        ]
+        isolation = os.environ.get("CLAUDE_BENCH_SETTINGS", "").strip()
+        if isolation:
+            # Bench isolation (tools/bench/runner.py claude_isolation_settings):
+            # no user/project settings, plugins, hooks, MCP or connectors;
+            # Bash confined by the OS sandbox; file tools auto-approved only
+            # inside cwd (acceptEdits), so reads/writes elsewhere are denied
+            # in -p mode.
+            cmd = [
+                "claude", "-p", prompt,
+                "--output-format", "stream-json",
+                "--verbose",
+                "--setting-sources", "",
+                "--strict-mcp-config", "--mcp-config", '{"mcpServers":{}}',
+                "--permission-mode", "acceptEdits",
+                "--settings", isolation,
+                "--disallowedTools", *CLAUDE_BENCH_DISALLOWED_TOOLS,
+            ]
+            effort = os.environ.get("CLAUDE_EFFORT", "").strip()
+            if effort:
+                cmd += ["--effort", effort]
+        else:
+            cmd = [
+                "claude", "-p", prompt,
+                "--dangerously-skip-permissions",
+                "--output-format", "stream-json",
+                "--verbose",
+            ]
         if model:
             # Insert after the prompt so cmd[2] stays the positional prompt
             # for any debugging tools that key on argv shape.
@@ -408,6 +462,7 @@ def run_agent_streaming(
     p = provider or get_provider()
     proc = subprocess.Popen(
         cmd, cwd=cwd,
+        stdin=subprocess.DEVNULL,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         text=True, bufsize=1,
@@ -419,7 +474,9 @@ def run_agent_streaming(
             proc.wait(timeout=timeout_sec)
         except subprocess.TimeoutExpired:
             timed_out['flag'] = True
-            proc.kill()
+            # The agent's own shells and tools die with it.
+            from tools.eval._subprocess import kill_process_tree
+            kill_process_tree(proc.pid)
 
     threading.Thread(target=watchdog, daemon=True).start()
 
