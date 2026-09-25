@@ -636,18 +636,41 @@ def sync_codex_auth_back(codex_home: Path, user_home: Path | None = None) -> boo
     return True
 
 
-def _tool_read_roots() -> list[str]:
+def _tool_read_roots(home: Path | None = None) -> list[str]:
     """Install roots of the EDA/compiler binaries, so sandboxed agent
-    shells can run them while the rest of $HOME stays unreadable."""
+    shells can run them while the rest of $HOME stays unreadable. A root
+    that is $HOME or a direct child of it (e.g. ~/.local, from a stray
+    wrapper earlier on PATH) is skipped: it would reopen far more than
+    the toolchain."""
     from tools.sandbox import EVAL_TOOLS
+    home = (home or Path.home()).resolve()
     roots: set[str] = set()
     for tool in EVAL_TOOLS:
         found = shutil.which(tool)
         if not found:
             continue
         for p in (Path(found), Path(found).resolve()):
-            roots.add(str(p.parent.parent))
+            root = p.parent.parent.resolve()
+            if root == home or root.parent == home:
+                continue
+            roots.add(str(root))
     return sorted(roots)
+
+
+def _python_user_site() -> str | None:
+    """User site-packages of the python3 on PATH. Test deps (cocotb)
+    may be installed there; sandboxed shells need to read it, or Claude
+    agents could not run the unit tests Codex agents can."""
+    py = shutil.which("python3")
+    if not py:
+        return None
+    try:
+        out = subprocess.run([py, "-c", "import site; print(site.getusersitepackages())"],
+                             capture_output=True, text=True, timeout=30)
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    path = out.stdout.strip()
+    return path if path and Path(path).is_dir() else None
 
 
 def claude_isolation_settings(clone: Path, uid: int | None = None,
@@ -668,9 +691,12 @@ def claude_isolation_settings(clone: Path, uid: int | None = None,
     uid = os.getuid() if uid is None else uid
     home = home or Path.home()
     rf = clone / "formal" / "riscv-formal"
-    reads = [str(clone), *_tool_read_roots()]
+    reads = [str(clone), *_tool_read_roots(home)]
     if rf.exists():
         reads.append(str(rf.resolve()))
+    user_site = _python_user_site()
+    if user_site:
+        reads.append(user_site)
     for f in (home / ".gitconfig", home / ".config" / "git"):
         if f.exists():
             reads.append(str(f))

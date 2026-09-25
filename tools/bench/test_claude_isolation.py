@@ -133,3 +133,27 @@ def test_claude_tool_results_are_compacted():
 def test_disallowed_tools_cover_outside_reach():
     assert {"SendMessage", "ListAgents", "RemoteTrigger", "Workflow"} <= set(
         _runtime.CLAUDE_BENCH_DISALLOWED_TOOLS)
+
+
+def test_python_user_site_is_readable(tmp_path, monkeypatch):
+    import tools.bench.runner as r
+    site = tmp_path / "py" / "lib" / "python3.13" / "site-packages"
+    site.mkdir(parents=True)
+    monkeypatch.setattr(r, "_python_user_site", lambda: str(site))
+    s, *_ = _settings(tmp_path)
+    assert str(site) in s["sandbox"]["filesystem"]["allowRead"]
+
+
+def test_tool_roots_never_open_home(tmp_path, monkeypatch):
+    import tools.bench.runner as r
+    home = tmp_path / "home"
+    (home / ".local" / "bin").mkdir(parents=True)
+    tc = tmp_path / "work" / "riscv" / ".toolchain" / "bin"
+    tc.mkdir(parents=True)
+    for d, name in ((home / ".local" / "bin", "sby"), (tc, "yosys")):
+        (d / name).write_text("#!/bin/sh\n")
+        (d / name).chmod(0o755)
+    monkeypatch.setenv("PATH", f"{home / '.local' / 'bin'}:{tc}")
+    roots = r._tool_read_roots(home)
+    assert str(tc.parent) in roots
+    assert str(home / ".local") not in roots and str(home) not in roots
