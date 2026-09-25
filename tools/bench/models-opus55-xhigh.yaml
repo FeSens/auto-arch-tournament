@@ -1,0 +1,11 @@
+# Claude Opus 5.5 at xhigh effort, via Claude Code on the operator's
+# subscription login (Keychain OAuth), isolated per
+# tools/bench/runner.py claude_isolation_settings.
+# First run (2026-09-25): --reps 1 --n 15 --k 3 --parallel 1 --keep-clones
+# --ref fix/eval-hardening --clone-base outside the repo (no parent CLAUDE.md).
+models:
+  - name: claude-opus-5_5_xhigh
+    provider: claude
+    model: claude-opus-5-5
+    variant: xhigh
+    oauth: true

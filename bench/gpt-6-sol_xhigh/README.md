@@ -20,7 +20,8 @@ One repetition, 15 rounds with 3 candidate hypotheses per round: one baseline pl
   - Codex runs with an isolated `CODEX_HOME` (memories disabled, no login shell). It does not read `~/.codex` memories or config.
 
   Because of these isolation changes, this rep's agent had less access to prior results than the earlier Codex reps. That is a second difference besides the model, so a comparison against those reps is also non-attributable.
-- Dollar billing is unavailable through OAuth. `total_cost_usd: 0.0` is the parser default, not measured zero spend. Tokens: 32,527,688 in, 592,247 out.
+- Dollar billing is unavailable through OAuth. `total_cost_usd: 0.0` is the parser default, not measured zero spend.
+- Tokens: the results row records 32,527,688 in and 592,247 out, but that covers only the 45 hypothesis agents. This harness deleted implementer and scribe transcripts before collecting them (fixed in `8da0d1e`). Codex's own session store for this rep holds all 136 agent sessions: 45 implementers, 45 hypothesis agents and 46 scribes, totalling **137,005,804 in and 1,654,470 out**. The row is left as recorded, and this line is the correction.
 - `agent.log` is compacted: tool-output fields longer than 4 KB are cut to head and tail around a marker recording the original length and sha256. Model-authored text and usage events are unchanged. The verbatim transcript and the Git bundle are kept locally and not published.
 
 ## Launch history
