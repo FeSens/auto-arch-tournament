@@ -89,6 +89,9 @@ SCHEDULED_MODELS = (
 #   Flash GA (May 19).
 # - Kimi K2.6 official tech-blog announcement (Apr 20).
 MODEL_RELEASES = {
+    # First documented Codex support: https://learn.chatgpt.com/docs/changelog
+    # 2026-09-22, Codex CLI 0.156.0 ("Choose GPT-6 Sol or GPT-6 Luna").
+    "gpt-6-sol_xhigh":{"date": "2026-09-22", "label": "GPT-6 Sol xhigh", "provider": "openai"},
     "gemini-3_1-pro":  {"date": "2026-02-19", "label": "Gemini 3.1 Pro",  "provider": "google"},
     "gpt-5_4_xhigh":  {"date": "2026-03-05", "label": "GPT-5.4 xhigh",   "provider": "openai"},
     "gpt-5_4-mini":   {"date": "2026-03-17", "label": "GPT-5.4 mini",    "provider": "openai"},

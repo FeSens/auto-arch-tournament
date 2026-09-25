@@ -7,3 +7,12 @@ Rules adopted: (1) mechanical agents share one hardened parser helper,
 (2) every prompt-parsing agent gets burned in at N >= 2 rounds, (3) an
 integration test builds a real round-2 prompt via hypothesis.py and asserts
 id extraction, so the bug class cannot ship again.
+
+## 2026-09-23: agent runtimes read the host, not just the clone
+Codex's workspace-write sandbox limits writes, not reads, and allows /tmp
+writes. A default CODEX_HOME exposed the operator's memories; a login shell
+exposed an unrelated PATH. Every stopped launch was caught by watching the
+agent's shell commands live, not by a gate. Rules adopted: (1) each clone
+gets its own CODEX_HOME with memories off and no login shell, (2) published
+results and research are stripped from the clone, (3) monitor new runtimes'
+shell commands for paths outside the clone during their first rep.
