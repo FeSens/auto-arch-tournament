@@ -157,3 +157,18 @@ def test_tool_roots_never_open_home(tmp_path, monkeypatch):
     roots = r._tool_read_roots(home)
     assert str(tc.parent) in roots
     assert str(home / ".local") not in roots and str(home) not in roots
+
+
+def test_claude_parser_recovers_killed_sessions(tmp_path):
+    def asst(sid, mid, inp, out):
+        return json.dumps({"type": "assistant", "session_id": sid,
+                           "message": {"id": mid, "usage": {"input_tokens": inp,
+                               "cache_read_input_tokens": 0, "cache_creation_input_tokens": 0,
+                               "output_tokens": out}}})
+    lines = [asst("done", "m1", 5, 1),
+             json.dumps({"type": "result", "session_id": "done", "uuid": "r1", "total_cost_usd": 1.0,
+                         "modelUsage": {"m": {"inputTokens": 5, "outputTokens": 40}}}),
+             asst("killed", "m2", 100, 3), asst("killed", "m2", 100, 3), asst("killed", "m3", 200, 4)]
+    log = tmp_path / "a.log"
+    log.write_text("\n".join(lines) + "\n")
+    assert parse_claude_cost_from_log(log) == (305, 47, 1.0)

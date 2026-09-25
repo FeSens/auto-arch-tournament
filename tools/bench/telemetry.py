@@ -263,24 +263,44 @@ def collect_agent_logs(clone: Path) -> Path:
 def parse_claude_cost_from_log(log_path: Path) -> tuple[int, int, float]:
     """Sum tokens and cost across a Claude Code stream-json log.
 
-    Each `claude -p` call ends with one {"type":"result"} event carrying
-    `modelUsage` (per model, subagents included) and `total_cost_usd`.
-    Input is gross, like the Codex parser: uncached + cache reads +
-    cache writes. Output includes thinking. The cost is Claude Code's
-    list-price estimate; on a subscription it is not billed spend.
-    Dedup by the event's uuid (collect_agent_logs may repeat a file)."""
+    Each `claude -p` call that exits normally ends with one
+    {"type":"result"} event carrying `modelUsage` (per model, subagents
+    included) and `total_cost_usd`. Input is gross, like the Codex
+    parser: uncached + cache reads + cache writes. Output includes
+    thinking. The cost is Claude Code's list-price estimate; on a
+    subscription it is not billed spend.
+
+    A session killed by the harness timeout never writes its result
+    event. For those, input is recovered exactly from the per-message
+    usage on its assistant events (deduplicated by message id; verified
+    equal to modelUsage on completed sessions), and output from the same
+    events, which only carry a streaming snapshot: a lower bound. No
+    cost is added for them. Results are deduplicated by uuid
+    (collect_agent_logs may repeat a file)."""
     if not log_path.is_file():
         return (0, 0, 0.0)
     seen: set[str] = set()
     toks_in = toks_out = 0
     cost = 0.0
+    finished: set[str] = set()
+    partial: dict[str, dict[str, dict]] = {}
     for raw in log_path.read_text(errors="replace").splitlines():
         s = raw.strip()
-        if not s.startswith("{") or '"result"' not in s:
+        if not s.startswith("{"):
+            continue
+        is_result = '"result"' in s
+        if not is_result and '"assistant"' not in s:
             continue
         try:
             ev = json.loads(s)
         except json.JSONDecodeError:
+            continue
+        sid = ev.get("session_id") or ""
+        if ev.get("type") == "assistant":
+            msg = ev.get("message") or {}
+            u = msg.get("usage")
+            if isinstance(u, dict) and msg.get("id"):
+                partial.setdefault(sid, {})[msg["id"]] = u
             continue
         if ev.get("type") != "result":
             continue
@@ -288,6 +308,7 @@ def parse_claude_cost_from_log(log_path: Path) -> tuple[int, int, float]:
         if key in seen:
             continue
         seen.add(key)
+        finished.add(sid)
         usage = ev.get("modelUsage")
         if isinstance(usage, dict) and usage:
             for m in usage.values():
@@ -307,6 +328,14 @@ def parse_claude_cost_from_log(log_path: Path) -> tuple[int, int, float]:
             cost += float(ev.get("total_cost_usd") or 0.0)
         except (TypeError, ValueError):
             pass
+    for sid, msgs in partial.items():
+        if sid in finished:
+            continue
+        for u in msgs.values():
+            toks_in += int(u.get("input_tokens") or 0)
+            toks_in += int(u.get("cache_read_input_tokens") or 0)
+            toks_in += int(u.get("cache_creation_input_tokens") or 0)
+            toks_out += int(u.get("output_tokens") or 0)
     return (toks_in, toks_out, cost)
 
 
