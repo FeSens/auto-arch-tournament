@@ -25,6 +25,7 @@ import argparse
 import datetime as dt
 import json
 import os
+import re
 import shutil
 import signal
 import subprocess
@@ -38,6 +39,16 @@ from typing import Optional
 import yaml
 
 from tools.bench import preflight
+from tools.bench.telemetry import (  # noqa: F401  (re-exported)
+    collect_agent_logs,
+    parse_codex_cost_from_log,
+    parse_cost_from_log,
+    parse_opencode_cost_from_log,
+    reconstruct_log_from_git,
+    summarize_run,
+)
+from tools.bench.transcript import publish_transcript
+from tools.eval._subprocess import install_tree_reaper, kill_process_tree
 
 
 HERE = Path(__file__).parent
@@ -216,6 +227,42 @@ def find_riscv_formal() -> Path | None:
     return None
 
 
+def provenance(repo_root: Path, ref: str) -> dict:
+    """Commits behind a rep: the fixture ref it evaluates with, and the
+    runner checkout (cost parsing, summaries) that drove it."""
+    def git(*args: str) -> str:
+        r = subprocess.run(["git", "-C", str(repo_root), *args],
+                           capture_output=True, text=True)
+        return r.stdout.strip() if r.returncode == 0 else ""
+    dirty = git("status", "--porcelain", "--", "tools")
+    return {
+        "fixture_ref": ref,
+        "fixture_commit": git("rev-parse", f"{ref}^{{commit}}") or None,
+        "runner_commit": git("rev-parse", "HEAD") or None,
+        "runner_dirty": bool(dirty),
+    }
+
+
+# Paths in a fixture clone that optimization agents must never see:
+# held-out kernels (E3), plus every published result of this benchmark.
+# bench/ keeps only its eval inputs (programs/, reference-cores.md).
+# Deliberately NOT stripped: README.md and cores/v1/, which the agent
+# prompts present as read-only reference (a design decision, not a leak).
+_BENCH_KEEP = frozenset({"programs", "reference-cores.md"})
+_AGENT_INVISIBLE_TOP = ("research", "docs", "site", "paper")
+
+
+def agent_invisible_paths(dest: Path) -> list[str]:
+    """Repo-relative paths clone_fixture strips from a fixture clone."""
+    paths = ["bench/holdout"]
+    bench = dest / "bench"
+    if bench.is_dir():
+        paths += sorted(f"bench/{p.name}" for p in bench.iterdir()
+                        if p.name not in _BENCH_KEEP and p.name != "holdout")
+    paths += [p for p in _AGENT_INVISIBLE_TOP if (dest / p).exists()]
+    return paths
+
+
 def clone_fixture(repo_root: Path, ref: str, dest: Path) -> None:
     if dest.exists():
         # Prefer to delete and re-clone for reproducibility — a stale
@@ -279,11 +326,23 @@ def clone_fixture(repo_root: Path, ref: str, dest: Path) -> None:
     # had bench/holdout; the single-root rebuild still runs for them, so
     # every clone has the same neutral shape and the guard's existence is
     # not advertised in a `git log` where no kernels were present.
-    subprocess.run(
-        ["git", "rm", "-r", "--cached", "--ignore-unmatch", "bench/holdout"],
-        cwd=str(dest), check=True, capture_output=True,
-    )
-    shutil.rmtree(dest / "bench" / "holdout", ignore_errors=True)
+    #
+    # The same structural strip removes every published result of this
+    # benchmark (agent_invisible_paths): with `--ref main` the fixture
+    # carries bench/<model>/rep*/ journals + transcripts, the leaderboard,
+    # results.jsonl, the research diary, docs and the site. Agents were
+    # observed listing bench/<model>/rep*/log.jsonl with `rg --files`,
+    # i.e. other runs' winning ideas were one `cat` away.
+    for rel in agent_invisible_paths(dest):
+        subprocess.run(
+            ["git", "rm", "-r", "-q", "--cached", "--ignore-unmatch", "--", rel],
+            cwd=str(dest), check=True, capture_output=True,
+        )
+        target = dest / rel
+        if target.is_dir() and not target.is_symlink():
+            shutil.rmtree(target, ignore_errors=True)
+        else:
+            target.unlink(missing_ok=True)
     # Pre-create cores/bench/experiments/ as a tracked directory so the
     # orchestrator can `git add` files into it without the sandbox check
     # tripping on the untracked parent dir. The fixture stripped this
@@ -346,7 +405,7 @@ def clone_fixture(repo_root: Path, ref: str, dest: Path) -> None:
     exclude_path.parent.mkdir(parents=True, exist_ok=True)
     extras = (
         "\n# bench runner — keep these out of git status / sandbox\n"
-        ".tmp/\n__pycache__/\n*.pyc\n"
+        ".tmp/\n.codex-home/\n__pycache__/\n*.pyc\n"
         # Cocotb pytest writes test/results.xml when the impl agent runs
         # `make test` locally to validate. The orchestrator's sandbox
         # only allows test_*.py changes, so an unignored results.xml
@@ -503,15 +562,207 @@ def install_opencode_config(clone: Path) -> None:
     (clone / "opencode.json").write_text(json.dumps(cfg, indent=2) + "\n")
 
 
+_CODEX_ISOLATED_CONFIG = """\
+# Written by tools/bench/runner.py:isolated_codex_home. A bench agent must
+# not inherit the operator's Codex state: memories (which held notes on
+# this very benchmark and personal context that then landed in published
+# transcripts), plugins (browser / computer-use), MCP servers, skills, or
+# project trust entries. Only auth.json is shared, as a symlink.
+#
+# allow_login_shell = false: with a login shell (`zsh -lc`) the agent's
+# PATH is rebuilt from the operator's shell profile, so agents ran
+# ~/.local/bin/sby under a python3 without `click` and could not run
+# their own formal self-checks, while the orchestrator's gates used the
+# runner's PATH. Non-login shells inherit the runner's PATH: agents and
+# gates see the same toolchain.
+allow_login_shell = false
+
+[features]
+memories = false
+
+[projects."{clone}"]
+trust_level = "trusted"
+"""
+
+
+def _user_codex_home() -> Path:
+    return Path(os.environ.get("CODEX_HOME") or Path.home() / ".codex")
+
+
+def isolated_codex_home(clone: Path, user_home: Path | None = None) -> Path:
+    """Create <clone>/.codex-home: a CODEX_HOME holding only a minimal
+    config.toml and a symlink to the operator's auth.json.
+
+    Not under <clone>/.tmp: the runner sets TMPDIR there, and Codex
+    refuses to create its arg0 helper binaries (the `apply_patch` & co.
+    PATH aliases) under a temporary dir, which would give bench agents a
+    different tool environment than the published reps had.
+
+    auth.json is symlinked, not copied: ChatGPT OAuth refresh tokens
+    rotate, and a refresh landing in a copy would leave the operator's
+    own login holding a revoked token. sync_codex_auth_back covers the
+    case where Codex replaces the symlink with a file."""
+    user_home = user_home or _user_codex_home()
+    home = clone / ".codex-home"
+    if home.exists():
+        shutil.rmtree(home)
+    home.mkdir(parents=True)
+    auth = user_home / "auth.json"
+    if auth.exists():
+        (home / "auth.json").symlink_to(auth.resolve())
+    (home / "config.toml").write_text(
+        _CODEX_ISOLATED_CONFIG.format(clone=clone.resolve()))
+    return home
+
+
+def sync_codex_auth_back(codex_home: Path, user_home: Path | None = None) -> bool:
+    """If Codex rewrote the isolated auth.json as a regular file with a
+    newer refresh than the operator's, copy it back. Returns True if it did."""
+    user_home = user_home or _user_codex_home()
+    iso, real = codex_home / "auth.json", user_home / "auth.json"
+    if not iso.exists() or iso.is_symlink():
+        return False
+    try:
+        new = json.loads(iso.read_text()).get("last_refresh") or ""
+        old = json.loads(real.read_text()).get("last_refresh") or "" if real.exists() else ""
+    except (OSError, ValueError):
+        return False
+    if new <= old:
+        return False
+    tmp = real.with_name(real.name + ".bench-sync")
+    shutil.copy2(iso, tmp)
+    os.chmod(tmp, 0o600)
+    os.replace(tmp, real)
+    return True
+
+
+def _tool_read_roots(home: Path | None = None) -> list[str]:
+    """Install roots of the EDA/compiler binaries, so sandboxed agent
+    shells can run them while the rest of $HOME stays unreadable. A root
+    that is $HOME or a direct child of it (e.g. ~/.local, from a stray
+    wrapper earlier on PATH) is skipped: it would reopen far more than
+    the toolchain."""
+    from tools.sandbox import EVAL_TOOLS
+    home = (home or Path.home()).resolve()
+    roots: set[str] = set()
+    for tool in EVAL_TOOLS:
+        found = shutil.which(tool)
+        if not found:
+            continue
+        for p in (Path(found), Path(found).resolve()):
+            root = p.parent.parent.resolve()
+            if root == home or root.parent == home:
+                continue
+            roots.add(str(root))
+    return sorted(roots)
+
+
+def _python_user_site() -> str | None:
+    """User site-packages of the python3 on PATH. Test deps (cocotb)
+    may be installed there; sandboxed shells need to read it, or Claude
+    agents could not run the unit tests Codex agents can."""
+    py = shutil.which("python3")
+    if not py:
+        return None
+    try:
+        out = subprocess.run([py, "-c", "import site; print(site.getusersitepackages())"],
+                             capture_output=True, text=True, timeout=30)
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    path = out.stdout.strip()
+    return path if path and Path(path).is_dir() else None
+
+
+def claude_isolation_settings(clone: Path, uid: int | None = None,
+                              home: Path | None = None,
+                              claude_tmp: Path | None = None) -> dict:
+    """Flag-level settings for bench Claude Code agents (see
+    tools/agents/_runtime.py for the CLI flags that go with them).
+
+    Parity with the Codex runs: no web lookup, no operator memory,
+    plugins, hooks, MCP servers or claude.ai connectors. Stricter than
+    Codex on reads: the Bash sandbox denies all of $HOME and /private/tmp
+    except the clone, the toolchain, riscv-formal and Claude's own temp
+    dir, and denies every other Claude session's temp subtree (these
+    hold other sessions' task outputs, including the operator's). File
+    tools are confined to cwd by acceptEdits in -p mode; Read gets
+    explicit allows for the same read roots."""
+    clone = clone.resolve()
+    uid = os.getuid() if uid is None else uid
+    home = home or Path.home()
+    rf = clone / "formal" / "riscv-formal"
+    reads = [str(clone), *_tool_read_roots(home)]
+    if rf.exists():
+        reads.append(str(rf.resolve()))
+    user_site = _python_user_site()
+    if user_site:
+        reads.append(user_site)
+    for f in (home / ".gitconfig", home / ".config" / "git"):
+        if f.exists():
+            reads.append(str(f))
+    claude_tmp = claude_tmp or Path(f"/private/tmp/claude-{uid}")
+    # Claude names each project's temp subtree after its cwd with every
+    # non-alphanumeric turned into '-'; the rep's own (clone root and
+    # slot worktrees) stay readable.
+    own = re.sub(r"[^A-Za-z0-9]", "-", str(clone))
+    # Every existing entry, files included: loose scratch files other
+    # sessions (or an earlier rep's agents) left at the top level.
+    other_sessions = sorted(
+        str(p) for p in claude_tmp.glob("*")
+        if not p.name.startswith(own)
+    ) if claude_tmp.is_dir() else []
+    return {
+        "disableAllHooks": True,
+        "disableClaudeAiConnectors": True,
+        "autoMemoryEnabled": False,
+        "permissions": {
+            "allow": ["Bash", *(f"Read(/{r}/**)" for r in reads)],
+            "deny": ["WebFetch", "WebSearch"],
+        },
+        "sandbox": {
+            "enabled": True,
+            "autoAllowBashIfSandboxed": True,
+            "allowUnsandboxedCommands": False,
+            "filesystem": {
+                "allowWrite": [str(clone)],
+                # The clone's riscv-formal is shared by every agent and the
+                # harness (worktrees symlink to it). formal/run_all.sh reaps
+                # per-PID work dirs whose `kill -0` fails, and kill -0 on any
+                # PID outside the sandbox fails, so a writable copy lets an
+                # agent's self-check delete the harness's live formal run
+                # (2026-09-26 incident). Read-only, as it was for Codex.
+                "denyWrite": [*{str(rf), str(rf.resolve())}],
+                "denyRead": [str(home), "/private/tmp", *other_sessions],
+                "allowRead": [*reads, str(claude_tmp)],
+            },
+            "network": {"allowedDomains": []},
+        },
+    }
+
+
+def claude_instruction_ancestors(clone: Path) -> list[Path]:
+    """CLAUDE.md-style files Claude Code would load from the clone's
+    parent directories (it walks up from cwd). A clone under the main
+    checkout would pick up the main repo's CLAUDE.md."""
+    found = []
+    for d in clone.resolve().parents:
+        for name in ("CLAUDE.md", "CLAUDE.local.md"):
+            if (d / name).is_file():
+                found.append(d / name)
+    return found
+
+
 def make_env_for_job(job: JobSpec, clone: Path, keys: dict[str, str]) -> dict[str, str]:
     env = os.environ.copy()
     env["TARGET"] = "bench"
     if job.model.provider == "codex":
-        # Codex CLI: workspace-write sandbox + clone isolation.
+        # Codex CLI: workspace-write sandbox + clone isolation, and an
+        # isolated CODEX_HOME (no operator memories/plugins/MCP/skills).
         env["AGENT_PROVIDER"] = "codex"
         env["CODEX_MODEL"] = job.model.model
         if job.model.variant is not None:
             env["CODEX_REASONING_EFFORT"] = job.model.variant
+        env["CODEX_HOME"] = str(isolated_codex_home(clone))
     elif job.model.provider == "opencode":
         # Opencode: per-clone opencode.json permission rules.
         env["AGENT_PROVIDER"] = "opencode"
@@ -519,9 +770,18 @@ def make_env_for_job(job: JobSpec, clone: Path, keys: dict[str, str]) -> dict[st
         if job.model.variant is not None:
             env["OPENCODE_VARIANT"] = job.model.variant
     elif job.model.provider == "claude":
-        # Claude CLI: --dangerously-skip-permissions + clone isolation.
+        # Claude Code: operator login (Keychain), but no operator
+        # settings/plugins/hooks/memory/MCP, and an OS sandbox around
+        # Bash. See claude_isolation_settings.
         env["AGENT_PROVIDER"] = "claude"
         env["ANTHROPIC_MODEL"] = job.model.model
+        env["CLAUDE_BENCH_SETTINGS"] = json.dumps(claude_isolation_settings(clone))
+        if job.model.variant is not None:
+            env["CLAUDE_EFFORT"] = job.model.variant
+        env["CLAUDE_CODE_DISABLE_AUTO_MEMORY"] = "1"
+        env["DISABLE_TELEMETRY"] = "1"
+        env["DISABLE_ERROR_REPORTING"] = "1"
+        env["DISABLE_AUTOUPDATER"] = "1"
     elif job.model.provider == "static":
         # No-LLM control runtime. Reads no API key, drives no model.
         env["AGENT_PROVIDER"] = "static"
@@ -549,328 +809,6 @@ def make_env_for_job(job: JobSpec, clone: Path, keys: dict[str, str]) -> dict[st
     env["TMPDIR"] = str((clone / ".tmp").resolve())
     Path(env["TMPDIR"]).mkdir(parents=True, exist_ok=True)
     return env
-
-
-def parse_codex_cost_from_log(log_path: Path) -> tuple[int, int, float]:
-    """Sum input/output tokens across a codex --json log.
-
-    Codex emits one event per agent turn:
-      {"type":"turn.completed","usage":{"input_tokens":N,
-        "cached_input_tokens":N,"output_tokens":N,"reasoning_output_tokens":N}}
-
-    `cached_input_tokens` is a *subset* of `input_tokens` (the prompt
-    portion already in the model's KV cache). We sum the gross
-    `input_tokens` so the count reflects what the model actually
-    processed — callers who want billable-only tokens can subtract
-    cache reads via the rate card.
-
-    Cost is always 0.0: codex via OAuth subscription doesn't expose
-    per-call billing, and even paid-API codex doesn't emit `cost` in
-    its stream-json schema. Apply pricing externally if needed.
-
-    Dedup: collect_agent_logs concatenates the same hypothesis log
-    multiple times because both the explicit hypotheses dir AND the
-    clone-root rglob pick it up. Without per-line dedup we'd
-    double-count every turn. The fix in collect_agent_logs is to use
-    a set of paths, but the per-line dedup here is a defensive
-    backstop in case any future log path changes re-introduce dupes.
-    """
-    if not log_path.is_file():
-        return (0, 0, 0.0)
-    seen: set[str] = set()
-    toks_in = toks_out = 0
-    for raw in log_path.read_text().splitlines():
-        s = raw.strip()
-        if not s.startswith("{") or '"turn.completed"' not in s:
-            continue
-        if s in seen:
-            continue
-        seen.add(s)
-        try:
-            ev = json.loads(s)
-        except json.JSONDecodeError:
-            continue
-        if ev.get("type") != "turn.completed":
-            continue
-        usage = ev.get("usage") or {}
-        if not isinstance(usage, dict):
-            continue
-        try:
-            toks_in += int(usage.get("input_tokens") or 0)
-            # OpenAI reasoning models report `output_tokens` (visible
-            # response + tool-call output) separately from
-            # `reasoning_output_tokens` (chain-of-thought, not visible
-            # but billed at the output rate). Sum both so the headline
-            # output number matches actual model work and matches
-            # opencode's normalization (tokens.output + tokens.reasoning).
-            toks_out += int(usage.get("output_tokens") or 0)
-            toks_out += int(usage.get("reasoning_output_tokens") or 0)
-        except (TypeError, ValueError):
-            pass
-    return (toks_in, toks_out, 0.0)
-
-
-def parse_opencode_cost_from_log(log_path: Path) -> tuple[int, int, float]:
-    """Sum input/output tokens and cost across an opencode --format json log.
-
-    Opencode emits a `step_finish` event after each turn carrying the
-    cumulative `tokens` and `cost` for that step:
-      {"type":"step_finish", ..., "part":{"tokens":{"input":N,"output":N,
-        "reasoning":N,"cache":{"read":N,"write":N}}, "cost":F, ...}}
-
-    `tokens.input` is the *uncached* portion of the prompt; cache hits
-    are reported separately under `tokens.cache.read`. To stay
-    consistent with parse_codex_cost_from_log (which sums codex's gross
-    `input_tokens` per turn — cache included), we count opencode's
-    gross input as `tokens.input + tokens.cache.read + tokens.cache.write`.
-    Without this normalization an apples-to-apples comparison with
-    codex showed a 15× gap that was almost entirely cache-accounting,
-    not actual model work — codex's xhigh n10 run reported 16.3M
-    "input" of which 14M was cached re-reads of the same prompt;
-    opencode at xhigh did the equivalent ~10M (1.1M new + 9.1M cache
-    reads) but the saved row read as 1.1M because cache.read was
-    skipped. Cumulative effect: the bench underreported opencode's
-    token usage by ~10×.
-
-    `cost: 0` is normal under OAuth subscriptions (no per-token
-    billing); we still tally token counts regardless.
-
-    cache.write is normally 0 under OpenAI; including it costs nothing
-    when 0 and keeps the field semantics correct if a model family
-    starts populating it (Anthropic, etc.).
-    """
-    if not log_path.is_file():
-        return (0, 0, 0.0)
-    toks_in = toks_out = 0
-    cost = 0.0
-    for raw in log_path.read_text().splitlines():
-        s = raw.strip()
-        if not s or not s.startswith("{"):
-            continue
-        try:
-            ev = json.loads(s)
-        except json.JSONDecodeError:
-            continue
-        if ev.get("type") != "step_finish":
-            continue
-        part = ev.get("part") or {}
-        if not isinstance(part, dict):
-            continue
-        toks = part.get("tokens") or {}
-        if isinstance(toks, dict):
-            ti = toks.get("input") or 0
-            to = toks.get("output") or 0
-            cache = toks.get("cache") or {}
-            cr = cache.get("read", 0) if isinstance(cache, dict) else 0
-            cw = cache.get("write", 0) if isinstance(cache, dict) else 0
-            tr = toks.get("reasoning") or 0
-            try:
-                toks_in += int(ti) + int(cr or 0) + int(cw or 0)
-                # Sum visible output + reasoning. opencode reports
-                # them separately; both are billed as output. Matches
-                # the codex parser, which sums output_tokens +
-                # reasoning_output_tokens for the same reason.
-                toks_out += int(to) + int(tr or 0)
-            except (TypeError, ValueError):
-                pass
-        c = part.get("cost", 0)
-        try:
-            cost += float(c or 0)
-        except (TypeError, ValueError):
-            pass
-    return (toks_in, toks_out, cost)
-
-
-def reconstruct_log_from_git(clone: Path, target: str = "bench") -> list[str] | None:
-    """Walk the rep clone's git history (across all reachable refs +
-    reflog) and recover every line ever written to
-    cores/<target>/experiments/log.jsonl.
-
-    Why: orchestrator.append_log auto-commits each iteration's entry
-    as `log: <id> <outcome>`. The commits are append-only and survive
-    HEAD-rewinding bugs (we hit one earlier — the bench-fixture-v1
-    tag/branch ambiguity caused mid-run rewinds that orphaned earlier
-    rounds, but the commits themselves stayed in the object DB).
-    Walking the reflog plus all reachable refs recovers them.
-
-    Strategy:
-      1. List every commit reachable from any ref OR the reflog whose
-         message starts with `log: hyp-` (per the orchestrator's
-         commit-message convention) — use --walk-reflogs and --all.
-      2. For each commit, `git show <sha>:cores/<target>/experiments/
-         log.jsonl` and take the LAST line — append_log writes one
-         entry per commit, so the new line is always at EOF.
-      3. Dedup by hypothesis id (different commits might re-write the
-         same entry).
-      4. Sort by (round_id, slot) so the reconstructed log is in
-         logical order even if the underlying commit graph isn't.
-
-    Returns:
-      list of JSONL lines (one per iteration) or None if no commits
-      matched. Caller compares to the on-disk file and uses whichever
-      is more complete.
-    """
-    log_path = f"cores/{target}/experiments/log.jsonl"
-    cwd = str(clone.resolve())
-    # All commits across refs + reflog with the orchestrator's
-    # canonical commit message prefix. --walk-reflogs covers the
-    # orphaned-by-rewind case.
-    # `^log: ` matches both per-iteration `log: hyp-...` commits and
-    # the orchestrator-emitted `log: baseline-<target>-<sha> improvement`
-    # commit (round_id=0). Including the baseline lets summarize_run's
-    # round_id=0 path produce the canonical baseline_fitness anchor.
-    out = subprocess.run(
-        ["git", "log", "--all", "--reflog", "--format=%H",
-         "--grep=^log: ", "--", log_path],
-        cwd=cwd, capture_output=True, text=True,
-    )
-    if out.returncode != 0 or not out.stdout.strip():
-        return None
-    shas = out.stdout.strip().splitlines()
-    by_id: dict[str, dict] = {}
-    for sha in shas:
-        proc = subprocess.run(
-            ["git", "show", f"{sha}:{log_path}"],
-            cwd=cwd, capture_output=True, text=True,
-        )
-        if proc.returncode != 0:
-            continue
-        # The last non-empty line is the entry this commit added (the
-        # rest are pre-existing). append_log always writes one new line.
-        lines = [ln for ln in proc.stdout.splitlines() if ln.strip()]
-        if not lines:
-            continue
-        try:
-            entry = json.loads(lines[-1])
-        except json.JSONDecodeError:
-            continue
-        eid = entry.get("id")
-        if not eid:
-            continue
-        # Keep the first occurrence per id; commit ordering is not
-        # author-stable, but content stability is what we need.
-        if eid not in by_id:
-            by_id[eid] = entry
-    if not by_id:
-        return None
-    ordered = sorted(
-        by_id.values(),
-        key=lambda e: (e.get("round_id", 0), e.get("slot", 0)),
-    )
-    return [json.dumps(e) for e in ordered]
-
-
-def collect_agent_logs(clone: Path) -> Path:
-    """Concatenate every per-iteration .agent.*.log into one stream.
-
-    Returns path to the concatenated file (in /tmp); the runner copies
-    that into bench/<model>/<rep>/agent.log afterward.
-    """
-    out_path = clone / ".tmp" / "agent.concatenated.log"
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-    # Dedup paths: the recursive rglob from `clone` re-finds every
-    # .agent*.log under cores/bench/experiments/hypotheses/, so without
-    # a set the concat lists each hypothesis log twice. Token parsers
-    # also dedup defensively, but fixing it here makes the file shape
-    # what the comments describe.
-    parts: set[Path] = set()
-    for sub in (
-        clone / "cores" / "bench" / "experiments" / "hypotheses",
-        clone,  # implementation worktrees write .agent.log at root of their dir
-    ):
-        if sub.is_dir():
-            parts.update(sub.rglob(".agent*.log"))
-    with out_path.open("w") as outf:
-        for p in sorted(parts):
-            try:
-                outf.write(f"=== {p} ===\n")
-                outf.write(p.read_text())
-                outf.write("\n")
-            except OSError:
-                continue
-    return out_path
-
-
-def parse_cost_from_log(log_path: Path, provider: str = "codex") -> tuple[int, int, float]:
-    """Dispatch to the right cost parser based on provider."""
-    if provider == "opencode":
-        return parse_opencode_cost_from_log(log_path)
-    if provider == "codex":
-        return parse_codex_cost_from_log(log_path)
-    # Claude has no cost parser yet; return zeros (the runner still
-    # records iterations / outcomes even without token telemetry).
-    return (0, 0, 0.0)
-
-
-def summarize_run(log_jsonl: Path, agent_log: Path,
-                  provider: str = "codex") -> dict:
-    """Per-rep summary, derived from orchestrator-emitted run_summary.json.
-
-    The orchestrator writes cores/<target>/experiments/run_summary.json
-    after every round and at end of main(), so a finalized rep dir always
-    has it. summarize_run loads that file and folds in provider-specific
-    token/cost counts from agent.log.
-
-    If run_summary.json is absent or unreadable (orchestrator crashed
-    before writing the first one, or pre-Phase-2 orchestrator), the row
-    notes the missing summary so the leaderboard can flag the rep as
-    not-summarizable rather than silently scoring 0/0/0.
-    """
-    toks_in, toks_out, cost = parse_cost_from_log(agent_log, provider=provider)
-    summary_path = log_jsonl.parent / "run_summary.json"
-
-    s: dict | None = None
-    if summary_path.is_file():
-        try:
-            s = json.loads(summary_path.read_text())
-        except (json.JSONDecodeError, OSError):
-            s = None
-
-    if not isinstance(s, dict):
-        return {
-            "iterations": 0,
-            "accepted": 0,
-            "rejected": 0,
-            "broken": 0,
-            "broken_by_class": {},
-            "final_fitness": None,
-            "baseline_fitness": None,
-            "best_fitness": None,
-            "best_round": None,
-            "delta_pct": None,
-            "best_lut4": None,
-            "best_ff": None,
-            "best_fmax_mhz": None,
-            "best_iterations": None,
-            "best_cycles": None,
-            "best_ipc_coremark": None,
-            "total_tokens_in": toks_in,
-            "total_tokens_out": toks_out,
-            "total_cost_usd": cost,
-            "summary_missing": True,
-        }
-
-    return {
-        "iterations":      int(s.get("iterations", 0) or 0),
-        "accepted":        int(s.get("accepted", 0) or 0),
-        "rejected":        int(s.get("rejected", 0) or 0),
-        "broken":          int(s.get("broken", 0) or 0),
-        "broken_by_class": dict(s.get("broken_by_class") or {}),
-        "final_fitness":   s.get("final_fitness"),
-        "baseline_fitness":s.get("baseline_fitness"),
-        "best_fitness":    s.get("best_fitness"),
-        "best_round":      s.get("best_round"),
-        "delta_pct":       s.get("delta_pct"),
-        "best_lut4":         s.get("best_lut4"),
-        "best_ff":           s.get("best_ff"),
-        "best_fmax_mhz":     s.get("best_fmax_mhz"),
-        "best_iterations":   s.get("best_iterations"),
-        "best_cycles":       s.get("best_cycles"),
-        "best_ipc_coremark": s.get("best_ipc_coremark"),
-        "total_tokens_in": toks_in,
-        "total_tokens_out":toks_out,
-        "total_cost_usd":  cost,
-    }
 
 
 def append_results_row(results_jsonl: Path, row: dict) -> None:
@@ -925,6 +863,11 @@ def run_one_job(
     fp_path = clone / ".tmp" / "env.json"
     orch_log_path = clone / ".tmp" / "orchestrator.log"
 
+    # Provenance: which eval code (the fixture) and which runner/reporting
+    # code produced this row. A dirty runner means the numbers came from
+    # code that is in no commit.
+    row.update(provenance(repo_root, ref))
+
     # 1. Fresh clone of the fixture.
     try:
         clone_fixture(repo_root, ref, clone)
@@ -941,9 +884,15 @@ def run_one_job(
     try:
         if job.model.provider == "opencode":
             install_opencode_config(clone)
-        # codex and claude rely on their CLIs' built-in sandbox modes
-        # (workspace-write / --dangerously-skip-permissions) plus the
-        # standalone-clone isolation; no per-clone fence file needed.
+        if job.model.provider == "claude":
+            inherited = claude_instruction_ancestors(clone)
+            if inherited:
+                raise RuntimeError(
+                    "claude would load instruction files from the clone's "
+                    f"parents: {', '.join(map(str, inherited))}; "
+                    "use a --clone-base outside any repo")
+        # codex uses its workspace-write sandbox + CODEX_HOME; claude gets
+        # its sandbox/permission settings through the env (make_env_for_job).
     except Exception as e:
         row["notes"] = f"fence install failed: {e}"[:400]
         _copy_early_forensics(out_dir, fp_path, orch_log_path)
@@ -1014,17 +963,19 @@ def run_one_job(
                 pass
             now = time.time()
             if has_deadline and now >= deadline:
-                proc.kill()
+                kill_process_tree(proc.pid)
                 last_status = "timed_out"
                 row["status"] = "timed_out"
                 row["notes"] = f"wall-clock {timeout_sec}s exceeded"
                 break
-            if now >= next_cost_check:
+            # OAuth subscription runs are not billed per token, and Claude
+            # Code's reported cost is an API-list estimate: no dollar cap.
+            if now >= next_cost_check and not job.model.oauth:
                 # Peek at the running cost; kill if over budget.
                 concat = collect_agent_logs(clone)
                 _, _, cost_so_far = parse_cost_from_log(concat, provider=job.model.provider)
                 if cost_so_far > max_cost_usd:
-                    proc.kill()
+                    kill_process_tree(proc.pid)
                     last_status = "over_budget"
                     row["status"] = "failed"
                     row["notes"] = (f"cost {cost_so_far:.2f} > "
@@ -1032,7 +983,7 @@ def run_one_job(
                     break
                 next_cost_check = now + cost_check_interval
     except KeyboardInterrupt:
-        proc.kill()
+        kill_process_tree(proc.pid)
         row["status"] = "failed"
         row["notes"] = "interrupted by user"
         last_status = "interrupted"
@@ -1041,6 +992,10 @@ def run_one_job(
             orch_log.close()
         except Exception:
             pass
+        if job.model.provider == "codex":
+            if sync_codex_auth_back(clone / ".codex-home"):
+                print("  [bench] copied a refreshed Codex auth.json back to "
+                      "the operator's CODEX_HOME", flush=True)
 
     # 4. Finalize: collect logs + summary regardless of how we exited.
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -1077,9 +1032,11 @@ def run_one_job(
     if run_summary_src.is_file():
         shutil.copy2(run_summary_src, out_dir / "run_summary.json")
 
+    # agent.log (tracked) has tool output capped; the verbatim stream is
+    # kept as the gitignored agent.full.log.gz. See tools/bench/transcript.py.
     agent_concat = collect_agent_logs(clone)
     if agent_concat.is_file():
-        shutil.copy2(agent_concat, out_dir / "agent.log")
+        publish_transcript(agent_concat, out_dir)
 
     # Forensics survive clone deletion: without this, a failed rep's
     # orchestrator.log dies with the clone (the sol rep2/3 startup
@@ -1089,9 +1046,18 @@ def run_one_job(
     if fp_path.is_file():
         shutil.copy2(fp_path, out_dir / "env.json")
 
-    summary = summarize_run(out_dir / "log.jsonl", out_dir / "agent.log",
+    # Cost comes from the verbatim transcript, not the compacted copy.
+    summary = summarize_run(out_dir / "log.jsonl",
+                            agent_concat if agent_concat.is_file()
+                            else out_dir / "agent.log",
                             provider=job.model.provider)
     row.update(summary)
+    if job.model.oauth and job.model.provider == "claude":
+        # Keep total_cost_usd = billed dollars (0 on a subscription, as
+        # for Codex OAuth rows); Claude Code's own list-price estimate
+        # goes in its own field.
+        row["api_equivalent_cost_usd"] = row.get("total_cost_usd", 0.0)
+        row["total_cost_usd"] = 0.0
     if last_status == "exited" and row["orchestrator_exit"] == 0:
         row["status"] = "done"
     elif last_status == "exited":
@@ -1186,6 +1152,11 @@ def main() -> int:
     ap.add_argument("--skip-preflight", action="store_true",
                     help="skip the toolchain pre-flight check (debug only)")
     args = ap.parse_args()
+
+    # `kill <runner>` must not orphan the orchestrators (and their formal /
+    # PnR / agent trees). SIGINT is left to the KeyboardInterrupt path in
+    # run_one_job, which records the rep as interrupted before tree-killing.
+    install_tree_reaper((signal.SIGTERM, signal.SIGHUP))
 
     if not args.skip_preflight:
         missing = preflight.missing_tools()

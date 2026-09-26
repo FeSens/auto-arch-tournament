@@ -217,7 +217,9 @@ def run_fpga_eval(worktree: str, target: str | None = None) -> dict:
 
     Returns:
       {'placement_failed': True}         — all PnR seeds failed
-      {'bench_failed': True, ...}        — bench didn't reach ebreak
+      {'bench_failed': True, ...}        — bench didn't reach ebreak, or
+                                           reason 'fpga_report_unparsed: ...'
+                                           when LUT4/DFF counts are missing
       {
         'fmax_mhz': float,               — median of successful seeds
         'ipc_coremark': float,           — iter/cycle
@@ -274,6 +276,19 @@ def run_fpga_eval(worktree: str, target: str | None = None) -> dict:
     log    = successful[-1]['log']
     lut4_m = re.search(r'LUT4:\s+(\d+)/',  log)
     ff_m   = re.search(r'\bDFF:\s+(\d+)/', log)
+    if not (lut4_m and ff_m):
+        # Never substitute 0: with a LUT target set, 0 LUT4 is the best
+        # possible area score, so a nextpnr log-format change would turn
+        # every hypothesis into a "win". Fail loudly instead.
+        missing = [n for n, m in (('LUT4', lut4_m), ('DFF', ff_m)) if not m]
+        return {
+            'bench_failed': True,
+            'reason': (f'fpga_report_unparsed: no {"/".join(missing)} count in '
+                       f'nextpnr log (seed {successful[-1]["seed"]})'),
+            'fmax_mhz': round(fmax_median, 2),
+            'seeds': all_fmax,
+            'placement_failed': False,
+        }
 
     return {
         'fmax_mhz':      round(fmax_median, 2),
@@ -282,8 +297,8 @@ def run_fpga_eval(worktree: str, target: str | None = None) -> dict:
         'cycles':        cm['cycles'],
         'iterations':    cm['iterations'],
         'seeds':         all_fmax,
-        'lut4':          int(lut4_m.group(1)) if lut4_m else 0,
-        'ff':            int(ff_m.group(1))   if ff_m   else 0,
+        'lut4':          int(lut4_m.group(1)),
+        'ff':            int(ff_m.group(1)),
         'placement_failed': False,
     }
 

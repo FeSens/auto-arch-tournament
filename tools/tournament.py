@@ -8,6 +8,8 @@ from __future__ import annotations
 
 import contextlib
 import datetime
+import fcntl
+import os
 import subprocess
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -125,22 +127,27 @@ def pick_winner(entries: list[dict],
 
     if not candidates:
         return None
+    # A missing LUT4 ranks worst, never best (0 would win the tie-break).
+    def _lut(e):
+        v = e.get("lut4")
+        return v if isinstance(v, (int, float)) else float("inf")
     return max(candidates,
-               key=lambda e: (e["fitness"], -(e.get("lut4") or 0), -e["slot"]))
+               key=lambda e: (e["fitness"], -_lut(e), -e["slot"]))
 
 
-# Per-phase capacity. Two distinct reasons phases are gated:
+# Per-phase capacity, per orchestrator process. Both gates are CPU gates:
 #
-# - formal=1 is a CORRECTNESS INVARIANT, not a CPU gate. formal/run_all.sh
-#   stages rtl/*.sv into formal/riscv-formal/cores/auto-arch-researcher/,
-#   which lives in the MAIN repo (the worktree's formal/riscv-formal is a
-#   symlink). Two slots running formal concurrently would corrupt that
-#   shared staging area. NEVER loosen this gate above 1.
+# - formal=1: run_all.sh runs `make -j<ncpu>` over ~50-100 SBY tasks. Each
+#   invocation stages into its own formal/riscv-formal/cores/<core>-<pid>/
+#   dir, so concurrent runs no longer corrupt each other, but two at once
+#   halve each one's CPU and push slow SMT problems past the 45-minute
+#   timeout (recorded as broken). Across processes (bench --parallel reps,
+#   two `make loop`s) the same contention is prevented by the machine-wide
+#   lock in phase_gate below.
 #
-# - fpga=1 is a CPU saturation gate. Each slot's run_fpga_eval already
-#   forks 3 parallel nextpnr seeds; N slots × 3 seeds at once would thrash
-#   on most hardware. Loosening it is a perf trade-off, not a correctness
-#   risk.
+# - fpga=1: each slot's run_fpga_eval already forks 3 parallel nextpnr
+#   seeds; N slots x 3 seeds at once would thrash on most hardware.
+#   nextpnr results depend only on the seed, so this is throughput only.
 #
 # Phase 3 (lint/synth/build) and Phase 5 (cosim) are not gated: each
 # worktree has its own generated/ + bench/programs/*.elf + obj_dir/, so no
@@ -150,6 +157,15 @@ PHASE_CAPACITY: dict[str, int] = {
     "formal": 1,
     "fpga":   1,
 }
+
+# Phases that additionally take a machine-wide advisory lock (fcntl.flock),
+# so separate orchestrator processes on one host run them one at a time.
+# The lock is taken after the in-process semaphore, and before the phase's
+# own timeout starts counting. Set AAT_MACHINE_LOCK_DIR=off to disable,
+# or to a directory to relocate the lock files (TMPDIR is per-rep under
+# the bench runner, so it can't be the default).
+MACHINE_LOCKED_PHASES = frozenset({"formal"})
+_MACHINE_LOCK_DIR_DEFAULT = "/tmp"
 
 # Module-level semaphores so all slots in a process share the same gates.
 # Created lazily so test imports don't allocate them up front.
@@ -167,13 +183,30 @@ def _get_phase_sem(phase: str) -> threading.Semaphore:
 
 
 @contextlib.contextmanager
+def _machine_lock(phase: str):
+    lock_dir = os.environ.get("AAT_MACHINE_LOCK_DIR", _MACHINE_LOCK_DIR_DEFAULT)
+    if phase not in MACHINE_LOCKED_PHASES or lock_dir == "off":
+        yield
+        return
+    path = Path(lock_dir) / f"auto-arch-tournament.{phase}.lock"
+    with open(path, "a") as fh:
+        fcntl.flock(fh, fcntl.LOCK_EX)
+        try:
+            yield
+        finally:
+            fcntl.flock(fh, fcntl.LOCK_UN)
+
+
+@contextlib.contextmanager
 def phase_gate(phase: str):
     """Acquire the named phase's capacity semaphore. Use as `with phase_gate('formal'):`.
-    A phase not in PHASE_CAPACITY defaults to capacity=1 (conservative)."""
+    A phase not in PHASE_CAPACITY defaults to capacity=1 (conservative).
+    Phases in MACHINE_LOCKED_PHASES also serialize across processes."""
     sem = _get_phase_sem(phase)
     sem.acquire()
     try:
-        yield
+        with _machine_lock(phase):
+            yield
     finally:
         sem.release()
 
@@ -225,6 +258,9 @@ def run_slot(
     from tools.eval.formal import run_formal
     from tools.eval.cosim import run_cosim
     from tools.eval.fpga import run_fpga_eval
+    from tools.sandbox import (
+        take_snapshot, snapshot_changes, purge_ignored_outputs,
+    )
 
     category = category_for_slot(slot)
     print(f"  [slot {slot}] category={category} id={hyp_id}", flush=True)
@@ -288,6 +324,15 @@ def run_slot(
             '_diff': diff,
         }
 
+    # Fingerprint what lives OUTSIDE the worktree but feeds the eval (the
+    # main checkout's contract paths, the shared riscv-formal checkout, the
+    # EDA binaries). The worktree git-status check below cannot see those.
+    # See tools/sandbox.py.
+    contract_before = take_snapshot(".")
+
+    def contract_breaches() -> list:
+        return snapshot_changes(contract_before, take_snapshot("."))
+
     if fixed_hyp_path and hyp.get('skip_implementation'):
         pass  # baseline-retest fixture path
     else:
@@ -299,6 +344,16 @@ def run_slot(
     if sandbox_breaches:
         return broken("sandbox_violation",
                       f"agent touched off-limits paths: {sandbox_breaches}")
+    outside = contract_breaches()
+    if outside:
+        return broken("sandbox_violation",
+                      f"contract paths changed outside the worktree: {outside}")
+
+    # Gitignored files are invisible to `git status` but the build consumes
+    # some of them (make keeps a planted, newer coremark.elf; run_all.sh
+    # prepends <worktree>/.toolchain to PATH). Delete them all so every
+    # artifact the eval reads is one it built itself.
+    purge_ignored_outputs(worktree, target)
 
     # Phase 3: lint + synth + bench + cosim-build (no gate; fast).
     build_ok, build_reason = emit_verilog(worktree, target=target)
@@ -343,7 +398,20 @@ def run_slot(
             '_diff': _capture_slot_diff(worktree, target, target_branch),
         }
     if fpga.get('bench_failed'):
-        return broken("coremark_failed", fpga.get('reason', ''))
+        reason = fpga.get('reason', '')
+        if reason.startswith('fpga_report_unparsed'):
+            return broken("fpga_report_unparsed", reason)
+        return broken("coremark_failed", reason)
+
+    # Re-check after the eval: another slot's agent runs concurrently with
+    # this slot's gates and could have touched the shared checkouts, or
+    # this worktree, while they ran. Fail closed.
+    late = contract_breaches() + offlimits_changes(worktree, patterns)
+    if (Path(worktree) / ".toolchain").exists():
+        late.append(".toolchain")
+    if late:
+        return broken("sandbox_violation",
+                      f"contract changed while this slot was being evaluated: {late}")
 
     fitness = fpga['fitness']
     delta   = ((fitness - current_best) / current_best * 100) if current_best > 0 else 0.0

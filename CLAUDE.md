@@ -15,7 +15,7 @@ checks** to make a hypothesis pass.
 | 5 | CPU makes forward progress under any symbolic instruction stream                                           | `riscv-formal liveness` check                |
 | 5b | M-extension arithmetic produces RV32M-correct bit results                                                | cocotb `test_alu.py` + `make formal-deep`    |
 | 6 | All memory accesses bounded to `[0x00000000, 0x00100000)` plus UART/markers `[0x10000000, 0x10000200)`     | sim emits `oob:true`, eval treats as failure |
-| 7 | CoreMark CRCs match canonical 6 KB perf run: `crclist=0xd4b0`, `crcmatrix=0xbe52`, `crcstate=0x5e47`       | `validate_coremark_uart` in fpga eval        |
+| 7 | CoreMark CRCs match the canonical 2K-config perf run (`TOTAL_DATA_SIZE=2000`, `-O3`, `ITERATIONS=10`): `seedcrc=0xe9f5`, `crclist=0xe714`, `crcmatrix=0x1fd7`, `crcstate=0x8e3a`, `crcfinal=0xfcaf` | `validate_coremark_uart` in fpga eval (`COREMARK_EXPECTED` in `tools/eval/fpga.py` is the source of truth) |
 | 8 | CoreMark timing brackets `start_time` / `stop_time` markers — total elapsed cycles do NOT count            | MMIO writes at `0x10000100` / `0x10000104`   |
 | 9 | "Correct operation validated." literal must appear in CoreMark UART output                                 | `validate_coremark_uart`                     |
 |10 | Decoder defaults `isIllegal = 1`; a bit is only cleared inside a validated opcode/funct match              | decoder unit tests with reserved encodings   |
@@ -29,10 +29,13 @@ improve fitness", not "what eval relaxations would let this RTL pass".
 - `tools/` — orchestrator, worktree manager, eval gates.
 - `schemas/` — hypothesis and eval-result JSON schemas.
 - `formal/wrapper.sv`, `formal/wrapper_si.sv`, `formal/checks.cfg`,
-  `formal/checks_si.cfg`, `formal/run_all.sh` — they define the
-  correctness contract (dual-channel + single-issue variants).
+  `formal/checks_si.cfg`, `formal/checks-deep.cfg`, `formal/run_all.sh`
+  — they define the correctness contract (dual-channel + single-issue
+  variants).
 - `formal/riscv-formal/` — vendored upstream submodule.
 - `bench/programs/` — selftest, crt0, link.ld, CoreMark sources, portme.
+- `bench/holdout/` — held-out generalization benchmarks (stripped from
+  bench fixtures).
 - `fpga/core_bench.sv`, `fpga/core_bench_si.sv`, `fpga/scripts/*`,
   `fpga/constraints/*` — they define the FPGA fitness contract
   (dual-channel + single-issue variants).
@@ -40,6 +43,14 @@ improve fitness", not "what eval relaxations would let this RTL pass".
   — Verilator harness + Python ISS = the cosim contract.
 - This file (`CLAUDE.md`), `ARCHITECTURE.md`, `README.md`, `setup.sh`,
   `Makefile`.
+
+Enforcement (`tools/tournament.py:run_slot`, `tools/sandbox.py`): the
+worktree's `git status` must only show allowed paths; the main checkout's
+copies of these paths, the shared `formal/riscv-formal` checkout and the
+EDA binaries on PATH are fingerprinted before the agent runs and
+re-checked after it and after the eval; every gitignored file in the
+worktree is deleted before the build, so the eval only consumes artifacts
+it built itself. Any mismatch is `broken: sandbox_violation`.
 
 ## What hypotheses MAY change
 
@@ -141,7 +152,7 @@ it does NOT prove that the actual hardware multiplier and divider
 produce RV32M-correct bit results. M-ext arithmetic correctness is
 covered separately by:
 
-  1. `test/test_alu.py` (30+ vectors per M-ext op, exact bit results)
+  1. `cores/<TARGET>/test/test_alu.py` (30+ vectors per M-ext op, exact bit results)
   2. cosim against `test/cosim/reference.py` (each retired MUL/DIV/REM
      diff'd field-by-field with the Python ISS)
   3. `make formal-deep` (formal without ALTOPS — slow but the only path

@@ -64,21 +64,12 @@ def _whitelist_regex(allowed_yaml_ids: list[str], target: str) -> 're.Pattern':
     )
 
 
-def _git_offlimits_changes(allow_re: 're.Pattern') -> list:
-    """git status --porcelain in the main repo; flag anything not matching
-    the supplied allow regex."""
-    out = subprocess.run(
-        ["git", "status", "--porcelain"],
-        capture_output=True, text=True, check=True,
-    ).stdout
-    bad = []
-    for line in out.splitlines():
-        if not line:
-            continue
-        for p in (s.strip() for s in line[3:].split(" -> ")):
-            if p and not allow_re.match(p):
-                bad.append(p)
-    return bad
+def _git_offlimits_changes(allow_re: 're.Pattern', before: dict | None = None) -> list:
+    """Main-repo paths whose dirty state changed since `before` (a
+    tools.sandbox.dirty_state() snapshot) and that don't match the allow
+    regex. Pre-existing dirt is not the agent's doing and is ignored."""
+    from tools.sandbox import changed_since, dirty_state
+    return changed_since(before or {}, dirty_state("."), allow_re.match)
 
 def _targets_clause(targets: dict, current_state: dict | None) -> str:
     """Generate the 'Optimization targets' prompt block.
@@ -484,6 +475,8 @@ def run_hypothesis_agent(log_tail: list, current_fitness: float,
         output_last_message=last_msg,
         enable_search=False,  # prompt has no search instruction; enable when added
     )
+    from tools.sandbox import dirty_state, revert_paths
+    before = dirty_state(".")
     rc, timed_out = run_agent_streaming(
         cmd, cwd=".", log_path=hyp_log_path, timeout_sec=HYPOTHESIS_TIMEOUT_SEC,
     )
@@ -505,11 +498,11 @@ def run_hypothesis_agent(log_tail: list, current_fitness: float,
     elif rc != 0:
         raise subprocess.CalledProcessError(rc, cmd)
 
-    breaches = _git_offlimits_changes(allow_re)
+    breaches = _git_offlimits_changes(allow_re, before)
     if breaches:
-        # Hard-revert anything the agent touched outside its allow list.
-        # `git checkout HEAD --` restores tracked files; new files have to
-        # be removed by hand.
+        # Hard-revert anything the agent touched outside its allow list
+        # (tools.sandbox.revert_paths: tracked -> HEAD, new -> deleted,
+        # pre-existing dirt left alone).
         #
         # NEVER revert the log.jsonl path — it's the orchestrator's own
         # journal. If an agent's tool somehow leaves a touch-mark on it
@@ -520,18 +513,9 @@ def run_hypothesis_agent(log_tail: list, current_fitness: float,
         # N=10 K=3 runs where the saved log lost rounds 1-8 entries.
         # Keep the breach reported (the agent shouldn't be touching it)
         # but don't physically restore the file.
-        for p in breaches:
-            if p.endswith("/log.jsonl") or p == "log.jsonl":
-                continue
-            subprocess.run(["git", "checkout", "HEAD", "--", p],
-                           capture_output=True)
-            path = Path(p)
-            if path.exists() and p not in [
-                line.split()[-1] for line in subprocess.run(
-                    ["git", "ls-files"],
-                    capture_output=True, text=True).stdout.splitlines()
-            ]:
-                path.unlink(missing_ok=True)
+        revert_paths([p for p in breaches
+                      if not (p.endswith("/log.jsonl") or p == "log.jsonl")],
+                     before)
         raise PermissionError(
             f"Hypothesis agent modified off-limits paths and was rolled back: {breaches}"
         )

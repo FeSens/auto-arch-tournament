@@ -86,9 +86,11 @@ def test_pick_winner_tie_breaks_to_lowest_slot():
     assert winner["slot"] == 0
 
 
-def test_phase_gate_serializes_under_capacity_one():
+def test_phase_gate_serializes_under_capacity_one(tmp_path, monkeypatch):
     """Two threads contending on the formal gate must not overlap."""
     import threading, time
+    # Keep the machine-wide formal lock out of the real /tmp.
+    monkeypatch.setenv("AAT_MACHINE_LOCK_DIR", str(tmp_path))
     from tools.tournament import phase_gate
 
     overlap = {'count': 0, 'max': 0}
@@ -161,3 +163,48 @@ def test_pick_winner_dual_target_phase2_strict_dominance():
     w = pick_winner(entries, current_best=320, current_lut=2900,
                     coremark_target=300, lut_target=3000)
     assert w is not None and w["slot"] == 0
+
+
+def test_pick_winner_missing_lut4_never_wins_tie_break():
+    from tools.tournament import pick_winner
+    entries = [
+        {"slot": 0, "fitness": 300.0, "lut4": None, "outcome": "regression"},
+        {"slot": 1, "fitness": 300.0, "lut4": 9000, "outcome": "regression"},
+    ]
+    assert pick_winner(entries, current_best=282.82)["slot"] == 1
+
+
+def test_machine_lock_serializes_across_open_files(tmp_path, monkeypatch):
+    """Two holders of the formal machine lock never overlap (flock is per
+    open-file description, so this models two orchestrator processes)."""
+    import threading, time
+    from tools.tournament import _machine_lock
+    monkeypatch.setenv("AAT_MACHINE_LOCK_DIR", str(tmp_path))
+    active, peak = [0], [0]
+    guard = threading.Lock()
+
+    def worker():
+        with _machine_lock("formal"):
+            with guard:
+                active[0] += 1
+                peak[0] = max(peak[0], active[0])
+            time.sleep(0.05)
+            with guard:
+                active[0] -= 1
+
+    ts = [threading.Thread(target=worker) for _ in range(3)]
+    for t in ts: t.start()
+    for t in ts: t.join()
+    assert peak[0] == 1
+    assert (tmp_path / "auto-arch-tournament.formal.lock").exists()
+
+
+def test_machine_lock_off_and_unlocked_phases(tmp_path, monkeypatch):
+    from tools.tournament import _machine_lock
+    monkeypatch.setenv("AAT_MACHINE_LOCK_DIR", str(tmp_path))
+    with _machine_lock("fpga"):
+        pass
+    monkeypatch.setenv("AAT_MACHINE_LOCK_DIR", "off")
+    with _machine_lock("formal"):
+        pass
+    assert list(tmp_path.iterdir()) == []

@@ -125,6 +125,12 @@ node_modules/
 # clone it was bundled from, so the content is not lost.
 bench/**/repo.bundle
 
+# agent.full.log.gz: the verbatim agent transcript. The tracked agent.log
+# next to it has tool-output fields capped (tools/bench/transcript.py),
+# which cut the published transcripts ~60%; the full stream stays on
+# disk for forensics, same policy as repo.bundle.
+bench/**/agent.full.log.gz
+
 # env.json (per-rep environment snapshot: PATH + resolved EDA tool paths)
 # IS tracked, decided at the first v2 rep publish (e1a static, 2026-07-16):
 # it is tiny, contains no secrets, and pins which toolchain binaries

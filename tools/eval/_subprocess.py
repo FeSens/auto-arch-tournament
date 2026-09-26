@@ -11,7 +11,10 @@ per task, so each leaf bash/yosys-smtbmc/bitwuzla becomes its own
 process-group leader and escapes the outer killpg. The PPID chain stays
 intact though, so we walk descendants via psutil and SIGKILL each.
 """
+import os
+import signal
 import subprocess
+import threading
 
 import psutil
 
@@ -58,3 +61,44 @@ def run_pgroup(args, *, timeout=None, capture_output=False, text=False,
     if check and rc != 0:
         raise subprocess.CalledProcessError(rc, args, output=out, stderr=err)
     return subprocess.CompletedProcess(args, rc, out, err)
+
+
+def kill_process_tree(pid: int) -> None:
+    """SIGKILL pid and every descendant.
+
+    Descendants are snapshotted first: once pid dies they reparent to
+    launchd/init and the PPID chain back to pid is gone, which is exactly
+    how `proc.kill()` on the orchestrator used to orphan its SBY / nextpnr
+    / agent trees."""
+    _kill_descendant_tree(pid)
+    try:
+        psutil.Process(pid).kill()
+    except psutil.NoSuchProcess:
+        pass
+
+
+_REAPER_SIGNALS = (signal.SIGTERM, signal.SIGHUP, signal.SIGINT)
+
+
+def install_tree_reaper(signals=_REAPER_SIGNALS) -> None:
+    """On SIGTERM / SIGHUP / SIGINT, SIGKILL every descendant, then exit.
+
+    run_pgroup starts each child in its own session (and sby re-setpgrp()s
+    every task), so a signal aimed at this process's group never reaches
+    them. Without this, stopping a run by hand leaves formal/PnR/agent
+    trees burning CPU (and skewing the next run's timeouts) until someone
+    pkills them.
+
+    Exits via os._exit rather than raising: unwinding would let in-flight
+    slots observe their killed subprocesses as gate failures and journal
+    bogus `broken` outcomes. Must be called from the main thread.
+    """
+    if threading.current_thread() is not threading.main_thread():
+        raise RuntimeError("install_tree_reaper must run on the main thread")
+
+    def _reap(signum, _frame):
+        _kill_descendant_tree(os.getpid())
+        os._exit(128 + signum)
+
+    for sig in signals:
+        signal.signal(sig, _reap)
