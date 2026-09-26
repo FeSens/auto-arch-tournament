@@ -1,0 +1,33 @@
+{
+  "model": "gpt-6-astra_max",
+  "rep": 2,
+  "started_at": "2026-09-06T06:44:24+00:00",
+  "ended_at": "2026-09-06T18:58:14.144313+00:00",
+  "wall_clock_sec": 44030,
+  "iterations": 46,
+  "accepted": 6,
+  "rejected": 39,
+  "broken": 1,
+  "final_fitness": 411.53,
+  "baseline_fitness": 282.82,
+  "best_fitness": 411.53,
+  "best_round": 32,
+  "delta_pct": 45.50951134997525,
+  "total_tokens_in": 32659985,
+  "total_tokens_out": 677210,
+  "total_cost_usd": 0.0,
+  "orchestrator_exit": 0,
+  "status": "done",
+  "notes": "Resumed quota interruption in place; preserved all valid slots and reran only quota-blocked slots in rounds 12-15. Original attempt archived.",
+  "broken_by_class": {
+    "formal_failed": 1
+  },
+  "best_lut4": 5485,
+  "best_ff": 2119,
+  "best_fmax_mhz": 184.84,
+  "best_iterations": 10,
+  "best_cycles": 4491485,
+  "best_ipc_coremark": 2e-06,
+  "quota_pause_sec": 2797,
+  "resumed_at": "2026-09-06T15:34:32.873090+00:00"
+}

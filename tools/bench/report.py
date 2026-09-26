@@ -141,7 +141,8 @@ def _safe_mean(xs: list[float]) -> Optional[float]:
 
 
 def _safe_std(xs: list[float]) -> Optional[float]:
-    return statistics.pstdev(xs) if len(xs) >= 2 else (0.0 if xs else None)
+    # One rep has no measurable spread: report none rather than 0.0.
+    return statistics.pstdev(xs) if len(xs) >= 2 else None
 
 
 def aggregate(rows: list[RepResult]) -> list[ModelAgg]:
@@ -221,7 +222,7 @@ def fmt_fitness(mean: Optional[float], std: Optional[float]) -> str:
     if mean is None:
         return "—"
     if std is None:
-        return f"{mean:.1f}"
+        return f"{mean:.1f} (n=1)"
     return f"{mean:.1f} ± {std:.1f}"
 
 
@@ -382,6 +383,13 @@ def render_markdown(aggs: list[ModelAgg]) -> str:
         "rep's best entry** (the one whose fitness equals `Best`). They "
         "surface the area-vs-frequency tradeoff each model picked. "
         "Baseline for reference: LUT4 = 9563, Fmax = 127 MHz, IPC ≈ 0.79.",
+        "",
+        "The table's `std` uses population standard deviation across completed reps. "
+        "Dollar values are runtime-reported fields; a parser-default zero does not "
+        "establish zero spend when OAuth billing is unavailable.",
+        "",
+        "For GPT-6 Astra, see [run and recovery notes](gpt-6-astra_max/README.md) "
+        "for endpoints, sample SD, quota-pause timing, and candidate outcome accounting.",
         "",
         "| Model | Reps | Fitness mean ± std | Best | LUT4 | Fmax MHz | IPC | acc | rej | brk | Iters→best | Pass-rate | $ cost | s/iter |",
         "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|",

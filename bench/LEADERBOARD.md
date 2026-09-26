@@ -6,25 +6,62 @@ Sorted by mean final CoreMark fitness (iter/s) across reps. Each rep is one full
 
 Best LUT4 / Fmax / IPC are the FPGA-side detail of the **best rep's best entry** (the one whose fitness equals `Best`). They surface the area-vs-frequency tradeoff each model picked. Baseline for reference: LUT4 = 9563, Fmax = 127 MHz, IPC ≈ 0.79.
 
+The table's `std` uses population standard deviation across completed reps. Dollar values are runtime-reported fields; a parser-default zero does not establish zero spend when OAuth billing is unavailable.
+
+For GPT-6 Astra, see [run and recovery notes](gpt-6-astra_max/README.md) for endpoints, sample SD, quota-pause timing, and candidate outcome accounting.
+
 | Model | Reps | Fitness mean ± std | Best | LUT4 | Fmax MHz | IPC | acc | rej | brk | Iters→best | Pass-rate | $ cost | s/iter |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| `claude-opus-5_5_xhigh` | 1/1 | 983.2 (n=1) | 983.2 | 3128 | 302.2 | 3.25 | 10.0 | 13.0 | 23.0 | 42.0 | 22% | $0.00 | 735 |
 | `gpt-5_4_xhigh` | 3/3 | 485.8 ± 28.1 | 513.8 | 10108 | 203.3 | 2.53 | 5.0 | 27.7 | 10.7 | 19.7 | 11% | $0.00 | 775 |
-| `gpt-5_6-sol` | 1/3 | 470.8 ± 0.0 | 470.8 | 10168 | 199.9 | 2.35 | 4.0 | 25.3 | 6.3 | 46.0 | 15% | $0.00 | 114 |
+| `gpt-5_6-sol` | 1/3 | 470.8 (n=1) | 470.8 | 10168 | 199.9 | 2.35 | 4.0 | 25.3 | 6.3 | 46.0 | 15% | $0.00 | 114 |
 | `gpt-5_5_xhigh` | 3/3 | 468.3 ± 52.8 | 525.0 | 5453 | 220.2 | 2.38 | 5.7 | 37.7 | 2.0 | 28.3 | 12% | $0.00 | 478 |
 | `gpt-5_6-luna` | 3/3 | 452.0 ± 29.0 | 480.9 | 10135 | 208.7 | 2.30 | 3.7 | 26.7 | 14.0 | 18.3 | 8% | $0.00 | 388 |
 | `gpt-5_6-terra` | 3/3 | 442.3 ± 55.8 | 515.7 | 10525 | 208.5 | 2.47 | 6.3 | 25.3 | 13.0 | 26.7 | 14% | $0.00 | 219 |
+| `gpt-6-sol_xhigh` | 1/1 | 435.2 (n=1) | 435.2 | 5713 | 188.6 | 2.31 | 6.0 | 40.0 | 0.0 | 43.0 | 13% | $0.00 | 512 |
 | `gpt-5_5_high` | 3/3 | 430.2 ± 23.0 | 461.9 | 9807 | 187.3 | 2.47 | 6.3 | 36.7 | 3.0 | 31.3 | 14% | $0.00 | 578 |
+| `gpt-6-astra_max` | 3/3 | 424.8 ± 36.2 | 474.3 | 6247 | 198.8 | 2.39 | 5.7 | 39.0 | 1.0 | 29.7 | 12% | $0.00 | 945 |
 | `gpt-5_5_medium` | 3/3 | 423.5 ± 11.2 | 431.6 | 7803 | 200.6 | 2.15 | 5.3 | 32.3 | 7.7 | 36.0 | 12% | $0.00 | 513 |
 | `gpt-5_4-mini` | 3/3 | 362.3 ± 23.7 | 395.5 | 10230 | 186.6 | 2.12 | 5.3 | 18.0 | 22.7 | 38.7 | 12% | $0.00 | 1973 |
 | `kimi-k2_6` | 2/3 | 339.5 ± 8.3 | 347.8 | 10254 | 146.2 | 2.38 | 3.3 | 16.7 | 21.0 | 11.5 | 7% | $28.44 | 690 |
 | `gemini-3_1-pro` | 3/3 | 339.4 ± 12.6 | 354.7 | 10242 | 149.7 | 2.37 | 3.0 | 12.7 | 30.3 | 21.0 | 7% | $83.53 | 492 |
+| `random-mutation` | 3/3 | 282.8 ± 0.0 | 282.8 | 9563 | 127.0 | 2.23 | 1.0 | 0.0 | 45.0 | 1.0 | 2% | $0.00 | 48 |
+| `static` | 2/2 | 282.8 ± 0.0 | 282.8 | 9563 | 127.0 | 2.23 | 1.0 | 24.0 | 21.0 | 1.0 | 2% | $0.00 | 86 |
 | `gemini-3_5-flash` | 0/1 | — | — | — | — | — | 2.0 | 1.0 | 1.0 | — | — | $0.00 | — |
 
 
 
+## Paired vs static control
+
+Each model paired with `static` on shared rep numbers; metric is `best_fitness`. p-values are two-sided Wilcoxon signed-rank with normal approximation. n<5 reports `—` for p (the null distribution is too sparse for a meaningful p-value).
+
+| Model | n_pairs | wins | mean Δ | median Δ | W | p (two-sided) |
+|---|---|---|---|---|---|---|
+| `claude-opus-5_5_xhigh` | 1 | 1/1 | +700.42 | +700.42 | — | — |
+| `gemini-3_1-pro` | 2 | 2/2 | +64.36 | +64.36 | — | — |
+| `gpt-5_4-mini` | 2 | 2/2 | +62.84 | +62.84 | — | — |
+| `gpt-5_4_xhigh` | 2 | 2/2 | +222.16 | +222.16 | — | — |
+| `gpt-5_5_high` | 2 | 2/2 | +158.42 | +158.42 | — | — |
+| `gpt-5_5_medium` | 2 | 2/2 | +136.75 | +136.75 | — | — |
+| `gpt-5_5_xhigh` | 2 | 2/2 | +178.61 | +178.61 | — | — |
+| `gpt-5_6-luna` | 2 | 2/2 | +188.92 | +188.92 | — | — |
+| `gpt-5_6-sol` | 1 | 1/1 | +187.98 | +187.98 | — | — |
+| `gpt-5_6-terra` | 2 | 2/2 | +190.26 | +190.26 | — | — |
+| `gpt-6-astra_max` | 2 | 2/2 | +117.28 | +117.28 | — | — |
+| `gpt-6-sol_xhigh` | 1 | 1/1 | +152.42 | +152.42 | — | — |
+| `kimi-k2_6` | 2 | 2/2 | +56.67 | +56.67 | — | — |
+| `random-mutation` | 2 | 0/2 | +0.00 | +0.00 | — | — |
+
 ## Failure modes
 
 Counts each model's broken iterations grouped by the orchestrator's broken-class label. `formal_failed` = RTL compiled but didn't pass riscv-formal (the suffix is the first failing check). `implementation_compile_failed` = RTL didn't pass Verilator lint. `hypothesis_gen_failed` = agent didn't write the expected YAML at the slot's pre-allocated path. `placement_failed` = nextpnr couldn't place the design on the target FPGA. `make_failed_during_execution` = formal/run_all.sh's `*.sby` glob found zero tasks at tally time (usually an agent wiped the checks dir mid-run; the PID-suffix fix in `formal/run_all.sh` removes the race but the class is still emitted if anything else corrupts the checks dir).
+
+### `claude-opus-5_5_xhigh`
+
+| Class | Count |
+|---|---|
+| `hypothesis_gen_failed` | 22 |
+| `formal_failed` | 1 |
 
 ### `gpt-5_4_xhigh`
 
@@ -74,6 +111,12 @@ Counts each model's broken iterations grouped by the orchestrator's broken-class
 | `formal_failed` | 3 |
 | `implementation_compile_failed` | 1 |
 
+### `gpt-6-astra_max`
+
+| Class | Count |
+|---|---|
+| `formal_failed` | 3 |
+
 ### `gpt-5_5_medium`
 
 | Class | Count |
@@ -113,6 +156,18 @@ Counts each model's broken iterations grouped by the orchestrator's broken-class
 | `cosim_failed` | 5 |
 | `implementation_compile_failed` | 3 |
 
+### `random-mutation`
+
+| Class | Count |
+|---|---|
+| `formal_failed` | 135 |
+
+### `static`
+
+| Class | Count |
+|---|---|
+| `hypothesis_gen_failed` | 42 |
+
 ### `gemini-3_5-flash`
 
 | Class | Count |
@@ -125,6 +180,7 @@ Every `(model, rep)` row from `bench/results.jsonl`, before per-model aggregatio
 
 | Model | Rep | Status | Iters | acc | rej | brk | Baseline → Final | Δ% | Best | LUT4 | Fmax MHz | IPC | Wall (m) |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| `claude-opus-5_5_xhigh` | 1 | done | 46 | 10 | 13 | 23 | 282.8 → 983.2 | 248% | 983.2 | 3128 | 302.2 | 3.25 | 563.3 |
 | `gemini-3_1-pro` | 1 | done | 46 | 2 | 13 | 31 | 282.8 → 354.7 | 25% | 354.7 | 10242 | 149.7 | 2.37 | 335.4 |
 | `gemini-3_1-pro` | 2 | done | 46 | 3 | 14 | 29 | 282.8 → 339.6 | 20% | 339.6 | 11068 | 142.4 | 2.39 | 438.8 |
 | `gemini-3_1-pro` | 3 | done | 46 | 4 | 11 | 31 | 282.8 → 323.9 | 15% | 323.9 | 11836 | 135.8 | 2.39 | 357.2 |
@@ -153,13 +209,34 @@ Every `(model, rep)` row from `bench/results.jsonl`, before per-model aggregatio
 | `gpt-5_6-terra` | 1 | done | 46 | 5 | 23 | 18 | 282.8 → 430.4 | 52% | 430.4 | 5763 | 193.3 | 2.23 | 214.6 |
 | `gpt-5_6-terra` | 2 | done | 46 | 7 | 29 | 8 | 282.8 → 515.7 | 82% | 515.7 | 10525 | 208.5 | 2.47 | 220.3 |
 | `gpt-5_6-terra` | 3 | done | 46 | 7 | 24 | 13 | 282.8 → 380.6 | 35% | 380.6 | 7729 | 157.9 | 2.41 | 68.2 |
+| `gpt-6-astra_max` | 1 | done | 46 | 6 | 38 | 2 | 282.8 → 388.7 | 37% | 388.7 | 6618 | 163.8 | 2.37 | 713.8 |
+| `gpt-6-astra_max` | 2 | done | 46 | 6 | 39 | 1 | 282.8 → 411.5 | 46% | 411.5 | 5485 | 184.8 | 2.23 | 733.8 |
+| `gpt-6-astra_max` | 3 | done | 46 | 5 | 40 | 0 | 282.8 → 474.3 | 68% | 474.3 | 6247 | 198.8 | 2.39 | 725.3 |
+| `gpt-6-sol_xhigh` | 1 | done | 46 | 6 | 40 | 0 | 282.8 → 435.2 | 54% | 435.2 | 5713 | 188.6 | 2.31 | 392.4 |
 | `kimi-k2_6` | 1 | done | 46 | 3 | 20 | 23 | 282.8 → 347.8 | 23% | 347.8 | 10254 | 146.2 | 2.38 | 542.5 |
 | `kimi-k2_6` | 2 | done | 46 | 3 | 17 | 26 | 282.8 → 331.2 | 17% | 331.2 | 10038 | 140.6 | 2.36 | 515.6 |
 | `kimi-k2_6` | 3 | failed | 31 | 4 | 13 | 14 | 282.8 → 396.1 | 40% | 396.1 | 9927 | 165.5 | 2.39 | 531.2 |
+| `random-mutation` | 1 | done | 46 | 1 | 0 | 45 | 282.8 → 282.8 | 0% | 282.8 | 9563 | 127.0 | 2.23 | 26.9 |
+| `random-mutation` | 2 | done | 46 | 1 | 0 | 45 | 282.8 → 282.8 | 0% | 282.8 | 9563 | 127.0 | 2.23 | 57.5 |
+| `random-mutation` | 3 | done | 46 | 1 | 0 | 45 | 282.8 → 282.8 | 0% | 282.8 | 9563 | 127.0 | 2.23 | 26.6 |
+| `static` | 1 | done | 46 | 1 | 3 | 42 | 282.8 → 282.8 | 0% | 282.8 | 9563 | 127.0 | 2.23 | 10.7 |
+| `static` | 2 | done | 46 | 1 | 45 | 0 | 282.8 → 282.8 | 0% | 282.8 | 9563 | 127.0 | 2.23 | 121.0 |
 
 ## Winning hypotheses
 
 Each model's accepted-improvement entries (the hypotheses that actually moved the fitness needle), in order. Pulled from the preserved `bench/<model>/rep<N>/log.jsonl`.
+
+### `claude-opus-5_5_xhigh` rep 1
+
+- **Split EX into single-cycle integer ALU plus iterative DIV/REM unit** — fitness 359.0 (+26.9%) _structural_ R1 — LUT4 5116, 161.3 MHz
+- **Stall-only I-fetch replay store with registered next-PC lookahead** — fitness 438.5 (+22.1%) _structural_ R3 — LUT4 5131, 162.2 MHz
+- **Fetch predecode + 64-entry bimodal BHT stacked on the I-fetch replay-store core** — fitness 458.9 (+4.7%) _predictor_ R4 — LUT4 5600, 156.3 MHz
+- **Pre-decoded one-hot ALU controls registered in ID/EX on the predictor core** — fitness 512.1 (+11.6%) _micro_opt_ R5 — LUT4 5560, 174.5 MHz
+- **LUT-RAM register file + ID/EX control/data split + registered div b!=0 (Fmax 174 -> ~223 MHz, cycle-identical)** — fitness 643.4 (+25.6%) _micro_opt_ R7 — LUT4 3080, 219.2 MHz
+- **Hide bus stalls on both sides: stall-only D-side store buffer + load cache, and a 4096-entry I-side replay store (netlist-identical to r7s0)** — fitness 695.2 (+8.0%) _structural_ R9 — LUT4 3078, 222.1 MHz
+- **Take the divider off every critical path: plain operand latch at start + two-phase registered restoring step (div_unit.sv only, cycle-neutral)** — fitness 859.8 (+23.7%) _micro_opt_ R10 — LUT4 3081, 274.6 MHz
+- **Front-end storage restructure: BHT in distributed LUT-RAM + split 2x32 rvfi_order counter (draft)** — fitness 894.4 (+4.0%) _structural_ R12 — LUT4 2826, 285.7 MHz
+- **Late branch unit (v2 form): verify load-dependent BRANCHes in MEM, redirect one cycle later from flops** — fitness 983.2 (+9.9%) _structural_ R14 — LUT4 3128, 302.2 MHz
 
 ### `gemini-3_1-pro` rep 1
 
@@ -352,6 +429,37 @@ Each model's accepted-improvement entries (the hypotheses that actually moved th
 - **Shared magnitude divide datapath** — fitness 348.6 (+0.9%) _micro_opt_ R6 — LUT4 8005, 144.6 MHz
 - **JAL-only fetch predictor** — fitness 353.6 (+1.4%) _predictor_ R8 — LUT4 8082, 146.7 MHz
 - **Aligned decode-stage JAL steering** — fitness 380.6 (+7.6%) _predictor_ R11 — LUT4 7729, 157.9 MHz
+
+### `gpt-6-astra_max` rep 1
+
+- **Small tagged target predictor with two-bit branch hysteresis** — fitness 319.4 (+12.9%) _predictor_ R1 — LUT4 10645, 134.7 MHz
+- **Split execution into a fast ALU and an eight-cycle divider** — fitness 320.3 (+0.3%) _structural_ R2 — LUT4 5871, 135.0 MHz
+- **Row-local predictor metadata training to remove the indexed feedback path** — fitness 350.5 (+9.4%) _predictor_ R3 — LUT4 6567, 147.8 MHz
+- **Pipeline row-addressed resolution events before local predictor updates** — fitness 371.6 (+6.0%) _structural_ R4 — LUT4 6584, 156.6 MHz
+- **Remove wide ID/EX payload registers from bubble-control fanout** — fitness 388.7 (+4.6%) _micro_opt_ R5 — LUT4 6618, 163.8 MHz
+
+### `gpt-6-astra_max` rep 2
+
+- **Separate bounded multicycle division from the single-cycle execute path** — fitness 372.6 (+31.8%) _structural_ R1 — LUT4 5438, 167.4 MHz
+- **Retiming divide writeback into a separate EX/MEM result bank** — fitness 375.8 (+0.8%) _structural_ R2 — LUT4 5470, 168.8 MHz
+- **Retime divider finalization using a narrow request-edge prefix** — fitness 382.5 (+1.8%) _structural_ R4 — LUT4 5513, 171.8 MHz
+- **Separate pipeline payload storage from bubble and divide control** — fitness 409.8 (+7.1%) _structural_ R5 — LUT4 5490, 184.1 MHz
+- **Remove launch qualification from idle divider operand storage** — fitness 411.5 (+0.4%) _micro_opt_ R11 — LUT4 5485, 184.8 MHz
+
+### `gpt-6-astra_max` rep 3
+
+- **Move DIV and REM into a bounded multicycle execution unit** — fitness 340.2 (+20.3%) _structural_ R1 — LUT4 5930, 152.8 MHz
+- **Table-free static prediction for backward branches and JAL** — fitness 425.8 (+25.1%) _predictor_ R2 — LUT4 5990, 181.4 MHz
+- **Small agree predictor to learn exceptions to static branch direction** — fitness 467.4 (+9.8%) _predictor_ R4 — LUT4 6146, 196.2 MHz
+- **Sixteen-entry tagged exception predictor for static branch bias** — fitness 474.3 (+1.5%) _predictor_ R14 — LUT4 6247, 198.8 MHz
+
+### `gpt-6-sol_xhigh` rep 1
+
+- **Decouple DIV and REM with an iterative EX unit** — fitness 349.3 (+23.5%) _structural_ R1 — LUT4 5575, 156.9 MHz
+- **Segment the RVFI retirement order counter** — fitness 361.9 (+3.6%) _micro_opt_ R2 — LUT4 5594, 162.6 MHz
+- **Register one-hot ALU selects before execute** — fitness 392.2 (+8.3%) _micro_opt_ R4 — LUT4 5644, 176.2 MHz
+- **Clear only side-effect controls on ID/EX bubbles** — fitness 408.6 (+4.2%) _micro_opt_ R6 — LUT4 5659, 183.5 MHz
+- **Predict backward branches with low-byte PC steering** — fitness 435.2 (+6.5%) _predictor_ R14 — LUT4 5713, 188.6 MHz
 
 ### `kimi-k2_6` rep 1
 

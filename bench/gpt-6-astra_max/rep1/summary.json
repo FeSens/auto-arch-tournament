@@ -1,0 +1,31 @@
+{
+  "model": "gpt-6-astra_max",
+  "rep": 1,
+  "started_at": "2026-09-05T13:28:11+00:00",
+  "ended_at": null,
+  "wall_clock_sec": null,
+  "iterations": 46,
+  "accepted": 6,
+  "rejected": 38,
+  "broken": 2,
+  "final_fitness": 388.66,
+  "baseline_fitness": 282.82,
+  "best_fitness": 388.66,
+  "best_round": 14,
+  "delta_pct": 37.42309596209604,
+  "total_tokens_in": 31739645,
+  "total_tokens_out": 620234,
+  "total_cost_usd": 0.0,
+  "orchestrator_exit": 0,
+  "status": "done",
+  "notes": "",
+  "broken_by_class": {
+    "formal_failed": 2
+  },
+  "best_lut4": 6618,
+  "best_ff": 3198,
+  "best_fmax_mhz": 163.83,
+  "best_iterations": 10,
+  "best_cycles": 4215262,
+  "best_ipc_coremark": 2e-06
+}

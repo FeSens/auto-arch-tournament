@@ -1,0 +1,9 @@
+# GPT-6 Astra at max reasoning effort, via the Codex ChatGPT OAuth session.
+# First run: --reps 1 --n 15 --k 3 --parallel 1 --keep-clones
+# After reviewing rep1, --reps 3 queues only the two remaining repetitions.
+models:
+  - name: gpt-6-astra_max
+    provider: codex
+    model: gpt-6-astra
+    variant: max
+    oauth: true

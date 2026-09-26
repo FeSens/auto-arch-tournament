@@ -74,7 +74,7 @@ def test_aggregate_failed_reps_counted_separately(tmp_path: Path):
     assert aggs[0].n_reps_done == 1
     assert aggs[0].n_reps_failed == 2
     assert aggs[0].fitness_mean == 300.0
-    assert aggs[0].fitness_std == 0.0  # single rep -> std treated as 0
+    assert aggs[0].fitness_std is None  # single rep -> spread not measurable
 
 
 def test_aggregate_orders_by_fitness_desc(tmp_path: Path):
@@ -122,7 +122,7 @@ def test_render_csv_round_trip(tmp_path: Path):
 
 def test_fmt_fitness_handles_none():
     assert fmt_fitness(None, None) == "—"
-    assert fmt_fitness(300.0, None) == "300.0"
+    assert fmt_fitness(300.0, None) == "300.0 (n=1)"
     assert "± 5.0" in fmt_fitness(300.0, 5.0)
 
 

@@ -21,8 +21,8 @@
     <li><a href="data.html">Data</a></li>
   </ul>
   <div class="meta">
-    <a href="https://github.com/FeSens/auto-arch-tournament" class="repo" aria-label="HWE Bench source on GitHub, click to view repo and star">github <span class="star">★</span> <span class="star-count">129</span></a>
-    <span class="version">v1 · 2026-07</span>
+    <a href="https://github.com/FeSens/auto-arch-tournament" class="repo" aria-label="HWE Bench source on GitHub, click to view repo and star">github <span class="star">★</span> <span class="star-count">139</span></a>
+    <span class="version">v1 · 2026-09</span>
   </div>
 </nav>
 
@@ -37,9 +37,74 @@
 </section>
 
 
+<section class="section" id="claude-opus-5_5_xhigh">
+  <div class="eyebrow">claude-opus-5_5_xhigh</div>
+  <h2>claude opus 5 5 xhigh</h2>
+<p class="prose">Claude Opus 5.5 via Claude Code 2.1.282 · reasoning effort <span class="mono">xhigh</span> · subscription (OAuth) login · 15 rounds × 3 hypotheses per round. One repetition (n=1): repeatability has not been measured, and any ranking against other configurations is untested.</p>
+<p class="prose">Isolation: no user settings, plugins, hooks, MCP servers, connectors or auto-memory. Bash ran in a sandbox with no network, writes confined to the rep's clone and reads of the operator's home directory denied. Web tools were disabled, and the clone sat outside the repository, so no parent CLAUDE.md was loaded.</p>
+<p class="prose">The scored repetition is the second launch. The first was stopped in round 8 by a harness bug (an agent's formal self-check could delete the harness's live formal work directory) and is kept but not scored.</p>
+<p class="prose">Most broken slots are hypothesis agents that reached the 20-minute limit, the same for every model, while running their own synthesis and place-and-route experiments, without writing a hypothesis.</p>
+<p class="prose">Caveats on accepted designs. CoreMark cycles are measured with random bus backpressure, but Fmax and area come from a bench wrapper with the memory ready signals tied high, so logic that only hides stalls costs no area or timing. Some accepted designs here contain such logic, as do accepted designs of other configurations; its share of the score is unmeasured. One accepted change made the divider slower, which is cycle-neutral because CoreMark's timed window retires no divides. Another partly optimizes the verification-only RVFI order counter. The LUT4 figures exclude LUT-RAM and block RAM, which later designs use for the register file.</p>
+<p class="prose">Dollar billing is unavailable under OAuth, so the $0.00 cost is not measured zero spend. Token totals cover every agent (hypothesis, implementer and scribe); output tokens are a lower bound for sessions stopped by the timeout.</p>
+<p class="prose"><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/claude-opus-5_5_xhigh/README.md" class="ext">Run notes, launch history and caveats</a>.</p>
+
+  <div class="stats">
+    <div class="stat"><div class="label">Best</div><div class="value">983.24</div><div class="sub">+247.7% vs baseline</div></div>
+    <div class="stat"><div class="label">Mean</div><div class="value">983.2</div><div class="sub">+247.7% mean Δ</div></div>
+    <div class="stat"><div class="label">Reps</div><div class="value">1/1</div><div class="sub">completed / total</div></div>
+  </div>
+
+  <div class="wide">
+  <table class="bench">
+    <caption>per-rep detail</caption>
+    <thead>
+      <tr>
+        <th>Rep</th><th>Status</th>
+        <th class="num">Best</th><th class="num">Δ%</th>
+        <th class="num">Area (LUT4)</th><th class="num">Fmax (MHz)</th>
+        <th class="num">acc</th><th class="num">brk</th>
+        <th class="num">Wall</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>rep1</td>
+        <td>done</td>
+        <td class="num">983.24</td>
+        <td class="num">+247.7%</td>
+        <td class="num">3,128</td>
+        <td class="num">302</td>
+        <td class="num">10</td>
+        <td class="num">23</td>
+        <td class="num">9.4h</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p class="prose"><strong>Broken classes (all reps combined):</strong> <code>hypothesis_gen_failed</code>×22, <code>formal_failed</code>×1</p>
+
+  <div class="prose">
+  <h3>rep1 , winning hypotheses</h3>
+<dl class="defs">
+<dt>R1 · Split EX into single-cycle integer ALU plus iterative DIV/REM unit</dt><dd>fitness <span class="mono">359.01</span> (<span class="mono">+26.9%</span>) · area <span class="mono">5.1k</span> LUT4 · Fmax <span class="mono">161 MHz</span></dd>
+<dt>R3 · Stall-only I-fetch replay store with registered next-PC lookahead</dt><dd>fitness <span class="mono">438.47</span> (<span class="mono">+22.1%</span>) · area <span class="mono">5.1k</span> LUT4 · Fmax <span class="mono">162 MHz</span></dd>
+<dt>R4 · Fetch predecode + 64-entry bimodal BHT stacked on the I-fetch replay-store core</dt><dd>fitness <span class="mono">458.93</span> (<span class="mono">+4.7%</span>) · area <span class="mono">5.6k</span> LUT4 · Fmax <span class="mono">156 MHz</span></dd>
+<dt>R5 · Pre-decoded one-hot ALU controls registered in ID/EX on the predictor core</dt><dd>fitness <span class="mono">512.08</span> (<span class="mono">+11.6%</span>) · area <span class="mono">5.6k</span> LUT4 · Fmax <span class="mono">174 MHz</span></dd>
+<dt>R7 · LUT-RAM register file + ID/EX control/data split + registered div b!=0 (Fmax 174 -> ~223 MHz, cycle-identical)</dt><dd>fitness <span class="mono">643.41</span> (<span class="mono">+25.6%</span>) · area <span class="mono">3.1k</span> LUT4 · Fmax <span class="mono">219 MHz</span></dd>
+<dt>R9 · Hide bus stalls on both sides: stall-only D-side store buffer + load cache, and a 4096-entry I-side replay store (netlist-identical to r7s0)</dt><dd>fitness <span class="mono">695.16</span> (<span class="mono">+8.0%</span>) · area <span class="mono">3.1k</span> LUT4 · Fmax <span class="mono">222 MHz</span></dd>
+<dt>R10 · Take the divider off every critical path: plain operand latch at start + two-phase registered restoring step (div_unit.sv only, cycle-neutral)</dt><dd>fitness <span class="mono">859.77</span> (<span class="mono">+23.7%</span>) · area <span class="mono">3.1k</span> LUT4 · Fmax <span class="mono">275 MHz</span></dd>
+<dt>R12 · Front-end storage restructure: BHT in distributed LUT-RAM + split 2x32 rvfi_order counter (draft)</dt><dd>fitness <span class="mono">894.39</span> (<span class="mono">+4.0%</span>) · area <span class="mono">2.8k</span> LUT4 · Fmax <span class="mono">286 MHz</span></dd>
+<dt>R14 · Late branch unit (v2 form): verify load-dependent BRANCHes in MEM, redirect one cycle later from flops</dt><dd>fitness <span class="mono">983.24</span> (<span class="mono">+9.9%</span>) · area <span class="mono">3.1k</span> LUT4 · Fmax <span class="mono">302 MHz</span></dd>
+</dl>
+  </div>
+</section>
+
+
 <section class="section" id="gpt-5_5_xhigh">
   <div class="eyebrow">gpt-5_5_xhigh</div>
   <h2>gpt 5 5 xhigh</h2>
+
 
   <div class="stats">
     <div class="stat"><div class="label">Best</div><div class="value">525.04</div><div class="sub">+85.6% vs baseline</div></div>
@@ -130,6 +195,7 @@
 <section class="section" id="gpt-5_6-terra">
   <div class="eyebrow">gpt-5_6-terra</div>
   <h2>gpt 5 6 terra</h2>
+
 
   <div class="stats">
     <div class="stat"><div class="label">Best</div><div class="value">515.70</div><div class="sub">+82.3% vs baseline</div></div>
@@ -223,6 +289,7 @@
   <div class="eyebrow">gpt-5_4_xhigh</div>
   <h2>gpt 5 4 xhigh</h2>
 
+
   <div class="stats">
     <div class="stat"><div class="label">Best</div><div class="value">513.84</div><div class="sub">+81.7% vs baseline</div></div>
     <div class="stat"><div class="label">Mean</div><div class="value">485.8</div><div class="sub">+71.8% mean Δ</div></div>
@@ -311,6 +378,7 @@
   <div class="eyebrow">gpt-5_6-luna</div>
   <h2>gpt 5 6 luna</h2>
 
+
   <div class="stats">
     <div class="stat"><div class="label">Best</div><div class="value">480.90</div><div class="sub">+70.0% vs baseline</div></div>
     <div class="stat"><div class="label">Mean</div><div class="value">452.0</div><div class="sub">+59.8% mean Δ</div></div>
@@ -391,9 +459,101 @@
 </section>
 
 
+<section class="section" id="gpt-6-astra_max">
+  <div class="eyebrow">gpt-6-astra_max</div>
+  <h2>gpt 6 astra max</h2>
+<p class="prose">GPT-6 Astra via Codex · reasoning effort <span class="mono">max</span> · 15 rounds × 3 hypotheses per round. 3 independent repetitions recorded.</p><p class="prose">Across completed repetitions: mean 424.82 ± 44.33 sample SD.</p><p class="prose">Repetitions 2 and 3 resumed after a usage-limit pause; reported wall time includes that pause. Valid attempts were preserved. The acceptance counts include the baseline; rep3 also has one FPGA placement failure outside the legacy broken counter. OAuth dollar billing was unavailable; raw cost zeros are parser defaults. <a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-6-astra_max/README.md" class="ext">Run and recovery notes</a>.</p>
+
+  <div class="stats">
+    <div class="stat"><div class="label">Best</div><div class="value">474.27</div><div class="sub">+67.7% vs baseline</div></div>
+    <div class="stat"><div class="label">Mean</div><div class="value">424.8</div><div class="sub">+50.2% mean Δ</div></div>
+    <div class="stat"><div class="label">Reps</div><div class="value">3/3</div><div class="sub">completed / total</div></div>
+  </div>
+
+  <div class="wide">
+  <table class="bench">
+    <caption>per-rep detail</caption>
+    <thead>
+      <tr>
+        <th>Rep</th><th>Status</th>
+        <th class="num">Best</th><th class="num">Δ%</th>
+        <th class="num">Area (LUT4)</th><th class="num">Fmax (MHz)</th>
+        <th class="num">acc</th><th class="num">brk</th>
+        <th class="num">Wall</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>rep1</td>
+        <td>done</td>
+        <td class="num">388.66</td>
+        <td class="num">+37.4%</td>
+        <td class="num">6,618</td>
+        <td class="num">164</td>
+        <td class="num">6</td>
+        <td class="num">2</td>
+        <td class="num">11.9h</td>
+      </tr>
+      <tr>
+        <td>rep2</td>
+        <td>done</td>
+        <td class="num">411.53</td>
+        <td class="num">+45.5%</td>
+        <td class="num">5,485</td>
+        <td class="num">185</td>
+        <td class="num">6</td>
+        <td class="num">1</td>
+        <td class="num">12.2h</td>
+      </tr>
+      <tr>
+        <td>rep3</td>
+        <td>done</td>
+        <td class="num">474.27</td>
+        <td class="num">+67.7%</td>
+        <td class="num">6,247</td>
+        <td class="num">199</td>
+        <td class="num">5</td>
+        <td class="num">0</td>
+        <td class="num">12.1h</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p class="prose"><strong>Broken classes (all reps combined):</strong> <code>formal_failed</code>×3</p>
+
+  <div class="prose">
+  <h3>rep1 , winning hypotheses</h3>
+<dl class="defs">
+<dt>R1 · Small tagged target predictor with two-bit branch hysteresis</dt><dd>fitness <span class="mono">319.45</span> (<span class="mono">+12.9%</span>) · area <span class="mono">10.6k</span> LUT4 · Fmax <span class="mono">135 MHz</span></dd>
+<dt>R2 · Split execution into a fast ALU and an eight-cycle divider</dt><dd>fitness <span class="mono">320.28</span> (<span class="mono">+0.3%</span>) · area <span class="mono">5.9k</span> LUT4 · Fmax <span class="mono">135 MHz</span></dd>
+<dt>R3 · Row-local predictor metadata training to remove the indexed feedback path</dt><dd>fitness <span class="mono">350.46</span> (<span class="mono">+9.4%</span>) · area <span class="mono">6.6k</span> LUT4 · Fmax <span class="mono">148 MHz</span></dd>
+<dt>R4 · Pipeline row-addressed resolution events before local predictor updates</dt><dd>fitness <span class="mono">371.55</span> (<span class="mono">+6.0%</span>) · area <span class="mono">6.6k</span> LUT4 · Fmax <span class="mono">157 MHz</span></dd>
+<dt>R5 · Remove wide ID/EX payload registers from bubble-control fanout</dt><dd>fitness <span class="mono">388.66</span> (<span class="mono">+4.6%</span>) · area <span class="mono">6.6k</span> LUT4 · Fmax <span class="mono">164 MHz</span></dd>
+</dl>
+<h3>rep2 , winning hypotheses</h3>
+<dl class="defs">
+<dt>R1 · Separate bounded multicycle division from the single-cycle execute path</dt><dd>fitness <span class="mono">372.62</span> (<span class="mono">+31.8%</span>) · area <span class="mono">5.4k</span> LUT4 · Fmax <span class="mono">167 MHz</span></dd>
+<dt>R2 · Retiming divide writeback into a separate EX/MEM result bank</dt><dd>fitness <span class="mono">375.78</span> (<span class="mono">+0.8%</span>) · area <span class="mono">5.5k</span> LUT4 · Fmax <span class="mono">169 MHz</span></dd>
+<dt>R4 · Retime divider finalization using a narrow request-edge prefix</dt><dd>fitness <span class="mono">382.48</span> (<span class="mono">+1.8%</span>) · area <span class="mono">5.5k</span> LUT4 · Fmax <span class="mono">172 MHz</span></dd>
+<dt>R5 · Separate pipeline payload storage from bubble and divide control</dt><dd>fitness <span class="mono">409.80</span> (<span class="mono">+7.1%</span>) · area <span class="mono">5.5k</span> LUT4 · Fmax <span class="mono">184 MHz</span></dd>
+<dt>R11 · Remove launch qualification from idle divider operand storage</dt><dd>fitness <span class="mono">411.53</span> (<span class="mono">+0.4%</span>) · area <span class="mono">5.5k</span> LUT4 · Fmax <span class="mono">185 MHz</span></dd>
+</dl>
+<h3>rep3 , winning hypotheses</h3>
+<dl class="defs">
+<dt>R1 · Move DIV and REM into a bounded multicycle execution unit</dt><dd>fitness <span class="mono">340.22</span> (<span class="mono">+20.3%</span>) · area <span class="mono">5.9k</span> LUT4 · Fmax <span class="mono">153 MHz</span></dd>
+<dt>R2 · Table-free static prediction for backward branches and JAL</dt><dd>fitness <span class="mono">425.76</span> (<span class="mono">+25.1%</span>) · area <span class="mono">6.0k</span> LUT4 · Fmax <span class="mono">181 MHz</span></dd>
+<dt>R4 · Small agree predictor to learn exceptions to static branch direction</dt><dd>fitness <span class="mono">467.44</span> (<span class="mono">+9.8%</span>) · area <span class="mono">6.1k</span> LUT4 · Fmax <span class="mono">196 MHz</span></dd>
+<dt>R14 · Sixteen-entry tagged exception predictor for static branch bias</dt><dd>fitness <span class="mono">474.27</span> (<span class="mono">+1.5%</span>) · area <span class="mono">6.2k</span> LUT4 · Fmax <span class="mono">199 MHz</span></dd>
+</dl>
+  </div>
+</section>
+
+
 <section class="section" id="gpt-5_6-sol">
   <div class="eyebrow">gpt-5_6-sol</div>
   <h2>gpt 5 6 sol</h2>
+
 
   <div class="stats">
     <div class="stat"><div class="label">Best</div><div class="value">470.80</div><div class="sub">+66.5% vs baseline</div></div>
@@ -479,6 +639,7 @@
 <section class="section" id="gpt-5_5_high">
   <div class="eyebrow">gpt-5_5_high</div>
   <h2>gpt 5 5 high</h2>
+
 
   <div class="stats">
     <div class="stat"><div class="label">Best</div><div class="value">461.87</div><div class="sub">+63.3% vs baseline</div></div>
@@ -568,9 +729,64 @@
 </section>
 
 
+<section class="section" id="gpt-6-sol_xhigh">
+  <div class="eyebrow">gpt-6-sol_xhigh</div>
+  <h2>gpt 6 sol xhigh</h2>
+
+
+  <div class="stats">
+    <div class="stat"><div class="label">Best</div><div class="value">435.24</div><div class="sub">+53.9% vs baseline</div></div>
+    <div class="stat"><div class="label">Mean</div><div class="value">435.2</div><div class="sub">+53.9% mean Δ</div></div>
+    <div class="stat"><div class="label">Reps</div><div class="value">1/1</div><div class="sub">completed / total</div></div>
+  </div>
+
+  <div class="wide">
+  <table class="bench">
+    <caption>per-rep detail</caption>
+    <thead>
+      <tr>
+        <th>Rep</th><th>Status</th>
+        <th class="num">Best</th><th class="num">Δ%</th>
+        <th class="num">Area (LUT4)</th><th class="num">Fmax (MHz)</th>
+        <th class="num">acc</th><th class="num">brk</th>
+        <th class="num">Wall</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>rep1</td>
+        <td>done</td>
+        <td class="num">435.24</td>
+        <td class="num">+53.9%</td>
+        <td class="num">5,713</td>
+        <td class="num">189</td>
+        <td class="num">6</td>
+        <td class="num">0</td>
+        <td class="num">6.5h</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p class="prose"><strong>Broken classes (all reps combined):</strong> n/a</p>
+
+  <div class="prose">
+  <h3>rep1 , winning hypotheses</h3>
+<dl class="defs">
+<dt>R1 · Decouple DIV and REM with an iterative EX unit</dt><dd>fitness <span class="mono">349.32</span> (<span class="mono">+23.5%</span>) · area <span class="mono">5.6k</span> LUT4 · Fmax <span class="mono">157 MHz</span></dd>
+<dt>R2 · Segment the RVFI retirement order counter</dt><dd>fitness <span class="mono">361.95</span> (<span class="mono">+3.6%</span>) · area <span class="mono">5.6k</span> LUT4 · Fmax <span class="mono">163 MHz</span></dd>
+<dt>R4 · Register one-hot ALU selects before execute</dt><dd>fitness <span class="mono">392.16</span> (<span class="mono">+8.3%</span>) · area <span class="mono">5.6k</span> LUT4 · Fmax <span class="mono">176 MHz</span></dd>
+<dt>R6 · Clear only side-effect controls on ID/EX bubbles</dt><dd>fitness <span class="mono">408.57</span> (<span class="mono">+4.2%</span>) · area <span class="mono">5.7k</span> LUT4 · Fmax <span class="mono">184 MHz</span></dd>
+<dt>R14 · Predict backward branches with low-byte PC steering</dt><dd>fitness <span class="mono">435.24</span> (<span class="mono">+6.5%</span>) · area <span class="mono">5.7k</span> LUT4 · Fmax <span class="mono">189 MHz</span></dd>
+</dl>
+  </div>
+</section>
+
+
 <section class="section" id="gpt-5_5_medium">
   <div class="eyebrow">gpt-5_5_medium</div>
   <h2>gpt 5 5 medium</h2>
+
 
   <div class="stats">
     <div class="stat"><div class="label">Best</div><div class="value">431.58</div><div class="sub">+52.6% vs baseline</div></div>
@@ -661,6 +877,7 @@
   <div class="eyebrow">kimi-k2_6</div>
   <h2>kimi k2 6</h2>
 
+
   <div class="stats">
     <div class="stat"><div class="label">Best</div><div class="value">396.13</div><div class="sub">+40.1% vs baseline</div></div>
     <div class="stat"><div class="label">Mean</div><div class="value">339.5</div><div class="sub">+20.0% mean Δ</div></div>
@@ -743,6 +960,7 @@
 <section class="section" id="gpt-5_4-mini">
   <div class="eyebrow">gpt-5_4-mini</div>
   <h2>gpt 5 4 mini</h2>
+
 
   <div class="stats">
     <div class="stat"><div class="label">Best</div><div class="value">395.53</div><div class="sub">+39.9% vs baseline</div></div>
@@ -833,6 +1051,7 @@
   <div class="eyebrow">gemini-3_5-flash</div>
   <h2>gemini 3 5 flash</h2>
 
+
   <div class="stats">
     <div class="stat"><div class="label">Best</div><div class="value">359.04</div><div class="sub">+27.0% vs baseline</div></div>
     <div class="stat"><div class="label">Mean</div><div class="value">n/a</div><div class="sub">n/a mean Δ</div></div>
@@ -881,6 +1100,7 @@
 <section class="section" id="gemini-3_1-pro">
   <div class="eyebrow">gemini-3_1-pro</div>
   <h2>gemini 3 1 pro</h2>
+
 
   <div class="stats">
     <div class="stat"><div class="label">Best</div><div class="value">354.73</div><div class="sub">+25.4% vs baseline</div></div>
@@ -960,6 +1180,64 @@
 </section>
 
 
+<section class="section" id="static">
+  <div class="eyebrow">static</div>
+  <h2>static</h2>
+
+
+  <div class="stats">
+    <div class="stat"><div class="label">Best</div><div class="value">282.82</div><div class="sub">+0.0% vs baseline</div></div>
+    <div class="stat"><div class="label">Mean</div><div class="value">282.8</div><div class="sub">+0.0% mean Δ</div></div>
+    <div class="stat"><div class="label">Reps</div><div class="value">2/2</div><div class="sub">completed / total</div></div>
+  </div>
+
+  <div class="wide">
+  <table class="bench">
+    <caption>per-rep detail</caption>
+    <thead>
+      <tr>
+        <th>Rep</th><th>Status</th>
+        <th class="num">Best</th><th class="num">Δ%</th>
+        <th class="num">Area (LUT4)</th><th class="num">Fmax (MHz)</th>
+        <th class="num">acc</th><th class="num">brk</th>
+        <th class="num">Wall</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>rep1</td>
+        <td>done</td>
+        <td class="num">282.82</td>
+        <td class="num">+0.0%</td>
+        <td class="num">9,563</td>
+        <td class="num">127</td>
+        <td class="num">1</td>
+        <td class="num">42</td>
+        <td class="num">0.2h</td>
+      </tr>
+      <tr>
+        <td>rep2</td>
+        <td>done</td>
+        <td class="num">282.82</td>
+        <td class="num">+0.0%</td>
+        <td class="num">9,563</td>
+        <td class="num">127</td>
+        <td class="num">1</td>
+        <td class="num">0</td>
+        <td class="num">2.0h</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p class="prose"><strong>Broken classes (all reps combined):</strong> <code>hypothesis_gen_failed</code>×42</p>
+
+  <div class="prose">
+  <p>No winning hypotheses recorded.</p>
+  </div>
+</section>
+
+
 <footer class="bot">
   <div>
     HWE Bench · methodology v1 ·
@@ -968,6 +1246,37 @@
   </div>
   <div class="manifesto">a benchmark that respects how far a frontier model still has to go.</div>
 </footer>
+
+<div id="chart-tip" role="tooltip" hidden></div>
+<style>
+  #chart-tip { position: fixed; z-index: 50; pointer-events: none; max-width: 320px;
+    padding: 6px 9px; border-radius: 4px; background: var(--ink, #262a33); color: var(--bg, #faf9f7);
+    font: 12px/1.35 Inter, ui-sans-serif, system-ui, sans-serif; box-shadow: 0 2px 8px rgba(0,0,0,.18); }
+  svg [data-tip] { cursor: default; }
+</style>
+<script>
+(() => {
+  // Chart tooltips: any SVG element with data-tip shows it on hover or tap.
+  const tip = document.getElementById("chart-tip");
+  const place = (e) => {
+    const pad = 14, w = tip.offsetWidth, h = tip.offsetHeight;
+    let x = e.clientX + pad, y = e.clientY + pad;
+    if (x + w > innerWidth - 8) x = e.clientX - w - pad;
+    if (y + h > innerHeight - 8) y = e.clientY - h - pad;
+    tip.style.left = x + "px"; tip.style.top = y + "px";
+  };
+  document.addEventListener("pointerover", (e) => {
+    const t = e.target.closest && e.target.closest("[data-tip]");
+    if (!t) return;
+    tip.textContent = t.getAttribute("data-tip"); tip.hidden = false; place(e);
+  });
+  document.addEventListener("pointermove", (e) => { if (!tip.hidden) place(e); });
+  document.addEventListener("pointerout", (e) => {
+    const t = e.target.closest && e.target.closest("[data-tip]");
+    if (t && !(e.relatedTarget && t.contains(e.relatedTarget))) tip.hidden = true;
+  });
+})();
+</script>
 
 </div>
 </body>

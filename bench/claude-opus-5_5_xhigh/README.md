@@ -1,35 +1,27 @@
 # Claude Opus 5.5 xhigh: one completed repetition
 
-<!--
-DRAFT, prepared while launch 2 was in round 13 of 15. Every {{PLACEHOLDER}}
-is filled from bench/claude-opus-5_5_xhigh/rep1/summary.json (the results
-row) and rep1/log.jsonl once the run ends. Tables marked "regenerate" are
-rebuilt from the final journal, see POST_RUN_CHECKLIST.md. Delete this
-comment when finalizing.
--->
-
 One repetition, 15 rounds with 3 candidate hypotheses per round: one baseline plus 45 candidate outcomes. It started from the same baseline as every other configuration, fitness 282.82.
 
 | Repetition | Final / best fitness | Gain over baseline | Last improving round | Wall time |
 |---|---:|---:|---:|---:|
-| 1 | {{FINAL_FITNESS}} | {{DELTA_PCT}}% | {{LAST_IMPROVING_ROUND}} | {{WALL_TIME_SEC}} s |
+| 1 | 983.24 | 247.66% | 14 | 33,800 s |
 
-**N=1.** This is a single measurement. Repeatability has not been measured, and no dispersion or model-to-model comparison can be computed from it. Treat any ranking against other configurations as untested. {{FINAL_FITNESS}} is the highest fitness recorded on this benchmark so far; with n=1 and the caveats below, that is a fact about this run, not evidence that this configuration is better than another.
+**N=1.** This is a single measurement. Repeatability has not been measured, and no dispersion or model-to-model comparison can be computed from it. Treat any ranking against other configurations as untested. 983.24 is the highest fitness recorded on this benchmark so far; with n=1 and the caveats below, that is a fact about this run, not evidence that this configuration is better than another.
 
-Of the 45 candidates, {{N_IMPROVEMENTS}} were improvements, {{N_REGRESSIONS}} regressions and {{N_BROKEN}} broken. Most broken slots are hypothesis agents that hit the 20-minute limit without writing a hypothesis ({{N_HYPGEN_FAILED}} of 45, see "Candidate outcomes").
+Of the 45 candidates, 9 were improvements, 13 regressions and 23 broken. Most broken slots are hypothesis agents that hit the 20-minute limit without writing a hypothesis (22 of 45, see "Candidate outcomes").
 
 ## Runtime and harness
 
 - Runtime: Claude Code 2.1.282, model `claude-opus-5-5`, effort `xhigh`, subscription (OAuth) login. Configuration: `tools/bench/models-opus55-xhigh.yaml` (result name `claude-opus-5_5_xhigh`). N=15, K=3. Tool paths are in `rep1/env.json`.
-- Harness: ref `fix/eval-hardening`, commit `132c378` (merged to main as `0920ae7`). The results row records `fixture_commit` `{{FIXTURE_COMMIT}}`, `runner_commit` `{{RUNNER_COMMIT}}`, `runner_dirty: {{RUNNER_DIRTY}}`. {{RUNNER_DIRTY_NOTE}} Candidate scoring is the same as for the other configurations: same fitness formula, gates, seeds [1, 2, 3], N=15, K=3. The integrity checks listed in [`gpt-6-sol_xhigh/README.md`](../gpt-6-sol_xhigh/README.md) apply here too. In addition, each clone carries a harness-only riscv-formal copy (`.tmp/riscv-formal-eval`) that agents cannot write. It is fingerprinted, and the worktree's `formal/riscv-formal` symlink is switched to it before the harness runs formal. Agents keep a writable copy for their own self-checks. {{SANDBOX_VIOLATIONS}} `sandbox_violation` outcomes occurred.
+- Harness: ref `fix/eval-hardening`, commit `132c378` (merged to main as `0920ae7`). The results row records `fixture_commit` `132c378287350708f5ce26cb67a8b4ef838a0f5c`, `runner_commit` `132c378287350708f5ce26cb67a8b4ef838a0f5c`, `runner_dirty: false`. Candidate scoring is the same as for the other configurations: same fitness formula, gates, seeds [1, 2, 3], N=15, K=3. The integrity checks listed in [`gpt-6-sol_xhigh/README.md`](../gpt-6-sol_xhigh/README.md) apply here too. In addition, each clone carries a harness-only riscv-formal copy (`.tmp/riscv-formal-eval`) that agents cannot write. It is fingerprinted, and the worktree's `formal/riscv-formal` symlink is switched to it before the harness runs formal. Agents keep a writable copy for their own self-checks. No `sandbox_violation` outcomes occurred.
 - Isolation (`tools/bench/runner.py` `claude_isolation_settings`; details and verification probes in `research/diary/2026-09-25.md`, section "Claude Code isolation"):
   - No user settings, plugins, hooks, MCP servers, connectors or auto-memory.
   - Bash runs in a sandbox with no network. Reads of `$HOME`, `/private/tmp` and other Claude sessions' temp dirs are denied. Writes are confined to the clone.
   - Web tools are disallowed, as in the Codex runs, along with tools that reach outside the rep.
   - The clone base is outside the repository, so Claude Code loads no parent `CLAUDE.md`.
   - Known differences from the Codex treatment: Claude's reads are stricter (Codex could read anywhere), `/tmp` writes are denied (Codex allowed them), and Claude session transcripts are written to the operator's `~/.claude/projects/`, which the agent cannot read. The diary section lists these.
-- Cost: dollar billing is not available under OAuth. `total_cost_usd: 0.0` is not measured zero spend. `api_equivalent_cost_usd` ({{API_EQUIV_COST_USD}} USD) is Claude Code's own list-price estimate, not a bill.
-- Tokens: {{TOKENS_IN}} in, {{TOKENS_OUT}} out. This harness archives implementer and scribe transcripts (the fix for the undercount described in the Sol README), so these totals cover all agents. Output tokens are a lower bound: sessions killed by the timeout report only streaming snapshots.
+- Cost: dollar billing is not available under OAuth. `total_cost_usd: 0.0` is not measured zero spend. `api_equivalent_cost_usd` (123.62 USD) is Claude Code's own list-price estimate, not a bill.
+- Tokens: 522,817,399 in, 1,904,689 out. This harness archives implementer and scribe transcripts (the fix for the undercount described in the Sol README), so these totals cover all agents. Output tokens are a lower bound: sessions killed by the timeout report only streaming snapshots.
 - `agent.log` is compacted the same way as for Sol: tool-output fields longer than 4 KB are cut to head and tail around a marker recording the original length and sha256. The verbatim transcript and the Git bundle are kept locally and not published.
 
 ## Launch history
@@ -44,11 +36,11 @@ The scored repetition is the second full launch, started 2026-09-26T03:22:40Z.
 
 | Repetition | Improvements | Regressions | Hypothesis timeouts | Formal failures | Other broken | Candidates |
 |---|---:|---:|---:|---:|---:|---:|
-| 1 | {{N_IMPROVEMENTS}} | {{N_REGRESSIONS}} | {{N_HYPGEN_FAILED}} | {{N_FORMAL_FAILED}} | {{N_OTHER_BROKEN}} | 45 |
+| 1 | 9 | 13 | 22 | 1 | 0 | 45 |
 
-Hypothesis-agent timeouts are the dominant failure mode. A timeout is `hypothesis_gen_failed`: the hypothesis agent reached the 20-minute limit (`HYPOTHESIS_TIMEOUT_SEC=1200`) without writing a hypothesis. The agents spent that budget running their own synthesis and place-and-route experiments. Every model ran with the same limit. Through round 13 the count was 19 of 39. The one formal failure through round 13 (r13s2, speculating load-dependent branches) is a BMC counterexample: 7 of 53 checks failed (the six conditional-branch instruction checks and `pc_fwd_ch0`). {{FORMAL_FAILED_NOTE_AFTER_R13}}
+Hypothesis-agent timeouts are the dominant failure mode. A timeout is `hypothesis_gen_failed`: the hypothesis agent reached the 20-minute limit (`HYPOTHESIS_TIMEOUT_SEC=1200`) without writing a hypothesis. The agents spent that budget running their own synthesis and place-and-route experiments. Every model ran with the same limit. All three hypothesis agents timed out in rounds 2, 6, 8 and 15. The one formal failure (r13s2, speculating load-dependent branches) is a BMC counterexample: 7 of 53 checks failed (the six conditional-branch instruction checks and `pc_fwd_ch0`).
 
-Accepted designs, in order (regenerate from the final journal):
+Accepted designs, in order:
 
 | Round, slot | Change (journal title, verbatim) | Fitness | LUT4 | Fmax median MHz |
 |---|---|---:|---:|---:|
@@ -60,20 +52,20 @@ Accepted designs, in order (regenerate from the final journal):
 | r9s1 | Hide bus stalls on both sides: stall-only D-side store buffer + load cache, and a 4096-entry I-side replay store (netlist-identical to r7s0) | 695.16 | 3078 | 222.07 |
 | r10s0 | Take the divider off every critical path: plain operand latch at start + two-phase registered restoring step (div_unit.sv only, cycle-neutral) | 859.77 | 3081 | 274.65 |
 | r12s1 | Front-end storage restructure: BHT in distributed LUT-RAM + split 2x32 rvfi_order counter (draft) | 894.39 | 2826 | 285.71 |
-{{ACCEPTED_ROWS_AFTER_R13}}
+| r14s1 | Late branch unit (v2 form): verify load-dependent BRANCHes in MEM, redirect one cycle later from flops | 983.24 | 3128 | 302.21 |
 
-Final design: {{FINAL_LUT4}} LUT4, {{FINAL_FF}} FF, Fmax median {{FINAL_FMAX}} MHz (seeds {{FMAX_SEEDS}}), {{FINAL_CYCLES}} CoreMark cycles for 10 iterations.
+Final design: 3128 LUT4, 1491 FF, Fmax median 302.21 MHz (seeds 302.21 / 278.71 / 315.76), 3,073,627 CoreMark cycles for 10 iterations.
 
-The legacy `accepted: {{ACCEPTED_LEGACY}}` counter includes the baseline, so it is one higher than candidate improvements. In summary JSON, `best_round: {{BEST_ROUND_INDEX}}` is the journal entry index, not the tournament round. The last improving round above comes from the journal's `round_id`.
+The legacy `accepted: 10` counter includes the baseline, so it is one higher than candidate improvements. In summary JSON, `best_round: 42` is the journal entry index, not the tournament round. The last improving round above comes from the journal's `round_id`.
 
 ## Caveats on the accepted designs
 
-The operator audited the accepted designs through r12s1{{AUDIT_SCOPE_AFTER_R13}}: changes are confined to `cores/bench/rtl/` and cocotb tests, no CoreMark-specific constants appear, and every design passed all gates. The fitness contract still leaves room for the following, so read the numbers with them in mind.
+The operator audited all nine accepted designs (r1s1 to r14s1): changes are confined to `cores/bench/rtl/` and cocotb tests, no CoreMark-specific constants appear in logic, and every design passed all gates. Several designs were tuned against CoreMark itself: r4s2 sized its branch history table at "the knee of the CoreMark sweep", and r10s0 relies on CoreMark retiring no divides in its timed window. That is benchmark-directed tuning, allowed by the contract, and it may not carry over to other workloads. The fitness contract still leaves room for the following, so read the numbers with them in mind.
 
-- **Stall-only hardware is free in the fitness metric.** CoreMark cycles are measured in simulation with about 22% random bus backpressure (`--istall --dstall`). Fmax and LUT4 come from `fpga/core_bench*.sv`, which ties the memory ready signals to 1. Logic that only acts while a ready is low is therefore constant-folded out of the timed netlist: its cycle savings count and its area and timing cost nothing. The r9s1 design exploits this (its title says "netlist-identical to r7s0"; it adds a 4096-entry I-side replay store and a load cache). Accepted designs of other configurations also contain stall-hiding structures. How much of any score comes from this is unmeasured; a proposed stall-free re-score has not been run. See `research/diary/2026-09-26.md`, "stall-only hardware".
-- **Slower divider, cycle-neutral.** The r10s0 design made the divider a slower two-phase unit. That costs no cycles because CoreMark retires no divides in its timed window. The operator's independent Verilator test found 0 mismatches over 200,676 cases, with a maximum latency of 68 cycles.
+- **Stall-only hardware is free in the fitness metric.** CoreMark cycles are measured in simulation with about 22% random bus backpressure (`--istall --dstall`). Fmax and LUT4 come from `fpga/core_bench*.sv`, which ties the memory ready signals to 1. Logic that only acts while a ready is low is therefore constant-folded out of the timed netlist: its cycle savings count and its area and timing cost nothing. Two accepted designs in this lineage are explicitly stall-only: r3s1 ("Stall-only I-fetch replay store", +22.1%) and r9s1 (its title says "netlist-identical to r7s0"; it adds a 4096-entry I-side replay store and a load cache). Accepted designs of other configurations also contain stall-hiding structures. How much of any score comes from this is unmeasured; a proposed stall-free re-score has not been run. See `research/diary/2026-09-26.md`, "stall-only hardware".
+- **Slower divider, cycle-neutral.** The r10s0 design made the divider a slower two-phase unit. That costs no cycles because CoreMark retires no divides in its timed window. The r14s1 design added a `kill` input that abandons a flushed divide. The operator's independent Verilator test (real arithmetic, not ALTOPS) found 0 mismatches over 200,676 cases on both the r10s0 and the final divider, with a maximum latency of 68 cycles. That test holds `kill` low; the flush path is covered only by the formal gate.
 - **Verification-only logic.** The r12s1 design partly optimizes the RVFI `rvfi_order` counter, which is verification-only logic the FPGA bench wrapper keeps in the timed design (the same pattern as Sol's r2s0).
-- **LUT4 excludes RAM cells.** From r7s0 on, the register file is in LUT-RAM. The `lut4` column excludes LUT-RAM and block-RAM cells, so area figures are not directly comparable to designs with a flip-flop register file. {{FINAL_RAM_CELLS_NOTE}}
+- **LUT4 excludes RAM cells.** From r7s0 on, the register file is in LUT-RAM. The `lut4` column excludes LUT-RAM and block-RAM cells, so area figures are not directly comparable to designs with a flip-flop register file. The final design also uses 36 RAM16SDP4 (LUT-RAM), 4 DPX9B (block RAM) and 1 MULT36X36 (DSP) cell, per an operator re-synthesis of the final commit with `fpga/scripts/synth.tcl`.
 
 ## Files
 

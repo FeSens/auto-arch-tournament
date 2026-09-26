@@ -34,6 +34,8 @@ def test_field_complete_requires_all_three_reps_for_all_models():
         for model in ("gpt-5_6-luna", "gpt-5_6-terra", "gpt-5_6-sol")
         for rep in range(1, 4)
     }
+    for rep in range(1, 4):
+        rows[("gpt-6-astra_max", rep)] = _row("gpt-6-astra_max", rep)
     assert field_complete(rows)
     rows.pop(("gpt-5_6-sol", 3))
     assert not field_complete(rows)

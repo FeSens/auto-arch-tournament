@@ -26,6 +26,12 @@ from datetime import date
 from pathlib import Path
 from typing import Optional
 
+from tools.site.run_notes import (
+    leader_sample_caveat,
+    render_run_note,
+    render_single_rep_caveat,
+)
+
 
 def fetch_star_count(repo: str = "FeSens/auto-arch-tournament",
                      timeout: float = 4.0) -> Optional[int]:
@@ -50,13 +56,20 @@ DEFAULT_RESULTS = REPO / "bench" / "results.jsonl"
 DEFAULT_OUT = REPO / "site"
 
 BASELINE_FITNESS = 282.82
-SITE_VERSION = "v1 · 2026-07"
+SITE_VERSION = "v1 · 2026-09"
 
 # Models registered for the next field but not yet fully represented in
 # bench/results.jsonl. The status table is rendered on the leaderboard and
 # models pages until all expected reps land; partial runs show their progress.
 # Keep the result names in sync with tools/bench/models-gpt56-preview.yaml.
 SCHEDULED_MODELS = (
+    {
+        "name": "gpt-6-astra_max",
+        "label": "GPT-6 Astra max",
+        "runtime_model": "codex:gpt-6-astra",
+        "effort": "max",
+        "expected_reps": 3,
+    },
     {
         "name": "gpt-5_6-sol",
         "label": "GPT-5.6 Sol",
@@ -90,8 +103,14 @@ SCHEDULED_MODELS = (
 # - Kimi K2.6 official tech-blog announcement (Apr 20).
 MODEL_RELEASES = {
     # First documented Codex support: https://learn.chatgpt.com/docs/changelog
+    # 2026-09-03, Codex CLI 0.153.1.
+    "gpt-6-astra_max":{"date": "2026-09-03", "label": "GPT-6 Astra max", "provider": "openai"},
+    # First documented Codex support: https://learn.chatgpt.com/docs/changelog
     # 2026-09-22, Codex CLI 0.156.0 ("Choose GPT-6 Sol or GPT-6 Luna").
     "gpt-6-sol_xhigh":{"date": "2026-09-22", "label": "GPT-6 Sol xhigh", "provider": "openai"},
+    # Public release 2026-09-22 (operator); first Claude Code support in the
+    # 2.1.280 changelog ("Added Claude Opus 5.5 (`claude-opus-5-5`)").
+    "claude-opus-5_5_xhigh":{"date": "2026-09-22", "label": "Claude Opus 5.5 xhigh", "provider": "anthropic"},
     "gemini-3_1-pro":  {"date": "2026-02-19", "label": "Gemini 3.1 Pro",  "provider": "google"},
     "gpt-5_4_xhigh":  {"date": "2026-03-05", "label": "GPT-5.4 xhigh",   "provider": "openai"},
     "gpt-5_4-mini":   {"date": "2026-03-17", "label": "GPT-5.4 mini",    "provider": "openai"},
@@ -109,6 +128,7 @@ PROVIDER_COLORS = {
     "openai": "var(--c2)",
     "google": "var(--c1)",
     "kimi": "var(--c3)",
+    "anthropic": "#D97757",  # Anthropic orange
 }
 
 # Control/ablation arms have no public "release date" (they are not LLMs, or
@@ -187,6 +207,12 @@ class Rep:
         return self.status == "done"
 
 
+# Configurations kept in bench/results.jsonl but not shown on the site. The
+# E1b random-mutation control never produces a valid design (every candidate
+# fails formal), so it scores the baseline and reads as a model on the charts.
+SITE_HIDDEN_MODELS = {"random-mutation"}
+
+
 def load_reps(results_path: Path, repo: Path) -> list[Rep]:
     """Load rows from results.jsonl and enrich each with its winners list."""
     reps: list[Rep] = []
@@ -194,6 +220,8 @@ def load_reps(results_path: Path, repo: Path) -> list[Rep]:
         if not raw.strip():
             continue
         d = json.loads(raw)
+        if d.get("model") in SITE_HIDDEN_MODELS:
+            continue
         reps.append(Rep(
             model=d.get("model", "?"),
             rep=int(d.get("rep", 0)),
@@ -325,7 +353,7 @@ def fint(n):
 
 
 def render_scheduled_models(aggs: list[ModelAgg]) -> str:
-    """Render registered models until their full three-rep field is present."""
+    """Render registered models until their expected repetitions are present."""
     reps_by_model = {a.model: a.n_total for a in aggs}
     rows = []
     for model in SCHEDULED_MODELS:
@@ -340,23 +368,23 @@ def render_scheduled_models(aggs: list[ModelAgg]) -> str:
         <td><code>{model['name']}</code></td>
         <td><code>{model['runtime_model']}</code></td>
         <td><span class="mono">{model['effort']}</span></td>
-        <td>{status}</td>
+        <td>{status} · {expected} planned rep{'s' if expected != 1 else ''}</td>
       </tr>""")
     if not rows:
         return ""
 
     return f"""
-<section class="section" id="gpt-5-6-field">
+<section class="section" id="scheduled-field">
   <div class="eyebrow">Scheduled field</div>
-  <h2>GPT-5.6 preview trio</h2>
+  <h2>Registered benchmark runs</h2>
   <p class="prose">
-    Sol, Terra, and Luna will each run three independent reps under the same
-    <span class="mono">high</span> reasoning budget. Results move into the
+    Each configuration uses the reasoning effort and repetition count shown below.
+    Results move into the
     leaderboard and per-model detail automatically as each rep completes.
   </p>
   <div class="wide">
   <table class="bench">
-    <caption>High reasoning only · N=3 reps per model</caption>
+    <caption>Reasoning effort and planned repetitions per model</caption>
     <thead>
       <tr>
         <th>Model</th><th>Result ID</th><th>Runtime model</th>
@@ -416,6 +444,37 @@ FOOTER = """
   </div>
   <div class="manifesto">a benchmark that respects how far a frontier model still has to go.</div>
 </footer>
+
+<div id="chart-tip" role="tooltip" hidden></div>
+<style>
+  #chart-tip { position: fixed; z-index: 50; pointer-events: none; max-width: 320px;
+    padding: 6px 9px; border-radius: 4px; background: var(--ink, #262a33); color: var(--bg, #faf9f7);
+    font: 12px/1.35 Inter, ui-sans-serif, system-ui, sans-serif; box-shadow: 0 2px 8px rgba(0,0,0,.18); }
+  svg [data-tip] { cursor: default; }
+</style>
+<script>
+(() => {
+  // Chart tooltips: any SVG element with data-tip shows it on hover or tap.
+  const tip = document.getElementById("chart-tip");
+  const place = (e) => {
+    const pad = 14, w = tip.offsetWidth, h = tip.offsetHeight;
+    let x = e.clientX + pad, y = e.clientY + pad;
+    if (x + w > innerWidth - 8) x = e.clientX - w - pad;
+    if (y + h > innerHeight - 8) y = e.clientY - h - pad;
+    tip.style.left = x + "px"; tip.style.top = y + "px";
+  };
+  document.addEventListener("pointerover", (e) => {
+    const t = e.target.closest && e.target.closest("[data-tip]");
+    if (!t) return;
+    tip.textContent = t.getAttribute("data-tip"); tip.hidden = false; place(e);
+  });
+  document.addEventListener("pointermove", (e) => { if (!tip.hidden) place(e); });
+  document.addEventListener("pointerout", (e) => {
+    const t = e.target.closest && e.target.closest("[data-tip]");
+    if (t && !(e.relatedTarget && t.contains(e.relatedTarget))) tip.hidden = true;
+  });
+})();
+</script>
 
 </div>
 </body>
@@ -479,83 +538,268 @@ def _place_labels(items, line_h=22):
     return items
 
 
+def _axis_titles(ml, mt, plot_w, plot_h, xtitle, ytitle):
+    """Axis titles: x centred under the tick labels, y rotated along the axis."""
+    cy = mt + plot_h / 2
+    return [
+        f'  <text class="axis-label" x="{ml + plot_w / 2:.1f}" y="{mt + plot_h + 42:.1f}" '
+        f'text-anchor="middle">{xtitle}</text>',
+        f'  <text class="axis-label" x="{ml - 50:.1f}" y="{cy:.1f}" text-anchor="middle" '
+        f'transform="rotate(-90 {ml - 50:.1f} {cy:.1f})">{ytitle}</text>',
+    ]
+
+
+HUMAN_HINT = "above: beats the human baseline"
+
+PROVIDER_NAMES = {"openai": "OpenAI", "google": "Google", "kimi": "Moonshot (Kimi)",
+                  "anthropic": "Anthropic"}
+
+
+def _display_name(model: str) -> str:
+    """Short human name for chart labels (MODEL_RELEASES label if known)."""
+    meta = MODEL_RELEASES.get(model)
+    return meta["label"] if meta else model
+
+
+def _provider_color(model: str, fallback: str) -> str:
+    meta = MODEL_RELEASES.get(model)
+    return PROVIDER_COLORS.get(meta["provider"], fallback) if meta else fallback
+
+
+def _legend(x0, y0, providers, extras=()):
+    """One-row legend: provider swatches, then extra (label, svg-marker) pairs."""
+    out, cx = [], x0
+    for prov in providers:
+        name = PROVIDER_NAMES.get(prov, prov)
+        out.append(f'  <circle cx="{cx + 5:.1f}" cy="{y0 - 4:.1f}" r="5" fill="{PROVIDER_COLORS[prov]}"/>')
+        out.append(f'  <text class="legend" x="{cx + 15:.1f}" y="{y0:.1f}">{name}</text>')
+        cx += 15 + len(name) * 6.2 + 18
+    for name, marker in extras:
+        out.append(marker.format(cx=cx + 5, cy=y0 - 4, x0=cx - 2, x1=cx + 11))
+        out.append(f'  <text class="legend" x="{cx + 15:.1f}" y="{y0:.1f}">{name}</text>')
+        cx += 15 + len(name) * 6.2 + 18
+    return out
+
+
+CHART_STYLE = """  <style>
+    text { font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
+    .axis-line { stroke: var(--rule, #d8d4cf); stroke-width: 1; }
+    .grid { stroke: var(--rule, #d8d4cf); stroke-width: .6; }
+    .axis-label { font-size: 12px; fill: var(--ink, #262a33); }
+    .tick { font-family: ui-monospace, SFMono-Regular, monospace; font-size: 10px; fill: var(--ink-muted, #77716c); }
+    .legend { font-size: 11.5px; fill: var(--ink-muted, #77716c); }
+    .name { font-size: 12px; font-weight: 600; paint-order: stroke;
+            stroke: var(--bg, #faf9f7); stroke-width: 4px; stroke-linejoin: round; }
+    .note { font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; }
+    .pt { stroke: var(--bg, #faf9f7); stroke-width: 2; }
+    .baseline { stroke: var(--ink-muted, #77716c); stroke-width: 1; stroke-dasharray: 4 3; }
+    g.dot:hover .pt { stroke: var(--ink, #262a33); }
+  </style>"""
+
+
+def _human_line(ml, plot_w, hy, bbox_out=None):
+    """Red dashed VexRiscv fitness line with an 'above human baseline' hint
+    at its right end. Appends the hint's text box to bbox_out if given."""
+    txt = f"Human reference (VexRiscv {VEXRISCV_REF['fitness']:.0f})"
+    if bbox_out is not None:
+        bbox_out.append((ml + plot_w - 6 - len(txt) * 6.1, hy - 16, ml + plot_w - 2, hy + 2))
+    return [
+        f'  <line stroke="var(--c-human)" stroke-width="1.2" stroke-dasharray="5 4" '
+        f'x1="{ml}" y1="{hy:.1f}" x2="{ml + plot_w}" y2="{hy:.1f}"/>',
+        f'  <text class="tick" x="{ml + plot_w - 6:.1f}" y="{hy - 6:.1f}" text-anchor="end" '
+        f'paint-order="stroke" stroke="var(--bg, #faf9f7)" stroke-width="6" stroke-linejoin="round" '
+        f'style="fill: var(--c-human)">{txt}</text>',
+    ]
+
+
+def _spread_1d(items, lo, hi, gap):
+    """Give each item a label_y near its py, at least `gap` apart and
+    inside [lo, hi]: push down top-to-bottom, then, if the stack overflows,
+    push back up from the bottom."""
+    s = sorted(items, key=lambda it: it["py"])
+    prev = lo - gap
+    for it in s:
+        it["label_y"] = max(it["py"] + 4, prev + gap)
+        prev = it["label_y"]
+    nxt = hi + gap
+    for it in reversed(s):
+        it["label_y"] = min(it["label_y"], nxt - gap)
+        nxt = it["label_y"]
+    return items
+
+
+def _place_labels_2d(items, bounds, step=13, max_shift=156, obstacles=()):
+    """Place two-line labels (name + sub) next to their points without
+    overlapping each other, any point, or leaving `bounds`.
+
+    Each item needs px, py (point), label and sub (strings), and optionally
+    prefer ("start" = right of the point, "end" = left). Candidates are tried
+    nearest-first: vertical shifts 0, -step, +step, ... on the preferred side,
+    then the other side. Sets lbl_x, anchor, label_y (baseline of the name
+    line) and pushed (label moved off the point's row, so draw a leader).
+    obstacles: extra (x0, y0, x1, y1) boxes labels must avoid (other text).
+    """
+    x0, y0, x1, y1 = bounds
+
+    def box(it, anchor, ly):
+        cw = it.get("char_w", 6.7)
+        w = max(len(it["label"]) * cw, len(it.get("sub", "")) * 6.1) + 2
+        lx = it["px"] + 11 if anchor == "start" else it["px"] - 11
+        bx0 = lx if anchor == "start" else lx - w
+        bottom = ly + 15 if it.get("sub") else ly + 4
+        return lx, (bx0, ly - 11, bx0 + w, bottom)
+
+    def hits(a, b, tol=1.0):
+        return (a[0] < b[2] - tol and b[0] < a[2] - tol
+                and a[1] < b[3] - tol and b[1] < a[3] - tol)
+
+    dots = [(it["px"] - 8, it["py"] - 8, it["px"] + 8, it["py"] + 8) for it in items]
+    placed = list(obstacles)
+    shifts = [0]
+    for k in range(1, max_shift // step + 1):
+        shifts += [-k * step, k * step]
+    # Crowded, high-scoring points first; ties top-down.
+    for it in sorted(items, key=lambda it: (it["py"], it["px"])):
+        sides = [it.get("prefer", "start")]
+        sides.append("end" if sides[0] == "start" else "start")
+        best = None
+        for dy in shifts:
+            for anchor in sides:
+                ly = it["py"] + 3 + dy
+                lx, b = box(it, anchor, ly)
+                if b[0] < x0 or b[2] > x1 or b[1] < y0 or b[3] > y1:
+                    continue
+                own = (it["px"] - 8, it["py"] - 8, it["px"] + 8, it["py"] + 8)
+                if any(hits(b, p) for p in placed) or any(
+                        hits(b, d) for d in dots if d != own):
+                    continue
+                best = (lx, anchor, ly, b)
+                break
+            if best:
+                break
+        if best is None:  # no free slot: keep it on the point's row
+            lx, b = box(it, sides[0], it["py"] + 3)
+            best = (lx, sides[0], it["py"] + 3, b)
+        it["lbl_x"], it["anchor"], it["label_y"], b = best
+        it["pushed"] = abs(it["label_y"] - (it["py"] + 3)) > 1.5
+        placed.append(b)
+    return items
+
+
 def chart_score_vs_lut4(aggs: list[ModelAgg], baseline_lut: int = 9563,
                          baseline_fit: float = BASELINE_FITNESS) -> str:
-    """Scatter — fitness (Y) × LUT4 (X). One labeled point per model + VexRiscv human reference + baseline cross-hair."""
+    """Scatter: fitness (Y) x LUT4 area (X), one point per model's best run,
+    coloured by provider. Numbers live in hover tooltips; the shaded region
+    is better than the human reference and smaller than the V0 baseline."""
     items = []
     for i, a in enumerate(aggs):
         if not a.best_rep or not a.best_rep.best_lut4 or not a.fitness_best:
             continue
+        if is_control_model(a.model):
+            continue  # controls score the baseline design
         items.append({"lut": a.best_rep.best_lut4, "fit": a.fitness_best,
-                      "label": a.model, "color": CHART_PALETTE[i % len(CHART_PALETTE)],
-                      "kind": "model"})
-    # VexRiscv human reference — first-class on this chart
-    items.append({"lut": VEXRISCV_REF["lut4"], "fit": VEXRISCV_REF["fitness"],
-                  "label": "VexRiscv", "sub": "human ref",
-                  "color": "var(--c-human)", "kind": "human"})
-
+                      "label": _display_name(a.model), "model": a.model,
+                      "color": _provider_color(a.model, CHART_PALETTE[i % len(CHART_PALETTE)])})
     if not items:
         return ""
+    hum = {"lut": VEXRISCV_REF["lut4"], "fit": VEXRISCV_REF["fitness"]}
 
-    luts = [p["lut"] for p in items] + [baseline_lut]
-    fits = [p["fit"] for p in items] + [baseline_fit]
-    xmin, xmax = min(luts) * 0.78, max(luts) * 1.05
-    ymin, ymax = min(fits) * 0.85, max(fits) * 1.05
+    luts = [p["lut"] for p in items] + [baseline_lut, hum["lut"]]
+    fits = [p["fit"] for p in items] + [baseline_fit, hum["fit"]]
+    xmin, xmax = 0, max(luts) * 1.08
+    ymin = min(250, min(fits) * 0.9)
+    ymax = max(fits) * 1.06
 
-    W, H = 880, 480
-    ml, mr, mt, mb = 76, 226, 30, 56
+    W, H = 900, 560
+    ml, mr, mt, mb = 80, 30, 58, 64
     plot_w, plot_h = W - ml - mr, H - mt - mb
 
     def x(v): return ml + _scale(v, xmin, xmax, 0, plot_w)
     def y(v): return mt + _scale(v, ymax, ymin, 0, plot_h)
 
-    xticks = _nice_ticks(xmin, xmax, 5)
-    yticks = _nice_ticks(ymin, ymax, 5)
+    parts = [f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" role="img" aria-label="Fitness versus LUT4 by model">',
+             CHART_STYLE]
 
-    parts = [f'<svg viewBox="0 0 {W} {H}" role="img" aria-label="Fitness versus LUT4 by model">']
+    # Shaded region: beats the human reference on both axes, i.e. smaller
+    # than VexRiscv AND higher fitness than VexRiscv.
+    qx, qy = x(hum["lut"]), y(hum["fit"])
+    parts.append(f'  <rect x="{ml}" y="{mt}" width="{qx - ml:.1f}" height="{qy - mt:.1f}" '
+                 f'fill="var(--c2)" opacity="0.08"/>')
+    quad_lines = ["Smaller and", "faster than", "VexRiscv"]
+    for k, line in enumerate(quad_lines):
+        parts.append(f'  <text class="note" x="{ml + 8}" y="{mt + 16 + 13 * k}" style="fill: var(--c2)">{line}</text>')
+    quad_box = (ml, mt, ml + 8 + max(len(l) for l in quad_lines) * 7.0, mt + 20 + 13 * len(quad_lines))
 
-    for t in yticks:
+    for t in _nice_ticks(ymin, ymax, 7):
         py = y(t)
         parts.append(f'  <line class="grid" x1="{ml}" y1="{py:.1f}" x2="{ml+plot_w}" y2="{py:.1f}"/>')
         parts.append(f'  <text class="tick" x="{ml-10}" y="{py+4:.1f}" text-anchor="end">{t:.0f}</text>')
-    for t in xticks:
+    for t in _nice_ticks(xmin, xmax, 8):
         px = x(t)
-        parts.append(f'  <line class="grid" x1="{px:.1f}" y1="{mt}" x2="{px:.1f}" y2="{mt+plot_h}"/>')
-        label = f"{t/1000:.1f}k" if t >= 1000 else f"{t:.0f}"
+        label = (f"{t/1000:g}k" if t >= 1000 else f"{t:.0f}")
         parts.append(f'  <text class="tick" x="{px:.1f}" y="{mt+plot_h+18}" text-anchor="middle">{label}</text>')
-
     parts.append(f'  <line class="axis-line" x1="{ml}" y1="{mt+plot_h}" x2="{ml+plot_w}" y2="{mt+plot_h}"/>')
-    parts.append(f'  <line class="axis-line" x1="{ml}" y1="{mt}" x2="{ml}" y2="{mt+plot_h}"/>')
+    parts += _axis_titles(ml, mt, plot_w, plot_h, "Area · LUT4 count (← smaller is better)",
+                          "Fitness · CoreMark iter/s (↑ better)")
 
-    # baseline V0 — kept as a quiet crosshair so the reader sees the anchor
+    # Human reference lines: fitness (horizontal) and area (vertical).
+    parts.append(f'  <line stroke="var(--c-human)" stroke-width="1.2" stroke-dasharray="5 4" '
+                 f'x1="{ml}" y1="{qy:.1f}" x2="{ml+plot_w}" y2="{qy:.1f}"/>')
+    parts.append(f'  <line stroke="var(--c-human)" stroke-width="1.2" stroke-dasharray="5 4" '
+                 f'x1="{qx:.1f}" y1="{mt}" x2="{qx:.1f}" y2="{mt+plot_h}"/>')
+    hint = f"Human reference (VexRiscv {hum['fit']:.0f})"
+    hint_box = (ml + plot_w - 6 - len(hint) * 5.9, qy - 16, ml + plot_w, qy - 2)
+    parts.append(f'  <text class="tick" x="{ml+plot_w-6:.1f}" y="{qy-6:.1f}" text-anchor="end" '
+                 f'style="fill: var(--c-human)">{hint}</text>')
+
+    # Legend.
+    provs = [p for p in PROVIDER_COLORS if any(
+        MODEL_RELEASES.get(it["model"], {}).get("provider") == p for it in items)]
+    parts += _legend(ml, 22, provs, extras=[
+        ("VexRiscv (human)", '  <rect x="{cx:.1f}" y="{cy:.1f}" width="9" height="9" '
+                             'transform="rotate(45 {cx:.1f} {cy:.1f}) translate(-4.5 -4.5)" fill="var(--c-human)"/>'),
+        ("V0 baseline", '  <circle cx="{cx:.1f}" cy="{cy:.1f}" r="4.5" fill="var(--bg)" '
+                        'stroke="var(--ink-muted)" stroke-width="1.5"/>')])
+
+    # Reference points.
+    hx, hy = x(hum["lut"]), qy
     bx, by = x(baseline_lut), y(baseline_fit)
-    parts.append(f'  <line class="baseline" x1="{ml}" y1="{by:.1f}" x2="{ml+plot_w}" y2="{by:.1f}"/>')
-    parts.append(f'  <line class="baseline" x1="{bx:.1f}" y1="{mt}" x2="{bx:.1f}" y2="{mt+plot_h}"/>')
-    parts.append(f'  <circle cx="{bx:.1f}" cy="{by:.1f}" r="3.5" fill="var(--bg)" stroke="var(--ink-muted)" stroke-width="1.4"/>')
-    parts.append(f'  <text class="tick" x="{bx+10:.1f}" y="{by-7:.1f}" fill="var(--ink-muted)" text-anchor="start">baseline V0 · {baseline_fit:.0f} · {baseline_lut/1000:.1f}k LUT</text>')
-
-    # axis labels
-    parts.append(f'  <text class="axis-label" x="{ml}" y="{mt-12}" text-anchor="start">Fitness (CoreMark iter/s)</text>')
-    parts.append(f'  <text class="axis-label" x="{ml+plot_w}" y="{H-14}" text-anchor="end">Area · LUT4 count  (← smaller is better)</text>')
-
-    # Pre-compute point pixel positions and resolve label collisions.
+    refs = [
+        {"px": hx, "py": hy, "label": "VexRiscv (human)", "color": "var(--c-human)", "char_w": 7.2},
+        {"px": bx, "py": by, "label": "V0 baseline", "color": "var(--ink-muted)", "char_w": 7.2},
+    ]
     for it in items:
-        it["px"] = x(it["lut"]); it["py"] = y(it["fit"])
-        # default label anchor — to the right of the dot, at the dot's y
-        it["y"] = it["py"]
-    _place_labels(items, line_h=24)
+        it["px"], it["py"], it["char_w"] = x(it["lut"]), y(it["fit"]), 7.2
+    everything = items + refs
+    # The human line itself is an obstacle, so no name sits on it.
+    line_box = (ml, qy - 1.5, ml + plot_w, qy + 1.5)
+    vline_box = (qx - 1.5, mt, qx + 1.5, mt + plot_h)
+    _place_labels_2d(everything, (ml + 2, mt + 4, W - 6, mt + plot_h - 2),
+                     obstacles=[hint_box, line_box, vline_box, quad_box])
 
-    # Draw points first, labels on top (so dots don't overdraw text)
+    for it in everything:
+        if it["pushed"]:
+            parts.append(
+                f'  <line x1="{it["px"]:.1f}" y1="{it["py"]:.1f}" '
+                f'x2="{it["lbl_x"] + (-3 if it["anchor"] == "start" else 3):.1f}" '
+                f'y2="{it["label_y"] - 4:.1f}" stroke="{it["color"]}" stroke-width="1" opacity="0.4"/>')
+    parts.append(f'  <g data-tip="VexRiscv (human reference) · fitness {hum["fit"]:.0f} · {hum["lut"]:,} LUT4">'
+                 f'<circle cx="{hx:.1f}" cy="{hy:.1f}" r="12" fill="transparent"/>'
+                 f'<rect x="{hx-4.5:.1f}" y="{hy-4.5:.1f}" width="9" height="9" '
+                 f'transform="rotate(45 {hx:.1f} {hy:.1f})" fill="var(--c-human)"/></g>')
+    parts.append(f'  <g data-tip="V0 baseline · fitness {baseline_fit:.0f} · {baseline_lut:,} LUT4">'
+                 f'<circle cx="{bx:.1f}" cy="{by:.1f}" r="12" fill="transparent"/>'
+                 f'<circle cx="{bx:.1f}" cy="{by:.1f}" r="4.5" fill="var(--bg)" stroke="var(--ink-muted)" '
+                 f'stroke-width="1.5"/></g>')
     for it in items:
-        parts.append(f'  <circle class="point" cx="{it["px"]:.1f}" cy="{it["py"]:.1f}" r="6" fill="{it["color"]}"/>')
-    for it in items:
-        lbl_x = it["px"] + 12
-        lbl_y = it["label_y"]
-        sub = it.get("sub", f"{it['fit']:.0f} · {it['lut']/1000:.1f}k LUT")
-        if it["kind"] != "model":
-            sub = f"{sub} · {it['fit']:.0f} · {it['lut']/1000:.1f}k LUT"
-        parts.append(f'  <text class="label" x="{lbl_x:.1f}" y="{lbl_y:.1f}" fill="{it["color"]}">{it["label"]}</text>')
-        parts.append(f'  <text class="tick" x="{lbl_x:.1f}" y="{lbl_y+12:.1f}" fill="{it["color"]}" fill-opacity="0.7">{sub}</text>')
+        parts.append(
+            f'  <g class="dot" data-tip="{it["label"]} · fitness {it["fit"]:.0f} · {it["lut"]:,} LUT4">'
+            f'<circle cx="{it["px"]:.1f}" cy="{it["py"]:.1f}" r="12" fill="transparent"/>'
+            f'<circle class="pt" cx="{it["px"]:.1f}" cy="{it["py"]:.1f}" r="6.5" fill="{it["color"]}"/></g>')
+    for it in everything:
+        parts.append(
+            f'  <text class="name" x="{it["lbl_x"]:.1f}" y="{it["label_y"]:.1f}" '
+            f'text-anchor="{it["anchor"]}" style="fill: {it["color"]}">{it["label"]}</text>')
 
     parts.append('</svg>')
     return "\n".join(parts)
@@ -593,25 +837,19 @@ def chart_release_vs_fitness(aggs: list[ModelAgg]) -> str:
     ymin = min(BASELINE_FITNESS * 0.96, min(it["fit"] for it in items) * 0.94)
     ymax = max(it["fit"] for it in items) * 1.07
 
-    W, H = 920, 510
-    ml, mr, mt, mb = 84, 196, 34, 62
+    W, H = 920, 580
+    ml, mr, mt, mb = 90, 40, 58, 64
     plot_w, plot_h = W - ml - mr, H - mt - mb
 
     def x(v): return ml + _scale(v, xmin, xmax, 0, plot_w)
     def y(v): return mt + _scale(v, ymax, ymin, 0, plot_h)
 
-    parts = [f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" role="img" aria-label="Peak HWE fitness by model release date">']
-    # Keep the SVG legible when copied or rendered outside the site stylesheet.
-    parts.append('''  <style>
-    text { font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
-    .axis-line { stroke: var(--rule, #d8d4cf); stroke-width: 1; }
-    .grid { stroke: var(--rule, #d8d4cf); stroke-width: .5; stroke-dasharray: 2 3; }
-    .baseline { stroke: var(--ink-muted, #77716c); stroke-width: 1; stroke-dasharray: 4 3; }
-    .axis-label { font-size: 12px; fill: var(--ink, #262a33); }
-    .tick { font-family: ui-monospace, SFMono-Regular, monospace; font-size: 10px; fill: var(--ink-muted, #77716c); }
-    .point { stroke: var(--bg, #faf9f7); stroke-width: 2; }
-    .label { font-family: ui-monospace, SFMono-Regular, monospace; font-size: 11px; font-weight: 500; }
-  </style>''')
+    parts = [f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" role="img" aria-label="Peak HWE fitness by model release date">',
+             CHART_STYLE]
+    provs = [p for p in PROVIDER_COLORS if any(it["provider"] == p for it in items)]
+    parts += _legend(ml, 22, provs, extras=[
+        ("OLS trend", '  <line x1="{x0:.1f}" y1="{cy:.1f}" x2="{x1:.1f}" y2="{cy:.1f}" '
+                      'stroke="var(--c2)" stroke-width="2" stroke-dasharray="5 3" opacity="0.6"/>')])
 
     # Monthly grid, using the first day of each month within the chart window.
     start = date.fromordinal(xmin)
@@ -624,7 +862,6 @@ def chart_release_vs_fitness(aggs: list[ModelAgg]) -> str:
             break
         if tick >= start:
             px = x(tick.toordinal())
-            parts.append(f'  <line class="grid" x1="{px:.1f}" y1="{mt}" x2="{px:.1f}" y2="{mt+plot_h}"/>')
             label = tick.strftime("%b %Y") if first_month_label or tick.month == 1 else tick.strftime("%b")
             parts.append(f'  <text class="tick" x="{px:.1f}" y="{mt+plot_h+20}" text-anchor="middle">{label}</text>')
             first_month_label = False
@@ -633,17 +870,16 @@ def chart_release_vs_fitness(aggs: list[ModelAgg]) -> str:
         else:
             month += 1
 
-    for t in _nice_ticks(ymin, ymax, 6):
+    for t in _nice_ticks(ymin, ymax, 8):
         py = y(t)
         parts.append(f'  <line class="grid" x1="{ml}" y1="{py:.1f}" x2="{ml+plot_w}" y2="{py:.1f}"/>')
         parts.append(f'  <text class="tick" x="{ml-10}" y="{py+4:.1f}" text-anchor="end">{t:.0f}</text>')
 
     parts.append(f'  <line class="axis-line" x1="{ml}" y1="{mt+plot_h}" x2="{ml+plot_w}" y2="{mt+plot_h}"/>')
-    parts.append(f'  <line class="axis-line" x1="{ml}" y1="{mt}" x2="{ml}" y2="{mt+plot_h}"/>')
 
     by = y(BASELINE_FITNESS)
     parts.append(f'  <line class="baseline" x1="{ml}" y1="{by:.1f}" x2="{ml+plot_w}" y2="{by:.1f}"/>')
-    parts.append(f'  <text class="tick" x="{ml+8}" y="{by-7:.1f}" fill="var(--ink-muted)">baseline V0 · {BASELINE_FITNESS:.0f}</text>')
+    parts.append(f'  <text class="tick" x="{ml+8}" y="{by-7:.1f}">V0 baseline · {BASELINE_FITNESS:.0f}</text>')
 
     # Ordinary least-squares trend. This is descriptive, not a forecast.
     if len(items) >= 2:
@@ -661,37 +897,41 @@ def chart_release_vs_fitness(aggs: list[ModelAgg]) -> str:
                 'stroke="var(--c2)" stroke-width="2" stroke-dasharray="7 6" opacity="0.55"/>'
             )
 
-    parts.append(f'  <text class="axis-label" x="{ml}" y="{mt-14}" text-anchor="start">Peak HWE fitness · higher is better</text>')
-    parts.append(f'  <text class="axis-label" x="{ml+plot_w}" y="{H-14}" text-anchor="end">Public model release date</text>')
+    parts += _axis_titles(ml, mt, plot_w, plot_h, "Public model release date",
+                          "Peak HWE fitness (↑ better)")
+    human_boxes = []
+    if ymin <= VEXRISCV_REF["fitness"] <= ymax:
+        parts += _human_line(ml, plot_w, y(VEXRISCV_REF["fitness"]), human_boxes)
 
     for it in items:
         it["px"], it["py"] = x(it["day"]), y(it["fit"])
-        it["y"] = it["py"]
-    _place_labels(items, line_h=22)
+        it["char_w"] = 7.2
+        it["prefer"] = "start" if it["px"] < ml + plot_w * 0.72 else "end"
+    base_box = (ml + 4, by - 17, ml + 140, by + 2)
+    _place_labels_2d(items, (ml + 2, mt + 4, W - 6, mt + plot_h - 2),
+                     obstacles=[*human_boxes, base_box])
 
     for it in items:
-        parts.append(
-            f'  <circle class="point" cx="{it["px"]:.1f}" cy="{it["py"]:.1f}" '
-            f'r="6.5" fill="{it["color"]}"/>'
-        )
-    for it in items:
-        right_side = it["px"] < ml + plot_w * 0.72
-        lbl_x = it["px"] + 11 if right_side else it["px"] - 11
-        anchor = "start" if right_side else "end"
         if it["pushed"]:
+            # Leader from the dot to the near edge of the label's name line.
             parts.append(
                 f'  <line x1="{it["px"]:.1f}" y1="{it["py"]:.1f}" '
-                f'x2="{it["px"]:.1f}" y2="{it["label_y"]:.1f}" '
-                f'stroke="{it["color"]}" stroke-width="1" opacity="0.35"/>'
+                f'x2="{it["lbl_x"] + (-3 if it["anchor"] == "start" else 3):.1f}" '
+                f'y2="{it["label_y"] - 4:.1f}" '
+                f'stroke="{it["color"]}" stroke-width="1" opacity="0.45"/>'
             )
+    for it in items:
         parts.append(
-            f'  <text class="label" x="{lbl_x:.1f}" y="{it["label_y"]:.1f}" '
-            f'text-anchor="{anchor}" fill="{it["color"]}">{it["label"]}</text>'
+            f'  <g class="dot" data-tip="{it["label"]} · peak fitness {it["fit"]:.0f} · '
+            f'released {it["released"].strftime("%b %d, %Y")}">'
+            f'<circle cx="{it["px"]:.1f}" cy="{it["py"]:.1f}" r="12" fill="transparent"/>'
+            f'<circle class="pt" cx="{it["px"]:.1f}" cy="{it["py"]:.1f}" '
+            f'r="6.5" fill="{it["color"]}"/></g>'
         )
+    for it in items:
         parts.append(
-            f'  <text class="tick" x="{lbl_x:.1f}" y="{it["label_y"]+12:.1f}" '
-            f'text-anchor="{anchor}" fill="{it["color"]}" fill-opacity="0.72">'
-            f'{it["fit"]:.0f} · {it["released"].strftime("%b %d")}</text>'
+            f'  <text class="name" x="{it["lbl_x"]:.1f}" y="{it["label_y"]:.1f}" '
+            f'text-anchor="{it["anchor"]}" style="fill: {it["color"]}">{it["label"]}</text>'
         )
 
     parts.append('</svg>')
@@ -706,6 +946,8 @@ def chart_score_vs_round(aggs: list[ModelAgg],
     for i, a in enumerate(aggs):
         rep = a.best_rep
         if not rep: continue
+        if is_control_model(a.model):
+            continue  # controls never leave the baseline line
         # Round 0 = baseline retest. After each round, take max fitness so far among
         # all of this rep's improvement entries.
         wins_by_round = {}
@@ -721,7 +963,10 @@ def chart_score_vs_round(aggs: list[ModelAgg],
             if r in wins_by_round and wins_by_round[r] > best:
                 best = wins_by_round[r]
             running.append((r, best))
-        series.append((a.model, CHART_PALETTE[i % len(CHART_PALETTE)], running))
+        color = CHART_PALETTE[i % len(CHART_PALETTE)]
+        if MODEL_RELEASES.get(a.model, {}).get("provider") == "anthropic":
+            color = PROVIDER_COLORS["anthropic"]
+        series.append((a.model, color, running))
 
     if not series:
         return ""
@@ -730,27 +975,29 @@ def chart_score_vs_round(aggs: list[ModelAgg],
     ymin = min(all_fits) * 0.95
     ymax = max(all_fits) * 1.04
 
-    W, H = 880, 460
-    ml, mr, mt, mb = 70, 200, 36, 60
+    W, H = 920, 480
+    ml, mr, mt, mb = 90, 250, 24, 64
     plot_w, plot_h = W - ml - mr, H - mt - mb
     xmin, xmax = 0, n_rounds
 
     def x(v): return ml + _scale(v, xmin, xmax, 0, plot_w)
     def y(v): return mt + _scale(v, ymax, ymin, 0, plot_h)
 
-    yticks = _nice_ticks(ymin, ymax, 5)
+    yticks = _nice_ticks(ymin, ymax, 8)
 
-    parts = [f'<svg viewBox="0 0 {W} {H}" role="img" aria-label="Best fitness over rounds, per model">']
+    parts = [f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" role="img" aria-label="Best fitness over rounds, per model">',
+             CHART_STYLE]
 
     # grid
     for t in yticks:
         py = y(t)
         parts.append(f'  <line class="grid" x1="{ml}" y1="{py:.1f}" x2="{ml+plot_w}" y2="{py:.1f}"/>')
         parts.append(f'  <text class="tick" x="{ml-8}" y="{py+4:.1f}" text-anchor="end">{t:.0f}</text>')
-    for t in range(0, n_rounds + 1, 5):
+    for t in range(0, n_rounds + 1):
         px = x(t)
-        parts.append(f'  <line class="grid" x1="{px:.1f}" y1="{mt}" x2="{px:.1f}" y2="{mt+plot_h}"/>')
-        parts.append(f'  <text class="tick" x="{px:.1f}" y="{mt+plot_h+18}" text-anchor="middle">R{t}</text>')
+        if t % 5 == 0:
+            parts.append(f'  <line class="grid" x1="{px:.1f}" y1="{mt}" x2="{px:.1f}" y2="{mt+plot_h}"/>')
+        parts.append(f'  <text class="tick" x="{px:.1f}" y="{mt+plot_h+18}" text-anchor="middle">{t}</text>')
 
     # axes
     parts.append(f'  <line class="axis-line" x1="{ml}" y1="{mt+plot_h}" x2="{ml+plot_w}" y2="{mt+plot_h}"/>')
@@ -759,17 +1006,18 @@ def chart_score_vs_round(aggs: list[ModelAgg],
     # baseline horizontal
     by = y(baseline_fit)
     parts.append(f'  <line class="baseline" x1="{ml}" y1="{by:.1f}" x2="{ml+plot_w}" y2="{by:.1f}"/>')
-    parts.append(f'  <text class="label" x="{ml+plot_w-6:.1f}" y="{by-6:.1f}" text-anchor="end" fill="var(--ink-muted)">baseline {baseline_fit:.0f}</text>')
+    parts.append(f'  <text class="label" x="{ml+plot_w-6:.1f}" y="{by-6:.1f}" text-anchor="end" paint-order="stroke" stroke="var(--bg, #faf9f7)" stroke-width="3.5" fill="var(--ink-muted)">baseline {baseline_fit:.0f}</text>')
 
     # VexRiscv human reference — horizontal red dashed line
+    human_text = []
     if ymin <= VEXRISCV_REF["fitness"] <= ymax:
-        hy = y(VEXRISCV_REF["fitness"])
-        parts.append(f'  <line stroke="var(--c-human)" stroke-width="1" stroke-dasharray="4 3" x1="{ml}" y1="{hy:.1f}" x2="{ml+plot_w}" y2="{hy:.1f}"/>')
-        parts.append(f'  <text class="label" x="{ml+plot_w-6:.1f}" y="{hy-6:.1f}" text-anchor="end" fill="var(--c-human)">VexRiscv {VEXRISCV_REF["fitness"]:.0f}</text>')
+        line, text = _human_line(ml, plot_w, y(VEXRISCV_REF["fitness"]))
+        parts.append(line)
+        human_text.append(text)  # drawn after the step lines, on top
 
     # axis labels
-    parts.append(f'  <text class="axis-label" x="{ml}" y="{mt-12}" text-anchor="start">Best fitness so far</text>')
-    parts.append(f'  <text class="axis-label" x="{ml+plot_w}" y="{H-14}" text-anchor="end">Round (1 hypothesis × 3 slots each)</text>')
+    parts += _axis_titles(ml, mt, plot_w, plot_h,
+                          "Round (3 hypothesis slots each)", "Best fitness so far")
 
     # Draw all step-lines first
     for (model, color, pts) in series:
@@ -781,24 +1029,37 @@ def chart_score_vs_round(aggs: list[ModelAgg],
             else:
                 prev_y = y(pts[i-1][1])
                 path.append(f"L {px:.1f} {prev_y:.1f} L {px:.1f} {py:.1f}")
-        parts.append(f'  <path d="{" ".join(path)}" stroke="{color}" stroke-width="1.8" fill="none"/>')
+        tip = f"{_display_name(model)} · best {pts[-1][1]:.0f}"
+        parts.append(f'  <g data-tip="{tip}"><path d="{" ".join(path)}" stroke="transparent" '
+                     f'stroke-width="10" fill="none"/>'
+                     f'<path d="{" ".join(path)}" stroke="{color}" stroke-width="1.8" fill="none"/></g>')
+    parts += human_text
 
-    # Endpoint dots + collision-resolved labels
+    # Endpoint dots + one-line labels spread to fit the plot height.
     label_items = []
     for (model, color, pts) in series:
-        rx, ry = x(pts[-1][0]), y(pts[-1][1])
-        label_items.append({"model": model, "color": color,
-                            "px": rx, "py": ry, "y": ry,
-                            "final": pts[-1][1], "round": pts[-1][0]})
-    _place_labels(label_items, line_h=24)
+        final = pts[-1][1]
+        reached = next(r for r, f in pts if f == final)
+        rx, ry = x(pts[-1][0]), y(final)
+        label_items.append({"model": model, "color": color, "px": rx,
+                            "py": ry, "final": final, "reached": reached})
+    _spread_1d(label_items, lo=mt + 4, hi=mt + plot_h - 2, gap=14)
 
+    lbl_x = ml + plot_w + 26
     for it in label_items:
-        parts.append(f'  <circle cx="{it["px"]:.1f}" cy="{it["py"]:.1f}" r="5" fill="{it["color"]}" class="point"/>')
+        # Elbow leader: dot -> right, then to the label row.
+        parts.append(
+            f'  <polyline points="{it["px"]:.1f},{it["py"]:.1f} '
+            f'{it["px"] + 10:.1f},{it["py"]:.1f} {lbl_x - 4:.1f},{it["label_y"] - 4:.1f}" '
+            f'fill="none" stroke="{it["color"]}" stroke-width="1" opacity="0.5"/>')
     for it in label_items:
-        lbl_x = it["px"] + 12
-        lbl_y = it["label_y"]
-        parts.append(f'  <text class="label" x="{lbl_x:.1f}" y="{lbl_y:.1f}" fill="{it["color"]}">{it["model"]}</text>')
-        parts.append(f'  <text class="tick" x="{lbl_x:.1f}" y="{lbl_y+12:.1f}" fill="{it["color"]}" fill-opacity="0.7">{it["final"]:.0f} at R{it["round"]}</text>')
+        parts.append(f'  <circle cx="{it["px"]:.1f}" cy="{it["py"]:.1f}" r="4.5" fill="{it["color"]}" class="point"/>')
+    for it in label_items:
+        reached = "baseline" if it["reached"] == 0 else f'R{it["reached"]}'
+        parts.append(
+            f'  <text class="name" x="{lbl_x:.1f}" y="{it["label_y"]:.1f}" style="fill: {it["color"]}">'
+            f'{_display_name(it["model"])} <tspan class="tick" style="font-weight: 400">'
+            f'{it["final"]:.0f} · {reached}</tspan></text>')
 
     parts.append('</svg>')
     return "\n".join(parts)
@@ -898,8 +1159,9 @@ def render_index(aggs: list[ModelAgg], reps: list[Rep], stars: Optional[int] = N
       Each point is one model configuration's best completed HWE Bench rep;
       reasoning-effort variants share their underlying model family's public release date.
       The dashed fit is descriptive, not a forecast. Release dates come from the
-      <a href="https://developers.openai.com/api/docs/changelog" class="ext">OpenAI API / Codex notes</a>,
+      <a href="https://learn.chatgpt.com/docs/changelog" class="ext">OpenAI Codex notes</a>,
       <a href="https://ai.google.dev/gemini-api/docs/changelog" class="ext">Gemini API changelog</a>,
+      <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md" class="ext">Claude Code changelog</a>,
       and <a href="https://www.kimi.com/blog/kimi-k2-6" class="ext">Kimi K2.6 announcement</a>.
     </figcaption>
   </figure>
@@ -924,7 +1186,7 @@ def render_index(aggs: list[ModelAgg], reps: list[Rep], stars: Optional[int] = N
   <h2>Peak fitness per model</h2>
   <div class="wide">
   <table class="bench">
-    <caption>Best of N=3 reps per model · {sum(a.n_total for a in aggs)} reps total · VexRiscv human reference in red · baseline V0 in italic</caption>
+    <caption>Best of recorded reps per model · {sum(a.n_total for a in aggs)} reps total · VexRiscv human reference in red · baseline V0 in italic</caption>
     <thead>
       <tr>
         <th class="num">#</th>
@@ -947,6 +1209,7 @@ def render_index(aggs: list[ModelAgg], reps: list[Rep], stars: Optional[int] = N
     of the LLM-generated designs beat it. See the <a href="methodology.html">methodology page</a>
     for the full procedure.
   </p>
+  {render_single_rep_caveat(aggs)}
 </section>
 
 <section class="section">
@@ -967,7 +1230,7 @@ def render_index(aggs: list[ModelAgg], reps: list[Rep], stars: Optional[int] = N
   </p>
   <p>
     Empirically: the current best is <strong>{stat_fit}</strong>
-    iter/s, <strong>{stat_delta}</strong> over the V0 baseline core, and clear of the
+    iter/s{leader_sample_caveat(leader)}, <strong>{stat_delta}</strong> over the V0 baseline core, and clear of the
     VexRiscv human reference. There is no theoretical ceiling, and within current budgets
     the curve has not saturated.
   </p>
@@ -1070,7 +1333,9 @@ def render_methodology(stars: Optional[int] = None) -> str:
     round.
   </p>
   <p>
-    Three reps per model are run independently. They share no state. Each rep's final fitness
+    The standard field has three independent reps per model, including GPT-6 Astra
+    at max reasoning effort. Recorded results are shown as each repetition finishes.
+    Reps share no state. Each rep's final fitness
     is published; the model's reported peak is the maximum across reps, and the mean is
     averaged across <em>completed</em> reps (status = <code>done</code>).
   </p>
@@ -1162,10 +1427,42 @@ def render_models(aggs: list[ModelAgg], stars: Optional[int] = None) -> str:
                                 sorted(a.broken_by_class_total.items(),
                                        key=lambda kv: -kv[1])) or "n/a"
 
+        configuration_note = ""
+        if a.model == "gpt-6-astra_max":
+            sample_note = (
+                "One of three planned repetitions recorded; repeatability has not yet been measured."
+                if a.n_total == 1 else f"{a.n_total} independent repetitions recorded."
+            )
+            configuration_note = (
+                '<p class="prose">GPT-6 Astra via Codex · '
+                'reasoning effort <span class="mono">max</span> · '
+                f'15 rounds × 3 hypotheses per round. {sample_note}</p>'
+            )
+            completed = [r.final_fitness for r in a.reps
+                         if r.is_complete and r.final_fitness is not None]
+            if len(completed) > 1:
+                configuration_note += (
+                    '<p class="prose">Across completed repetitions: '
+                    f'mean {statistics.mean(completed):.2f} ± '
+                    f'{statistics.stdev(completed):.2f} sample SD.</p>'
+                )
+            configuration_note += (
+                '<p class="prose">Repetitions 2 and 3 resumed after a usage-limit pause; '
+                'reported wall time includes that pause. Valid attempts were preserved. '
+                'The acceptance counts include the baseline; rep3 also has one FPGA '
+                'placement failure outside the legacy broken counter. '
+                'OAuth dollar billing was unavailable; raw cost zeros are parser defaults. '
+                '<a href="https://github.com/FeSens/auto-arch-tournament/blob/main/'
+                'bench/gpt-6-astra_max/README.md" class="ext">Run and recovery notes</a>.</p>'
+            )
+
+        configuration_note += render_run_note(a)
+
         sections.append(f"""
 <section class="section" id="{a.model}">
   <div class="eyebrow">{a.model}</div>
   <h2>{a.model.replace('_', ' ').replace('-', ' ')}</h2>
+{configuration_note}
 
   <div class="stats">
     <div class="stat"><div class="label">Best</div><div class="value">{fnum(a.fitness_best)}</div><div class="sub">{fpct(a.delta_best)} vs baseline</div></div>

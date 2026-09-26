@@ -1,0 +1,2 @@
+[orchestrator] empty log for cores/bench — running baseline retest
+baseline retest: formal failed for cores/bench: causal_ch0

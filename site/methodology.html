@@ -21,8 +21,8 @@
     <li><a href="data.html">Data</a></li>
   </ul>
   <div class="meta">
-    <a href="https://github.com/FeSens/auto-arch-tournament" class="repo" aria-label="HWE Bench source on GitHub, click to view repo and star">github <span class="star">★</span> <span class="star-count">129</span></a>
-    <span class="version">v1 · 2026-07</span>
+    <a href="https://github.com/FeSens/auto-arch-tournament" class="repo" aria-label="HWE Bench source on GitHub, click to view repo and star">github <span class="star">★</span> <span class="star-count">139</span></a>
+    <span class="version">v1 · 2026-09</span>
   </div>
 </nav>
 
@@ -102,7 +102,9 @@
     round.
   </p>
   <p>
-    Three reps per model are run independently. They share no state. Each rep's final fitness
+    The standard field has three independent reps per model, including GPT-6 Astra
+    at max reasoning effort. Recorded results are shown as each repetition finishes.
+    Reps share no state. Each rep's final fitness
     is published; the model's reported peak is the maximum across reps, and the mean is
     averaged across <em>completed</em> reps (status = <code>done</code>).
   </p>
@@ -145,6 +147,37 @@
   </div>
   <div class="manifesto">a benchmark that respects how far a frontier model still has to go.</div>
 </footer>
+
+<div id="chart-tip" role="tooltip" hidden></div>
+<style>
+  #chart-tip { position: fixed; z-index: 50; pointer-events: none; max-width: 320px;
+    padding: 6px 9px; border-radius: 4px; background: var(--ink, #262a33); color: var(--bg, #faf9f7);
+    font: 12px/1.35 Inter, ui-sans-serif, system-ui, sans-serif; box-shadow: 0 2px 8px rgba(0,0,0,.18); }
+  svg [data-tip] { cursor: default; }
+</style>
+<script>
+(() => {
+  // Chart tooltips: any SVG element with data-tip shows it on hover or tap.
+  const tip = document.getElementById("chart-tip");
+  const place = (e) => {
+    const pad = 14, w = tip.offsetWidth, h = tip.offsetHeight;
+    let x = e.clientX + pad, y = e.clientY + pad;
+    if (x + w > innerWidth - 8) x = e.clientX - w - pad;
+    if (y + h > innerHeight - 8) y = e.clientY - h - pad;
+    tip.style.left = x + "px"; tip.style.top = y + "px";
+  };
+  document.addEventListener("pointerover", (e) => {
+    const t = e.target.closest && e.target.closest("[data-tip]");
+    if (!t) return;
+    tip.textContent = t.getAttribute("data-tip"); tip.hidden = false; place(e);
+  });
+  document.addEventListener("pointermove", (e) => { if (!tip.hidden) place(e); });
+  document.addEventListener("pointerout", (e) => {
+    const t = e.target.closest && e.target.closest("[data-tip]");
+    if (t && !(e.relatedTarget && t.contains(e.relatedTarget))) tip.hidden = true;
+  });
+})();
+</script>
 
 </div>
 </body>
