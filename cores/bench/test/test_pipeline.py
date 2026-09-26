@@ -17,6 +17,12 @@ the fetch, IF serves the current PC from the words it has already
 fetched. The harness drives a poison word on imemData whenever
 iready=0, so an instruction that retires correctly after a refused
 fetch can only have come from the replay store.
+
+Also covers the fetch-time BRANCH/JAL prediction (bimodal BHT, JAL
+always taken, misaligned targets never predicted): every retirement of
+each predictor program is compared against a small golden ISS, so a
+wrong-path retirement, a lost mispredict recovery or a bad rd value
+fails exactly, and the same programs are replayed under bus stalls.
 """
 from __future__ import annotations
 
@@ -68,6 +74,7 @@ def _j(imm, rd, opcode):
 
 
 def ADDI(rd, rs1, imm): return _i(imm & 0xFFF, rs1, 0b000, rd, 0b0010011)
+def XORI(rd, rs1, imm): return _i(imm & 0xFFF, rs1, 0b100, rd, 0b0010011)
 def ADD (rd, rs1, rs2): return _r(0, rs2, rs1, 0b000, rd, 0b0110011)
 def LW  (rd, rs1, imm): return _i(imm & 0xFFF, rs1, 0b010, rd, 0b0000011)
 def SW  (rs2, rs1, imm): return _s(imm & 0xFFF, rs2, rs1, 0b010, 0b0100011)
@@ -882,6 +889,339 @@ async def replay_redirect_and_load_use_targets(dut):
                                 start_clock=False)
         _check_ctrl(rets, dmem)
         assert rets == base, f"seed {seed}: refuse-seen + dstall run differs"
+
+
+# ── Fetch-time BRANCH/JAL prediction ──────────────────────────────────────
+def _sx(v, bits):
+    v &= (1 << bits) - 1
+    return v - (1 << bits) if v >> (bits - 1) else v
+
+
+def _golden(program, max_steps=2000):
+    """Reference retirement stream for the subset the predictor programs
+    use: (pc, insn, rd, rd_wdata, pc_next, trap) per instruction, in the
+    core's RVFI convention (rd/rd_wdata = 0 when nothing is written; a
+    taken branch/jump to a misaligned target traps, writes nothing and
+    falls through to pc+4)."""
+    imem = {i * 4: w & M32 for i, w in enumerate(program)}
+    regs = [0] * 32
+    dmem = {}
+    pc, out = 0, []
+    for _ in range(max_steps):
+        insn = imem.get(pc, EBREAK())
+        op, rd = insn & 0x7F, (insn >> 7) & 0x1F
+        f3, f7 = (insn >> 12) & 7, insn >> 25
+        a, b = regs[(insn >> 15) & 0x1F], regs[(insn >> 20) & 0x1F]
+        iimm = _sx(insn >> 20, 12)
+        simm = _sx(((insn >> 25) << 5) | ((insn >> 7) & 0x1F), 12)
+        bimm = _sx((((insn >> 31) & 1) << 12) | (((insn >> 7) & 1) << 11)
+                   | (((insn >> 25) & 0x3F) << 5) | (((insn >> 8) & 0xF) << 1), 13)
+        jimm = _sx((((insn >> 31) & 1) << 20) | (((insn >> 12) & 0xFF) << 12)
+                   | (((insn >> 20) & 1) << 11) | (((insn >> 21) & 0x3FF) << 1), 21)
+        wd, nxt, trap = None, (pc + 4) & M32, 0
+        if insn == EBREAK():
+            pass
+        elif op == 0x13 and f3 == 0:
+            wd = a + iimm
+        elif op == 0x13 and f3 == 4:
+            wd = a ^ (iimm & M32)
+        elif op == 0x33 and f7 == 0 and f3 == 0:
+            wd = a + b
+        elif op == 0x33 and f7 == 1 and f3 == 4:
+            wd = _div(a, b)
+        elif op == 0x03 and f3 == 2:
+            wd = dmem.get((a + iimm) & M32 & ~3, 0)
+        elif op == 0x23 and f3 == 2:
+            dmem[(a + simm) & M32 & ~3] = b
+        elif op == 0x63 and f3 in (0, 1):
+            if (a == b) == (f3 == 0):
+                nxt = (pc + bimm) & M32
+        elif op == 0x6F:
+            wd, nxt = pc + 4, (pc + jimm) & M32
+        elif op == 0x67 and f3 == 0:
+            wd, nxt = pc + 4, (a + iimm) & M32 & ~1
+        else:
+            raise AssertionError(f"_golden: unsupported insn 0x{insn:08x}")
+        if nxt & 3:
+            wd, nxt, trap = None, (pc + 4) & M32, 1
+        if wd is not None and rd:
+            regs[rd] = wd & M32
+        else:
+            rd, wd = 0, 0
+        out.append((pc, insn, rd, wd & M32, nxt, trap))
+        if insn == EBREAK():
+            return out
+        pc = nxt
+    raise AssertionError("_golden: no EBREAK")
+
+
+def _trace(rets):
+    return [(r["pc"], r["insn"], r["rd"], r["rd_wdata"], r["pc_next"], r["trap"])
+            for r in rets]
+
+
+def _check_pred(rets, program, pcs, regs):
+    """Exact retired stream (vs the golden ISS and a hand-written PC list),
+    strict +1 rvfi_order from 0, no poison, and the final registers."""
+    _check_order_and_pcs(rets, pcs)
+    _check_order(rets)
+    assert [(r["pc"], r["insn"]) for r in rets] == \
+           [(pc, program[pc // 4] & M32) for pc in pcs]
+    assert _trace(rets) == _golden(program), "retired stream != golden ISS"
+    assert not _by_insn(rets, POISON), "poison word retired"
+    final = _regs(rets)
+    for rd, val in regs.items():
+        assert final.get(rd) == val & M32, f"x{rd} = {final.get(rd)} != {val}"
+
+
+# (1) Countdown loop: the back-edge BNE is taken PRED_ITERS-1 times and
+# then falls through, so the last one is predicted taken and must
+# recover to pc+4; the loop head it steered to must not retire.
+PRED_ITERS     = 10
+PRED_LOOP_HEAD = 8
+PRED_LOOP_BNE  = 16
+PROG_PRED_LOOP = [
+    ADDI(1, 0, PRED_ITERS),  # 0   x1 = trip count
+    ADDI(2, 0, 0),           # 4   x2 = 0
+    ADDI(2, 2, 3),           # 8   loop: x2 += 3
+    ADDI(1, 1, -1),          # 12  x1 -= 1
+    BNE (1, 0, -8),          # 16  -> 8
+    SW  (2, 0, 0x40),        # 20  fall-through: mem[0x40] = x2
+    LW  (3, 0, 0x40),        # 24  x3 = mem[0x40]
+    ADDI(4, 3, 1),           # 28  load-use dependent
+    EBREAK(),                # 32
+]
+PRED_LOOP_PCS = [0, 4] + [8, 12, 16] * PRED_ITERS + [20, 24, 28, 32]
+PRED_LOOP_REGS = {1: 0, 2: 3 * PRED_ITERS, 3: 3 * PRED_ITERS, 4: 3 * PRED_ITERS + 1}
+
+# (2) Forward BEQ alternating taken / not-taken, taken first, so the
+# counter ping-pongs 01 -> 10 -> 01 and the BEQ mispredicts both ways.
+PRED_ALT_ITERS = 8
+PROG_PRED_ALT = [
+    ADDI(1, 0, PRED_ALT_ITERS),  # 0   x1 = trip count
+    ADDI(2, 0, 1),           # 4   x2 = parity (first XORI -> 0: taken)
+    ADDI(3, 0, 0),           # 8   x3 = iterations
+    ADDI(4, 0, 0),           # 12  x4 = not-taken accumulator
+    XORI(2, 2, 1),           # 16  loop: x2 ^= 1
+    BEQ (2, 0, 12),          # 20  x2 == 0 -> 32
+    ADDI(4, 4, 1),           # 24  not-taken path
+    ADDI(4, 4, 16),          # 28  not-taken path
+    ADDI(3, 3, 1),           # 32  BEQ target
+    ADDI(1, 1, -1),          # 36
+    BNE (1, 0, -24),         # 40  -> 16
+    ADD (5, 3, 4),           # 44
+    EBREAK(),                # 48
+]
+PRED_ALT_PCS = [0, 4, 8, 12] + sum(
+    ([16, 20, 32, 36, 40] if i % 2 == 0 else [16, 20, 24, 28, 32, 36, 40]
+     for i in range(PRED_ALT_ITERS)), []) + [44, 48]
+PRED_ALT_REGS = {3: PRED_ALT_ITERS, 4: 17 * (PRED_ALT_ITERS // 2),
+                 5: PRED_ALT_ITERS + 17 * (PRED_ALT_ITERS // 2)}
+
+# (3) A BNE that consumes the LW right before it: the load-use stall
+# holds the PC while the (predicted) branch sits in fetch.
+PROG_PRED_LOADUSE = [
+    ADDI(1, 0, 0x40),        # 0   x1 = dmem base
+    ADDI(2, 0, 4),           # 4
+    SW  (2, 1, 0),           # 8   mem[0x40] = 4
+    ADDI(5, 0, 0),           # 12  x5 = accumulator
+    LW  (3, 1, 0),           # 16  loop: x3 = mem[0x40]
+    BNE (3, 0, 8),           # 20  load-use: x3 != 0 -> 28
+    JAL (0, 24),             # 24  -> 48 (exit)
+    ADDI(3, 3, -1),          # 28
+    SW  (3, 1, 0),           # 32  mem[0x40] = x3
+    ADDI(5, 5, 7),           # 36
+    JAL (0, -24),            # 40  -> 16
+    ADDI(9, 0, 99),          # 44  never reached
+    ADD (6, 5, 3),           # 48  exit
+    EBREAK(),                # 52
+]
+PRED_LOADUSE_PCS = [0, 4, 8, 12] + [16, 20, 28, 32, 36, 40] * 4 + [16, 20, 24, 48, 52]
+PRED_LOADUSE_REGS = {3: 0, 5: 28, 6: 28}
+
+# (4) JAL -> BNE back to back (and JAL -> JAL -> BNE on the back edge).
+# The first JAL jumps over a poison word, which must never retire.
+PROG_PRED_JAL_BNE = [
+    ADDI(1, 0, 3),           # 0   x1 = trip count
+    ADDI(2, 0, 0),           # 4
+    JAL (5, 8),              # 8   loop: -> 16, x5 = 12
+    POISON,                  # 12  jumped over
+    BNE (1, 0, 8),           # 16  JAL target: x1 != 0 -> 24
+    JAL (0, 16),             # 20  -> 36 (exit)
+    ADDI(2, 2, 5),           # 24
+    ADDI(1, 1, -1),          # 28
+    JAL (0, -24),            # 32  -> 8
+    ADD (6, 2, 5),           # 36  exit
+    EBREAK(),                # 40
+]
+PRED_JAL_BNE_PCS = [0, 4] + [8, 16, 24, 28, 32] * 3 + [8, 16, 20, 36, 40]
+PRED_JAL_BNE_REGS = {2: 15, 5: 12, 6: 27}
+
+# (5) A BNE right behind a DIV: div_busy holds the PC for the whole
+# divide while the (predicted-taken, from the 2nd pass on) BNE is in
+# fetch.
+PROG_PRED_DIV = [
+    ADDI(1, 0, 3),           # 0   x1 = trip count
+    ADDI(2, 0, 100),         # 4
+    ADDI(3, 0, 7),           # 8
+    ADDI(4, 0, 0),           # 12  x4 = accumulator
+    DIV (5, 2, 3),           # 16  loop: x5 = x2 / 7
+    BNE (1, 0, 8),           # 20  right behind the DIV: x1 != 0 -> 28
+    JAL (0, 20),             # 24  -> 44 (exit)
+    ADD (4, 4, 5),           # 28  x4 += x5
+    ADDI(2, 2, 50),          # 32
+    ADDI(1, 1, -1),          # 36
+    JAL (0, -24),            # 40  -> 16
+    ADD (6, 4, 5),           # 44  exit
+    EBREAK(),                # 48
+]
+PRED_DIV_PCS = [0, 4, 8, 12] + [16, 20, 28, 32, 36, 40] * 3 + [16, 20, 24, 44, 48]
+PRED_DIV_REGS = {4: 14 + 21 + 28, 5: 35, 6: 14 + 21 + 28 + 35}
+
+# Misaligned targets (imm[1] set) are never predicted: a BNE whose
+# counter has been trained taken and a JAL still trap and fall through.
+PROG_PRED_MISALIGN = [
+    ADDI(1, 0, 3),           # 0   x1 = trip count
+    BNE (1, 0, 6),           # 4   loop: taken -> 10: trap, fall through
+    JAL (5, 10),             # 8   -> 18: trap, x5 not written
+    ADDI(1, 1, -1),          # 12
+    BNE (1, 0, -12),         # 16  -> 4
+    ADDI(2, 0, 7),           # 20
+    EBREAK(),                # 24
+]
+PRED_MISALIGN_PCS = [0] + [4, 8, 12, 16] * 3 + [20, 24]
+PRED_MISALIGN_REGS = {1: 0, 2: 7}
+
+PRED_CASES = [
+    (PROG_PRED_LOOP,     PRED_LOOP_PCS,     PRED_LOOP_REGS),
+    (PROG_PRED_ALT,      PRED_ALT_PCS,      PRED_ALT_REGS),
+    (PROG_PRED_LOADUSE,  PRED_LOADUSE_PCS,  PRED_LOADUSE_REGS),
+    (PROG_PRED_JAL_BNE,  PRED_JAL_BNE_PCS,  PRED_JAL_BNE_REGS),
+    (PROG_PRED_DIV,      PRED_DIV_PCS,      PRED_DIV_REGS),
+    (PROG_PRED_MISALIGN, PRED_MISALIGN_PCS, PRED_MISALIGN_REGS),
+]
+
+
+def _loop_window(rets):
+    """Cycles from the 2nd loop-head retirement to the last back-edge BNE
+    retirement of PROG_PRED_LOOP (steady state: every PC already fetched,
+    no memory op in the body)."""
+    heads = [r for r in rets if r["pc"] == PRED_LOOP_HEAD]
+    bnes = [r for r in rets if r["pc"] == PRED_LOOP_BNE]
+    return bnes[-1]["cycle"] - heads[1]["cycle"]
+
+
+# One retirement per cycle over iterations 2..PRED_ITERS: every taken
+# back edge in the window was predicted (no bubble).
+PRED_LOOP_WINDOW = 3 * (PRED_ITERS - 1) - 1
+# Without prediction each of the PRED_ITERS-2 taken back edges inside
+# the window costs one bubble.
+PRED_LOOP_NOPRED = PRED_LOOP_WINDOW + (PRED_ITERS - 2)
+
+
+@cocotb.test()
+async def predict_loop_backedge(dut):
+    """(1) Backward BNE taken N-1 times, then falling through: the
+    predicted-taken last instance recovers to pc+4 with no wrong-path
+    retirement, and steady-state taken back edges cost no bubble."""
+    rets, dmem = await _run(dut, PROG_PRED_LOOP, max_cycles=300)
+    _check_pred(rets, PROG_PRED_LOOP, PRED_LOOP_PCS, PRED_LOOP_REGS)
+    assert dmem.get(0x40) == 3 * PRED_ITERS
+    win = _loop_window(rets)
+    assert win == PRED_LOOP_WINDOW, (
+        f"steady-state loop took {win} cycles, expected {PRED_LOOP_WINDOW}")
+
+
+@cocotb.test()
+async def predict_forward_branch_alternating(dut):
+    """(2) Forward BEQ alternating taken / not-taken: mispredicts in both
+    directions recover to the right path."""
+    rets, _ = await _run(dut, PROG_PRED_ALT, max_cycles=400)
+    _check_pred(rets, PROG_PRED_ALT, PRED_ALT_PCS, PRED_ALT_REGS)
+
+
+@cocotb.test()
+async def predict_branch_behind_load_use(dut):
+    """(3) BNE consuming the LW right before it: load-use stall while the
+    predicted branch sits in fetch."""
+    rets, dmem = await _run(dut, PROG_PRED_LOADUSE, max_cycles=400)
+    _check_pred(rets, PROG_PRED_LOADUSE, PRED_LOADUSE_PCS, PRED_LOADUSE_REGS)
+    assert dmem.get(0x40) == 0
+
+
+@cocotb.test()
+async def predict_jal_then_branch(dut):
+    """(4) JAL -> BNE back to back; the JAL skips a poison word that must
+    never retire, and the BNE's final mispredict recovers after a JAL."""
+    rets, _ = await _run(dut, PROG_PRED_JAL_BNE, max_cycles=300)
+    _check_pred(rets, PROG_PRED_JAL_BNE, PRED_JAL_BNE_PCS, PRED_JAL_BNE_REGS)
+    assert not [r for r in rets if r["pc"] == 12], "jumped-over word retired"
+
+
+@cocotb.test()
+async def predict_branch_behind_div(dut):
+    """(5) BNE right after a DIV: div_busy holds the PC while a predicted
+    branch is in fetch; the branch retires once, after the divide."""
+    rets, _ = await _run(dut, PROG_PRED_DIV, max_cycles=600)
+    _check_pred(rets, PROG_PRED_DIV, PRED_DIV_PCS, PRED_DIV_REGS)
+
+
+@cocotb.test()
+async def predict_never_misaligned_target(dut):
+    """A trained-taken BNE and a JAL whose targets are misaligned are not
+    predicted: both trap, write nothing and fall through to pc+4. EX
+    would recover from such a prediction too, so check it never happens:
+    IF never fetches a misaligned address."""
+    log = []
+    rets, _ = await _run(dut, PROG_PRED_MISALIGN, max_cycles=300, fetch_log=log)
+    _check_pred(rets, PROG_PRED_MISALIGN, PRED_MISALIGN_PCS, PRED_MISALIGN_REGS)
+    traps = sorted({r["pc"] for r in rets if r["trap"]})
+    assert traps == [4, 8], f"trapping PCs {traps}"
+    assert all(r["rd"] == 0 for r in rets if r["trap"])
+    bad = [(c, ia) for c, ia, _ in log if ia & 3]
+    assert not bad, f"misaligned fetches (predicted misaligned target): {bad}"
+
+
+@cocotb.test()
+async def predict_loop_under_bus_stalls(dut):
+    """(6) Loop (1) under seeded ~22% random imem + dmem stalls: the
+    retirement stream equals the all-ready run, and the steady-state
+    loop (replay hits, no memory op) keeps its no-bubble timing, below
+    the prediction-free bound."""
+    base, _ = await _run(dut, PROG_PRED_LOOP, max_cycles=300)
+    for seed in range(6):
+        log = []
+        rets, dmem = await _run(dut, PROG_PRED_LOOP, max_cycles=800,
+                                ready=_random_ready(500 + seed),
+                                start_clock=False, fetch_log=log)
+        assert _refused(log), f"seed {seed}: no refused fetches"
+        _check_pred(rets, PROG_PRED_LOOP, PRED_LOOP_PCS, PRED_LOOP_REGS)
+        assert _arch(rets) == _arch(base), f"seed {seed}: RVFI stream differs"
+        assert dmem.get(0x40) == 3 * PRED_ITERS
+        win = _loop_window(rets)
+        assert win < PRED_LOOP_NOPRED, (
+            f"seed {seed}: loop took {win} cycles, prediction-free bound "
+            f"is {PRED_LOOP_NOPRED}")
+        assert win == PRED_LOOP_WINDOW, f"seed {seed}: loop took {win} cycles"
+
+
+@cocotb.test()
+async def predict_programs_under_bus_stalls(dut):
+    """Every predictor program under random imem-only and imem + dmem
+    stalls, and with imem refusing every already-served address (pure
+    replay): identical retirement stream to the all-ready run."""
+    first = True
+    for idx, (prog, pcs, regs) in enumerate(PRED_CASES):
+        base, _ = await _run(dut, prog, max_cycles=600, start_clock=first)
+        first = False
+        runs = [_random_iready(2000 + 10 * idx), _random_ready(2001 + 10 * idx),
+                _random_ready(2002 + 10 * idx), _refuse_seen(dut)]
+        for k, ready in enumerate(runs):
+            rets, _ = await _run(dut, prog, max_cycles=1500, ready=ready,
+                                 start_clock=False)
+            _check_pred(rets, prog, pcs, regs)
+            assert _arch(rets) == _arch(base), (
+                f"program {idx} run {k}: RVFI stream differs under stalls")
 
 
 def test_pipeline_runner():

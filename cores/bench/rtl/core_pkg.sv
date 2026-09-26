@@ -51,6 +51,11 @@
   localparam logic [2:0] BR_BGEU = 3'd7;
   /* verilator lint_on UNUSEDPARAM */
 
+  // ── Fetch-time branch predictor ─────────────────────────────────────────
+  // Bimodal BHT in IF: 2^BHT_IDX_W 2-bit counters indexed by
+  // pc[BHT_IDX_W+1:2]. 64 entries was the knee of the CoreMark sweep.
+  localparam int BHT_IDX_W = 6;
+
   // ── Pipeline-bundle typedefs ────────────────────────────────────────────
   typedef struct packed {
     logic [4:0] alu_op;
@@ -75,9 +80,17 @@
   // IF -> ID combinational bundle (no register; PC reg sits in if_stage).
   // instr comes from live imem or from IF's replay store on an imem
   // stall; imem is immutable, so both are the same word for a given pc.
+  // pred_taken / bht_ctr / alt_target describe the fetch-time BRANCH/JAL
+  // prediction made from that same word: pred_taken says IF steered the
+  // PC to pc+imm (always 0 on a NOP/bubble), bht_ctr is the counter read
+  // at fetch, and alt_target is the path IF did NOT take (pc+4 if
+  // predicted taken, pc+imm otherwise) — EX's mispredict redirect target.
   typedef struct packed {
     logic [31:0] pc;
     logic [31:0] instr;
+    logic        pred_taken;
+    logic [1:0]  bht_ctr;
+    logic [31:0] alt_target;
     logic        valid;
   } if_id_t;
 
@@ -92,6 +105,9 @@
     logic [4:0]  rs2_addr;
     ctrl_t       ctrl;
     logic [31:0] instr;
+    logic        pred_taken;     // IF steered to pc+imm (see if_id_t)
+    logic [1:0]  bht_ctr;        // BHT counter read at fetch
+    logic [31:0] alt_target;     // not-predicted path = mispredict target
     logic        valid;
   } id_ex_t;
 

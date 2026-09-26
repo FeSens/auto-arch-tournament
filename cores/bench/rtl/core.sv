@@ -8,6 +8,9 @@
 //   |               from EX/MEM and MEM/WB
 //   +- stall <- hazard_unit (load-use)
 //   +- fetch_ready -> hazard_unit (imem delivered, or IF replay-store hit)
+//   +- predict: BRANCH (64-entry bimodal BHT) / JAL (always) steer the PC
+//      at fetch; EX checks and redirects on mispredict (and every JALR),
+//      and writes the BHT back one cycle later (bht_we/widx/wdata)
 //
 // IO port names use the `io_*` Chisel-emit prefix so the existing
 // formal/wrapper_si.sv and test/cosim/main.cpp bindings carry through
@@ -85,9 +88,14 @@ module core (
   logic       fetch_ready;   // imem delivered, or IF replay store hit
   logic [1:0] fwd_rs1_sel, fwd_rs2_sel;
 
-  // EX redirect
+  // EX redirect (= mispredict of IF's fetch-time prediction, or JALR)
   logic        redirect;
   logic [31:0] redirect_target;
+
+  // EX -> IF BHT update (registered in EX)
+  logic                 bht_we;
+  logic [BHT_IDX_W-1:0] bht_widx;
+  logic [1:0]           bht_wdata;
 
   // regfile interface (driven by ID + WB stages)
   logic [4:0]  rs1_addr_w;
@@ -106,6 +114,9 @@ module core (
     .flush           (flush_if),
     .redirect        (redirect),
     .redirect_target (redirect_target),
+    .bht_we          (bht_we),
+    .bht_widx        (bht_widx),
+    .bht_wdata       (bht_wdata),
     .imem_addr       (io_imemAddr),
     .imem_data       (io_imemData),
     .imem_ready      (io_imemReady),
@@ -152,7 +163,10 @@ module core (
     .out             (ex_mem_w),
     .redirect        (redirect),
     .redirect_target (redirect_target),
-    .ex_div_busy     (ex_div_busy)
+    .ex_div_busy     (ex_div_busy),
+    .bht_we          (bht_we),
+    .bht_widx        (bht_widx),
+    .bht_wdata       (bht_wdata)
   );
 
   // ── MEM ───────────────────────────────────────────────────────────────

@@ -34,31 +34,89 @@
 // miss, so a PC fetched once is always a replay hit (barring an alias
 // eviction at the same index).
 //
+// Fetch-time prediction. instr_word (live or replayed) is predecoded for
+// BRANCH (valid funct3 only) and JAL, and pred_target = pc + B/J-imm is
+// formed from those same bits. JAL is always predicted taken; a BRANCH
+// is predicted taken when its 2-bit counter in a 64-entry bimodal BHT
+// (flops, indexed by pc[7:2]) is >= 2. JALR is never predicted. A target
+// with imm[1] set (misaligned without C) is never predicted, so EX's
+// misalign trap only ever sees unpredicted instructions. On a taken
+// prediction pc_d = pred_target, and since pc_d is also the replay
+// lookahead address, the replay candidate follows the predicted path.
+// On a stall the prediction is dropped (PC holds) and made again from
+// the same word next cycle.
+//
+// Because pred_target comes from the exact bits that enter ID/EX, a
+// prediction can only be wrong in direction. EX checks it, and on a
+// mispredict redirects to alt_target (the path IF did not take), which
+// is carried down with the instruction. BHT counters are written by EX
+// one cycle after resolution (bht_we / bht_widx / bht_wdata).
+//
 // Latency:        PC-reg update is synchronous; output is combinational.
 // RVFI fields:    feeds pc_rdata (via ID/EX/MEM/WB) and pc_wdata (via
 //                 EX-stage redirect); insn is the live or replayed word.
 module if_stage (
-  input  logic              clock,
-  input  logic              reset,
-  input  logic              stall,            // hold PC (any stall reason)
-  input  logic              flush,            // emit NOP into ID this cycle
-  input  logic              redirect,         // EX has resolved a branch/jump
-  input  logic [31:0]       redirect_target,
-  output logic [31:0]       imem_addr,
-  input  logic [31:0]       imem_data,
-  input  logic              imem_ready,       // external imem delivered imem_data
-  output logic              fetch_ready,      // IF has the word at pc (live or replay)
+  input  logic                 clock,
+  input  logic                 reset,
+  input  logic                 stall,         // hold PC (any stall reason)
+  input  logic                 flush,         // emit NOP into ID this cycle
+  input  logic                 redirect,      // EX mispredict (or JALR)
+  input  logic [31:0]          redirect_target,
+  // BHT write port (registered in EX, one cycle after branch resolve)
+  input  logic                 bht_we,
+  input  logic [BHT_IDX_W-1:0] bht_widx,
+  input  logic [1:0]           bht_wdata,
+  output logic [31:0]          imem_addr,
+  input  logic [31:0]          imem_data,
+  input  logic                 imem_ready,    // external imem delivered imem_data
+  output logic                 fetch_ready,   // IF has the word at pc (live or replay)
   output if_id_t  out
 );
 
-  localparam logic [31:0] RESET_PC   = 32'h0000_0000;
-  localparam int          RP_IDX_W   = 9;                   // 512 entries
-  localparam int          RP_ENTRIES = 1 << RP_IDX_W;
-  localparam int          RP_TAG_LSB = RP_IDX_W + 2;        // tag = pc[31:11]
-  localparam int          RP_TAG_W   = 32 - RP_TAG_LSB;
+  localparam logic [31:0] RESET_PC    = 32'h0000_0000;
+  localparam int          RP_IDX_W    = 9;                  // 512 entries
+  localparam int          RP_ENTRIES  = 1 << RP_IDX_W;
+  localparam int          RP_TAG_LSB  = RP_IDX_W + 2;       // tag = pc[31:11]
+  localparam int          RP_TAG_W    = 32 - RP_TAG_LSB;
+  localparam int          BHT_ENTRIES = 1 << BHT_IDX_W;
 
   logic [31:0] pc;
   logic [31:0] pc_d;
+  logic [31:0] instr_word;   // live imem word, or the replayed one
+
+  // ── Predecode + bimodal BHT ───────────────────────────────────────────
+  logic [1:0]  bht [0:BHT_ENTRIES-1];
+  logic        pd_br;
+  logic        pd_jal;
+  logic [31:0] pimm;
+  logic [31:0] pred_target;
+  logic [31:0] pc_plus4;
+  logic [1:0]  bht_ctr;
+  logic        pred_raw;
+
+  always_comb begin
+    // funct3 2/3 are reserved BRANCH encodings (decoder traps them).
+    pd_br       = (instr_word[6:0] == 7'b1100011) && (instr_word[14:13] != 2'b01);
+    pd_jal      = (instr_word[6:0] == 7'b1101111);
+    // opcode bit 3 separates JAL (1101111) from BRANCH (1100011).
+    pimm        = instr_word[3]
+                ? {{12{instr_word[31]}}, instr_word[19:12], instr_word[20],
+                   instr_word[30:21], 1'b0}
+                : {{20{instr_word[31]}}, instr_word[7], instr_word[30:25],
+                   instr_word[11:8], 1'b0};
+    pred_target = pc + pimm;
+    pc_plus4    = pc + 32'd4;
+    bht_ctr     = bht[pc[BHT_IDX_W+1:2]];
+    pred_raw    = (pd_jal || (pd_br && bht_ctr[1])) && !pimm[1];
+  end
+
+  always_ff @(posedge clock) begin
+    if (reset) begin
+      for (int i = 0; i < BHT_ENTRIES; i++) bht[i] <= 2'b01;  // weakly not-taken
+    end else if (bht_we) begin
+      bht[bht_widx] <= bht_wdata;
+    end
+  end
 
   // Redirect must override stall: a BRANCH/JAL/JALR in EX may fire
   // redirect on the same cycle as imem_stall or dmem_stall — without
@@ -68,9 +126,11 @@ module if_stage (
   // VexRiscv-binary CoreMark sweep with --istall enabled.
   //
   // pc_d is also the replay-store lookahead address, so the candidate
-  // registers always describe the PC this flop holds next cycle.
+  // registers always describe the PC this flop holds next cycle,
+  // including a predicted-taken target.
   always_comb begin
-    pc_d = redirect ? redirect_target : (!stall ? pc + 32'd4 : pc);
+    pc_d = redirect ? redirect_target
+         : (!stall ? (pred_raw ? pred_target : pc_plus4) : pc);
   end
 
   always_ff @(posedge clock) begin
@@ -92,7 +152,6 @@ module if_stage (
   logic                  look_hit;
   logic                  cand_hit_q;
   logic [31:0]           cand_instr_q;
-  logic [31:0]           instr_word;
 
   always_comb begin
     fill_idx    = pc[RP_TAG_LSB-1:2];
@@ -128,10 +187,20 @@ module if_stage (
     end
   end
 
+  // kill = flush || redirect stays on the NOP/valid mux (dropping
+  // redirect here puts imem_data -> load-use -> ID/EX enable on the
+  // critical path). pred_taken is killed too, so bubbles never make EX
+  // see a predicted-taken instruction and fire a false redirect.
+  logic kill;
+
   always_comb begin
-    out.pc    = pc;
-    out.instr = (flush || redirect) ? 32'h0000_0013 : instr_word;
-    out.valid = !(flush || redirect);
+    kill           = flush || redirect;
+    out.pc         = pc;
+    out.instr      = kill ? 32'h0000_0013 : instr_word;
+    out.pred_taken = pred_raw && !kill;
+    out.bht_ctr    = bht_ctr;
+    out.alt_target = pred_raw ? pc_plus4 : pred_target;
+    out.valid      = !kill;
   end
 
 endmodule

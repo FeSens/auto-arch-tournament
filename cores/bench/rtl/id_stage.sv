@@ -5,6 +5,9 @@
 // the regfile read data. The ID/EX register is owned by this module so
 // the decoded view of instruction n is latched by end of cycle n+1.
 //
+// IF's fetch-time prediction (pred_taken, bht_ctr, alt_target) is
+// latched into ID/EX unchanged; EX verifies it.
+//
 // Latency:        1 cycle (ID/EX register clocked here).
 // RVFI fields:    feeds rs1_addr, rs1_rdata, rs2_addr, rs2_rdata, insn,
 //                 trap (via ctrl.is_illegal).
@@ -105,6 +108,11 @@ module id_stage (
       reg_q.rs2_addr <= in.instr[24:20];
       reg_q.ctrl     <= ctrl_decoded;
       reg_q.instr    <= in.instr;
+      // Fetch-time prediction travels with the instruction for EX to
+      // check; reset/flush clear it, so a bubble is never predicted.
+      reg_q.pred_taken <= in.pred_taken;
+      reg_q.bht_ctr    <= in.bht_ctr;
+      reg_q.alt_target <= in.alt_target;
       reg_q.valid    <= in.valid;
     end
   end

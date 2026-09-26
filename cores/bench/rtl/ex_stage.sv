@@ -1,8 +1,17 @@
 // rtl/ex_stage.sv
 //
 // Execute stage. Resolves the operand muxes (forwarding from EX/MEM and
-// MEM/WB), runs the ALU, resolves branches, computes the redirect
-// target. Owns the EX/MEM pipeline register.
+// MEM/WB), runs the ALU, resolves branches and checks IF's fetch-time
+// prediction. Owns the EX/MEM pipeline register.
+//
+// Prediction check: IF already steered the PC for a predicted BRANCH/JAL
+// (in.pred_taken), so redirect fires only on a mispredict, i.e. when
+// the real outcome differs from the prediction, plus every JALR (never
+// predicted). The mispredict target is in.alt_target, the path IF did
+// not take, so the EX pc+imm adder is off the redirect path; only JALR
+// uses its forwarded sum. The BHT update (counter inc/dec by the branch
+// condition) is registered here and written into IF one cycle later, so
+// the forwarded compare never reaches the BHT write enables.
 //
 // Forwarding select encoding (driven by forward_unit):
 //   00 = ID/EX register value (no forward)
@@ -20,22 +29,26 @@
 //     registered result, and ID/EX advances on the same edge.
 //
 // Latency:        1 cycle (EX/MEM register clocked here); divides hold
-//                 EX for the div_unit latency.
+//                 EX for the div_unit latency. BHT write 1 cycle after EX.
 // RVFI fields:    feeds pc_wdata (= pc_next), the rd_wdata path for
 //                 ALU, divide and JAL/JALR (PC+4), and the branch resolve.
 module ex_stage (
-  input  logic               clock,
-  input  logic               reset,
-  input  logic               stall,         // freeze EX/MEM register (dmem stall)
+  input  logic                  clock,
+  input  logic                  reset,
+  input  logic                  stall,         // freeze EX/MEM register (dmem stall)
   input  id_ex_t   in,
-  input  logic [1:0]         fwd_rs1_sel,
-  input  logic [1:0]         fwd_rs2_sel,
-  input  logic [31:0]        fwd_ex_mem,    // EX/MEM.alu_result (registered)
-  input  logic [31:0]        fwd_mem_wb,    // WB-stage write-data mux output
+  input  logic [1:0]            fwd_rs1_sel,
+  input  logic [1:0]            fwd_rs2_sel,
+  input  logic [31:0]           fwd_ex_mem,    // EX/MEM.alu_result (registered)
+  input  logic [31:0]           fwd_mem_wb,    // WB-stage write-data mux output
   output ex_mem_t  out,
-  output logic               redirect,
-  output logic [31:0]        redirect_target,
-  output logic               ex_div_busy    // divide in EX, result not ready
+  output logic                  redirect,      // mispredict (or JALR)
+  output logic [31:0]           redirect_target,
+  output logic                  ex_div_busy,   // divide in EX, result not ready
+  // Registered BHT update into IF
+  output logic                  bht_we,
+  output logic [BHT_IDX_W-1:0]  bht_widx,
+  output logic [1:0]            bht_wdata
 );
 
   // ── Operand forwarding muxes ───────────────────────────────────────────
@@ -168,8 +181,45 @@ module ex_stage (
       ctrl_with_trap.reg_write  = 1'b0;
   end
 
-  assign redirect        = (branch_taken || in.ctrl.is_jump) && !misalign_fault;
-  assign redirect_target = in.ctrl.is_jump ? jump_target : branch_target;
+  // ── Prediction check ──────────────────────────────────────────────────
+  // actual_taken is the architectural control transfer (a misaligned
+  // target traps and falls through). IF never predicts a misaligned
+  // target or a JALR, and pred_target was formed from the same
+  // instruction bits, so only the direction can be wrong: redirect =
+  // mispredict, to the path IF did not take. A bubble or a divide
+  // carries pred_taken = 0, so redirect stays 0 while ex_div_busy is high.
+  logic actual_taken;
+
+  always_comb begin
+    actual_taken    = (branch_taken || in.ctrl.is_jump) && !misalign_fault;
+    redirect        = actual_taken ^ in.pred_taken;
+    redirect_target = in.ctrl.is_jalr ? {jalr_sum[31:1], 1'b0} : in.alt_target;
+  end
+
+  // ── BHT update (registered, written into IF next cycle) ───────────────
+  // Repeated writes while EX is held (dmem stall) are idempotent: the
+  // held branch's operands and fetch-time counter do not change.
+  logic [1:0]           ctr_inc;
+  logic [1:0]           ctr_dec;
+  logic                 bht_we_q;
+  logic [BHT_IDX_W-1:0] bht_widx_q;
+  logic [1:0]           bht_wdata_q;
+
+  always_comb begin
+    ctr_inc = (in.bht_ctr == 2'b11) ? 2'b11 : in.bht_ctr + 2'd1;
+    ctr_dec = (in.bht_ctr == 2'b00) ? 2'b00 : in.bht_ctr - 2'd1;
+  end
+
+  always_ff @(posedge clock) begin
+    if (reset) bht_we_q <= 1'b0;
+    else       bht_we_q <= in.valid && in.ctrl.is_branch;
+    bht_widx_q  <= in.pc[BHT_IDX_W+1:2];
+    bht_wdata_q <= branch_cond ? ctr_inc : ctr_dec;
+  end
+
+  assign bht_we    = bht_we_q;
+  assign bht_widx  = bht_widx_q;
+  assign bht_wdata = bht_wdata_q;
 
   // ── EX/MEM register ───────────────────────────────────────────────────
   ex_mem_t reg_q;
