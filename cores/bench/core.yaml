@@ -11,10 +11,10 @@ targets:
   coremark_iter_s: 300
   coremark_per_mhz: 2.2
 current:
-  fmax_mhz: 156.35
-  lut4: 5600
-  ff: 2274
+  fmax_mhz: 174.46
+  lut4: 5560
+  ff: 2263
   coremark_iter_s: 3.0e-06
   coremark_per_mhz: 0.0
-  source_id: hyp-20260926-003-r4s2
-  updated: '2026-09-26T06:07:50.963165Z'
+  source_id: hyp-20260926-001-r5s0
+  updated: '2026-09-26T06:53:17.226970Z'
