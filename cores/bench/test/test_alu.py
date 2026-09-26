@@ -330,9 +330,9 @@ DIV, DIVU, REM, REMU = (0, 0), (0, 1), (1, 0), (1, 1)
 _DIV_REF = {DIV: ref_div, DIVU: ref_divu, REM: ref_rem, REMU: ref_remu}
 _DIV_NAME = {DIV: "DIV", DIVU: "DIVU", REM: "REM", REMU: "REMU"}
 
-# start -> done is 34 cycles today (1 latch + 1 prep + 32 steps + 1 fixup
-# - 1). Bound it so a stuck / runaway FSM fails loudly.
-_DIV_MAX_CYCLES = 40
+# start -> done is 67 cycles today (1 latch + 1 sign + 1 prep + 32 two-cycle
+# steps + 1 fixup - 1). Bound it so a stuck / runaway FSM fails loudly.
+_DIV_MAX_CYCLES = 72
 
 
 async def _div_setup(dut):
@@ -559,6 +559,25 @@ async def start_ignored_while_busy(dut):
     assert int(dut.result.value) == 1000 % 33
     assert int(dut.a_lat.value) == 1000 and int(dut.b_lat.value) == 33
     await _div_ack(dut)
+
+
+@div_test
+async def start_held_through_every_phase(dut):
+    """start held high with fresh operands from the cycle after launch
+    (SIGN) through PREP and both ITER phases must not disturb the op:
+    start is only accepted in IDLE."""
+    await _div_setup(dut)
+    for op, a, b in [(DIV, 0xFFFFFF9C, 7), (REM, 0x80000001, 0xFFFFFFFD),
+                     (DIVU, 0xDEADBEEF, 0x1234)]:
+        await _div_launch(dut, op, a, b)
+        dut.start.value = 1
+        dut.a.value     = 0x7FFFFFFF
+        dut.b.value     = 0xFFFFFFFF
+        await _div_wait_done(dut)
+        dut.start.value = 0
+        assert int(dut.result.value) == _DIV_REF[op](a, b)
+        assert int(dut.a_lat.value) == a and int(dut.b_lat.value) == b
+        await _div_ack(dut)
 
 
 def test_alu_runner():
