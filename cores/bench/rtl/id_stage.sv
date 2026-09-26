@@ -92,6 +92,11 @@ module id_stage (
     ctrl_decoded.is_illegal = dec_is_illegal;
   end
 
+  // ALU opcode -> one-hot controls, decoded here so EX's ALU runs from
+  // ID/EX flops with no opcode decode on its path.
+  alu_ctl_t alu_ctl_decoded;
+  alu_predecode u_alu_pd (.op(dec_alu_op), .ctl(alu_ctl_decoded));
+
   // ── ID/EX register ──────────────────────────────────────────────────────
   id_ex_t reg_q;
 
@@ -107,6 +112,7 @@ module id_stage (
       reg_q.rs1_addr <= in.instr[19:15];
       reg_q.rs2_addr <= in.instr[24:20];
       reg_q.ctrl     <= ctrl_decoded;
+      reg_q.alu_ctl  <= alu_ctl_decoded;
       reg_q.instr    <= in.instr;
       // Fetch-time prediction travels with the instruction for EX to
       // check; reset/flush clear it, so a bubble is never predicted.

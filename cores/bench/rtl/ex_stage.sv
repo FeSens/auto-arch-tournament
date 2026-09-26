@@ -76,9 +76,11 @@ module ex_stage (
     alu_b = in.ctrl.alu_src  ? in.imm : rs2;
   end
 
+  // The ALU runs from the one-hot controls pre-decoded in ID (in.alu_ctl),
+  // so no opcode decode sits between ID/EX and EX/MEM.
   logic [31:0] alu_result;
-  alu u_alu (
-    .op  (in.ctrl.alu_op),
+  alu_core u_alu (
+    .ctl (in.alu_ctl),
     .a   (alu_a),
     .b   (alu_b),
     .out (alu_result)

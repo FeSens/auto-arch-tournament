@@ -77,6 +77,29 @@
                               // validated opcode/funct arms only.
   } ctrl_t;
 
+  // Pre-decoded ALU controls. alu_predecode (alu.sv) expands ctrl.alu_op
+  // into this bundle in ID and it is registered in ID/EX, so EX's ALU sees
+  // one-hot result selects and operand modifiers straight from flops and
+  // never decodes the opcode. All-zero (reset / flush bubble, DIV/REM)
+  // selects nothing: the ALU output is 0.
+  typedef struct packed {
+    logic sub;         // SUB, SLT, SLTU: shared adder computes a + ~b + 1
+    logic sra;         // right-shift fill = a[31]
+    logic mul_a_sgn;   // MULH, MULHSU: a is signed
+    logic mul_b_sgn;   // MULH: b is signed
+    logic sel_sum;     // ADD, SUB
+    logic sel_and;
+    logic sel_or;
+    logic sel_xor;
+    logic sel_slt;
+    logic sel_sltu;
+    logic sel_sll;
+    logic sel_sr;      // SRL, SRA
+    logic sel_b;       // LUI
+    logic sel_mul_lo;  // MUL
+    logic sel_mul_hi;  // MULH, MULHU, MULHSU
+  } alu_ctl_t;
+
   // IF -> ID combinational bundle (no register; PC reg sits in if_stage).
   // instr comes from live imem or from IF's replay store on an imem
   // stall; imem is immutable, so both are the same word for a given pc.
@@ -104,6 +127,7 @@
     logic [4:0]  rs1_addr;
     logic [4:0]  rs2_addr;
     ctrl_t       ctrl;
+    alu_ctl_t    alu_ctl;        // pre-decoded ctrl.alu_op (EX ALU controls)
     logic [31:0] instr;
     logic        pred_taken;     // IF steered to pc+imm (see if_id_t)
     logic [1:0]  bht_ctr;        // BHT counter read at fetch

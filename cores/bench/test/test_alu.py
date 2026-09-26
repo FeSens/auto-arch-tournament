@@ -25,6 +25,7 @@ from _helpers import (
     ALU_SLT, ALU_SLTU, ALU_SLL, ALU_SRL, ALU_SRA,
     ALU_LUI,
     ALU_MUL, ALU_MULH, ALU_MULHU, ALU_MULHSU,
+    ALU_DIV, ALU_DIVU, ALU_REM, ALU_REMU,
     run_cocotb,
 )
 
@@ -235,6 +236,90 @@ async def mul_vectors(dut):
         assert len(vecs) >= 30
         for a, b in vecs:
             await _check(dut, op, a, b, ref(a, b))
+
+
+# ── Shared-datapath corners ───────────────────────────────────────────────
+# ADD/SUB/SLT/SLTU share one 33-bit adder (SLT from its sign bit, SLTU from
+# its carry) and the four MUL variants share one signed 33x33 product, so
+# these pin the sign/carry and operand-extension edges.
+_SLT_PAIRS = [
+    (0x80000000, 0x7FFFFFFF), (0x7FFFFFFF, 0x80000000),   # MIN vs MAX
+    (0x80000000, 0x80000000), (0x7FFFFFFF, 0x7FFFFFFF),   # equal
+    (0, 0), (0xFFFFFFFF, 0xFFFFFFFF),
+    (0xFFFFFFFF, 0), (0, 0xFFFFFFFF),
+    (0x80000000, 0), (0, 0x80000000),
+    (0x80000000, 0xFFFFFFFF), (0xFFFFFFFF, 0x80000000),
+    (0x7FFFFFFF, 0), (0, 0x7FFFFFFF),
+    (0xFFFFFFFE, 0xFFFFFFFF), (0xFFFFFFFF, 0xFFFFFFFE),
+    (1, 2), (2, 1), (0x80000001, 0x80000000),
+]
+
+
+@alu_test
+async def slt_sltu_corners(dut):
+    for a, b in _SLT_PAIRS:
+        await _check(dut, ALU_SLT, a, b, int(_s32(a) < _s32(b)))
+        await _check(dut, ALU_SLTU, a, b, int(a < b))
+
+
+@alu_test
+async def add_sub_corners(dut):
+    for a, b in _SLT_PAIRS + [(0, 1), (1, 0), (0x80000000, 1),
+                              (0x7FFFFFFF, 1), (0xFFFFFFFF, 1)]:
+        await _check(dut, ALU_ADD, a, b, (a + b) & MASK32)
+        await _check(dut, ALU_SUB, a, b, (a - b) & MASK32)
+
+
+@alu_test
+async def mul_high_corners(dut):
+    pairs = [
+        (INT_MIN, INT_MIN), (0xFFFFFFFF, 0xFFFFFFFF),
+        (INT_MIN, 0xFFFFFFFF), (0xFFFFFFFF, INT_MIN),
+        (0x7FFFFFFF, INT_MIN), (INT_MIN, 0x7FFFFFFF),
+        (0x7FFFFFFF, 0x7FFFFFFF), (0x7FFFFFFF, 0xFFFFFFFF),
+        (0xFFFFFFFF, 0x7FFFFFFF), (0, 0xFFFFFFFF), (0xFFFFFFFF, 0),
+        (1, 0xFFFFFFFF), (0xFFFFFFFF, 1),
+    ]
+    for op, ref in [(ALU_MUL, ref_mul), (ALU_MULH, ref_mulh),
+                    (ALU_MULHU, ref_mulhu), (ALU_MULHSU, ref_mulhsu)]:
+        for a, b in pairs:
+            await _check(dut, op, a, b, ref(a, b))
+
+
+# RV32I reference for every non-M op. A wrong or overlapping one-hot select
+# in the AND-OR result merge shows up here as a stray OR'd-in term.
+_RV32I_REF = {
+    ALU_ADD:  lambda a, b: a + b,
+    ALU_SUB:  lambda a, b: a - b,
+    ALU_AND:  lambda a, b: a & b,
+    ALU_OR:   lambda a, b: a | b,
+    ALU_XOR:  lambda a, b: a ^ b,
+    ALU_SLT:  lambda a, b: int(_s32(a) < _s32(b)),
+    ALU_SLTU: lambda a, b: int(a < b),
+    ALU_SLL:  lambda a, b: a << (b & 31),
+    ALU_SRL:  lambda a, b: a >> (b & 31),
+    ALU_SRA:  lambda a, b: _s32(a) >> (b & 31),
+    ALU_LUI:  lambda a, b: b,
+}
+
+
+@alu_test
+async def rv32i_vectors(dut):
+    rng = random.Random(31)
+    pairs = [(a, b) for a in _CORNERS for b in _CORNERS[::3]]
+    pairs += [(rng.getrandbits(32), rng.getrandbits(32)) for _ in range(40)]
+    pairs += [(rng.getrandbits(32), rng.getrandbits(6)) for _ in range(20)]
+    for op, ref in _RV32I_REF.items():
+        for a, b in pairs:
+            await _check(dut, op, a, b, ref(a, b) & MASK32)
+
+
+@alu_test
+async def div_ops_output_zero(dut):
+    """DIV/DIVU/REM/REMU run in div_unit; the ALU selects nothing for them."""
+    for op in (ALU_DIV, ALU_DIVU, ALU_REM, ALU_REMU):
+        for a, b in [(0xFFFFFFFF, 0xFFFFFFFF), (0x12345678, 3), (7, 0)]:
+            await _check(dut, op, a, b, 0)
 
 
 # ══════════════════════════════════════════════════════════════════════════
