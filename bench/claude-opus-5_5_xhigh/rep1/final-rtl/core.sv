@@ -1,0 +1,338 @@
+// rtl/core.sv
+//
+// Top-level wiring for the 5-stage in-order RV32IM core.
+//
+//  IF -> ID -> EX -> MEM -> WB
+//   |    |     ^
+//   |    +-----+    forward_unit drives EX-stage rs1/rs2 muxes
+//   |               from EX/MEM and MEM/WB
+//   +- stall <- hazard_unit (load-use)
+//   +- fetch_ready -> hazard_unit (imem delivered, or IF replay-store hit)
+//   +- mem_ready -> hazard_unit (MEM op done: dmem delivered, or a
+//      stall-only load-cache hit / posted store; the cache lookahead
+//      is keyed on EX's ALU result, ex_addr)
+//   +- predict: BRANCH (64-entry bimodal BHT) / JAL (always) steer the PC
+//      at fetch; EX checks and redirects on mispredict (and every JALR),
+//      and writes the BHT back one cycle later (bht_we/widx/wdata)
+//   +- late branch: a BRANCH reading the LOAD right ahead of it skips the
+//      load-use stall; MEM resolves it from MEM/WB.read_data and, on a
+//      mispredict, raises late_kill (a flop) the cycle it is in WB. EX
+//      folds late_kill / late_tgt into its redirect, and the MEM BHT
+//      write takes the shared BHT port over EX's
+//
+// IO port names use the `io_*` Chisel-emit prefix so the existing
+// formal/wrapper_si.sv and test/cosim/main.cpp bindings carry through
+// byte-for-byte. RVFI port set is the single-channel set described in
+// CLAUDE.md invariant 1 under `nret: 1` (declared in core.yaml). The
+// orchestrator routes formal to wrapper_si.sv + checks_si.cfg and FPGA
+// synth to fpga/core_bench_si.sv for this core. There is no channel 1.
+//
+// Latency:        full pipeline; instruction n retires at MEM/WB on
+//                 cycle n+4 (no hazards) or later (load-use stall,
+//                 redirect).
+// RVFI fields:    all of them — driven from the MEM/WB register and
+//                 the WB-stage write-data mux.
+module core (
+  input  logic        clock,
+  input  logic        reset,
+  // imem
+  output logic [31:0] io_imemAddr,
+  input  logic [31:0] io_imemData,
+  // imem bus backpressure. Drive 1 for zero-wait single-cycle BRAM (the
+  // V0 default). Drive 0 to model bus stall — IF's replay store supplies
+  // the word if it has seen this PC before; otherwise the PC reg holds,
+  // IF/ID payload becomes a NOP, and a pipeline bubble propagates
+  // downstream. Used by cosim's --istall mode to match VexRiscv's
+  // random ~22% backpressure model so CoreMark/MHz can be compared
+  // apples-to-apples with their published "full no cache" number.
+  input  logic        io_imemReady,
+  // dmem
+  output logic [31:0] io_dmemAddr,
+  input  logic [31:0] io_dmemRData,
+  output logic [31:0] io_dmemWData,
+  output logic [3:0]  io_dmemWEn,
+  output logic        io_dmemREn,
+  // dmem bus backpressure. Drive 1 for zero-wait. Drive 0 to model
+  // dStall — a STORE is posted to MEM's store buffer and a LOAD of a
+  // word MEM's stall-only cache holds completes from it; any other
+  // memory op in EX/MEM freezes the pipeline back to MEM (MEM/WB
+  // captures a bubble) until the bus delivers.
+  input  logic        io_dmemReady,
+  // RVFI — single-channel retirement port set (NRET=1 contract,
+  // declared via `nret: 1` in core.yaml). Channel 0 is the sole
+  // retirement channel. See CLAUDE.md invariant 1 for the full contract.
+  output logic        io_rvfi_valid_0,
+  output logic [63:0] io_rvfi_order_0,
+  output logic [31:0] io_rvfi_insn_0,
+  output logic        io_rvfi_trap_0,
+  output logic        io_rvfi_halt_0,
+  output logic        io_rvfi_intr_0,
+  output logic [1:0]  io_rvfi_mode_0,
+  output logic [1:0]  io_rvfi_ixl_0,
+  output logic [4:0]  io_rvfi_rs1_addr_0,
+  output logic [31:0] io_rvfi_rs1_rdata_0,
+  output logic [4:0]  io_rvfi_rs2_addr_0,
+  output logic [31:0] io_rvfi_rs2_rdata_0,
+  output logic [4:0]  io_rvfi_rd_addr_0,
+  output logic [31:0] io_rvfi_rd_wdata_0,
+  output logic [31:0] io_rvfi_pc_rdata_0,
+  output logic [31:0] io_rvfi_pc_wdata_0,
+  output logic [31:0] io_rvfi_mem_addr_0,
+  output logic [3:0]  io_rvfi_mem_rmask_0,
+  output logic [3:0]  io_rvfi_mem_wmask_0,
+  output logic [31:0] io_rvfi_mem_rdata_0,
+  output logic [31:0] io_rvfi_mem_wdata_0
+);
+
+  // ── Inter-stage wires ──────────────────────────────────────────────────
+  if_id_t  if_id_w;
+  id_ex_t  id_ex_w;
+  ex_mem_t ex_mem_w;
+  mem_wb_t mem_wb_w;
+
+  // hazard / forward
+  logic       stall_if, hold_id, flush_if, flush_id;
+  logic       stall_ex_mem, hold_mem_wb;
+  logic       ex_div_busy;
+  logic       fetch_ready;   // imem delivered, or IF replay store hit
+  logic       mem_ready;     // MEM op done: dmem, cache hit, or store post
+  logic [1:0] fwd_rs1_sel, fwd_rs2_sel;
+
+  // EX ALU result (next load/store address) for MEM's cache lookahead
+  logic [31:0] ex_addr;
+
+  // EX redirect (= mispredict of IF's fetch-time prediction, or JALR),
+  // with the WB-stage late_kill merged in
+  logic        redirect;
+  logic [31:0] redirect_target;
+
+  // Late branch unit (MEM): WB-stage redirect, registered
+  logic        late_kill;
+  logic [31:0] late_tgt;
+
+  // BHT updates into IF (registered in EX and MEM), merged on one port
+  logic                 ex_bht_we;
+  logic [BHT_IDX_W-1:0] ex_bht_widx;
+  logic [1:0]           ex_bht_wdata;
+  logic                 mem_bht_we;
+  logic [BHT_IDX_W-1:0] mem_bht_widx;
+  logic [1:0]           mem_bht_wdata;
+  logic                 bht_we;
+  logic [BHT_IDX_W-1:0] bht_widx;
+  logic [1:0]           bht_wdata;
+
+  // hazard -> ID: capture the IF/ID BRANCH as a late branch
+  logic       late_br;
+
+  // regfile interface (driven by ID + WB stages)
+  logic [4:0]  rs1_addr_w;
+  logic [4:0]  rs2_addr_w;
+  logic [31:0] rs1_data_w;
+  logic [31:0] rs2_data_w;
+  logic        wb_w_en;
+  logic [4:0]  wb_w_addr;
+  logic [31:0] wb_w_data;
+
+  // ── IF ────────────────────────────────────────────────────────────────
+  if_stage u_if (
+    .clock           (clock),
+    .reset           (reset),
+    .stall           (stall_if),
+    .flush           (flush_if),
+    .redirect        (redirect),
+    .redirect_target (redirect_target),
+    .bht_we          (bht_we),
+    .bht_widx        (bht_widx),
+    .bht_wdata       (bht_wdata),
+    .imem_addr       (io_imemAddr),
+    .imem_data       (io_imemData),
+    .imem_ready      (io_imemReady),
+    .fetch_ready     (fetch_ready),
+    .out             (if_id_w)
+  );
+
+  // ── ID + regfile ──────────────────────────────────────────────────────
+  id_stage u_id (
+    .clock    (clock),
+    .reset    (reset),
+    .hold     (hold_id),
+    .flush    (flush_id),
+    .in       (if_id_w),
+    .late_br  (late_br),
+    .rs1_addr (rs1_addr_w),
+    .rs2_addr (rs2_addr_w),
+    .rs1_data (rs1_data_w),
+    .rs2_data (rs2_data_w),
+    .out      (id_ex_w)
+  );
+
+  reg_file u_rf (
+    .clock    (clock),
+    .reset    (reset),
+    .rs1_addr (rs1_addr_w),
+    .rs2_addr (rs2_addr_w),
+    .rs1_data (rs1_data_w),
+    .rs2_data (rs2_data_w),
+    .w_en     (wb_w_en),
+    .w_addr   (wb_w_addr),
+    .w_data   (wb_w_data)
+  );
+
+  // ── EX ────────────────────────────────────────────────────────────────
+  ex_stage u_ex (
+    .clock           (clock),
+    .reset           (reset),
+    .stall           (stall_ex_mem),
+    .in              (id_ex_w),
+    .fwd_rs1_sel     (fwd_rs1_sel),
+    .fwd_rs2_sel     (fwd_rs2_sel),
+    .fwd_ex_mem      (ex_mem_w.alu_result),  // EX/MEM-registered ALU result
+    .fwd_mem_wb      (wb_w_data),            // WB-stage's write-mux output
+    .late_kill       (late_kill),
+    .late_tgt        (late_tgt),
+    .out             (ex_mem_w),
+    .ex_addr         (ex_addr),
+    .redirect        (redirect),
+    .redirect_target (redirect_target),
+    .ex_div_busy     (ex_div_busy),
+    .bht_we          (ex_bht_we),
+    .bht_widx        (ex_bht_widx),
+    .bht_wdata       (ex_bht_wdata)
+  );
+
+  // ── MEM ───────────────────────────────────────────────────────────────
+  mem_stage u_mem (
+    .clock      (clock),
+    .reset      (reset),
+    .hold_wb    (hold_mem_wb),
+    .in         (ex_mem_w),
+    .ex_addr    (ex_addr),
+    .ex_adv     (!stall_ex_mem),
+    .dmem_addr  (io_dmemAddr),
+    .dmem_wdata (io_dmemWData),
+    .dmem_rdata (io_dmemRData),
+    .dmem_wen   (io_dmemWEn),
+    .dmem_ren   (io_dmemREn),
+    .dmem_ready (io_dmemReady),
+    .mem_ready  (mem_ready),
+    .late_kill  (late_kill),
+    .late_tgt   (late_tgt),
+    .bht_we     (mem_bht_we),
+    .bht_widx   (mem_bht_widx),
+    .bht_wdata  (mem_bht_wdata),
+    .out        (mem_wb_w)
+  );
+
+  // One BHT write port, all inputs registered. MEM's late-branch update
+  // wins a collision; a dropped EX update only loses a prediction hint.
+  always_comb begin
+    bht_we    = mem_bht_we || ex_bht_we;
+    bht_widx  = mem_bht_we ? mem_bht_widx  : ex_bht_widx;
+    bht_wdata = mem_bht_we ? mem_bht_wdata : ex_bht_wdata;
+  end
+
+  // ── WB ────────────────────────────────────────────────────────────────
+  wb_stage u_wb (
+    .in     (mem_wb_w),
+    .w_en   (wb_w_en),
+    .w_addr (wb_w_addr),
+    .w_data (wb_w_data)
+  );
+
+  // ── Hazard / forwarding ───────────────────────────────────────────────
+  hazard_unit u_hazard (
+    .id_ex_ld_nz     (id_ex_w.ld_nz),
+    .id_ex_rd        (id_ex_w.rd),
+    .id_ex_late      (id_ex_w.late),
+    .if_id_rs1       (if_id_w.instr[19:15]),
+    .if_id_rs2       (if_id_w.instr[24:20]),
+    .if_id_is_branch (if_id_w.pd_br),
+    .if_id_is_jalr   (if_id_w.pd_jalr),
+    .redirect        (redirect),
+    .late_kill       (late_kill),
+    .fetch_ready     (fetch_ready),
+    .mem_ready       (mem_ready),
+    .ex_mem_mem_op   (ex_mem_w.ctrl.mem_read | ex_mem_w.ctrl.mem_write),
+    .ex_div_busy     (ex_div_busy),
+    .stall_if        (stall_if),
+    .hold_id         (hold_id),
+    .flush_if        (flush_if),
+    .flush_id        (flush_id),
+    .stall_ex_mem    (stall_ex_mem),
+    .hold_mem_wb     (hold_mem_wb),
+    .late_br         (late_br)
+  );
+
+  forward_unit u_fwd (
+    .id_ex_rs1   (id_ex_w.rs1_addr),
+    .id_ex_rs2   (id_ex_w.rs2_addr),
+    .ex_mem_rd   (ex_mem_w.rd),
+    .ex_mem_w_en (ex_mem_w.ctrl.reg_write),
+    .mem_wb_rd   (mem_wb_w.rd),
+    .mem_wb_w_en (mem_wb_w.ctrl.reg_write),
+    .fwd_rs1     (fwd_rs1_sel),
+    .fwd_rs2     (fwd_rs2_sel)
+  );
+
+  // ── RVFI ──────────────────────────────────────────────────────────────
+  // The MEM/WB register is the retirement boundary. rvfi_order increments
+  // every cycle rvfi_valid is high; CLAUDE.md invariant 4 (riscv-formal
+  // unique-check) requires strict +1.
+  //
+  // The counter is two 32-bit halves so no 64-bit carry chain exists: the
+  // low half counts retirements and the high half steps on the same edge
+  // the low half wraps (valid with lo all ones). {hi, lo} is exactly the
+  // 64-bit count every cycle. lo_ones_q is a registered copy of
+  // (order_lo_q == all ones), loaded with the value lo is about to step
+  // from, so the 32-input compare ends in one flop instead of driving the
+  // high half's 32 clock enables.
+  logic [31:0] order_lo_q;
+  logic [31:0] order_hi_q;
+  logic        lo_ones_q;
+  logic        rd_wen;
+
+  always_ff @(posedge clock) begin
+    if (reset) begin
+      order_lo_q <= 32'b0;
+      order_hi_q <= 32'b0;
+      lo_ones_q  <= 1'b0;
+    end else if (mem_wb_w.valid) begin
+      order_lo_q <= order_lo_q + 32'b1;
+      lo_ones_q  <= (order_lo_q == 32'hFFFF_FFFE);
+      if (lo_ones_q) order_hi_q <= order_hi_q + 32'b1;
+    end
+  end
+
+  // A late branch's trap and pc_wdata are fixed up here from registered
+  // bits: MEM/WB.late_trap (taken to a misaligned target), and late_kill
+  // (mispredicted: the actual next PC is late_tgt; late_kill is high
+  // exactly while the branch is in MEM/WB, or on a replay, which does
+  // not retire).
+  always_comb begin
+    rd_wen = mem_wb_w.ctrl.reg_write && (mem_wb_w.rd != 5'b0);
+
+    // Channel 0: the only retirement channel for the single-issue baseline.
+    io_rvfi_valid_0     = mem_wb_w.valid;
+    io_rvfi_order_0     = {order_hi_q, order_lo_q};
+    io_rvfi_insn_0      = mem_wb_w.instr;
+    io_rvfi_trap_0      = mem_wb_w.ctrl.is_illegal || mem_wb_w.late_trap;
+    io_rvfi_halt_0      = 1'b0;
+    io_rvfi_intr_0      = 1'b0;
+    io_rvfi_mode_0      = 2'd3;     // M-mode only
+    io_rvfi_ixl_0       = 2'd1;     // 32-bit ISA
+    io_rvfi_rs1_addr_0  = mem_wb_w.rs1_addr;
+    io_rvfi_rs1_rdata_0 = mem_wb_w.rs1_val;
+    io_rvfi_rs2_addr_0  = mem_wb_w.rs2_addr;
+    io_rvfi_rs2_rdata_0 = mem_wb_w.rs2_val;
+    io_rvfi_rd_addr_0   = rd_wen ? mem_wb_w.rd : 5'b0;
+    io_rvfi_rd_wdata_0  = rd_wen ? wb_w_data   : 32'b0;
+    io_rvfi_pc_rdata_0  = mem_wb_w.pc;
+    io_rvfi_pc_wdata_0  = late_kill ? late_tgt : mem_wb_w.pc_next;
+    io_rvfi_mem_addr_0  = mem_wb_w.mem_addr;
+    io_rvfi_mem_rmask_0 = mem_wb_w.mem_rmask;
+    io_rvfi_mem_wmask_0 = mem_wb_w.mem_wmask;
+    io_rvfi_mem_rdata_0 = mem_wb_w.mem_rdata;
+    io_rvfi_mem_wdata_0 = mem_wb_w.mem_wdata;
+  end
+
+endmodule

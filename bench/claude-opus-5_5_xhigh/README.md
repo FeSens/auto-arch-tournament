@@ -69,4 +69,4 @@ The operator audited all nine accepted designs (r1s1 to r14s1): changes are conf
 
 ## Files
 
-Per-repetition folder `rep1/` contains the canonical summaries (`summary.json`, `run_summary.json`), the full final journal (`log.jsonl`), the orchestrator log, the compacted agent transcript (`agent.log`) and the tool environment (`env.json`). The website and aggregate reports are generated from `bench/results.jsonl` and these journals. `aborted1-formal-reaper/` holds the stopped first launch.
+Per-repetition folder `rep1/` contains the canonical summaries (`summary.json`, `run_summary.json`), the full final journal (`log.jsonl`), the orchestrator log, the compacted agent transcript (`agent.log`), the tool environment (`env.json`) and the final design's RTL (`final-rtl/`, identical to the accepted r14s1 commit). The website and aggregate reports are generated from `bench/results.jsonl` and these journals. `aborted1-formal-reaper/` holds the stopped first launch.
