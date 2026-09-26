@@ -7,6 +7,7 @@
 //   |    +-----+    forward_unit drives EX-stage rs1/rs2 muxes
 //   |               from EX/MEM and MEM/WB
 //   +- stall <- hazard_unit (load-use)
+//   +- fetch_ready -> hazard_unit (imem delivered, or IF replay-store hit)
 //
 // IO port names use the `io_*` Chisel-emit prefix so the existing
 // formal/wrapper_si.sv and test/cosim/main.cpp bindings carry through
@@ -27,9 +28,10 @@ module core (
   output logic [31:0] io_imemAddr,
   input  logic [31:0] io_imemData,
   // imem bus backpressure. Drive 1 for zero-wait single-cycle BRAM (the
-  // V0 default). Drive 0 to model bus stall — PC reg holds, IF/ID
-  // payload becomes a NOP, and a pipeline bubble propagates downstream.
-  // Used by test/cosim/vex_main.cpp's --istall mode to match VexRiscv's
+  // V0 default). Drive 0 to model bus stall — IF's replay store supplies
+  // the word if it has seen this PC before; otherwise the PC reg holds,
+  // IF/ID payload becomes a NOP, and a pipeline bubble propagates
+  // downstream. Used by cosim's --istall mode to match VexRiscv's
   // random ~22% backpressure model so CoreMark/MHz can be compared
   // apples-to-apples with their published "full no cache" number.
   input  logic        io_imemReady,
@@ -80,6 +82,7 @@ module core (
   logic       stall_if, stall_id, flush_if, flush_id;
   logic       stall_ex_mem, hold_mem_wb;
   logic       ex_div_busy;
+  logic       fetch_ready;   // imem delivered, or IF replay store hit
   logic [1:0] fwd_rs1_sel, fwd_rs2_sel;
 
   // EX redirect
@@ -105,6 +108,8 @@ module core (
     .redirect_target (redirect_target),
     .imem_addr       (io_imemAddr),
     .imem_data       (io_imemData),
+    .imem_ready      (io_imemReady),
+    .fetch_ready     (fetch_ready),
     .out             (if_id_w)
   );
 
@@ -179,7 +184,7 @@ module core (
     .if_id_rs1      (if_id_w.instr[19:15]),
     .if_id_rs2      (if_id_w.instr[24:20]),
     .redirect       (redirect),
-    .imem_ready     (io_imemReady),
+    .fetch_ready    (fetch_ready),
     .dmem_ready     (io_dmemReady),
     .ex_mem_mem_op  (ex_mem_w.ctrl.mem_read | ex_mem_w.ctrl.mem_write),
     .ex_div_busy    (ex_div_busy),

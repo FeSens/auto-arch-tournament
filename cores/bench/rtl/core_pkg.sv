@@ -73,6 +73,8 @@
   } ctrl_t;
 
   // IF -> ID combinational bundle (no register; PC reg sits in if_stage).
+  // instr comes from live imem or from IF's replay store on an imem
+  // stall; imem is immutable, so both are the same word for a given pc.
   typedef struct packed {
     logic [31:0] pc;
     logic [31:0] instr;

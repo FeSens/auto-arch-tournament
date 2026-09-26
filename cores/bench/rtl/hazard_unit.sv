@@ -22,10 +22,13 @@ module hazard_unit (
   input  logic [4:0] if_id_rs1,         // IF/ID instr[19:15]  (next rs1)
   input  logic [4:0] if_id_rs2,         // IF/ID instr[24:20]  (next rs2)
   input  logic       redirect,          // EX has resolved a branch/jump
-  // Bus backpressure (default-1 in zero-wait testbenches; VexRiscv-style
-  // random ~22% stall in vex_main.cpp). When low, the corresponding
-  // memory request is NOT serviced this cycle.
-  input  logic       imem_ready,
+  // Effective fetch-ready from IF: the external imem accepted the fetch,
+  // or IF's replay store supplied the word for the current PC. When low,
+  // IF has no instruction this cycle.
+  input  logic       fetch_ready,
+  // dmem bus backpressure (default-1 in zero-wait testbenches;
+  // VexRiscv-style random ~22% stall in cosim). When low, the memory
+  // request is NOT serviced this cycle.
   input  logic       dmem_ready,
   // EX/MEM has a memory op in flight (the LOAD/STORE the dmem stall
   // would actually be holding up). Computed at top level from the
@@ -53,7 +56,9 @@ module hazard_unit (
     load_use_hazard = id_ex_mem_read
                    && (id_ex_rd == if_id_rs1 || id_ex_rd == if_id_rs2)
                    && (id_ex_rd != 5'b0);
-    imem_stall = !imem_ready;
+    // A replayed word counts as a delivered fetch: load-use detection
+    // above sees its rs1/rs2 and the PC advances exactly as on a live one.
+    imem_stall = !fetch_ready;
     // dmem stall only matters if there's actually a memory op in EX/MEM
     // — otherwise bus-not-ready is irrelevant to the pipeline.
     dmem_stall = !dmem_ready && ex_mem_mem_op;
@@ -61,8 +66,8 @@ module hazard_unit (
     // PC reg holds on any stall reason.
     stall_if      = load_use_hazard || imem_stall || dmem_stall || ex_div_busy;
     // IF/ID combinational payload: NOP whenever we wouldn't have a valid
-    // instruction this cycle (redirect target unknown to IF, or imem
-    // didn't deliver).
+    // instruction this cycle (redirect target unknown to IF, or neither
+    // imem nor the replay store delivered).
     flush_if      = redirect || imem_stall;
     // ID/EX register:
     //   - dmem_stall  -> hold        (preserve in-flight pipeline state)

@@ -11,6 +11,12 @@ forwarding to dependents, back-to-back divides, operands forwarded at
 launch (incl. from a LW), divides around branches/jumps, and the same
 programs under imem/dmem bus stalls (the formal wrapper ties both
 ready signals high, so stalls are only exercised here and in cosim).
+
+Also covers IF's stall-only replay store: on a cycle where imem refuses
+the fetch, IF serves the current PC from the words it has already
+fetched. The harness drives a poison word on imemData whenever
+iready=0, so an instruction that retires correctly after a refused
+fetch can only have come from the replay store.
 """
 from __future__ import annotations
 
@@ -80,8 +86,14 @@ def ECALL():             return 0x00000073
 
 
 # ── Harness ────────────────────────────────────────────────────────────────
+# Driven on imemData on every cycle the imem bus refuses the fetch
+# (iready=0). It decodes as JAL x29, so a leaked poison word redirects
+# and writes x29 instead of vanishing silently.
+POISON = 0xDEADBEEF
+
+
 async def _run(dut, program, dmem_init=None, max_cycles=200, ready=None,
-               start_clock=True):
+               start_clock=True, fetch_log=None):
     """Drive imem/dmem; capture RVFI retirements until EBREAK or max_cycles.
 
     imem is read combinationally each cycle from imemAddr; dmem similarly.
@@ -91,7 +103,11 @@ async def _run(dut, program, dmem_init=None, max_cycles=200, ready=None,
     `ready` (optional) is a callable cycle -> (imem_ready, dmem_ready)
     giving the bus backpressure for each cycle, mirroring
     test/cosim/main.cpp: a store is only accepted on a cycle with
-    dmem_ready=1. Default: zero-wait on both buses.
+    dmem_ready=1. Default: zero-wait on both buses. On a cycle with
+    imem_ready=0, imemData carries POISON instead of the addressed word.
+
+    `fetch_log` (optional list) gets one (cycle, imemAddr, imem_ready)
+    tuple appended per cycle.
 
     Returns (retirements, dmem) where retirements is a list of dicts
     sampled on every cycle that rvfi_valid=1.
@@ -108,8 +124,7 @@ async def _run(dut, program, dmem_init=None, max_cycles=200, ready=None,
     dut.reset.value = 1
     dut.io_imemData.value = 0
     dut.io_dmemRData.value = 0
-    # Zero-wait bus model: ready always asserted. The stall-mode tests
-    # live in vex_main.cpp's --istall/--dstall flags, not in cocotb.
+    # Zero-wait bus during reset; `ready` takes over once the loop runs.
     dut.io_imemReady.value = 1
     dut.io_dmemReady.value = 1
     for _ in range(3):
@@ -134,6 +149,8 @@ async def _run(dut, program, dmem_init=None, max_cycles=200, ready=None,
         iready, dready = ready(cycle) if ready else (1, 1)
         dut.io_imemReady.value = iready
         dut.io_dmemReady.value = dready
+        if fetch_log is not None:
+            fetch_log.append((cycle, ia, iready))
 
         # Apply dmem write side effects (only if the bus accepts them).
         if wen and dready:
@@ -172,8 +189,9 @@ async def _run(dut, program, dmem_init=None, max_cycles=200, ready=None,
             if r["insn"] == EBREAK():
                 break
 
-        # Drive next cycle's imem fetch and dmem read combinationally.
-        dut.io_imemData.value  = imem.get(ia & ~3, EBREAK())
+        # Drive this cycle's imem fetch and dmem read combinationally. A
+        # refused fetch returns POISON: the core must not consume it.
+        dut.io_imemData.value  = imem.get(ia & ~3, EBREAK()) if iready else POISON
         dut.io_dmemRData.value = dmem.get(da & ~3, 0)
     else:
         raise AssertionError(f"max_cycles={max_cycles} reached without EBREAK")
@@ -646,6 +664,224 @@ async def div_programs_under_bus_stalls(dut):
             assert _arch(rets) == _arch(base), (
                 f"program {idx} seed {seed}: RVFI stream differs under stalls"
             )
+
+
+# ── Stall-only I-fetch replay store ───────────────────────────────────────
+# Countdown loop: LW/SW read-modify-write of one dmem word with a
+# load-use dependent ADD, 20 iterations.
+LOOP_HEAD = 16
+PROG_REPLAY_LOOP = [
+    ADDI(1, 0, 20),        # 0   x1 = trip count
+    ADDI(2, 0, 0),         # 4   x2 = sum of running totals
+    ADDI(3, 0, 0x40),      # 8   x3 = dmem base
+    SW  (0, 3, 0),         # 12  mem[0x40] = 0
+    LW  (4, 3, 0),         # 16  loop: x4 = mem[0x40]
+    ADD (4, 4, 1),         # 20  load-use dependent: x4 += x1
+    SW  (4, 3, 0),         # 24  mem[0x40] = x4
+    ADD (2, 2, 4),         # 28  x2 += x4
+    ADDI(1, 1, -1),        # 32  x1 -= 1
+    BNE (1, 0, -20),       # 36  -> 16
+    LW  (5, 3, 0),         # 40  x5 = mem[0x40]
+    ADD (6, 5, 2),         # 44  x6 = x5 + x2
+    EBREAK(),              # 48
+]
+
+# Two passes over a body with a JAL, a taken BEQ, a JAL +4 (redirect
+# onto the PC IF is already fetching) and a LW + load-use dependent.
+PROG_REPLAY_CTRL = [
+    ADDI(1, 0, 2),         # 0   x1 = pass count
+    ADDI(3, 0, 0x80),      # 4   x3 = dmem base
+    ADDI(7, 0, 0),         # 8   x7 = accumulator
+    JAL (5, 12),           # 12  body: -> 24, x5 = 16
+    ADDI(7, 7, 100),       # 16  wrong path
+    ADDI(7, 7, 200),       # 20  wrong path
+    SW  (5, 3, 0),         # 24  JAL target: mem[0x80] = 16
+    LW  (6, 3, 0),         # 28  x6 = 16
+    ADD (7, 7, 6),         # 32  load-use dependent: x7 += x6
+    BEQ (0, 0, 12),        # 36  taken -> 48
+    ADDI(7, 7, 300),       # 40  wrong path
+    ADDI(7, 7, 400),       # 44  wrong path
+    JAL (9, 4),            # 48  BEQ target: -> 52, x9 = 52
+    ADDI(1, 1, -1),        # 52  JAL target
+    BNE (1, 0, -44),       # 56  -> 12
+    ADD (8, 7, 9),         # 60  x8 = x7 + x9
+    EBREAK(),              # 64
+]
+CTRL_REPLAYED = (24, 48, 52, 12, 32)  # redirect targets + load-use dependent
+
+
+def _random_iready(seed, p_stall=0.22):
+    """~22% random imem refusals; dmem zero-wait."""
+    rng = random.Random(seed)
+    table = {}
+
+    def ready(cycle):
+        if cycle not in table:
+            table[cycle] = (int(rng.random() >= p_stall), 1)
+        return table[cycle]
+    return ready
+
+
+def _random_dready(seed, p_stall=0.22):
+    """~22% random dmem refusals; imem zero-wait."""
+    rng = random.Random(seed)
+    table = {}
+
+    def ready(cycle):
+        if cycle not in table:
+            table[cycle] = (1, int(rng.random() >= p_stall))
+        return table[cycle]
+    return ready
+
+
+def _refuse_seen(dut, dready=None):
+    """imem refuses every fetch of an address it has already served once
+    (dmem readiness from `dready`, default zero-wait). Every refused fetch
+    must be a replay hit, so the core runs exactly as with iready=1."""
+    served = set()
+
+    def ready(cycle):
+        ia = int(dut.io_imemAddr.value) & ~3
+        iready = int(ia not in served)
+        served.add(ia)
+        return iready, dready(cycle)[1] if dready else 1
+    return ready
+
+
+def _flow(rets):
+    return [(r["pc"], r["insn"], r["rd_wdata"]) for r in rets]
+
+
+def _regs(rets):
+    """Final architectural register state implied by the rd writes."""
+    regs = {}
+    for r in rets:
+        if r["rd"]:
+            regs[r["rd"]] = r["rd_wdata"]
+    return regs
+
+
+def _check_order(rets):
+    orders = [r["order"] for r in rets]
+    assert orders == list(range(len(rets))), f"rvfi_order not strictly +1: {orders}"
+
+
+def _check_loop(rets, dmem):
+    total, acc = 0, 0
+    for x1 in range(20, 0, -1):
+        total += x1
+        acc += total
+    regs = _regs(rets)
+    assert regs[5] == total and regs[2] == acc and regs[6] == total + acc, regs
+    assert dmem.get(0x40) == total
+    assert not _by_insn(rets, POISON), "poison word retired"
+
+
+def _check_ctrl(rets, dmem):
+    body = [12, 24, 28, 32, 36, 48, 52, 56]
+    _check_order_and_pcs(rets, [0, 4, 8] + body * 2 + [60, 64])
+    regs = _regs(rets)
+    assert regs[7] == 32 and regs[9] == 52 and regs[8] == 84, regs
+    assert dmem.get(0x80) == 16
+    assert not _by_insn(rets, POISON), "poison word retired"
+
+
+def _refused(log):
+    return [(c, ia) for c, ia, iready in log if not iready]
+
+
+@cocotb.test()
+async def replay_loop_under_istalls(dut):
+    """Countdown loop under random ~22% imem refusals (and both buses):
+    final registers, dmem and the retired (pc, insn, rd_wdata) stream
+    equal the all-ready run; rvfi_order stays strictly +1."""
+    base, base_dmem = await _run(dut, PROG_REPLAY_LOOP, max_cycles=400)
+    _check_loop(base, base_dmem)
+    _check_order(base)
+    cases = [(_random_iready, s) for s in range(6)] + \
+            [(_random_ready, 100 + s) for s in range(3)]
+    for mk, seed in cases:
+        log = []
+        rets, dmem = await _run(dut, PROG_REPLAY_LOOP, max_cycles=800,
+                                ready=mk(seed), start_clock=False,
+                                fetch_log=log)
+        assert _refused(log), f"seed {seed}: no refused fetches"
+        _check_loop(rets, dmem)
+        _check_order(rets)
+        assert _flow(rets) == _flow(base), f"seed {seed}: retired stream differs"
+        assert _arch(rets) == _arch(base), f"seed {seed}: RVFI stream differs"
+        assert _regs(rets) == _regs(base) and dmem == base_dmem
+
+
+@cocotb.test()
+async def replay_hides_istalls_in_steady_state(dut):
+    """Same loop, random imem refusals only. Once the body has been
+    fetched, refused cycles still advance the PC linearly (replay hits),
+    and every lost cycle is a refusal of a never-served address."""
+    base, _ = await _run(dut, PROG_REPLAY_LOOP, max_cycles=400)
+    for seed in range(4):
+        log = []
+        rets, dmem = await _run(dut, PROG_REPLAY_LOOP, max_cycles=800,
+                                ready=_random_iready(seed), start_clock=False,
+                                fetch_log=log)
+        _check_loop(rets, dmem)
+        # Steady state: from the first return to the loop head.
+        first_back = next(i for i in range(1, len(log))
+                          if log[i][1] == LOOP_HEAD and log[i - 1][1] != LOOP_HEAD
+                          and any(ia > LOOP_HEAD for _, ia, _ in log[:i]))
+        hidden = sum(1 for i in range(first_back, len(log) - 1)
+                     if not log[i][2] and log[i + 1][1] == log[i][1] + 4)
+        served, cold = set(), 0
+        for _, ia, iready in log:
+            if iready:
+                served.add(ia)
+            elif ia not in served:
+                cold += 1
+        refused = len(_refused(log))
+        lost = rets[-1]["cycle"] - base[-1]["cycle"]
+        assert hidden > 0, f"seed {seed}: no replay hit in steady state"
+        assert 0 <= lost <= cold, (
+            f"seed {seed}: lost {lost} cycles, only {cold} cold refusals")
+        assert 4 * lost < refused, (
+            f"seed {seed}: lost {lost} of {refused} refused cycles")
+
+
+@cocotb.test()
+async def replay_redirect_and_load_use_targets(dut):
+    """imem refuses every address it has served before (poison data), so
+    the second pass runs purely from the replay store: JAL / taken-BEQ /
+    JAL+4 targets arrive on refused cycles right after the redirect, and
+    the load-use dependent ADD is replayed across its stall. The run must
+    be cycle-for-cycle identical to the all-ready run."""
+    first = True
+    for prog, check in ((PROG_REPLAY_CTRL, _check_ctrl),
+                        (PROG_REPLAY_LOOP, _check_loop)):
+        base, base_dmem = await _run(dut, prog, max_cycles=400,
+                                     start_clock=first)
+        first = False
+        check(base, base_dmem)
+        log = []
+        rets, dmem = await _run(dut, prog, max_cycles=400,
+                                ready=_refuse_seen(dut), start_clock=False,
+                                fetch_log=log)
+        check(rets, dmem)
+        assert rets == base, "refuse-seen run differs from the all-ready run"
+        assert 4 * len(_refused(log)) > len(log), "too few refused fetches"
+        if prog is PROG_REPLAY_CTRL:
+            replayed = {ia for _, ia in _refused(log)}
+            missing = [a for a in CTRL_REPLAYED if a not in replayed]
+            assert not missing, f"never served from replay: {missing}"
+
+    # Same, composed with random dmem stalls: identical to the run with
+    # the same dmem pattern and a zero-wait imem.
+    for seed in range(3):
+        base, _ = await _run(dut, PROG_REPLAY_CTRL, max_cycles=600,
+                             ready=_random_dready(seed), start_clock=False)
+        rets, dmem = await _run(dut, PROG_REPLAY_CTRL, max_cycles=600,
+                                ready=_refuse_seen(dut, _random_dready(seed)),
+                                start_clock=False)
+        _check_ctrl(rets, dmem)
+        assert rets == base, f"seed {seed}: refuse-seen + dstall run differs"
 
 
 def test_pipeline_runner():
