@@ -32,6 +32,7 @@ module id_stage (
   logic        dec_is_jalr;
   logic        dec_is_lui;
   logic        dec_is_auipc;
+  logic        dec_is_div;
   logic        dec_mem_read;
   logic        dec_mem_write;
   logic [1:0]  dec_mem_width;
@@ -50,6 +51,7 @@ module id_stage (
     .is_jalr    (dec_is_jalr),
     .is_lui     (dec_is_lui),
     .is_auipc   (dec_is_auipc),
+    .is_div     (dec_is_div),
     .mem_read   (dec_mem_read),
     .mem_write  (dec_mem_write),
     .mem_width  (dec_mem_width),
@@ -77,6 +79,7 @@ module id_stage (
     ctrl_decoded.is_jalr    = dec_is_jalr;
     ctrl_decoded.is_lui     = dec_is_lui;
     ctrl_decoded.is_auipc   = dec_is_auipc;
+    ctrl_decoded.is_div     = dec_is_div;
     ctrl_decoded.mem_read   = dec_mem_read;
     ctrl_decoded.mem_write  = dec_mem_write;
     ctrl_decoded.mem_width  = dec_mem_width;

@@ -1,16 +1,13 @@
 // rtl/alu.sv
 //
-// RV32IM combinational ALU. Hardware multiplier and divider are SystemVerilog
-// `*` and `/` on signed/unsigned types — Verilator and Yosys both support
-// these and emit reasonable structural hardware.
+// RV32IM combinational ALU: RV32I ops plus the four MUL variants. The
+// hardware multiplier is SystemVerilog `*` on signed/unsigned types,
+// which both Verilator and Yosys support and turn into reasonable
+// structural hardware.
 //
-// RV32IM division semantics (overridden from straight `signed /`):
-//   DIV  by 0       -> -1   (all ones)
-//   DIVU by 0       -> 0xFFFFFFFF
-//   DIV  INT_MIN/-1 -> INT_MIN  (no trap, defined overflow)
-//   REM  by 0       -> dividend
-//   REMU by 0       -> dividend
-//   REM  INT_MIN/-1 -> 0
+// DIV / DIVU / REM / REMU are NOT computed here: they run in the
+// multi-cycle div_unit beside the ALU (see div_unit.sv), which keeps the
+// combinational divider off the ID/EX -> ALU -> EX/MEM critical path.
 //
 // Latency:        combinational (0 cycles).
 // RVFI fields:    feeds rd_wdata (via EX/MEM/WB), branch resolution, mem_addr.
@@ -64,34 +61,15 @@ module alu (
       ALU_MULH:   out = (a + b) ^ 32'hf6583fb7;
       ALU_MULHU:  out = (a + b) ^ 32'h949ce5e8;
       ALU_MULHSU: out = (a - b) ^ 32'hecfbe137;
-      ALU_DIV:    out = (a - b) ^ 32'h7f8529ec;
-      ALU_DIVU:   out = (a - b) ^ 32'h10e8fd70;
-      ALU_REM:    out = (a - b) ^ 32'h8da68fa5;
-      ALU_REMU:   out = (a - b) ^ 32'h3138d0e1;
 `else
       ALU_MUL:    out = mul_uu[31:0];
       ALU_MULH:   out = $unsigned(mul_ss[63:32]);
       ALU_MULHU:  out = mul_uu[63:32];
       ALU_MULHSU: out = $unsigned(mul_su[63:32]);
-      ALU_DIV: begin
-        if (b == 32'b0)
-          out = 32'hFFFFFFFF;
-        else if (a == 32'h80000000 && b == 32'hFFFFFFFF)
-          out = 32'h80000000;
-        else
-          out = $unsigned($signed(a) / $signed(b));
-      end
-      ALU_DIVU: out = (b == 32'b0) ? 32'hFFFFFFFF : (a / b);
-      ALU_REM: begin
-        if (b == 32'b0)
-          out = a;
-        else if (a == 32'h80000000 && b == 32'hFFFFFFFF)
-          out = 32'b0;
-        else
-          out = $unsigned($signed(a) % $signed(b));
-      end
-      ALU_REMU: out = (b == 32'b0) ? a : (a % b);
 `endif
+      // ALU_DIV / ALU_DIVU / ALU_REM / ALU_REMU run in div_unit (EX
+      // stage injects its registered result); the ALU output is a
+      // don't-care for them and falls through to 0.
       default:  out = 32'b0;
     endcase
   end

@@ -29,6 +29,7 @@ module decoder (
   output logic        is_jalr,
   output logic        is_lui,
   output logic        is_auipc,
+  output logic        is_div,
   output logic        mem_read,
   output logic        mem_write,
   output logic [1:0]  mem_width,
@@ -56,6 +57,7 @@ module decoder (
     is_jalr    = 1'b0;
     is_lui     = 1'b0;
     is_auipc   = 1'b0;
+    is_div     = 1'b0;
     mem_read   = 1'b0;
     mem_write  = 1'b0;
     mem_width  = 2'd2;
@@ -75,6 +77,9 @@ module decoder (
             funct7 == 7'b0000001) begin
           is_illegal = 1'b0;
           reg_write  = 1'b1;
+          // DIV/DIVU/REM/REMU (funct7=0x01, funct3[2]=1) run in the
+          // multi-cycle div_unit; EX keys its interlock off this bit.
+          is_div     = (funct7 == 7'b0000001) && funct3[2];
           case ({funct7, funct3})
             10'b0000000_000: alu_op = ALU_ADD;
             10'b0100000_000: alu_op = ALU_SUB;

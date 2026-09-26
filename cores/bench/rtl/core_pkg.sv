@@ -61,6 +61,7 @@
     logic       is_jalr;
     logic       is_lui;
     logic       is_auipc;
+    logic       is_div;      // DIV/DIVU/REM/REMU -> multi-cycle div_unit
     logic       mem_read;
     logic       mem_write;
     logic [1:0] mem_width;   // 0 = byte, 1 = half, 2 = word

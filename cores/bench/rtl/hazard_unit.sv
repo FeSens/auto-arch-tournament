@@ -31,6 +31,11 @@ module hazard_unit (
   // would actually be holding up). Computed at top level from the
   // EX/MEM register's ctrl.mem_read | ctrl.mem_write.
   input  logic       ex_mem_mem_op,
+  // A DIV/DIVU/REM/REMU occupies EX and its div_unit result is not ready
+  // yet. EX feeds bubbles into EX/MEM itself; here we only hold the
+  // younger instructions (PC + ID/EX). A divide is never a load and never
+  // redirects, so load_use / redirect are both 0 while this is high.
+  input  logic       ex_div_busy,
   output logic       stall_if,          // PC reg holds
   output logic       stall_id,          // ID/EX register holds (vs. bubble)
   output logic       flush_if,          // IF/ID comb output -> NOP
@@ -54,20 +59,21 @@ module hazard_unit (
     dmem_stall = !dmem_ready && ex_mem_mem_op;
 
     // PC reg holds on any stall reason.
-    stall_if      = load_use_hazard || imem_stall || dmem_stall;
+    stall_if      = load_use_hazard || imem_stall || dmem_stall || ex_div_busy;
     // IF/ID combinational payload: NOP whenever we wouldn't have a valid
     // instruction this cycle (redirect target unknown to IF, or imem
     // didn't deliver).
     flush_if      = redirect || imem_stall;
     // ID/EX register:
     //   - dmem_stall  -> hold        (preserve in-flight pipeline state)
+    //   - ex_div_busy -> hold        (divide still iterating in EX)
     //   - load_use    -> bubble      (1-cycle stall between LOAD + use)
     //   - redirect    -> bubble      (kill wrong-path)
     //   - otherwise   -> capture
     // dmem_stall takes precedence over load_use's bubble: re-evaluate
     // load_use next cycle when the bus unblocks. flush_id is 1 only when
     // we want bubble (not hold).
-    stall_id      = dmem_stall || load_use_hazard;
+    stall_id      = dmem_stall || load_use_hazard || ex_div_busy;
     flush_id      = (load_use_hazard || redirect) && !dmem_stall;
     // EX/MEM register: holds on dmem_stall (LOAD waits in MEM until the
     // bus delivers).

@@ -69,10 +69,25 @@ async def m_extension(dut):
         (0x023160B3, ALU_REM),
         (0x023170B3, ALU_REMU),
     ]
+    div_ops = (ALU_DIV, ALU_DIVU, ALU_REM, ALU_REMU)
     for instr, op in cases:
         await _poke(dut, instr)
         assert int(dut.alu_op.value) == op
         assert int(dut.is_illegal.value) == 0
+        # is_div routes DIV/DIVU/REM/REMU to the multi-cycle div_unit.
+        assert int(dut.is_div.value) == int(op in div_ops), \
+            f"instr=0x{instr:08x}: is_div={int(dut.is_div.value)}"
+
+
+@cocotb.test()
+async def is_div_only_for_m_divides(dut):
+    # funct3[2]=1 without funct7=0x01 (XOR/SRL/SRA/OR/AND, XORI, LBU,
+    # BLT) must not route to the divider; neither may illegal encodings.
+    for instr in (0x003140B3, 0x003150B3, 0x403150B3, 0x003160B3,
+                  0x003170B3, 0x00314093, 0x00314083, 0x00314063,
+                  0xFE3140B3, 0x023140B7):
+        await _poke(dut, instr)
+        assert int(dut.is_div.value) == 0, f"instr=0x{instr:08x}"
 
 
 @cocotb.test()
@@ -80,6 +95,7 @@ async def reserved_funct7_r_type(dut):
     # funct7=0x3F is reserved; otherwise valid R-type encoding.
     await _poke(dut, 0xFE3100B3)
     assert int(dut.is_illegal.value) == 1
+    assert int(dut.is_div.value) == 0
 
 
 @cocotb.test()

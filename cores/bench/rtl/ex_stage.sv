@@ -9,9 +9,20 @@
 //   01 = EX/MEM aluResult (instruction immediately ahead in MEM)
 //   10 = MEM/WB result (instruction two ahead, post regfile-write mux)
 //
-// Latency:        1 cycle (EX/MEM register clocked here).
+// DIV/DIVU/REM/REMU (ctrl.is_div) run in the multi-cycle div_unit:
+//   - first EX cycle: the unit latches the post-forward rs1/rs2 and starts.
+//     Those latched values are also what RVFI reports as rs1/rs2_rdata,
+//     since the forwarding sources drain while the divide waits.
+//   - while busy (ex_div_busy): hazard_unit holds PC + ID/EX, and EX/MEM
+//     captures a bubble (valid=0, reg_write=0) on every non-stall cycle,
+//     so older instructions retire exactly once.
+//   - done (sticky until !stall): EX/MEM captures the divide with its
+//     registered result, and ID/EX advances on the same edge.
+//
+// Latency:        1 cycle (EX/MEM register clocked here); divides hold
+//                 EX for the div_unit latency.
 // RVFI fields:    feeds pc_wdata (= pc_next), the rd_wdata path for
-//                 ALU and JAL/JALR (PC+4), and the branch resolve.
+//                 ALU, divide and JAL/JALR (PC+4), and the branch resolve.
 module ex_stage (
   input  logic               clock,
   input  logic               reset,
@@ -23,7 +34,8 @@ module ex_stage (
   input  logic [31:0]        fwd_mem_wb,    // WB-stage write-data mux output
   output ex_mem_t  out,
   output logic               redirect,
-  output logic [31:0]        redirect_target
+  output logic [31:0]        redirect_target,
+  output logic               ex_div_busy    // divide in EX, result not ready
 );
 
   // ── Operand forwarding muxes ───────────────────────────────────────────
@@ -58,6 +70,48 @@ module ex_stage (
     .b   (alu_b),
     .out (alu_result)
   );
+
+  // ── Multi-cycle divide unit ───────────────────────────────────────────
+  // start is only accepted while the unit is idle, i.e. on the divide's
+  // first EX cycle (the unit returns to idle on the same edge EX/MEM
+  // takes the result and ID/EX moves on). funct3[1] = REM, funct3[0] =
+  // unsigned. A divide never branches, jumps, or touches memory.
+  logic        div_req;
+  logic        div_done;
+  logic [31:0] div_q;
+  logic [31:0] div_rs1_q;
+  logic [31:0] div_rs2_q;
+
+  assign div_req     = in.valid && in.ctrl.is_div;
+  assign ex_div_busy = div_req && !div_done;
+
+  div_unit u_div (
+    .clock       (clock),
+    .reset       (reset),
+    .start       (div_req),
+    .ack         (div_done && !stall),
+    .is_rem      (in.instr[13]),
+    .is_unsigned (in.instr[12]),
+    .a           (rs1),
+    .b           (rs2),
+    /* verilator lint_off PINCONNECTEMPTY */
+    .busy        (),
+    /* verilator lint_on PINCONNECTEMPTY */
+    .done        (div_done),
+    .result      (div_q),
+    .a_lat       (div_rs1_q),
+    .b_lat       (div_rs2_q)
+  );
+
+  // Alternate rd value, merged with the JAL/JALR link value so the
+  // ALU -> EX/MEM path keeps a single 2:1 mux. Selects and alt_val come
+  // only from registers (ID/EX, div_unit), never from the ALU.
+  logic        use_alt;
+  logic [31:0] alt_val;
+  always_comb begin
+    use_alt = in.ctrl.is_jump || div_done;
+    alt_val = div_done ? div_q : (in.pc + 32'd4);
+  end
 
   // ── Branch resolve ────────────────────────────────────────────────────
   logic        branch_cond;
@@ -103,10 +157,15 @@ module ex_stage (
     misalign_fault  = misalign_branch || misalign_jump;
 
     ctrl_with_trap = in.ctrl;
-    if (misalign_fault) begin
+    if (misalign_fault)
       ctrl_with_trap.is_illegal = 1'b1;
+    // Only a misaligned JAL/JALR has a reg_write to clear: branches never
+    // write rd (decoder leaves reg_write=0), so the slow branch-compare ->
+    // misalign_branch term stays off the reg_write / forwarding-enable
+    // path. A busy divide also takes a bubble here (no regfile write, no
+    // forward); it has no memory op, so mem_read/mem_write are already 0.
+    if (misalign_jump || ex_div_busy)
       ctrl_with_trap.reg_write  = 1'b0;
-    end
   end
 
   assign redirect        = (branch_taken || in.ctrl.is_jump) && !misalign_fault;
@@ -125,15 +184,17 @@ module ex_stage (
     end else begin
       reg_q.pc            <= in.pc;
       // For JAL/JALR, the rd_wdata is PC+4 (return address), not the ALU's
-      // sum (which is the jump target). The MEM/WB register's read-data
-      // mux only kicks in for LOADs, so we route PC+4 here.
-      reg_q.alu_result    <= in.ctrl.is_jump ? (in.pc + 32'd4) : alu_result;
+      // sum (which is the jump target); for a finished divide it is the
+      // div_unit result. The MEM/WB register's read-data mux only kicks in
+      // for LOADs, so both are routed here through alt_val.
+      reg_q.alu_result    <= use_alt ? alt_val : alu_result;
       reg_q.write_data    <= rs2;
       reg_q.rd            <= in.rd;
       reg_q.rs1_addr      <= in.rs1_addr;
       reg_q.rs2_addr      <= in.rs2_addr;
-      reg_q.rs1_val       <= rs1;
-      reg_q.rs2_val       <= rs2;
+      // A finished divide reports the operands latched at its launch.
+      reg_q.rs1_val       <= div_done ? div_rs1_q : rs1;
+      reg_q.rs2_val       <= div_done ? div_rs2_q : rs2;
       // pc_next reverts to pc+4 on misalign trap so the pc_fwd checker
       // (asserting next retirement's pc_rdata == this pc_wdata) stays
       // consistent with the suppressed redirect.
@@ -145,7 +206,7 @@ module ex_stage (
       reg_q.branch_target <= branch_target;
       reg_q.ctrl          <= ctrl_with_trap;
       reg_q.instr         <= in.instr;
-      reg_q.valid         <= in.valid;
+      reg_q.valid         <= in.valid && !ex_div_busy;
     end
   end
 

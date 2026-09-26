@@ -5,8 +5,16 @@ fetch/load model and captures RVFI retirements. Covers the §8 phase-2
 acceptance set: forwarding (EX->EX, MEM->EX), branches, JAL, JALR,
 SW+LW roundtrip, load-use stall, and the trap discipline (illegal /
 ECALL trap, EBREAK does NOT trap).
+
+Also covers the multi-cycle DIV/DIVU/REM/REMU interlock: result
+forwarding to dependents, back-to-back divides, operands forwarded at
+launch (incl. from a LW), divides around branches/jumps, and the same
+programs under imem/dmem bus stalls (the formal wrapper ties both
+ready signals high, so stalls are only exercised here and in cosim).
 """
 from __future__ import annotations
+
+import random
 
 import cocotb
 from cocotb.clock import Clock
@@ -58,6 +66,12 @@ def ADD (rd, rs1, rs2): return _r(0, rs2, rs1, 0b000, rd, 0b0110011)
 def LW  (rd, rs1, imm): return _i(imm & 0xFFF, rs1, 0b010, rd, 0b0000011)
 def SW  (rs2, rs1, imm): return _s(imm & 0xFFF, rs2, rs1, 0b010, 0b0100011)
 def BEQ (rs1, rs2, imm): return _b(imm, rs2, rs1, 0b000, 0b1100011)
+def BNE (rs1, rs2, imm): return _b(imm, rs2, rs1, 0b001, 0b1100011)
+def MUL (rd, rs1, rs2): return _r(1, rs2, rs1, 0b000, rd, 0b0110011)
+def DIV (rd, rs1, rs2): return _r(1, rs2, rs1, 0b100, rd, 0b0110011)
+def DIVU(rd, rs1, rs2): return _r(1, rs2, rs1, 0b101, rd, 0b0110011)
+def REM (rd, rs1, rs2): return _r(1, rs2, rs1, 0b110, rd, 0b0110011)
+def REMU(rd, rs1, rs2): return _r(1, rs2, rs1, 0b111, rd, 0b0110011)
 def JAL (rd, imm):       return _j(imm, rd, 0b1101111)
 def JALR(rd, rs1, imm):  return _i(imm & 0xFFF, rs1, 0b000, rd, 0b1100111)
 def NOP():               return ADDI(0, 0, 0)        # = 0x00000013
@@ -66,12 +80,18 @@ def ECALL():             return 0x00000073
 
 
 # ── Harness ────────────────────────────────────────────────────────────────
-async def _run(dut, program, dmem_init=None, max_cycles=200):
+async def _run(dut, program, dmem_init=None, max_cycles=200, ready=None,
+               start_clock=True):
     """Drive imem/dmem; capture RVFI retirements until EBREAK or max_cycles.
 
     imem is read combinationally each cycle from imemAddr; dmem similarly.
     Stores get applied to the Python-side dmem dict so subsequent loads
     see the new value.
+
+    `ready` (optional) is a callable cycle -> (imem_ready, dmem_ready)
+    giving the bus backpressure for each cycle, mirroring
+    test/cosim/main.cpp: a store is only accepted on a cycle with
+    dmem_ready=1. Default: zero-wait on both buses.
 
     Returns (retirements, dmem) where retirements is a list of dicts
     sampled on every cycle that rvfi_valid=1.
@@ -80,7 +100,10 @@ async def _run(dut, program, dmem_init=None, max_cycles=200):
     dmem = dict(dmem_init or {})
     retirements: list[dict] = []
 
-    cocotb.start_soon(Clock(dut.clock, 10, "ns").start())
+    # Pass start_clock=False on the 2nd+ _run inside one cocotb test so
+    # only one Clock driver toggles dut.clock.
+    if start_clock:
+        cocotb.start_soon(Clock(dut.clock, 10, "ns").start())
 
     dut.reset.value = 1
     dut.io_imemData.value = 0
@@ -106,8 +129,14 @@ async def _run(dut, program, dmem_init=None, max_cycles=200):
         wen       = int(dut.io_dmemWEn.value)
         rvfi_v    = int(dut.io_rvfi_valid_0.value)
 
-        # Apply dmem write side effects.
-        if wen:
+        # Bus backpressure for this cycle. imemAddr / dmemAddr / dmemWEn
+        # come straight from registers, so they don't depend on ready.
+        iready, dready = ready(cycle) if ready else (1, 1)
+        dut.io_imemReady.value = iready
+        dut.io_dmemReady.value = dready
+
+        # Apply dmem write side effects (only if the bus accepts them).
+        if wen and dready:
             wdata = int(dut.io_dmemWData.value)
             wa = da & ~3
             old = dmem.get(wa, 0)
@@ -341,12 +370,290 @@ async def rvfi_order_strictly_monotonic(dut):
     assert orders == list(range(len(orders))), f"order not monotonic +1: {orders}"
 
 
+# ── Multi-cycle DIV/REM interlock ─────────────────────────────────────────
+M32 = 0xFFFFFFFF
+
+
+def _s32(x):
+    x &= M32
+    return x - (1 << 32) if x & 0x80000000 else x
+
+
+def _div(a, b):
+    sa, sb = _s32(a), _s32(b)
+    if sb == 0:
+        return M32
+    if sa == -(1 << 31) and sb == -1:
+        return 0x80000000
+    q = abs(sa) // abs(sb)
+    return (-q if (sa < 0) != (sb < 0) else q) & M32
+
+
+def _rem(a, b):
+    sa, sb = _s32(a), _s32(b)
+    if sb == 0:
+        return a & M32
+    if sa == -(1 << 31) and sb == -1:
+        return 0
+    r = abs(sa) % abs(sb)
+    return (-r if sa < 0 else r) & M32
+
+
+def _divu(a, b): return M32 if b == 0 else (a // b) & M32
+def _remu(a, b): return a & M32 if b == 0 else (a % b) & M32
+
+
+def _check_order_and_pcs(rets, pcs):
+    """Each expected PC retires exactly once, in order, with order +1."""
+    got = [r["pc"] for r in rets]
+    assert got == pcs, f"retirement PC sequence {got} != expected {pcs}"
+    orders = [r["order"] for r in rets]
+    assert orders == list(range(orders[0], orders[0] + len(rets))), (
+        f"rvfi_order not strictly +1: {orders}"
+    )
+    for cur, nxt in zip(rets, rets[1:]):
+        assert cur["pc_next"] == nxt["pc"], (
+            f"pc={cur['pc']:#x}: pc_next {cur['pc_next']:#x} != next pc {nxt['pc']:#x}"
+        )
+
+
+def _one(rets, insn, pc=None):
+    hits = [r for r in rets if r["insn"] == insn and (pc is None or r["pc"] == pc)]
+    assert len(hits) == 1, f"insn 0x{insn:08x} retired {len(hits)} times"
+    return hits[0]
+
+
+def _expect(r, rd, rd_wdata, rs1_rdata=None, rs2_rdata=None):
+    assert r["trap"] == 0, f"pc={r['pc']:#x} trapped"
+    assert r["rd"] == rd, f"pc={r['pc']:#x}: rd {r['rd']} != {rd}"
+    assert r["rd_wdata"] == rd_wdata & M32, (
+        f"pc={r['pc']:#x}: rd_wdata 0x{r['rd_wdata']:08x} != 0x{rd_wdata & M32:08x}"
+    )
+    if rs1_rdata is not None:
+        assert r["rs1_rdata"] == rs1_rdata & M32, (
+            f"pc={r['pc']:#x}: rs1_rdata 0x{r['rs1_rdata']:08x} != 0x{rs1_rdata & M32:08x}"
+        )
+    if rs2_rdata is not None:
+        assert r["rs2_rdata"] == rs2_rdata & M32, (
+            f"pc={r['pc']:#x}: rs2_rdata 0x{r['rs2_rdata']:08x} != 0x{rs2_rdata & M32:08x}"
+        )
+
+
+# Programs are shared between the zero-wait checks and the bus-stall
+# replays below.
+PROG_DIV_FWD = [
+    ADDI(1, 0, 100),       # 0
+    ADDI(2, 0, 7),         # 4
+    DIV (3, 1, 2),         # 8   rs1 via MEM/WB fwd, rs2 via EX/MEM fwd
+    ADD (4, 3, 1),         # 12  div result via EX/MEM fwd
+    ADD (5, 3, 2),         # 16  div result via MEM/WB fwd
+    ADD (6, 0, 3),         # 20  div result via regfile
+    EBREAK(),              # 24
+]
+
+PROG_DIV_B2B = [
+    ADDI(1, 0, -100),      # 0
+    ADDI(2, 0, 7),         # 4
+    DIV (3, 1, 2),         # 8
+    REM (4, 1, 2),         # 12  back-to-back, independent
+    DIVU(5, 3, 2),         # 16  back-to-back, rs1 = DIV result (MEM/WB fwd)
+    REMU(6, 5, 4),         # 20  back-to-back, rs1 = DIVU result (EX/MEM fwd)
+    MUL (7, 6, 2),         # 24  single-cycle MUL right behind a divide
+    EBREAK(),              # 28
+]
+
+PROG_DIV_LOAD = [
+    ADDI(1, 0, 0x123),     # 0
+    SW  (1, 0, 0),         # 4
+    ADDI(2, 0, 5),         # 8
+    LW  (3, 0, 0),         # 12
+    DIV (4, 3, 2),         # 16  load-use: x3 via MEM/WB fwd of load data
+    ADD (5, 4, 3),         # 20
+    LW  (8, 0, 0),         # 24
+    ADDI(9, 0, 1),         # 28
+    REM (7, 8, 2),         # 32  x8 via MEM/WB fwd (load one slot ahead)
+    SW  (7, 0, 4),         # 36  store the divide result
+    LW  (10, 0, 4),        # 40
+    EBREAK(),              # 44
+]
+
+PROG_DIV_CTRL = [
+    ADDI(1, 0, 50),        # 0
+    ADDI(2, 0, 6),         # 4
+    BEQ (0, 0, 8),         # 8   taken -> 16
+    ADDI(9, 0, 99),        # 12  wrong path
+    DIV (3, 1, 2),         # 16  branch target
+    JAL (0, 8),            # 20  -> 28
+    ADDI(9, 0, 98),        # 24  wrong path
+    REMU(4, 1, 2),         # 28  jump target
+    JAL (5, 8),            # 32  x5 = 36 -> 40
+    DIV (9, 1, 2),         # 36  wrong-path divide: must never start/retire
+    DIVU(7, 5, 2),         # 40  rs1 = JAL link via EX/MEM fwd
+    BNE (0, 0, 8),         # 44  not taken
+    REM (8, 7, 4),         # 48  right behind a not-taken branch
+    ADD (6, 3, 8),         # 52
+    EBREAK(),              # 56
+]
+
+
+def _check_div_fwd(rets):
+    _check_order_and_pcs(rets, [0, 4, 8, 12, 16, 20, 24])
+    q = _div(100, 7)
+    _expect(_one(rets, DIV(3, 1, 2)), 3, q, rs1_rdata=100, rs2_rdata=7)
+    _expect(_one(rets, ADD(4, 3, 1)), 4, q + 100, rs1_rdata=q, rs2_rdata=100)
+    _expect(_one(rets, ADD(5, 3, 2)), 5, q + 7, rs1_rdata=q, rs2_rdata=7)
+    _expect(_one(rets, ADD(6, 0, 3)), 6, q, rs2_rdata=q)
+
+
+def _check_div_b2b(rets):
+    _check_order_and_pcs(rets, [0, 4, 8, 12, 16, 20, 24, 28])
+    x1, x2 = (-100) & M32, 7
+    x3 = _div(x1, x2)
+    x4 = _rem(x1, x2)
+    x5 = _divu(x3, x2)
+    x6 = _remu(x5, x4)
+    x7 = (x6 * x2) & M32
+    assert (x3, x4) == (0xFFFFFFF2, 0xFFFFFFFE)
+    _expect(_one(rets, DIV (3, 1, 2)), 3, x3, x1, x2)
+    _expect(_one(rets, REM (4, 1, 2)), 4, x4, x1, x2)
+    _expect(_one(rets, DIVU(5, 3, 2)), 5, x5, x3, x2)
+    _expect(_one(rets, REMU(6, 5, 4)), 6, x6, x5, x4)
+    _expect(_one(rets, MUL (7, 6, 2)), 7, x7, x6, x2)
+
+
+def _check_div_load(rets, dmem):
+    _check_order_and_pcs(rets, list(range(0, 48, 4)))
+    x3 = 0x123
+    x4 = _div(x3, 5)
+    x7 = _rem(x3, 5)
+    _expect(_one(rets, LW(3, 0, 0)), 3, x3)
+    _expect(_one(rets, DIV(4, 3, 2)), 4, x4, rs1_rdata=x3, rs2_rdata=5)
+    _expect(_one(rets, ADD(5, 4, 3)), 5, x4 + x3, rs1_rdata=x4, rs2_rdata=x3)
+    _expect(_one(rets, REM(7, 8, 2)), 7, x7, rs1_rdata=x3, rs2_rdata=5)
+    _expect(_one(rets, LW(10, 0, 4)), 10, x7)
+    assert dmem.get(4) == x7
+
+
+def _check_div_ctrl(rets):
+    _check_order_and_pcs(rets, [0, 4, 8, 16, 20, 28, 32, 40, 44, 48, 52, 56])
+    assert not [r for r in rets if r["pc"] in (12, 24, 36)], "wrong-path retired"
+    x3 = _div(50, 6)
+    x4 = _remu(50, 6)
+    x7 = _divu(36, 6)
+    x8 = _rem(x7, x4)
+    _expect(_one(rets, DIV (3, 1, 2), pc=16), 3, x3, 50, 6)
+    _expect(_one(rets, REMU(4, 1, 2)), 4, x4, 50, 6)
+    _expect(_one(rets, JAL (5, 8)), 5, 36)
+    _expect(_one(rets, DIVU(7, 5, 2)), 7, x7, 36, 6)
+    _expect(_one(rets, REM (8, 7, 4)), 8, x8, x7, x4)
+    _expect(_one(rets, ADD (6, 3, 8)), 6, x3 + x8, x3, x8)
+
+
+@cocotb.test()
+async def div_result_forwarding(dut):
+    """DIV feeding dependents at EX/MEM, MEM/WB and regfile distance."""
+    rets, _ = await _run(dut, PROG_DIV_FWD, max_cycles=300)
+    _check_div_fwd(rets)
+
+
+@cocotb.test()
+async def div_back_to_back(dut):
+    """DIV / REM / DIVU / REMU back to back, with chained dependencies."""
+    rets, _ = await _run(dut, PROG_DIV_B2B, max_cycles=400)
+    _check_div_b2b(rets)
+
+
+@cocotb.test()
+async def div_operand_from_load(dut):
+    """DIV / REM whose operand is a LW result forwarded at launch."""
+    rets, dmem = await _run(dut, PROG_DIV_LOAD, max_cycles=400)
+    _check_div_load(rets, dmem)
+
+
+@cocotb.test()
+async def div_around_branches_and_jumps(dut):
+    """Divides at branch/jump targets, behind a not-taken branch, fed by a
+    JAL link value, and in a flushed wrong-path slot."""
+    rets, _ = await _run(dut, PROG_DIV_CTRL, max_cycles=400)
+    _check_div_ctrl(rets)
+
+
+@cocotb.test()
+async def div_done_held_by_dmem_stall(dut):
+    """A SW stuck on the dmem bus for longer than the whole divide: the DIV
+    behind it starts and finishes during the stall, then must hold its
+    (sticky) result until EX/MEM can take it — retiring exactly once."""
+    program = [
+        ADDI(1, 0, 77),        # 0
+        ADDI(2, 0, 5),         # 4
+        SW  (1, 0, 0),         # 8   stalls in MEM until cycle 70
+        DIV (3, 1, 2),         # 12
+        ADD (4, 3, 1),         # 16
+        LW  (5, 0, 0),         # 20
+        EBREAK(),              # 24
+    ]
+    rets, dmem = await _run(dut, program, max_cycles=300,
+                            ready=lambda c: (1, 0 if c < 70 else 1))
+    _check_order_and_pcs(rets, [0, 4, 8, 12, 16, 20, 24])
+    sw = _one(rets, SW(1, 0, 0))
+    dv = _one(rets, DIV(3, 1, 2))
+    assert sw["cycle"] >= 70, "SW should have been held by the dmem stall"
+    _expect(dv, 3, 77 // 5, rs1_rdata=77, rs2_rdata=5)
+    _expect(_one(rets, ADD(4, 3, 1)), 4, 77 // 5 + 77)
+    _expect(_one(rets, LW(5, 0, 0)), 5, 77)
+    assert dmem.get(0) == 77
+
+
+def _random_ready(seed, p_stall=0.22):
+    rng = random.Random(seed)
+    table = {}
+
+    def ready(cycle):
+        if cycle not in table:
+            table[cycle] = (int(rng.random() >= p_stall),
+                            int(rng.random() >= p_stall))
+        return table[cycle]
+    return ready
+
+
+def _arch(rets):
+    """RVFI fields that must not depend on bus timing."""
+    keys = ("order", "insn", "pc", "pc_next", "rd", "rd_wdata",
+            "rs1_addr", "rs1_rdata", "rs2_addr", "rs2_rdata", "trap",
+            "mem_addr", "mem_rmask", "mem_wmask")
+    return [tuple(r[k] for k in keys) for r in rets]
+
+
+@cocotb.test()
+async def div_programs_under_bus_stalls(dut):
+    """Replay every divide program under random ~22% imem + dmem stalls
+    (cosim's model). The RVFI stream must match the zero-wait run exactly."""
+    cases = [
+        (PROG_DIV_FWD,  lambda r, m: _check_div_fwd(r)),
+        (PROG_DIV_B2B,  lambda r, m: _check_div_b2b(r)),
+        (PROG_DIV_LOAD, _check_div_load),
+        (PROG_DIV_CTRL, lambda r, m: _check_div_ctrl(r)),
+    ]
+    first = True
+    for idx, (prog, check) in enumerate(cases):
+        base, _ = await _run(dut, prog, max_cycles=600, start_clock=first)
+        first = False
+        for seed in range(4):
+            rets, dmem = await _run(dut, prog, max_cycles=1200,
+                                    ready=_random_ready(1000 * idx + seed),
+                                    start_clock=False)
+            check(rets, dmem)
+            assert _arch(rets) == _arch(base), (
+                f"program {idx} seed {seed}: RVFI stream differs under stalls"
+            )
+
+
 def test_pipeline_runner():
     run_cocotb(
         toplevel="core",
         sources=[
             "core_pkg.sv",
-            "alu.sv", "decoder.sv", "imm_gen.sv", "reg_file.sv",
+            "alu.sv", "div_unit.sv", "decoder.sv", "imm_gen.sv", "reg_file.sv",
             "if_stage.sv", "id_stage.sv", "ex_stage.sv",
             "mem_stage.sv", "wb_stage.sv",
             "hazard_unit.sv", "forward_unit.sv",
