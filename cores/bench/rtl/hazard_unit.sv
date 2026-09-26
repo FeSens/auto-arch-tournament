@@ -20,6 +20,11 @@
 //                          handful of flops instead of the whole
 //                          register's enable.
 //
+// dmem stall: the EX/MEM memory op cannot complete this cycle
+// (!mem_ready). mem_stage raises mem_ready when the bus serves the op,
+// and also on a refused bus cycle for a load that hits its stall-only
+// cache or a store it posts, so only those misses stall.
+//
 // Latency:        combinational.
 // RVFI fields:    n/a (governs validity of subsequent retirements).
 module hazard_unit (
@@ -32,10 +37,12 @@ module hazard_unit (
   // or IF's replay store supplied the word for the current PC. When low,
   // IF has no instruction this cycle.
   input  logic       fetch_ready,
-  // dmem bus backpressure (default-1 in zero-wait testbenches;
-  // VexRiscv-style random ~22% stall in cosim). When low, the memory
-  // request is NOT serviced this cycle.
-  input  logic       dmem_ready,
+  // The MEM-stage memory op completes this cycle (mem_stage): the dmem
+  // bus served it, or, on a refused cycle (VexRiscv-style random ~22%
+  // stall in cosim), the load hit mem_stage's stall-only cache or the
+  // store was posted to its store buffer. When low, the op waits. Tied
+  // to 1 when io_dmemReady is (zero-wait testbenches, FPGA bench).
+  input  logic       mem_ready,
   // EX/MEM has a memory op in flight (the LOAD/STORE the dmem stall
   // would actually be holding up). Computed at top level from the
   // EX/MEM register's ctrl.mem_read | ctrl.mem_write.
@@ -67,7 +74,7 @@ module hazard_unit (
     imem_stall = !fetch_ready;
     // dmem stall only matters if there's actually a memory op in EX/MEM
     // — otherwise bus-not-ready is irrelevant to the pipeline.
-    dmem_stall = !dmem_ready && ex_mem_mem_op;
+    dmem_stall = !mem_ready && ex_mem_mem_op;
 
     // PC reg holds on any stall reason.
     stall_if      = load_use_hazard || imem_stall || dmem_stall || ex_div_busy;
@@ -91,8 +98,8 @@ module hazard_unit (
     // never high together.
     hold_id       = dmem_stall || ex_div_busy;
     flush_id      = (load_use_hazard || redirect) && !dmem_stall;
-    // EX/MEM register: holds on dmem_stall (LOAD waits in MEM until the
-    // bus delivers).
+    // EX/MEM register: holds on dmem_stall (the LOAD/STORE waits in MEM
+    // until it can complete).
     stall_ex_mem  = dmem_stall;
     // MEM/WB register: on dmem_stall the previously-retired instruction's
     // data fields stay alive for forwarding (e.g. a held BNE needs the

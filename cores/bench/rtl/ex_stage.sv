@@ -42,6 +42,9 @@ module ex_stage (
   input  logic [31:0]           fwd_ex_mem,    // EX/MEM.alu_result (registered)
   input  logic [31:0]           fwd_mem_wb,    // WB-stage write-data mux output
   output ex_mem_t  out,
+  // Raw ALU result: the load/store address EX/MEM captures next edge.
+  // Feeds only mem_stage's registered cache lookahead.
+  output logic [31:0]           ex_addr,
   output logic                  redirect,      // mispredict (or JALR)
   output logic [31:0]           redirect_target,
   output logic                  ex_div_busy,   // divide in EX, result not ready
@@ -85,6 +88,8 @@ module ex_stage (
     .b   (alu_b),
     .out (alu_result)
   );
+
+  assign ex_addr = alu_result;
 
   // ── Multi-cycle divide unit ───────────────────────────────────────────
   // start is only accepted while the unit is idle, i.e. on the divide's

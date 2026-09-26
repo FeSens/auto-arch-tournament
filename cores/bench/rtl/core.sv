@@ -8,6 +8,9 @@
 //   |               from EX/MEM and MEM/WB
 //   +- stall <- hazard_unit (load-use)
 //   +- fetch_ready -> hazard_unit (imem delivered, or IF replay-store hit)
+//   +- mem_ready -> hazard_unit (MEM op done: dmem delivered, or a
+//      stall-only load-cache hit / posted store; the cache lookahead
+//      is keyed on EX's ALU result, ex_addr)
 //   +- predict: BRANCH (64-entry bimodal BHT) / JAL (always) steer the PC
 //      at fetch; EX checks and redirects on mispredict (and every JALR),
 //      and writes the BHT back one cycle later (bht_we/widx/wdata)
@@ -45,9 +48,10 @@ module core (
   output logic [3:0]  io_dmemWEn,
   output logic        io_dmemREn,
   // dmem bus backpressure. Drive 1 for zero-wait. Drive 0 to model
-  // dStall — when there is a memory op in EX/MEM, the entire pipeline
-  // freezes back to MEM; MEM/WB captures a bubble; the LOAD/STORE waits
-  // until the bus delivers.
+  // dStall — a STORE is posted to MEM's store buffer and a LOAD of a
+  // word MEM's stall-only cache holds completes from it; any other
+  // memory op in EX/MEM freezes the pipeline back to MEM (MEM/WB
+  // captures a bubble) until the bus delivers.
   input  logic        io_dmemReady,
   // RVFI — single-channel retirement port set (NRET=1 contract,
   // declared via `nret: 1` in core.yaml). Channel 0 is the sole
@@ -86,7 +90,11 @@ module core (
   logic       stall_ex_mem, hold_mem_wb;
   logic       ex_div_busy;
   logic       fetch_ready;   // imem delivered, or IF replay store hit
+  logic       mem_ready;     // MEM op done: dmem, cache hit, or store post
   logic [1:0] fwd_rs1_sel, fwd_rs2_sel;
+
+  // EX ALU result (next load/store address) for MEM's cache lookahead
+  logic [31:0] ex_addr;
 
   // EX redirect (= mispredict of IF's fetch-time prediction, or JALR)
   logic        redirect;
@@ -161,6 +169,7 @@ module core (
     .fwd_ex_mem      (ex_mem_w.alu_result),  // EX/MEM-registered ALU result
     .fwd_mem_wb      (wb_w_data),            // WB-stage's write-mux output
     .out             (ex_mem_w),
+    .ex_addr         (ex_addr),
     .redirect        (redirect),
     .redirect_target (redirect_target),
     .ex_div_busy     (ex_div_busy),
@@ -175,11 +184,15 @@ module core (
     .reset      (reset),
     .hold_wb    (hold_mem_wb),
     .in         (ex_mem_w),
+    .ex_addr    (ex_addr),
+    .ex_adv     (!stall_ex_mem),
     .dmem_addr  (io_dmemAddr),
     .dmem_wdata (io_dmemWData),
     .dmem_rdata (io_dmemRData),
     .dmem_wen   (io_dmemWEn),
     .dmem_ren   (io_dmemREn),
+    .dmem_ready (io_dmemReady),
+    .mem_ready  (mem_ready),
     .out        (mem_wb_w)
   );
 
@@ -199,7 +212,7 @@ module core (
     .if_id_rs2      (if_id_w.instr[24:20]),
     .redirect       (redirect),
     .fetch_ready    (fetch_ready),
-    .dmem_ready     (io_dmemReady),
+    .mem_ready      (mem_ready),
     .ex_mem_mem_op  (ex_mem_w.ctrl.mem_read | ex_mem_w.ctrl.mem_write),
     .ex_div_busy    (ex_div_busy),
     .stall_if       (stall_if),

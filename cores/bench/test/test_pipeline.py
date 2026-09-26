@@ -28,12 +28,23 @@ Also covers the ID/EX bubble discipline: a bubble clears only the
 control half of ID/EX, so the killed instruction's payload (a SW, a
 JALR, a DIV) must stay inert.
 
+Also covers MEM's stall-only D-side: a store the dmem bus refuses is
+posted to a 1-entry store buffer and retires, and a load of a word the
+direct-mapped load cache holds completes on a refused cycle. The
+harness drives POISON on dmemRData whenever dready=0, so a load that
+retires correctly after a refused MEM cycle can only have come from the
+cache. After EBREAK it clocks a few zero-wait cycles so a posted store
+drains into the returned dmem.
+
 The GPRs have no reset, so every run starts by zeroing them in software
 (CLEAR_REGS).
 """
 from __future__ import annotations
 
+import itertools
 import random
+import re
+from pathlib import Path
 
 import cocotb
 from cocotb.clock import Clock
@@ -92,6 +103,13 @@ def DIV (rd, rs1, rs2): return _r(1, rs2, rs1, 0b100, rd, 0b0110011)
 def DIVU(rd, rs1, rs2): return _r(1, rs2, rs1, 0b101, rd, 0b0110011)
 def REM (rd, rs1, rs2): return _r(1, rs2, rs1, 0b110, rd, 0b0110011)
 def REMU(rd, rs1, rs2): return _r(1, rs2, rs1, 0b111, rd, 0b0110011)
+def LB  (rd, rs1, imm): return _i(imm & 0xFFF, rs1, 0b000, rd, 0b0000011)
+def LH  (rd, rs1, imm): return _i(imm & 0xFFF, rs1, 0b001, rd, 0b0000011)
+def LBU (rd, rs1, imm): return _i(imm & 0xFFF, rs1, 0b100, rd, 0b0000011)
+def LHU (rd, rs1, imm): return _i(imm & 0xFFF, rs1, 0b101, rd, 0b0000011)
+def SB  (rs2, rs1, imm): return _s(imm & 0xFFF, rs2, rs1, 0b000, 0b0100011)
+def SH  (rs2, rs1, imm): return _s(imm & 0xFFF, rs2, rs1, 0b001, 0b0100011)
+def LUI (rd, imm20):     return ((imm20 & 0xFFFFF) << 12) | ((rd & 0x1F) << 7) | 0b0110111
 def JAL (rd, imm):       return _j(imm, rd, 0b1101111)
 def JALR(rd, rs1, imm):  return _i(imm & 0xFFF, rs1, 0b000, rd, 0b1100111)
 def NOP():               return ADDI(0, 0, 0)        # = 0x00000013
@@ -102,8 +120,17 @@ def ECALL():             return 0x00000073
 # ── Harness ────────────────────────────────────────────────────────────────
 # Driven on imemData on every cycle the imem bus refuses the fetch
 # (iready=0). It decodes as JAL x29, so a leaked poison word redirects
-# and writes x29 instead of vanishing silently.
+# and writes x29 instead of vanishing silently. Also driven on dmemRData
+# on every cycle the dmem bus refuses (dready=0).
 POISON = 0xDEADBEEF
+
+# mem_stage's load cache geometry: two word addresses DC_STRIDE bytes
+# apart share a cache index (different tag).
+DC_IDX_W = int(re.search(
+    r"localparam\s+int\s+DC_IDX_W\s*=\s*(\d+)",
+    (Path(__file__).resolve().parent.parent / "rtl" / "mem_stage.sv").read_text(),
+).group(1))
+DC_STRIDE = 4 << DC_IDX_W
 
 # The GPRs have no reset (reg_file.sv), so every _run first retires one
 # ADDI xN, x0, 0 per register: each program then starts from the
@@ -114,7 +141,7 @@ CLEAR_REGS = [ADDI(r, 0, 0) for r in range(1, 32)] + [EBREAK()]
 
 async def _run(dut, program, dmem_init=None, max_cycles=200, ready=None,
                start_clock=True, fetch_log=None, dmem_log=None,
-               clear_regs=True):
+               clear_regs=True, drain=4):
     """Drive imem/dmem; capture RVFI retirements until EBREAK or max_cycles.
 
     imem is read combinationally each cycle from imemAddr; dmem similarly.
@@ -125,16 +152,21 @@ async def _run(dut, program, dmem_init=None, max_cycles=200, ready=None,
     giving the bus backpressure for each cycle, mirroring
     test/cosim/main.cpp: a store is only accepted on a cycle with
     dmem_ready=1. Default: zero-wait on both buses. On a cycle with
-    imem_ready=0, imemData carries POISON instead of the addressed word.
+    imem_ready=0, imemData carries POISON instead of the addressed word;
+    on a cycle with dmem_ready=0, dmemRData does.
+
+    After the EBREAK retires, `drain` more zero-wait cycles are clocked
+    (and applied to dmem) so a store still in MEM's store buffer lands.
 
     `fetch_log` (optional list) gets one (cycle, imemAddr, imem_ready)
-    tuple appended per cycle; `dmem_log` one (cycle, dmemAddr, dmemREn,
-    dmemWEn, dmem_ready) tuple.
+    tuple appended per cycle up to the EBREAK; `dmem_log` one (cycle,
+    dmemAddr, dmemREn, dmemWEn, dmem_ready) tuple per cycle, drain
+    included.
 
     `clear_regs` zeroes x1..x31 first (CLEAR_REGS, then the reset below).
 
     Returns (retirements, dmem) where retirements is a list of dicts
-    sampled on every cycle that rvfi_valid=1.
+    sampled on every cycle that rvfi_valid=1, up to the EBREAK.
     """
     imem = {i * 4: instr & 0xFFFFFFFF for i, instr in enumerate(program)}
     dmem = dict(dmem_init or {})
@@ -162,7 +194,14 @@ async def _run(dut, program, dmem_init=None, max_cycles=200, ready=None,
     dut.reset.value = 0
     dut.io_imemData.value = imem.get(0, EBREAK())
 
-    for cycle in range(max_cycles):
+    ebreak_cycle = None
+    for cycle in itertools.count():
+        if ebreak_cycle is None and cycle == max_cycles:
+            raise AssertionError(f"max_cycles={max_cycles} reached without EBREAK")
+        if ebreak_cycle is not None and cycle > ebreak_cycle + drain:
+            break
+        draining = ebreak_cycle is not None
+
         await RisingEdge(dut.clock)
         await Timer(1, "ns")  # let combinational signals settle
 
@@ -170,14 +209,14 @@ async def _run(dut, program, dmem_init=None, max_cycles=200, ready=None,
         ia        = int(dut.io_imemAddr.value)
         da        = int(dut.io_dmemAddr.value)
         wen       = int(dut.io_dmemWEn.value)
-        rvfi_v    = int(dut.io_rvfi_valid_0.value)
+        rvfi_v    = int(dut.io_rvfi_valid_0.value) and not draining
 
         # Bus backpressure for this cycle. imemAddr / dmemAddr / dmemWEn
         # come straight from registers, so they don't depend on ready.
-        iready, dready = ready(cycle) if ready else (1, 1)
+        iready, dready = ready(cycle) if ready and not draining else (1, 1)
         dut.io_imemReady.value = iready
         dut.io_dmemReady.value = dready
-        if fetch_log is not None:
+        if fetch_log is not None and not draining:
             fetch_log.append((cycle, ia, iready))
         if dmem_log is not None:
             dmem_log.append((cycle, da, int(dut.io_dmemREn.value), wen, dready))
@@ -217,14 +256,12 @@ async def _run(dut, program, dmem_init=None, max_cycles=200, ready=None,
             }
             retirements.append(r)
             if r["insn"] == EBREAK():
-                break
+                ebreak_cycle = cycle
 
         # Drive this cycle's imem fetch and dmem read combinationally. A
-        # refused fetch returns POISON: the core must not consume it.
+        # refused access returns POISON: the core must not consume it.
         dut.io_imemData.value  = imem.get(ia & ~3, EBREAK()) if iready else POISON
-        dut.io_dmemRData.value = dmem.get(da & ~3, 0)
-    else:
-        raise AssertionError(f"max_cycles={max_cycles} reached without EBREAK")
+        dut.io_dmemRData.value = dmem.get(da & ~3, 0) if dready else POISON
 
     return retirements, dmem
 
@@ -628,24 +665,28 @@ async def div_around_branches_and_jumps(dut):
 
 @cocotb.test()
 async def div_done_held_by_dmem_stall(dut):
-    """A SW stuck on the dmem bus for longer than the whole divide: the DIV
+    """A LW stuck on the dmem bus for longer than the whole divide: the DIV
     behind it starts and finishes during the stall, then must hold its
-    (sticky) result until EX/MEM can take it — retiring exactly once."""
+    (sticky) result until EX/MEM can take it — retiring exactly once.
+    The LW is a cache miss (first access after reset), so it can only
+    complete once the bus serves it; a SW would be posted instead."""
     program = [
         ADDI(1, 0, 77),        # 0
         ADDI(2, 0, 5),         # 4
-        SW  (1, 0, 0),         # 8   stalls in MEM until cycle 70
+        LW  (6, 0, 8),         # 8   cold: stalls in MEM until cycle 70
         DIV (3, 1, 2),         # 12
         ADD (4, 3, 1),         # 16
-        LW  (5, 0, 0),         # 20
-        EBREAK(),              # 24
+        SW  (1, 0, 0),         # 20
+        LW  (5, 0, 0),         # 24
+        EBREAK(),              # 28
     ]
-    rets, dmem = await _run(dut, program, max_cycles=300,
+    rets, dmem = await _run(dut, program, dmem_init={8: 123}, max_cycles=300,
                             ready=lambda c: (1, 0 if c < 70 else 1))
-    _check_order_and_pcs(rets, [0, 4, 8, 12, 16, 20, 24])
-    sw = _one(rets, SW(1, 0, 0))
+    _check_order_and_pcs(rets, [0, 4, 8, 12, 16, 20, 24, 28])
+    lw = _one(rets, LW(6, 0, 8))
     dv = _one(rets, DIV(3, 1, 2))
-    assert sw["cycle"] >= 70, "SW should have been held by the dmem stall"
+    assert lw["cycle"] > 70, "LW should have been held by the dmem stall"
+    _expect(lw, 6, 123)
     _expect(dv, 3, 77 // 5, rs1_rdata=77, rs2_rdata=5)
     _expect(_one(rets, ADD(4, 3, 1)), 4, 77 // 5 + 77)
     _expect(_one(rets, LW(5, 0, 0)), 5, 77)
@@ -920,15 +961,20 @@ def _sx(v, bits):
     return v - (1 << bits) if v >> (bits - 1) else v
 
 
-def _golden(program, max_steps=2000):
-    """Reference retirement stream for the subset the predictor programs
-    use: (pc, insn, rd, rd_wdata, pc_next, trap) per instruction, in the
-    core's RVFI convention (rd/rd_wdata = 0 when nothing is written; a
-    taken branch/jump to a misaligned target traps, writes nothing and
-    falls through to pc+4)."""
+_LD_BYTES = {0: 1, 1: 2, 2: 4, 4: 1, 5: 2}   # LOAD funct3 -> access width
+_ST_BYTES = {0: 1, 1: 2, 2: 4}               # STORE funct3 -> access width
+
+
+def _golden(program, max_steps=2000, dmem_init=None):
+    """Reference retirement stream for the subset the predictor and
+    D-side programs use: (pc, insn, rd, rd_wdata, pc_next, trap) per
+    instruction, in the core's RVFI convention (rd/rd_wdata = 0 when
+    nothing is written; a taken branch/jump to a misaligned target, or a
+    load/store not aligned to its width, traps, writes nothing and falls
+    through to pc+4)."""
     imem = {i * 4: w & M32 for i, w in enumerate(program)}
     regs = [0] * 32
-    dmem = {}
+    dmem = dict(dmem_init or {})
     pc, out = 0, []
     for _ in range(max_steps):
         insn = imem.get(pc, EBREAK())
@@ -952,10 +998,23 @@ def _golden(program, max_steps=2000):
             wd = a + b
         elif op == 0x33 and f7 == 1 and f3 == 4:
             wd = _div(a, b)
-        elif op == 0x03 and f3 == 2:
-            wd = dmem.get((a + iimm) & M32 & ~3, 0)
-        elif op == 0x23 and f3 == 2:
-            dmem[(a + simm) & M32 & ~3] = b
+        elif op == 0x37:
+            wd = insn & 0xFFFFF000
+        elif op == 0x03 and f3 in _LD_BYTES:
+            addr, n = (a + iimm) & M32, _LD_BYTES[f3]
+            if addr % n:
+                trap = 1
+            else:
+                v = (dmem.get(addr & ~3, 0) >> (8 * (addr & 3))) & ((1 << (8 * n)) - 1)
+                wd = v if f3 & 4 else _sx(v, 8 * n) & M32
+        elif op == 0x23 and f3 in _ST_BYTES:
+            addr, n = (a + simm) & M32, _ST_BYTES[f3]
+            if addr % n:
+                trap = 1
+            else:
+                sh, lanes = 8 * (addr & 3), (1 << (8 * n)) - 1
+                old = dmem.get(addr & ~3, 0)
+                dmem[addr & ~3] = (old & ~(lanes << sh)) | ((b & lanes) << sh)
         elif op == 0x63 and f3 in (0, 1):
             if (a == b) == (f3 == 0):
                 nxt = (pc + bimm) & M32
@@ -1297,13 +1356,36 @@ def _retired_dmem(rets):
     return out
 
 
+def _check_bus_order(accepted, retired):
+    """The bus accesses are the retired loads/stores in program order,
+    except that a load served by MEM's cache on a refused cycle never
+    reaches the bus: every retired store is written exactly once, and
+    no access is accepted that did not retire."""
+    it = iter(retired)
+    for acc in accepted:
+        for ret in it:
+            if ret == acc:
+                break
+            assert ret[0] == "r", (
+                f"retired store {ret} never reached the bus: "
+                f"accepted {accepted}, retired {retired}")
+        else:
+            raise AssertionError(
+                f"bus access {acc} out of order or not retired: "
+                f"accepted {accepted}, retired {retired}")
+    rest = list(it)
+    assert all(k == "r" for k, _ in rest), (
+        f"retired stores {rest} never reached the bus")
+
+
 @cocotb.test()
 async def bubble_payload_is_inert(dut):
     """Load-use and mispredict bubbles carry a stale ID/EX payload but
     never write dmem, redirect, start a divide, write rd or retire: the
     retired stream matches the golden ISS, and the dmem accesses the bus
-    accepted are exactly the retired loads/stores, in order. Zero-wait
-    and under random imem + dmem stalls."""
+    accepted are exactly the retired loads/stores, in order (under dmem
+    stalls, minus loads MEM's cache served). Zero-wait and under random
+    imem + dmem stalls."""
     first = True
     for ready in (None, _random_ready(3000), _random_ready(3001)):
         log = []
@@ -1311,13 +1393,237 @@ async def bubble_payload_is_inert(dut):
                                 start_clock=first, dmem_log=log)
         first = False
         _check_pred(rets, PROG_BUBBLE, BUBBLE_PCS, BUBBLE_REGS)
-        assert _accepted_dmem(log) == _retired_dmem(rets), (
-            f"dmem accesses {_accepted_dmem(log)} != retired {_retired_dmem(rets)}")
+        if ready is None:
+            assert _accepted_dmem(log) == _retired_dmem(rets), (
+                f"dmem accesses {_accepted_dmem(log)} != retired {_retired_dmem(rets)}")
+        else:
+            _check_bus_order(_accepted_dmem(log), _retired_dmem(rets))
         assert dmem == {0x40: 7, 0x44: 7, 0x48: 60}, dmem
         if ready is None:
             # The SW and the JALR really did take a load-use bubble.
             cyc = {r["pc"]: r["cycle"] for r in rets}
             assert cyc[24] - cyc[20] == 2 and cyc[32] - cyc[28] == 2, cyc
+
+
+# ── Stall-only D-side: posted store buffer + load cache ────────────────────
+def _arch_mem(rets):
+    """_arch plus the memory data: the stored word, and the full loaded
+    word (the cache holds whole architectural words, so a cache-served
+    load reports the same mem_rdata as a bus load)."""
+    return [a + (r["mem_wdata"] if r["mem_wmask"] else 0,
+                 r["mem_rdata"] if r["mem_rmask"] else 0)
+            for a, r in zip(_arch(rets), rets)]
+
+
+def _cache_served(rets, dmem_log):
+    """Loads that completed in MEM on a cycle the dmem bus refused: the
+    load retiring at cycle c was in MEM during cycle c-1."""
+    dready = {c: rdy for c, _, _, _, rdy in dmem_log}
+    return [r for r in rets if r["mem_rmask"] and not dready[r["cycle"] - 1]]
+
+
+def _random_ready_p(seed, p_istall, p_dstall):
+    rng = random.Random(seed)
+    table = {}
+
+    def ready(cycle):
+        if cycle not in table:
+            table[cycle] = (int(rng.random() >= p_istall),
+                            int(rng.random() >= p_dstall))
+        return table[cycle]
+    return ready
+
+
+@cocotb.test()
+async def posted_store_retires_during_dstall(dut):
+    """A SW in MEM while the dmem bus refuses everything is posted: it
+    retires (and so does the code behind it) long before the bus comes
+    back, and its write lands exactly once, on the first ready cycle."""
+    window = 50
+    program = [
+        ADDI(1, 0, 0x55),      # 0
+        ADDI(3, 0, 0x40),      # 4
+        SW  (1, 3, 0),         # 8   posted
+        ADDI(2, 0, 7),         # 12
+    ] + [NOP()] * 60 + [      # retire through the refused window
+        ADD (4, 1, 2),
+        EBREAK(),
+    ]
+    log = []
+    rets, dmem = await _run(dut, program, max_cycles=300, dmem_log=log,
+                            ready=lambda c: (1, 0 if c < window else 1))
+    sw = _one(rets, SW(1, 3, 0))
+    assert sw["cycle"] < 10, f"SW retired at cycle {sw['cycle']}, not posted"
+    assert _one(rets, ADDI(2, 0, 7))["cycle"] < 10
+    writes = [(c, da & ~3, wen) for c, da, _, wen, rdy in log if wen and rdy]
+    assert writes == [(window, 0x40, 0xF)], f"bus writes {writes}"
+    # While refused, the buffer kept presenting the store.
+    held = [(da, wen) for c, da, _, wen, _ in log if sw["cycle"] <= c < window]
+    assert held and all(h == (0x40, 0xF) for h in held), held
+    assert dmem == {0x40: 0x55}, dmem
+    _expect(_one(rets, ADD(4, 1, 2)), 4, 0x55 + 7)
+
+
+# SW / LW, SB / LB, SH / LHU and SW / LW of one word back to back, then a
+# partial store to an uncached word (invalidate path) and its reload.
+PROG_ST_LD = [
+    ADDI(3, 0, 0x40),        # 0   x3 = base
+    ADDI(1, 0, 0x123),       # 4
+    SW  (1, 3, 0),           # 8   posted, allocates the word
+    LW  (2, 3, 0),           # 12  same word right behind: store bypass
+    ADDI(4, 0, -1),          # 16
+    SB  (4, 3, 1),           # 20  merges into the cached word
+    LB  (5, 3, 1),           # 24  same word right behind: merged bypass
+    LW  (6, 3, 0),           # 28  from the table
+    ADDI(7, 0, 0x456),       # 32
+    SH  (7, 3, 2),           # 36
+    LHU (8, 3, 2),           # 40
+    LW  (9, 3, 0),           # 44
+    SB  (4, 3, 5),           # 48  partial store to uncached 0x44
+    LW  (10, 3, 4),          # 52  miss: waits for the bus
+    LBU (11, 3, 5),          # 56
+    EBREAK(),                # 60
+]
+ST_LD_INIT = {0x44: 0x11223344}
+ST_LD_REGS = {2: 0x123, 5: M32, 6: 0xFF23, 8: 0x456, 9: 0x0456FF23,
+              10: 0x1122FF44, 11: 0xFF}
+
+
+@cocotb.test()
+async def store_merge_then_load_under_dstall(dut):
+    """Stores and dependent loads of the same word with the dmem bus
+    refusing 4 cycles in 5: loads right behind a store (lookahead
+    bypass), byte/halfword merges into a cached word, and a partial store
+    to an uncached word. Loads must complete from the cache on refused
+    cycles (POISON on the bus) with the architectural value."""
+    base, base_dmem = await _run(dut, PROG_ST_LD, dmem_init=ST_LD_INIT)
+    assert _trace(base) == _golden(PROG_ST_LD, dmem_init=ST_LD_INIT)
+    final = _regs(base)
+    for rd, val in ST_LD_REGS.items():
+        assert final.get(rd) == val, f"x{rd} = {final.get(rd):#x} != {val:#x}"
+    assert base_dmem == {0x40: 0x0456FF23, 0x44: 0x1122FF44}, base_dmem
+    for ready in (lambda c: (1, int(c % 5 == 4)),
+                  lambda c: (1, int(c % 3 == 2)),
+                  _random_ready_p(4000, 0.3, 0.7)):
+        log = []
+        rets, dmem = await _run(dut, PROG_ST_LD, dmem_init=ST_LD_INIT,
+                                max_cycles=600, ready=ready,
+                                start_clock=False, dmem_log=log)
+        assert _arch_mem(rets) == _arch_mem(base), "RVFI stream differs"
+        assert dmem == base_dmem, dmem
+        served = {r["pc"] for r in _cache_served(rets, log)}
+        assert served & {12, 24}, f"no bypassed load served on a refused cycle: {served}"
+        assert 52 not in served, "the load after an invalidating store hit"
+        _check_bus_order(_accepted_dmem(log), _retired_dmem(rets))
+
+
+@cocotb.test()
+async def cache_aliasing_under_stalls(dut):
+    """Two words DC_STRIDE bytes apart share a cache index: stores and
+    loads of both, alternating, under random dmem stalls must always see
+    their own word, never the alias."""
+    a, b = 0x100, 0x100 + DC_STRIDE
+    program = [
+        LUI (10, a >> 12), ADDI(10, 10, a & 0xFFF),    # 0, 4    x10 = a
+        LUI (11, b >> 12), ADDI(11, 11, b & 0xFFF),    # 8, 12   x11 = b
+        ADDI(1, 0, 5),           # 16  x1 = trip count
+        LW  (2, 10, 0),          # 20  loop: a (fills a)
+        LW  (12, 10, 0),         # 24  a again: hit
+        LW  (3, 11, 0),          # 28  b: tag mismatch, evicts a
+        LW  (4, 10, 0),          # 32  a: tag mismatch, evicts b
+        ADD (5, 5, 2),           # 36
+        ADD (6, 6, 3),           # 40
+        ADD (7, 7, 4),           # 44
+        ADD (13, 13, 12),        # 48
+        ADDI(2, 2, 3),           # 52
+        SW  (2, 10, 0),          # 56  a += 3
+        ADDI(3, 3, 5),           # 60
+        SW  (3, 11, 0),          # 64  b += 5 (evicts a)
+        ADDI(1, 1, -1),          # 68
+        BNE (1, 0, -52),         # 72  -> 20
+        LW  (8, 10, 0),          # 76
+        LW  (9, 11, 0),          # 80
+        EBREAK(),                # 84
+    ]
+    init = {a: 1000, b: 2000}
+    base, base_dmem = await _run(dut, program, dmem_init=init, max_cycles=400)
+    assert _trace(base) == _golden(program, dmem_init=init)
+    regs = _regs(base)
+    assert (regs[8], regs[9]) == (1000 + 15, 2000 + 25), regs
+    assert regs[5] == regs[7] == regs[13] == 5 * 1000 + 3 * (0 + 1 + 2 + 3 + 4)
+    assert base_dmem == {a: 1015, b: 2025}, base_dmem
+    served = 0
+    for seed in range(4):
+        log = []
+        rets, dmem = await _run(dut, program, dmem_init=init, max_cycles=1500,
+                                ready=_random_ready_p(4100 + seed, 0.22, 0.5),
+                                start_clock=False, dmem_log=log)
+        assert _arch_mem(rets) == _arch_mem(base), f"seed {seed}: RVFI stream differs"
+        assert dmem == base_dmem, f"seed {seed}: {dmem}"
+        served += len(_cache_served(rets, log))
+    assert served, "no load was served from the cache"
+
+
+def _mem_stress_program(rng, bases, body_len=48):
+    """Random LW/LH/LHU/LB/LBU/SW/SH/SB/ADD/ADDI body (a few misaligned
+    accesses included) over 8 words at each base, run twice by a loop
+    so the second pass finds cached words."""
+    prog = []
+    for i, base in enumerate(bases):
+        prog += [LUI(1 + i, base >> 12), ADDI(1 + i, 1 + i, base & 0xFFF)]
+    prog += [ADDI(r, 0, rng.randrange(-2048, 2048)) for r in range(4, 12)]
+    prog += [ADDI(31, 0, 2)]
+    head = len(prog)
+    loads = [(LW, 4), (LH, 2), (LHU, 2), (LB, 1), (LBU, 1)]
+    stores = [(SW, 4), (SH, 2), (SB, 1)]
+    for _ in range(body_len):
+        k = rng.random()
+        rb = rng.randrange(1, 1 + len(bases))
+        rd, rs, rt = (rng.randrange(4, 12) for _ in range(3))
+        if k < 0.6:
+            op, n = rng.choice(loads if k < 0.35 else stores)
+            off = 4 * rng.randrange(8) + n * rng.randrange(4 // n)
+            if rng.random() < 0.05 and n > 1:
+                off += 1                                   # misaligned: traps
+            prog.append(op(rd, rb, off) if k < 0.35 else op(rs, rb, off))
+        elif k < 0.8:
+            prog.append(ADD(rd, rs, rt))
+        else:
+            prog.append(ADDI(rd, rs, rng.randrange(-2048, 2048)))
+    prog += [ADDI(31, 31, -1)]
+    prog += [BNE(31, 0, 4 * (head - len(prog))), EBREAK()]
+    return prog
+
+
+@cocotb.test()
+async def random_mem_stress_under_stalls(dut):
+    """Seeded random load/store/ALU programs over three bases one cache
+    size apart (same indices, different tags). Each program's zero-wait
+    run matches the golden ISS; runs under random imem + dmem stall
+    profiles up to 0.6 must match it exactly (RVFI incl. memory data,
+    final dmem, bus write order), and some loads must be cache-served."""
+    bases = [0x300 + k * DC_STRIDE for k in range(3)]
+    first, served = True, 0
+    for seed in range(6):
+        rng = random.Random(5000 + seed)
+        prog = _mem_stress_program(rng, bases)
+        init = {b + 4 * w: rng.getrandbits(32) for b in bases for w in range(8)}
+        base, base_dmem = await _run(dut, prog, dmem_init=init, max_cycles=800,
+                                     start_clock=first)
+        first = False
+        assert _trace(base) == _golden(prog, dmem_init=init), f"seed {seed}"
+        profiles = [(0.22, 0.22), (0.0, 0.6), (0.4, 0.4), (0.6, 0.6)]
+        for k, (pi, pd) in enumerate(profiles):
+            log = []
+            rets, dmem = await _run(dut, prog, dmem_init=init, max_cycles=4000,
+                                    ready=_random_ready_p(100 * seed + k, pi, pd),
+                                    start_clock=False, dmem_log=log)
+            assert _arch_mem(rets) == _arch_mem(base), (
+                f"seed {seed} profile {k}: RVFI stream differs under stalls")
+            assert dmem == base_dmem, f"seed {seed} profile {k}: dmem differs"
+            _check_bus_order(_accepted_dmem(log), _retired_dmem(rets))
+            served += len(_cache_served(rets, log))
+    assert served, "no load was served from the cache"
 
 
 def test_pipeline_runner():

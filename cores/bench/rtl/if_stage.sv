@@ -10,8 +10,8 @@
 // observing a real rs1/rs2 from a wrong-path instruction and inserting
 // a spurious load-use stall the cycle after a taken branch.
 //
-// Stall-only replay store. A 512-entry direct-mapped table (index
-// pc[10:2], tag pc[31:11], 32-bit word) is filled with the fetched word
+// Stall-only replay store. A 4096-entry direct-mapped table (index
+// pc[13:2], tag pc[31:14], 32-bit word) is filled with the fetched word
 // on every imem_ready cycle. It is consumed only on cycles where the
 // external imem does NOT accept the fetch: if the table held the current
 // PC, IF supplies the replayed word and the fetch proceeds as if the bus
@@ -74,9 +74,9 @@ module if_stage (
 );
 
   localparam logic [31:0] RESET_PC    = 32'h0000_0000;
-  localparam int          RP_IDX_W    = 9;                  // 512 entries
+  localparam int          RP_IDX_W    = 12;                 // 4096 entries
   localparam int          RP_ENTRIES  = 1 << RP_IDX_W;
-  localparam int          RP_TAG_LSB  = RP_IDX_W + 2;       // tag = pc[31:11]
+  localparam int          RP_TAG_LSB  = RP_IDX_W + 2;       // tag = pc[31:14]
   localparam int          RP_TAG_W    = 32 - RP_TAG_LSB;
   localparam int          BHT_ENTRIES = 1 << BHT_IDX_W;
 
