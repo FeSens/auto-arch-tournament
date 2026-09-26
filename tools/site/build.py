@@ -725,7 +725,7 @@ def chart_score_vs_lut4(aggs: list[ModelAgg], baseline_lut: int = 9563,
     qx, qy = x(hum["lut"]), y(hum["fit"])
     parts.append(f'  <rect x="{ml}" y="{mt}" width="{qx - ml:.1f}" height="{qy - mt:.1f}" '
                  f'fill="var(--c2)" opacity="0.08"/>')
-    quad_lines = ["Smaller and", "faster than", "VexRiscv"]
+    quad_lines = ["Smaller and", "faster than", "human baseline"]
     for k, line in enumerate(quad_lines):
         parts.append(f'  <text class="note" x="{ml + 8}" y="{mt + 16 + 13 * k}" style="fill: var(--c2)">{line}</text>')
     quad_box = (ml, mt, ml + 8 + max(len(l) for l in quad_lines) * 7.0, mt + 20 + 13 * len(quad_lines))
@@ -1150,6 +1150,20 @@ def render_index(aggs: list[ModelAgg], reps: list[Rep], stars: Optional[int] = N
 
 {scheduled_html}
 
+<section class="section">
+  <div class="eyebrow">Speed vs size</div>
+  <h2>Score × Area</h2>
+  <figure class="chart">
+    {chart1_svg}
+    <figcaption>
+      Vertical axis: CoreMark fitness (how fast the CPU runs the benchmark).
+      Horizontal axis: chip area (LUT4 count, basically how many gates the design uses on the FPGA).
+      One point per model's best run. VexRiscv (3,402 LUT4 · fitness 370) is the human-engineered
+      reference. Up and to the left is the goal: faster chip, smaller chip.
+    </figcaption>
+  </figure>
+</section>
+
 <section class="section" id="release-curve">
   <div class="eyebrow">Capability over time</div>
   <h2>Model release date × peak HWE score</h2>
@@ -1163,20 +1177,6 @@ def render_index(aggs: list[ModelAgg], reps: list[Rep], stars: Optional[int] = N
       <a href="https://ai.google.dev/gemini-api/docs/changelog" class="ext">Gemini API changelog</a>,
       <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md" class="ext">Claude Code changelog</a>,
       and <a href="https://www.kimi.com/blog/kimi-k2-6" class="ext">Kimi K2.6 announcement</a>.
-    </figcaption>
-  </figure>
-</section>
-
-<section class="section">
-  <div class="eyebrow">Speed vs size</div>
-  <h2>Score × Area</h2>
-  <figure class="chart">
-    {chart1_svg}
-    <figcaption>
-      Vertical axis: CoreMark fitness (how fast the CPU runs the benchmark).
-      Horizontal axis: chip area (LUT4 count, basically how many gates the design uses on the FPGA).
-      One point per model's best run. VexRiscv (3,957 LUT4 · fitness 370) is the human-engineered
-      reference. Up and to the left is the goal: faster chip, smaller chip.
     </figcaption>
   </figure>
 </section>

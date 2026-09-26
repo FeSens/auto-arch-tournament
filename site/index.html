@@ -46,6 +46,110 @@
 
 
 
+<section class="section">
+  <div class="eyebrow">Speed vs size</div>
+  <h2>Score × Area</h2>
+  <figure class="chart">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 560" role="img" aria-label="Fitness versus LUT4 by model">
+  <style>
+    text { font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
+    .axis-line { stroke: var(--rule, #d8d4cf); stroke-width: 1; }
+    .grid { stroke: var(--rule, #d8d4cf); stroke-width: .6; }
+    .axis-label { font-size: 12px; fill: var(--ink, #262a33); }
+    .tick { font-family: ui-monospace, SFMono-Regular, monospace; font-size: 10px; fill: var(--ink-muted, #77716c); }
+    .legend { font-size: 11.5px; fill: var(--ink-muted, #77716c); }
+    .name { font-size: 12px; font-weight: 600; paint-order: stroke;
+            stroke: var(--bg, #faf9f7); stroke-width: 4px; stroke-linejoin: round; }
+    .note { font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; }
+    .pt { stroke: var(--bg, #faf9f7); stroke-width: 2; }
+    .baseline { stroke: var(--ink-muted, #77716c); stroke-width: 1; stroke-dasharray: 4 3; }
+    g.dot:hover .pt { stroke: var(--ink, #262a33); }
+  </style>
+  <rect x="80" y="58" width="180.7" height="371.7" fill="var(--c2)" opacity="0.08"/>
+  <text class="note" x="88" y="74" style="fill: var(--c2)">Smaller and</text>
+  <text class="note" x="88" y="87" style="fill: var(--c2)">faster than</text>
+  <text class="note" x="88" y="100" style="fill: var(--c2)">human baseline</text>
+  <line class="grid" x1="80" y1="413.1" x2="870" y2="413.1"/>
+  <text class="tick" x="70" y="417.1" text-anchor="end">400</text>
+  <line class="grid" x1="80" y1="302.5" x2="870" y2="302.5"/>
+  <text class="tick" x="70" y="306.5" text-anchor="end">600</text>
+  <line class="grid" x1="80" y1="191.9" x2="870" y2="191.9"/>
+  <text class="tick" x="70" y="195.9" text-anchor="end">800</text>
+  <line class="grid" x1="80" y1="81.3" x2="870" y2="81.3"/>
+  <text class="tick" x="70" y="85.3" text-anchor="end">1000</text>
+  <text class="tick" x="80.0" y="514" text-anchor="middle">0</text>
+  <text class="tick" x="212.8" y="514" text-anchor="middle">2.5k</text>
+  <text class="tick" x="345.5" y="514" text-anchor="middle">5k</text>
+  <text class="tick" x="478.3" y="514" text-anchor="middle">7.5k</text>
+  <text class="tick" x="611.1" y="514" text-anchor="middle">10k</text>
+  <text class="tick" x="743.9" y="514" text-anchor="middle">12.5k</text>
+  <line class="axis-line" x1="80" y1="496" x2="870" y2="496"/>
+  <text class="axis-label" x="475.0" y="538.0" text-anchor="middle">Area · LUT4 count (← smaller is better)</text>
+  <text class="axis-label" x="30.0" y="277.0" text-anchor="middle" transform="rotate(-90 30.0 277.0)">Fitness · CoreMark iter/s (↑ better)</text>
+  <line stroke="var(--c-human)" stroke-width="1.2" stroke-dasharray="5 4" x1="80" y1="429.7" x2="870" y2="429.7"/>
+  <line stroke="var(--c-human)" stroke-width="1.2" stroke-dasharray="5 4" x1="260.7" y1="58" x2="260.7" y2="496"/>
+  <text class="tick" x="864.0" y="423.7" text-anchor="end" style="fill: var(--c-human)">Human reference (VexRiscv 370)</text>
+  <circle cx="85.0" cy="18.0" r="5" fill="var(--c2)"/>
+  <text class="legend" x="95.0" y="22.0">OpenAI</text>
+  <circle cx="155.2" cy="18.0" r="5" fill="var(--c1)"/>
+  <text class="legend" x="165.2" y="22.0">Google</text>
+  <circle cx="225.4" cy="18.0" r="5" fill="var(--c3)"/>
+  <text class="legend" x="235.4" y="22.0">Moonshot (Kimi)</text>
+  <circle cx="351.4" cy="18.0" r="5" fill="#D97757"/>
+  <text class="legend" x="361.4" y="22.0">Anthropic</text>
+  <rect x="440.2" y="18.0" width="9" height="9" transform="rotate(45 440.2 18.0) translate(-4.5 -4.5)" fill="var(--c-human)"/>
+  <text class="legend" x="450.2" y="22.0">VexRiscv (human)</text>
+  <circle cx="572.4" cy="18.0" r="4.5" fill="var(--bg)" stroke="var(--ink-muted)" stroke-width="1.5"/>
+  <text class="legend" x="582.4" y="22.0">V0 baseline</text>
+  <line x1="620.0" y1="373.9" x2="628.0" y2="385.9" stroke="var(--c2)" stroke-width="1" opacity="0.4"/>
+  <line x1="600.8" y1="378.9" x2="592.8" y2="390.9" stroke="var(--c2)" stroke-width="1" opacity="0.4"/>
+  <line x1="494.4" y1="395.6" x2="486.4" y2="407.6" stroke="var(--c2)" stroke-width="1" opacity="0.4"/>
+  <line x1="623.3" y1="415.5" x2="631.3" y2="401.5" stroke="var(--c2)" stroke-width="1" opacity="0.4"/>
+  <line x1="811.5" y1="435.7" x2="803.5" y2="447.7" stroke="var(--c1)" stroke-width="1" opacity="0.4"/>
+  <line x1="624.0" y1="438.1" x2="616.0" y2="450.1" stroke="var(--c1)" stroke-width="1" opacity="0.4"/>
+  <line x1="260.7" y1="429.7" x2="252.7" y2="415.7" stroke="var(--c-human)" stroke-width="1" opacity="0.4"/>
+  <g data-tip="VexRiscv (human reference) · fitness 370 · 3,402 LUT4"><circle cx="260.7" cy="429.7" r="12" fill="transparent"/><rect x="256.2" y="425.2" width="9" height="9" transform="rotate(45 260.7 429.7)" fill="var(--c-human)"/></g>
+  <g data-tip="V0 baseline · fitness 283 · 9,563 LUT4"><circle cx="587.9" cy="477.9" r="12" fill="transparent"/><circle cx="587.9" cy="477.9" r="4.5" fill="var(--bg)" stroke="var(--ink-muted)" stroke-width="1.5"/></g>
+  <g class="dot" data-tip="Claude Opus 5.5 xhigh · fitness 983 · 3,128 LUT4"><circle cx="246.1" cy="90.6" r="12" fill="transparent"/><circle class="pt" cx="246.1" cy="90.6" r="6.5" fill="#D97757"/></g>
+  <g class="dot" data-tip="GPT-5.5 xhigh · fitness 525 · 5,453 LUT4"><circle cx="369.6" cy="343.9" r="12" fill="transparent"/><circle class="pt" cx="369.6" cy="343.9" r="6.5" fill="var(--c2)"/></g>
+  <g class="dot" data-tip="GPT-5.6 Terra · fitness 516 · 10,525 LUT4"><circle cx="639.0" cy="349.1" r="12" fill="transparent"/><circle class="pt" cx="639.0" cy="349.1" r="6.5" fill="var(--c2)"/></g>
+  <g class="dot" data-tip="GPT-5.4 xhigh · fitness 514 · 10,108 LUT4"><circle cx="616.8" cy="350.1" r="12" fill="transparent"/><circle class="pt" cx="616.8" cy="350.1" r="6.5" fill="var(--c2)"/></g>
+  <g class="dot" data-tip="GPT-5.6 Luna · fitness 481 · 10,135 LUT4"><circle cx="618.3" cy="368.3" r="12" fill="transparent"/><circle class="pt" cx="618.3" cy="368.3" r="6.5" fill="var(--c2)"/></g>
+  <g class="dot" data-tip="GPT-6 Astra max · fitness 474 · 6,247 LUT4"><circle cx="411.8" cy="372.0" r="12" fill="transparent"/><circle class="pt" cx="411.8" cy="372.0" r="6.5" fill="var(--c2)"/></g>
+  <g class="dot" data-tip="GPT-5.6 Sol · fitness 471 · 10,168 LUT4"><circle cx="620.0" cy="373.9" r="12" fill="transparent"/><circle class="pt" cx="620.0" cy="373.9" r="6.5" fill="var(--c2)"/></g>
+  <g class="dot" data-tip="GPT-5.5 high · fitness 462 · 9,807 LUT4"><circle cx="600.8" cy="378.9" r="12" fill="transparent"/><circle class="pt" cx="600.8" cy="378.9" r="6.5" fill="var(--c2)"/></g>
+  <g class="dot" data-tip="GPT-6 Sol xhigh · fitness 435 · 5,713 LUT4"><circle cx="383.4" cy="393.6" r="12" fill="transparent"/><circle class="pt" cx="383.4" cy="393.6" r="6.5" fill="var(--c2)"/></g>
+  <g class="dot" data-tip="GPT-5.5 medium · fitness 432 · 7,803 LUT4"><circle cx="494.4" cy="395.6" r="12" fill="transparent"/><circle class="pt" cx="494.4" cy="395.6" r="6.5" fill="var(--c2)"/></g>
+  <g class="dot" data-tip="Kimi K2.6 · fitness 396 · 9,927 LUT4"><circle cx="607.2" cy="415.2" r="12" fill="transparent"/><circle class="pt" cx="607.2" cy="415.2" r="6.5" fill="var(--c3)"/></g>
+  <g class="dot" data-tip="GPT-5.4 mini · fitness 396 · 10,230 LUT4"><circle cx="623.3" cy="415.5" r="12" fill="transparent"/><circle class="pt" cx="623.3" cy="415.5" r="6.5" fill="var(--c2)"/></g>
+  <g class="dot" data-tip="Gemini 3.5 Flash · fitness 359 · 13,773 LUT4"><circle cx="811.5" cy="435.7" r="12" fill="transparent"/><circle class="pt" cx="811.5" cy="435.7" r="6.5" fill="var(--c1)"/></g>
+  <g class="dot" data-tip="Gemini 3.1 Pro · fitness 355 · 10,242 LUT4"><circle cx="624.0" cy="438.1" r="12" fill="transparent"/><circle class="pt" cx="624.0" cy="438.1" r="6.5" fill="var(--c1)"/></g>
+  <text class="name" x="257.1" y="93.6" text-anchor="start" style="fill: #D97757">Claude Opus 5.5 xhigh</text>
+  <text class="name" x="380.6" y="346.9" text-anchor="start" style="fill: var(--c2)">GPT-5.5 xhigh</text>
+  <text class="name" x="650.0" y="352.1" text-anchor="start" style="fill: var(--c2)">GPT-5.6 Terra</text>
+  <text class="name" x="605.8" y="353.1" text-anchor="end" style="fill: var(--c2)">GPT-5.4 xhigh</text>
+  <text class="name" x="629.3" y="371.3" text-anchor="start" style="fill: var(--c2)">GPT-5.6 Luna</text>
+  <text class="name" x="422.8" y="375.0" text-anchor="start" style="fill: var(--c2)">GPT-6 Astra max</text>
+  <text class="name" x="631.0" y="389.9" text-anchor="start" style="fill: var(--c2)">GPT-5.6 Sol</text>
+  <text class="name" x="589.8" y="394.9" text-anchor="end" style="fill: var(--c2)">GPT-5.5 high</text>
+  <text class="name" x="372.4" y="396.6" text-anchor="end" style="fill: var(--c2)">GPT-6 Sol xhigh</text>
+  <text class="name" x="483.4" y="411.6" text-anchor="end" style="fill: var(--c2)">GPT-5.5 medium</text>
+  <text class="name" x="596.2" y="418.2" text-anchor="end" style="fill: var(--c3)">Kimi K2.6</text>
+  <text class="name" x="634.3" y="405.5" text-anchor="start" style="fill: var(--c2)">GPT-5.4 mini</text>
+  <text class="name" x="800.5" y="451.7" text-anchor="end" style="fill: var(--c1)">Gemini 3.5 Flash</text>
+  <text class="name" x="613.0" y="454.1" text-anchor="end" style="fill: var(--c1)">Gemini 3.1 Pro</text>
+  <text class="name" x="249.7" y="419.7" text-anchor="end" style="fill: var(--c-human)">VexRiscv (human)</text>
+  <text class="name" x="598.9" y="480.9" text-anchor="start" style="fill: var(--ink-muted)">V0 baseline</text>
+</svg>
+    <figcaption>
+      Vertical axis: CoreMark fitness (how fast the CPU runs the benchmark).
+      Horizontal axis: chip area (LUT4 count, basically how many gates the design uses on the FPGA).
+      One point per model's best run. VexRiscv (3,402 LUT4 · fitness 370) is the human-engineered
+      reference. Up and to the left is the goal: faster chip, smaller chip.
+    </figcaption>
+  </figure>
+</section>
+
 <section class="section" id="release-curve">
   <div class="eyebrow">Capability over time</div>
   <h2>Model release date × peak HWE score</h2>
@@ -137,110 +241,6 @@
       <a href="https://ai.google.dev/gemini-api/docs/changelog" class="ext">Gemini API changelog</a>,
       <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md" class="ext">Claude Code changelog</a>,
       and <a href="https://www.kimi.com/blog/kimi-k2-6" class="ext">Kimi K2.6 announcement</a>.
-    </figcaption>
-  </figure>
-</section>
-
-<section class="section">
-  <div class="eyebrow">Speed vs size</div>
-  <h2>Score × Area</h2>
-  <figure class="chart">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 560" role="img" aria-label="Fitness versus LUT4 by model">
-  <style>
-    text { font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
-    .axis-line { stroke: var(--rule, #d8d4cf); stroke-width: 1; }
-    .grid { stroke: var(--rule, #d8d4cf); stroke-width: .6; }
-    .axis-label { font-size: 12px; fill: var(--ink, #262a33); }
-    .tick { font-family: ui-monospace, SFMono-Regular, monospace; font-size: 10px; fill: var(--ink-muted, #77716c); }
-    .legend { font-size: 11.5px; fill: var(--ink-muted, #77716c); }
-    .name { font-size: 12px; font-weight: 600; paint-order: stroke;
-            stroke: var(--bg, #faf9f7); stroke-width: 4px; stroke-linejoin: round; }
-    .note { font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; }
-    .pt { stroke: var(--bg, #faf9f7); stroke-width: 2; }
-    .baseline { stroke: var(--ink-muted, #77716c); stroke-width: 1; stroke-dasharray: 4 3; }
-    g.dot:hover .pt { stroke: var(--ink, #262a33); }
-  </style>
-  <rect x="80" y="58" width="180.7" height="371.7" fill="var(--c2)" opacity="0.08"/>
-  <text class="note" x="88" y="74" style="fill: var(--c2)">Smaller and</text>
-  <text class="note" x="88" y="87" style="fill: var(--c2)">faster than</text>
-  <text class="note" x="88" y="100" style="fill: var(--c2)">VexRiscv</text>
-  <line class="grid" x1="80" y1="413.1" x2="870" y2="413.1"/>
-  <text class="tick" x="70" y="417.1" text-anchor="end">400</text>
-  <line class="grid" x1="80" y1="302.5" x2="870" y2="302.5"/>
-  <text class="tick" x="70" y="306.5" text-anchor="end">600</text>
-  <line class="grid" x1="80" y1="191.9" x2="870" y2="191.9"/>
-  <text class="tick" x="70" y="195.9" text-anchor="end">800</text>
-  <line class="grid" x1="80" y1="81.3" x2="870" y2="81.3"/>
-  <text class="tick" x="70" y="85.3" text-anchor="end">1000</text>
-  <text class="tick" x="80.0" y="514" text-anchor="middle">0</text>
-  <text class="tick" x="212.8" y="514" text-anchor="middle">2.5k</text>
-  <text class="tick" x="345.5" y="514" text-anchor="middle">5k</text>
-  <text class="tick" x="478.3" y="514" text-anchor="middle">7.5k</text>
-  <text class="tick" x="611.1" y="514" text-anchor="middle">10k</text>
-  <text class="tick" x="743.9" y="514" text-anchor="middle">12.5k</text>
-  <line class="axis-line" x1="80" y1="496" x2="870" y2="496"/>
-  <text class="axis-label" x="475.0" y="538.0" text-anchor="middle">Area · LUT4 count (← smaller is better)</text>
-  <text class="axis-label" x="30.0" y="277.0" text-anchor="middle" transform="rotate(-90 30.0 277.0)">Fitness · CoreMark iter/s (↑ better)</text>
-  <line stroke="var(--c-human)" stroke-width="1.2" stroke-dasharray="5 4" x1="80" y1="429.7" x2="870" y2="429.7"/>
-  <line stroke="var(--c-human)" stroke-width="1.2" stroke-dasharray="5 4" x1="260.7" y1="58" x2="260.7" y2="496"/>
-  <text class="tick" x="864.0" y="423.7" text-anchor="end" style="fill: var(--c-human)">Human reference (VexRiscv 370)</text>
-  <circle cx="85.0" cy="18.0" r="5" fill="var(--c2)"/>
-  <text class="legend" x="95.0" y="22.0">OpenAI</text>
-  <circle cx="155.2" cy="18.0" r="5" fill="var(--c1)"/>
-  <text class="legend" x="165.2" y="22.0">Google</text>
-  <circle cx="225.4" cy="18.0" r="5" fill="var(--c3)"/>
-  <text class="legend" x="235.4" y="22.0">Moonshot (Kimi)</text>
-  <circle cx="351.4" cy="18.0" r="5" fill="#D97757"/>
-  <text class="legend" x="361.4" y="22.0">Anthropic</text>
-  <rect x="440.2" y="18.0" width="9" height="9" transform="rotate(45 440.2 18.0) translate(-4.5 -4.5)" fill="var(--c-human)"/>
-  <text class="legend" x="450.2" y="22.0">VexRiscv (human)</text>
-  <circle cx="572.4" cy="18.0" r="4.5" fill="var(--bg)" stroke="var(--ink-muted)" stroke-width="1.5"/>
-  <text class="legend" x="582.4" y="22.0">V0 baseline</text>
-  <line x1="620.0" y1="373.9" x2="628.0" y2="385.9" stroke="var(--c2)" stroke-width="1" opacity="0.4"/>
-  <line x1="600.8" y1="378.9" x2="592.8" y2="390.9" stroke="var(--c2)" stroke-width="1" opacity="0.4"/>
-  <line x1="494.4" y1="395.6" x2="486.4" y2="407.6" stroke="var(--c2)" stroke-width="1" opacity="0.4"/>
-  <line x1="623.3" y1="415.5" x2="631.3" y2="401.5" stroke="var(--c2)" stroke-width="1" opacity="0.4"/>
-  <line x1="811.5" y1="435.7" x2="803.5" y2="447.7" stroke="var(--c1)" stroke-width="1" opacity="0.4"/>
-  <line x1="624.0" y1="438.1" x2="616.0" y2="450.1" stroke="var(--c1)" stroke-width="1" opacity="0.4"/>
-  <line x1="260.7" y1="429.7" x2="252.7" y2="415.7" stroke="var(--c-human)" stroke-width="1" opacity="0.4"/>
-  <g data-tip="VexRiscv (human reference) · fitness 370 · 3,402 LUT4"><circle cx="260.7" cy="429.7" r="12" fill="transparent"/><rect x="256.2" y="425.2" width="9" height="9" transform="rotate(45 260.7 429.7)" fill="var(--c-human)"/></g>
-  <g data-tip="V0 baseline · fitness 283 · 9,563 LUT4"><circle cx="587.9" cy="477.9" r="12" fill="transparent"/><circle cx="587.9" cy="477.9" r="4.5" fill="var(--bg)" stroke="var(--ink-muted)" stroke-width="1.5"/></g>
-  <g class="dot" data-tip="Claude Opus 5.5 xhigh · fitness 983 · 3,128 LUT4"><circle cx="246.1" cy="90.6" r="12" fill="transparent"/><circle class="pt" cx="246.1" cy="90.6" r="6.5" fill="#D97757"/></g>
-  <g class="dot" data-tip="GPT-5.5 xhigh · fitness 525 · 5,453 LUT4"><circle cx="369.6" cy="343.9" r="12" fill="transparent"/><circle class="pt" cx="369.6" cy="343.9" r="6.5" fill="var(--c2)"/></g>
-  <g class="dot" data-tip="GPT-5.6 Terra · fitness 516 · 10,525 LUT4"><circle cx="639.0" cy="349.1" r="12" fill="transparent"/><circle class="pt" cx="639.0" cy="349.1" r="6.5" fill="var(--c2)"/></g>
-  <g class="dot" data-tip="GPT-5.4 xhigh · fitness 514 · 10,108 LUT4"><circle cx="616.8" cy="350.1" r="12" fill="transparent"/><circle class="pt" cx="616.8" cy="350.1" r="6.5" fill="var(--c2)"/></g>
-  <g class="dot" data-tip="GPT-5.6 Luna · fitness 481 · 10,135 LUT4"><circle cx="618.3" cy="368.3" r="12" fill="transparent"/><circle class="pt" cx="618.3" cy="368.3" r="6.5" fill="var(--c2)"/></g>
-  <g class="dot" data-tip="GPT-6 Astra max · fitness 474 · 6,247 LUT4"><circle cx="411.8" cy="372.0" r="12" fill="transparent"/><circle class="pt" cx="411.8" cy="372.0" r="6.5" fill="var(--c2)"/></g>
-  <g class="dot" data-tip="GPT-5.6 Sol · fitness 471 · 10,168 LUT4"><circle cx="620.0" cy="373.9" r="12" fill="transparent"/><circle class="pt" cx="620.0" cy="373.9" r="6.5" fill="var(--c2)"/></g>
-  <g class="dot" data-tip="GPT-5.5 high · fitness 462 · 9,807 LUT4"><circle cx="600.8" cy="378.9" r="12" fill="transparent"/><circle class="pt" cx="600.8" cy="378.9" r="6.5" fill="var(--c2)"/></g>
-  <g class="dot" data-tip="GPT-6 Sol xhigh · fitness 435 · 5,713 LUT4"><circle cx="383.4" cy="393.6" r="12" fill="transparent"/><circle class="pt" cx="383.4" cy="393.6" r="6.5" fill="var(--c2)"/></g>
-  <g class="dot" data-tip="GPT-5.5 medium · fitness 432 · 7,803 LUT4"><circle cx="494.4" cy="395.6" r="12" fill="transparent"/><circle class="pt" cx="494.4" cy="395.6" r="6.5" fill="var(--c2)"/></g>
-  <g class="dot" data-tip="Kimi K2.6 · fitness 396 · 9,927 LUT4"><circle cx="607.2" cy="415.2" r="12" fill="transparent"/><circle class="pt" cx="607.2" cy="415.2" r="6.5" fill="var(--c3)"/></g>
-  <g class="dot" data-tip="GPT-5.4 mini · fitness 396 · 10,230 LUT4"><circle cx="623.3" cy="415.5" r="12" fill="transparent"/><circle class="pt" cx="623.3" cy="415.5" r="6.5" fill="var(--c2)"/></g>
-  <g class="dot" data-tip="Gemini 3.5 Flash · fitness 359 · 13,773 LUT4"><circle cx="811.5" cy="435.7" r="12" fill="transparent"/><circle class="pt" cx="811.5" cy="435.7" r="6.5" fill="var(--c1)"/></g>
-  <g class="dot" data-tip="Gemini 3.1 Pro · fitness 355 · 10,242 LUT4"><circle cx="624.0" cy="438.1" r="12" fill="transparent"/><circle class="pt" cx="624.0" cy="438.1" r="6.5" fill="var(--c1)"/></g>
-  <text class="name" x="257.1" y="93.6" text-anchor="start" style="fill: #D97757">Claude Opus 5.5 xhigh</text>
-  <text class="name" x="380.6" y="346.9" text-anchor="start" style="fill: var(--c2)">GPT-5.5 xhigh</text>
-  <text class="name" x="650.0" y="352.1" text-anchor="start" style="fill: var(--c2)">GPT-5.6 Terra</text>
-  <text class="name" x="605.8" y="353.1" text-anchor="end" style="fill: var(--c2)">GPT-5.4 xhigh</text>
-  <text class="name" x="629.3" y="371.3" text-anchor="start" style="fill: var(--c2)">GPT-5.6 Luna</text>
-  <text class="name" x="422.8" y="375.0" text-anchor="start" style="fill: var(--c2)">GPT-6 Astra max</text>
-  <text class="name" x="631.0" y="389.9" text-anchor="start" style="fill: var(--c2)">GPT-5.6 Sol</text>
-  <text class="name" x="589.8" y="394.9" text-anchor="end" style="fill: var(--c2)">GPT-5.5 high</text>
-  <text class="name" x="372.4" y="396.6" text-anchor="end" style="fill: var(--c2)">GPT-6 Sol xhigh</text>
-  <text class="name" x="483.4" y="411.6" text-anchor="end" style="fill: var(--c2)">GPT-5.5 medium</text>
-  <text class="name" x="596.2" y="418.2" text-anchor="end" style="fill: var(--c3)">Kimi K2.6</text>
-  <text class="name" x="634.3" y="405.5" text-anchor="start" style="fill: var(--c2)">GPT-5.4 mini</text>
-  <text class="name" x="800.5" y="451.7" text-anchor="end" style="fill: var(--c1)">Gemini 3.5 Flash</text>
-  <text class="name" x="613.0" y="454.1" text-anchor="end" style="fill: var(--c1)">Gemini 3.1 Pro</text>
-  <text class="name" x="249.7" y="419.7" text-anchor="end" style="fill: var(--c-human)">VexRiscv (human)</text>
-  <text class="name" x="598.9" y="480.9" text-anchor="start" style="fill: var(--ink-muted)">V0 baseline</text>
-</svg>
-    <figcaption>
-      Vertical axis: CoreMark fitness (how fast the CPU runs the benchmark).
-      Horizontal axis: chip area (LUT4 count, basically how many gates the design uses on the FPGA).
-      One point per model's best run. VexRiscv (3,957 LUT4 · fitness 370) is the human-engineered
-      reference. Up and to the left is the goal: faster chip, smaller chip.
     </figcaption>
   </figure>
 </section>
