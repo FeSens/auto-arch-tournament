@@ -1,0 +1,838 @@
+#!/usr/bin/env python3
+"""Hardcoded AutoResearch loop. The LLM never touches this file."""
+import argparse, json, datetime, os, shutil, subprocess, re, threading, sys
+from pathlib import Path
+
+import jsonschema, yaml
+
+# Disable commit/tag signing for every git subprocess in the orchestrator
+# process tree. With SSH-key signing + a 1Password agent, every
+# administrative commit (worktree accept, log+plot append) prompts for
+# biometric auth, which hangs the loop when running unattended.
+# Affects only orchestrator-spawned git calls; manual `git commit`
+# from a shell still signs normally.
+_SIGN_OFF = "'commit.gpgsign=false' 'tag.gpgsign=false'"
+os.environ["GIT_CONFIG_PARAMETERS"] = (
+    (os.environ.get("GIT_CONFIG_PARAMETERS", "").strip() + " " + _SIGN_OFF).strip()
+)
+
+from tools.worktree import create_worktree, accept_worktree, destroy_worktree
+from tools.agents.hypothesis import run_hypothesis_agent
+from tools.agents.implement import run_implementation_agent
+from tools.eval.formal import run_formal
+from tools.eval.cosim import run_cosim
+from tools.eval.fpga import run_fpga_eval
+from tools.plot import plot_progress
+from tools.tournament import run_tournament_round
+
+# When orchestrator is launched via `python3 -m tools.orchestrator`, Python
+# only registers it under `__main__`, not `tools.orchestrator`. Sub-modules
+# (e.g., tools.tournament's lazy imports of current_lut/current_best) then
+# trigger a fresh disk read of tools/orchestrator.py — which is fatal when
+# git checkout has swapped the on-disk file to an older baseline-tag
+# version. Register the running module under the dotted name so dotted
+# imports always resolve to the in-memory copy.
+sys.modules.setdefault('tools.orchestrator', sys.modules[__name__])
+
+# Pre-import sub-modules that are imported lazily elsewhere (e.g.,
+# tools.tournament's `from tools.accept_rule import accept` inside
+# pick_winner). This forces them into sys.modules at orchestrator
+# startup, so any later git checkout that removes the on-disk file
+# (e.g., when forking a branch from a tag predating the file's commit)
+# doesn't break the lazy import.
+import tools.accept_rule  # noqa: F401
+# Same for the other lazily-imported modules. Loading them now also means
+# a source or .pyc an agent plants under the main checkout's tools/ mid-run
+# can never be imported into this process (tools/sandbox.py catches the
+# source edit; this closes the bytecode side).
+import tools.agents.scribe  # noqa: F401
+import tools.eval.rvfi_lint  # noqa: F401
+import tools.sandbox  # noqa: F401
+
+LOG_PATH: Path | None  = None  # bound by main(); see log_path_for()
+PLOT_PATH: Path | None = None  # bound by main(); see plot_path_for()
+_TARGET: str | None    = None  # bound by main() alongside LOG_PATH/PLOT_PATH
+HYP_SCHEMA     = json.loads(Path("schemas/hypothesis.schema.json").read_text())
+RESULT_SCHEMA  = json.loads(Path("schemas/eval_result.schema.json").read_text())
+
+
+def log_path_for(target: str) -> Path:
+    # Absolute path: append_log/scribe/plot all run in the orchestrator
+    # process and the orchestrator never chdirs, but absolute paths
+    # eliminate an entire class of "what was cwd at this exact moment?"
+    # bugs. Bench reps surfaced this as `[Errno 1] Operation not
+    # permitted: 'experiments'` when a stray `mkdir` got the unbound
+    # default `Path("experiments/...")` whose parent is just
+    # `Path("experiments")` — a one-component relative path that
+    # macOS sandbox rejects with EPERM showing only the leaf name.
+    return (Path.cwd() / "cores" / target / "experiments" / "log.jsonl").resolve()
+
+
+def plot_path_for(target: str) -> Path:
+    return (Path.cwd() / "cores" / target / "experiments" / "progress.png").resolve()
+
+# Serializes append_log across concurrent tournament slots. The body of
+# append_log writes log.jsonl, regenerates progress.png, then git-adds
+# and commits both — three operations that all touch the index. Without
+# this lock, two slots finishing within the same ~second would race on
+# .git/index.lock and crash the round.
+_LOG_LOCK = threading.Lock()
+
+# Don't-touch sandbox: anything outside the per-target allowed patterns that
+# the agent touches is rejected before the eval gates run. Without this an
+# agent could silently soften checks.cfg, the cosim main.cpp, or the
+# fpga.py CRC table and inflate its own fitness score.
+#
+# Permitted modifications per CLAUDE.md "What hypotheses MAY change":
+#   - cores/<target>/rtl/ (any file)
+#   - cores/<target>/test/test_*.py (cocotb suites for new modules)
+#   - cores/<target>/implementation_notes.md (the agent's own writeup)
+#   - cores/<target>/core.yaml
+#
+# Everything else is off-limits.
+def allowed_patterns_for(target: str) -> tuple:
+    base = re.escape(f"cores/{target}")
+    return (
+        re.compile(rf"^{base}/rtl/.+"),
+        re.compile(rf"^{base}/test/test_[^/]+\.py$"),
+        re.compile(rf"^{base}/implementation_notes\.md$"),
+        # Per-iteration worktrees are checked out at cores/<target>/worktrees/<id>/,
+        # but the agent's cwd is the worktree root and the prompt says
+        # "current directory" — so models commonly write
+        # implementation_notes.md at the worktree root instead. Both
+        # locations are equally innocuous; allowing both removes a
+        # routine sandbox-violation failure mode that would otherwise
+        # mark every iteration broken.
+        re.compile(r"^implementation_notes\.md$"),
+        re.compile(rf"^{base}/core\.yaml$"),
+    )
+
+
+def path_is_allowed(path: str, patterns: tuple) -> bool:
+    return any(p.match(path) for p in patterns)
+
+
+def offlimits_changes(worktree: str, patterns: tuple,
+                      before: dict | None = None) -> list:
+    """Return paths the agent modified that are NOT on the allow list.
+
+    Compares the worktree's dirty state against `before` (a
+    tools.sandbox.dirty_state() snapshot; default: clean, which is what a
+    freshly created worktree is). Catches modifications, deletions,
+    additions, and renames. Harness-written files (tools.sandbox
+    .HARNESS_OUTPUTS) are tolerated whether or not .gitignore covers them.
+    Returns [] if the sandbox is clean.
+    """
+    from tools.sandbox import changed_since, dirty_state
+    return changed_since(before or {}, dirty_state(worktree),
+                         lambda p: path_is_allowed(p, patterns))
+
+def update_core_yaml_current(target: str, repo_root: Path | None = None, *,
+                              fmax_mhz: float, lut4: int, ff: int | None,
+                              coremark_iter_s: float, source_id: str) -> None:
+    """Write the `current:` section of cores/<target>/core.yaml.
+
+    Called from the accept path (after run_fpga_eval succeeds and the
+    hypothesis is accepted as an improvement).
+
+    Args:
+      target          -- core name under cores/.
+      repo_root       -- repo root path; defaults to cwd if None.
+      fmax_mhz        -- achieved Fmax in MHz.
+      lut4            -- achieved LUT4 count.
+      ff              -- achieved flip-flop count (may be None).
+      coremark_iter_s -- CoreMark iterations/second.
+      source_id       -- hypothesis ID that produced this result.
+    """
+    repo_root = Path(repo_root or ".").resolve()
+    yaml_path = repo_root / "cores" / target / "core.yaml"
+    if not yaml_path.exists():
+        return  # no yaml to update; older cores may not have one.
+    y = yaml.safe_load(yaml_path.read_text()) or {}
+    y["current"] = {
+        "fmax_mhz": fmax_mhz,
+        "lut4": lut4,
+        "ff": ff,
+        "coremark_iter_s": coremark_iter_s,
+        "coremark_per_mhz": round(coremark_iter_s / fmax_mhz, 4) if fmax_mhz else None,
+        "source_id": source_id,
+        "updated": datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00", "Z"),
+    }
+    yaml_path.write_text(yaml.safe_dump(y, sort_keys=False))
+
+
+def _current_target() -> str | None:
+    """Return the target main() bound on startup, or None if unbound."""
+    return _TARGET
+
+
+def _active_branch(repo_root: Path | str | None = None) -> str:
+    """Return the currently checked-out branch name in repo_root (default cwd).
+
+    The orchestrator's loop forks hypothesis worktrees off this branch and
+    merges accepted ones back into it. In WORKTREE=1 mode (the default for
+    `make loop`), this is `core-<target>`; in WORKTREE=0 mode it's whatever
+    branch the user has checked out (typically `main`).
+
+    Raises SystemExit on detached HEAD — the loop's accept path needs a
+    named branch to fast-forward into.
+    """
+    cwd = str(repo_root) if repo_root is not None else None
+    out = subprocess.run(
+        ["git", "rev-parse", "--abbrev-ref", "HEAD"],
+        cwd=cwd, capture_output=True, text=True, check=True,
+    ).stdout.strip()
+    if out == "HEAD":
+        raise SystemExit(
+            "orchestrator: detached HEAD detected. Check out a branch "
+            "(e.g. main, or core-<target>) before running the loop."
+        )
+    return out
+
+
+def read_log() -> list:
+    if not LOG_PATH.exists(): return []
+    return [json.loads(l) for l in LOG_PATH.read_text().splitlines() if l.strip()]
+
+
+def write_run_summary(log_path: Path, out_path: Path) -> dict:
+    """Emit the canonical per-rep summary derived from a target's log.jsonl.
+
+    The bench runner (tools/bench/runner.py) reads this file at end of rep
+    instead of re-parsing log.jsonl with its own classification logic. The
+    orchestrator owns the schema here so that future contract changes
+    (new outcome strings, new error classes, new fitness fields) propagate
+    without a runner.py edit.
+
+    log_path may be absent or empty — both produce a zero-counts summary
+    (a fresh experiment's results.jsonl row should still be written so
+    `--reps J` retries can move on; an absent summary would force the
+    runner into a more fragile fallback path).
+    """
+    entries: list[dict] = []
+    if log_path.is_file():
+        for raw in log_path.read_text().splitlines():
+            s = raw.strip()
+            if not s:
+                continue
+            try:
+                entries.append(json.loads(s))
+            except json.JSONDecodeError:
+                continue
+
+    iterations = 0
+    accepted = 0
+    rejected = 0
+    broken = 0
+    final_fitness: float | None = None
+    baseline: float | None = None
+    best_fitness: float | None = None
+    best_round: int | None = None
+    best_entry: dict | None = None
+    broken_by_class: dict[str, int] = {}
+
+    for e in entries:
+        iterations += 1
+        outcome = e.get("outcome", "")
+        # The orchestrator emits 'improvement' / 'regression' / 'broken'.
+        # Legacy 'accepted' / 'rejected' synonyms are still accepted in
+        # case any third-party log surfaces them.
+        if outcome in ("improvement", "accepted"):
+            accepted += 1
+        elif outcome in ("regression", "rejected"):
+            rejected += 1
+        elif outcome == "broken":
+            broken += 1
+            err = (e.get("error") or "").strip()
+            cls = err.split(":", 1)[0] if err else "unknown"
+            broken_by_class[cls] = broken_by_class.get(cls, 0) + 1
+
+        fit = e.get("fitness") or e.get("coremark") or e.get("coremark_iter_s")
+        if isinstance(fit, (int, float)):
+            if best_fitness is None or fit > best_fitness:
+                best_fitness = float(fit)
+                best_round = iterations
+                best_entry = e
+            if outcome in ("improvement", "accepted"):
+                final_fitness = float(fit)
+
+        if baseline is None:
+            # Resolution paths, in priority order:
+            #   1. Explicit baseline_fitness/baseline field (legacy schema).
+            #   2. The baseline retest entry — round_id=0,
+            #      outcome='improvement', delta_pct=0 — its fitness IS the
+            #      run's baseline.
+            #   3. Derive from any row with both fitness and non-zero delta_pct:
+            #      baseline = fit / (1 + d/100).
+            bf = e.get("baseline_fitness") or e.get("baseline")
+            if isinstance(bf, (int, float)):
+                baseline = float(bf)
+            elif (e.get("round_id") == 0
+                  and outcome in ("improvement", "accepted")
+                  and isinstance(fit, (int, float))):
+                baseline = float(fit)
+
+    if baseline is None:
+        for e in entries:
+            d = e.get("delta_pct")
+            fit = e.get("fitness")
+            if isinstance(d, (int, float)) and isinstance(fit, (int, float)) and d != 0:
+                baseline = float(fit) / (1.0 + d / 100.0)
+                break
+
+    delta_pct: float | None = None
+    if baseline is not None and final_fitness is not None and baseline > 0:
+        delta_pct = (final_fitness - baseline) / baseline * 100.0
+
+    summary = {
+        "iterations": iterations,
+        "accepted": accepted,
+        "rejected": rejected,
+        "broken": broken,
+        "broken_by_class": broken_by_class,
+        "baseline_fitness": baseline,
+        "final_fitness": final_fitness,
+        "best_fitness": best_fitness,
+        "best_round": best_round,
+        "delta_pct": delta_pct,
+        # FPGA / sim detail of the best-fitness entry — surfaces LUT4,
+        # Fmax, IPC, etc. without forcing downstream consumers to re-parse
+        # log.jsonl. None when no entry produced a fitness number.
+        "best_lut4":         best_entry.get("lut4")         if best_entry else None,
+        "best_ff":           best_entry.get("ff")           if best_entry else None,
+        "best_fmax_mhz":     best_entry.get("fmax_mhz")     if best_entry else None,
+        "best_iterations":   best_entry.get("iterations")   if best_entry else None,
+        "best_cycles":       best_entry.get("cycles")       if best_entry else None,
+        "best_ipc_coremark": best_entry.get("ipc_coremark") if best_entry else None,
+    }
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_text(json.dumps(summary, indent=2) + "\n")
+    return summary
+
+def _last_improvement(log: list) -> dict | None:
+    """The most recent accepted-improvement entry, or None.
+
+    Both current_best() and current_lut() anchor on this so that in dual-
+    target Pareto mode (where accept() can take a lower-fitness entry to
+    improve the combined score) the comparison anchor is a real design,
+    not a (max-fitness, last-lut4) phantom.
+    """
+    improvements = [e for e in log if e.get('outcome') == 'improvement']
+    return improvements[-1] if improvements else None
+
+
+def current_best(log: list) -> float:
+    """Fitness of the running champion (most recent accepted improvement).
+
+    In no-targets mode, accept is monotonic on fitness so this is also
+    max(fitness). In Pareto mode, lower-fitness improvements that win on
+    score can land, and the champion is whichever entry came last.
+    """
+    last = _last_improvement(log)
+    if last is None:
+        return 0.0
+    val = last.get('fitness')
+    return float(val) if isinstance(val, (int, float)) else 0.0
+
+
+def baseline_fitness(log: list) -> float:
+    if log: return log[0].get('fitness', 0.0)
+    return 0.0
+
+
+def current_lut(log: list) -> float | None:
+    """LUT4 of the running champion (most recent accepted improvement)."""
+    last = _last_improvement(log)
+    if last is None:
+        return None
+    val = last.get('lut4')
+    return val if isinstance(val, (int, float)) else None
+
+def append_log(entry: dict):
+    with _LOG_LOCK:
+        # If a per-iteration hypothesis YAML exists for this entry's id, read
+        # its proposal content and embed it under a 'hypothesis' sub-object
+        # before writing the log line. This keeps log.jsonl as the single
+        # journal of both proposals and outcomes.
+        target = _current_target()
+        hyp_yaml_path: Path | None = None
+        if target:
+            candidate = Path("cores") / target / "experiments" / "hypotheses" / f"{entry.get('id', '')}.yaml"
+            if candidate.exists():
+                hyp_yaml_path = candidate
+                try:
+                    y = yaml.safe_load(candidate.read_text()) or {}
+                    entry["hypothesis"] = {
+                        "motivation": y.get("motivation"),
+                        "hypothesis": y.get("hypothesis"),
+                        "expected_impact": y.get("expected_impact"),
+                        "changes": y.get("changes"),
+                    }
+                except Exception:
+                    pass  # malformed YAML — log the entry without hypothesis content
+
+        # Strip private side-channel fields (set by run_slot, consumed here)
+        # before they reach the JSONL on disk. Diffs are too large to keep
+        # per-line in the log and would dwarf the actual outcome record.
+        slot_diff = entry.pop("_diff", "")
+
+        # Scribe step: distill one bullet into cores/<target>/LESSONS.md per
+        # iteration. Runs sequentially under _LOG_LOCK so concurrent slots
+        # never race on the file. A scribe failure MUST NOT fail the
+        # iteration — the JSONL line is the authoritative outcome; the
+        # lesson is decoration the next round's hypothesis agent reads.
+        if target:
+            try:
+                from tools.agents.scribe import run_scribe_agent
+                lesson = run_scribe_agent(entry, slot_diff, target)
+                if lesson:
+                    entry["lesson"] = lesson
+            except Exception as e:
+                entry["scribe_skipped"] = f"{type(e).__name__}: {e}"
+                print(f"  [scribe] skipped for {entry.get('id','?')}: {e}",
+                      flush=True)
+
+        LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
+        with LOG_PATH.open('a') as f:
+            f.write(json.dumps(entry) + '\n')
+        # Regen progress.png from the updated log so the README chart reflects
+        # every iteration (improvement, regression, broken — see plot.py's
+        # color_map). plot_progress reads LOG_PATH directly, so this picks up
+        # the line we just appended.
+        plot_progress(log_path=LOG_PATH, out_path=PLOT_PATH)
+        # Commit log + plot together. One "log: <id> <outcome>" commit per
+        # iteration; for accepts this lands alongside the implementation
+        # merge that accept_worktree already created.
+        subprocess.run(["git", "add", str(LOG_PATH)], check=True)
+        if PLOT_PATH.exists():
+            subprocess.run(["git", "add", str(PLOT_PATH)], check=True)
+        # Roll the scribe's LESSONS.md write (if any) into the same commit
+        # as the log line that triggered it, so a `git log cores/<target>/
+        # LESSONS.md` shows knowledge accumulating in lockstep with outcomes.
+        if target:
+            lessons = Path("cores") / target / "LESSONS.md"
+            if lessons.exists():
+                subprocess.run(["git", "add", str(lessons)], check=True)
+        if target and entry.get("outcome") == "improvement":
+            yaml_path = Path("cores") / target / "core.yaml"
+            update_core_yaml_current(
+                target=target,
+                fmax_mhz=entry["fmax_mhz"],
+                lut4=entry["lut4"],
+                ff=entry.get("ff"),
+                coremark_iter_s=entry.get("coremark_iter_s") or entry.get("ipc_coremark"),
+                source_id=entry["id"],
+            )
+            if yaml_path.exists():
+                subprocess.run(["git", "add", str(yaml_path)], check=True)
+        subprocess.run(
+            ["git", "commit", "-m",
+             f"log: {entry.get('id','unknown')} {entry.get('outcome','unknown')}"],
+            check=True,
+        )
+        # After the commit succeeds, delete the transient hypothesis YAML.
+        # Deletion is intentionally post-commit: if the commit fails, the YAML
+        # stays on disk for debugging. The YAML is untracked (gitignored), so
+        # no git rm needed.
+        if hyp_yaml_path is not None:
+            try:
+                hyp_yaml_path.unlink()
+            except FileNotFoundError:
+                pass
+
+def validate_hypothesis(hyp_path: str) -> dict:
+    with open(hyp_path) as f:
+        hyp = yaml.safe_load(f)
+    jsonschema.validate(hyp, HYP_SCHEMA)
+    return hyp
+
+def emit_verilog(worktree: str, target: str | None = None) -> tuple[bool, str]:
+    """Prepare a worktree for evaluation.
+
+    SV-source-of-truth project: there is no Chisel emit step. Instead this
+    function (1) lints the target's RTL directory (rtl/ or cores/<target>/rtl/)
+    with verilator, (2) synthesizes core_bench via yosys for nextpnr, (3) builds
+    the bench ELFs (selftest + coremark), and (4) rebuilds the Verilator cosim
+    binary against the worktree's RTL. Any failure here is a "broken" outcome
+    — the hypothesis didn't even compile.
+
+    Returns (ok, reason). On success: (True, ""). On failure: (False,
+    "<step>: <stderr-or-stdout tail>"), so callers can record *which* step
+    failed and *why* in their broken-outcome detail field. Without this, a
+    build failure surfaces as `error: "build_failed: "` and the worktree is
+    already destroyed by the time anyone notices, leaving no way to diagnose.
+
+    Args:
+      worktree -- absolute path to the worktree directory.
+      target   -- core name under cores/. When set, RTL lives in
+                  cores/<target>/rtl/ instead of rtl/.
+    """
+    worktree = str(Path(worktree).resolve())
+
+    def _fail(step: str, proc: subprocess.CompletedProcess) -> tuple[bool, str]:
+        # Prefer stderr, fall back to stdout. Trim to the last ~800 chars so
+        # JSONL lines stay readable; the error message is upstream of the
+        # stack trace, so the tail is what we want.
+        out = (proc.stderr or b"").decode(errors="replace").strip()
+        if not out:
+            out = (proc.stdout or b"").decode(errors="replace").strip()
+        if len(out) > 800:
+            out = "..." + out[-800:]
+        return (False, f"{step}: {out}" if out else f"{step}: (no output)")
+
+    # 1. Verilator lint. Catches syntax errors before slower steps. Keep
+    # core_pkg.sv first: it defines compilation-unit typedefs consumed by the
+    # other sources, and current Verilator rejects forward references when a
+    # shell glob happens to place core.sv before core_pkg.sv.
+    rtl_dir = f"cores/{target}/rtl" if target else "rtl"
+    rtl_path = Path(worktree) / rtl_dir
+    rtl_sources = sorted(rtl_path.glob("*.sv"))
+    core_pkg = rtl_path / "core_pkg.sv"
+    if core_pkg in rtl_sources:
+        rtl_sources = [core_pkg, *(p for p in rtl_sources if p != core_pkg)]
+    if not rtl_sources:
+        return (False, f"lint: no source files in {rtl_dir}/")
+    lint = subprocess.run(
+        [
+            "verilator", "--lint-only", "-Wall", "-Wno-MULTITOP", "-sv",
+            f"+incdir+{rtl_dir}",
+            *(str(p.relative_to(worktree)) for p in rtl_sources),
+        ],
+        cwd=worktree, capture_output=True,
+    )
+    if lint.returncode != 0:
+        return _fail("lint", lint)
+
+    # 2. Yosys synth (writes generated/synth.json for nextpnr).
+    gen_dir = Path(worktree) / "cores" / target / "generated" if target else Path(worktree) / "generated"
+    gen_dir.mkdir(parents=True, exist_ok=True)
+    # _build_synth_env reads cores/<target>/core.yaml's nret to pick BENCH
+    # (fpga/core_bench.sv for nret=2, fpga/core_bench_si.sv for nret=1).
+    from tools.eval.fpga import _build_synth_env
+    synth_env = _build_synth_env(worktree, target=target) if target else None
+    synth = subprocess.run(
+        ["yosys", "-c", "fpga/scripts/synth.tcl"],
+        cwd=worktree, capture_output=True,
+        env=synth_env,
+    )
+    if synth.returncode != 0:
+        return _fail("yosys synth", synth)
+
+    # 3. Build bench ELFs (selftest + coremark). They are gitignored.
+    # Bench programs are shared across cores; no target-specific env needed.
+    bench = subprocess.run(
+        ["make", "-f", "bench/programs/Makefile", "all"],
+        cwd=worktree, capture_output=True,
+    )
+    if bench.returncode != 0:
+        return _fail("bench make", bench)
+
+    # 4. Rebuild Verilator cosim binary against the worktree's RTL.
+    # _build_cosim_env reads cores/<target>/core.yaml's nret to pick the
+    # NRET preprocessor value (1 or 2). main.cpp's ch1 drain is gated by
+    # `#if NRET >= 2`, so an nret=1 core (no `_1` ports) compiles cleanly.
+    from tools.eval.cosim import _build_cosim_env
+    build_env = _build_cosim_env(worktree, target=target) if target else None
+    build = subprocess.run(
+        ["bash", "test/cosim/build.sh"],
+        cwd=worktree, capture_output=True,
+        env=build_env,
+    )
+    if build.returncode != 0:
+        return _fail("cosim build", build)
+    return (True, "")
+
+def _read_notes(worktree: str) -> str:
+    p = Path(worktree) / "implementation_notes.md"
+    return p.read_text() if p.exists() else ""
+
+def run_report():
+    log = read_log()
+    if not log:
+        print("No experiments yet.")
+        return
+    improvements = [e for e in log if e.get('outcome') == 'improvement']
+    broken       = [e for e in log if e.get('outcome') == 'broken']
+    regressions  = [e for e in log if e.get('outcome') == 'regression']
+    print(f"\nExperiment Report")
+    print(f"  Total iterations : {len(log)}")
+    print(f"  Improvements     : {len(improvements)}")
+    print(f"  Regressions      : {len(regressions)}")
+    print(f"  Broken           : {len(broken)}")
+    if improvements:
+        best = max(improvements, key=lambda e: e['fitness'])
+        print(f"  Best fitness     : {best['fitness']:.2f}  ({best['title']})")
+    print(f"\nChampion path:")
+    for e in improvements:
+        print(f"  {e['id']:20s}  {e['fitness']:6.2f}  ({e['delta_pct']:+.1f}%)  {e['title']}")
+
+def fork_core(target: str, base: str, repo_root: Path | None = None,
+              interactive: bool | None = None) -> None:
+    """Create cores/<target>/ by forking from cores/<base>/.
+
+    Copies rtl/, test/, core.yaml from base. Does NOT copy CORE_PHILOSOPHY.md
+    (always per-core). Does NOT copy experiments/ (new core gets its own log).
+    Resets core.yaml's current: section. Prompts user for philosophy via TTY
+    if interactive (None → auto-detect from sys.stdin.isatty()).
+    """
+    repo_root = Path(repo_root or ".").resolve()
+    tgt = repo_root / "cores" / target
+    src = repo_root / "cores" / base
+
+    if tgt.exists():
+        raise SystemExit(
+            f"cores/{target}/ already exists. Drop BASE= to continue iterating, "
+            f"or `git rm -r cores/{target}` to start over."
+        )
+    if not src.exists():
+        raise SystemExit(f"BASE core 'cores/{base}/' does not exist.")
+
+    tgt.mkdir(parents=True)
+    # Copy rtl/ and test/ trees.
+    if (src / "rtl").exists():
+        shutil.copytree(src / "rtl", tgt / "rtl")
+    (tgt / "test").mkdir(exist_ok=True)
+    if (src / "test").exists():
+        for p in (src / "test").glob("test_*.py"):
+            shutil.copy2(p, tgt / "test" / p.name)
+        # Also copy _helpers.py and conftest.py if present (per-core test infra).
+        for p in (src / "test").glob("_helpers.py"):
+            shutil.copy2(p, tgt / "test" / p.name)
+        for p in (src / "test").glob("conftest.py"):
+            shutil.copy2(p, tgt / "test" / p.name)
+    # Copy and rewrite core.yaml.
+    if (src / "core.yaml").exists():
+        y = yaml.safe_load((src / "core.yaml").read_text()) or {}
+        y["name"] = target
+        y["current"] = {}
+        (tgt / "core.yaml").write_text(yaml.safe_dump(y, sort_keys=False))
+    # Always create an empty experiments/ for the new core.
+    (tgt / "experiments").mkdir(exist_ok=True)
+    # Philosophy prompt (TTY-gated).
+    philo = tgt / "CORE_PHILOSOPHY.md"
+    if interactive is None:
+        interactive = sys.stdin.isatty()
+    if interactive:
+        sys.stderr.write(
+            f"Optional: write the philosophy for cores/{target} (constraints, "
+            f"style, intent).\n"
+            f"Press Enter on an empty line to finish (just press Enter now to skip).\n"
+        )
+        sys.stderr.flush()
+        lines: list[str] = []
+        while True:
+            try:
+                line = input()
+            except EOFError:
+                break  # Ctrl-D also accepted
+            if line == "":
+                break
+            lines.append(line)
+        text = ("\n".join(lines) + "\n") if lines else ""
+        philo.write_text(text)
+    else:
+        philo.write_text("")  # silent, headless-safe.
+    # Commit the fork.
+    subprocess.run(["git", "-C", str(repo_root), "add", f"cores/{target}/"],
+                   check=True)
+    subprocess.run(
+        ["git", "-C", str(repo_root), "commit", "-m",
+         f"feat: fork cores/{target} from cores/{base}"],
+        check=True,
+    )
+
+
+def _run_baseline_retest(target: str):
+    """Run a one-shot eval on the freshly created core's RTL.
+
+    Writes a single 'baseline' entry to the per-target log so subsequent
+    hypothesis rounds have a fitness anchor. Aborts the run if any gate
+    fails — the user investigates while the core is left intact.
+
+    Args:
+      target -- core name under cores/.
+    """
+    # Re-emit verilog + run gates against the main repo's working copy
+    # (the active branch is checked out). We don't create a worktree —
+    # the baseline retest IS the branch tip, not a hypothesis.
+    repo_root = str(Path(".").resolve())
+    build_ok, build_reason = emit_verilog(repo_root, target=target)
+    if not build_ok:
+        raise SystemExit(
+            f"baseline retest: emit_verilog failed for cores/{target}: {build_reason}"
+        )
+    formal = run_formal(repo_root, target=target)
+    if not formal['passed']:
+        raise SystemExit(
+            f"baseline retest: formal failed for cores/{target}: "
+            f"{formal.get('failed_check','')}"
+        )
+    cosim = run_cosim(repo_root, target=target)
+    if not cosim['passed']:
+        raise SystemExit(
+            f"baseline retest: cosim failed for cores/{target}: "
+            f"{cosim.get('failed_elf','')}"
+        )
+    fpga = run_fpga_eval(repo_root, target=target)
+    if fpga.get('placement_failed') or fpga.get('bench_failed'):
+        raise SystemExit(f"baseline retest: fpga eval failed for cores/{target}.")
+
+    sha = subprocess.run(
+        ["git", "rev-parse", "--short", "HEAD"],
+        capture_output=True, text=True, check=True,
+    ).stdout.strip()
+    entry = {
+        'id':            f'baseline-{target}-{sha}',
+        'title':         f'Baseline retest for cores/{target}',
+        'category':      'micro_opt',
+        'outcome':       'improvement',
+        'fitness':       fpga['fitness'],
+        'delta_pct':     0.0,
+        'vs_baseline':   0.0,
+        'fmax_mhz':      fpga['fmax_mhz'],
+        'ipc_coremark':  fpga['ipc_coremark'],
+        'cycles':        fpga.get('cycles'),
+        'iterations':    fpga.get('iterations'),
+        'lut4':          fpga['lut4'],
+        'ff':            fpga['ff'],
+        'seeds':         fpga['seeds'],
+        'formal_passed': True,
+        'cosim_passed':  True,
+        'error':         None,
+        'implementation_notes': '',
+        'timestamp':     datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00", "Z"),
+        'round_id':      0,
+        'slot':          0,
+    }
+    append_log(entry)
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--iterations', type=int, default=1,
+                        help='Number of tournament rounds to run.')
+    parser.add_argument('--tournament-size', type=int, default=3,
+                        help='Number of parallel slots per round (N=1 = sequential).')
+    parser.add_argument('--report', action='store_true')
+    parser.add_argument('--from-hypothesis', metavar='PATH', default=None,
+                        help='Skip the LLM hypothesis step and use a pre-written YAML. '
+                             'Comma-separated list for tournament-size > 1.')
+    parser.add_argument('--coremark-target', type=int, default=None,
+                        help='CoreMark iter/s target for two-phase Pareto accept.')
+    parser.add_argument('--lut-target', type=int, default=None,
+                        help='LUT4 target for two-phase Pareto accept.')
+    parser.add_argument('--target', default=None,
+                        help='Core name under cores/. Required for non-report invocations.')
+    parser.add_argument('--base', default='baseline',
+                        help='When forking a new --target, copy from cores/<base>/. '
+                             'Default: baseline. Ignored if --target already exists.')
+    args = parser.parse_args()
+
+    # Stopping the loop (Ctrl-C, kill, bench runner timeout) must take the
+    # formal / PnR / agent subprocess trees down with it.
+    from tools.eval._subprocess import install_tree_reaper
+    install_tree_reaper()
+
+    # --target is required for all non-report invocations.
+    if not args.report and not args.target:
+        parser.error("--target is required. Available cores: " +
+                     ", ".join(sorted(
+                         p.name for p in Path("cores").iterdir()
+                         if p.is_dir()
+                     ) if Path("cores").exists() else []))
+
+    # Validate --target: must be a safe identifier (used in shell commands,
+    # git branch names, and filesystem paths).
+    if args.target and not re.fullmatch(r'[A-Za-z0-9_-]+', args.target):
+        parser.error(
+            f"--target must contain only letters, digits, hyphens, and "
+            f"underscores (got '{args.target}')"
+        )
+
+    # Flag validation.
+    if args.coremark_target is not None and args.coremark_target <= 0:
+        raise SystemExit("--coremark-target must be positive.")
+    if args.lut_target is not None and args.lut_target <= 0:
+        raise SystemExit("--lut-target must be positive.")
+
+    # Per-target log/plot. Rebound as globals so read_log/append_log pick them
+    # up without needing to thread the paths through every call.
+    global LOG_PATH, PLOT_PATH, _TARGET
+    if args.target:
+        LOG_PATH  = log_path_for(args.target)
+        PLOT_PATH = plot_path_for(args.target)
+        _TARGET   = args.target
+
+    if args.report:
+        run_report()
+        return
+
+    targets = {}
+    if args.coremark_target is not None:
+        targets["coremark"] = args.coremark_target
+    if args.lut_target is not None:
+        targets["lut"] = args.lut_target
+
+    # Fork-on-create: if cores/<target>/ is absent, fork from cores/<base>/.
+    target_dir = Path("cores") / args.target
+    if not target_dir.exists():
+        fork_core(args.target, args.base)
+        # Run baseline retest on the freshly forked core.
+        print(f"[orchestrator] freshly forked cores/{args.target} — running baseline retest",
+              flush=True)
+        _run_baseline_retest(args.target)
+
+    fixed = None
+    if args.from_hypothesis:
+        fixed = [p.strip() for p in args.from_hypothesis.split(',')]
+
+    # Always run baseline_retest at the start of a fresh experiment, even
+    # when cores/<target>/ already exists (e.g., the bench fixture). The
+    # entry it writes (round_id=0, outcome='improvement', delta_pct=0.0)
+    # is the fitness anchor every subsequent delta_pct is measured
+    # against. Without it the saved bench results.jsonl row carries
+    # baseline_fitness=null, breaking cross-run comparison and
+    # statistical aggregation. Idempotent: skip if log.jsonl already
+    # has any entries (= the experiment has prior history we shouldn't
+    # disturb).
+    log = read_log()
+    if not log:
+        print(f"[orchestrator] empty log for cores/{args.target} — running baseline retest",
+              flush=True)
+        _run_baseline_retest(args.target)
+
+    # Round numbering.
+    log = read_log()
+    prior_rounds = [e.get('round_id', 0) for e in log if isinstance(e.get('round_id'), int)]
+    next_round = (max(prior_rounds) + 1) if prior_rounds else 1
+
+    # Active branch is the loop's fork/merge anchor — see _active_branch
+    # docstring. Hardcoding "main" here breaks WORKTREE=1 mode, where the
+    # orchestrator runs inside .worktrees/<target>/ on branch core-<target>
+    # and the target's RTL only exists on that branch.
+    target_branch = _active_branch()
+
+    # run_summary.json is the typed contract the bench runner consumes.
+    # Emit it AFTER EACH ROUND (not only at end-of-main) so that a
+    # crash mid-loop still leaves a usable partial summary on disk —
+    # the runner now relies on the file existing rather than re-parsing
+    # log.jsonl as a fallback (Phase 2 cleanup).
+    summary_path = LOG_PATH.parent / "run_summary.json"
+    for r in range(args.iterations):
+        round_id = next_round + r
+        log = read_log()
+        run_tournament_round(
+            round_id, args.tournament_size, log,
+            fixed_hyp_paths=fixed,
+            targets=targets or None,
+            target_branch=target_branch,
+            target=args.target,
+        )
+        write_run_summary(log_path=LOG_PATH, out_path=summary_path)
+
+    # Final emit even if --iterations 0 (the loop didn't run) so the runner
+    # never finds an empty experiments/ dir without a summary file.
+    write_run_summary(log_path=LOG_PATH, out_path=summary_path)
+
+if __name__ == '__main__':
+    main()

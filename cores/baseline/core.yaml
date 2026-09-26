@@ -1,0 +1,21 @@
+name: baseline
+description: "Original simple RV32IM core from the baseline git tag \u2014 the universal\
+  \ seed for new cores. 5-stage in-order with hardware M-extension, operand forwarding,\
+  \ and hazard detection; no branch prediction, no caches."
+isa: rv32im
+target_fpga: tang-nano-20k
+targets:
+  # Targets reflect the measured baseline (rounded). Baseline is the fork seed;
+  # forks should aim to beat these — keep these aligned with the actual tag.
+  fmax_mhz: 135
+  lut4: 10000
+  coremark_iter_s: 300
+  coremark_per_mhz: 2.2
+current:
+  fmax_mhz: 127.03
+  lut4: 9563
+  ff: 1866
+  coremark_iter_s: 282.82
+  coremark_per_mhz: 2.2264
+  source_id: baseline-retest-2026-07-16 (bench/static/rep1, 3-seed median; corrects stale 2026-04-29 one-off per Task 4 review adjudication)
+  updated: '2026-07-16T12:38:00Z'

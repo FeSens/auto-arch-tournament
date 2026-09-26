@@ -1,0 +1,21 @@
+name: vexriscv
+description: |
+  vexriscv synth-only reference core; vendored from https://github.com/SpinalHDL/VexRiscv.
+  License: MIT. CoreMark/MHz cited (not measured on this harness).
+  No pre-generated Verilog available in upstream repo without running sbt.
+  Scala demo sources vendored in rtl/demo_scala/ for documentation only.
+synth_only: true
+citation_only: true
+citation_only_reason: >
+  No pre-generated Verilog found in upstream repo (SpinalHDL/VexRiscv).
+  Generating VexRiscv.v requires running `sbt "runMain vexriscv.demo.GenFullNoMmuMaxPerf"`
+  or similar. Do NOT run sbt in the bench environment. To enable synthesis,
+  generate the Verilog locally and place it in cores/vexriscv/rtl/.
+cited_coremark_per_mhz: 2.30
+cited_coremark_source: https://github.com/SpinalHDL/VexRiscv/blob/680756065e9e6fc50d8c3d6c58191a16e867d822/README.md
+targets:
+  lut: null
+  fmax_mhz: null
+current:
+  fmax_mhz: null
+  luts: null

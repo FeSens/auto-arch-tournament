@@ -1,0 +1,20 @@
+# cores/v1/core.yaml
+name: v1
+description: Current evolved RV32IM core (5-stage in-order with M-ext, store-slot, hazard/forward, banked I-fetch replay predictor).
+isa: rv32im
+target_fpga: tang-nano-20k
+
+targets:
+  fmax_mhz: 90
+  lut4: 3000
+  coremark_iter_s: 400
+  coremark_per_mhz: 4.5
+
+current:
+  fmax_mhz: 198.69
+  lut4: 5944
+  ff: 2235
+  coremark_iter_s: 577.76
+  coremark_per_mhz: 2.9078
+  source_id: hyp-20260428-054-r20s2
+  updated: 2026-04-28T08:24:46Z

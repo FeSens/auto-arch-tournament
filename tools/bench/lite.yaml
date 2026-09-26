@@ -1,0 +1,23 @@
+# Lite-variant config — fast smoke run for the bench fixture.
+# Target: <2h wall-clock, <$10 USD, 1 model, N=5 rounds, 1 P&R seed.
+#
+# Used by reviewers for executability verification, NOT for fitness comparison
+# (1 P&R seed is insufficient for a defensible fitness median; full matrix
+# uses 3 seeds).
+#
+# Invocation:
+#
+#   python -m tools.bench.runner --models tools/bench/lite.yaml --reps 1 --n 5 --k 1
+
+# N/K/reps/seeds_per_pnr below are documentation only (runner ignores them;
+# pass --n / --k / --reps on the command line as shown above).
+N: 5
+K: 1
+reps: 1
+seeds_per_pnr: 1
+models:
+  - name: lite-gpt-5_5_medium
+    provider: opencode
+    model: openai/gpt-5.5
+    variant: medium
+    oauth: true

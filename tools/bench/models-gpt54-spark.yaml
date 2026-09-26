@@ -1,0 +1,27 @@
+# Combined run: gpt-5.4 (xhigh), gpt-5.4-mini, gpt-5.3-codex-spark (xhigh).
+#
+# All three routed via opencode's OpenAI OAuth ("OpenAI [oauth]" in
+# `opencode auth list`) — same codex subscription as the gpt-5.5 sweep.
+#
+# Naming convention follows the prior sweep: the swept-effort variants
+# get a suffix (gpt-5_4_xhigh), and single-effort entries use the base
+# name (gpt-5_4-mini, gpt-5_3-codex-spark). reps=3, N=15, K=3.
+#
+# 9 reps total at parallel=2 → ~30h wall (matches gpt-5.5 sweep).
+
+models:
+  - name: gpt-5_4_xhigh
+    provider: opencode
+    model: openai/gpt-5.4
+    variant: xhigh
+    oauth: true
+  - name: gpt-5_4-mini
+    provider: opencode
+    model: openai/gpt-5.4-mini
+    variant: high
+    oauth: true
+  - name: gpt-5_3-codex-spark
+    provider: opencode
+    model: openai/gpt-5.3-codex-spark
+    variant: xhigh
+    oauth: true

@@ -1,0 +1,158 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.mypy_cache/
+
+# Toolchain (downloaded by setup.sh)
+.toolchain/
+
+# Vendored as submodule (initialized in Phase 4). No trailing slash so the
+# pattern matches both the cloned directory in the main repo AND the
+# symlink that worktree.py creates inside each worktree (otherwise git
+# status flags the symlink as untracked and sandbox check trips).
+formal/riscv-formal
+
+# Formal run output (regenerated per run; surfaced via stdout to the orchestrator).
+# Glob covers both the legacy single-file path and the PID-suffixed variants
+# emitted by run_all.sh after the concurrent-rm-race fix (formal/run_all.sh
+# writes last_run-<pid>.log so simultaneous invocations don't truncate each
+# other). Without the glob, `git status` lists the per-PID logs as untracked
+# and the scribe-phase sandbox check rolls back the scribe's commit.
+formal/last_run*.log
+
+# Orchestrator-emitted per-rep summary. Phase-2 contract output written
+# by tools/orchestrator.py:write_run_summary after every round and at
+# end of main(). Derivable from log.jsonl; not worth tracking in git.
+# Without this entry, `git status` between rounds shows it as untracked
+# (since the orchestrator never `git add`s it), and the hypothesis-phase
+# sandbox check in tools/agents/hypothesis.py rolls back the next slot's
+# turn with "modified off-limits paths: ['.../run_summary.json']".
+# Caught live during the gpt-5.5 effort sweep — slot 2 in round 2 of
+# every rep was hypothesis_gen_failed for this reason.
+cores/*/experiments/run_summary.json
+
+# Agent stdout capture, written per-worktree by tools/agents/implement.py
+# and per-hypothesis by tools/agents/hypothesis.py for `tail -f` visibility
+# into Phase 1 and Phase 2. Untracked so the orchestrator's sandbox check
+# (offlimits_changes, orchestrator.py:42) doesn't see it as an off-limits
+# agent edit. .claude.log kept for back-compat with legacy worktree logs.
+.agent.log
+.agent.last
+.agent.*.log
+.agent.*.last
+.claude.log
+.scribe.log
+.scribe.*.last
+
+# Build artifacts
+out/
+generated/
+sim_build/
+test/cosim/obj_dir/
+test/cosim/sim_build/
+test/**/sim_build/
+test/*.result.xml
+test/results.xml
+cores/*/test/*.result.xml
+*.vcd
+*.fst
+*.gtkw
+
+# Bench ELFs (rebuild from sources)
+bench/programs/*.elf
+bench/programs/*.o
+bench/programs/*.bin
+bench/programs/*.hex
+
+# Held-out benchmark ELFs (rebuild via `make -f bench/holdout/Makefile all`)
+bench/holdout/build/*.elf
+
+# Experiment artifacts.
+# - log.jsonl IS tracked: orchestrator's authoritative journal of every
+#   iteration (accept/regression/broken). Rejected hypotheses never
+#   produce an implementation commit so the log is the only record.
+#   Auto-committed by tools/orchestrator.py:append_log() per iteration.
+# - progress.png IS tracked: it's the chart embedded in README.md, so
+#   the latest state is always viewable from GitHub. Regenerated and
+#   auto-committed alongside log.jsonl.
+# - per-iteration worktrees and per-iteration hypothesis YAMLs are
+#   transient inputs/outputs of the loop, not source of truth.
+
+# Per-core gitignored paths (Phase C)
+cores/*/worktrees/
+cores/*/generated/
+cores/*/obj_dir/
+cores/*/implementation_notes.md
+cores/*/experiments/hypotheses/
+cores/*/experiments/hypotheses/*.yml
+cores/*/experiments/hypotheses/*.yaml
+
+# Editor / OS
+.DS_Store
+*.swp
+.idea/
+.vscode/
+
+# Claude Code workspace
+.claude/
+docs/assets/
+
+# Local git worktrees (subagent-driven dev; not the orchestrator's experiments/worktrees)
+.worktrees/
+
+# Node deps for bench-fence pi extension (installed locally for typecheck;
+# pi handles installs at run time so the deps don't need to be committed).
+node_modules/
+
+# Pi-coding-agent session storage inside per-rep clones.
+.pi-sessions/
+
+# Per-rep agent telemetry inside bench/ is now tracked: log.jsonl carries
+# the full per-iteration data (LUT4, Fmax, IPC, error class) that the
+# rolled-up summary.json doesn't surface, and agent.log is the model's
+# verbatim transcript — both are essential for reproducibility and
+# postmortems. Combined they're ~3-4 MB per rep × 9 reps = ~35 MB; cheap.
+# (Previously gitignored as "regenerable", but they're only regenerable
+# by re-running the bench at considerable wall time and cost.)
+
+# repo.bundle (each rep's full git history, task-7 disk hygiene) is NOT
+# tracked, unlike orchestrator.log: a bundle runs about 45 MB binary per
+# rep, and at full compute-matrix scale that would bloat the git history
+# by gigabytes. It stays on disk as a local forensics artifact instead,
+# and tools/bench/gc.py archives (or recreates) it before deleting the
+# clone it was bundled from, so the content is not lost.
+bench/**/repo.bundle
+
+# agent.full.log.gz: the verbatim agent transcript. The tracked agent.log
+# next to it has tool-output fields capped (tools/bench/transcript.py),
+# which cut the published transcripts ~60%; the full stream stays on
+# disk for forensics, same policy as repo.bundle.
+bench/**/agent.full.log.gz
+
+# env.json (per-rep environment snapshot: PATH + resolved EDA tool paths)
+# IS tracked, decided at the first v2 rep publish (e1a static, 2026-07-16):
+# it is tiny, contains no secrets, and pins which toolchain binaries
+# produced each rep's numbers.
+
+# Throwaway harness-verification runs (one-model YAMLs + their output
+# trees). These are reliability checks, not benchmark data — output is
+# regenerable and the YAMLs only encode "rerun this single model to
+# confirm a fix landed". Naming convention: `*-verify` for output dirs,
+# `models-*-verify.yaml` for the throwaway model YAML.
+bench/*-verify/
+bench/smoke-*/
+tools/bench/models-*-verify.yaml
+
+# Aborted/partial bench output preserved locally with a debug-tag suffix
+# (e.g. `gpt-5_5.failed-pwd-bug/`, `gpt-5_5.validate-v3/`, sibling
+# `results.jsonl.<tag>`). They document a known-broken state for the
+# author's own postmortem; the canonical results live in the un-suffixed
+# per-model dirs.
+bench/*.failed-*
+bench/*.validate-*
+bench/*.prev-*
+bench/*.stale-*
+bench/*.partial-*
+bench/results.jsonl.*

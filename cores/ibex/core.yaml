@@ -1,0 +1,14 @@
+name: ibex
+description: |
+  ibex synth-only reference core; vendored from https://github.com/lowRISC/ibex.
+  License: Apache-2.0. CoreMark/MHz cited (not measured on this harness).
+  Multiple config variants vendored; specific variant chosen at synth time.
+synth_only: true
+cited_coremark_per_mhz: 0.904
+cited_coremark_source: https://github.com/lowRISC/ibex/blob/eede2fbbef007d53cafbd85d937b897751c40a54/README.md
+targets:
+  lut: null
+  fmax_mhz: null
+current:
+  fmax_mhz: null
+  luts: null

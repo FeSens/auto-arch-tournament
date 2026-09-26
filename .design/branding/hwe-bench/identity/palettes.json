@@ -1,0 +1,49 @@
+{
+  "version": "1.0",
+  "brand": "hwe-bench",
+  "mode": "light-only-v1",
+  "tokens": {
+    "color": {
+      "bg":          "#FAF7F2",
+      "bg-sunk":     "#F2EEE5",
+      "ink":         "#1A1A1A",
+      "ink-soft":    "#4A4A4A",
+      "ink-muted":   "#8A8480",
+      "rule":        "#D9D3C8",
+      "accent":      "#1F4380",
+      "accent-soft": "#E5EBF4",
+      "success":     "#2A6F4E",
+      "warning":     "#8A5A2B"
+    },
+    "font": {
+      "display": "'Source Serif 4', 'Source Serif Pro', Georgia, serif",
+      "body":    "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+      "mono":    "'IBM Plex Mono', 'JetBrains Mono', Menlo, Monaco, monospace"
+    },
+    "text": {
+      "xs":   { "size": "0.75rem",  "line": 1.4 },
+      "sm":   { "size": "0.875rem", "line": 1.5 },
+      "base": { "size": "1rem",     "line": 1.6 },
+      "lg":   { "size": "1.125rem", "line": 1.7 },
+      "xl":   { "size": "1.5rem",   "line": 1.4 },
+      "2xl":  { "size": "2rem",     "line": 1.3 },
+      "3xl":  { "size": "2.75rem",  "line": 1.15 },
+      "hero": { "size": "4rem",     "line": 1.05 }
+    },
+    "space": {
+      "1":  "4px",   "2":  "8px",   "3":  "12px",  "4":  "16px",
+      "5":  "20px",  "6":  "24px",  "8":  "32px",  "10": "40px",
+      "12": "48px",  "16": "64px",  "20": "80px",  "24": "96px",
+      "32": "128px"
+    },
+    "layout": {
+      "w-prose": "64ch",
+      "w-wide":  "1080px",
+      "w-page":  "1200px"
+    },
+    "rule": {
+      "width": "1px",
+      "color": "#D9D3C8"
+    }
+  }
+}

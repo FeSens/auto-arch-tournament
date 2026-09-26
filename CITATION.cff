@@ -1,0 +1,39 @@
+cff-version: 1.2.0
+message: "If you use HWE Bench in research, please cite it as below."
+title: "HWE Bench: An Unbounded Benchmark for LLM Hardware Development on RISC-V"
+authors:
+  - family-names: Bonetto
+    given-names: Felipe Sens
+    email: felipesensbonetto@gmail.com
+type: software
+repository-code: "https://github.com/FeSens/auto-arch-tournament"
+url: "https://hwebench.com"
+version: v1
+date-released: "2026-05-15"
+keywords:
+  - benchmark
+  - large language models
+  - RISC-V
+  - CPU design
+  - microarchitecture
+  - formal verification
+  - FPGA
+  - hardware engineering
+abstract: >-
+  HWE Bench measures LLM hardware-development capability by having
+  models propose and implement RISC-V CPU microarchitectures, scored
+  by CoreMark fitness (Fmax × IPC) on a real FPGA under riscv-formal
+  correctness gates. Unlike saturable benchmarks such as SWE-bench,
+  HWE Bench has no ceiling — fitness can keep climbing as long as
+  models keep finding better microarchitecture. An arXiv preprint
+  describing the methodology in detail is in preparation; in the
+  interim, please cite the repository.
+preferred-citation:
+  type: software
+  title: "HWE Bench: An Unbounded Benchmark for LLM Hardware Development on RISC-V"
+  authors:
+    - family-names: Sens Bonetto
+      given-names: Felipe
+  year: 2026
+  url: "https://hwebench.com"
+  repository-code: "https://github.com/FeSens/auto-arch-tournament"

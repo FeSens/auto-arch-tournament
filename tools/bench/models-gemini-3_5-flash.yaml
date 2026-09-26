@@ -1,0 +1,16 @@
+# gemini-3.5-flash via OpenRouter (3 reps, NeurIPS pilot shape).
+#
+# Routed via opencode through OpenRouter (auth: OPENROUTER_API_KEY env
+# var; also stored in ~/.local/share/opencode/auth.json under the
+# "openrouter" provider). The model is registered in
+# ~/.config/opencode/opencode.json under provider.openrouter.models so
+# opencode resolves the id "openrouter/google/gemini-3.5-flash".
+# Variant: xhigh (flash class, but giving it the best effort signal
+# opencode supports).
+
+models:
+  - name: gemini-3_5-flash
+    provider: opencode
+    model: openrouter/google/gemini-3.5-flash
+    variant: xhigh
+    key_env: OPENROUTER_API_KEY

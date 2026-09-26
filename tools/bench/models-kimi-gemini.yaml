@@ -1,0 +1,22 @@
+# Combined run: kimi-k2.6 (opencode-go) + gemini-3.1-pro (OpenRouter).
+#
+# Both routes go through opencode but with distinct auth:
+#   - kimi:    OpenCode Go OAuth (~/.local/share/opencode/auth.json,
+#              "OpenCode Go [api]" credential).
+#   - gemini:  OPENROUTER_API_KEY env var. Variant xhigh — openrouter's
+#              SSE stream doesn't hit the Bun 964s cap that broke the
+#              native Code Assist route, so xhigh is safe here.
+#
+# Layout: NeurIPS pilot shape (reps=3, N=15, K=3). With parallel=2 the
+# runner interleaves kimi and gemini reps automatically.
+
+models:
+  - name: kimi-k2_6
+    provider: opencode
+    model: opencode-go/kimi-k2.6
+    oauth: true
+  - name: gemini-3_1-pro
+    provider: opencode
+    model: openrouter/google/gemini-3.1-pro-preview
+    variant: xhigh
+    key_env: OPENROUTER_API_KEY

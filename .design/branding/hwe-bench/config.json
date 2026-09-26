@@ -1,0 +1,22 @@
+{
+  "version": "0.8.2",
+  "project_type": "brand",
+  "brand": {
+    "name": "hwe-bench",
+    "created": "2026-05-15"
+  },
+  "brand_mode": "new",
+  "e2e": true,
+  "evolution_scope": {
+    "preserve": [],
+    "evolve": [],
+    "replace": []
+  },
+  "system_config": {
+    "tech_stack": "static-html-css",
+    "system_strategy": "generate",
+    "style_preset": "",
+    "style_base": []
+  },
+  "gsp_version": "0.7.2"
+}

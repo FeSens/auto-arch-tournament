@@ -1,0 +1,32 @@
+# GPT-5.6 preview trio (3 models x 3 reps, NeurIPS pilot shape).
+#
+# Luna, Terra, and Sol are benchmarked as separate models in that order. All three use
+# exactly the same reasoning budget: high only. Do not add medium or xhigh
+# entries to this matrix; the point is a controlled comparison across the
+# three GPT-5.6 preview variants.
+#
+# Routed through the first-party Codex CLI using its ChatGPT OAuth session.
+# Direct `codex exec` probes for Luna, Terra, and Sol all succeeded at high on
+# 2026-07-10. Do not route this matrix through OpenCode or OpenRouter.
+#
+# Run with:
+#   python -m tools.bench.runner \
+#     --models tools/bench/models-gpt56-preview.yaml \
+#     --reps 3 --n 15 --k 3 --parallel 1 --keep-clones
+
+models:
+  - name: gpt-5_6-luna
+    provider: codex
+    model: gpt-5.6-luna
+    variant: high
+    oauth: true
+  - name: gpt-5_6-terra
+    provider: codex
+    model: gpt-5.6-terra
+    variant: high
+    oauth: true
+  - name: gpt-5_6-sol
+    provider: codex
+    model: gpt-5.6-sol
+    variant: high
+    oauth: true

@@ -1,0 +1,23 @@
+# gpt-5.3-codex + gpt-5.2 sweep (3 reps each, NeurIPS pilot shape).
+#
+# Routes via opencode through the OpenAI codex subscription. Both
+# probed live via `opencode run --model <m> 'reply with READY'`
+# before scheduling, both returned cleanly. Cost $0 per rep.
+#
+# gpt-5.3-codex is the non-spark variant. gpt-5.3-codex-spark in a
+# prior sweep cascaded on no-file failures; the regular codex variant
+# is expected to behave more like gpt-5.4 than like the spark.
+# gpt-5.2 is the oldest codex model on the listing — anchors the
+# "older capability" end of the bench.
+
+models:
+  - name: gpt-5_3-codex
+    provider: opencode
+    model: openai/gpt-5.3-codex
+    variant: xhigh
+    oauth: true
+  - name: gpt-5_2
+    provider: opencode
+    model: openai/gpt-5.2
+    variant: xhigh
+    oauth: true

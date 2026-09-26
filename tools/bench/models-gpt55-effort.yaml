@@ -1,0 +1,30 @@
+# gpt-5.5 reasoning-effort sweep
+#
+# Same underlying model (openai/gpt-5.5) at three reasoning-effort
+# variants. Each variant runs as its own (name, rep) sequence so the
+# leaderboard can compare them directly. Three reps each → 9 reps total
+# at the NeurIPS pilot shape (reps=3, N=15, K=3).
+#
+# Naming: `gpt-5_5_<variant>` so results.jsonl rows are distinguishable.
+# opencode reads the variant from per-model `variant:` (mapped to
+# OPENCODE_VARIANT env var by tools/bench/runner.py make_env_for_job).
+#
+# Routed via opencode (tools/agents/_runtime.py opencode branch). Auth:
+# OpenAI OAuth in ~/.local/share/opencode/auth.json (codex subscription).
+
+models:
+  - name: gpt-5_5_xhigh
+    provider: opencode
+    model: openai/gpt-5.5
+    variant: xhigh
+    oauth: true
+  - name: gpt-5_5_high
+    provider: opencode
+    model: openai/gpt-5.5
+    variant: high
+    oauth: true
+  - name: gpt-5_5_medium
+    provider: opencode
+    model: openai/gpt-5.5
+    variant: medium
+    oauth: true

@@ -1,0 +1,145 @@
+"""Tests for the random-mutation control agent."""
+import random
+import subprocess
+from pathlib import Path
+
+from tools.agents import random_agent as ra
+
+SV = """\
+module alu(input logic [31:0] a, b, output logic [31:0] y);
+  // adder path
+  assign y = (a == 32'h0000_0001) ? a + b : a & b;
+endmodule
+"""
+
+
+def _mk_worktree(tmp_path: Path) -> Path:
+    rtl = tmp_path / "cores" / "bench" / "rtl"
+    rtl.mkdir(parents=True)
+    (rtl / "alu.sv").write_text(SV)
+    return tmp_path
+
+
+def test_candidates_skip_comment_lines():
+    cands = ra.line_candidates("  // adder path + fast")
+    assert cands == []
+
+
+def test_op_swap_produces_parseable_line():
+    cands = ra.line_candidates("  assign y = a + b;")
+    assert any("a - b" in c.new_line for c in cands)
+
+
+def test_eq_swap_guards_composites():
+    cands = ra.line_candidates("  assign t = (a == b) && c;")
+    assert any("!=" in c.new_line for c in cands)
+    assert all("&" * 3 not in c.new_line for c in cands)
+
+
+def test_ternary_swap_swaps_arms():
+    line = "  assign y = sel ? a + b : a & b;"
+    cands = [c for c in ra.line_candidates(line) if c.kind == "ternary_swap"]
+    assert len(cands) == 1
+    assert "? a & b : a + b" in cands[0].new_line
+
+
+def test_lit_perturb_xors_low_bit():
+    line = "  assign y = 32'h0000_0001;"
+    cands = [c for c in ra.line_candidates(line) if c.kind == "lit_perturb"]
+    assert len(cands) == 1
+    assert "32'h0" in cands[0].new_line and "_0001" not in cands[0].new_line
+
+
+def test_mutate_deterministic(tmp_path):
+    wt1 = _mk_worktree(tmp_path / "a")
+    wt2 = _mk_worktree(tmp_path / "b")
+    rng1 = random.Random("101:hyp-x")
+    rng2 = random.Random("101:hyp-x")
+    m1 = ra.apply_mutations(wt1, "bench", rng1, k=2)
+    m2 = ra.apply_mutations(wt2, "bench", rng2, k=2)
+    assert [str(m) for m in m1] == [str(m) for m in m2]
+    assert (wt1 / "cores/bench/rtl/alu.sv").read_text() == \
+           (wt2 / "cores/bench/rtl/alu.sv").read_text()
+
+
+def test_mutate_touches_only_rtl(tmp_path):
+    wt = _mk_worktree(tmp_path)
+    (wt / "Makefile").write_text("all:\n")
+    before = (wt / "Makefile").read_text()
+    ra.apply_mutations(wt, "bench", random.Random(1), k=3)
+    assert (wt / "Makefile").read_text() == before
+
+
+def test_hyp_id_uses_authoritative_clause_not_leftmost_match():
+    # Round >= 2 prompt shape: the history section quotes a stale prior
+    # round's id before the authoritative id clause appears later.
+    prompt = (
+        "## Recent outcomes (last 5)\n"
+        "- hyp-20260715-001-r1s0: rejected, formal_failed: ill check\n"
+        "\n"
+        "## Instructions\n"
+        "Use exactly this hypothesis ID: hyp-20260715-001-r2s1\n"
+        "\n"
+        "## Required YAML structure\n"
+    )
+    assert ra._hyp_id(prompt) == "hyp-20260715-001-r2s1"
+
+
+def test_hyp_id_falls_back_to_leftmost_when_no_marker():
+    # Older prompt shapes without the authoritative clause: preserve the
+    # previous leftmost-match behavior.
+    prompt = "Hypothesis: hyp-20260101-001-r1s0\nSome other text.\n"
+    assert ra._hyp_id(prompt) == "hyp-20260101-001-r1s0"
+
+
+def test_hyp_id_marker_text_quoted_in_history_uses_last_marker():
+    # Stale id clause quoted in history, then real clause appears later.
+    # rfind() should grab the last marker occurrence.
+    prompt = (
+        "## Recent outcomes\n"
+        "Use exactly this hypothesis ID: hyp-20260715-001-r1s0\n"
+        "\n"
+        "## Instructions\n"
+        "Use exactly this hypothesis ID: hyp-20260715-001-r2s1\n"
+    )
+    assert ra._hyp_id(prompt) == "hyp-20260715-001-r2s1"
+
+
+def test_hyp_id_marker_present_but_malformed_returns_none():
+    # Marker is present but no valid id token follows.
+    # Should return None (fail loudly) not fall back to leftmost search.
+    prompt = (
+        "## History\n"
+        "Use exactly this hypothesis ID: hyp-20260715-001-r1s0\n"
+        "\n"
+        "## Instructions\n"
+        "Use exactly this hypothesis ID: (no valid id here)\n"
+    )
+    assert ra._hyp_id(prompt) is None
+
+
+def test_lint_ok_returns_false_on_timeout(tmp_path, monkeypatch):
+    # A hung lint (past the 300s cap) must count as a failed lint draw,
+    # not crash the agent with an uncaught TimeoutExpired.
+    wt = _mk_worktree(tmp_path)
+
+    def fake_run(*a, **kw):
+        raise subprocess.TimeoutExpired(cmd="verilator", timeout=300)
+
+    monkeypatch.setattr(subprocess, "run", fake_run)
+    assert ra._lint_ok(wt, "bench") is False
+
+
+def test_verilator_absent_applies_no_mutations(tmp_path, monkeypatch):
+    wt = _mk_worktree(tmp_path)
+    monkeypatch.setattr("shutil.which", lambda *a, **kw: None)
+    monkeypatch.setenv("RANDOM_AGENT_SEED", "101")
+    monkeypatch.chdir(wt)
+    ra._implement(
+        "TARGET CORE: cores/bench/ "
+        "Edit, create, or delete files in the worktree. "
+        "Hypothesis: hyp-20260101-001-r1s0"
+    )
+    assert (wt / "cores/bench/rtl/alu.sv").read_text() == SV
+    notes = (wt / "cores/bench/implementation_notes.md").read_text()
+    assert "INVALID" in notes

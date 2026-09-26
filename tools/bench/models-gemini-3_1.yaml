@@ -1,0 +1,15 @@
+# gemini-3.1-pro single-model bench config (3 reps × N=15 × K=3).
+#
+# Native Google Code Assist via opencode (no openrouter/ prefix, no
+# OPENROUTER_API_KEY). Auth flows through opencode's own auth store
+# at ~/.local/share/opencode/auth.json — the user's Google Code Assist
+# session must already be linked there (verified by `opencode auth list`).
+# Effort=high. xhigh previously triggered Bun's 964s response-stream
+# cap on certain gemini turns; high is the stable variant for the
+# native route.
+
+models:
+  - name: gemini-3_1-pro
+    provider: opencode
+    model: google/gemini-3.1-pro-preview
+    variant: high
