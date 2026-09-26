@@ -101,7 +101,7 @@ Then edit `bench/claude-opus-5_5_xhigh/README.md`:
 
 ## 3. Site: release-chart entry (done, uncommitted)
 
-`MODEL_RELEASES` in `tools/site/build.py` has `claude-opus-5_5_xhigh` with date 2026-09-22 (operator-confirmed), provider `anthropic`, and the release-chart caption links the Claude Code changelog. With a stand-in Opus row, the release-chart coverage test passes and the chart plots the point.
+`MODEL_RELEASES` in `tools/site/build.py` has `claude-opus-5_5_xhigh` with date 2026-09-22. Source: the operator's answer in the writeup session on 2026-09-26. No changelog line with that date was found locally (the Claude Code changelog is undated). Replace it if a dated public source says otherwise. The entry has provider `anthropic`, and the release-chart caption links the Claude Code changelog. With a stand-in Opus row, the release-chart coverage test passes and the chart plots the point.
 
 ## 4. Build and test locally
 
@@ -127,9 +127,11 @@ CI builds the site from the committed `tools/site/build.py`, so the notes appear
 
 The Pages workflow triggers on `tools/site/build.py`, not on `run_notes.py`. A change to `run_notes.py` alone does not redeploy. Use `workflow_dispatch` or bundle it with a data change.
 
-## 6. Commit and push (GPT-6 Astra and Opus ship together)
+## 6. Commit and push (operator only)
 
-Operator decision (2026-09-26): the uncommitted GPT-6 Astra work ships in the same commit as this rep. That covers the Astra hunks in `tools/site/build.py`, `tools/site/test_build.py`, `tools/site/test_watch_publish.py`, `tools/bench/report.py` and `bench/results.jsonl` (three Astra rows), plus the untracked `bench/gpt-6-astra_max/` (about 64 MB of tracked files, largest `agent.log` 22 MB) and `tools/bench/models-gpt6-astra-max.yaml`. `paper/` and `bench/logs/` are not part of it.
+No agent commits the Astra work or pushes. The operator runs this step.
+
+OPEN, operator to confirm: in the writeup session the operator said the uncommitted GPT-6 Astra work "will ship at the same time as this one". The team lead asked that this be confirmed before anyone plans on it. If confirmed, the joint commit covers the Astra hunks in `tools/site/build.py`, `tools/site/test_build.py`, `tools/site/test_watch_publish.py`, `tools/bench/report.py` and `bench/results.jsonl` (three Astra rows), plus the untracked `bench/gpt-6-astra_max/` (about 64 MB of tracked files, largest `agent.log` 22 MB) and `tools/bench/models-gpt6-astra-max.yaml`. `paper/` and `bench/logs/` are not part of it.
 
 ```sh
 python3 -m pytest -q tools/site tools/bench/test_report.py
@@ -142,8 +144,10 @@ git add bench/results.jsonl \
         tools/bench/report.py
 git status --short     # no repo.bundle or agent.full.log.gz staged; paper/ and bench/logs/ untracked
 git commit -m "bench: publish claude-opus-5_5_xhigh rep1 (N=1, <fitness>, +<delta>%, <k> improvements, <b> broken) and gpt-6-astra_max reps 1-3"
-git push origin main
+git push origin main   # operator
 ```
+
+If the Astra work does not ship in the same commit, it must still land in an earlier commit: the Opus row sits below the Astra rows in `bench/results.jsonl`, and the Opus hunks in `build.py` and `test_build.py` are interleaved with the Astra hunks.
 
 The push triggers the Pages workflow (`bench/results.jsonl` and `tools/site/build.py` are in its path filter). Check the Actions run and the live pages afterwards.
 
@@ -156,3 +160,8 @@ No edit needed. `README.md` has no per-model results table (the "What came out o
 ```markdown
 Benchmark results for each model configuration: <https://hwebench.com>, [`bench/LEADERBOARD.md`](bench/LEADERBOARD.md), and per-configuration notes in `bench/<config>/README.md`.
 ```
+
+## Operator decisions
+
+- n=1 leaderboard footnote scope: the operator answered "only new" in the writeup session. Implemented: the footnote lists only configurations with a run note in `tools/site/run_notes.py` (today only Opus). The "current best" n=1 qualifier still applies to any one-rep leader. PENDING confirmation per the team lead.
+- `agent.log` size: PENDING. Measured from copies of the live logs at round 13: 48.1 MB compacted (12.0 MB gzipped), so about 55 MB is expected at round 15. That is over GitHub's 50 MB warning and under its 100 MB limit. Recommendation: publish as is (same format as other reps, site links unchanged). Alternatives: commit it gzipped (not viewable on GitHub, needs a data-page link change), or split by agent role (needs a link change). Not recommended: tightening compaction for this rep only, since it would differ from Sol and Astra.
