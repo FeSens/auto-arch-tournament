@@ -50,7 +50,7 @@ def test_unknown_model_has_no_note():
     assert set(RUN_NOTES) == {"claude-opus-5_5_xhigh"}
 
 
-def test_single_rep_caveat_lists_only_scored_single_rep_models():
+def test_single_rep_caveat_lists_only_new_scored_single_rep_models():
     aggs = [
         _agg("claude-opus-5_5_xhigh", 1),
         _agg("gpt-6-sol_xhigh", 1),
@@ -60,7 +60,7 @@ def test_single_rep_caveat_lists_only_scored_single_rep_models():
     ]
     html = render_single_rep_caveat(aggs)
     assert "<code>claude-opus-5_5_xhigh</code>" in html
-    assert "<code>gpt-6-sol_xhigh</code>" in html
+    assert "gpt-6-sol_xhigh" not in html  # published before run notes existed
     assert "gpt-5_5_high" not in html
     assert "random-mutation" not in html
     assert "gemini-3_5-flash" not in html

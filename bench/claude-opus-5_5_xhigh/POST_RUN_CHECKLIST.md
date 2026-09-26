@@ -99,23 +99,9 @@ Then edit `bench/claude-opus-5_5_xhigh/README.md`:
 - Confirm there are no placeholders or em-dashes left:
   `grep -n -e '{{' -e "$(printf '\342\200\224')" bench/claude-opus-5_5_xhigh/README.md` (the second pattern is an em-dash; expect no output).
 
-## 3. Site: release-chart entry (needs the Opus 5.5 release date)
+## 3. Site: release-chart entry (done, uncommitted)
 
-`tools/site/test_build.py::test_release_chart_covers_every_scored_model_and_renders_labels` fails as soon as the row is in `bench/results.jsonl` without a `MODEL_RELEASES` entry. Add to `MODEL_RELEASES` in `tools/site/build.py`, using the confirmed public release date:
-
-```python
-    # First documented Claude Code support: Claude Code 2.1.280 changelog
-    # ("Added Claude Opus 5.5 (`claude-opus-5-5`)"), released <DATE>.
-    "claude-opus-5_5_xhigh":{"date": "<YYYY-MM-DD>", "label": "Claude Opus 5.5 xhigh", "provider": "anthropic"},
-```
-
-Add the source to the release-chart caption in `render_index`, next to the OpenAI, Gemini and Kimi links:
-
-```html
-      <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md" class="ext">Claude Code changelog</a>,
-```
-
-The `anthropic` provider color (`var(--c4)`) and the rest of the wiring are already in place (step 5 lists them).
+`MODEL_RELEASES` in `tools/site/build.py` has `claude-opus-5_5_xhigh` with date 2026-09-22 (operator-confirmed), provider `anthropic`, and the release-chart caption links the Claude Code changelog. With a stand-in Opus row, the release-chart coverage test passes and the chart plots the point.
 
 ## 4. Build and test locally
 
@@ -136,26 +122,32 @@ Check the output by eye (for example `open site/models.html#claude-opus-5_5_xhig
 
 CI builds the site from the committed `tools/site/build.py`, so the notes appear only if these are committed:
 - `tools/site/run_notes.py` and `tools/site/test_run_notes.py`: already committed.
-- Hunks in `tools/site/build.py` (not committed, because the file also holds uncommitted GPT-6 Astra work): the `run_notes` import, `"anthropic": "var(--c4)"` in `PROVIDER_COLORS`, `{render_single_rep_caveat(aggs)}` under the leaderboard, `{leader_sample_caveat(leader)}` in the "current best" sentence, and `configuration_note += render_run_note(a)` in `render_models`. Plus the step 3 hunks.
+- Hunks in `tools/site/build.py` (not committed, because the file also holds uncommitted GPT-6 Astra work): the `run_notes` import, `"anthropic": "var(--c4)"` in `PROVIDER_COLORS`, the `MODEL_RELEASES` entry and caption link from step 3, `{render_single_rep_caveat(aggs)}` under the leaderboard, `{leader_sample_caveat(leader)}` in the "current best" sentence, and `configuration_note += render_run_note(a)` in `render_models`.
 - Hunk in `tools/site/test_build.py` (not committed, same reason): `test_site_renders_opus_row_with_note_and_caveats`, which renders a stand-in Opus row through the index, models and data pages.
 
 The Pages workflow triggers on `tools/site/build.py`, not on `run_notes.py`. A change to `run_notes.py` alone does not redeploy. Use `workflow_dispatch` or bundle it with a data change.
 
-## 6. Commit (operator), then push
+## 6. Commit and push (GPT-6 Astra and Opus ship together)
 
-Decide first how the uncommitted Astra hunks in `tools/site/build.py`, `tools/site/test_build.py`, `tools/site/test_watch_publish.py`, `tools/bench/report.py` and `bench/results.jsonl` (three Astra rows) ship. They must go in the same or an earlier commit, because the Opus row sits below them in `bench/results.jsonl` and the build hunks are interleaved with them.
+Operator decision (2026-09-26): the uncommitted GPT-6 Astra work ships in the same commit as this rep. That covers the Astra hunks in `tools/site/build.py`, `tools/site/test_build.py`, `tools/site/test_watch_publish.py`, `tools/bench/report.py` and `bench/results.jsonl` (three Astra rows), plus the untracked `bench/gpt-6-astra_max/` (about 64 MB of tracked files, largest `agent.log` 22 MB) and `tools/bench/models-gpt6-astra-max.yaml`. `paper/` and `bench/logs/` are not part of it.
 
 ```sh
-git add bench/results.jsonl bench/claude-opus-5_5_xhigh/README.md \
-        bench/claude-opus-5_5_xhigh/rep1 \
+python3 -m pytest -q tools/site tools/bench/test_report.py
+git add bench/results.jsonl \
+        bench/claude-opus-5_5_xhigh/README.md bench/claude-opus-5_5_xhigh/rep1 \
+        bench/gpt-6-astra_max tools/bench/models-gpt6-astra-max.yaml \
         bench/LEADERBOARD.md bench/leaderboard.csv \
         site/index.html site/models.html site/methodology.html site/data.html \
-        tools/site/build.py tools/site/test_build.py
-git status --short     # rep1/repo.bundle and rep1/agent.full.log.gz must NOT be staged
-git commit -m "bench: publish claude-opus-5_5_xhigh rep1 (N=1, <fitness>, +<delta>%, <k> improvements, <b> broken)"
+        tools/site/build.py tools/site/test_build.py tools/site/test_watch_publish.py \
+        tools/bench/report.py
+git status --short     # no repo.bundle or agent.full.log.gz staged; paper/ and bench/logs/ untracked
+git commit -m "bench: publish claude-opus-5_5_xhigh rep1 (N=1, <fitness>, +<delta>%, <k> improvements, <b> broken) and gpt-6-astra_max reps 1-3"
+git push origin main
 ```
 
-Optionally also delete this checklist in that commit, or keep it as a record. Add a diary entry (`research/diary/<date>.md`) with the final outcome counts, and the research notes in the same form as the Sol publish (`research/lessons.md`, `research/experiments/EXP-...`).
+The push triggers the Pages workflow (`bench/results.jsonl` and `tools/site/build.py` are in its path filter). Check the Actions run and the live pages afterwards.
+
+Add a diary entry (`research/diary/<date>.md`) with the final outcome counts, and research notes in the same form as the Sol publish (`research/lessons.md`, `research/experiments/EXP-...`).
 
 ## 7. Top-level README
 

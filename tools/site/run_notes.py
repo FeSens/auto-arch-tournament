@@ -74,10 +74,14 @@ def _is_control(name: str) -> bool:
 
 
 def render_single_rep_caveat(aggs) -> str:
-    """Leaderboard footnote naming scored configurations with one rep."""
+    """Leaderboard footnote naming scored one-rep configurations.
+
+    Limited to configurations with a run note (added from Opus 5.5 on);
+    earlier one-rep rows keep their published presentation.
+    """
     single = [a.model for a in aggs
-              if a.n_total == 1 and a.fitness_best is not None
-              and not _is_control(a.model)]
+              if a.model in RUN_NOTES and a.n_total == 1
+              and a.fitness_best is not None and not _is_control(a.model)]
     if not single:
         return ""
     names = ", ".join(f"<code>{m}</code>" for m in single)
