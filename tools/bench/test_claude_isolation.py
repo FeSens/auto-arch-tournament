@@ -43,6 +43,7 @@ def test_sandbox_confines_bash_to_clone(tmp_path):
     assert sb["network"]["allowedDomains"] == []
     fs = sb["filesystem"]
     assert fs["allowWrite"] == [str(clone.resolve())]
+    assert str(clone.resolve() / "formal" / "riscv-formal") in fs["denyWrite"]
     assert str(home) in fs["denyRead"] and "/private/tmp" in fs["denyRead"]
     # Other Claude sessions' temp dirs are denied; the rep's own are not.
     assert str(ctmp / "-Users-me-other-project") in fs["denyRead"]

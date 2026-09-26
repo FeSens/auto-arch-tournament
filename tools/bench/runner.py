@@ -723,6 +723,13 @@ def claude_isolation_settings(clone: Path, uid: int | None = None,
             "allowUnsandboxedCommands": False,
             "filesystem": {
                 "allowWrite": [str(clone)],
+                # The clone's riscv-formal is shared by every agent and the
+                # harness (worktrees symlink to it). formal/run_all.sh reaps
+                # per-PID work dirs whose `kill -0` fails, and kill -0 on any
+                # PID outside the sandbox fails, so a writable copy lets an
+                # agent's self-check delete the harness's live formal run
+                # (2026-09-26 incident). Read-only, as it was for Codex.
+                "denyWrite": [*{str(rf), str(rf.resolve())}],
                 "denyRead": [str(home), "/private/tmp", *other_sessions],
                 "allowRead": [*reads, str(claude_tmp)],
             },
