@@ -44,7 +44,8 @@ def test_sandbox_confines_bash_to_clone(tmp_path):
     assert sb["network"]["allowedDomains"] == []
     fs = sb["filesystem"]
     assert fs["allowWrite"] == [str(clone.resolve())]
-    assert str(clone.resolve() / "formal" / "riscv-formal") in fs["denyWrite"]
+    # Agents may run formal in their own copy; the eval's copy is read-only.
+    assert fs["denyWrite"] == [str(clone.resolve() / ".tmp" / "riscv-formal-eval")]
     assert str(home) in fs["denyRead"] and "/private/tmp" in fs["denyRead"]
     # Other Claude sessions' temp dirs are denied; the rep's own are not.
     assert str(ctmp / "-Users-me-other-project") in fs["denyRead"]
@@ -175,3 +176,22 @@ def test_claude_parser_recovers_killed_sessions(tmp_path):
     log = tmp_path / "a.log"
     log.write_text("\n".join(lines) + "\n")
     assert parse_claude_cost_from_log(log) == (305, 47, 1.0)
+
+
+def test_eval_uses_harness_riscv_formal_copy(tmp_path):
+    from tools.sandbox import take_snapshot, snapshot_changes, use_eval_riscv_formal
+    root = tmp_path / "clone"
+    agent_rf = root / "formal" / "riscv-formal"
+    eval_rf = root / ".tmp" / "riscv-formal-eval"
+    for rf in (agent_rf, eval_rf):
+        (rf / "checks").mkdir(parents=True)
+        (rf / "checks" / "genchecks.py").write_text("gen\n")
+    wt = root / "wt"
+    (wt / "formal").mkdir(parents=True)
+    (wt / "formal" / "riscv-formal").symlink_to(agent_rf)
+    before = take_snapshot(root)
+    (eval_rf / "checks" / "genchecks.py").write_text("tampered\n")
+    assert snapshot_changes(before, take_snapshot(root)) == [
+        "riscv-formal-eval/checks/genchecks.py"]
+    assert use_eval_riscv_formal(wt, root)
+    assert (wt / "formal" / "riscv-formal").resolve() == eval_rf.resolve()

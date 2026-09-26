@@ -259,7 +259,7 @@ def run_slot(
     from tools.eval.cosim import run_cosim
     from tools.eval.fpga import run_fpga_eval
     from tools.sandbox import (
-        take_snapshot, snapshot_changes, purge_ignored_outputs,
+        take_snapshot, snapshot_changes, purge_ignored_outputs, use_eval_riscv_formal,
     )
 
     category = category_for_slot(slot)
@@ -354,6 +354,7 @@ def run_slot(
     # prepends <worktree>/.toolchain to PATH). Delete them all so every
     # artifact the eval reads is one it built itself.
     purge_ignored_outputs(worktree, target)
+    use_eval_riscv_formal(worktree)
 
     # Phase 3: lint + synth + bench + cosim-build (no gate; fast).
     build_ok, build_reason = emit_verilog(worktree, target=target)
