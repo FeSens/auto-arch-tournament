@@ -1,0 +1,13 @@
+[preflight] toolchain:
+  verilator            /Users/bonetto/bonetto/riscv-autoarch/.toolchain/oss-cad-suite/bin/verilator
+  yosys                /Users/bonetto/bonetto/riscv-autoarch/.toolchain/oss-cad-suite/bin/yosys
+  nextpnr-himbaechel   /Users/bonetto/bonetto/riscv-autoarch/.toolchain/oss-cad-suite/bin/nextpnr-himbaechel
+  sby                  /Users/bonetto/bonetto/riscv-autoarch/.toolchain/oss-cad-suite/bin/sby
+  bitwuzla             /Users/bonetto/bonetto/riscv-autoarch/.toolchain/oss-cad-suite/bin/bitwuzla
+[bench] 1 job(s) queued (40 already done)
+        - claude-opus-5_5_xhigh-rep1  ->  claude:claude-opus-5-5
+[bench] config: N=15 K=3 reps=1 parallel=1
+[bench] clone base: /Users/bonetto/bonetto/aat-bench-runs
+[bench] results: /Users/bonetto/bonetto/auto-arch-tournament/bench/results.jsonl
+
+[bench] === claude-opus-5_5_xhigh-rep1 starting at 2026-09-25T20:26:45+00:00 ===
