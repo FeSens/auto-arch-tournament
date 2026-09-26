@@ -12,6 +12,15 @@ loop on one core at a time, on a dedicated `core-<name>` git branch inside
 its own worktree, so two cores can iterate in parallel without stomping each
 other.
 
+## HWE Bench
+
+![HWE Bench fitness over rounds, best repetition per model. Claude Opus 5.5 xhigh reaches 983 by round 14; the dashed red line is the human reference, VexRiscv at 370.](docs/img/hwe-bench-fitness-over-rounds.png)
+
+Best fitness so far per tournament round, best repetition per model, starting
+from the shared baseline (283). Several configurations have a single
+repetition, so the ordering is a record of runs, not a tested ranking. Live
+leaderboard, methodology and per-run data: <https://hwebench.com>.
+
 ## What came out of it
 
 ![CoreMark progress: green dots are accepted winners, orange are rejected, blue/purple bands group tournament rounds.](cores/v1/experiments/progress.png)
