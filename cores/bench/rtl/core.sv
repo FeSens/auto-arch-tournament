@@ -238,12 +238,29 @@ module core (
   // The MEM/WB register is the retirement boundary. rvfi_order increments
   // every cycle rvfi_valid is high; CLAUDE.md invariant 4 (riscv-formal
   // unique-check) requires strict +1.
-  logic [63:0] rvfi_order_q;
+  //
+  // The counter is two 32-bit halves so no 64-bit carry chain exists: the
+  // low half counts retirements and the high half steps on the same edge
+  // the low half wraps (valid with lo all ones). {hi, lo} is exactly the
+  // 64-bit count every cycle. lo_ones_q is a registered copy of
+  // (order_lo_q == all ones), loaded with the value lo is about to step
+  // from, so the 32-input compare ends in one flop instead of driving the
+  // high half's 32 clock enables.
+  logic [31:0] order_lo_q;
+  logic [31:0] order_hi_q;
+  logic        lo_ones_q;
   logic        rd_wen;
 
   always_ff @(posedge clock) begin
-    if (reset)                rvfi_order_q <= 64'b0;
-    else if (mem_wb_w.valid)  rvfi_order_q <= rvfi_order_q + 64'b1;
+    if (reset) begin
+      order_lo_q <= 32'b0;
+      order_hi_q <= 32'b0;
+      lo_ones_q  <= 1'b0;
+    end else if (mem_wb_w.valid) begin
+      order_lo_q <= order_lo_q + 32'b1;
+      lo_ones_q  <= (order_lo_q == 32'hFFFF_FFFE);
+      if (lo_ones_q) order_hi_q <= order_hi_q + 32'b1;
+    end
   end
 
   always_comb begin
@@ -251,7 +268,7 @@ module core (
 
     // Channel 0: the only retirement channel for the single-issue baseline.
     io_rvfi_valid_0     = mem_wb_w.valid;
-    io_rvfi_order_0     = rvfi_order_q;
+    io_rvfi_order_0     = {order_hi_q, order_lo_q};
     io_rvfi_insn_0      = mem_wb_w.instr;
     io_rvfi_trap_0      = mem_wb_w.ctrl.is_illegal;
     io_rvfi_halt_0      = 1'b0;

@@ -52,7 +52,7 @@
 //
 // Latency:        1 cycle (MEM/WB register clocked here).
 // RVFI fields:    feeds mem_addr, mem_rmask, mem_wmask, mem_rdata,
-//                 mem_wdata, plus rd_wdata via the loaded-data path.
+//                 mem_wdata, trap, plus rd_wdata via the loaded data.
 module mem_stage (
   input  logic               clock,
   input  logic               reset,
@@ -116,6 +116,37 @@ module mem_stage (
   logic mem_op;
   ctrl_t ctrl_with_trap;
 
+  // Illegal-encoding decode. is_illegal only ever reaches rvfi_trap, so it
+  // is decoded here from the registered EX/MEM instruction word instead
+  // of in ID, where its cone (opcode/funct plus the full-word EBREAK
+  // match) sat on the imem -> decode -> ID/EX path. EX/MEM.ctrl.is_illegal
+  // arrives holding ID's opcode pre-check and EX's misaligned-target
+  // trap. Only the decoder's is_illegal output is used; synthesis drops
+  // the rest of this instance.
+  logic dec_is_illegal;
+
+  /* verilator lint_off PINCONNECTEMPTY */
+  decoder u_ill_dec (
+    .instr      (in.instr),
+    .alu_op     (),
+    .alu_src    (),
+    .branch_op  (),
+    .is_branch  (),
+    .is_jump    (),
+    .is_jalr    (),
+    .is_lui     (),
+    .is_auipc   (),
+    .is_div     (),
+    .mem_read   (),
+    .mem_write  (),
+    .mem_width  (),
+    .mem_sext   (),
+    .reg_write  (),
+    .mem_to_reg (),
+    .is_illegal (dec_is_illegal)
+  );
+  /* verilator lint_on PINCONNECTEMPTY */
+
   // Stall-only D-side (see header).
   logic        ld;          // aligned load in MEM
   logic        st;          // aligned store in MEM
@@ -169,10 +200,10 @@ module mem_stage (
                    );
 
     ctrl_with_trap = in.ctrl;
-    if (mem_misalign) begin
-      ctrl_with_trap.is_illegal = 1'b1;
+    ctrl_with_trap.is_illegal = in.ctrl.is_illegal || dec_is_illegal
+                             || mem_misalign;
+    if (mem_misalign)
       ctrl_with_trap.reg_write  = 1'b0;
-    end
 
     ld        = in.ctrl.mem_read  && !mem_misalign;
     st        = in.ctrl.mem_write && !mem_misalign;

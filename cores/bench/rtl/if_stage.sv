@@ -38,7 +38,7 @@
 // BRANCH (valid funct3 only) and JAL, and pred_target = pc + B/J-imm is
 // formed from those same bits. JAL is always predicted taken; a BRANCH
 // is predicted taken when its 2-bit counter in a 64-entry bimodal BHT
-// (flops, indexed by pc[7:2]) is >= 2. JALR is never predicted. A target
+// (indexed by pc[7:2]) is >= 2. JALR is never predicted. A target
 // with imm[1] set (misaligned without C) is never predicted, so EX's
 // misalign trap only ever sees unpredicted instructions. On a taken
 // prediction pc_d = pred_target, and since pc_d is also the replay
@@ -51,6 +51,13 @@
 // mispredict redirects to alt_target (the path IF did not take), which
 // is carried down with the instruction. BHT counters are written by EX
 // one cycle after resolution (bht_we / bht_widx / bht_wdata).
+//
+// The BHT has no reset: every counter starts weakly-not-taken (2'b01)
+// from an initial block, which Verilator, the formal flow and the Gowin
+// LUT-RAM INIT all honour. With a plain write port and an async read the
+// array infers distributed LUT RAM (Gowin RAM16SDP4) instead of 128
+// flops and a LUT-mux read tree. A counter only steers prediction, never
+// architectural state, so skipping the reset cannot affect correctness.
 //
 // Latency:        PC-reg update is synchronous; output is combinational.
 // RVFI fields:    feeds pc_rdata (via ID/EX/MEM/WB) and pc_wdata (via
@@ -110,12 +117,12 @@ module if_stage (
     pred_raw    = (pd_jal || (pd_br && bht_ctr[1])) && !pimm[1];
   end
 
+  initial begin
+    for (int i = 0; i < BHT_ENTRIES; i++) bht[i] = 2'b01;  // weakly not-taken
+  end
+
   always_ff @(posedge clock) begin
-    if (reset) begin
-      for (int i = 0; i < BHT_ENTRIES; i++) bht[i] <= 2'b01;  // weakly not-taken
-    end else if (bht_we) begin
-      bht[bht_widx] <= bht_wdata;
-    end
+    if (bht_we) bht[bht_widx] <= bht_wdata;
   end
 
   // Redirect must override stall: a BRANCH/JAL/JALR in EX may fire

@@ -77,8 +77,8 @@
                               // validated opcode/funct arms only.
   } ctrl_t;
 
-  // Pre-decoded ALU controls. alu_predecode (alu.sv) expands ctrl.alu_op
-  // into this bundle in ID and it is registered in ID/EX, so EX's ALU sees
+  // Pre-decoded ALU controls. id_stage decodes them from the instruction
+  // bits in ID and they are registered in ID/EX, so EX's ALU sees
   // one-hot result selects and operand modifiers straight from flops and
   // never decodes the opcode. All-zero (DIV/REM) selects nothing: the
   // ALU output is 0. A flush bubble keeps the killed instruction's

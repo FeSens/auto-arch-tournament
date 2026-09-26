@@ -3,8 +3,8 @@
 // RV32IM combinational ALU: RV32I ops plus the four MUL variants, split
 // in two so the opcode decode is off the EX critical path:
 //
-//   alu_predecode  op (ALU_*) -> alu_ctl_t. Runs in ID; the result is
-//                  registered in ID/EX.
+//   alu_predecode  op (ALU_*) -> alu_ctl_t. The core's ID stage decodes the
+//                  same controls straight from the instruction bits.
 //   alu_core       (ctl, a, b) -> out. Runs in EX from the registered
 //                  controls: one shared 33-bit add/sub (ADD, SUB, and
 //                  SLT/SLTU from its sign / carry), one 33-bit arithmetic
@@ -12,8 +12,8 @@
 //                  (MUL/MULH/MULHU/MULHSU), and a one-hot AND-OR result
 //                  merge instead of an opcode-indexed mux.
 //   alu            the original (op, a, b) -> out view, chaining the two.
-//                  Used by test/test_alu.py; the core instantiates the
-//                  halves separately (id_stage / ex_stage).
+//                  Used by test/test_alu.py; the core instantiates only
+//                  alu_core (ex_stage).
 //
 // The hardware multiplier is SystemVerilog `*` on signed types, which
 // both Verilator and Yosys support and turn into reasonable structural
@@ -71,6 +71,10 @@ module alu_core (
 );
 
   logic [32:0] sum;      // {carry, a + b} or {carry, a - b} (sub)
+  // sum_ext[0] only generates the carry-in; it is not part of the result.
+  /* verilator lint_off UNUSEDSIGNAL */
+  logic [33:0] sum_ext;
+  /* verilator lint_on UNUSEDSIGNAL */
   logic        lt_s;
   logic        lt_u;
   logic [31:0] sll;
@@ -82,8 +86,12 @@ module alu_core (
   logic [31:0] mul_hi;
 
   always_comb begin
-    // a - b = a + ~b + 1; carry out = (a >= b) unsigned.
-    sum  = {1'b0, a} + {1'b0, b ^ {32{ctl.sub}}} + {32'b0, ctl.sub};
+    // a - b = a + ~b + 1; carry out = (a >= b) unsigned. The +1 enters as
+    // the carry out of an extra low bit (1 + sub), so this is one
+    // two-operand 34-bit add, i.e. a single carry chain, instead of a
+    // three-addend sum that synthesis can split into two chained adders.
+    sum_ext = {1'b0, a, 1'b1} + {1'b0, b ^ {32{ctl.sub}}, ctl.sub};
+    sum     = sum_ext[33:1];
     // Signs differ: a < b iff a is negative. Same sign: the difference
     // cannot overflow, so its sign bit is the answer.
     lt_s = (a[31] ^ b[31]) ? a[31] : sum[31];

@@ -24,9 +24,14 @@
 // off valid). A valid entry always has its data half captured on the
 // same edge as its control half.
 //
+// ctrl.is_illegal is only pre-checked here (opcode not in RV32IM): MEM
+// ORs in the decoder's full is_illegal from EX/MEM.instr (see
+// mem_stage.sv), so the full decode (funct fields plus the 32-bit EBREAK
+// match) stays off the imem -> ID/EX path. The pre-check is a subset of
+// the full decode, so the retired trap bit is unchanged.
+//
 // Latency:        1 cycle (ID/EX register clocked here).
-// RVFI fields:    feeds rs1_addr, rs1_rdata, rs2_addr, rs2_rdata, insn,
-//                 trap (via ctrl.is_illegal).
+// RVFI fields:    feeds rs1_addr, rs1_rdata, rs2_addr, rs2_rdata, insn.
 module id_stage (
   input  logic              clock,
   input  logic              reset,
@@ -58,8 +63,9 @@ module id_stage (
   logic        dec_mem_sext;
   logic        dec_reg_write;
   logic        dec_mem_to_reg;
-  logic        dec_is_illegal;
 
+  // is_illegal is left open: MEM decodes it from EX/MEM.instr.
+  /* verilator lint_off PINCONNECTEMPTY */
   decoder u_decoder (
     .instr      (in.instr),
     .alu_op     (dec_alu_op),
@@ -77,8 +83,9 @@ module id_stage (
     .mem_sext   (dec_mem_sext),
     .reg_write  (dec_reg_write),
     .mem_to_reg (dec_mem_to_reg),
-    .is_illegal (dec_is_illegal)
+    .is_illegal ()
   );
+  /* verilator lint_on PINCONNECTEMPTY */
 
   logic [31:0] imm;
   imm_gen u_imm (.instr(in.instr), .imm(imm));
@@ -87,6 +94,18 @@ module id_stage (
   // are also wired to the hazard unit at top level for load-use detection.
   assign rs1_addr = in.instr[19:15];
   assign rs2_addr = in.instr[24:20];
+
+  // Opcode-only illegal pre-check (a subset of the decoder's is_illegal,
+  // default illegal). MEM ORs in the full decode.
+  logic opc_illegal;
+  always_comb begin
+    case (in.instr[6:0])
+      7'b0110011, 7'b0010011, 7'b0000011, 7'b0100011, 7'b1100011,
+      7'b1101111, 7'b1100111, 7'b0110111, 7'b0010111, 7'b0001111,
+      7'b1110011: opc_illegal = 1'b0;
+      default:    opc_illegal = 1'b1;
+    endcase
+  end
 
   ctrl_t ctrl_decoded;
   always_comb begin
@@ -105,13 +124,56 @@ module id_stage (
     ctrl_decoded.mem_sext   = dec_mem_sext;
     ctrl_decoded.reg_write  = dec_reg_write;
     ctrl_decoded.mem_to_reg = dec_mem_to_reg;
-    ctrl_decoded.is_illegal = dec_is_illegal;
+    ctrl_decoded.is_illegal = opc_illegal;
   end
 
-  // ALU opcode -> one-hot controls, decoded here so EX's ALU runs from
-  // ID/EX flops with no opcode decode on its path.
+  // One-hot ALU controls, decoded here so EX's ALU runs from ID/EX flops
+  // with no opcode decode on its path. They are decoded straight from the
+  // instruction bits rather than through dec_alu_op + alu_predecode,
+  // which puts a binary re-encode on the imem -> ID/EX path. Legal
+  // instructions get exactly alu_predecode(dec_alu_op). Of funct7 only
+  // instr[25] (M-ext) and instr[30] (SUB/SRA) are read, so an illegal
+  // OP / OP-IMM encoding may select some ALU op, but it never writes rd
+  // or touches memory, so its ALU result is unused:
+  //   rr  : OP with instr[25] = 0 (base R-type)     ri : OP-IMM
+  //   mul : OP with instr[25] = 1 (MUL..REMU; DIV/REM select nothing)
+  //   everything else that is not LUI adds (loads, stores, AUIPC; the
+  //   ALU result of branches / jumps / FENCE / EBREAK is unused).
+  // sub / sra / mul_*_sgn are only read under their selects.
+  logic     opc_op;
+  logic     opc_opimm;
+  logic     opc_lui;
+  logic     alu_rr_ri;
+  logic     alu_mul;
+  logic [2:0] f3;
   alu_ctl_t alu_ctl_decoded;
-  alu_predecode u_alu_pd (.op(dec_alu_op), .ctl(alu_ctl_decoded));
+
+  always_comb begin
+    f3        = in.instr[14:12];
+    opc_op    = (in.instr[6:0] == 7'b0110011);
+    opc_opimm = (in.instr[6:0] == 7'b0010011);
+    opc_lui   = (in.instr[6:0] == 7'b0110111);
+    alu_rr_ri = (opc_op && !in.instr[25]) || opc_opimm;
+    alu_mul   = opc_op && in.instr[25];
+
+    alu_ctl_decoded.sub        = alu_rr_ri && ((f3 == 3'd0) ? opc_op && in.instr[30]
+                                                             : (f3[2:1] == 2'b01));
+    alu_ctl_decoded.sra        = in.instr[30];
+    alu_ctl_decoded.mul_a_sgn  = (f3 == 3'd1) || (f3 == 3'd2);   // MULH, MULHSU
+    alu_ctl_decoded.mul_b_sgn  = (f3 == 3'd1);                   // MULH
+    alu_ctl_decoded.sel_sum    = (alu_rr_ri && f3 == 3'd0)
+                               || !(opc_op || opc_opimm || opc_lui);
+    alu_ctl_decoded.sel_and    = alu_rr_ri && f3 == 3'd7;
+    alu_ctl_decoded.sel_or     = alu_rr_ri && f3 == 3'd6;
+    alu_ctl_decoded.sel_xor    = alu_rr_ri && f3 == 3'd4;
+    alu_ctl_decoded.sel_slt    = alu_rr_ri && f3 == 3'd2;
+    alu_ctl_decoded.sel_sltu   = alu_rr_ri && f3 == 3'd3;
+    alu_ctl_decoded.sel_sll    = alu_rr_ri && f3 == 3'd1;
+    alu_ctl_decoded.sel_sr     = alu_rr_ri && f3 == 3'd5;
+    alu_ctl_decoded.sel_b      = opc_lui;
+    alu_ctl_decoded.sel_mul_lo = alu_mul && f3 == 3'd0;
+    alu_ctl_decoded.sel_mul_hi = alu_mul && !f3[2] && (f3 != 3'd0);
+  end
 
   // ── ID/EX register ──────────────────────────────────────────────────────
   // Data half: the whole next-state bundle, resetless. Its copies of the

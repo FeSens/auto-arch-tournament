@@ -165,6 +165,8 @@ module ex_stage (
   // (without C extension that means [1:0] != 0). We trap the offending
   // instruction, suppress the redirect (PC stays linear), and clear
   // reg_write so JAL/JALR don't write the return address on trap.
+  // The illegal-encoding decode proper is ORed in by MEM from
+  // EX/MEM.instr; ID/EX.ctrl.is_illegal carries only ID's opcode check.
   logic misalign_branch;
   logic misalign_jump;
   logic misalign_fault;
