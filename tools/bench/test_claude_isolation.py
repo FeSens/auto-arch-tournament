@@ -23,6 +23,7 @@ def _settings(tmp_path):
     own = ctmp / re.sub(r"[^A-Za-z0-9]", "-", str(clone.resolve()))
     for d in (ctmp / "-Users-me-other-project", own, ctmp / (own.name + "-cores-bench-worktrees-x")):
         d.mkdir(parents=True)
+    (ctmp / "leftover_scratch.py").write_text("x")
     home = tmp_path / "home"
     home.mkdir()
     s = claude_isolation_settings(clone, uid=501, home=home, claude_tmp=ctmp)
@@ -47,6 +48,7 @@ def test_sandbox_confines_bash_to_clone(tmp_path):
     assert str(home) in fs["denyRead"] and "/private/tmp" in fs["denyRead"]
     # Other Claude sessions' temp dirs are denied; the rep's own are not.
     assert str(ctmp / "-Users-me-other-project") in fs["denyRead"]
+    assert str(ctmp / "leftover_scratch.py") in fs["denyRead"]
     assert not any(d.startswith(str(own)) for d in fs["denyRead"])
     assert str(ctmp) in fs["allowRead"] and str(clone.resolve()) in fs["allowRead"]
 

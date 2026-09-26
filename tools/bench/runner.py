@@ -705,9 +705,11 @@ def claude_isolation_settings(clone: Path, uid: int | None = None,
     # non-alphanumeric turned into '-'; the rep's own (clone root and
     # slot worktrees) stay readable.
     own = re.sub(r"[^A-Za-z0-9]", "-", str(clone))
+    # Every existing entry, files included: loose scratch files other
+    # sessions (or an earlier rep's agents) left at the top level.
     other_sessions = sorted(
         str(p) for p in claude_tmp.glob("*")
-        if p.is_dir() and not p.name.startswith(own)
+        if not p.name.startswith(own)
     ) if claude_tmp.is_dir() else []
     return {
         "disableAllHooks": True,
