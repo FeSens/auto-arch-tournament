@@ -243,13 +243,14 @@ def _contract_fingerprint(root: Path) -> dict[str, str]:
     return {f: _hash_file(root / f) for f in files}
 
 
-def _riscv_formal_fingerprint(root: Path) -> dict[str, str]:
+def _riscv_formal_fingerprint(root: Path, rf: Path | None = None,
+                              label: str = "riscv-formal") -> dict[str, str]:
     """HEAD + dirty paths of the (possibly shared) riscv-formal checkout.
 
     `cores/` is excluded: formal/run_all.sh stages each run under
     cores/<CORE_NAME>-<pid>/ there, and concurrent slots do so legitimately.
     """
-    rf = root / "formal" / "riscv-formal"
+    rf = rf or root / "formal" / "riscv-formal"
     if not rf.exists():
         return {}
     rf = rf.resolve()
@@ -268,9 +269,9 @@ def _riscv_formal_fingerprint(root: Path) -> dict[str, str]:
             if base.is_dir():
                 for f in sorted(base.rglob("*")):
                     if f.is_file() and "__pycache__" not in f.parts:
-                        fp[f"riscv-formal/{f.relative_to(rf)}"] = _hash_file(f)
+                        fp[f"{label}/{f.relative_to(rf)}"] = _hash_file(f)
         return fp
-    fp = {"riscv-formal@HEAD": head.stdout.strip()}
+    fp = {f"{label}@HEAD": head.stdout.strip()}
     status = subprocess.run(
         ["git", "-C", str(rf), "status", "--porcelain", "-z",
          "--untracked-files=all", "--no-renames", "--", ".", ":(exclude)cores"],
@@ -280,7 +281,7 @@ def _riscv_formal_fingerprint(root: Path) -> dict[str, str]:
         if len(entry) < 4:
             continue
         path = entry[3:]
-        fp[f"riscv-formal/{path}"] = _hash_file(rf / path)
+        fp[f"{label}/{path}"] = _hash_file(rf / path)
     return fp
 
 
@@ -306,8 +307,31 @@ def take_snapshot(root: str | Path = ".") -> dict[str, str]:
     return {
         **_contract_fingerprint(root),
         **_riscv_formal_fingerprint(root),
+        **_riscv_formal_fingerprint(root, root / EVAL_RISCV_FORMAL,
+                                    "riscv-formal-eval"),
         **_toolchain_fingerprint(),
     }
+
+
+# A harness-only riscv-formal copy (bench clones make one). Agents run
+# their own formal self-checks in formal/riscv-formal; the eval runs
+# against this copy instead. formal/run_all.sh reaps per-PID work dirs
+# whose `kill -0` fails, and from inside an agent sandbox kill -0 on any
+# outside PID fails, so a shared copy let an agent's self-check delete
+# the harness's live formal run (2026-09-26 incident).
+EVAL_RISCV_FORMAL = Path(".tmp") / "riscv-formal-eval"
+
+
+def use_eval_riscv_formal(worktree: str | Path, root: str | Path = ".") -> bool:
+    """Point the worktree's riscv-formal symlink at the harness-only copy,
+    when one exists. Called after the agent finishes, before formal."""
+    src = Path(root) / EVAL_RISCV_FORMAL
+    link = Path(worktree) / "formal" / "riscv-formal"
+    if not src.is_dir() or not link.is_symlink():
+        return False
+    link.unlink()
+    link.symlink_to(src.resolve())
+    return True
 
 
 def snapshot_changes(before: dict[str, str], after: dict[str, str]) -> list[str]:

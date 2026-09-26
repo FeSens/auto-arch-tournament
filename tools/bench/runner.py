@@ -48,6 +48,7 @@ from tools.bench.telemetry import (  # noqa: F401  (re-exported)
     summarize_run,
 )
 from tools.bench.transcript import publish_transcript
+from tools.sandbox import EVAL_RISCV_FORMAL
 from tools.eval._subprocess import install_tree_reaper, kill_process_tree
 
 
@@ -486,8 +487,11 @@ def clone_fixture(repo_root: Path, ref: str, dest: Path) -> None:
     # isn't supported on the underlying filesystem. Either way, never
     # inherit a prior run's SBY work dirs into a fresh rep clone.
     rf_src = find_riscv_formal()
-    if rf_src is not None:
-        rf_dest = dest / "formal" / "riscv-formal"
+    if rf_src is None:
+        return
+    # Two copies: formal/riscv-formal for the agents' own formal runs, and
+    # a harness-only one the eval uses (tools/sandbox.py EVAL_RISCV_FORMAL).
+    for rf_dest in (dest / "formal" / "riscv-formal", dest / EVAL_RISCV_FORMAL):
         rf_dest.parent.mkdir(parents=True, exist_ok=True)
         if not rf_dest.exists():
             # APFS clonefile (cp -c) is copy-on-write: ~zero extra disk
@@ -505,9 +509,9 @@ def clone_fixture(repo_root: Path, ref: str, dest: Path) -> None:
                 subprocess.run(
                     ["cp", "-R", str(rf_src.resolve()), str(rf_dest)],
                     check=True)
-            # Never inherit prior runs' SBY work dirs into a fresh rep.
-            for junk in rf_dest.glob("cores/*-[0-9]*"):
-                shutil.rmtree(junk, ignore_errors=True)
+        # Never inherit prior runs' SBY work dirs into a fresh rep.
+        for junk in rf_dest.glob("cores/*-[0-9]*"):
+            shutil.rmtree(junk, ignore_errors=True)
 
 
 def install_opencode_config(clone: Path) -> None:
@@ -691,6 +695,7 @@ def claude_isolation_settings(clone: Path, uid: int | None = None,
     uid = os.getuid() if uid is None else uid
     home = home or Path.home()
     rf = clone / "formal" / "riscv-formal"
+    rf_eval = clone / EVAL_RISCV_FORMAL
     reads = [str(clone), *_tool_read_roots(home)]
     if rf.exists():
         reads.append(str(rf.resolve()))
@@ -725,13 +730,13 @@ def claude_isolation_settings(clone: Path, uid: int | None = None,
             "allowUnsandboxedCommands": False,
             "filesystem": {
                 "allowWrite": [str(clone)],
-                # The clone's riscv-formal is shared by every agent and the
-                # harness (worktrees symlink to it). formal/run_all.sh reaps
+                # The eval's riscv-formal copy. formal/run_all.sh reaps
                 # per-PID work dirs whose `kill -0` fails, and kill -0 on any
                 # PID outside the sandbox fails, so a writable copy lets an
                 # agent's self-check delete the harness's live formal run
-                # (2026-09-26 incident). Read-only, as it was for Codex.
-                "denyWrite": [*{str(rf), str(rf.resolve())}],
+                # (2026-09-26 incident). formal/riscv-formal stays writable
+                # for the agents' own formal runs, as it is for Codex.
+                "denyWrite": [str(rf_eval)],
                 "denyRead": [str(home), "/private/tmp", *other_sessions],
                 "allowRead": [*reads, str(claude_tmp)],
             },
