@@ -6,13 +6,19 @@
 // must be stalled by exactly one cycle.
 //
 // Outputs:
-//   stall_if / stall_id : freeze the PC reg and the IF/ID combinational
-//                          payload (cleared by ID's flush input).
+//   stall_if            : freeze the PC reg.
+//   hold_id             : freeze the whole ID/EX register (dmem stall,
+//                          divide in EX). Load-use is not in it: its
+//                          bubble comes from flush_id alone.
 //   flush_if / flush_id : on EX redirect, kill the two in-flight
 //                          instructions ahead of the redirect target.
 //   flush_id            : also kills ID's own register on load-use to
 //                          inject a single-cycle bubble between LOAD
-//                          and the dependent instruction.
+//                          and the dependent instruction. It clears
+//                          only ID/EX's side-effect control bits (see
+//                          id_stage.sv), so this late net fans out to a
+//                          handful of flops instead of the whole
+//                          register's enable.
 //
 // Latency:        combinational.
 // RVFI fields:    n/a (governs validity of subsequent retirements).
@@ -40,9 +46,9 @@ module hazard_unit (
   // redirects, so load_use / redirect are both 0 while this is high.
   input  logic       ex_div_busy,
   output logic       stall_if,          // PC reg holds
-  output logic       stall_id,          // ID/EX register holds (vs. bubble)
+  output logic       hold_id,           // ID/EX register holds (all of it)
   output logic       flush_if,          // IF/ID comb output -> NOP
-  output logic       flush_id,          // ID/EX register captures '0
+  output logic       flush_id,          // ID/EX control bits clear (bubble)
   output logic       stall_ex_mem,      // EX/MEM register holds
   output logic       hold_mem_wb        // MEM/WB clears valid only;
                                         // data fields stay (for fwd)
@@ -77,8 +83,13 @@ module hazard_unit (
     //   - otherwise   -> capture
     // dmem_stall takes precedence over load_use's bubble: re-evaluate
     // load_use next cycle when the bus unblocks. flush_id is 1 only when
-    // we want bubble (not hold).
-    stall_id      = dmem_stall || load_use_hazard || ex_div_busy;
+    // we want bubble (not hold). load_use needs no hold term: without
+    // dmem_stall it already raises flush_id (the payload the bubble
+    // captures is inert, and the PC hold re-presents the instruction),
+    // and with dmem_stall it is covered by hold_id. A divide in EX is
+    // never a load and never redirects, so flush_id and ex_div_busy are
+    // never high together.
+    hold_id       = dmem_stall || ex_div_busy;
     flush_id      = (load_use_hazard || redirect) && !dmem_stall;
     // EX/MEM register: holds on dmem_stall (LOAD waits in MEM until the
     // bus delivers).

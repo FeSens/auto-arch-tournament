@@ -80,8 +80,10 @@
   // Pre-decoded ALU controls. alu_predecode (alu.sv) expands ctrl.alu_op
   // into this bundle in ID and it is registered in ID/EX, so EX's ALU sees
   // one-hot result selects and operand modifiers straight from flops and
-  // never decodes the opcode. All-zero (reset / flush bubble, DIV/REM)
-  // selects nothing: the ALU output is 0.
+  // never decodes the opcode. All-zero (DIV/REM) selects nothing: the
+  // ALU output is 0. A flush bubble keeps the killed instruction's
+  // alu_ctl (the ID/EX data half has no clear); its result is never
+  // written or used as an address.
   typedef struct packed {
     logic sub;         // SUB, SLT, SLTU: shared adder computes a + ~b + 1
     logic sra;         // right-shift fill = a[31]

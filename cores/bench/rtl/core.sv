@@ -82,7 +82,7 @@ module core (
   mem_wb_t mem_wb_w;
 
   // hazard / forward
-  logic       stall_if, stall_id, flush_if, flush_id;
+  logic       stall_if, hold_id, flush_if, flush_id;
   logic       stall_ex_mem, hold_mem_wb;
   logic       ex_div_busy;
   logic       fetch_ready;   // imem delivered, or IF replay store hit
@@ -128,7 +128,7 @@ module core (
   id_stage u_id (
     .clock    (clock),
     .reset    (reset),
-    .stall    (stall_id),
+    .hold     (hold_id),
     .flush    (flush_id),
     .in       (if_id_w),
     .rs1_addr (rs1_addr_w),
@@ -203,7 +203,7 @@ module core (
     .ex_mem_mem_op  (ex_mem_w.ctrl.mem_read | ex_mem_w.ctrl.mem_write),
     .ex_div_busy    (ex_div_busy),
     .stall_if       (stall_if),
-    .stall_id       (stall_id),
+    .hold_id        (hold_id),
     .flush_if       (flush_if),
     .flush_id       (flush_id),
     .stall_ex_mem   (stall_ex_mem),

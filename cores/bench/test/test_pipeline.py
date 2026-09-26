@@ -23,6 +23,13 @@ always taken, misaligned targets never predicted): every retirement of
 each predictor program is compared against a small golden ISS, so a
 wrong-path retirement, a lost mispredict recovery or a bad rd value
 fails exactly, and the same programs are replayed under bus stalls.
+
+Also covers the ID/EX bubble discipline: a bubble clears only the
+control half of ID/EX, so the killed instruction's payload (a SW, a
+JALR, a DIV) must stay inert.
+
+The GPRs have no reset, so every run starts by zeroing them in software
+(CLEAR_REGS).
 """
 from __future__ import annotations
 
@@ -98,9 +105,16 @@ def ECALL():             return 0x00000073
 # and writes x29 instead of vanishing silently.
 POISON = 0xDEADBEEF
 
+# The GPRs have no reset (reg_file.sv), so every _run first retires one
+# ADDI xN, x0, 0 per register: each program then starts from the
+# all-zero register file the checks and the golden ISS assume, and a
+# replayed program cannot see the previous run's values.
+CLEAR_REGS = [ADDI(r, 0, 0) for r in range(1, 32)] + [EBREAK()]
+
 
 async def _run(dut, program, dmem_init=None, max_cycles=200, ready=None,
-               start_clock=True, fetch_log=None):
+               start_clock=True, fetch_log=None, dmem_log=None,
+               clear_regs=True):
     """Drive imem/dmem; capture RVFI retirements until EBREAK or max_cycles.
 
     imem is read combinationally each cycle from imemAddr; dmem similarly.
@@ -114,7 +128,10 @@ async def _run(dut, program, dmem_init=None, max_cycles=200, ready=None,
     imem_ready=0, imemData carries POISON instead of the addressed word.
 
     `fetch_log` (optional list) gets one (cycle, imemAddr, imem_ready)
-    tuple appended per cycle.
+    tuple appended per cycle; `dmem_log` one (cycle, dmemAddr, dmemREn,
+    dmemWEn, dmem_ready) tuple.
+
+    `clear_regs` zeroes x1..x31 first (CLEAR_REGS, then the reset below).
 
     Returns (retirements, dmem) where retirements is a list of dicts
     sampled on every cycle that rvfi_valid=1.
@@ -127,6 +144,10 @@ async def _run(dut, program, dmem_init=None, max_cycles=200, ready=None,
     # only one Clock driver toggles dut.clock.
     if start_clock:
         cocotb.start_soon(Clock(dut.clock, 10, "ns").start())
+
+    if clear_regs:
+        await _run(dut, CLEAR_REGS, max_cycles=100, start_clock=False,
+                   clear_regs=False)
 
     dut.reset.value = 1
     dut.io_imemData.value = 0
@@ -158,6 +179,8 @@ async def _run(dut, program, dmem_init=None, max_cycles=200, ready=None,
         dut.io_dmemReady.value = dready
         if fetch_log is not None:
             fetch_log.append((cycle, ia, iready))
+        if dmem_log is not None:
+            dmem_log.append((cycle, da, int(dut.io_dmemREn.value), wen, dready))
 
         # Apply dmem write side effects (only if the bus accepts them).
         if wen and dready:
@@ -1222,6 +1245,79 @@ async def predict_programs_under_bus_stalls(dut):
             _check_pred(rets, prog, pcs, regs)
             assert _arch(rets) == _arch(base), (
                 f"program {idx} run {k}: RVFI stream differs under stalls")
+
+
+# ── ID/EX bubbles ─────────────────────────────────────────────────────────
+# A bubble clears only ID/EX's control half (valid, pred_taken, reg_write,
+# mem_read, mem_write, is_branch, is_jump, is_div); the data half keeps
+# the killed instruction. On a load-use bubble that is the dependent
+# instruction itself: here a SW, a JALR and a DIV. A mispredicted BEQ
+# (first sighting, BHT weakly not-taken) adds a redirect bubble.
+PROG_BUBBLE = [
+    ADDI(3, 0, 0x40),        # 0   x3 = dmem base
+    ADDI(1, 0, 7),           # 4
+    SW  (1, 3, 0),           # 8   mem[0x40] = 7
+    ADDI(2, 0, 60),          # 12
+    SW  (2, 3, 8),           # 16  mem[0x48] = 60
+    LW  (1, 3, 0),           # 20  x1 = 7
+    SW  (1, 3, 4),           # 24  load-use: bubble holds this SW
+    LW  (4, 3, 8),           # 28  x4 = 60
+    JALR(5, 4, 0),           # 32  load-use: bubble holds this JALR; -> 60
+] + [ADDI(6, 0, 1)] * 6 + [  # 36..56 wrong path
+    LW  (7, 3, 4),           # 60  x7 = 7
+    DIV (8, 7, 1),           # 64  load-use: bubble holds this DIV; x8 = 1
+    BEQ (0, 0, 12),          # 68  taken, predicted not-taken -> 80
+    SW  (3, 3, 12),          # 72  wrong path: must never write
+    ADDI(9, 0, 99),          # 76  wrong path
+    ADD (10, 8, 7),          # 80  x10 = 8
+    EBREAK(),                # 84
+]
+BUBBLE_PCS = [0, 4, 8, 12, 16, 20, 24, 28, 32, 60, 64, 68, 80, 84]
+BUBBLE_REGS = {1: 7, 2: 60, 3: 0x40, 4: 60, 5: 36, 7: 7, 8: 1, 10: 8}
+
+
+def _accepted_dmem(log):
+    """dmem accesses the bus accepted, in bus order: (kind, word addr)."""
+    out = []
+    for _, da, ren, wen, dready in log:
+        if dready and wen:
+            out.append(("w", da & ~3))
+        if dready and ren:
+            out.append(("r", da & ~3))
+    return out
+
+
+def _retired_dmem(rets):
+    out = []
+    for r in rets:
+        if r["mem_wmask"]:
+            out.append(("w", r["mem_addr"]))
+        if r["mem_rmask"]:
+            out.append(("r", r["mem_addr"]))
+    return out
+
+
+@cocotb.test()
+async def bubble_payload_is_inert(dut):
+    """Load-use and mispredict bubbles carry a stale ID/EX payload but
+    never write dmem, redirect, start a divide, write rd or retire: the
+    retired stream matches the golden ISS, and the dmem accesses the bus
+    accepted are exactly the retired loads/stores, in order. Zero-wait
+    and under random imem + dmem stalls."""
+    first = True
+    for ready in (None, _random_ready(3000), _random_ready(3001)):
+        log = []
+        rets, dmem = await _run(dut, PROG_BUBBLE, max_cycles=800, ready=ready,
+                                start_clock=first, dmem_log=log)
+        first = False
+        _check_pred(rets, PROG_BUBBLE, BUBBLE_PCS, BUBBLE_REGS)
+        assert _accepted_dmem(log) == _retired_dmem(rets), (
+            f"dmem accesses {_accepted_dmem(log)} != retired {_retired_dmem(rets)}")
+        assert dmem == {0x40: 7, 0x44: 7, 0x48: 60}, dmem
+        if ready is None:
+            # The SW and the JALR really did take a load-use bubble.
+            cyc = {r["pc"]: r["cycle"] for r in rets}
+            assert cyc[24] - cyc[20] == 2 and cyc[32] - cyc[28] == 2, cyc
 
 
 def test_pipeline_runner():

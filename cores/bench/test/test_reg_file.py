@@ -1,5 +1,6 @@
 """Unit tests for rtl/reg_file.sv. Covers x0 hardwiring, write-first
-bypass, and the synchronous-reset-clears-all property."""
+bypass, and the resetless GPRs (reset does not touch the array, so it
+can map to LUT RAM; x0 still reads 0)."""
 from __future__ import annotations
 
 import cocotb
@@ -38,12 +39,28 @@ async def _read(dut, rs1, rs2):
 
 
 @cocotb.test()
-async def reset_clears_all(dut):
+async def x0_reads_zero_across_reset(dut):
+    cocotb.start_soon(Clock(dut.clock, 10, "ns").start())
+    rs1, rs2 = await _read(dut, 0, 0)
+    assert rs1 == 0 and rs2 == 0, "x0 before reset"
+    await _reset(dut)
+    rs1, rs2 = await _read(dut, 0, 0)
+    assert rs1 == 0 and rs2 == 0, "x0 after reset"
+
+
+@cocotb.test()
+async def writes_survive_reset(dut):
+    """The GPRs have no reset: a reset leaves every written value intact."""
     cocotb.start_soon(Clock(dut.clock, 10, "ns").start())
     await _reset(dut)
-    for r in range(32):
-        rs1, _ = await _read(dut, r, 0)
-        assert rs1 == 0, f"x{r} after reset = 0x{rs1:08x}"
+    vals = {r: (0x9E3779B9 * r) & 0xFFFFFFFF for r in range(1, 32)}
+    for r, v in vals.items():
+        await _write(dut, r, v)
+    await _reset(dut)
+    for r, v in vals.items():
+        rs1, rs2 = await _read(dut, r, 32 - r)
+        assert rs1 == v, f"x{r} after reset = 0x{rs1:08x}, expected 0x{v:08x}"
+        assert rs2 == vals[32 - r], f"x{32 - r} (rs2) after reset = 0x{rs2:08x}"
 
 
 @cocotb.test()

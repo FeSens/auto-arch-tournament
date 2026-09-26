@@ -8,14 +8,30 @@
 // IF's fetch-time prediction (pred_taken, bht_ctr, alt_target) is
 // latched into ID/EX unchanged; EX verifies it.
 //
+// The ID/EX register is split in two so the late bubble decision
+// (flush = load-use or redirect) drives the sync clear of 8 flops
+// instead of the reset/enable pins of the whole ~240-bit register:
+//   - control half: valid, pred_taken and ctrl.{reg_write, mem_read,
+//     mem_write, is_branch, is_jump, is_div}. Cleared on reset || flush,
+//     otherwise captured when !hold.
+//   - data half: every other field. No reset, captured when !hold.
+// A bubble therefore carries the killed instruction's payload with the
+// control bits cleared. That payload is inert: every side effect keys
+// off the control bits (redirect and the misalign trap off is_branch /
+// is_jump / pred_taken, the BHT write off valid && is_branch, the divide
+// start off valid && is_div, forwarding / load-use / regfile write off
+// reg_write / mem_read, the dmem enables off mem_read / mem_write, RVFI
+// off valid). A valid entry always has its data half captured on the
+// same edge as its control half.
+//
 // Latency:        1 cycle (ID/EX register clocked here).
 // RVFI fields:    feeds rs1_addr, rs1_rdata, rs2_addr, rs2_rdata, insn,
 //                 trap (via ctrl.is_illegal).
 module id_stage (
   input  logic              clock,
   input  logic              reset,
-  input  logic              stall,
-  input  logic              flush,
+  input  logic              hold,    // freeze ID/EX (dmem stall, divide busy)
+  input  logic              flush,   // bubble: clear the control half
   input  if_id_t  in,
   // regfile read interface
   output logic [4:0]        rs1_addr,
@@ -98,31 +114,77 @@ module id_stage (
   alu_predecode u_alu_pd (.op(dec_alu_op), .ctl(alu_ctl_decoded));
 
   // ── ID/EX register ──────────────────────────────────────────────────────
-  id_ex_t reg_q;
+  // Data half: the whole next-state bundle, resetless. Its copies of the
+  // 8 control-half fields are overridden in `out` and never read, so
+  // synthesis drops those flops.
+  id_ex_t d_next;
+  id_ex_t data_q;
+
+  always_comb begin
+    d_next.pc         = in.pc;
+    d_next.rs1_val    = rs1_data;
+    d_next.rs2_val    = rs2_data;
+    d_next.imm        = imm;
+    d_next.rd         = in.instr[11:7];
+    d_next.rs1_addr   = in.instr[19:15];
+    d_next.rs2_addr   = in.instr[24:20];
+    d_next.ctrl       = ctrl_decoded;
+    d_next.alu_ctl    = alu_ctl_decoded;
+    d_next.instr      = in.instr;
+    d_next.pred_taken = in.pred_taken;
+    d_next.bht_ctr    = in.bht_ctr;
+    d_next.alt_target = in.alt_target;
+    d_next.valid      = in.valid;
+  end
+
+  always_ff @(posedge clock) begin
+    if (!hold) data_q <= d_next;
+  end
+
+  // Control half. Fetch-time prediction travels with the instruction for
+  // EX to check; reset/flush clear pred_taken, so a bubble is never
+  // predicted.
+  logic valid_q;
+  logic pred_taken_q;
+  logic reg_write_q;
+  logic mem_read_q;
+  logic mem_write_q;
+  logic is_branch_q;
+  logic is_jump_q;
+  logic is_div_q;
 
   always_ff @(posedge clock) begin
     if (reset || flush) begin
-      reg_q <= '0;
-    end else if (!stall) begin
-      reg_q.pc       <= in.pc;
-      reg_q.rs1_val  <= rs1_data;
-      reg_q.rs2_val  <= rs2_data;
-      reg_q.imm      <= imm;
-      reg_q.rd       <= in.instr[11:7];
-      reg_q.rs1_addr <= in.instr[19:15];
-      reg_q.rs2_addr <= in.instr[24:20];
-      reg_q.ctrl     <= ctrl_decoded;
-      reg_q.alu_ctl  <= alu_ctl_decoded;
-      reg_q.instr    <= in.instr;
-      // Fetch-time prediction travels with the instruction for EX to
-      // check; reset/flush clear it, so a bubble is never predicted.
-      reg_q.pred_taken <= in.pred_taken;
-      reg_q.bht_ctr    <= in.bht_ctr;
-      reg_q.alt_target <= in.alt_target;
-      reg_q.valid    <= in.valid;
+      valid_q      <= 1'b0;
+      pred_taken_q <= 1'b0;
+      reg_write_q  <= 1'b0;
+      mem_read_q   <= 1'b0;
+      mem_write_q  <= 1'b0;
+      is_branch_q  <= 1'b0;
+      is_jump_q    <= 1'b0;
+      is_div_q     <= 1'b0;
+    end else if (!hold) begin
+      valid_q      <= in.valid;
+      pred_taken_q <= in.pred_taken;
+      reg_write_q  <= dec_reg_write;
+      mem_read_q   <= dec_mem_read;
+      mem_write_q  <= dec_mem_write;
+      is_branch_q  <= dec_is_branch;
+      is_jump_q    <= dec_is_jump;
+      is_div_q     <= dec_is_div;
     end
   end
 
-  assign out = reg_q;
+  always_comb begin
+    out                = data_q;
+    out.valid          = valid_q;
+    out.pred_taken     = pred_taken_q;
+    out.ctrl.reg_write = reg_write_q;
+    out.ctrl.mem_read  = mem_read_q;
+    out.ctrl.mem_write = mem_write_q;
+    out.ctrl.is_branch = is_branch_q;
+    out.ctrl.is_jump   = is_jump_q;
+    out.ctrl.is_div    = is_div_q;
+  end
 
 endmodule

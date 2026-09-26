@@ -9,15 +9,20 @@
 //     and lets the ID stage see WB-stage writes within the same cycle
 //     without an extra forwarding mux.
 //
-// The reset clears all 32 registers. Distributed-LUT or flop inference is
-// fine here; explicit BRAM attribution lives on the larger imem/dmem
-// declarations in soc.sv (phase 5).
+// The GPRs have no reset: RISC-V does not define their reset value, and
+// the simulators (Verilator cocotb / cosim) zero-initialize them. With a
+// plain write port the array infers distributed LUT RAM (Gowin
+// RAM16SDP4, one bank per read port) instead of 992 flops and two 32:1
+// LUT read-mux trees. `reset` is kept on the port list for the instance
+// and unit-test interface only.
 //
 // Latency:        write = 1 cycle (synchronous), read = combinational.
 // RVFI fields:    feeds rs1_rdata, rs2_rdata, rd_wdata.
 module reg_file (
   input  logic        clock,
+  /* verilator lint_off UNUSEDSIGNAL */
   input  logic        reset,
+  /* verilator lint_on UNUSEDSIGNAL */
 
   input  logic [4:0]  rs1_addr,
   input  logic [4:0]  rs2_addr,
@@ -32,11 +37,7 @@ module reg_file (
   logic [31:0] regs [0:31];
 
   always_ff @(posedge clock) begin
-    if (reset) begin
-      for (int i = 0; i < 32; i++) regs[i] <= 32'b0;
-    end else if (w_en && w_addr != 5'b0) begin
-      regs[w_addr] <= w_data;
-    end
+    if (w_en && w_addr != 5'b0) regs[w_addr] <= w_data;
   end
 
   always_comb begin

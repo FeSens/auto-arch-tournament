@@ -74,6 +74,7 @@ module div_unit (
   logic        neg_q;       // negate rq path: PREP = a<0, FIXUP = result<0
   logic        dneg_q;      // negate dvs in PREP (b<0, signed op)
   logic        sel_rem_q;   // FIXUP source: 1 = rem_q, 0 = rq_q
+  logic        b_nz_q;      // b != 0, registered in PREP, read in ITER
 
   assign busy   = (state_q != ST_IDLE) && (state_q != ST_DONE);
   assign done   = (state_q == ST_DONE);
@@ -95,9 +96,11 @@ module div_unit (
   end
 
   // ── Result sign (from the raw operands held in a_q / b_q) ─────────────
-  // b == 0 is registered in PREP (b_zero_q) and the sign is folded into
-  // neg_q during ITER, so the 32-bit zero detect and the sign logic are
-  // two short register-to-register paths instead of one long one.
+  // b != 0 is registered in PREP (b_nz_q) and folded into neg_q during
+  // ITER, so the 32-bit zero detect and the sign logic are two short
+  // register-to-register paths instead of one long one. neg_q is not
+  // read again until FIXUP, and the fold is idempotent over the 32 ITER
+  // cycles.
   /* verilator lint_off UNUSEDSIGNAL */
   logic a_neg;
   logic b_neg;
@@ -107,8 +110,8 @@ module div_unit (
     a_neg   = !is_uns_q && a_q[31];
     b_neg   = !is_uns_q && b_q[31];
     // REM takes the dividend's sign; DIV is negative iff the signs differ,
-    // except x / 0 which must stay all ones.
-    res_neg = is_rem_q ? a_neg : ((a_neg ^ b_neg) && (b_q != 32'b0));
+    // except x / 0 which must stay all ones (ITER clears neg_q for that).
+    res_neg = is_rem_q ? a_neg : (a_neg ^ b_neg);
   end
 
   // ── ITER: one restoring step ──────────────────────────────────────────
@@ -151,6 +154,7 @@ module div_unit (
       neg_q     <= 1'b0;
       dneg_q    <= 1'b0;
       sel_rem_q <= 1'b0;
+      b_nz_q    <= 1'b0;
     end else begin
       case (state_q)
         ST_IDLE: begin
@@ -177,7 +181,8 @@ module div_unit (
           dvs_q     <= abs_b;                // |b|
           rem_q     <= 32'b0;
           cnt_q     <= 5'd31;
-          neg_q     <= res_neg;              // FIXUP sign
+          neg_q     <= res_neg;              // FIXUP sign, before b == 0
+          b_nz_q    <= (b_q != 32'b0);
           state_q   <= ST_ITER;
 `endif
         end
@@ -187,6 +192,7 @@ module div_unit (
           rq_q      <= {rq_q[30:0], take};
           cnt_q     <= cnt_q - 5'd1;
           sel_rem_q <= is_rem_q;
+          neg_q     <= neg_q && (is_rem_q || b_nz_q);  // x / 0: no fixup
           if (cnt_q == 5'd0) state_q <= ST_FIXUP;
         end
 
