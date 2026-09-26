@@ -98,6 +98,10 @@ def LW  (rd, rs1, imm): return _i(imm & 0xFFF, rs1, 0b010, rd, 0b0000011)
 def SW  (rs2, rs1, imm): return _s(imm & 0xFFF, rs2, rs1, 0b010, 0b0100011)
 def BEQ (rs1, rs2, imm): return _b(imm, rs2, rs1, 0b000, 0b1100011)
 def BNE (rs1, rs2, imm): return _b(imm, rs2, rs1, 0b001, 0b1100011)
+def BLT (rs1, rs2, imm): return _b(imm, rs2, rs1, 0b100, 0b1100011)
+def BGE (rs1, rs2, imm): return _b(imm, rs2, rs1, 0b101, 0b1100011)
+def BLTU(rs1, rs2, imm): return _b(imm, rs2, rs1, 0b110, 0b1100011)
+def BGEU(rs1, rs2, imm): return _b(imm, rs2, rs1, 0b111, 0b1100011)
 def MUL (rd, rs1, rs2): return _r(1, rs2, rs1, 0b000, rd, 0b0110011)
 def DIV (rd, rs1, rs2): return _r(1, rs2, rs1, 0b100, rd, 0b0110011)
 def DIVU(rd, rs1, rs2): return _r(1, rs2, rs1, 0b101, rd, 0b0110011)
@@ -963,6 +967,14 @@ def _sx(v, bits):
 
 _LD_BYTES = {0: 1, 1: 2, 2: 4, 4: 1, 5: 2}   # LOAD funct3 -> access width
 _ST_BYTES = {0: 1, 1: 2, 2: 4}               # STORE funct3 -> access width
+_BR_COND = {                                 # BRANCH funct3 -> taken(a, b)
+    0: lambda a, b: a == b,
+    1: lambda a, b: a != b,
+    4: lambda a, b: _s32(a) < _s32(b),
+    5: lambda a, b: _s32(a) >= _s32(b),
+    6: lambda a, b: a < b,
+    7: lambda a, b: a >= b,
+}
 
 
 def _golden(program, max_steps=2000, dmem_init=None):
@@ -1015,8 +1027,8 @@ def _golden(program, max_steps=2000, dmem_init=None):
                 sh, lanes = 8 * (addr & 3), (1 << (8 * n)) - 1
                 old = dmem.get(addr & ~3, 0)
                 dmem[addr & ~3] = (old & ~(lanes << sh)) | ((b & lanes) << sh)
-        elif op == 0x63 and f3 in (0, 1):
-            if (a == b) == (f3 == 0):
+        elif op == 0x63 and f3 in _BR_COND:
+            if _BR_COND[f3](a, b):
                 nxt = (pc + bimm) & M32
         elif op == 0x6F:
             wd, nxt = pc + 4, (pc + jimm) & M32
@@ -1624,6 +1636,454 @@ async def random_mem_stress_under_stalls(dut):
             _check_bus_order(_accepted_dmem(log), _retired_dmem(rets))
             served += len(_cache_served(rets, log))
     assert served, "no load was served from the cache"
+
+
+# ── Late branch: a BRANCH reading the LOAD right ahead of it ──────────────
+# It skips the load-use stall, is resolved in MEM against the loaded data
+# and, on a mispredict, redirects from WB one cycle later (late_kill): the
+# instruction right behind it is then already in MEM and must be dropped
+# (no dmem access, no divide result, no retirement).
+LATE_BASE = 0x40
+LATE_FAR  = 0xDEAD0000        # far outside dmem/imem (cosim flags any access)
+
+
+def _late_cyc(rets, pc, k=0):
+    return [r["cycle"] for r in rets if r["pc"] == pc][k]
+
+
+def _no_far_access(dmem_log, fetch_log):
+    """No bus access of either kind to the far address: a wrong-path
+    load / store / JALR right behind a late branch never reaches a bus."""
+    bad_d = [(c, da, ren, wen) for c, da, ren, wen, _ in dmem_log
+             if (ren or wen) and (da & ~3) == LATE_FAR]
+    bad_i = [(c, ia) for c, ia, _ in fetch_log if ia >= 0x1000]
+    assert not bad_d, f"wrong-path dmem access: {bad_d}"
+    assert not bad_i, f"wrong-path fetch: {bad_i}"
+
+
+async def _bht_reset(dut, pcs, start_clock=False):
+    """Put the BHT counters of the branches at `pcs` back to their
+    power-on value (01, weakly not-taken). The BHT has no reset, so
+    earlier runs leave trained counters behind: three not-taken passes
+    saturate each counter at 00, then one taken pass (target pc+4)
+    raises it to 01."""
+    for taken in (False, False, False, True):
+        prog = [NOP()] * (max(pcs) // 4 + 1) + [EBREAK()]
+        for pc in pcs:
+            prog[pc // 4] = BEQ(0, 0, 4) if taken else BNE(0, 0, 4)
+        await _run(dut, prog, start_clock=start_clock, clear_regs=False)
+        start_clock = False
+
+
+# Countdown through memory with a late BEQ exit test: predicted not-taken
+# and right LATE_ITERS times (no load-use bubble), then taken (late
+# mispredict, 3 bubbles). A late BNE back edge covers the other
+# directions: first sighting mispredicted taken, trained taken, then
+# mispredicted not-taken. The late operand is rs1 in one, rs2 in the
+# other, and the non-load operand of the BNE is forwarded from MEM/WB.
+LATE_ITERS = 6
+PROG_LATE_LOOP = [
+    ADDI(1, 0, LATE_BASE),   # 0   x1 = base
+    ADDI(2, 0, LATE_ITERS),  # 4
+    SW  (2, 1, 0),           # 8   mem[base] = N
+    ADDI(5, 0, 0),           # 12
+    LW  (3, 1, 0),           # 16  loop: x3 = mem[base]
+    BEQ (3, 0, 24),          # 20  late (rs1): x3 == 0 -> 44
+    ADDI(3, 3, -1),          # 24  x3 via MEM/WB forward
+    SW  (3, 1, 0),           # 28
+    ADDI(5, 5, 1),           # 32
+    JAL (0, -20),            # 36  -> 16
+    ADDI(9, 0, 99),          # 40  never reached
+    ADDI(6, 0, LATE_ITERS),  # 44  exit: second loop, x6 = trip count
+    SW  (6, 1, 4),           # 48  mem[base+4] = N
+    LW  (7, 1, 4),           # 52  loop2: x7 = mem[base+4]
+    ADDI(7, 7, -1),          # 56
+    SW  (7, 1, 4),           # 60
+    ADDI(8, 0, 0),           # 64  x8 = 0 (MEM/WB-forwarded below)
+    LW  (4, 1, 4),           # 68  x4 = mem[base+4]
+    BNE (8, 4, -20),         # 72  late (rs2): x4 != 0 -> 52
+    ADD (10, 5, 4),          # 76
+    EBREAK(),                # 80
+]
+LATE_LOOP_PCS = ([0, 4, 8, 12] + [16, 20, 24, 28, 32, 36] * LATE_ITERS
+                 + [16, 20, 44, 48] + [52, 56, 60, 64, 68, 72] * LATE_ITERS
+                 + [76, 80])
+
+
+@cocotb.test()
+async def late_branch_loops(dut):
+    """LW -> dependent BEQ / BNE: retired stream matches the golden ISS, a
+    correctly predicted late branch costs no bubble, and a late
+    mispredict (either direction) costs exactly three."""
+    await _bht_reset(dut, [20, 72], start_clock=True)
+    rets, dmem = await _run(dut, PROG_LATE_LOOP, max_cycles=400,
+                            start_clock=False)
+    _check_pred(rets, PROG_LATE_LOOP, LATE_LOOP_PCS,
+                {5: LATE_ITERS, 10: LATE_ITERS})
+    assert dmem == {LATE_BASE: 0, LATE_BASE + 4: 0}, dmem
+    for k in range(LATE_ITERS):
+        # LW, late BEQ and the instruction behind it retire back to back.
+        lw, beq = _late_cyc(rets, 16, k), _late_cyc(rets, 20, k)
+        assert (beq - lw, _late_cyc(rets, 24, k) - beq) == (1, 1), (k, lw, beq)
+    for k in range(1, LATE_ITERS):
+        # Steady state: one retirement per cycle around the whole loop.
+        assert _late_cyc(rets, 16, k) - _late_cyc(rets, 16, k - 1) == 6
+    # Taken BEQ, predicted not-taken: redirect from WB, 3 bubbles.
+    assert _late_cyc(rets, 44) - _late_cyc(rets, 20, LATE_ITERS) == 4
+    # BNE: taken but predicted not-taken the first time, then trained.
+    bne = [r["cycle"] for r in rets if r["pc"] == 72]
+    assert _late_cyc(rets, 52, 1) - bne[0] == 4
+    assert _late_cyc(rets, 52, 2) - bne[1] == 1
+    # Last BNE: not taken but predicted taken.
+    assert _late_cyc(rets, 76) - bne[-1] == 4
+    lw2 = _late_cyc(rets, 68, 3)
+    assert _late_cyc(rets, 72, 3) - lw2 == 1
+
+
+# All six conditions, each late against a loaded value, over signed /
+# unsigned edge values, in both operand orders; the branch skips an
+# ADDI so its outcome shows in x5 and in the retired stream.
+LATE_VALS = [0, 1, -1, 7, -7, 0x7FFFFFFF, -0x80000000, 7, 3, -1]
+
+
+def _late_cond_program(br, load_rs2):
+    n = len(LATE_VALS)
+    head = [
+        ADDI(10, 0, LATE_BASE),
+        ADDI(1, 0, n),
+        ADDI(4, 0, 7),       # threshold
+        ADDI(5, 0, 0),
+    ]
+    body = [
+        LW  (3, 10, 0),                               # 16  loop: x3 = *x10
+        br(4, 3, 8) if load_rs2 else br(3, 4, 8),     # 20  late -> skip
+        ADDI(5, 5, 1),                                # 24  if not taken
+        ADDI(10, 10, 4),                              # 28
+        ADDI(1, 1, -1),                               # 32
+        BNE (1, 0, -20),                              # 36  -> 16
+        EBREAK(),                                     # 40
+    ]
+    init = {LATE_BASE + 4 * i: v & M32 for i, v in enumerate(LATE_VALS)}
+    return head + body, init
+
+
+@cocotb.test()
+async def late_branch_all_conditions(dut):
+    """BEQ/BNE/BLT/BGE/BLTU/BGEU as late branches (load in rs1 and in
+    rs2): every retirement, incl. rs1/rs2_rdata = the loaded value,
+    matches the golden ISS, zero-wait and under bus stalls."""
+    first = True
+    for br in (BEQ, BNE, BLT, BGE, BLTU, BGEU):
+        for load_rs2 in (False, True):
+            prog, init = _late_cond_program(br, load_rs2)
+            base, _ = await _run(dut, prog, dmem_init=init, max_cycles=600,
+                                 start_clock=first)
+            first = False
+            assert _trace(base) == _golden(prog, dmem_init=init), (br, load_rs2)
+            _check_order(base)
+            # The retirement right before each late branch is its LW.
+            for lw, r in zip(base, base[1:]):
+                if r["pc"] == 20:
+                    assert lw["pc"] == 16, (br, load_rs2, lw)
+                    val = lw["rd_wdata"]
+                    want = (7, val) if load_rs2 else (val, 7)
+                    assert (r["rs1_rdata"], r["rs2_rdata"]) == want, (br, r)
+            rets, _ = await _run(dut, prog, dmem_init=init, max_cycles=2000,
+                                 ready=_random_ready_p(7000, 0.2, 0.5),
+                                 start_clock=False)
+            assert _arch_mem(rets) == _arch_mem(base), (br, load_rs2)
+
+
+# A late mispredict with a SW, and with a LW / SW to a far address, right
+# behind it: the store never reaches dmem, and no access to the far
+# address ever reaches the bus. Each BEQ is predicted not-taken (first
+# sighting) and taken, so the fall-through is the wrong path.
+PROG_LATE_STORE = [
+    ADDI(1, 0, LATE_BASE),   # 0
+    LUI (7, LATE_FAR >> 12), # 4   x7 = far address
+    ADDI(9, 0, 0x55),        # 8
+    LW  (3, 1, 0),           # 12  x3 = 0
+    BEQ (3, 0, 12),          # 16  late, taken, predicted not-taken -> 28
+    SW  (9, 1, 8),           # 20  wrong path: must not write
+    ADDI(9, 0, 0x66),        # 24  wrong path
+    LW  (3, 1, 0),           # 28  x3 = 0
+    BEQ (3, 0, 12),          # 32  late, taken -> 44
+    LW  (8, 7, 0),           # 36  wrong path: far load
+    SW  (9, 7, 0),           # 40  wrong path: far store
+    LW  (3, 1, 4),           # 44  x3 = 1
+    BEQ (0, 3, 12),          # 48  late (rs2), not taken
+    SW  (9, 1, 12),          # 52  right path: writes 0x55
+    JAL (0, 8),              # 56  -> 64
+    SW  (7, 7, 0),           # 60  never reached
+    LW  (3, 1, 0),           # 64  x3 = 0
+    BNE (3, 0, 8),           # 68  late, not taken
+    EBREAK(),                # 72
+]
+
+
+@cocotb.test()
+async def late_mispredict_drops_mem_op(dut):
+    """The wrong-path SW / LW / far SW right behind a late mispredict
+    never reach dmem; the bus sees exactly the retired accesses."""
+    init = {LATE_BASE: 0, LATE_BASE + 4: 1}
+    first = True
+    for ready in (None, _random_ready_p(7100, 0.2, 0.4)):
+        await _bht_reset(dut, [16, 32, 48, 68], start_clock=first)
+        dlog, flog = [], []
+        rets, dmem = await _run(dut, PROG_LATE_STORE, dmem_init=init,
+                                max_cycles=600, ready=ready, start_clock=False,
+                                dmem_log=dlog, fetch_log=flog)
+        first = False
+        assert _trace(rets) == _golden(PROG_LATE_STORE, dmem_init=init)
+        _check_order(rets)
+        assert not [r for r in rets if r["pc"] in (20, 24, 36, 40, 60)]
+        assert dmem == {LATE_BASE: 0, LATE_BASE + 4: 1,
+                        LATE_BASE + 12: 0x55}, dmem
+        _no_far_access(dlog, flog)
+        if ready is None:
+            # Both taken BEQs really were late mispredicts (3 bubbles).
+            assert _late_cyc(rets, 28) - _late_cyc(rets, 16) == 4
+            assert _late_cyc(rets, 44) - _late_cyc(rets, 32) == 4
+            assert _accepted_dmem(dlog) == _retired_dmem(rets)
+        else:
+            _check_bus_order(_accepted_dmem(dlog), _retired_dmem(rets))
+
+
+# A late mispredict with a DIV right behind it (started in EX, then
+# killed in its first busy cycle) and with a DIV two behind it (killed on
+# its start cycle): neither may leave a result for the right-path DIVs.
+PROG_LATE_DIV = [
+    ADDI(1, 0, LATE_BASE),   # 0
+    ADDI(11, 0, 100),        # 4
+    ADDI(12, 0, 7),          # 8
+    ADDI(13, 0, 3),          # 12
+    LW  (3, 1, 0),           # 16  x3 = 0
+    BEQ (3, 0, 12),          # 20  late, taken, predicted not-taken -> 32
+    DIV (14, 11, 13),        # 24  wrong path, right behind: 100 / 3
+    ADDI(9, 0, 99),          # 28  wrong path
+    DIV (15, 11, 12),        # 32  right path: 100 / 7 = 14
+    LW  (3, 1, 0),           # 36  x3 = 0
+    BEQ (3, 0, 12),          # 40  late, taken -> 52
+    ADDI(9, 0, 98),          # 44  wrong path
+    DIV (14, 11, 13),        # 48  wrong path, two behind: 100 / 3
+    DIV (16, 12, 13),        # 52  right path: 7 / 3 = 2
+    ADD (17, 15, 16),        # 56
+    EBREAK(),                # 60
+]
+
+
+@cocotb.test()
+async def late_mispredict_kills_divide(dut):
+    """A wrong-path DIV right behind or two behind a late mispredict is
+    dropped with the divider: the right-path DIVs get their own results,
+    and nothing from the wrong path retires."""
+    init = {LATE_BASE: 0}
+    first = True
+    for ready in (None, _random_ready_p(7200, 0.2, 0.3)):
+        await _bht_reset(dut, [20, 40], start_clock=first)
+        rets, _ = await _run(dut, PROG_LATE_DIV, dmem_init=init,
+                             max_cycles=800, ready=ready, start_clock=False)
+        first = False
+        assert _trace(rets) == _golden(PROG_LATE_DIV, dmem_init=init)
+        _check_order(rets)
+        assert not [r for r in rets if r["pc"] in (24, 28, 44, 48)]
+        _expect(_one(rets, DIV(15, 11, 12)), 15, 14, 100, 7)
+        _expect(_one(rets, DIV(16, 12, 13)), 16, 2, 7, 3)
+        _expect(_one(rets, ADD(17, 15, 16)), 17, 16)
+
+
+# A late branch whose taken target is misaligned: it traps and falls
+# through (IF never predicts it, so it is no mispredict); not taken, it
+# does not trap.
+PROG_LATE_MISALIGN = [
+    ADDI(1, 0, LATE_BASE),   # 0
+    ADDI(2, 0, 3),           # 4   trip count
+    LW  (3, 1, 0),           # 8   loop: x3 = mem[base] (= 5, then 0)
+    BNE (3, 0, 6),           # 12  late: taken -> 18 misaligned: trap
+    SW  (0, 1, 0),           # 16  mem[base] = 0
+    ADDI(2, 2, -1),          # 20
+    BNE (2, 0, -16),         # 24  -> 8
+    ADDI(4, 0, 7),           # 28
+    EBREAK(),                # 32
+]
+
+
+@cocotb.test()
+async def late_branch_misaligned_target(dut):
+    """A taken late BNE to a misaligned target traps, writes nothing and
+    falls through (pc_wdata = pc+4); not taken it retires normally."""
+    init = {LATE_BASE: 5}
+    first = True
+    for ready in (None, _random_ready_p(7300, 0.2, 0.4)):
+        log = []
+        rets, _ = await _run(dut, PROG_LATE_MISALIGN, dmem_init=init,
+                             max_cycles=400, ready=ready, start_clock=first,
+                             fetch_log=log)
+        first = False
+        assert _trace(rets) == _golden(PROG_LATE_MISALIGN, dmem_init=init)
+        late = [r for r in rets if r["pc"] == 12]
+        assert [(r["trap"], r["pc_next"]) for r in late] == \
+               [(1, 16), (0, 16), (0, 16)], late
+        assert not [ia for _, ia, _ in log if ia & 3], "misaligned fetch"
+
+
+# The LOAD ahead of a late branch traps (misaligned): it writes nothing,
+# so the branch must see the register's old value. The late path replays
+# the branch (it does not retire from there) and it then resolves
+# normally. x3 = 5 before the trapping loads; x3 == x5 is taken.
+PROG_LATE_LDTRAP = [
+    ADDI(1, 0, LATE_BASE),   # 0
+    ADDI(3, 0, 5),           # 4
+    ADDI(5, 0, 5),           # 8
+    LW  (3, 1, 1),           # 12  misaligned: traps, x3 stays 5
+    BEQ (3, 5, 8),           # 16  x3 (old) == 5: taken -> 24
+    ADDI(9, 0, 99),          # 20  skipped
+    LH  (3, 1, 3),           # 24  misaligned: traps
+    BNE (5, 3, 8),           # 28  late (rs2), 5 != 5: not taken
+    ADDI(6, 0, 1),           # 32
+    LW  (3, 1, 0),           # 36  aligned: x3 = mem[base]
+    BEQ (3, 5, 8),           # 40  late, mem[base] = 9 != 5: not taken
+    ADDI(7, 0, 1),           # 44
+    EBREAK(),                # 48
+]
+
+
+@cocotb.test()
+async def late_branch_after_trapping_load(dut):
+    """A late branch behind a misaligned (trapping) LW / LH compares the
+    register's old value, retires exactly once, and reports it as
+    rs1/rs2_rdata."""
+    init = {LATE_BASE: 9}
+    first = True
+    for ready in (None, _random_ready_p(7400, 0.2, 0.4)):
+        rets, _ = await _run(dut, PROG_LATE_LDTRAP, dmem_init=init,
+                             max_cycles=400, ready=ready, start_clock=first)
+        first = False
+        assert _trace(rets) == _golden(PROG_LATE_LDTRAP, dmem_init=init)
+        _check_order(rets)
+        assert [r["trap"] for r in rets if r["pc"] in (12, 24)] == [1, 1]
+        beq = _one(rets, BEQ(3, 5, 8), pc=16)
+        assert (beq["rs1_rdata"], beq["rs2_rdata"]) == (5, 5)
+        bne = _one(rets, BNE(5, 3, 8), pc=28)
+        assert (bne["rs1_rdata"], bne["rs2_rdata"]) == (5, 5)
+        _one(rets, BEQ(3, 5, 8), pc=40)
+
+
+# A JALR right behind a late branch: if the branch mispredicts, the JALR
+# is wrong-path and its rs1 may be anything (here a far address). It
+# must never redirect fetch there; on the right path it still works.
+PROG_LATE_JALR = [
+    ADDI(1, 0, LATE_BASE),   # 0
+    LUI (7, LATE_FAR >> 12), # 4   x7 = far address
+    ADDI(8, 0, 36),          # 8   x8 = 36
+    LW  (3, 1, 0),           # 12  x3 = 0
+    BEQ (3, 0, 12),          # 16  late, taken, predicted not-taken -> 28
+    JALR(0, 7, 0),           # 20  wrong path: jump to the far address
+    ADDI(9, 0, 99),          # 24  wrong path
+    LW  (3, 1, 4),           # 28  x3 = 1
+    BEQ (3, 0, 12),          # 32  late, not taken
+    JALR(6, 8, 12),          # 36  right path: -> 48, x6 = 40
+    ADDI(9, 0, 98),          # 40  skipped
+    ADDI(9, 0, 97),          # 44  skipped
+    ADD (10, 6, 3),          # 48  x10 = 41
+    EBREAK(),                # 52
+]
+
+
+@cocotb.test()
+async def late_mispredict_wrong_path_jalr(dut):
+    """A wrong-path JALR right behind a late mispredict never fetches from
+    its (far) target; a right-path one right behind a late branch works
+    (after a one-cycle stall)."""
+    init = {LATE_BASE: 0, LATE_BASE + 4: 1}
+    first = True
+    for ready in (None, _random_ready_p(7500, 0.2, 0.4)):
+        await _bht_reset(dut, [16, 32], start_clock=first)
+        dlog, flog = [], []
+        rets, _ = await _run(dut, PROG_LATE_JALR, dmem_init=init,
+                             max_cycles=400, ready=ready, start_clock=False,
+                             dmem_log=dlog, fetch_log=flog)
+        first = False
+        assert _trace(rets) == _golden(PROG_LATE_JALR, dmem_init=init)
+        _no_far_access(dlog, flog)
+        _expect(_one(rets, ADD(10, 6, 3)), 10, 41)
+        if ready is None:
+            # The first BEQ was a late mispredict with the JALR behind it.
+            assert _late_cyc(rets, 28) - _late_cyc(rets, 16) == 4
+            assert _late_cyc(rets, 36) - _late_cyc(rets, 32) == 2
+
+
+# Random load -> branch programs, run under bus backpressure. Each block
+# is a load, a branch that usually reads it (late), and a few
+# instructions the branch may skip: stores, loads (some misaligned, so
+# the late-branch replay runs), ALU ops and divides. An outer loop runs
+# the body twice so the BHT trains and predicted-taken mispredicts occur.
+def _late_stress_program(rng, blocks=14):
+    base = LATE_BASE
+    prog = [ADDI(1, 0, base)]
+    prog += [ADDI(r, 0, rng.choice([0, 1, -1, 5, 7, -7, 100])) for r in range(4, 12)]
+    prog += [ADDI(31, 0, 2)]
+    head = len(prog)
+    conds = (BEQ, BNE, BLT, BGE, BLTU, BGEU)
+    regs = list(range(4, 12))
+    for _ in range(blocks):
+        rd = rng.choice(regs)
+        off = 4 * rng.randrange(8)
+        if rng.random() < 0.08:
+            prog.append(LW(rd, 1, off + 2))                       # traps
+        else:
+            prog.append(rng.choice([LW, LH, LBU, LB])(rd, 1, off))
+        other = rng.choice(regs + [0])
+        a, b = (rd, other) if rng.random() < 0.5 else (other, rd)
+        if rng.random() < 0.15:
+            a = rng.choice(regs)                                  # maybe not late
+        skip = rng.randrange(1, 4)
+        prog.append(rng.choice(conds)(a, b, 4 * (skip + 1)))
+        for _ in range(skip):
+            k = rng.random()
+            r1, r2, r3 = (rng.choice(regs) for _ in range(3))
+            if k < 0.25:
+                prog.append(SW(r1, 1, 4 * rng.randrange(8)))
+            elif k < 0.4:
+                prog.append(LW(r1, 1, 4 * rng.randrange(8)))
+            elif k < 0.5:
+                prog.append(DIV(r1, r2, r3))
+            elif k < 0.75:
+                prog.append(ADD(r1, r2, r3))
+            else:
+                prog.append(ADDI(r1, r2, rng.randrange(-64, 64)))
+    prog.append(ADDI(31, 31, -1))
+    prog.append(BNE(31, 0, 4 * (head - len(prog))))
+    prog.append(EBREAK())
+    init = {base + 4 * w: rng.choice([0, 1, 5, 7, M32, 0x80000000,
+                                      rng.getrandbits(32)])
+            for w in range(8)}
+    return prog, init
+
+
+@cocotb.test()
+async def late_branch_random_under_stalls(dut):
+    """Random load -> branch programs: the zero-wait run matches the
+    golden ISS, and runs under random imem / dmem stall profiles match
+    it exactly (RVFI incl. memory data, final dmem, bus write order)."""
+    first = True
+    for seed in range(8):
+        rng = random.Random(7600 + seed)
+        prog, init = _late_stress_program(rng)
+        base, base_dmem = await _run(dut, prog, dmem_init=init,
+                                     max_cycles=3000, start_clock=first)
+        first = False
+        assert _trace(base) == _golden(prog, dmem_init=init), f"seed {seed}"
+        _check_order(base)
+        for k, (pi, pd) in enumerate([(0.0, 0.5), (0.22, 0.22), (0.5, 0.7)]):
+            log = []
+            rets, dmem = await _run(dut, prog, dmem_init=init,
+                                    max_cycles=12000,
+                                    ready=_random_ready_p(50 * seed + k, pi, pd),
+                                    start_clock=False, dmem_log=log)
+            assert _arch_mem(rets) == _arch_mem(base), f"seed {seed} profile {k}"
+            assert dmem == base_dmem, f"seed {seed} profile {k}"
+            _check_bus_order(_accepted_dmem(log), _retired_dmem(rets))
 
 
 def test_pipeline_runner():

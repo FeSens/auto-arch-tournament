@@ -14,6 +14,11 @@
 //   +- predict: BRANCH (64-entry bimodal BHT) / JAL (always) steer the PC
 //      at fetch; EX checks and redirects on mispredict (and every JALR),
 //      and writes the BHT back one cycle later (bht_we/widx/wdata)
+//   +- late branch: a BRANCH reading the LOAD right ahead of it skips the
+//      load-use stall; MEM resolves it from MEM/WB.read_data and, on a
+//      mispredict, raises late_kill (a flop) the cycle it is in WB. EX
+//      folds late_kill / late_tgt into its redirect, and the MEM BHT
+//      write takes the shared BHT port over EX's
 //
 // IO port names use the `io_*` Chisel-emit prefix so the existing
 // formal/wrapper_si.sv and test/cosim/main.cpp bindings carry through
@@ -96,14 +101,28 @@ module core (
   // EX ALU result (next load/store address) for MEM's cache lookahead
   logic [31:0] ex_addr;
 
-  // EX redirect (= mispredict of IF's fetch-time prediction, or JALR)
+  // EX redirect (= mispredict of IF's fetch-time prediction, or JALR),
+  // with the WB-stage late_kill merged in
   logic        redirect;
   logic [31:0] redirect_target;
 
-  // EX -> IF BHT update (registered in EX)
+  // Late branch unit (MEM): WB-stage redirect, registered
+  logic        late_kill;
+  logic [31:0] late_tgt;
+
+  // BHT updates into IF (registered in EX and MEM), merged on one port
+  logic                 ex_bht_we;
+  logic [BHT_IDX_W-1:0] ex_bht_widx;
+  logic [1:0]           ex_bht_wdata;
+  logic                 mem_bht_we;
+  logic [BHT_IDX_W-1:0] mem_bht_widx;
+  logic [1:0]           mem_bht_wdata;
   logic                 bht_we;
   logic [BHT_IDX_W-1:0] bht_widx;
   logic [1:0]           bht_wdata;
+
+  // hazard -> ID: capture the IF/ID BRANCH as a late branch
+  logic       late_br;
 
   // regfile interface (driven by ID + WB stages)
   logic [4:0]  rs1_addr_w;
@@ -139,6 +158,7 @@ module core (
     .hold     (hold_id),
     .flush    (flush_id),
     .in       (if_id_w),
+    .late_br  (late_br),
     .rs1_addr (rs1_addr_w),
     .rs2_addr (rs2_addr_w),
     .rs1_data (rs1_data_w),
@@ -168,14 +188,16 @@ module core (
     .fwd_rs2_sel     (fwd_rs2_sel),
     .fwd_ex_mem      (ex_mem_w.alu_result),  // EX/MEM-registered ALU result
     .fwd_mem_wb      (wb_w_data),            // WB-stage's write-mux output
+    .late_kill       (late_kill),
+    .late_tgt        (late_tgt),
     .out             (ex_mem_w),
     .ex_addr         (ex_addr),
     .redirect        (redirect),
     .redirect_target (redirect_target),
     .ex_div_busy     (ex_div_busy),
-    .bht_we          (bht_we),
-    .bht_widx        (bht_widx),
-    .bht_wdata       (bht_wdata)
+    .bht_we          (ex_bht_we),
+    .bht_widx        (ex_bht_widx),
+    .bht_wdata       (ex_bht_wdata)
   );
 
   // ── MEM ───────────────────────────────────────────────────────────────
@@ -193,8 +215,21 @@ module core (
     .dmem_ren   (io_dmemREn),
     .dmem_ready (io_dmemReady),
     .mem_ready  (mem_ready),
+    .late_kill  (late_kill),
+    .late_tgt   (late_tgt),
+    .bht_we     (mem_bht_we),
+    .bht_widx   (mem_bht_widx),
+    .bht_wdata  (mem_bht_wdata),
     .out        (mem_wb_w)
   );
+
+  // One BHT write port, all inputs registered. MEM's late-branch update
+  // wins a collision; a dropped EX update only loses a prediction hint.
+  always_comb begin
+    bht_we    = mem_bht_we || ex_bht_we;
+    bht_widx  = mem_bht_we ? mem_bht_widx  : ex_bht_widx;
+    bht_wdata = mem_bht_we ? mem_bht_wdata : ex_bht_wdata;
+  end
 
   // ── WB ────────────────────────────────────────────────────────────────
   wb_stage u_wb (
@@ -206,21 +241,26 @@ module core (
 
   // ── Hazard / forwarding ───────────────────────────────────────────────
   hazard_unit u_hazard (
-    .id_ex_mem_read (id_ex_w.ctrl.mem_read),
-    .id_ex_rd       (id_ex_w.rd),
-    .if_id_rs1      (if_id_w.instr[19:15]),
-    .if_id_rs2      (if_id_w.instr[24:20]),
-    .redirect       (redirect),
-    .fetch_ready    (fetch_ready),
-    .mem_ready      (mem_ready),
-    .ex_mem_mem_op  (ex_mem_w.ctrl.mem_read | ex_mem_w.ctrl.mem_write),
-    .ex_div_busy    (ex_div_busy),
-    .stall_if       (stall_if),
-    .hold_id        (hold_id),
-    .flush_if       (flush_if),
-    .flush_id       (flush_id),
-    .stall_ex_mem   (stall_ex_mem),
-    .hold_mem_wb    (hold_mem_wb)
+    .id_ex_ld_nz     (id_ex_w.ld_nz),
+    .id_ex_rd        (id_ex_w.rd),
+    .id_ex_late      (id_ex_w.late),
+    .if_id_rs1       (if_id_w.instr[19:15]),
+    .if_id_rs2       (if_id_w.instr[24:20]),
+    .if_id_is_branch (if_id_w.pd_br),
+    .if_id_is_jalr   (if_id_w.pd_jalr),
+    .redirect        (redirect),
+    .late_kill       (late_kill),
+    .fetch_ready     (fetch_ready),
+    .mem_ready       (mem_ready),
+    .ex_mem_mem_op   (ex_mem_w.ctrl.mem_read | ex_mem_w.ctrl.mem_write),
+    .ex_div_busy     (ex_div_busy),
+    .stall_if        (stall_if),
+    .hold_id         (hold_id),
+    .flush_if        (flush_if),
+    .flush_id        (flush_id),
+    .stall_ex_mem    (stall_ex_mem),
+    .hold_mem_wb     (hold_mem_wb),
+    .late_br         (late_br)
   );
 
   forward_unit u_fwd (
@@ -263,6 +303,11 @@ module core (
     end
   end
 
+  // A late branch's trap and pc_wdata are fixed up here from registered
+  // bits: MEM/WB.late_trap (taken to a misaligned target), and late_kill
+  // (mispredicted: the actual next PC is late_tgt; late_kill is high
+  // exactly while the branch is in MEM/WB, or on a replay, which does
+  // not retire).
   always_comb begin
     rd_wen = mem_wb_w.ctrl.reg_write && (mem_wb_w.rd != 5'b0);
 
@@ -270,7 +315,7 @@ module core (
     io_rvfi_valid_0     = mem_wb_w.valid;
     io_rvfi_order_0     = {order_hi_q, order_lo_q};
     io_rvfi_insn_0      = mem_wb_w.instr;
-    io_rvfi_trap_0      = mem_wb_w.ctrl.is_illegal;
+    io_rvfi_trap_0      = mem_wb_w.ctrl.is_illegal || mem_wb_w.late_trap;
     io_rvfi_halt_0      = 1'b0;
     io_rvfi_intr_0      = 1'b0;
     io_rvfi_mode_0      = 2'd3;     // M-mode only
@@ -282,7 +327,7 @@ module core (
     io_rvfi_rd_addr_0   = rd_wen ? mem_wb_w.rd : 5'b0;
     io_rvfi_rd_wdata_0  = rd_wen ? wb_w_data   : 32'b0;
     io_rvfi_pc_rdata_0  = mem_wb_w.pc;
-    io_rvfi_pc_wdata_0  = mem_wb_w.pc_next;
+    io_rvfi_pc_wdata_0  = late_kill ? late_tgt : mem_wb_w.pc_next;
     io_rvfi_mem_addr_0  = mem_wb_w.mem_addr;
     io_rvfi_mem_rmask_0 = mem_wb_w.mem_rmask;
     io_rvfi_mem_wmask_0 = mem_wb_w.mem_wmask;

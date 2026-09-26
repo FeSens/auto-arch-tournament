@@ -13,6 +13,18 @@
 // condition) is registered here and written into IF one cycle later, so
 // the forwarded compare never reaches the BHT write enables.
 //
+// Late branch (in.late, see id_stage.sv): arrives with is_branch and
+// pred_taken 0, so it never redirects, traps or writes the BHT here. Its
+// load operand's forward (EX/MEM = the LOAD's address) is meaningless;
+// MEM substitutes MEM/WB.read_data. EX only carries the late fields into
+// EX/MEM. The other operand forwards as usual (its rs does not match the
+// LOAD's rd).
+//
+// late_kill (a WB-stage flop from mem_stage: a late branch mispredicted)
+// is ORed into redirect with late_tgt as the target, and kills this
+// stage's instruction: EX/MEM captures a bubble, the div_unit returns to
+// IDLE, and no BHT write is registered.
+//
 // Forwarding select encoding (driven by forward_unit):
 //   00 = ID/EX register value (no forward)
 //   01 = EX/MEM aluResult (instruction immediately ahead in MEM)
@@ -36,16 +48,22 @@ module ex_stage (
   input  logic                  clock,
   input  logic                  reset,
   input  logic                  stall,         // freeze EX/MEM register (dmem stall)
+  // in.ld_nz is for the hazard unit only.
+  /* verilator lint_off UNUSEDSIGNAL */
   input  id_ex_t   in,
+  /* verilator lint_on UNUSEDSIGNAL */
   input  logic [1:0]            fwd_rs1_sel,
   input  logic [1:0]            fwd_rs2_sel,
   input  logic [31:0]           fwd_ex_mem,    // EX/MEM.alu_result (registered)
   input  logic [31:0]           fwd_mem_wb,    // WB-stage write-data mux output
+  // Late-branch mispredict in WB (registered in MEM) and its target
+  input  logic                  late_kill,
+  input  logic [31:0]           late_tgt,
   output ex_mem_t  out,
   // Raw ALU result: the load/store address EX/MEM captures next edge.
   // Feeds only mem_stage's registered cache lookahead.
   output logic [31:0]           ex_addr,
-  output logic                  redirect,      // mispredict (or JALR)
+  output logic                  redirect,      // mispredict / JALR, or late_kill
   output logic [31:0]           redirect_target,
   output logic                  ex_div_busy,   // divide in EX, result not ready
   // Registered BHT update into IF
@@ -96,6 +114,8 @@ module ex_stage (
   // first EX cycle (the unit returns to idle on the same edge EX/MEM
   // takes the result and ID/EX moves on). funct3[1] = REM, funct3[0] =
   // unsigned. A divide never branches, jumps, or touches memory.
+  // late_kill (the divide is wrong-path) sends the unit back to IDLE, so
+  // an orphaned divide can never hand its result to a later one.
   logic        div_req;
   logic        div_done;
   logic [31:0] div_q;
@@ -110,6 +130,7 @@ module ex_stage (
     .reset       (reset),
     .start       (div_req),
     .ack         (div_done && !stall),
+    .kill        (late_kill),
     .is_rem      (in.instr[13]),
     .is_unsigned (in.instr[12]),
     .a           (rs1),
@@ -186,8 +207,13 @@ module ex_stage (
     // misalign_branch term stays off the reg_write / forwarding-enable
     // path. A busy divide also takes a bubble here (no regfile write, no
     // forward); it has no memory op, so mem_read/mem_write are already 0.
-    if (misalign_jump || ex_div_busy)
+    // A late-killed instruction becomes a bubble: no write, no dmem op.
+    if (misalign_jump || ex_div_busy || late_kill)
       ctrl_with_trap.reg_write  = 1'b0;
+    if (late_kill) begin
+      ctrl_with_trap.mem_read   = 1'b0;
+      ctrl_with_trap.mem_write  = 1'b0;
+    end
   end
 
   // ── Prediction check ──────────────────────────────────────────────────
@@ -196,18 +222,24 @@ module ex_stage (
   // target or a JALR, and pred_target was formed from the same
   // instruction bits, so only the direction can be wrong: redirect =
   // mispredict, to the path IF did not take. A bubble or a divide
-  // carries pred_taken = 0, so redirect stays 0 while ex_div_busy is high.
+  // carries pred_taken = 0, so the EX term stays 0 while ex_div_busy is
+  // high. late_kill (a flop) overrides: this stage's instruction is then
+  // younger than the late branch, i.e. wrong-path.
   logic actual_taken;
 
   always_comb begin
     actual_taken    = (branch_taken || in.ctrl.is_jump) && !misalign_fault;
-    redirect        = actual_taken ^ in.pred_taken;
-    redirect_target = in.ctrl.is_jalr ? {jalr_sum[31:1], 1'b0} : in.alt_target;
+    redirect        = (actual_taken ^ in.pred_taken) || late_kill;
+    redirect_target = late_kill       ? late_tgt
+                    : in.ctrl.is_jalr ? {jalr_sum[31:1], 1'b0}
+                    :                   in.alt_target;
   end
 
   // ── BHT update (registered, written into IF next cycle) ───────────────
   // Repeated writes while EX is held (dmem stall) are idempotent: the
-  // held branch's operands and fetch-time counter do not change.
+  // held branch's operands and fetch-time counter do not change. A
+  // late-killed branch registers no write. The core merges this port
+  // with MEM's late-branch write, which wins a same-cycle collision.
   logic [1:0]           ctr_inc;
   logic [1:0]           ctr_dec;
   logic                 bht_we_q;
@@ -221,7 +253,7 @@ module ex_stage (
 
   always_ff @(posedge clock) begin
     if (reset) bht_we_q <= 1'b0;
-    else       bht_we_q <= in.valid && in.ctrl.is_branch;
+    else       bht_we_q <= in.valid && in.ctrl.is_branch && !late_kill;
     bht_widx_q  <= in.pc[BHT_IDX_W+1:2];
     bht_wdata_q <= branch_cond ? ctr_inc : ctr_dec;
   end
@@ -265,7 +297,16 @@ module ex_stage (
       reg_q.branch_target <= branch_target;
       reg_q.ctrl          <= ctrl_with_trap;
       reg_q.instr         <= in.instr;
-      reg_q.valid         <= in.valid && !ex_div_busy;
+      // Late branch: MEM resolves it. The LOAD it depends on is in EX/MEM
+      // right now, so the forward unit's EX/MEM match (from flops) says
+      // which operand is the LOAD's rd; MEM substitutes MEM/WB.read_data
+      // there.
+      reg_q.late          <= in.late && !late_kill;
+      reg_q.late_rs1      <= in.late && (fwd_rs1_sel == 2'd1);
+      reg_q.late_rs2      <= in.late && (fwd_rs2_sel == 2'd1);
+      reg_q.late_pred     <= in.late_pred;
+      reg_q.bht_ctr       <= in.bht_ctr;
+      reg_q.valid         <= in.valid && !ex_div_busy && !late_kill;
     end
   end
 

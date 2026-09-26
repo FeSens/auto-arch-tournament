@@ -110,16 +110,27 @@
   // PC to pc+imm (always 0 on a NOP/bubble), bht_ctr is the counter read
   // at fetch, and alt_target is the path IF did NOT take (pc+4 if
   // predicted taken, pc+imm otherwise) — EX's mispredict redirect target.
+  // pd_br / pd_jalr are IF's raw predecode of the fetched word (BRANCH
+  // with a valid funct3 / JALR opcode) for the hazard unit. They are not
+  // gated by IF's NOP kill (see if_stage.sv).
   typedef struct packed {
     logic [31:0] pc;
     logic [31:0] instr;
     logic        pred_taken;
     logic [1:0]  bht_ctr;
     logic [31:0] alt_target;
+    logic        pd_br;
+    logic        pd_jalr;
     logic        valid;
   } if_id_t;
 
   // ID/EX register payload.
+  //
+  // Late branch: a BRANCH that reads the rd of the LOAD directly ahead of
+  // it skips the load-use stall and is resolved in MEM against the load's
+  // MEM/WB.read_data (see mem_stage.sv). In ID/EX it carries late = 1 with
+  // ctrl.is_branch = pred_taken = 0, so EX treats it as an inert op; the
+  // fetch-time prediction travels in late_pred.
   typedef struct packed {
     logic [31:0] pc;
     logic [31:0] rs1_val;
@@ -134,6 +145,9 @@
     logic        pred_taken;     // IF steered to pc+imm (see if_id_t)
     logic [1:0]  bht_ctr;        // BHT counter read at fetch
     logic [31:0] alt_target;     // not-predicted path = mispredict target
+    logic        ld_nz;          // LOAD with rd != x0 (load-use producer)
+    logic        late;           // late branch (resolved in MEM)
+    logic        late_pred;      // fetch-time pred_taken, kept for MEM
     logic        valid;
   } id_ex_t;
 
@@ -152,6 +166,11 @@
     logic [31:0] branch_target;
     ctrl_t       ctrl;
     logic [31:0] instr;
+    logic        late;           // late branch: MEM resolves it
+    logic        late_rs1;       // late && rs1 is the LOAD's rd
+    logic        late_rs2;       // late && rs2 is the LOAD's rd
+    logic        late_pred;      // fetch-time prediction (taken)
+    logic [1:0]  bht_ctr;        // BHT counter read at fetch
     logic        valid;
   } ex_mem_t;
 
@@ -173,6 +192,7 @@
     logic [3:0]  mem_rmask;
     ctrl_t       ctrl;
     logic [31:0] instr;
+    logic        late_trap;      // late branch taken to a misaligned target
     logic        valid;
   } mem_wb_t;
 

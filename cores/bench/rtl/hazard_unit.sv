@@ -5,13 +5,27 @@
 // so an instruction immediately behind that consumes the LOAD's rd
 // must be stalled by exactly one cycle.
 //
+// Except a conditional BRANCH: it enters EX without the stall as a
+// "late branch" (late_br). EX treats it as inert and MEM resolves it
+// against the LOAD's registered MEM/WB.read_data, redirecting one cycle
+// later from a WB-stage flop (late_kill, see mem_stage.sv).
+//
+// A JALR directly behind a late branch takes a one-cycle stall instead
+// (late_jalr). Without it the JALR would be in EX while the late branch
+// is in MEM; if the branch then mispredicts, that wrong-path JALR has
+// already redirected fetch to an arbitrary register value for a cycle,
+// which puts an unbounded address on the imem bus. With the stall it
+// reaches EX only once the late branch is in WB, where late_kill
+// overrides its redirect. Pc-relative wrong-path targets are always
+// real code.
+//
 // Outputs:
 //   stall_if            : freeze the PC reg.
 //   hold_id             : freeze the whole ID/EX register (dmem stall,
 //                          divide in EX). Load-use is not in it: its
 //                          bubble comes from flush_id alone.
-//   flush_if / flush_id : on EX redirect, kill the two in-flight
-//                          instructions ahead of the redirect target.
+//   flush_if / flush_id : on a redirect (EX, or late_kill from WB), kill
+//                          the in-flight instructions behind it.
 //   flush_id            : also kills ID's own register on load-use to
 //                          inject a single-cycle bubble between LOAD
 //                          and the dependent instruction. It clears
@@ -19,20 +33,34 @@
 //                          id_stage.sv), so this late net fans out to a
 //                          handful of flops instead of the whole
 //                          register's enable.
+//   late_br             : ID/EX captures the IF/ID BRANCH as late. Which
+//                          operand is the LOAD's rd is taken later, in
+//                          EX, from the forward unit's EX/MEM match, so
+//                          these compares fan out no further.
 //
 // dmem stall: the EX/MEM memory op cannot complete this cycle
 // (!mem_ready). mem_stage raises mem_ready when the bus serves the op,
 // and also on a refused bus cycle for a load that hits its stall-only
-// cache or a store it posts, so only those misses stall.
+// cache or a store it posts, so only those misses stall. On a late_kill
+// cycle the EX/MEM op is wrong-path and dropped, so it never stalls.
 //
 // Latency:        combinational.
 // RVFI fields:    n/a (governs validity of subsequent retirements).
 module hazard_unit (
-  input  logic       id_ex_mem_read,    // ID/EX.ctrl.mem_read (LOAD in EX)
+  // ID/EX.ld_nz: LOAD in EX with rd != x0, registered in ID so the
+  // final load-use gate stays narrow.
+  input  logic       id_ex_ld_nz,
   input  logic [4:0] id_ex_rd,          // ID/EX.rd            (LOAD's dest)
+  input  logic       id_ex_late,        // ID/EX holds a late branch
   input  logic [4:0] if_id_rs1,         // IF/ID instr[19:15]  (next rs1)
   input  logic [4:0] if_id_rs2,         // IF/ID instr[24:20]  (next rs2)
-  input  logic       redirect,          // EX has resolved a branch/jump
+  input  logic       if_id_is_branch,   // IF predecode: BRANCH (valid funct3)
+  input  logic       if_id_is_jalr,     // IF predecode: JALR opcode
+  // EX redirect (mispredict / JALR) or late_kill, merged in ex_stage.
+  input  logic       redirect,
+  // Late-branch mispredict in WB (registered in MEM). Drops the MEM-stage
+  // op; the kill itself reaches IF/ID through `redirect`.
+  input  logic       late_kill,
   // Effective fetch-ready from IF: the external imem accepted the fetch,
   // or IF's replay store supplied the word for the current PC. When low,
   // IF has no instruction this cycle.
@@ -50,31 +78,41 @@ module hazard_unit (
   // A DIV/DIVU/REM/REMU occupies EX and its div_unit result is not ready
   // yet. EX feeds bubbles into EX/MEM itself; here we only hold the
   // younger instructions (PC + ID/EX). A divide is never a load and never
-  // redirects, so load_use / redirect are both 0 while this is high.
+  // redirects, so load_use and an EX redirect are 0 while this is high;
+  // late_kill can be (the divide is then wrong-path).
   input  logic       ex_div_busy,
   output logic       stall_if,          // PC reg holds
   output logic       hold_id,           // ID/EX register holds (all of it)
   output logic       flush_if,          // IF/ID comb output -> NOP
   output logic       flush_id,          // ID/EX control bits clear (bubble)
   output logic       stall_ex_mem,      // EX/MEM register holds
-  output logic       hold_mem_wb        // MEM/WB clears valid only;
+  output logic       hold_mem_wb,       // MEM/WB clears valid only;
                                         // data fields stay (for fwd)
+  output logic       late_br            // capture the IF/ID BRANCH as late
 );
 
+  logic ld_rs1;
+  logic ld_rs2;
+  logic ld_dep;
+  logic late_jalr;
   logic load_use_hazard;
   logic imem_stall;
   logic dmem_stall;
 
   always_comb begin
-    load_use_hazard = id_ex_mem_read
-                   && (id_ex_rd == if_id_rs1 || id_ex_rd == if_id_rs2)
-                   && (id_ex_rd != 5'b0);
+    ld_rs1    = (id_ex_rd == if_id_rs1);
+    ld_rs2    = (id_ex_rd == if_id_rs2);
+    ld_dep    = id_ex_ld_nz && (ld_rs1 || ld_rs2);
+    late_br   = ld_dep && if_id_is_branch;
+    late_jalr = id_ex_late && if_id_is_jalr;
+    load_use_hazard = (ld_dep && !if_id_is_branch) || late_jalr;
     // A replayed word counts as a delivered fetch: load-use detection
     // above sees its rs1/rs2 and the PC advances exactly as on a live one.
     imem_stall = !fetch_ready;
     // dmem stall only matters if there's actually a memory op in EX/MEM
-    // — otherwise bus-not-ready is irrelevant to the pipeline.
-    dmem_stall = !mem_ready && ex_mem_mem_op;
+    // — otherwise bus-not-ready is irrelevant to the pipeline. A
+    // late-killed op is not waited for.
+    dmem_stall = !mem_ready && ex_mem_mem_op && !late_kill;
 
     // PC reg holds on any stall reason.
     stall_if      = load_use_hazard || imem_stall || dmem_stall || ex_div_busy;
@@ -93,9 +131,10 @@ module hazard_unit (
     // we want bubble (not hold). load_use needs no hold term: without
     // dmem_stall it already raises flush_id (the payload the bubble
     // captures is inert, and the PC hold re-presents the instruction),
-    // and with dmem_stall it is covered by hold_id. A divide in EX is
-    // never a load and never redirects, so flush_id and ex_div_busy are
-    // never high together.
+    // and with dmem_stall it is covered by hold_id. flush_id and
+    // ex_div_busy are high together only on a late_kill: the control
+    // half's clear wins over the hold (id_stage.sv), which kills the
+    // wrong-path divide in EX (div_unit takes the same kill).
     hold_id       = dmem_stall || ex_div_busy;
     flush_id      = (load_use_hazard || redirect) && !dmem_stall;
     // EX/MEM register: holds on dmem_stall (the LOAD/STORE waits in MEM

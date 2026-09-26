@@ -8,21 +8,28 @@
 // IF's fetch-time prediction (pred_taken, bht_ctr, alt_target) is
 // latched into ID/EX unchanged; EX verifies it.
 //
+// Late branch (late_br from hazard_unit: a BRANCH reading the rd of the
+// LOAD in EX): captured with late = 1 and is_branch = pred_taken = 0, so
+// EX never redirects, traps or writes the BHT off its stale compare. The
+// real prediction stays in the data half (late_pred, bht_ctr) for MEM to
+// resolve it.
+//
 // The ID/EX register is split in two so the late bubble decision
-// (flush = load-use or redirect) drives the sync clear of 8 flops
+// (flush = load-use or redirect) drives the sync clear of 10 flops
 // instead of the reset/enable pins of the whole ~240-bit register:
-//   - control half: valid, pred_taken and ctrl.{reg_write, mem_read,
-//     mem_write, is_branch, is_jump, is_div}. Cleared on reset || flush,
-//     otherwise captured when !hold.
+//   - control half: valid, pred_taken, ld_nz, late and ctrl.{reg_write,
+//     mem_read, mem_write, is_branch, is_jump, is_div}. Cleared on
+//     reset || flush, otherwise captured when !hold.
 //   - data half: every other field. No reset, captured when !hold.
 // A bubble therefore carries the killed instruction's payload with the
 // control bits cleared. That payload is inert: every side effect keys
 // off the control bits (redirect and the misalign trap off is_branch /
 // is_jump / pred_taken, the BHT write off valid && is_branch, the divide
 // start off valid && is_div, forwarding / load-use / regfile write off
-// reg_write / mem_read, the dmem enables off mem_read / mem_write, RVFI
-// off valid). A valid entry always has its data half captured on the
-// same edge as its control half.
+// reg_write / mem_read / ld_nz, the dmem enables off mem_read /
+// mem_write, the late-branch unit off late, RVFI off valid). A valid
+// entry always has its data half captured on the same edge as its
+// control half.
 //
 // ctrl.is_illegal is only pre-checked here (opcode not in RV32IM): MEM
 // ORs in the decoder's full is_illegal from EX/MEM.instr (see
@@ -37,7 +44,12 @@ module id_stage (
   input  logic              reset,
   input  logic              hold,    // freeze ID/EX (dmem stall, divide busy)
   input  logic              flush,   // bubble: clear the control half
+  // in.pd_br / in.pd_jalr are for the hazard unit only.
+  /* verilator lint_off UNUSEDSIGNAL */
   input  if_id_t  in,
+  /* verilator lint_on UNUSEDSIGNAL */
+  // hazard_unit: capture the BRANCH as a late branch
+  input  logic              late_br,
   // regfile read interface
   output logic [4:0]        rs1_addr,
   output logic [4:0]        rs2_addr,
@@ -177,7 +189,7 @@ module id_stage (
 
   // ── ID/EX register ──────────────────────────────────────────────────────
   // Data half: the whole next-state bundle, resetless. Its copies of the
-  // 8 control-half fields are overridden in `out` and never read, so
+  // 10 control-half fields are overridden in `out` and never read, so
   // synthesis drops those flops.
   id_ex_t d_next;
   id_ex_t data_q;
@@ -196,6 +208,9 @@ module id_stage (
     d_next.pred_taken = in.pred_taken;
     d_next.bht_ctr    = in.bht_ctr;
     d_next.alt_target = in.alt_target;
+    d_next.ld_nz      = 1'b0;
+    d_next.late       = 1'b0;
+    d_next.late_pred  = in.pred_taken;
     d_next.valid      = in.valid;
   end
 
@@ -205,7 +220,9 @@ module id_stage (
 
   // Control half. Fetch-time prediction travels with the instruction for
   // EX to check; reset/flush clear pred_taken, so a bubble is never
-  // predicted.
+  // predicted. A late branch is captured as inert for EX (is_branch and
+  // pred_taken 0). ld_nz = LOAD with rd != x0, registered here so the
+  // hazard unit's load-use gate needs no rd != 0 reduction.
   logic valid_q;
   logic pred_taken_q;
   logic reg_write_q;
@@ -214,6 +231,8 @@ module id_stage (
   logic is_branch_q;
   logic is_jump_q;
   logic is_div_q;
+  logic ld_nz_q;
+  logic late_q;
 
   always_ff @(posedge clock) begin
     if (reset || flush) begin
@@ -225,15 +244,19 @@ module id_stage (
       is_branch_q  <= 1'b0;
       is_jump_q    <= 1'b0;
       is_div_q     <= 1'b0;
+      ld_nz_q      <= 1'b0;
+      late_q       <= 1'b0;
     end else if (!hold) begin
       valid_q      <= in.valid;
-      pred_taken_q <= in.pred_taken;
+      pred_taken_q <= in.pred_taken && !late_br;
       reg_write_q  <= dec_reg_write;
       mem_read_q   <= dec_mem_read;
       mem_write_q  <= dec_mem_write;
-      is_branch_q  <= dec_is_branch;
+      is_branch_q  <= dec_is_branch && !late_br;
       is_jump_q    <= dec_is_jump;
       is_div_q     <= dec_is_div;
+      ld_nz_q      <= dec_mem_read && (in.instr[11:7] != 5'b0);
+      late_q       <= late_br;
     end
   end
 
@@ -247,6 +270,8 @@ module id_stage (
     out.ctrl.is_branch = is_branch_q;
     out.ctrl.is_jump   = is_jump_q;
     out.ctrl.is_div    = is_div_q;
+    out.ld_nz          = ld_nz_q;
+    out.late           = late_q;
   end
 
 endmodule

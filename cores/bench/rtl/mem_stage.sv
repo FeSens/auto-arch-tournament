@@ -50,9 +50,43 @@
 // Misaligned (trapping) accesses keep their behavior: they wait for
 // bus_free, never post and never fill.
 //
+// Late branch unit. A conditional BRANCH that read the rd of the LOAD
+// directly ahead of it skipped the load-use stall (hazard_unit) and went
+// through EX as an inert op (in.late). Both left ID/EX -> EX/MEM ->
+// MEM/WB on the same edges (MEM/WB only holds for a memory op in EX/MEM,
+// which a branch is not), so while the branch is in MEM the LOAD is in
+// MEM/WB. The branch is resolved here from flops only: each operand is
+// MEM/WB.read_data if it is the LOAD's rd (in.late_rs?), else the
+// EX-forwarded EX/MEM.rs?_val, and a six-way compare gives the condition.
+// The compare ends in a few flops, never in a 32-bit mux:
+//   - late_kill_q: the branch mispredicted. It is the WB-stage redirect,
+//     raised the cycle the branch is in MEM/WB. EX ORs it into redirect
+//     (target late_tgt_q, the path IF did not take), so flush_if /
+//     flush_id and the IF kill follow; EX/MEM captures a bubble, the
+//     div_unit goes idle, and here the MEM-stage op (the wrong-path
+//     instruction right behind the branch) is dropped: no dmem read or
+//     write, no store post, no cache update, and MEM/WB captures it
+//     with valid = reg_write = 0.
+//   - MEM/WB.late_trap: taken to a misaligned target. It traps and falls
+//     through; IF never predicts such a target, so it is no mispredict.
+//   - the BHT update, as the cond-selected one of two counter values
+//     precomputed from the carried fetch-time counter (with its write
+//     enable skipped when the counter would not change). It wins the
+//     shared BHT port over EX's write.
+// RVFI takes the late branch's pc_wdata from late_tgt_q on a mispredict
+// (core.sv); MEM/WB.pc_next holds the predicted next PC, selected here
+// by flops. MEM/WB.rs?_val take the substituted operands.
+//
+// If the LOAD ahead trapped (misaligned: MEM/WB reg_write = 0), its rd
+// keeps the old value, which the late path does not have (EX forwarded
+// the LOAD's address instead). The branch is then replayed: it does not
+// retire (MEM/WB valid = 0), writes no BHT, and late_kill_q redirects to
+// its own pc, where it refetches with the LOAD retired.
+//
 // Latency:        1 cycle (MEM/WB register clocked here).
 // RVFI fields:    feeds mem_addr, mem_rmask, mem_wmask, mem_rdata,
-//                 mem_wdata, trap, plus rd_wdata via the loaded data.
+//                 mem_wdata, trap, plus rd_wdata via the loaded data;
+//                 for a late branch rs1/rs2_rdata, trap and pc_wdata.
 module mem_stage (
   input  logic               clock,
   input  logic               reset,
@@ -86,6 +120,13 @@ module mem_stage (
   // The MEM-stage memory op completes this cycle: via the bus, a cache
   // hit, or a store post. hazard_unit stalls on !mem_ready && mem op.
   output logic               mem_ready,
+  // Late branch unit (registered): WB-stage redirect and its target
+  output logic               late_kill,
+  output logic [31:0]        late_tgt,
+  // Late branch BHT update (registered, has priority over EX's)
+  output logic                  bht_we,
+  output logic [BHT_IDX_W-1:0]  bht_widx,
+  output logic [1:0]            bht_wdata,
   // MEM/WB register output
   output mem_wb_t  out
 );
@@ -177,6 +218,12 @@ module mem_stage (
   logic                  cand_hit_q;
   logic [31:0]           cand_data_q;
 
+  // MEM/WB register (declared here: the late branch unit reads the LOAD
+  // it holds) and the late branch unit's flops.
+  mem_wb_t               reg_q;
+  logic                  late_kill_q;
+  logic [31:0]           late_tgt_q;
+
   always_comb begin
     // Byte/halfword replication for stores.
     case (in.ctrl.mem_width)
@@ -202,11 +249,14 @@ module mem_stage (
     ctrl_with_trap = in.ctrl;
     ctrl_with_trap.is_illegal = in.ctrl.is_illegal || dec_is_illegal
                              || mem_misalign;
-    if (mem_misalign)
+    // A late-killed op never writes rd (and so is never forwarded).
+    if (mem_misalign || late_kill_q)
       ctrl_with_trap.reg_write  = 1'b0;
 
-    ld        = in.ctrl.mem_read  && !mem_misalign;
-    st        = in.ctrl.mem_write && !mem_misalign;
+    // A late-killed op is wrong-path: no bus access of any kind (its
+    // address may be anything), no store post, no cache update.
+    ld        = in.ctrl.mem_read  && !mem_misalign && !late_kill_q;
+    st        = in.ctrl.mem_write && !mem_misalign && !late_kill_q;
     cacheable = !in.alu_result[28];
     bus_free  = dmem_ready && !sb_valid_q;
     st_done   = st && !sb_valid_q;
@@ -307,9 +357,72 @@ module mem_stage (
     end
   end
 
-  // ── MEM/WB register ───────────────────────────────────────────────────
-  mem_wb_t reg_q;
+  // ── Late branch unit ──────────────────────────────────────────────────
+  // Operands from flops only (see header). ld_trap: the LOAD in MEM/WB
+  // did not write its rd (misaligned trap), so the branch is replayed.
+  // late_redo / late_mis are only ever set with in.late, which EX/MEM
+  // never holds on a late_kill cycle (the instruction right behind a
+  // branch cannot be a late branch), so they need no kill term.
+  logic        ld_trap;
+  logic [31:0] late_a;
+  logic [31:0] late_b;
+  logic        late_cond;
+  logic        late_redo;
+  logic        late_mis;
+  logic [1:0]  late_inc;
+  logic [1:0]  late_dec;
 
+  always_comb begin
+    late_a = in.late_rs1 ? reg_q.read_data : in.rs1_val;
+    late_b = in.late_rs2 ? reg_q.read_data : in.rs2_val;
+    case (in.ctrl.branch_op)
+      BR_BEQ:  late_cond = (late_a == late_b);
+      BR_BNE:  late_cond = (late_a != late_b);
+      BR_BLT:  late_cond = ($signed(late_a) <  $signed(late_b));
+      BR_BGE:  late_cond = ($signed(late_a) >= $signed(late_b));
+      BR_BLTU: late_cond = (late_a <  late_b);
+      BR_BGEU: late_cond = (late_a >= late_b);
+      default: late_cond = 1'b0;
+    endcase
+    ld_trap   = !reg_q.ctrl.reg_write;
+    late_redo = in.late && ld_trap;
+    // Architectural transfer: taken, and the target is aligned (pc is,
+    // so branch_target[1] = imm[1]). IF predicted it in late_pred.
+    late_mis  = in.late && (ld_trap
+                || ((late_cond && !in.branch_target[1]) != in.late_pred));
+    late_inc  = (in.bht_ctr == 2'b11) ? 2'b11 : in.bht_ctr + 2'd1;
+    late_dec  = (in.bht_ctr == 2'b00) ? 2'b00 : in.bht_ctr - 2'd1;
+  end
+
+  logic                 late_bht_we_q;
+  logic [BHT_IDX_W-1:0] late_bht_widx_q;
+  logic [1:0]           late_bht_wdata_q;
+
+  always_ff @(posedge clock) begin
+    if (reset) begin
+      late_kill_q   <= 1'b0;
+      late_bht_we_q <= 1'b0;
+    end else begin
+      late_kill_q   <= late_mis;
+      late_bht_we_q <= in.late && !ld_trap
+                    && (late_cond ? (in.bht_ctr != 2'b11) : (in.bht_ctr != 2'b00));
+    end
+    // Mispredicted: the path IF did not take (pc+4 = EX's pc_next for an
+    // inert branch, or pc+imm). Replay: the branch itself.
+    late_tgt_q       <= late_redo      ? in.pc
+                      : in.late_pred   ? in.pc_next
+                      :                  in.branch_target;
+    late_bht_widx_q  <= in.pc[BHT_IDX_W+1:2];
+    late_bht_wdata_q <= late_cond ? late_inc : late_dec;
+  end
+
+  assign late_kill = late_kill_q;
+  assign late_tgt  = late_tgt_q;
+  assign bht_we    = late_bht_we_q;
+  assign bht_widx  = late_bht_widx_q;
+  assign bht_wdata = late_bht_wdata_q;
+
+  // ── MEM/WB register ───────────────────────────────────────────────────
   always_ff @(posedge clock) begin
     if (reset) begin
       reg_q <= '0;
@@ -326,9 +439,12 @@ module mem_stage (
       reg_q.rd         <= in.rd;
       reg_q.rs1_addr   <= in.rs1_addr;
       reg_q.rs2_addr   <= in.rs2_addr;
-      reg_q.rs1_val    <= in.rs1_val;
-      reg_q.rs2_val    <= in.rs2_val;
-      reg_q.pc_next    <= in.pc_next;
+      // Late branch: the substituted operands, and the predicted next PC
+      // (a mispredict's pc_wdata comes from late_tgt_q, see core.sv).
+      reg_q.rs1_val    <= late_a;
+      reg_q.rs2_val    <= late_b;
+      reg_q.pc_next    <= (in.late && in.late_pred) ? in.branch_target
+                                                    : in.pc_next;
       reg_q.mem_addr   <= aligned_addr;
       reg_q.mem_rdata  <= ld_word;
       reg_q.mem_wdata  <= wdata_rep;
@@ -336,7 +452,8 @@ module mem_stage (
       reg_q.mem_rmask  <= (in.ctrl.mem_read  && !mem_misalign) ? byte_mask : 4'b0000;
       reg_q.ctrl       <= ctrl_with_trap;
       reg_q.instr      <= in.instr;
-      reg_q.valid      <= in.valid;
+      reg_q.late_trap  <= in.late && late_cond && in.branch_target[1];
+      reg_q.valid      <= in.valid && !late_kill_q && !late_redo;
     end
   end
 

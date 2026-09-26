@@ -6,7 +6,8 @@
 //
 // Sequencing (real arithmetic):
 //   IDLE  --start-->  latch raw operands + op                   (1 cycle)
-//   SIGN              rq = a, dvs = b, operand signs            (1 cycle)
+//   SIGN              rq = a, dvs = b, operand signs,
+//                     b != 0 per nibble                         (1 cycle)
 //   PREP              rq = |a|, dvs = |b|, rem = 0, flag b == 0 (1 cycle)
 //   ITER              radix-2 restoring step in two phases:
 //                     compare (register take / trial - dvs),
@@ -43,6 +44,11 @@
 // them as RVFI rs1_rdata / rs2_rdata: the forwarding sources that fed
 // them drain while the divide waits in EX.
 //
+// kill (EX's late_kill: the divide in EX is wrong-path and is being
+// flushed) returns the unit to IDLE from any state, over start, in both
+// the real and the ALTOPS sequences, so a flushed divide can never leave
+// a DONE result for the next one.
+//
 // Latency:        start -> done = 67 cycles (real), 2 cycles (ALTOPS).
 //                 result / done are registered outputs.
 // RVFI fields:    rd_wdata of DIV/DIVU/REM/REMU (via EX/MEM alu_result),
@@ -52,6 +58,7 @@ module div_unit (
   input  logic        reset,
   input  logic        start,        // accepted only in IDLE
   input  logic        ack,          // DONE -> IDLE (EX/MEM took the result)
+  input  logic        kill,         // any state -> IDLE (divide flushed)
   input  logic        is_rem,       // funct3[1]: REM / REMU
   input  logic        is_unsigned,  // funct3[0]: DIVU / REMU
   input  logic [31:0] a,            // dividend (post-forward rs1)
@@ -83,6 +90,7 @@ module div_unit (
   logic        neg_q;       // negate rq path: PREP = a<0, FIXUP = result<0
   logic        dneg_q;      // negate dvs in PREP (b<0, signed op)
   logic        sel_rem_q;   // FIXUP source: 1 = rem_q, 0 = rq_q
+  logic [7:0]  b_nz4_q;     // b != 0 per nibble, registered in SIGN
   logic        b_nz_q;      // b != 0, registered in PREP, read in ITER
   logic        iter_hi_q;   // ITER phase: 0 = compare, 1 = apply
   logic        take_q;      // compare phase: trial >= dvs
@@ -112,11 +120,14 @@ module div_unit (
   // ITER, so the 32-bit zero detect and the sign logic are two short
   // register-to-register paths instead of one long one. neg_q is not
   // read again until FIXUP, and the fold is idempotent over the ITER
-  // cycles.
+  // cycles. The zero detect itself is split over SIGN (one LUT per
+  // nibble, b_nz4_q) and PREP (the 8-input OR), so the b_q flops, which
+  // sit by EX's operand path, never feed a deep OR tree.
   /* verilator lint_off UNUSEDSIGNAL */
-  logic a_neg;
-  logic b_neg;
-  logic res_neg;
+  logic       a_neg;
+  logic       b_neg;
+  logic       res_neg;
+  logic [7:0] b_nz4;
   /* verilator lint_on UNUSEDSIGNAL */
   always_comb begin
     a_neg   = !is_uns_q && a_q[31];
@@ -124,6 +135,7 @@ module div_unit (
     // REM takes the dividend's sign; DIV is negative iff the signs differ,
     // except x / 0 which must stay all ones (ITER clears neg_q for that).
     res_neg = is_rem_q ? a_neg : (a_neg ^ b_neg);
+    for (int i = 0; i < 8; i++) b_nz4[i] = |b_q[4*i +: 4];
   end
 
   // ── ITER: one restoring step, split over two cycles ───────────────────
@@ -168,6 +180,7 @@ module div_unit (
       neg_q       <= 1'b0;
       dneg_q      <= 1'b0;
       sel_rem_q   <= 1'b0;
+      b_nz4_q     <= 8'b0;
       b_nz_q      <= 1'b0;
       iter_hi_q   <= 1'b0;
       take_q      <= 1'b0;
@@ -194,6 +207,7 @@ module div_unit (
           neg_q     <= !is_uns_q && a_q[31];
           dneg_q    <= !is_uns_q && b_q[31];
           sel_rem_q <= 1'b0;
+          b_nz4_q   <= b_nz4;
           state_q   <= ST_PREP;
         end
 
@@ -207,7 +221,7 @@ module div_unit (
           rem_q     <= 32'b0;
           cnt_q     <= 5'd31;
           neg_q     <= res_neg;              // FIXUP sign, before b == 0
-          b_nz_q    <= (b_q != 32'b0);
+          b_nz_q    <= |b_nz4_q;
           state_q   <= ST_ITER;
 `endif
         end
@@ -238,6 +252,9 @@ module div_unit (
 
         default: state_q <= ST_IDLE;
       endcase
+      // Flushed divide: overrides every state_q assignment above. The
+      // datapath registers keep their values; the next start reloads them.
+      if (kill) state_q <= ST_IDLE;
     end
   end
 

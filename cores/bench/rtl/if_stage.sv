@@ -49,8 +49,11 @@
 // Because pred_target comes from the exact bits that enter ID/EX, a
 // prediction can only be wrong in direction. EX checks it, and on a
 // mispredict redirects to alt_target (the path IF did not take), which
-// is carried down with the instruction. BHT counters are written by EX
-// one cycle after resolution (bht_we / bht_widx / bht_wdata).
+// is carried down with the instruction. A late branch (one reading the
+// LOAD right ahead of it) is checked in MEM instead and redirected from
+// a WB-stage flop through the same redirect input (see mem_stage.sv).
+// BHT counters are written one cycle after resolution (bht_we /
+// bht_widx / bht_wdata), by EX or, for a late branch, by MEM.
 //
 // The BHT has no reset: every counter starts weakly-not-taken (2'b01)
 // from an initial block, which Verilator, the formal flow and the Gowin
@@ -67,9 +70,9 @@ module if_stage (
   input  logic                 reset,
   input  logic                 stall,         // hold PC (any stall reason)
   input  logic                 flush,         // emit NOP into ID this cycle
-  input  logic                 redirect,      // EX mispredict (or JALR)
+  input  logic                 redirect,      // EX mispredict / JALR, or late kill
   input  logic [31:0]          redirect_target,
-  // BHT write port (registered in EX, one cycle after branch resolve)
+  // BHT write port (registered in EX or MEM, one cycle after resolve)
   input  logic                 bht_we,
   input  logic [BHT_IDX_W-1:0] bht_widx,
   input  logic [1:0]           bht_wdata,
@@ -95,6 +98,7 @@ module if_stage (
   logic [1:0]  bht [0:BHT_ENTRIES-1];
   logic        pd_br;
   logic        pd_jal;
+  logic        pd_jalr;
   logic [31:0] pimm;
   logic [31:0] pred_target;
   logic [31:0] pc_plus4;
@@ -105,6 +109,7 @@ module if_stage (
     // funct3 2/3 are reserved BRANCH encodings (decoder traps them).
     pd_br       = (instr_word[6:0] == 7'b1100011) && (instr_word[14:13] != 2'b01);
     pd_jal      = (instr_word[6:0] == 7'b1101111);
+    pd_jalr     = (instr_word[6:0] == 7'b1100111);
     // opcode bit 3 separates JAL (1101111) from BRANCH (1100011).
     pimm        = instr_word[3]
                 ? {{12{instr_word[31]}}, instr_word[19:12], instr_word[20],
@@ -198,6 +203,13 @@ module if_stage (
   // redirect here puts imem_data -> load-use -> ID/EX enable on the
   // critical path). pred_taken is killed too, so bubbles never make EX
   // see a predicted-taken instruction and fire a false redirect.
+  //
+  // pd_br / pd_jalr go to the hazard unit raw, without the kill. pd_br
+  // only acts together with an rs match against a LOAD's rd != x0, and
+  // the killed NOP reads x0, so it cannot act. pd_jalr only raises a
+  // stall + ID/EX bubble; on a killed cycle IF already refetches the PC
+  // (imem stall) or follows the redirect (which wins over stall), and
+  // ID/EX captures a bubble either way.
   logic kill;
 
   always_comb begin
@@ -207,6 +219,8 @@ module if_stage (
     out.pred_taken = pred_raw && !kill;
     out.bht_ctr    = bht_ctr;
     out.alt_target = pred_raw ? pc_plus4 : pred_target;
+    out.pd_br      = pd_br;
+    out.pd_jalr    = pd_jalr;
     out.valid      = !kill;
   end
 
