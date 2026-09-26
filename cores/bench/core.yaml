@@ -1,5 +1,7 @@
 name: bench
-description: "Frozen LLM-benchmark fixture core. Identical RTL to baseline at the bench-fixture-v1 freeze point. The benchmark matrix clones from the bench-fixture-v1 orphan branch and operates only on this directory."
+description: Frozen LLM-benchmark fixture core. Identical RTL to baseline at the bench-fixture-v1
+  freeze point. The benchmark matrix clones from the bench-fixture-v1 orphan branch
+  and operates only on this directory.
 isa: rv32im
 nret: 1
 target_fpga: tang-nano-20k
@@ -9,10 +11,10 @@ targets:
   coremark_iter_s: 300
   coremark_per_mhz: 2.2
 current:
-  fmax_mhz: 135.21
-  lut4: 9880
-  ff: 1858
-  coremark_iter_s: 301.04
-  coremark_per_mhz: 2.2265
-  source_id: bench-initial-fork-2026-04-29
-  updated: '2026-04-29T18:29:48.033631Z'
+  fmax_mhz: 127.03
+  lut4: 9563
+  ff: 1866
+  coremark_iter_s: 2.0e-06
+  coremark_per_mhz: 0.0
+  source_id: baseline-bench-aea55f8
+  updated: '2026-09-26T03:26:17.776617Z'
