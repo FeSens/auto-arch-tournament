@@ -4,4 +4,4 @@ The `cores/bench/rtl/` files and `core.yaml` of the design this repetition ended
 
 Scored results for this design: 3128 LUT4 (LUT-RAM, block RAM and DSP cells not counted), 1491 FF, Fmax median 302.21 MHz, 3,073,627 CoreMark cycles for 10 iterations. See [`../../README.md`](../../README.md) for how it was scored and the caveats, including stall-only logic that the FPGA wrapper constant-folds away.
 
-To evaluate it, copy these files into `cores/<name>/rtl/` (and `core.yaml` into `cores/<name>/`) and run the normal gates. The per-change diffs are not published.
+To evaluate it, copy these files into `cores/<name>/rtl/` (and `core.yaml` into `cores/<name>/`) and run the normal gates. The full run history, one commit per accepted change plus a journal commit per candidate, is on the branch [`runs/claude-opus-5_5_xhigh-rep1`](https://github.com/FeSens/auto-arch-tournament/commits/runs/claude-opus-5_5_xhigh-rep1).

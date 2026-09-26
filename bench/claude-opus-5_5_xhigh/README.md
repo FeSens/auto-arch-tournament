@@ -22,7 +22,7 @@ Of the 45 candidates, 9 were improvements, 13 regressions and 23 broken. Most br
   - Known differences from the Codex treatment: Claude's reads are stricter (Codex could read anywhere), `/tmp` writes are denied (Codex allowed them), and Claude session transcripts are written to the operator's `~/.claude/projects/`, which the agent cannot read. The diary section lists these.
 - Cost: dollar billing is not available under OAuth. `total_cost_usd: 0.0` is not measured zero spend. `api_equivalent_cost_usd` (123.62 USD) is Claude Code's own list-price estimate, not a bill.
 - Tokens: 522,817,399 in, 1,904,689 out. This harness archives implementer and scribe transcripts (the fix for the undercount described in the Sol README), so these totals cover all agents. Output tokens are a lower bound: sessions killed by the timeout report only streaming snapshots.
-- `agent.log` is compacted the same way as for Sol: tool-output fields longer than 4 KB are cut to head and tail around a marker recording the original length and sha256. The verbatim transcript and the Git bundle are kept locally and not published.
+- `agent.log` is compacted the same way as for Sol: tool-output fields longer than 4 KB are cut to head and tail around a marker recording the original length and sha256. The verbatim transcript is kept locally and not published; the Git history is published as a branch (see Files).
 
 ## Launch history
 
@@ -69,4 +69,4 @@ The operator audited all nine accepted designs (r1s1 to r14s1): changes are conf
 
 ## Files
 
-Per-repetition folder `rep1/` contains the canonical summaries (`summary.json`, `run_summary.json`), the full final journal (`log.jsonl`), the orchestrator log, the compacted agent transcript (`agent.log`), the tool environment (`env.json`) and the final design's RTL (`final-rtl/`, identical to the accepted r14s1 commit). The website and aggregate reports are generated from `bench/results.jsonl` and these journals. `aborted1-formal-reaper/` holds the stopped first launch.
+Per-repetition folder `rep1/` contains the canonical summaries (`summary.json`, `run_summary.json`), the full final journal (`log.jsonl`), the orchestrator log, the compacted agent transcript (`agent.log`), the tool environment (`env.json`) and the final design's RTL (`final-rtl/`, identical to the accepted r14s1 commit). The run's Git history, with one commit per accepted change, is published as the branch [`runs/claude-opus-5_5_xhigh-rep1`](https://github.com/FeSens/auto-arch-tournament/commits/runs/claude-opus-5_5_xhigh-rep1). The website and aggregate reports are generated from `bench/results.jsonl` and these journals. `aborted1-formal-reaper/` holds the stopped first launch.
