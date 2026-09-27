@@ -301,6 +301,15 @@ no file means this attempt is lost.
 
 """
 
+    from tools.accept_rule import ACCEPT_MARGIN_LN, margin_pct
+    margin_clause = (
+        f"Acceptance: a candidate replaces the champion only if its score is more\n"
+        f"than {margin_pct():.1f}% above the champion's. Changes that do not alter the\n"
+        f"circuit still move place-and-route results by several percent, so\n"
+        f"smaller expected gains will not be accepted.\n\n"
+        if ACCEPT_MARGIN_LN > 0 else ""
+    )
+
     return f"""You are a CPU microarchitecture research agent.
 
 Your job: propose one architectural hypothesis to improve this RV32IM CPU.
@@ -313,7 +322,7 @@ Fitness metric: CoreMark iter/sec = CoreMark iterations/cycle × Fmax_Hz on Tang
 ## Current SystemVerilog Source ({rtl_dir}/)
 {src_dump}{history_section}
 
-{time_clause}## Instructions
+{time_clause}{margin_clause}## Instructions
 {lessons_instruction}2. Identify the most promising architectural improvement.
 3. Use the **write** tool to write a hypothesis YAML file at:
      cores/{target}/experiments/hypotheses/<id>.yaml

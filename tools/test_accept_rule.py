@@ -135,3 +135,19 @@ def test_accept_no_targets_pure_fitness_compare():
 def test_accept_no_targets_equal_fitness_rejected():
     assert accept(old=(300, 5000), new=(300, 4000),
                   coremark_target=None, lut_target=None) is False
+
+
+def test_margin_blocks_sub_noise_gains(monkeypatch):
+    import math
+    from tools import accept_rule
+    monkeypatch.setattr(accept_rule, "ACCEPT_MARGIN_LN", math.log(1.05))
+    assert not accept_rule.accept((100.0, None), (104.0, None))
+    assert accept_rule.accept((100.0, None), (105.5, None))
+    assert round(accept_rule.margin_pct(), 6) == 5.0
+
+
+def test_zero_margin_is_v1_strict_comparison(monkeypatch):
+    from tools import accept_rule
+    monkeypatch.setattr(accept_rule, "ACCEPT_MARGIN_LN", 0.0)
+    assert accept_rule.beats(100.01, 100.0)
+    assert not accept_rule.beats(100.0, 100.0)

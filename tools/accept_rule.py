@@ -6,7 +6,28 @@ Pure functions, no I/O. Designed to be unit-testable without subprocess
 or git state. The orchestrator calls accept(old, new, targets) when
 deciding whether to merge a hypothesis into the active branch.
 """
+import math
 from typing import Optional
+
+# V2 acceptance margin, in natural-log units of score. A candidate must beat
+# the champion by more than this to be accepted, so that placement noise
+# (changes that do not alter the circuit still move Fmax) is not recorded
+# as progress. Set from EXP-2026-09-27-v2-placement-noise; 0.0 reproduces
+# V1's strict comparison.
+ACCEPT_MARGIN_LN = 0.0
+
+
+def margin_pct() -> float:
+    """The margin as a percentage, for prompts and reports."""
+    return (math.exp(ACCEPT_MARGIN_LN) - 1.0) * 100.0
+
+
+def beats(new: Optional[float], old: Optional[float]) -> bool:
+    """Scalar-score comparison with the acceptance margin."""
+    new, old = (new or 0), (old or 0)
+    if old <= 0:
+        return new > old
+    return new > old * math.exp(ACCEPT_MARGIN_LN)
 
 
 def _deficit(value: float, target: float, lower_is_better: bool) -> float:
@@ -83,7 +104,7 @@ def accept(old: tuple,
 
     # No targets → today's behavior (just compare CoreMark).
     if coremark_target is None and lut_target is None:
-        return (np or 0) > (op or 0)
+        return beats(np, op)
 
     s_old = score(op, ol, coremark_target, lut_target)
     s_new = score(np, nl, coremark_target, lut_target)
