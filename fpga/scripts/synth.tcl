@@ -37,6 +37,7 @@ if {[info exists ::env(BENCH)]} {
 } else {
     set bench_sv "fpga/core_bench.sv"
 }
+read_verilog -sv fpga/bench_stall_gen.sv
 read_verilog -sv $bench_sv
 
 synth_gowin -top core_bench -json $gen_dir/synth.json

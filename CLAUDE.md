@@ -36,7 +36,7 @@ improve fitness", not "what eval relaxations would let this RTL pass".
 - `bench/programs/` — selftest, crt0, link.ld, CoreMark sources, portme.
 - `bench/holdout/` — held-out generalization benchmarks (stripped from
   bench fixtures).
-- `fpga/core_bench.sv`, `fpga/core_bench_si.sv`, `fpga/scripts/*`,
+- `fpga/core_bench.sv`, `fpga/core_bench_si.sv`, `fpga/bench_stall_gen.sv`, `fpga/scripts/*`,
   `fpga/constraints/*` — they define the FPGA fitness contract
   (dual-channel + single-issue variants).
 - `test/cosim/main.cpp`, `test/cosim/reference.py`, `test/cosim/run_cosim.py`

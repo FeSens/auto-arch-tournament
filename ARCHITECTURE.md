@@ -15,9 +15,11 @@ are the I/O contract below and the invariants in `CLAUDE.md`.
   field — see `CLAUDE.md` invariant 1 for the exact set.
 
 `io_imemReady` / `io_dmemReady` are single-bit bus-handshake signals:
-`1` = zero-wait, `0` = stalled. The FPGA bench drives zero-wait; the
-orchestrator's apples-to-apples cosim mode drives ~22% random stalls
-on both buses to match VexRiscv's published "full no cache" methodology.
+`1` = zero-wait, `0` = stalled. Both the CoreMark simulation and the timed
+FPGA netlist drive them from the same pseudo-random sequence (about 22%
+stalls on each bus, VexRiscv's "full no cache" methodology;
+`fpga/bench_stall_gen.sv`). Logic that handles or hides stalls is
+therefore part of the timed circuit: it costs area and can limit Fmax.
 
 ## Fitness
 
@@ -26,6 +28,11 @@ CoreMark iterations/second (median Fmax x iterations/cycle), 2K working set
 Bracketed by MMIO writes to `0x10000100` (start) / `0x10000104` (stop) —
 only cycles between the markers count.
 
-`make fpga` runs yosys synth + 3-seed nextpnr P&R + CoreMark cosim. Median
-Fmax across seeds × CoreMark iter/cycle = fitness number reported in
+`make fpga` runs yosys synth + multi-seed nextpnr P&R + CoreMark cosim.
+Median Fmax across seeds × CoreMark iter/cycle = fitness number reported in
 `experiments/log.jsonl`.
+
+The timed netlist observes only the memory-side outputs (fetch address,
+data address, write data, write enables, read enable). RVFI outputs are
+verification-only and are not timed: logic that only feeds RVFI is pruned
+by synthesis, so optimizing it does not change the score.

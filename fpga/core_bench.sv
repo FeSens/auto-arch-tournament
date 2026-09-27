@@ -14,8 +14,12 @@
 //
 // dmem mirrors the deployable SoC (8 KiB, byte-lane writeable) so the
 // dmem read mux's LUT/BRAM map matches what the eventual deployment will
-// see. The XOR-reduce LED retains every RVFI fan-out so the rvfi register
-// chain isn't dead-code-eliminated.
+// see.
+//
+//   3. (V2) Memory-ready signals come from fpga/bench_stall_gen.sv, the
+//      same stall sequence as the CoreMark simulation, and the LED
+//      observes only memory-side outputs. Stall-handling logic is timed;
+//      RVFI-only logic is pruned.
 //
 // Module is `core_bench` (lowercase) to match the project's "module name
 // = file name" rule. The synth.tcl script reads rtl/*.sv first so this
@@ -52,9 +56,8 @@ module core_bench (
   assign dmem_rdata = dmem[dmem_addr[12:2]];
 
   logic [31:0] imem_addr;
-  // 2-channel RVFI fan-out (NRET=2 contract). V0 channel 1 is constants
-  // from core, but the parallel decl + XOR include keeps the harness
-  // identical for future dual-issue hypotheses.
+  // 2-channel RVFI port set (NRET=2 contract). Connected for elaboration
+  // only; nothing downstream observes it, so synthesis prunes it.
   logic        rvfi_valid_0, rvfi_valid_1;
   logic [63:0] rvfi_order_0, rvfi_order_1;
   logic [31:0] rvfi_insn_0, rvfi_pc_rdata_0, rvfi_pc_wdata_0;
@@ -72,6 +75,17 @@ module core_bench (
   logic        rvfi_trap_0, rvfi_halt_0, rvfi_intr_0;
   logic        rvfi_trap_1, rvfi_halt_1, rvfi_intr_1;
 
+  // V2: memory-ready signals come from the same stall sequence the
+  // CoreMark simulation uses, so stall-handling logic is part of the
+  // timed netlist (fpga/bench_stall_gen.sv).
+  logic imem_ready, dmem_ready;
+  bench_stall_gen stall_gen (
+    .clock      (clock),
+    .reset      (reset),
+    .imem_ready (imem_ready),
+    .dmem_ready (dmem_ready)
+  );
+
   core cpu (
     .clock            (clock),
     .reset            (reset),
@@ -80,13 +94,13 @@ module core_bench (
     // FPGA target uses 1-cycle BRAM, modelled here as zero-wait. The
     // ready ports exist only so the cosim's stall-mode (vex_main.cpp)
     // can drive them; on silicon they're permanently asserted.
-    .io_imemReady     (1'b1),
+    .io_imemReady     (imem_ready),
     .io_dmemAddr      (dmem_addr),
     .io_dmemWData     (dmem_wdata),
     .io_dmemRData     (dmem_rdata),
     .io_dmemWEn       (dmem_wen),
     .io_dmemREn       (dmem_ren),
-    .io_dmemReady     (1'b1),
+    .io_dmemReady     (dmem_ready),
     .io_rvfi_valid_0    (rvfi_valid_0),
     .io_rvfi_order_0    (rvfi_order_0),
     .io_rvfi_insn_0     (rvfi_insn_0),
@@ -131,20 +145,10 @@ module core_bench (
     .io_rvfi_mem_wdata_1(rvfi_mem_wdata_1)
   );
 
-  // XOR-reduce all CPU outputs to a single LED bit. Without this,
-  // dead-output elimination would prune the RVFI fan-out (and most of
-  // the pipeline registers) since their values aren't visible at the
-  // top-level pin list.
-  assign led = ^{rvfi_valid_0, rvfi_order_0, rvfi_insn_0, rvfi_trap_0, rvfi_halt_0, rvfi_intr_0,
-                 rvfi_mode_0, rvfi_ixl_0, rvfi_rs1_addr_0, rvfi_rs1_rdata_0,
-                 rvfi_rs2_addr_0, rvfi_rs2_rdata_0, rvfi_rd_addr_0, rvfi_rd_wdata_0,
-                 rvfi_pc_rdata_0, rvfi_pc_wdata_0, rvfi_mem_addr_0,
-                 rvfi_mem_rmask_0, rvfi_mem_wmask_0, rvfi_mem_rdata_0, rvfi_mem_wdata_0,
-                 rvfi_valid_1, rvfi_order_1, rvfi_insn_1, rvfi_trap_1, rvfi_halt_1, rvfi_intr_1,
-                 rvfi_mode_1, rvfi_ixl_1, rvfi_rs1_addr_1, rvfi_rs1_rdata_1,
-                 rvfi_rs2_addr_1, rvfi_rs2_rdata_1, rvfi_rd_addr_1, rvfi_rd_wdata_1,
-                 rvfi_pc_rdata_1, rvfi_pc_wdata_1, rvfi_mem_addr_1,
-                 rvfi_mem_rmask_1, rvfi_mem_wmask_1, rvfi_mem_rdata_1, rvfi_mem_wdata_1,
-                 imem_addr, dmem_rdata};
+  // V2: observe only the memory-side outputs. Everything the core computes
+  // reaches the fetch address or a store, so the datapath stays in the
+  // netlist; logic that only drives RVFI (a verification port a deployed
+  // core would not have) is pruned and does not count toward Fmax or area.
+  assign led = ^{imem_addr, dmem_addr, dmem_wdata, dmem_wen, dmem_ren, dmem_rdata};
 
 endmodule

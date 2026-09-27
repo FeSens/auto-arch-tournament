@@ -5,9 +5,9 @@
 // set — no `_1` ports. Selected by the orchestrator (via BENCH env var in
 // synth.tcl) when cores/<target>/core.yaml declares nret: 1.
 //
-// See core_bench.sv for the full rationale on LFSR-driven imem, dmem
-// model, and the XOR-reduce LED that keeps RVFI fan-out alive through
-// dead-output elimination.
+// See core_bench.sv for the rationale on LFSR-driven imem, the dmem
+// model, the V2 stall generator, and why the LED observes only the
+// memory-side outputs (RVFI-only logic is pruned).
 module core_bench (
   input  logic clock,
   input  logic reset,
@@ -35,7 +35,8 @@ module core_bench (
   assign dmem_rdata = dmem[dmem_addr[12:2]];
 
   logic [31:0] imem_addr;
-  // Single-channel RVFI fan-out (NRET=1 contract).
+  // Single-channel RVFI port set (NRET=1 contract). Connected for
+  // elaboration only; nothing observes it, so synthesis prunes it.
   logic        rvfi_valid_0;
   logic [63:0] rvfi_order_0;
   logic [31:0] rvfi_insn_0, rvfi_pc_rdata_0, rvfi_pc_wdata_0;
@@ -46,18 +47,29 @@ module core_bench (
   logic [1:0]  rvfi_mode_0, rvfi_ixl_0;
   logic        rvfi_trap_0, rvfi_halt_0, rvfi_intr_0;
 
+  // V2: memory-ready signals come from the same stall sequence the
+  // CoreMark simulation uses, so stall-handling logic is part of the
+  // timed netlist (fpga/bench_stall_gen.sv).
+  logic imem_ready, dmem_ready;
+  bench_stall_gen stall_gen (
+    .clock      (clock),
+    .reset      (reset),
+    .imem_ready (imem_ready),
+    .dmem_ready (dmem_ready)
+  );
+
   core cpu (
     .clock            (clock),
     .reset            (reset),
     .io_imemAddr      (imem_addr),
     .io_imemData      (lfsr),
-    .io_imemReady     (1'b1),
+    .io_imemReady     (imem_ready),
     .io_dmemAddr      (dmem_addr),
     .io_dmemWData     (dmem_wdata),
     .io_dmemRData     (dmem_rdata),
     .io_dmemWEn       (dmem_wen),
     .io_dmemREn       (dmem_ren),
-    .io_dmemReady     (1'b1),
+    .io_dmemReady     (dmem_ready),
     .io_rvfi_valid_0    (rvfi_valid_0),
     .io_rvfi_order_0    (rvfi_order_0),
     .io_rvfi_insn_0     (rvfi_insn_0),
@@ -81,13 +93,10 @@ module core_bench (
     .io_rvfi_mem_wdata_0(rvfi_mem_wdata_0)
   );
 
-  // XOR-reduce all CPU outputs to a single LED bit. Without this,
-  // dead-output elimination would prune the RVFI fan-out.
-  assign led = ^{rvfi_valid_0, rvfi_order_0, rvfi_insn_0, rvfi_trap_0, rvfi_halt_0, rvfi_intr_0,
-                 rvfi_mode_0, rvfi_ixl_0, rvfi_rs1_addr_0, rvfi_rs1_rdata_0,
-                 rvfi_rs2_addr_0, rvfi_rs2_rdata_0, rvfi_rd_addr_0, rvfi_rd_wdata_0,
-                 rvfi_pc_rdata_0, rvfi_pc_wdata_0, rvfi_mem_addr_0,
-                 rvfi_mem_rmask_0, rvfi_mem_wmask_0, rvfi_mem_rdata_0, rvfi_mem_wdata_0,
-                 imem_addr, dmem_rdata};
+  // V2: observe only the memory-side outputs. Everything the core computes
+  // reaches the fetch address or a store, so the datapath stays in the
+  // netlist; logic that only drives RVFI (a verification port a deployed
+  // core would not have) is pruned and does not count toward Fmax or area.
+  assign led = ^{imem_addr, dmem_addr, dmem_wdata, dmem_wen, dmem_ren, dmem_rdata};
 
 endmodule
