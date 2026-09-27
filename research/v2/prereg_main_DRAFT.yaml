@@ -1,0 +1,52 @@
+# DRAFT, not yet pre-registered. Becomes research/runs/<id>/prereg.yaml
+# (write-once) after: calibration sets ACCEPT_MARGIN_LN and the seed count,
+# the isolation setup is decided, the harness is tagged, and a smoke test of
+# both systems passes on that tag.
+question: >
+  Under the HWE Bench V2 contract, does the final design produced by
+  Claude Opus 5.5 (xhigh, Claude Code) score differently on the held-out
+  suite than the final design produced by GPT-6 Sol (xhigh, Codex CLI)?
+systems:
+  - name: claude-opus-5_5_xhigh-v2
+    cli: Claude Code (version pinned and recorded at launch)
+    model: claude-opus-5-5
+    effort: xhigh
+  - name: gpt-6-sol_xhigh-v2
+    cli: Codex CLI (version pinned and recorded at launch)
+    model: gpt-6-sol
+    effort: xhigh
+unit_of_comparison: >
+  A model inside its vendor's CLI. Claims name the system, never the bare model.
+harness: tag hwe-bench-v2.0 (to be created), HARNESS_VERSION 2.0.0, toolchain_digest recorded per row
+budget: N=15 rounds, K=3 slots, hypothesis 20 min, implementation 30 min, scribe 4 min, same for both
+runs_per_system: 6
+power_basis: >
+  V1 within-configuration sample SD of final score, as a fraction of the mean,
+  ranged 7.8% to 15% (median about 11%) across the three-run configurations.
+  With sigma(ln score) ~= 0.12, n=6 per system gives 80% power at two-sided
+  alpha=0.05 to detect a ratio of about 1.22 (22%) between system means.
+  Smaller true differences will likely end as "not distinguishable".
+schedule: >
+  Runs interleaved: one run of each system in parallel, pairs launched in
+  sequence, so time-of-day, provider load and machine contention affect both
+  systems equally. Launch order within a pair alternates.
+primary_metric: >
+  ln(held-out score) of each run's final champion: Fmax (V2 harness, median of
+  the calibrated seed count) times the geometric mean of the five held-out
+  kernels' iterations per cycle.
+primary_test: >
+  Welch two-sample t-test on ln(held-out score), two-sided, alpha = 0.05; report
+  the difference in means as a ratio with its 95% CI, plus a 10,000-sample
+  percentile bootstrap CI as a robustness check.
+verdict_rules:
+  - "CI excludes 1 and p < 0.05: the system with the higher mean ranks higher on this contract."
+  - "Otherwise: not distinguishable at n=6. No ranking claimed; no 'within noise' wording."
+secondary_metrics: >
+  CoreMark score (the optimization signal), accepted / correct-no-gain / failed
+  attempts by stage, hypothesis timeouts, LUT4 + LUT-RAM + BSRAM + DSP of the
+  final design, tokens for all agents, wall time. Descriptive only.
+incident_policy: >
+  A run stopped by a harness or provider failure (not by the agent) is re-run
+  from V0 and both attempts are reported; the scored run is the first complete
+  one. Quota pauses are resumed only for blocked slots, as in V1, and recorded.
+  Runs are never discarded for being low.

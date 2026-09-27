@@ -1,0 +1,39 @@
+# WRITE-ONCE. Pre-registered 2026-09-27 before any calibration run.
+id: EXP-2026-09-27-v2-placement-noise
+question: >
+  How much does the V2 score of a fixed design vary under changes that do not
+  alter the circuit, and how many place-and-route seeds and what acceptance
+  margin make a strict-improvement decision robust to that variation?
+harness: v2 branch at commit b098250 (HARNESS_VERSION 2.0.0-dev), toolchain_digest fe10e94c...
+designs:
+  - V0 (bench-v2 cores/bench/rtl)
+  - gpt-5_6-sol rep1 final, gpt-5_6-terra rep3 final, gpt-6-astra_max rep1/2/3 final,
+    gpt-6-sol_xhigh rep1 final (all from repo.bundle)
+  - claude-opus-5_5_xhigh rep1 final is excluded: it fails placement under V2 on
+    seeds 1-3 (75,830 LUT4 > 20,736), recorded in research/v2/NOTES.md.
+perturbation: >
+  An unused module zz_calib_pad.sv with k assign statements added to the RTL
+  directory. Synthesis removes it; it changes Yosys's internal numbering, which
+  changed both LUT4 count and Fmax in the pilot (k=7 vs none on V0, seed 2).
+  k in {5, 9, 13, 17, 21, 25, 29, 33}; plus the unperturbed design (k=0).
+seeds: unperturbed k=0 -> seeds 1..10; each k>0 -> seeds 1..5.
+primary_metric: >
+  sigma = pooled standard deviation, across designs, of ln(median Fmax) over the
+  9 variants of each design (k=0 and the 8 k>0), computed for median-of-3
+  (seeds 1-3) and median-of-5 (seeds 1-5). Within-design SD first, pooled by
+  root-mean-square over designs.
+decision_rules:
+  seeds: >
+    Use 5 seeds if sigma(median-of-5) <= 0.8 * sigma(median-of-3); otherwise keep 3
+    seeds (extra seeds not worth the P&R time).
+  margin: >
+    Accept a candidate only if ln(S_new) - ln(S_champion) > 2.33 * sigma for the
+    chosen seed count. Two independent draws with SD sigma differ with SD
+    sqrt(2) * sigma; 1.645 * sqrt(2) = 2.33 gives a one-sided 5% chance that a
+    design no better than the champion is accepted. Cycles are deterministic, so
+    noise enters only through Fmax.
+  report: per-design table of the 9 medians, sigma per design, pooled sigma, chosen seed count and margin.
+stop_rule: >
+  If any design fails placement on >=2 of its seeds in a variant, record it and
+  exclude that variant from sigma (not imputed).
+outputs: research/runs/EXP-2026-09-27-v2-placement-noise/{runs.jsonl,notes.md}

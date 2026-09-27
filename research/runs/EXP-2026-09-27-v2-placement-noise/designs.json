@@ -1,0 +1,9 @@
+{
+ "V0": "/private/tmp/claude-501/-Users-bonetto-bonetto-auto-arch-tournament/c4aa8f8e-836f-4266-9ad0-a31f867c07f9/scratchpad/wrap/cores/bench/rtl",
+ "gpt-5_6-sol_rep1": "/private/tmp/claude-501/-Users-bonetto-bonetto-auto-arch-tournament/c4aa8f8e-836f-4266-9ad0-a31f867c07f9/scratchpad/stallfree/runs/gpt-5_6-sol_rep1/src/cores/bench/rtl",
+ "gpt-5_6-terra_rep3": "/private/tmp/claude-501/-Users-bonetto-bonetto-auto-arch-tournament/c4aa8f8e-836f-4266-9ad0-a31f867c07f9/scratchpad/stallfree/runs/gpt-5_6-terra_rep3/src/cores/bench/rtl",
+ "gpt-6-astra_max_rep1": "/private/tmp/claude-501/-Users-bonetto-bonetto-auto-arch-tournament/c4aa8f8e-836f-4266-9ad0-a31f867c07f9/scratchpad/stallfree/runs/gpt-6-astra_max_rep1/src/cores/bench/rtl",
+ "gpt-6-astra_max_rep2": "/private/tmp/claude-501/-Users-bonetto-bonetto-auto-arch-tournament/c4aa8f8e-836f-4266-9ad0-a31f867c07f9/scratchpad/stallfree/runs/gpt-6-astra_max_rep2/src/cores/bench/rtl",
+ "gpt-6-astra_max_rep3": "/private/tmp/claude-501/-Users-bonetto-bonetto-auto-arch-tournament/c4aa8f8e-836f-4266-9ad0-a31f867c07f9/scratchpad/stallfree/runs/gpt-6-astra_max_rep3/src/cores/bench/rtl",
+ "gpt-6-sol_xhigh_rep1": "/private/tmp/claude-501/-Users-bonetto-bonetto-auto-arch-tournament/c4aa8f8e-836f-4266-9ad0-a31f867c07f9/scratchpad/stallfree/runs/gpt-6-sol_xhigh_rep1/src/cores/bench/rtl"
+}
