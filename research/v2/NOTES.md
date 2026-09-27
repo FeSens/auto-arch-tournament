@@ -76,3 +76,22 @@ harness as-is (n=2 pairs, exact match).
 
 Interim (2 of 7 designs complete, not a result): SD of ln(Fmax) across
 variants 0.16-0.21 vs 0.04-0.07 across seeds within a variant.
+
+## 2026-09-27: synthesis targets the wrong family; flow experiment
+
+fpga/scripts/synth.tcl calls synth_gowin without -family, so Yosys maps for
+its default gw1n while nextpnr places on GW2A-18C. The fabric is LUT4 in both
+and the design places, but it is not the intended flow. This holds for all V1
+results too.
+
+The placement-noise calibration was stopped at 235 rows (V0, gpt-5_6-sol_rep1,
+gpt-5_6-terra_rep3, gpt-6-astra_max_rep1 complete; astra rep2 partial): its
+numbers describe gw1n synthesis and will be re-measured on the corrected
+flow. Kept as the record of the V1-flow noise.
+
+gpt-5_6-terra_rep3 k=9 (measured): LUT4 7830 vs 7782 unpadded, seeds 1-3 at
+65.49 / 62.98 / 66.28 MHz vs 125.72 / 141.64 / 145.77. The neutral padding
+changes the mapped netlist, not only placement.
+
+EXP-2026-09-27-v2-synth-flow (pre-registered) compares -family gw2a, with
+-noabc9, and with -retime on 3 designs x 9 variants x 2 seeds.

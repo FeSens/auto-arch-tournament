@@ -1,0 +1,35 @@
+# WRITE-ONCE. Pre-registered 2026-09-27 before any run of this experiment.
+id: EXP-2026-09-27-v2-synth-flow
+question: >
+  Does a different synth_gowin configuration make post-route Fmax less sensitive
+  to circuit-neutral netlist perturbations, without losing median Fmax or area?
+motivation: >
+  EXP-2026-09-27-v2-placement-noise (stopped at 235 rows) showed an unused
+  padding module moving ln(Fmax) with SD ~0.16-0.21 across variants vs ~0.04-0.07
+  across seeds, up to 2x (gpt-5_6-terra_rep3 k=9: 63-66 MHz, LUT4 7830 vs 7782).
+  synth.tcl also omits -family, so synth_gowin targets gw1n while the part is GW2A.
+harness: v2 branch commit 164a2fb; research/v2/scripts/{calibrate.py,wrapper_compare.sh} with --flow
+flows:
+  baseline: '' (current synth.tcl; rows reused from the placement-noise runs.jsonl, deterministic)
+  A: '-family gw2a'
+  B: '-family gw2a -noabc9'
+  C: '-family gw2a -retime'
+designs: [V0, gpt-5_6-sol_rep1, gpt-5_6-terra_rep3]
+perturbations: k in {0, 5, 9, 13, 17, 21, 25, 29, 33}
+seeds: [1, 2]
+primary_metric: >
+  sigma_flow = RMS over the 3 designs of SD(ln(mean over seeds 1-2 of Fmax)) over
+  the 9 variants. Lower is better.
+secondary: per-design median Fmax over variants and median LUT4, per flow.
+decision_rule: >
+  Among flows A, B, C choose the lowest sigma_flow whose per-design median Fmax is
+  >= 0.9x flow A's and median LUT4 <= 1.1x flow A's for every design; if none
+  qualifies choose A. The chosen flow always includes -family gw2a (correctness
+  fix, not a tuning choice). With 3 designs x 9 variants this is a screening
+  experiment: a difference in sigma below 25% relative is reported as
+  not distinguishable, and then A (the minimal change) is chosen.
+consequence: >
+  The chosen flow goes into fpga/scripts/synth.tcl; the placement-noise
+  calibration is re-run on it from scratch (amendment to that prereg: harness
+  flow changed), since margins measured on gw1n synthesis do not apply.
+outputs: runs.jsonl, notes.md in this directory

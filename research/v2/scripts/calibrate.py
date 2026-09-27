@@ -32,16 +32,22 @@ def pad_module(k: int) -> str:
             f"{body}\nendmodule\n")
 
 
+FLOW = ""   # synth_gowin options (--flow); "" = the harness's flow
+
+
 def run_variant(name: str, rtl: str, k: int, out: Path, work_root: Path) -> None:
-    work = work_root / f"{name}_k{k}"
-    src = work_root / f"{name}_k{k}_rtl"
+    tag = re.sub(r"[^A-Za-z0-9]", "", FLOW)
+    work = work_root / f"{name}_k{k}{tag}"
+    src = work_root / f"{name}_k{k}{tag}_rtl"
     shutil.rmtree(src, ignore_errors=True)
     shutil.copytree(rtl, src)
     if k:
         (src / "zz_calib_pad.sv").write_text(pad_module(k))
     seeds = SEEDS.get(k, DEFAULT_SEEDS)
+    import os
     r = subprocess.run(["bash", str(HERE / "wrapper_compare.sh"), str(src), "v2", str(work),
-                        *map(str, seeds)], capture_output=True, text=True)
+                        *map(str, seeds)], capture_output=True, text=True,
+                       env={**os.environ, "SYNTH_ARGS": FLOW})
     rows = []
     for line in r.stdout.splitlines():
         m = LINE.search(line)
@@ -50,6 +56,7 @@ def run_variant(name: str, rtl: str, k: int, out: Path, work_root: Path) -> None
         cells = dict(kv.split("=") for kv in m.group(3).split())
         fmax = None if m.group(2) == "FAILED" else float(m.group(2).split()[0])
         rows.append({"design": name, "k": k, "seed": int(m.group(1)), "fmax_mhz": fmax,
+                     **({"flow": FLOW} if FLOW else {}),
                      **{c.lower(): (None if v == "NA" else int(v)) for c, v in cells.items()}})
     if len(rows) != len(seeds):
         rows.append({"design": name, "k": k, "error": "missing seeds",
@@ -60,7 +67,7 @@ def run_variant(name: str, rtl: str, k: int, out: Path, work_root: Path) -> None
                 f.write(json.dumps(row) + "\n")
     shutil.rmtree(work, ignore_errors=True)
     shutil.rmtree(src, ignore_errors=True)
-    print(f"{name} k={k}: " + ", ".join(str(x.get('fmax_mhz')) for x in rows), flush=True)
+    print(f"{name} k={k} flow='{FLOW}': " + ", ".join(str(x.get('fmax_mhz')) for x in rows), flush=True)
 
 
 def main() -> None:
@@ -69,13 +76,22 @@ def main() -> None:
     ap.add_argument("out", type=Path)
     ap.add_argument("work_root", type=Path)
     ap.add_argument("--lanes", type=int, default=2)
+    ap.add_argument("--flow", default="", help="extra synth_gowin options")
+    ap.add_argument("--only", nargs="+", help="design subset")
+    ap.add_argument("--seeds", type=int, nargs="+", help="seeds for every k (overrides defaults)")
     a = ap.parse_args()
+    global FLOW, SEEDS, DEFAULT_SEEDS
+    FLOW = a.flow
+    if a.seeds:
+        SEEDS, DEFAULT_SEEDS = {}, a.seeds
     designs = json.loads(a.designs.read_text())
+    if a.only:
+        designs = {n: designs[n] for n in a.only}
     done = set()
     if a.out.exists():
         for line in a.out.read_text().splitlines():
             row = json.loads(line)
-            if "error" not in row:
+            if "error" not in row and row.get("flow", "") == FLOW:
                 done.add((row["design"], row["k"]))
     a.work_root.mkdir(parents=True, exist_ok=True)
     jobs = [(n, p, k) for n, p in designs.items() for k in KS if (n, k) not in done]
