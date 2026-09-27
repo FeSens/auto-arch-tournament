@@ -37,6 +37,7 @@ PERTURBATIONS = [(0, 1), (0, 2), (0, 3)]
 # The final champion's Fmax for the headline score is measured afresh on
 # perturbations and seeds the loop never used: the loop's number was
 # selected for being high (winner's curse) and rests on fewer draws.
+MAX_PARALLEL_JOBS = max(2, (os.cpu_count() or 4) - 2)
 FINAL_PERTURBATIONS = [(100 + i, 100 + i) for i in range(1, 16)]
 # Per-seed wall-clock cap on nextpnr. Without it a design that never
 # routes hangs the rep with no outcome recorded (V1: one seed took ~45 min
@@ -169,8 +170,14 @@ async def _run_perturbations(worktree: str, generated_dir: str, env: dict,
                              synth_env: dict, pairs=None) -> list:
     pairs = PERTURBATIONS if pairs is None else pairs
     ks = sorted({k for k, _ in pairs})
-    synths = dict(zip(ks, await asyncio.gather(
-        *(_synth_variant(k, worktree, generated_dir, synth_env) for k in ks))))
+    # Bounded: the final measurement runs 15 synth + P&R jobs, possibly
+    # while another rep's loop is evaluating.
+    sem = asyncio.Semaphore(MAX_PARALLEL_JOBS)
+
+    async def synth(k):
+        async with sem:
+            return await _synth_variant(k, worktree, generated_dir, synth_env)
+    synths = dict(zip(ks, await asyncio.gather(*(synth(k) for k in ks))))
 
     async def one(k, seed):
         vdir, err = synths[k]
@@ -178,7 +185,8 @@ async def _run_perturbations(worktree: str, generated_dir: str, env: dict,
             r = {'seed': seed, 'fmax_mhz': None, 'log': err, 'returncode': None,
                  'placement_failed': True}
         else:
-            r = await run_seed(seed, worktree, f"{vdir}/pnr_seed{seed}", env=env)
+            async with sem:
+                r = await run_seed(seed, worktree, f"{vdir}/pnr_seed{seed}", env=env)
         return {**r, 'perturbation': k}
     return await asyncio.gather(*(one(k, s) for k, s in pairs))
 
