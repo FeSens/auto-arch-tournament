@@ -160,18 +160,29 @@ def _build_kernels_once(repo_root: Path) -> None:
     holdout._build_holdout_elfs(repo_root)
 
 
-def score_rep(rep_dir: Path, repo_root: Path) -> dict:
+def score_rep(rep_dir: Path, repo_root: Path, remeasure: bool = False) -> dict:
     """Score one rep's champion against the held-out kernels. Scratch
     clone lives under the caller's TMPDIR and is always removed, even
-    on failure; rep_dir itself is only ever read, never mutated."""
+    on failure; rep_dir itself is only ever read, never mutated.
+
+    remeasure (V2): measure the champion's Fmax afresh on
+    fpga.FINAL_PERTURBATIONS instead of reusing the loop's value."""
     model, rep = _parse_rep_dir(rep_dir)
-    fmax_mhz = _champion_fmax_mhz(rep_dir)
+    fmax_mhz = loop_fmax = _champion_fmax_mhz(rep_dir)
     coremark_iter_s = _coremark_iter_s(rep_dir)
+    final = None
 
     scratch = Path(tempfile.mkdtemp(prefix="e3-transfer-"))
     clone_dir = scratch / "champion"
     try:
         _clone_champion(rep_dir, clone_dir)
+        if remeasure:
+            from tools.eval.fpga import measure_fmax
+            final = measure_fmax(str(clone_dir), TARGET)
+            if final["fmax_mhz"] is None:
+                raise RuntimeError(f"final Fmax: only {final['placed']} of "
+                                   f"{len(final['pairs'])} pairs placed")
+            fmax_mhz = final["fmax_mhz"]
         result = run_holdout(
             str(clone_dir), TARGET, fmax_mhz, holdout_dir=str(repo_root),
         )
@@ -182,6 +193,8 @@ def score_rep(rep_dir: Path, repo_root: Path) -> dict:
         "model": model,
         "rep": rep,
         "champion_fmax_mhz": fmax_mhz,
+        "loop_fmax_mhz": loop_fmax,
+        "final_fmax_pairs": final["pairs"] if final else None,
         "kernels": result["kernels"],
         "geomean_iter_s": result["geomean_iter_s"],
         "coremark_iter_s": coremark_iter_s,

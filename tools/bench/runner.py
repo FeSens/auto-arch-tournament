@@ -1295,13 +1295,16 @@ def score_holdout(rep_dir: Path) -> dict:
     repo_root = Path(__file__).resolve().parents[2]
     try:
         transfer._build_kernels_once(repo_root)
-        scored = transfer.score_rep(rep_dir, repo_root)
+        scored = transfer.score_rep(rep_dir, repo_root, remeasure=True)
     except Exception as e:  # recorded in the row, see docstring
         return {"holdout_geomean_iter_s": None,
                 "holdout_error": f"{type(e).__name__}: {e}"[:500]}
     return {
         "holdout_geomean_iter_s": scored["geomean_iter_s"],
         "holdout_kernels": scored["kernels"],
+        "holdout_fmax_mhz": scored["champion_fmax_mhz"],
+        "loop_fmax_mhz": scored["loop_fmax_mhz"],
+        "holdout_fmax_pairs": scored["final_fmax_pairs"],
     }
 
 

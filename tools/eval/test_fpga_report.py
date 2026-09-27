@@ -86,3 +86,20 @@ def test_score_is_median_over_pairs_and_two_thirds_must_place(monkeypatch, tmp_p
     assert r['fmax_mhz'] == 130.0 and len(r['perturbations']) == 4
     fmax[21] = None   # 2 of 4 placed: below ceil(2/3 * 4) = 3
     assert fpga.run_fpga_eval(str(tmp_path))['placement_failed'] is True
+
+
+def test_final_measurement_uses_fresh_perturbations(monkeypatch, tmp_path):
+    import pytest
+    loop_ks = {k for k, _ in fpga.PERTURBATIONS}
+    loop_seeds = {s for _, s in fpga.PERTURBATIONS}
+    assert not loop_ks & {k for k, _ in fpga.FINAL_PERTURBATIONS}
+    assert not loop_seeds & {s for _, s in fpga.FINAL_PERTURBATIONS}
+
+    async def pairs(worktree, generated_dir, env, synth_env, pairs=None):
+        return [{'seed': s, 'perturbation': k, 'fmax_mhz': float(k), 'log': '',
+                 'placement_failed': False} for k, s in pairs]
+    monkeypatch.setattr(fpga, "_run_perturbations", pairs)
+    r = fpga.measure_fmax(str(tmp_path), "bench", pairs=[(1, 1), (2, 2), (9, 3)])
+    assert r['fmax_mhz'] == 2.0 and r['placed'] == 3
+    with pytest.raises(ValueError):
+        fpga.measure_fmax(str(tmp_path), "bench", pairs=[(0, 1)])

@@ -34,6 +34,10 @@ SEEDS = [1, 2, 3]
 # seeds do (EXP-2026-09-27-v2-placement-noise), so one netlist is one
 # draw. Set from that calibration; see research/v2/NOTES.md.
 PERTURBATIONS = [(0, 1), (0, 2), (0, 3)]
+# The final champion's Fmax for the headline score is measured afresh on
+# perturbations and seeds the loop never used: the loop's number was
+# selected for being high (winner's curse) and rests on fewer draws.
+FINAL_PERTURBATIONS = [(100 + i, 100 + i) for i in range(1, 16)]
 # Per-seed wall-clock cap on nextpnr. Without it a design that never
 # routes hangs the rep with no outcome recorded (V1: one seed took ~45 min
 # and blocked the FPGA gate). A seed that hits the cap counts as a failed
@@ -280,6 +284,25 @@ def validate_coremark_uart(uart: str, iterations: int) -> tuple:
     if reported_iterations != iterations:
         return False, f'coremark_iterations_mismatch: expected {iterations}, got {reported_iterations}'
     return True, None
+
+def measure_fmax(worktree: str, target: str, pairs=None) -> dict:
+    """Fmax only (no CoreMark), median over pairs; every pair re-synthesizes,
+    so no pair may use perturbation 0. Returns {'fmax_mhz': float | None,
+    'pairs': [[k, seed, fmax], ...], 'placed': int}."""
+    pairs = FINAL_PERTURBATIONS if pairs is None else pairs
+    if any(k == 0 for k, _ in pairs):
+        raise ValueError("measure_fmax pairs must all be perturbed (k > 0)")
+    worktree = str(Path(worktree).resolve())
+    env = os.environ.copy()
+    synth_env = _build_synth_env(worktree, target, base_env=env)
+    res = asyncio.run(_run_perturbations(worktree, f"cores/{target}/generated", env,
+                                         synth_env, pairs=pairs))
+    ok = [r['fmax_mhz'] for r in res if not r['placement_failed']]
+    enough = len(ok) >= -(-2 * len(res) // 3)
+    return {'fmax_mhz': round(statistics.median(ok), 2) if enough else None,
+            'pairs': [[r['perturbation'], r['seed'], r.get('fmax_mhz')] for r in res],
+            'placed': len(ok)}
+
 
 def run_fpga_eval(worktree: str, target: str | None = None) -> dict:
     """

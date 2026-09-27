@@ -255,6 +255,8 @@ def test_score_rep_produces_complete_row(tmp_path, monkeypatch):
         "model": "gpt-5_6-sol",
         "rep": 1,
         "champion_fmax_mhz": 199.92,
+        "loop_fmax_mhz": 199.92,
+        "final_fmax_pairs": None,
         "kernels": _FAKE_HOLDOUT_RESULT["kernels"],
         "geomean_iter_s": 42.0,
         "coremark_iter_s": 470.8,
