@@ -500,9 +500,18 @@ def run_hypothesis_agent(log_tail: list, current_fitness: float,
     )
     from tools.sandbox import dirty_state, revert_paths
     before = dirty_state(".")
-    rc, timed_out = run_agent_streaming(
-        cmd, cwd=".", log_path=hyp_log_path, timeout_sec=HYPOTHESIS_TIMEOUT_SEC,
-    )
+    from tools.agents.quota import run_with_quota_wait
+
+    def _discard_partial_hypothesis() -> None:
+        # A provider limit interrupted this attempt: rerun it from scratch.
+        for f in hyp_dir.glob(f"{hyp_id}*.yaml"):
+            f.unlink(missing_ok=True)
+
+    def _run(mode: str) -> tuple[int, bool]:
+        return run_agent_streaming(cmd, cwd=".", log_path=hyp_log_path,
+                                   timeout_sec=HYPOTHESIS_TIMEOUT_SEC, mode=mode)
+
+    rc, timed_out = run_with_quota_wait(_run, hyp_log_path, _discard_partial_hypothesis)
     if rc != 0 and not timed_out:
         # Single retry. Append (not truncate) so the first attempt's stream
         # — often the actual rate-limit/error evidence we want to debug —
@@ -510,10 +519,8 @@ def run_hypothesis_agent(log_tail: list, current_fitness: float,
         print(f"  [agent] non-zero exit ({rc}); retrying once", flush=True)
         with hyp_log_path.open("a") as log:
             log.write(f'\n{{"type":"retry_marker","first_rc":{rc}}}\n')
-        rc, timed_out = run_agent_streaming(
-            cmd, cwd=".", log_path=hyp_log_path, timeout_sec=HYPOTHESIS_TIMEOUT_SEC,
-            mode="a",
-        )
+        rc, timed_out = run_with_quota_wait(_run, hyp_log_path, _discard_partial_hypothesis,
+                                            initial_mode="a")
 
     if timed_out:
         print(f"  [agent] TIMEOUT after {HYPOTHESIS_TIMEOUT_SEC}s — process killed",

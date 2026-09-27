@@ -58,6 +58,120 @@ DEFAULT_MODELS_YAML = HERE / "models.yaml"
 DEFAULT_REF = "main"
 DEFAULT_RESULTS_JSONL = REPO_ROOT / "bench" / "results.jsonl"
 DEFAULT_CLONE_BASE = REPO_ROOT / ".claude" / "bench-runs"
+
+# V2 isolation (research/v2/scripts/setup_bench_user.sh): with
+# HWE_AGENT_USER set, the runner stays the operator and only the agent
+# CLIs run as that account, which cannot read the operator's home. The
+# account shares one directory with the operator: clones, a copy of the
+# toolchain, and the pinned CLI binaries.
+AGENT_SHARED = Path("/Users/Shared/hwebench")
+_DIR_ACE = ("list,add_file,search,delete,add_subdirectory,delete_child,readattr,"
+            "writeattr,readextattr,writeextattr,readsecurity,file_inherit,directory_inherit")
+_FILE_ACE = "read,write,append,execute,delete,readattr,writeattr,readextattr,writeextattr,readsecurity"
+
+
+@dataclass(frozen=True)
+class AgentUser:
+    name: str
+    uid: int
+    home: Path
+    shared: Path = AGENT_SHARED
+
+    @property
+    def local(self) -> Path:
+        """Copy of the operator's ~/.local pieces the agents need (sby,
+        cocotb), used as PYTHONUSERBASE."""
+        return self.shared / "local"
+
+    @property
+    def path(self) -> str:
+        tc = self.shared / "toolchain"
+        dirs = [self.shared / "bin", self.local / "bin",
+                tc / "oss-cad-suite" / "bin", tc / "bin"]
+        py = shutil.which("python3")
+        if py and not Path(py).resolve().is_relative_to(Path.home()):
+            dirs.append(Path(py).parent)
+        return ":".join([*map(str, dirs), "/opt/homebrew/bin", "/usr/bin", "/bin",
+                         "/usr/sbin", "/sbin"])
+
+    def read_roots(self) -> list[str]:
+        return [str(self.shared / d) for d in ("toolchain", "local", "bin")]
+
+    def cli_versions(self) -> dict:
+        out = {}
+        try:
+            out["claude_cli"] = (self.shared / "bin" / "claude.version").read_text().strip()
+        except OSError:
+            pass
+        try:
+            out["codex_cli"] = json.loads(
+                (self.shared / "bin" / "codex.version.json").read_text()).get("version")
+        except (OSError, ValueError):
+            pass
+        return out
+
+
+def agent_user() -> Optional[AgentUser]:
+    name = os.environ.get("HWE_AGENT_USER", "").strip()
+    if not name:
+        return None
+    import pwd
+    pw = pwd.getpwnam(name)
+    return AgentUser(name=name, uid=pw.pw_uid, home=Path(pw.pw_dir))
+
+
+def check_agent_user(agent: AgentUser) -> Optional[str]:
+    """What stops the runner from launching agents as this account, or None."""
+    try:
+        r = as_agent(agent.name, "/usr/bin/true", capture_output=True, timeout=30)
+    except (OSError, subprocess.TimeoutExpired) as e:
+        return f"sudo failed: {e}"
+    if r.returncode != 0:
+        return "cannot sudo to it without a password (run setup_bench_user.sh)"
+    for d in ("clones", "toolchain", "local", "bin"):
+        if not (agent.shared / d).is_dir():
+            return f"{agent.shared / d} missing (run setup_bench_user.sh)"
+    if as_agent(agent.name, "/bin/test", "-r", str(Path.home()),
+                capture_output=True).returncode == 0:
+        return f"it can read {Path.home()}"
+    return None
+
+
+def as_agent(user: str, *cmd: str, **kw) -> subprocess.CompletedProcess:
+    return subprocess.run(["sudo", "-n", "-u", user, *cmd], **kw)
+
+
+def share_with_agent(path: Path, agent: AgentUser) -> None:
+    """Give the agent account read/write on everything under path, and
+    the operator the same on whatever the agent creates there later
+    (inherited ACEs; tempfile.mkdtemp's 0700 dirs included)."""
+    op = os.environ.get("USER") or Path.home().name
+    for who in (agent.name, op):
+        subprocess.run(["find", str(path), "-type", "d", "-exec",
+                        "chmod", "+a", f"user:{who} allow {_DIR_ACE}", "{}", "+"],
+                       check=True, capture_output=True)
+        subprocess.run(["find", str(path), "-type", "f", "-exec",
+                        "chmod", "+a", f"user:{who} allow {_FILE_ACE}", "{}", "+"],
+                       check=True, capture_output=True)
+
+
+def lock_from_agent(path: Path, agent: AgentUser) -> None:
+    """Make path (the eval's riscv-formal copy) unwritable and
+    undeletable for the agent account."""
+    subprocess.run(["chmod", "-R", "-N", str(path)], check=True, capture_output=True)
+    subprocess.run(["chmod", "-R", "go-w", str(path)], check=True, capture_output=True)
+    subprocess.run(["chmod", "+a", f"user:{agent.name} deny delete", str(path)],
+                   check=True, capture_output=True)
+
+
+def rmtree_shared(path: Path) -> None:
+    """Delete a clone; anything the agent account left undeletable for
+    the operator is removed as that account."""
+    shutil.rmtree(path, ignore_errors=True)
+    agent = agent_user()
+    if agent and path.exists():
+        as_agent(agent.name, "/bin/rm", "-rf", str(path), capture_output=True)
+        shutil.rmtree(path, ignore_errors=True)
 DEFAULT_RESULTS_DIR = REPO_ROOT / "bench"
 
 # Per-rep wall-clock ceiling. 0 = no cap (the runner waits for the
@@ -269,7 +383,7 @@ def clone_fixture(repo_root: Path, ref: str, dest: Path) -> None:
     if dest.exists():
         # Prefer to delete and re-clone for reproducibility — a stale
         # half-built clone is worse than the few seconds spent re-cloning.
-        shutil.rmtree(dest)
+        rmtree_shared(dest)
     dest.parent.mkdir(parents=True, exist_ok=True)
     subprocess.run(
         ["git", "clone", "--depth", "1", "--branch", ref, "--single-branch",
@@ -513,6 +627,10 @@ def clone_fixture(repo_root: Path, ref: str, dest: Path) -> None:
         # Never inherit prior runs' SBY work dirs into a fresh rep.
         for junk in rf_dest.glob("cores/*-[0-9]*"):
             shutil.rmtree(junk, ignore_errors=True)
+    agent = agent_user()
+    if agent:
+        share_with_agent(dest, agent)
+        lock_from_agent(dest / EVAL_RISCV_FORMAL, agent)
 
 
 def install_opencode_config(clone: Path) -> None:
@@ -594,7 +712,8 @@ def _user_codex_home() -> Path:
     return Path(os.environ.get("CODEX_HOME") or Path.home() / ".codex")
 
 
-def isolated_codex_home(clone: Path, user_home: Path | None = None) -> Path:
+def isolated_codex_home(clone: Path, user_home: Path | None = None,
+                        link_unchecked: bool = False) -> Path:
     """Create <clone>/.codex-home: a CODEX_HOME holding only a minimal
     config.toml and a symlink to the operator's auth.json.
 
@@ -606,14 +725,19 @@ def isolated_codex_home(clone: Path, user_home: Path | None = None) -> Path:
     auth.json is symlinked, not copied: ChatGPT OAuth refresh tokens
     rotate, and a refresh landing in a copy would leave the operator's
     own login holding a revoked token. sync_codex_auth_back covers the
-    case where Codex replaces the symlink with a file."""
+    case where Codex replaces the symlink with a file.
+
+    link_unchecked: link even though the operator cannot see the target
+    (the agent account's own ~/.codex, under HWE_AGENT_USER)."""
     user_home = user_home or _user_codex_home()
     home = clone / ".codex-home"
     if home.exists():
         shutil.rmtree(home)
     home.mkdir(parents=True)
     auth = user_home / "auth.json"
-    if auth.exists():
+    if link_unchecked:
+        (home / "auth.json").symlink_to(auth)
+    elif auth.exists():
         (home / "auth.json").symlink_to(auth.resolve())
     (home / "config.toml").write_text(
         _CODEX_ISOLATED_CONFIG.format(clone=clone.resolve()))
@@ -624,7 +748,11 @@ def sync_codex_auth_back(codex_home: Path, user_home: Path | None = None) -> boo
     """If Codex rewrote the isolated auth.json as a regular file with a
     newer refresh than the operator's, copy it back. Returns True if it did."""
     user_home = user_home or _user_codex_home()
-    iso, real = codex_home / "auth.json", user_home / "auth.json"
+    return _sync_auth_file(codex_home / "auth.json", user_home / "auth.json")
+
+
+def _sync_auth_file(iso, real) -> bool:
+    import json, os, shutil
     if not iso.exists() or iso.is_symlink():
         return False
     try:
@@ -639,6 +767,17 @@ def sync_codex_auth_back(codex_home: Path, user_home: Path | None = None) -> boo
     os.chmod(tmp, 0o600)
     os.replace(tmp, real)
     return True
+
+
+def sync_codex_auth_back_as(agent: AgentUser, codex_home: Path) -> bool:
+    """sync_codex_auth_back for the agent account's login, run as it."""
+    import inspect
+    code = ("from pathlib import Path\nimport sys\n" + inspect.getsource(_sync_auth_file)
+            + "\nprint(_sync_auth_file(Path(sys.argv[1]), Path(sys.argv[2])))\n")
+    r = as_agent(agent.name, "/usr/bin/python3", "-B", "-c", code,
+                 str(codex_home / "auth.json"), str(agent.home / ".codex" / "auth.json"),
+                 capture_output=True, text=True)
+    return r.stdout.strip() == "True"
 
 
 def _tool_read_roots(home: Path | None = None) -> list[str]:
@@ -680,7 +819,8 @@ def _python_user_site() -> str | None:
 
 def claude_isolation_settings(clone: Path, uid: int | None = None,
                               home: Path | None = None,
-                              claude_tmp: Path | None = None) -> dict:
+                              claude_tmp: Path | None = None,
+                              read_roots: list[str] | None = None) -> dict:
     """Flag-level settings for bench Claude Code agents (see
     tools/agents/_runtime.py for the CLI flags that go with them).
 
@@ -697,15 +837,20 @@ def claude_isolation_settings(clone: Path, uid: int | None = None,
     home = home or Path.home()
     rf = clone / "formal" / "riscv-formal"
     rf_eval = clone / EVAL_RISCV_FORMAL
-    reads = [str(clone), *_tool_read_roots(home)]
+    if read_roots is not None:
+        # Agent account: toolchain, python user base and CLIs all live in
+        # the shared directory.
+        reads = [str(clone), *read_roots]
+    else:
+        reads = [str(clone), *_tool_read_roots(home)]
+        user_site = _python_user_site()
+        if user_site:
+            reads.append(user_site)
+        for f in (home / ".gitconfig", home / ".config" / "git"):
+            if f.exists():
+                reads.append(str(f))
     if rf.exists():
         reads.append(str(rf.resolve()))
-    user_site = _python_user_site()
-    if user_site:
-        reads.append(user_site)
-    for f in (home / ".gitconfig", home / ".config" / "git"):
-        if f.exists():
-            reads.append(str(f))
     claude_tmp = claude_tmp or Path(f"/private/tmp/claude-{uid}")
     # Claude names each project's temp subtree after its cwd with every
     # non-alphanumeric turned into '-'; the rep's own (clone root and
@@ -761,6 +906,11 @@ def claude_instruction_ancestors(clone: Path) -> list[Path]:
 def make_env_for_job(job: JobSpec, clone: Path, keys: dict[str, str]) -> dict[str, str]:
     env = os.environ.copy()
     env["TARGET"] = "bench"
+    agent = agent_user()
+    if agent:
+        env["HWE_AGENT_HOME"] = str(agent.home)
+        env["HWE_AGENT_PATH"] = agent.path
+        env["HWE_AGENT_PYTHONUSERBASE"] = str(agent.local)
     if job.model.provider == "codex":
         # Codex CLI: workspace-write sandbox + clone isolation, and an
         # isolated CODEX_HOME (no operator memories/plugins/MCP/skills).
@@ -768,7 +918,11 @@ def make_env_for_job(job: JobSpec, clone: Path, keys: dict[str, str]) -> dict[st
         env["CODEX_MODEL"] = job.model.model
         if job.model.variant is not None:
             env["CODEX_REASONING_EFFORT"] = job.model.variant
-        env["CODEX_HOME"] = str(isolated_codex_home(clone))
+        if agent:
+            env["CODEX_HOME"] = str(isolated_codex_home(
+                clone, user_home=agent.home / ".codex", link_unchecked=True))
+        else:
+            env["CODEX_HOME"] = str(isolated_codex_home(clone))
     elif job.model.provider == "opencode":
         # Opencode: per-clone opencode.json permission rules.
         env["AGENT_PROVIDER"] = "opencode"
@@ -781,7 +935,13 @@ def make_env_for_job(job: JobSpec, clone: Path, keys: dict[str, str]) -> dict[st
         # Bash. See claude_isolation_settings.
         env["AGENT_PROVIDER"] = "claude"
         env["ANTHROPIC_MODEL"] = job.model.model
-        env["CLAUDE_BENCH_SETTINGS"] = json.dumps(claude_isolation_settings(clone))
+        if agent:
+            # Login: CLAUDE_CODE_OAUTH_TOKEN (`claude setup-token`) from the
+            # keys file; the agent account has no Keychain session.
+            env["CLAUDE_BENCH_SETTINGS"] = json.dumps(claude_isolation_settings(
+                clone, uid=agent.uid, home=agent.home, read_roots=agent.read_roots()))
+        else:
+            env["CLAUDE_BENCH_SETTINGS"] = json.dumps(claude_isolation_settings(clone))
         if job.model.variant is not None:
             env["CLAUDE_EFFORT"] = job.model.variant
         env["CLAUDE_CODE_DISABLE_AUTO_MEMORY"] = "1"
@@ -873,6 +1033,10 @@ def run_one_job(
     # code produced this row. A dirty runner means the numbers came from
     # code that is in no commit.
     row.update(provenance(repo_root, ref))
+    agent = agent_user()
+    if agent:
+        row["agent_user"] = agent.name
+        row.update(agent.cli_versions())
 
     # 1. Fresh clone of the fixture.
     try:
@@ -998,7 +1162,12 @@ def run_one_job(
             orch_log.close()
         except Exception:
             pass
-        if job.model.provider == "codex":
+        agent = agent_user()
+        if job.model.provider == "codex" and agent:
+            if sync_codex_auth_back_as(agent, clone / ".codex-home"):
+                print(f"  [bench] copied a refreshed Codex auth.json back to "
+                      f"{agent.name}'s CODEX_HOME", flush=True)
+        elif job.model.provider == "codex":
             if sync_codex_auth_back(clone / ".codex-home"):
                 print("  [bench] copied a refreshed Codex auth.json back to "
                       "the operator's CODEX_HOME", flush=True)
@@ -1111,7 +1280,7 @@ def run_one_job(
 
     _finalize(row, started, results_jsonl)
     if not keep_clone:
-        shutil.rmtree(clone, ignore_errors=True)
+        rmtree_shared(clone)
 
     return row
 
@@ -1186,6 +1355,9 @@ def main() -> int:
                     help="restrict to these model names (e.g. --only opus-47 gpt-5)")
     ap.add_argument("--keep-clones", action="store_true",
                     help="don't delete per-job clones after run (forensics)")
+    ap.add_argument("--agent-user", default=os.environ.get("HWE_AGENT_USER") or None,
+                    help="run the agent CLIs as this account (V2 isolation; "
+                         "see research/v2/scripts/setup_bench_user.sh)")
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--skip-preflight", action="store_true",
                     help="skip the toolchain pre-flight check (debug only)")
@@ -1231,6 +1403,15 @@ def main() -> int:
             return 2
         print(preflight.report())
 
+    if args.agent_user:
+        os.environ["HWE_AGENT_USER"] = args.agent_user
+        problem = check_agent_user(agent_user())
+        if problem:
+            print(f"[bench] FATAL: agent user {args.agent_user}: {problem}", file=sys.stderr)
+            return 2
+        if args.clone_base == DEFAULT_CLONE_BASE:
+            args.clone_base = AGENT_SHARED / "clones"
+
     models = load_models(args.models)
     keys = load_keyfile(args.keys_file)
     done = load_done_set(args.results_jsonl)
@@ -1250,6 +1431,15 @@ def main() -> int:
     # Validate keys before any expensive operation.
     env_with_keys = {**os.environ, **{k: v for k, v in keys.items() if k not in os.environ}}
     missing = validate_keys(jobs, env_with_keys)
+    if args.agent_user and any(j.model.provider == "claude" for j in jobs) \
+            and not env_with_keys.get("CLAUDE_CODE_OAUTH_TOKEN"):
+        missing.append("CLAUDE_CODE_OAUTH_TOKEN")
+    if args.agent_user and any(j.model.provider == "codex" for j in jobs):
+        agent = agent_user()
+        if as_agent(agent.name, "/bin/test", "-s", str(agent.home / ".codex" / "auth.json"),
+                    capture_output=True).returncode != 0:
+            missing.append(f"Codex login for {agent.name} "
+                           f"(sudo -iu {agent.name} {agent.shared}/bin/codex login --device-auth)")
     if missing:
         print(f"[bench] FATAL: missing API key env vars: {missing}", file=sys.stderr)
         print(f"[bench] put them in {args.keys_file} or export in your shell.")

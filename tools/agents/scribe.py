@@ -161,10 +161,11 @@ def run_scribe_agent(entry: dict, diff: str, target: str) -> str | None:
     )
     from tools.sandbox import dirty_state, revert_paths
     before = dirty_state(".")
-    rc, timed_out = run_agent_streaming(
-        cmd, cwd=".", log_path=log_path, timeout_sec=SCRIBE_TIMEOUT_SEC,
-        mode="a",
-    )
+    from tools.agents.quota import run_with_quota_wait
+    rc, timed_out = run_with_quota_wait(
+        lambda mode: run_agent_streaming(cmd, cwd=".", log_path=log_path,
+                                         timeout_sec=SCRIBE_TIMEOUT_SEC, mode=mode),
+        log_path, initial_mode="a")
     # Whether the scribe finishes, times out, or errors — its own log
     # file (.scribe.log) and last-msg file are off-limits per the
     # sandbox allow-list. Always remove them before propagating success

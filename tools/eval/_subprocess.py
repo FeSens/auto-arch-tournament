@@ -29,12 +29,30 @@ def _kill_descendant_tree(root_pid: int) -> None:
     except psutil.NoSuchProcess:
         return
     descendants = root.children(recursive=True)
+    denied = []
     for child in descendants:
         try:
             child.kill()
         except psutil.NoSuchProcess:
             pass
+        except psutil.AccessDenied:
+            denied.append(child.pid)
+    _kill_as_agent_user(denied)
     psutil.wait_procs(descendants, timeout=2)
+
+
+def _kill_as_agent_user(pids: list[int]) -> None:
+    """Agents launched as HWE_AGENT_USER (tools/agents/_runtime.py) cannot
+    be signalled by the operator directly; the sudoers rule that starts
+    them also lets the operator kill them."""
+    user = os.environ.get("HWE_AGENT_USER", "").strip()
+    if not user or not pids:
+        return
+    try:
+        subprocess.run(["sudo", "-n", "-u", user, "/bin/kill", "-KILL", *map(str, pids)],
+                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=30)
+    except (OSError, subprocess.TimeoutExpired):
+        pass
 
 
 def run_pgroup(args, *, timeout=None, capture_output=False, text=False,
@@ -74,6 +92,9 @@ def kill_process_tree(pid: int) -> None:
     try:
         psutil.Process(pid).kill()
     except psutil.NoSuchProcess:
+        pass
+    except psutil.AccessDenied:
+        # A root-owned `sudo -u <agent user>` exits once its child dies.
         pass
 
 

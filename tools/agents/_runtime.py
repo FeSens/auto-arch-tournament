@@ -445,6 +445,48 @@ def summarize_event(line: str, provider: Optional[str] = None) -> Optional[str]:
     return None
 
 
+# Variables an agent run as HWE_AGENT_USER inherits from the orchestrator.
+# Everything else (the operator's HOME, PATH, shell state, unrelated
+# secrets) is dropped.
+_AGENT_ENV_PASS = (
+    "TARGET", "TMPDIR", "LANG", "LC_ALL", "TERM",
+    "CODEX_HOME", "CODEX_MODEL", "CODEX_REASONING_EFFORT",
+    "ANTHROPIC_MODEL", "CLAUDE_BENCH_SETTINGS", "CLAUDE_EFFORT",
+    "CLAUDE_CODE_OAUTH_TOKEN", "CLAUDE_CODE_DISABLE_AUTO_MEMORY",
+    "DISABLE_TELEMETRY", "DISABLE_ERROR_REPORTING", "DISABLE_AUTOUPDATER",
+)
+_AGENT_ENV_PREFIXES = ("AGENT_", "BENCH_", "HWE_")
+
+
+def as_agent_user(cmd: list[str], environ: Optional[dict] = None) -> list[str]:
+    """Wrap cmd to run as HWE_AGENT_USER (V2 isolation) with a clean
+    environment; unchanged when the variable is unset.
+
+    The runner stays the operator; the agent CLI runs as an account that
+    cannot read the operator's home (held-out kernels, results, other
+    sessions). See research/v2/scripts/setup_bench_user.sh."""
+    env = os.environ if environ is None else environ
+    user = env.get("HWE_AGENT_USER", "").strip()
+    if not user:
+        return cmd
+    home = env["HWE_AGENT_HOME"]
+    keep = {k: v for k, v in env.items()
+            if k in _AGENT_ENV_PASS or k.startswith(_AGENT_ENV_PREFIXES)}
+    keep.update({
+        "HOME": home, "USER": user, "LOGNAME": user, "SHELL": "/bin/zsh",
+        "PATH": env["HWE_AGENT_PATH"],
+        "PYTHONUSERBASE": env.get("HWE_AGENT_PYTHONUSERBASE", ""),
+        # The clone belongs to the operator; git refuses it otherwise.
+        "GIT_CONFIG_COUNT": "1",
+        "GIT_CONFIG_KEY_0": "safe.directory", "GIT_CONFIG_VALUE_0": "*",
+    })
+    assigns = [f"{k}={v}" for k, v in sorted(keep.items()) if v != ""]
+    # umask 002: files the agent creates stay writable for the operator's
+    # group as well as through the clone directory's inherited ACL.
+    return ["sudo", "-n", "-u", user, "/usr/bin/env", "-i", *assigns,
+            "/bin/sh", "-c", 'umask 002; exec "$@"', "sh", *cmd]
+
+
 def run_agent_streaming(
     cmd: list,
     cwd: str,
@@ -461,7 +503,7 @@ def run_agent_streaming(
     """
     p = provider or get_provider()
     proc = subprocess.Popen(
-        cmd, cwd=cwd,
+        as_agent_user(cmd), cwd=cwd,
         stdin=subprocess.DEVNULL,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,

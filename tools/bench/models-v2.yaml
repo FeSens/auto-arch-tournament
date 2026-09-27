@@ -1,0 +1,14 @@
+# HWE Bench V2 main comparison (research/v2/prereg_main_DRAFT.yaml).
+# Run with --agent-user hwebench; the CLI versions come from the pinned
+# copies in /Users/Shared/hwebench/bin and are recorded per row.
+models:
+  - name: claude-opus-5_5_xhigh-v2
+    provider: claude
+    model: claude-opus-5-5
+    variant: xhigh
+    oauth: true
+  - name: gpt-6-sol_xhigh-v2
+    provider: codex
+    model: gpt-6-sol
+    variant: xhigh
+    oauth: true

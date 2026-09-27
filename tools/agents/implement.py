@@ -198,18 +198,30 @@ def run_implementation_agent(hypothesis_path: str, worktree: str,
         output_last_message=last_msg,
         enable_search=False,  # implementation runs in the worktree, no search needed
     )
-    rc, timed_out = run_agent_streaming(
-        cmd, cwd=worktree, log_path=log_path, timeout_sec=CLAUDE_TIMEOUT_SEC,
-    )
+    from tools.agents.quota import run_with_quota_wait
+    edit_root = f"cores/{target}" if target else "rtl"
+
+    def _discard_partial_implementation() -> None:
+        # A provider limit interrupted this attempt: restore the champion's
+        # sources so the rerun starts from the same state as any attempt.
+        subprocess.run(["git", "-C", worktree, "checkout", "--", edit_root],
+                       capture_output=True)
+        subprocess.run(["git", "-C", worktree, "clean", "-fdq", "--", edit_root],
+                       capture_output=True)
+        Path(worktree, "implementation_notes.md").unlink(missing_ok=True)
+
+    def _run(mode: str) -> tuple[int, bool]:
+        return run_agent_streaming(cmd, cwd=worktree, log_path=log_path,
+                                   timeout_sec=CLAUDE_TIMEOUT_SEC, mode=mode)
+
+    rc, timed_out = run_with_quota_wait(_run, log_path, _discard_partial_implementation)
     if rc != 0 and not timed_out:
         # See hypothesis.py for the append-on-retry rationale.
         print(f"  [agent] non-zero exit ({rc}); retrying once", flush=True)
         with log_path.open("a") as log:
             log.write(f'\n{{"type":"retry_marker","first_rc":{rc}}}\n')
-        rc, timed_out = run_agent_streaming(
-            cmd, cwd=worktree, log_path=log_path, timeout_sec=CLAUDE_TIMEOUT_SEC,
-            mode="a",
-        )
+        rc, timed_out = run_with_quota_wait(_run, log_path, _discard_partial_implementation,
+                                            initial_mode="a")
     # The worktree (and this log) is deleted after the slot; keep a copy
     # for the rep's transcript and token totals.
     archive_agent_log(log_path, f"impl.{Path(worktree).name}")

@@ -195,3 +195,26 @@ def test_eval_uses_harness_riscv_formal_copy(tmp_path):
         "riscv-formal-eval/checks/genchecks.py"]
     assert use_eval_riscv_formal(wt, root)
     assert (wt / "formal" / "riscv-formal").resolve() == eval_rf.resolve()
+
+
+def test_env_under_agent_user(tmp_path, monkeypatch):
+    """With HWE_AGENT_USER, agents get the agent account's home, the
+    shared toolchain, and a Codex auth link into the agent's own login."""
+    import getpass
+    from pathlib import Path
+    monkeypatch.setenv("HWE_AGENT_USER", getpass.getuser())
+    clone = tmp_path / "clone"
+    clone.mkdir()
+    claude = JobSpec(model=ModelEntry(name="opus", provider="claude",
+                                      model="claude-opus-5-5", oauth=True), rep=1)
+    env = make_env_for_job(claude, clone, {})
+    assert env["HWE_AGENT_PATH"].startswith("/Users/Shared/hwebench/bin:")
+    fs = json.loads(env["CLAUDE_BENCH_SETTINGS"])["sandbox"]["filesystem"]
+    assert "/Users/Shared/hwebench/toolchain" in fs["allowRead"]
+    assert env["HWE_AGENT_HOME"] in fs["denyRead"]
+    codex = JobSpec(model=ModelEntry(name="gpt", provider="codex",
+                                     model="gpt-6-sol", oauth=True), rep=1)
+    env = make_env_for_job(codex, clone, {})
+    link = Path(env["CODEX_HOME"]) / "auth.json"
+    assert link.is_symlink()
+    assert str(link.readlink()) == str(Path(env["HWE_AGENT_HOME"]) / ".codex" / "auth.json")
