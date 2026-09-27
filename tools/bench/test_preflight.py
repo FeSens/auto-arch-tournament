@@ -17,9 +17,21 @@ def test_env_fingerprint_shape(monkeypatch):
     monkeypatch.setattr(shutil, "which",
                         lambda t: f"/fake/bin/{t}" if t != "sby" else None)
     fp = preflight.env_fingerprint()
-    assert set(fp) == {"path", "tools"}
+    assert set(fp) == {"path", "harness_version", "tools", "tool_versions",
+                       "tool_sha256", "toolchain_digest"}
     assert fp["tools"]["yosys"] == "/fake/bin/yosys"
     assert fp["tools"]["sby"] is None
+    assert fp["tool_sha256"]["yosys"] is None  # fake path: unreadable, not guessed
+
+
+def test_toolchain_digest_changes_with_a_binary(monkeypatch, tmp_path):
+    for t in preflight.DIGEST_TOOLS:
+        (tmp_path / t).write_bytes(b"build-a")
+    monkeypatch.setattr(shutil, "which", lambda t: str(tmp_path / t))
+    monkeypatch.setattr(preflight, "_version", lambda t: "v")
+    before = preflight.toolchain_identity()["toolchain_digest"]
+    (tmp_path / "nextpnr-himbaechel").write_bytes(b"build-b")
+    assert preflight.toolchain_identity()["toolchain_digest"] != before
 
 
 def test_fingerprint_is_json_serializable(monkeypatch):

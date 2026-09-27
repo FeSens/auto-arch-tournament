@@ -28,6 +28,11 @@ def _build_synth_env(worktree, target: str | None,
     return env
 
 SEEDS = [1, 2, 3]
+# Per-seed wall-clock cap on nextpnr. Without it a design that never
+# routes hangs the rep with no outcome recorded (V1: one seed took ~45 min
+# and blocked the FPGA gate). A seed that hits the cap counts as a failed
+# seed, the same as a placement failure.
+NEXTPNR_TIMEOUT_SEC = 2700
 NEXTPNR_SCRIPT = "fpga/scripts/nextpnr_run.sh"
 PORTME_H = "bench/programs/coremark/baremetal/core_portme.h"
 # Canonical 2K-config CoreMark CRCs (the EEMBC-published reporting size,
@@ -75,8 +80,25 @@ async def run_seed(seed: int, worktree: str, outdir: str, env: dict | None = Non
         stderr=asyncio.subprocess.PIPE,
         cwd=Path(worktree).resolve(),
         env=env,
+        start_new_session=True,  # own process group, so a timeout kills nextpnr too
     )
-    stdout, stderr = await proc.communicate()
+    try:
+        stdout, stderr = await asyncio.wait_for(proc.communicate(),
+                                                timeout=NEXTPNR_TIMEOUT_SEC)
+    except asyncio.TimeoutError:
+        try:
+            os.killpg(proc.pid, 9)
+        except ProcessLookupError:
+            pass
+        await proc.wait()
+        return {
+            'seed': seed,
+            'fmax_mhz': None,
+            'log': f'nextpnr timeout after {NEXTPNR_TIMEOUT_SEC}s',
+            'returncode': None,
+            'placement_failed': True,
+            'timed_out': True,
+        }
     output = (stdout + stderr).decode()
 
     # Take the LAST "Max frequency" line: nextpnr prints intermediate estimates
@@ -276,6 +298,11 @@ def run_fpga_eval(worktree: str, target: str | None = None) -> dict:
     log    = successful[-1]['log']
     lut4_m = re.search(r'LUT4:\s+(\d+)/',  log)
     ff_m   = re.search(r'\bDFF:\s+(\d+)/', log)
+    # Memory and DSP cells are not LUT4s; report them so area is not
+    # understated for designs that move logic into RAM or DSP blocks.
+    def _cells(name: str) -> int:
+        m = re.search(rf'\b{name}:\s+(\d+)/', log)
+        return int(m.group(1)) if m else 0
     if not (lut4_m and ff_m):
         # Never substitute 0: with a LUT target set, 0 LUT4 is the best
         # possible area score, so a nextpnr log-format change would turn
@@ -298,6 +325,11 @@ def run_fpga_eval(worktree: str, target: str | None = None) -> dict:
         'iterations':    cm['iterations'],
         'seeds':         all_fmax,
         'lut4':          int(lut4_m.group(1)),
+        'lutram':        _cells('RAM16SDP4'),
+        'bsram':         _cells('BSRAM'),
+        'dsp':           sum(_cells(n) for n in ('MULT36X36', 'MULT18X18', 'MULT9X9',
+                                                 'MULTALU36X18', 'MULTALU18X18',
+                                                 'MULTADDALU18X18', 'ALU54D')),
         'ff':            int(ff_m.group(1)),
         'placement_failed': False,
     }

@@ -241,6 +241,7 @@ def provenance(repo_root: Path, ref: str) -> dict:
         "fixture_commit": git("rev-parse", f"{ref}^{{commit}}") or None,
         "runner_commit": git("rev-parse", "HEAD") or None,
         "runner_dirty": bool(dirty),
+        "harness_version": preflight.harness_version(),
     }
 
 
@@ -1096,11 +1097,43 @@ def run_one_job(
         print(f"  [bench] warn: git bundle failed: "
               f"{bundle.stderr.decode()[:200]}", flush=True)
 
+    # V2: keep the final design readable without the bundle (V1 lost the
+    # final RTL of every run that predates bundles).
+    final_rtl = clone / "cores" / "bench" / "rtl"
+    if final_rtl.is_dir():
+        shutil.copytree(final_rtl, out_dir / "final-rtl", dirs_exist_ok=True)
+
+    # V2 headline metric: the final champion on the held-out kernels, which
+    # the agents never see. Scored from the bundle, like tools.bench.transfer.
+    if row.get("status") == "done" and bundle.returncode == 0:
+        row.update(score_holdout(out_dir))
+        (out_dir / "summary.json").write_text(json.dumps(row, indent=2) + "\n")
+
     _finalize(row, started, results_jsonl)
     if not keep_clone:
         shutil.rmtree(clone, ignore_errors=True)
 
     return row
+
+
+def score_holdout(rep_dir: Path) -> dict:
+    """Held-out score of a finished rep's champion, as results-row fields.
+
+    Failures are recorded, never raised: a scoring error must not lose the
+    rep's other results, and a missing score must not read as zero.
+    """
+    from tools.bench import transfer
+    repo_root = Path(__file__).resolve().parents[2]
+    try:
+        transfer._build_kernels_once(repo_root)
+        scored = transfer.score_rep(rep_dir, repo_root)
+    except Exception as e:  # recorded in the row, see docstring
+        return {"holdout_geomean_iter_s": None,
+                "holdout_error": f"{type(e).__name__}: {e}"[:500]}
+    return {
+        "holdout_geomean_iter_s": scored["geomean_iter_s"],
+        "holdout_kernels": scored["kernels"],
+    }
 
 
 def _copy_early_forensics(out_dir: Path, fp_path: Path, orch_log_path: Path) -> None:

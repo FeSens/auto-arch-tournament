@@ -37,3 +37,23 @@ def test_missing_dff_fails(monkeypatch, tmp_path):
     r = fpga.run_fpga_eval(str(tmp_path))
     assert r['bench_failed'] is True
     assert 'DFF' in r['reason']
+
+
+def test_memory_and_dsp_cells_reported(monkeypatch, tmp_path):
+    log = (_LOG_OK + "Info: RAM16SDP4:  36/648  5%\nInfo: BSRAM:  4/46  8%\n"
+           "Info: MULT36X36:  1/12  8%\nInfo: MULT18X18:  0/48  0%\n")
+    _patch(monkeypatch, log)
+    r = fpga.run_fpga_eval(str(tmp_path))
+    assert (r['lutram'], r['bsram'], r['dsp']) == (36, 4, 1)
+
+
+def test_nextpnr_timeout_counts_as_failed_seed(monkeypatch, tmp_path):
+    # A stand-in nextpnr script that never finishes must be killed at the
+    # cap and reported as a failed seed, not hang the evaluation.
+    script = tmp_path / "hang.sh"
+    script.write_text("#!/usr/bin/env bash\nsleep 600\n")
+    monkeypatch.setattr(fpga, "NEXTPNR_SCRIPT", str(script))
+    monkeypatch.setattr(fpga, "NEXTPNR_TIMEOUT_SEC", 1)
+    r = asyncio.run(fpga.run_seed(1, str(tmp_path), str(tmp_path / "out")))
+    assert r['placement_failed'] is True and r.get('timed_out') is True
+    assert r['fmax_mhz'] is None
