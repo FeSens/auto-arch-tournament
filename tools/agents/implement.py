@@ -8,7 +8,7 @@ from tools.agents._runtime import (
     run_agent_streaming,
 )
 
-CLAUDE_TIMEOUT_SEC = 600*3  # 10 min watchdog on the implementation agent
+CLAUDE_TIMEOUT_SEC = 600*3  # 30 min watchdog on the implementation agent
 
 def _build_prompt(hypothesis: dict, worktree: str,
                   target: str | None = None) -> str:
@@ -84,6 +84,12 @@ Advisory file changes (you may deviate, add, rename, or restructure freely):
 ## Current SystemVerilog Source (your working directory)
 {src_dump}
 
+## Time budget
+You have {CLAUDE_TIMEOUT_SEC // 60} minutes of wall-clock time. At the limit your
+process is killed and whatever is in {rtl_rel}/ at that moment is evaluated
+as-is. Keep the RTL in a buildable state between edits, and leave time for
+the self-checks below.
+
 ## Instructions
 1. Implement the hypothesis by editing, creating, or restructuring files in {rtl_rel}/.
    You may create new files, delete files, merge files, or split files.
@@ -131,6 +137,13 @@ Advisory file changes (you may deviate, add, rename, or restructure freely):
    implementation_notes.md and exit. Do not fight a stubborn check —
    some hypotheses are genuinely wrong and the orchestrator's hard
    gate is the right place to record that, not your watchdog budget.
+
+   Then self-check co-simulation (the next gate; it failed 90 times in
+   earlier runs):
+     make cosim TARGET={target}
+   It compares every retired instruction of selftest.elf against the
+   Python ISS, with and without random memory stalls, and checks
+   CoreMark's CRCs under the same stalls the evaluator uses.
 
    A passing local formal does NOT mean the hypothesis is accepted.
    The orchestrator still runs cosim (RVFI byte-exact vs Python ISS)

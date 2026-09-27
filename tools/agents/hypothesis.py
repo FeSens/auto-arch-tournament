@@ -287,6 +287,20 @@ regex rejects it.
         "   relevant prior attempts in the same category before proposing.\n"
     )
 
+    budget_min = HYPOTHESIS_TIMEOUT_SEC // 60
+    time_clause = f"""## Time budget
+You have {budget_min} minutes of wall-clock time. At the limit your process is
+killed. A hypothesis file already written at that moment is still used;
+no file means this attempt is lost.
+- Within your first 5 minutes, write a complete, schema-valid YAML at the
+  path below, even if you intend to refine it.
+- Refine by overwriting that same file.
+- Run experiments (synthesis, simulation, place-and-route) only if they fit
+  in the remaining time. One place-and-route seed takes several minutes;
+  the evaluator measures timing for you after implementation.
+
+"""
+
     return f"""You are a CPU microarchitecture research agent.
 
 Your job: propose one architectural hypothesis to improve this RV32IM CPU.
@@ -299,7 +313,7 @@ Fitness metric: CoreMark iter/sec = CoreMark iterations/cycle × Fmax_Hz on Tang
 ## Current SystemVerilog Source ({rtl_dir}/)
 {src_dump}{history_section}
 
-## Instructions
+{time_clause}## Instructions
 {lessons_instruction}2. Identify the most promising architectural improvement.
 3. Use the **write** tool to write a hypothesis YAML file at:
      cores/{target}/experiments/hypotheses/<id>.yaml
