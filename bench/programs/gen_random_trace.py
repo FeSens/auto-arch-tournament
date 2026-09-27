@@ -1,0 +1,158 @@
+#!/usr/bin/env python3
+"""Generate deterministic random RV32IM programs for the full-trace cosim.
+
+HWE Bench V2. selftest.elf retires only 115 instructions, too few to catch
+bugs in forwarding, M-extension edge cases, store/load aliasing, or branch
+misprediction recovery. Each program here retires a few thousand
+instructions that tools/eval/cosim.py diffs, one by one, against the Python
+ISS, with and without memory stalls.
+
+Every program starts with an exhaustive M-extension edge matrix (each
+MUL/DIV/REM variant on every pair of edge operands), then random blocks.
+
+Programs always terminate: branches and jumps only go forward, except the
+back edge of short counted loops whose counter register (x30) the loop body
+never writes. Memory accesses stay inside a 64-byte .bss window addressed
+from x31 and are naturally aligned, so no instruction traps.
+
+Usage: gen_random_trace.py <seed> <out.S> [n_blocks]
+"""
+import random
+import sys
+
+EDGE = [0, 1, -1, 2, -2, 0x7FFFFFFF, -0x80000000, 0x80000001 - (1 << 32), 3, 0x55555555]
+GP = list(range(1, 29))          # x1..x28 free for random use
+BASE, LOOPC, JTMP = 31, 30, 29   # reserved: buffer base, loop counter, jalr target
+
+R_OPS = ["add", "sub", "sll", "slt", "sltu", "xor", "srl", "sra", "or", "and"]
+M_OPS = ["mul", "mulh", "mulhsu", "mulhu", "div", "divu", "rem", "remu"]
+I_OPS = ["addi", "slti", "sltiu", "xori", "ori", "andi"]
+SH_OPS = ["slli", "srli", "srai"]
+BR_OPS = ["beq", "bne", "blt", "bge", "bltu", "bgeu"]
+LOADS = [("lb", 1), ("lbu", 1), ("lh", 2), ("lhu", 2), ("lw", 4)]
+STORES = [("sb", 1), ("sh", 2), ("sw", 4)]
+WINDOW = 64
+
+
+class Gen:
+    def __init__(self, seed: int):
+        self.r = random.Random(seed)
+        self.lines: list[str] = []
+        self.label_n = 0
+
+    def reg(self, dest: bool = False) -> str:
+        # x0 is a legal destination (the write is discarded) and source.
+        if self.r.random() < 0.04:
+            return "x0"
+        return f"x{self.r.choice(GP)}"
+
+    def label(self) -> str:
+        self.label_n += 1
+        return f"L{self.label_n}"
+
+    def emit(self, s: str) -> None:
+        self.lines.append("    " + s)
+
+    def straight(self) -> None:
+        """One non-control instruction."""
+        r = self.r
+        k = r.random()
+        if k < 0.25:
+            self.emit(f"{r.choice(R_OPS)} {self.reg(True)}, {self.reg()}, {self.reg()}")
+        elif k < 0.45:
+            self.emit(f"{r.choice(M_OPS)} {self.reg(True)}, {self.reg()}, {self.reg()}")
+        elif k < 0.58:
+            self.emit(f"{r.choice(I_OPS)} {self.reg(True)}, {self.reg()}, {r.randint(-2048, 2047)}")
+        elif k < 0.64:
+            self.emit(f"{r.choice(SH_OPS)} {self.reg(True)}, {self.reg()}, {r.randint(0, 31)}")
+        elif k < 0.67:
+            self.emit(f"lui {self.reg(True)}, {r.randint(0, 0xFFFFF)}")
+        elif k < 0.69:
+            self.emit(f"auipc {self.reg(True)}, {r.randint(0, 0xFFFFF)}")
+        elif k < 0.76:
+            self.emit(f"li {self.reg(True)}, {r.choice(EDGE)}")
+        elif k < 0.88:
+            op, w = r.choice(LOADS)
+            self.emit(f"{op} {self.reg(True)}, {r.randrange(0, WINDOW, w)}(x{BASE})")
+        else:
+            op, w = r.choice(STORES)
+            self.emit(f"{op} {self.reg()}, {r.randrange(0, WINDOW, w)}(x{BASE})")
+
+    def block(self) -> None:
+        r = self.r
+        k = r.random()
+        if k < 0.55:
+            for _ in range(r.randint(1, 6)):
+                self.straight()
+        elif k < 0.75:
+            # Forward conditional branch over 0..4 instructions.
+            lab = self.label()
+            self.emit(f"{r.choice(BR_OPS)} {self.reg()}, {self.reg()}, {lab}")
+            for _ in range(r.randint(0, 4)):
+                self.straight()
+            self.lines.append(f"{lab}:")
+        elif k < 0.83:
+            # Forward jal, with or without a link register.
+            lab = self.label()
+            self.emit(f"jal {self.reg(True)}, {lab}")
+            for _ in range(r.randint(0, 3)):
+                self.straight()
+            self.lines.append(f"{lab}:")
+        elif k < 0.89:
+            # Forward jalr through an address computed at run time.
+            lab = self.label()
+            self.emit(f"la x{JTMP}, {lab}")
+            self.emit(f"jalr {self.reg(True)}, 0(x{JTMP})")
+            for _ in range(r.randint(0, 3)):
+                self.straight()
+            self.lines.append(f"{lab}:")
+        else:
+            # Short counted loop: exercises branch prediction and the
+            # recovery from the final, mispredicted exit.
+            lab = self.label()
+            self.emit(f"li x{LOOPC}, {r.randint(2, 12)}")
+            self.lines.append(f"{lab}:")
+            for _ in range(r.randint(1, 5)):
+                self.straight()
+            self.emit(f"addi x{LOOPC}, x{LOOPC}, -1")
+            self.emit(f"bnez x{LOOPC}, {lab}")
+
+    def program(self, n_blocks: int) -> str:
+        self.lines = [
+            "# Generated by bench/programs/gen_random_trace.py. Do not edit.",
+            ".section .text.start",
+            ".global _start",
+            "_start:",
+        ]
+        self.emit(f"la x{BASE}, buf")
+        # Exhaustive M-extension edge matrix: every op on every pair of edge
+        # values. Corner cases such as INT_MIN / -1 need both operands at
+        # once, which random draws rarely produce.
+        for a in EDGE:
+            for b in EDGE:
+                self.emit(f"li x1, {a}")
+                self.emit(f"li x2, {b}")
+                for op in M_OPS:
+                    self.emit(f"{op} x3, x1, x2")
+        for i in GP:
+            self.emit(f"li x{i}, {self.r.choice(EDGE + [self.r.getrandbits(32) - (1 << 31)])}")
+        for _ in range(n_blocks):
+            self.block()
+            if self.r.random() < 0.05:
+                # Refresh a few registers with edge values for M-extension ops.
+                for _ in range(3):
+                    self.emit(f"li x{self.r.choice(GP)}, {self.r.choice(EDGE)}")
+        self.emit("ebreak")
+        self.lines += [".section .bss", ".align 4", "buf:", f"    .space {WINDOW}", ""]
+        return "\n".join(self.lines)
+
+
+def main() -> None:
+    seed, out = int(sys.argv[1]), sys.argv[2]
+    n_blocks = int(sys.argv[3]) if len(sys.argv) > 3 else 1500
+    with open(out, "w") as f:
+        f.write(Gen(seed).program(n_blocks))
+
+
+if __name__ == "__main__":
+    main()

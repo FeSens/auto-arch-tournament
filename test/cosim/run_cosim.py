@@ -3,8 +3,8 @@
 import json, subprocess, sys
 from pathlib import Path
 
-def run_verilator(sim_bin, elf, maxcycles=50_000_000, timeout=120):
-    result = subprocess.run([sim_bin, elf, str(maxcycles)],
+def run_verilator(sim_bin, elf, maxcycles=50_000_000, timeout=120, sim_flags=()):
+    result = subprocess.run([sim_bin, elf, str(maxcycles), *sim_flags],
                             capture_output=True, text=True, timeout=timeout)
     trace = []
     for line in result.stdout.splitlines():
@@ -100,10 +100,12 @@ def compare(ref_trace, sim_trace, ref_completed=True, sim_completed=True,
     return {'passed': True, 'retired': len(ref_trace)}
 
 if __name__ == '__main__':
-    sim_bin, elf = sys.argv[1], sys.argv[2]
+    # Extra args after the ELF are passed to the simulator (e.g. --istall
+    # --dstall to run the trace comparison under bus backpressure).
+    sim_bin, elf, sim_flags = sys.argv[1], sys.argv[2], sys.argv[3:]
     try:
         ref, ref_completed, ref_reason = run_reference(elf)
-        sim, sim_completed, sim_returncode, sim_stderr = run_verilator(sim_bin, elf)
+        sim, sim_completed, sim_returncode, sim_stderr = run_verilator(sim_bin, elf, sim_flags=sim_flags)
         result = compare(ref, sim, ref_completed, sim_completed,
                          ref_reason, sim_returncode, sim_stderr)
     except (json.JSONDecodeError, subprocess.TimeoutExpired, OSError) as e:

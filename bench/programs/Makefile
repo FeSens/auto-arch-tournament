@@ -38,7 +38,16 @@ bench/programs/selftest.elf: bench/programs/selftest.S
 	$(CC) -march=rv32im -mabi=ilp32 -static -nostartfiles \
 	  -T bench/programs/link.ld $< -o $@
 
+# Random full-trace programs (V2). The .S files are generated once by
+# gen_random_trace.py <seed> and committed, so every candidate runs the
+# same programs.
+RANDOM_ELFS := bench/programs/random1.elf bench/programs/random2.elf bench/programs/random3.elf
+
+bench/programs/random%.elf: bench/programs/random%.S
+	$(CC) -march=rv32im -mabi=ilp32 -static -nostartfiles \
+	  -T bench/programs/link.ld $< -o $@
+
 .PHONY: all clean
-all: bench/programs/coremark.elf bench/programs/selftest.elf
+all: bench/programs/coremark.elf bench/programs/selftest.elf $(RANDOM_ELFS)
 clean:
 	rm -f bench/programs/*.elf

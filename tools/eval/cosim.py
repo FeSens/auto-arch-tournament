@@ -39,20 +39,28 @@ def _build_cosim_env(worktree, target: str | None,
     env["NRET"] = str(read_nret(worktree_path / "cores" / target / "core.yaml"))
     return env
 
-def run_one(elf: Path, sim_bin: str, worktree: str, env: dict | None = None) -> dict:
+# Stall modes for the full-trace comparison. The stalled mode uses the same
+# bus backpressure as the fitness run, so logic that only acts while a
+# memory port stalls (which V2 now times and scores) is trace-checked too.
+TRACE_STALL_MODES = ((), ("--istall", "--dstall"))
+
+
+def run_one(elf: Path, sim_bin: str, worktree: str, env: dict | None = None,
+            sim_flags: tuple = ()) -> dict:
     """Run cosim for a single ELF using the run_cosim script."""
     try:
         worktree_path = Path(worktree).resolve()
         result = run_pgroup(
             [sys.executable, str(worktree_path / "test/cosim/run_cosim.py"),
-             sim_bin, str(elf)],
+             sim_bin, str(elf), *sim_flags],
             capture_output=True, text=True, timeout=120, cwd=worktree_path, env=env
         )
+        label = elf.name + (' [' + ' '.join(sim_flags) + ']' if sim_flags else '')
         if result.returncode == 0:
-            return {'passed': True, 'elf': elf.name}
+            return {'passed': True, 'elf': label}
         else:
             detail = (result.stdout + result.stderr)[-2000:]
-            return {'passed': False, 'elf': elf.name, 'field': 'divergence', 'detail': detail}
+            return {'passed': False, 'elf': label, 'field': 'divergence', 'detail': detail}
     except subprocess.TimeoutExpired:
         return {'passed': False, 'elf': elf.name, 'field': 'timeout'}
     except Exception as e:
@@ -147,7 +155,8 @@ def run_cosim(worktree: str, target: str | None = None) -> dict:
 
     # 1. Full-trace cosim of small ELFs (parallel).
     with ThreadPoolExecutor() as pool:
-        futures = {pool.submit(run_one, elf, sim_bin, worktree, env): elf for elf in trace_elfs}
+        futures = {pool.submit(run_one, elf, sim_bin, worktree, env, flags): elf
+                   for elf in trace_elfs for flags in TRACE_STALL_MODES}
         for future in as_completed(futures):
             result = future.result()
             if not result['passed']:
