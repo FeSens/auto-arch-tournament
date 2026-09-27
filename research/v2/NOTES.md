@@ -59,3 +59,20 @@ Append-only. Plan: `PLAN.md`. Branch `v2`.
 
 ### Provenance
 - `tools/HARNESS_VERSION` (2.0.0-dev) in every results row; `env.json` records each tool's version and SHA-256 and a combined `toolchain_digest` (current: fe10e94c...).
+
+## 2026-09-27: perturbation scoring in the harness (measured)
+
+tools/eval/fpga.py now scores Fmax as the median over PERTURBATIONS, a list
+of (k, seed) pairs: k=0 is the netlist `make` built, k>0 re-synthesizes with
+the unused module zz_calib_pad (k assigns) read through SYNTH_PAD in
+synth.tcl. The list stays at [(0,1),(0,2),(0,3)] (the V1 scheme) until the
+calibration sets it.
+
+Equivalence check (V0, harness path vs calibration driver, whose pad file
+sat in the RTL dir instead of generated/var<k>/): k=0 seed 1 97.20 MHz,
+LUT4 9723 in both; k=9 seed 1 136.71 MHz, LUT4 9705 in both. The pad file's
+location does not matter, so the calibration's numbers apply to the
+harness as-is (n=2 pairs, exact match).
+
+Interim (2 of 7 designs complete, not a result): SD of ln(Fmax) across
+variants 0.16-0.21 vs 0.04-0.07 across seeds within a variant.

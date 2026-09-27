@@ -8,10 +8,11 @@ _LOG_OK = "Info: LUT4:  9563/20736  46%\nInfo: DFF:  2911/15552  18%\n"
 
 
 def _patch(monkeypatch, log: str):
-    async def seeds(worktree, generated_dir="generated", env=None):
-        return [{'seed': s, 'fmax_mhz': 80.0 + s, 'log': log, 'returncode': 0,
-                 'placement_failed': False} for s in fpga.SEEDS]
-    monkeypatch.setattr(fpga, "_run_all_seeds", seeds)
+    async def pairs(worktree, generated_dir, env, synth_env, pairs=None):
+        return [{'seed': s, 'perturbation': k, 'fmax_mhz': 80.0 + s, 'log': log,
+                 'returncode': 0, 'placement_failed': False}
+                for k, s in fpga.PERTURBATIONS]
+    monkeypatch.setattr(fpga, "_run_perturbations", pairs)
     monkeypatch.setattr(fpga, "run_coremark_ipc", lambda *a, **k: {
         'completed': True, 'iter_per_cycle': 3e-6, 'cycles': 1, 'iterations': 10})
 
@@ -57,3 +58,31 @@ def test_nextpnr_timeout_counts_as_failed_seed(monkeypatch, tmp_path):
     r = asyncio.run(fpga.run_seed(1, str(tmp_path), str(tmp_path / "out")))
     assert r['placement_failed'] is True and r.get('timed_out') is True
     assert r['fmax_mhz'] is None
+
+
+def test_pad_module_matches_calibration_driver():
+    import importlib.util
+    from pathlib import Path
+    spec = importlib.util.spec_from_file_location(
+        "calibrate", Path(__file__).parents[2] / "research/v2/scripts/calibrate.py")
+    cal = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(cal)
+    for k in (0, 5, 33):
+        assert fpga.pad_module(k) == cal.pad_module(k)
+
+
+def test_score_is_median_over_pairs_and_two_thirds_must_place(monkeypatch, tmp_path):
+    monkeypatch.setattr(fpga, "PERTURBATIONS", [(0, 1), (9, 2), (21, 3), (33, 4)])
+    fmax = {0: 100.0, 9: 140.0, 21: 130.0, 33: None}
+
+    async def pairs(worktree, generated_dir, env, synth_env, pairs=None):
+        return [{'seed': s, 'perturbation': k, 'fmax_mhz': fmax[k], 'log': _LOG_OK,
+                 'returncode': 0, 'placement_failed': fmax[k] is None}
+                for k, s in fpga.PERTURBATIONS]
+    monkeypatch.setattr(fpga, "_run_perturbations", pairs)
+    monkeypatch.setattr(fpga, "run_coremark_ipc", lambda *a, **k: {
+        'completed': True, 'iter_per_cycle': 3e-6, 'cycles': 1, 'iterations': 10})
+    r = fpga.run_fpga_eval(str(tmp_path))
+    assert r['fmax_mhz'] == 130.0 and len(r['perturbations']) == 4
+    fmax[21] = None   # 2 of 4 placed: below ceil(2/3 * 4) = 3
+    assert fpga.run_fpga_eval(str(tmp_path))['placement_failed'] is True

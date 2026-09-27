@@ -28,6 +28,12 @@ def _build_synth_env(worktree, target: str | None,
     return env
 
 SEEDS = [1, 2, 3]
+# Fmax is scored over (perturbation, seed) pairs. Perturbation k adds an
+# unused k-assign module to synthesis (k=0: the netlist `make` built);
+# neutral changes like this move a design's Fmax by far more than nextpnr
+# seeds do (EXP-2026-09-27-v2-placement-noise), so one netlist is one
+# draw. Set from that calibration; see research/v2/NOTES.md.
+PERTURBATIONS = [(0, 1), (0, 2), (0, 3)]
 # Per-seed wall-clock cap on nextpnr. Without it a design that never
 # routes hangs the rep with no outcome recorded (V1: one seed took ~45 min
 # and blocked the FPGA gate). A seed that hits the cap counts as a failed
@@ -124,6 +130,53 @@ async def run_seed(seed: int, worktree: str, outdir: str, env: dict | None = Non
 async def _run_all_seeds(worktree: str, generated_dir: str = "generated", env: dict | None = None) -> list:
     tasks = [run_seed(s, worktree, f"{generated_dir}/pnr_seed{s}", env=env) for s in SEEDS]
     return await asyncio.gather(*tasks)
+
+
+def pad_module(k: int) -> str:
+    """The unused module behind perturbation k (identical to the
+    calibration driver's)."""
+    body = "\n".join(f"  assign y[{i}] = a[{i}] ^ a[{(i + 1) % 32}];" for i in range(k))
+    return ("module zz_calib_pad(input logic [31:0] a, output logic [31:0] y);\n"
+            f"{body}\nendmodule\n")
+
+
+async def _synth_variant(k: int, worktree: str, generated_dir: str,
+                         synth_env: dict) -> tuple[str, str | None]:
+    """Synthesize perturbation k into <generated_dir>/var<k>/synth.json.
+    Returns (dir, error or None). k=0 reuses the netlist `make` built."""
+    if k == 0:
+        return generated_dir, None
+    vdir = f"{generated_dir}/var{k}"
+    root = Path(worktree).resolve()
+    (root / vdir).mkdir(parents=True, exist_ok=True)
+    (root / vdir / "zz_calib_pad.sv").write_text(pad_module(k))
+    env = {**synth_env, "GEN_DIR": vdir, "SYNTH_PAD": f"{vdir}/zz_calib_pad.sv"}
+    proc = await asyncio.create_subprocess_exec(
+        "yosys", "-q", "-l", f"{vdir}/synth.log", "-c", "fpga/scripts/synth.tcl",
+        stdout=asyncio.subprocess.DEVNULL, stderr=asyncio.subprocess.PIPE,
+        cwd=root, env=env, start_new_session=True)
+    _, err = await proc.communicate()
+    if proc.returncode != 0:
+        return vdir, f"synth var{k} failed: {err.decode(errors='replace')[-300:]}"
+    return vdir, None
+
+
+async def _run_perturbations(worktree: str, generated_dir: str, env: dict,
+                             synth_env: dict, pairs=None) -> list:
+    pairs = PERTURBATIONS if pairs is None else pairs
+    ks = sorted({k for k, _ in pairs})
+    synths = dict(zip(ks, await asyncio.gather(
+        *(_synth_variant(k, worktree, generated_dir, synth_env) for k in ks))))
+
+    async def one(k, seed):
+        vdir, err = synths[k]
+        if err:
+            r = {'seed': seed, 'fmax_mhz': None, 'log': err, 'returncode': None,
+                 'placement_failed': True}
+        else:
+            r = await run_seed(seed, worktree, f"{vdir}/pnr_seed{seed}", env=env)
+        return {**r, 'perturbation': k}
+    return await asyncio.gather(*(one(k, s) for k, s in pairs))
 
 def run_coremark_ipc(worktree: str, sim_bin: str | None = None, env: dict | None = None) -> dict:
     """Run CoreMark on Verilator sim, return {iter_per_cycle, completed, cycles, iterations}.
@@ -265,12 +318,15 @@ def run_fpga_eval(worktree: str, target: str | None = None) -> dict:
         else None
     )
 
-    seed_results = asyncio.run(_run_all_seeds(worktree, generated_dir, env=env))
+    synth_env = _build_synth_env(worktree, target, base_env=os.environ.copy())
+    seed_results = asyncio.run(_run_perturbations(worktree, generated_dir, env, synth_env))
     successful   = [r for r in seed_results if not r['placement_failed']]
     all_fmax     = [r['fmax_mhz'] for r in successful]
     seeds_log    = [r.get('fmax_mhz') for r in seed_results]
+    # Same 2-of-3 bar as V1, scaled to the number of pairs.
+    min_ok = -(-2 * len(seed_results) // 3)
 
-    if len(successful) < MIN_SUCCESSFUL_SEEDS:
+    if len(successful) < min_ok:
         # 0-of-3 or 1-of-3 placements is itself a quality signal: the
         # design is unroutable or fragile. Single-seed luck is not a
         # fitness score we'll commit to.
@@ -278,7 +334,7 @@ def run_fpga_eval(worktree: str, target: str | None = None) -> dict:
             'placement_failed': True,
             'seeds': seeds_log,
             'successful_seeds': len(successful),
-            'min_required':     MIN_SUCCESSFUL_SEEDS,
+            'min_required':     min_ok,
         }
 
     fmax_median = statistics.median(all_fmax)
@@ -295,7 +351,10 @@ def run_fpga_eval(worktree: str, target: str | None = None) -> dict:
 
     fitness = fmax_median * cm['iter_per_cycle'] * 1_000_000  # iter/sec
 
-    log    = successful[-1]['log']
+    # Area of the netlist `make` built (perturbation 0); cell counts do not
+    # depend on the placement seed.
+    area_run = next((r for r in successful if r.get('perturbation', 0) == 0), successful[0])
+    log    = area_run['log']
     lut4_m = re.search(r'LUT4:\s+(\d+)/',  log)
     ff_m   = re.search(r'\bDFF:\s+(\d+)/', log)
     # Memory and DSP cells are not LUT4s; report them so area is not
@@ -311,7 +370,7 @@ def run_fpga_eval(worktree: str, target: str | None = None) -> dict:
         return {
             'bench_failed': True,
             'reason': (f'fpga_report_unparsed: no {"/".join(missing)} count in '
-                       f'nextpnr log (seed {successful[-1]["seed"]})'),
+                       f'nextpnr log (seed {area_run["seed"]})'),
             'fmax_mhz': round(fmax_median, 2),
             'seeds': all_fmax,
             'placement_failed': False,
@@ -324,6 +383,8 @@ def run_fpga_eval(worktree: str, target: str | None = None) -> dict:
         'cycles':        cm['cycles'],
         'iterations':    cm['iterations'],
         'seeds':         all_fmax,
+        'perturbations': [[r['perturbation'], r['seed'], r.get('fmax_mhz')]
+                          for r in seed_results],
         'lut4':          int(lut4_m.group(1)),
         'lutram':        _cells('RAM16SDP4'),
         'bsram':         _cells('BSRAM'),

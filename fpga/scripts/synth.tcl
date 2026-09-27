@@ -37,6 +37,13 @@ if {[info exists ::env(BENCH)]} {
 } else {
     set bench_sv "fpga/core_bench.sv"
 }
+# SYNTH_PAD (tools/eval/fpga.py): an unused module the harness adds to
+# perturb the netlist's internal numbering. Synthesis prunes it; placement
+# still changes, so Fmax is scored as a median over several such variants
+# (research/v2/NOTES.md, placement noise).
+if {[info exists ::env(SYNTH_PAD)] && $::env(SYNTH_PAD) ne ""} {
+    read_verilog -sv $::env(SYNTH_PAD)
+}
 read_verilog -sv fpga/bench_stall_gen.sv
 read_verilog -sv $bench_sv
 
