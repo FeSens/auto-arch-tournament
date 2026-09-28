@@ -18,7 +18,13 @@ if [ "$PAD" -gt 0 ]; then
 s = u.spec_from_file_location('f', '$REPO/tools/eval/fpga.py'); m = u.module_from_spec(s); s.loader.exec_module(m)
 open('$WORK/src/zz_calib_pad.sv', 'w').write(m.pad_module($PAD))"
 fi
-cp "$REPO/fpga/core_bench_si.sv" "$REPO/fpga/bench_stall_gen.sv" "$REPO/fpga/constraints/Tang_Nano_20K.cst" "$WORK/src/"
+# FPGA_REF=main: the V1 wrapper (ready tied high, RVFI kept) from that ref.
+if [ -n "${FPGA_REF:-}" ]; then
+  git -C "$REPO" show "$FPGA_REF:fpga/core_bench_si.sv" > "$WORK/src/core_bench_si.sv"
+  git -C "$REPO" show "$FPGA_REF:fpga/constraints/Tang_Nano_20K.cst" > "$WORK/src/Tang_Nano_20K.cst"
+else
+  cp "$REPO/fpga/core_bench_si.sv" "$REPO/fpga/bench_stall_gen.sv" "$REPO/fpga/constraints/Tang_Nano_20K.cst" "$WORK/src/"
+fi
 # Gowin P&R needs an I/O standard per port (the board's banks are 3.3 V);
 # nextpnr ignores these, so they go in the pilot's copy only.
 printf 'IO_PORT "clock" IO_TYPE=LVCMOS33;\nIO_PORT "reset" IO_TYPE=LVCMOS33;\nIO_PORT "led" IO_TYPE=LVCMOS33;\n' >> "$WORK/src/Tang_Nano_20K.cst"

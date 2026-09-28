@@ -147,3 +147,20 @@ arithmetic (V0 itself relies on it); agents could gain score by moving logic
 into carry chains; part of the "synthesis chaos" may be which paths the timer
 happens to see. Scope: n=1 build per cell; the 18x gap is not a noise effect,
 but the exact missing arc in nextpnr is not identified.
+
+## 2026-09-28: Opus 5.5 V1 winner under both flows (measured)
+
+claude-opus-5_5_xhigh rep1 final (V1 score 983.24, +248%), RTL from repo.bundle.
+One build per cell (nextpnr: seeds 1-3; Gowin: default placement).
+
+| wrapper | Yosys+nextpnr | Gowin EDA |
+|---|---|---|
+| V1 (ready tied high) | 240.73 / 223.11 / 247.46 MHz, 3119 LUT4, 36 RAM16SDP4 | 48.92 MHz, 13 levels, 2872 logic, 1257 regs |
+| V2 (stalls in hardware) | does not fit: 75,857 LUT4, 37,475 DFF | does not fit: 18,380 DFF > 15,750 |
+
+Gowin's critical path: register file (cpu/u_rf/regs_regs...) -> dmem BSRAM,
+13 levels. nextpnr claims ~4.2 ns for the same design; 13 LUT levels plus
+routing cannot close in 4 ns on this part, so nextpnr is also missing arcs
+outside carry chains, likely through LUT-RAM (RAM16SDP4) reads (inferred,
+not isolated). V1's largest gain was scored on logic the timer did not see,
+and the design only fit because the V1 wrapper let the stall logic be pruned.
