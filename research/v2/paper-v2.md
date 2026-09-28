@@ -128,6 +128,28 @@ own tool (Gowin EDA 1.9.11.03):
   agent the previous generation's ideas. Allowlist + separate OS principals
   + a live transcript monitor.
 
+## 5c. Incident 01: the first campaign was stopped (measured)
+
+- The V2.1 campaign ran 6 h (batch 1, rep 1 of each system, ~19 of 45 slots)
+  and was stopped as a harness failure under the incident policy; its runs
+  are reported, not scored (`research/runs/EXP-2026-09-28-v2-main/incident_01`).
+- Cause 1, a CLI-specific harness artifact: Claude Code's bubblewrap sandbox
+  leaves empty placeholder files (`.bashrc`, `.mcp.json`, `.vscode`, ...)
+  where a command runs. Hypothesis agents share the clone root, so one
+  agent's off-limits check saw another's live placeholders and rolled the
+  slot back: 4 of 15 Opus hypothesis slots lost, Codex unaffected. Three
+  smoke rounds had missed it (timing-dependent).
+- Cause 2, cross-run interference: three runs x three slots, plus agents'
+  self-checks, all ran formal at `make -j20` on 20 cores (load 20). Formal
+  checks hit the 45-min ceiling because of what other runs were doing.
+- Fixes (harness 2.2.0): placeholders ignored (and purged before every
+  build, so they never reach the eval); a host-wide cap of three concurrent
+  harness evals, formal at -j6, timeout counted from slot acquisition;
+  agent CLIs at nice 10 so their self-checks yield to scoring.
+- Paper angle: a comparison of agent CLIs needs per-CLI integration
+  testing under the real concurrency, and a monitor that reads outcomes by
+  class per system; the bias showed up as one system's "broken" count.
+
 ## 6. Engineering lessons worth a short section or appendix
 
 - Same tool versions are not the same tool: host OS/libc changes netlists.
