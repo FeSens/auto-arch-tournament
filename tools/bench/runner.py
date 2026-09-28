@@ -289,11 +289,16 @@ def load_done_set(results_jsonl: Path) -> set[tuple[str, int]]:
 def interleaved_batches(jobs: list[JobSpec]) -> list[list[JobSpec]]:
     """V2 schedule: one batch per rep holding that rep's run of every
     system, started together, so time of day, provider load and host
-    contention hit all systems alike. Launch order alternates by rep."""
+    contention hit all systems alike. Launch order rotates by rep (with two
+    systems: alternates)."""
     by_rep: dict[int, list[JobSpec]] = {}
     for j in jobs:
         by_rep.setdefault(j.rep, []).append(j)
-    return [b if rep % 2 else b[::-1] for rep, b in sorted(by_rep.items())]
+    out = []
+    for rep, b in sorted(by_rep.items()):
+        r = (rep - 1) % len(b)
+        out.append(b[r:] + b[:r])
+    return out
 
 
 def enumerate_jobs(

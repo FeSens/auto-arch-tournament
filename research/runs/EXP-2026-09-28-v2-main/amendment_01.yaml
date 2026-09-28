@@ -1,0 +1,30 @@
+# WRITE-ONCE. Amendment 01 to prereg.yaml, made 2026-09-28T03:44Z,
+# before any main run started (only the smoke round on the frozen tag had run).
+reason: >
+  The operator asked to add a third system in the same campaign. Added before
+  data, so the primary analysis is unaffected.
+added_system:
+  name: gpt-6-luna_xhigh-v2
+  cli: Codex CLI 0.156.1 (same pinned copy as GPT-6 Sol)
+  model: gpt-6-luna
+  effort: xhigh
+  checked: answers through the pinned Codex as hwebench (one prompt, 2026-09-28)
+runs_per_system: 6 (all three systems)
+schedule_change: >
+  --interleave now starts rep r of all three systems together; launch order rotates
+  by rep (a,b,c / b,c,a / c,a,b / ...). Three concurrent runs instead of two load
+  the host more; the load is the same for every system in every rep.
+shared_quota: >
+  GPT-6 Sol and GPT-6 Luna share one Codex subscription quota. Quota pauses rerun
+  the interrupted attempt from scratch and are logged per system; they are reported
+  and do not count against either system.
+analysis:
+  primary: unchanged (Opus 5.5 vs GPT-6 Sol, as in prereg.yaml; alpha 0.05, no adjustment)
+  secondary: >
+    Luna vs Sol and Luna vs Opus, same test (Welch on ln held-out score + bootstrap CI),
+    Holm-adjusted across these two comparisons at family alpha 0.05. Same verdict
+    wording rules ("ranks higher" / "not distinguishable at n=6").
+command: >
+  python3 -m tools.bench.runner --models tools/bench/models-v2.yaml --ref bench-v2.0
+  --agent-user hwebench --reps 6 --interleave --n 15 --k 3
+  --results-jsonl bench/v2/results.jsonl --results-dir bench/v2

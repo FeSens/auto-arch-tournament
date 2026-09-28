@@ -12,3 +12,8 @@ models:
     model: gpt-6-sol
     variant: xhigh
     oauth: true
+  - name: gpt-6-luna_xhigh-v2
+    provider: codex
+    model: gpt-6-luna
+    variant: xhigh
+    oauth: true
