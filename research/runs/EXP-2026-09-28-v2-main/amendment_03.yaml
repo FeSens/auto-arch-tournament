@@ -1,0 +1,36 @@
+# WRITE-ONCE. Amendment 03 to prereg.yaml, made 2026-09-28T13:50Z, after
+# incident 01 and before the campaign restart. No scored run exists.
+reason: >
+  Incident 01: the first campaign (harness 2.1.0, started 2026-09-28T05:40Z) was
+  stopped after ~6 h (batch 1 only, ~19 of 45 slots per run) as a harness failure
+  under the incident policy. Three defects, all fixed before any scored data:
+  (1) Claude Code's bubblewrap sandbox leaves placeholder files (.bashrc, .mcp.json,
+  .vscode, ...) where commands run; concurrent hypothesis agents saw each other's and
+  were rolled back as off-limits writes (4 of 15 Opus hypothesis slots; Codex
+  unaffected). (2) Host saturation (load 20 on 20 cores): formal checks timed out
+  because of other runs' load, not the design. (3) Found by the post-fix smoke: Claude
+  Code's sandbox writes a 0700 .claude/ dir inside rtl/; the runner's final copy of the
+  rtl working tree crashed there, which would have lost every Claude run at its end.
+incident_01_runs: >
+  Reported, not scored: research/runs/EXP-2026-09-28-v2-main/incident_01/ (logs,
+  orchestrator logs, runner log, monitor alerts). Per the incident policy all 18 runs
+  restart from V0; the first complete attempt of each is scored.
+harness: >
+  tag hwe-bench-v2.2 = branch bench-v2.2 = b436df3, HARNESS_VERSION 2.2.0 (replaces
+  hwe-bench-v2.1). Changes: Claude sandbox placeholder names ignored in every clone
+  (ignored paths are purged before every build, so they never reach the eval); at most
+  three concurrent harness evals (formal, Gowin) on the host, formal at -j6, each
+  eval's timeout counted from slot acquisition; agent CLIs at nice 10; the final design
+  saved from git-tracked RTL; a runner exception writes a rerunnable harness_error row.
+  Same rules for every system.
+validation: >
+  372 harness tests pass. Smoke on bench-v2.2-rc (3 systems, N=2 K=3): 0 broken slots
+  in all three runs; Sol and Luna complete; Opus completed both rounds and then hit
+  defect (3), fixed in 2a9d4ee. Opus-only smoke after the fix (N=1 K=3): done, held-out
+  scored, final RTL saved. The tag adds only the version file and research files to the
+  smoke-tested code.
+command: >
+  python3 -m tools.bench.runner --models tools/bench/models-v2.yaml --ref bench-v2.2
+  --agent-user hwebench,hwebench2,hwebench3 --reps 6 --interleave --n 15 --k 3
+  --results-jsonl bench/v2/results.jsonl --results-dir bench/v2
+unchanged: question, systems, metrics, tests, verdict rules, budget, runs per system, incident policy, monitoring policy (amendment 02)
