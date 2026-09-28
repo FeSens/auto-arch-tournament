@@ -155,6 +155,13 @@ own tool (Gowin EDA 1.9.11.03):
   build, so they never reach the eval); a host-wide cap of three concurrent
   harness evals, formal at -j6, timeout counted from slot acquisition;
   agent CLIs at nice 10 so their self-checks yield to scoring.
+- Found by the post-fix smoke: a third Claude-only artifact. Claude Code's
+  sandbox writes a `.claude/` dir (0700, agent-owned) wherever it works,
+  including `cores/bench/rtl/`; the runner's final step copied the whole
+  rtl/ working tree, hit it, and lost the run at the finish line (no result
+  row, no held-out score). Every Opus run of the campaign would have ended
+  this way. Fix: save the git-tracked design only; a runner exception now
+  leaves a rerunnable `harness_error` row instead of no trace.
 - Paper angle: a comparison of agent CLIs needs per-CLI integration
   testing under the real concurrency, and a monitor that reads outcomes by
   class per system; the bias showed up as one system's "broken" count.
