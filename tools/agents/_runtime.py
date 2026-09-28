@@ -33,6 +33,7 @@ import shutil
 import subprocess
 import sys
 import threading
+import uuid
 from pathlib import Path
 from typing import Optional
 
@@ -522,8 +523,25 @@ def run_agent_streaming(
     summarize-event grammar differ.
     """
     p = provider or get_provider()
+    # A private TMPDIR per agent invocation: the K concurrent agents of a
+    # run used to share the run's <clone>/.tmp, and one agent's scratch
+    # files overwrote a sibling's (V2 smoke10). Under the agent's own
+    # working directory (its worktree for implementation and hypothesis
+    # agents); plain mkdir, so the clone's default ACL gives the agent
+    # account write access (mkdtemp's 0700 would zero it).
+    tmpdir = Path(cwd).resolve() / ".tmp" / f"agent-{uuid.uuid4().hex[:12]}"
+    tmpdir.mkdir(parents=True)
+    env = {**os.environ, "TMPDIR": str(tmpdir)}
+    try:
+        return _run_agent_streaming(cmd, cwd, log_path, timeout_sec, mode, p, env)
+    finally:
+        from tools.eval._subprocess import remove_path
+        remove_path(tmpdir, must=False)
+
+
+def _run_agent_streaming(cmd, cwd, log_path, timeout_sec, mode, p, env) -> tuple[int, bool]:
     proc = subprocess.Popen(
-        as_agent_user(cmd), cwd=cwd,
+        as_agent_user(cmd, env), cwd=cwd, env=env,
         stdin=subprocess.DEVNULL,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,

@@ -90,3 +90,30 @@ def test_agent_launch_goes_through_the_cpu_slice_helper_on_linux():
     from tools.agents._runtime import AGENT_SCOPE, agent_launch_prefix
     assert agent_launch_prefix("hwebench2", "linux") == ["sudo", "-n", AGENT_SCOPE, "hwebench2"]
     assert agent_launch_prefix("hwebench2", "darwin") == ["sudo", "-n", "-u", "hwebench2"]
+
+
+def test_each_agent_invocation_gets_a_private_tmpdir(tmp_path, monkeypatch):
+    """Concurrent agents of a run must not share TMPDIR (smoke10: a sibling
+    overwrote an agent's logs in the run-wide <clone>/.tmp)."""
+    import threading
+    from pathlib import Path
+    from tools.agents import _runtime
+    monkeypatch.delenv("HWE_AGENT_USER", raising=False)
+    monkeypatch.setenv("TMPDIR", str(tmp_path / "run-wide"))
+    seen = []
+    def one(i):
+        ws = tmp_path / f"ws{i}"
+        ws.mkdir()
+        out = ws / "tmpdir.txt"
+        _runtime.run_agent_streaming(
+            ["/bin/sh", "-c", f'echo "$TMPDIR" > {out}; touch "$TMPDIR/scratch.log"; sleep 0.3'],
+            cwd=str(ws), log_path=ws / "agent.log", timeout_sec=30, provider="claude")
+        seen.append((ws, Path(out.read_text().strip())))
+    threads = [threading.Thread(target=one, args=(i,)) for i in range(3)]
+    for t in threads: t.start()
+    for t in threads: t.join()
+    dirs = [d for _, d in seen]
+    assert len(set(dirs)) == 3
+    for ws, d in seen:
+        assert d.parent == ws.resolve() / ".tmp" and d.name.startswith("agent-")
+        assert not d.exists()          # removed when the agent exits
