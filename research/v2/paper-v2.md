@@ -162,6 +162,20 @@ own tool (Gowin EDA 1.9.11.03):
   row, no held-out score). Every Opus run of the campaign would have ended
   this way. Fix: save the git-tracked design only; a runner exception now
   leaves a rerunnable `harness_error` row instead of no trace.
+- Incident 02 (harness 2.2.0 campaign, stopped after 1.5 h, not scored,
+  `research/runs/EXP-2026-09-28-v2-main/incident_02`): hypothesis agents
+  shared the clone root. An Opus hypothesis agent (r3s0) ran a trial
+  experiment in place (edited `core_pkg.sv` and three other RTL files, ran
+  a Gowin build, reverted with `git checkout`) and finished clean; a
+  sibling (r3s2) finished during the trial, its before/after check saw the
+  edits, rolled them back under the running experiment and failed the
+  innocent sibling. The third sibling was reading `rtl/` meanwhile. Across
+  the batch, 4 of ~12 Opus hypothesis agents ran trial experiments (3 on
+  copies, 1 in place); 0 Codex hypothesis agents edited the tree. So the
+  shared tree turned a compliant behavior into a lost slot for the system
+  that experiments. Fix (harness 2.3): each hypothesis agent works in its
+  own disposable worktree of the champion; its YAML is copied out; the
+  main clone is still checked for absolute-path writes.
 - Paper angle: a comparison of agent CLIs needs per-CLI integration
   testing under the real concurrency, and a monitor that reads outcomes by
   class per system; the bias showed up as one system's "broken" count.

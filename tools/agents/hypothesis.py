@@ -2,11 +2,12 @@
 AGENT_PROVIDER) to generate a hypothesis. Writes
 experiments/hypotheses/hyp-{id}.yaml.
 
-The agent runs with workspace-write sandbox in the main repo, so this
-module brackets the call with a sandbox check: any path it touches
-outside experiments/hypotheses/ is reverted and the run is rejected.
-Without that, a misbehaving agent could silently patch tools/, schemas/,
-etc., and those changes would persist into every subsequent worktree.
+The agent runs in its own disposable git worktree of the champion (edits
+there are discarded; its YAML is copied out). The main clone is still
+bracketed by a sandbox check: any path the agent touches there outside
+experiments/hypotheses/ is reverted and the run is rejected. Without that,
+a misbehaving agent could silently patch tools/, schemas/, etc., and those
+changes would persist into every subsequent worktree.
 """
 import subprocess, re, datetime, os
 import yaml
@@ -498,40 +499,68 @@ def run_hypothesis_agent(log_tail: list, current_fitness: float,
     # the shared `.agent.log`. Falls back to the per-target hypothesis_log()
     # for the legacy single-slot path.
     hyp_log_path = (hyp_dir / f".agent.{hyp_id}.log") if hyp_id else hypothesis_log(target)
+    # Each hypothesis agent works in its own disposable worktree of the
+    # champion, not in the shared clone root (harness 2.3, incident 02).
+    # With a shared tree, one agent's in-place trial edit (reverted before
+    # it finished) was caught by a sibling's before/after check, which
+    # blamed and rolled back the sibling, and siblings read non-champion
+    # RTL meanwhile. Now an agent's edits stay in its own workspace and are
+    # discarded with it; only its YAML is copied to the round's directory.
+    import shutil
+    from tools.worktree import create_worktree, destroy_worktree
+    from tools.sandbox import changed_since, dirty_state, revert_paths
+    ws_id = f"{hyp_id}-hypgen"
+    ws = Path(create_worktree(ws_id, base_branch="HEAD", target=target))
+    ws_hyp_dir = ws / "cores" / target / "experiments" / "hypotheses"
+    ws_hyp_dir.mkdir(parents=True, exist_ok=True)
     cmd = build_agent_cmd(
-        prompt, cwd=".",
+        prompt, cwd=str(ws),
         output_last_message=last_msg,
         enable_search=False,  # prompt has no search instruction; enable when added
     )
-    from tools.sandbox import dirty_state, revert_paths
+    # The main clone must stay untouched (an agent could still write there
+    # by absolute path): checked as before.
     before = dirty_state(".")
     from tools.agents.quota import run_with_quota_wait
 
     def _discard_partial_hypothesis() -> None:
         # A provider limit interrupted this attempt: rerun it from scratch.
-        for f in hyp_dir.glob(f"{hyp_id}*.yaml"):
-            f.unlink(missing_ok=True)
+        for d in (hyp_dir, ws_hyp_dir):
+            for f in d.glob(f"{hyp_id}*.yaml"):
+                f.unlink(missing_ok=True)
 
     def _run(mode: str) -> tuple[int, bool]:
-        return run_agent_streaming(cmd, cwd=".", log_path=hyp_log_path,
+        return run_agent_streaming(cmd, cwd=str(ws), log_path=hyp_log_path,
                                    timeout_sec=HYPOTHESIS_TIMEOUT_SEC, mode=mode)
 
-    rc, timed_out = run_with_quota_wait(_run, hyp_log_path, _discard_partial_hypothesis)
-    if rc != 0 and not timed_out:
-        # Single retry. Append (not truncate) so the first attempt's stream
-        # — often the actual rate-limit/error evidence we want to debug —
-        # is preserved alongside the retry's.
-        print(f"  [agent] non-zero exit ({rc}); retrying once", flush=True)
-        with hyp_log_path.open("a") as log:
-            log.write(f'\n{{"type":"retry_marker","first_rc":{rc}}}\n')
-        rc, timed_out = run_with_quota_wait(_run, hyp_log_path, _discard_partial_hypothesis,
-                                            initial_mode="a")
+    try:
+        rc, timed_out = run_with_quota_wait(_run, hyp_log_path, _discard_partial_hypothesis)
+        if rc != 0 and not timed_out:
+            # Single retry. Append (not truncate) so the first attempt's stream
+            # — often the actual rate-limit/error evidence we want to debug —
+            # is preserved alongside the retry's.
+            print(f"  [agent] non-zero exit ({rc}); retrying once", flush=True)
+            with hyp_log_path.open("a") as log:
+                log.write(f'\n{{"type":"retry_marker","first_rc":{rc}}}\n')
+            rc, timed_out = run_with_quota_wait(_run, hyp_log_path, _discard_partial_hypothesis,
+                                                initial_mode="a")
 
-    if timed_out:
-        print(f"  [agent] TIMEOUT after {HYPOTHESIS_TIMEOUT_SEC}s — process killed",
-              flush=True)
-    elif rc != 0:
-        raise subprocess.CalledProcessError(rc, cmd)
+        if timed_out:
+            print(f"  [agent] TIMEOUT after {HYPOTHESIS_TIMEOUT_SEC}s — process killed",
+                  flush=True)
+        elif rc != 0:
+            raise subprocess.CalledProcessError(rc, cmd)
+
+        # Leftover edits in the agent's own workspace (trial experiments) are
+        # discarded with it and cost nothing; they are only reported.
+        leftovers = changed_since({}, dirty_state(ws),
+                                  lambda p: p.startswith(f"cores/{target}/experiments/hypotheses/"))
+        if leftovers:
+            print(f"  [agent] {hyp_id}: discarding workspace edits {leftovers[:6]}", flush=True)
+        for f in ws_hyp_dir.glob(f"{hyp_id}*.y*ml"):
+            shutil.copy2(f, hyp_dir / f.name)
+    finally:
+        destroy_worktree(ws_id, target)
 
     breaches = _git_offlimits_changes(allow_re, before)
     if breaches:
