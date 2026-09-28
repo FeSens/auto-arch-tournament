@@ -26,6 +26,8 @@ agent searching `cores/v1` for past divider work. The harness was frozen as
 | 9 | World-readable files agents write outside the clone | Agents ran with umask 002, so files in `/tmp` were readable by other accounts | Audit | Agent umask 007 (inside the clone the default ACL still grants the operator) | closed |
 | 10 | Codex web search | Codex 0.156's default `web_search` mode is "cached" (OpenAI's index); the benchmark's results are public (hwebench.com, the GitHub repo). No web search appeared in the smoke transcripts | Audit of the CLI's config keys | `web_search = "disabled"` in the per-run Codex config (tested) | closed |
 | 11 | Hints in harness source comments | `tools/eval/gowin.py` named V0's single-cycle divider and V1's best Fmax; `tools/worktree.py` mentioned a multi-cycle divider | Grep of kept files for model names, results, design terms | Comments rewritten to be design-neutral | closed |
+| 13 | Clone "other" permission bits (found by the live probe after the first fix) | Clones were created with the default umask (o+rx), so with separate accounts any account could still read any clone: the ACL admits one account, but "other" admitted all | `research/v2/scripts/leak_probe.py` | `chmod -R o-rwx` and a default `o::---` ACL on each clone; clone set to 0700 on release | closed |
+| 14 | Run homes surviving release (probe) | The wipe looked for the account's run homes by listing the homes directory, which the account cannot list (by design), so they survived | Live probe | The runner deletes the run home by name at release and before creating it | closed |
 | 12 | Runner code and model list | `tools/bench/` (runner, `models-v2.yaml`) and `tools/site/` in the clone | Audit | Not in the allowlist (the eval does not import them) | closed |
 
 ## Channels checked and already closed in V2.0
@@ -59,9 +61,11 @@ agent searching `cores/v1` for past divider work. The harness was frozen as
 - `research/v2/scripts/setup_server.sh` step 7: each pool account cannot list
   the clone base or the homes directory, cannot see other users' processes,
   and can run nested bubblewrap.
-- Live probe before the campaign (pending): the full smoke (all three systems
-  concurrently) with the monitor running, plus a check from each account
-  that it cannot read the other runs' clones and homes.
+- `research/v2/scripts/leak_probe.py` (live, on the run host): each account
+  tries the other's clone, run home, login home, /tmp files, processes and
+  the operator home, and the released account tries its finished clone. The
+  first pass found leaks 13 and 14; after the fix every check is closed.
+- Pending: the full smoke (all three systems concurrently) with the monitor.
 
 ## Paper angle
 

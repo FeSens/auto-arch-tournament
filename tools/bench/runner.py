@@ -159,13 +159,15 @@ def run_home(agent: AgentUser, slug: str) -> Path:
     return agent.shared / "homes" / slug
 
 
-def reset_agent(agent: AgentUser) -> None:
+def reset_agent(agent: AgentUser, homes: tuple[Path, ...] = ()) -> None:
     """Leave nothing of a finished run for the account's next run: its
-    processes, per-run homes and files in the shared temp dirs."""
+    processes, the given per-run homes (the homes directory is not
+    listable, so they are named) and its files in the shared temp dirs."""
     as_agent(agent.name, "/usr/bin/pkill", "-KILL", "-u", agent.name, capture_output=True)
-    script = ('for d in /tmp /var/tmp /dev/shm "$1"; do '
-              'find "$d" -mindepth 1 -maxdepth 1 -user "$2" -exec rm -rf {} + 2>/dev/null; done; true')
-    as_agent(agent.name, "/bin/sh", "-c", script, "sh", str(agent.shared / "homes"), agent.name,
+    script = ('for d in /tmp /var/tmp /dev/shm; do '
+              'find "$d" -mindepth 1 -maxdepth 1 -user "$1" -exec rm -rf {} + 2>/dev/null; done; '
+              'shift; rm -rf "$@"; true')
+    as_agent(agent.name, "/bin/sh", "-c", script, "sh", agent.name, *map(str, homes),
              capture_output=True)
 
 
@@ -194,7 +196,8 @@ def release_agent(agent: Optional[AgentUser], clone: Path) -> None:
         # Every path into the clone goes through its top directory.
         subprocess.run(["setfacl", "-x", f"u:{agent.name},d:u:{agent.name}", str(clone)],
                        capture_output=True)
-    reset_agent(agent)
+        os.chmod(clone, 0o700)
+    reset_agent(agent, (run_home(agent, clone.name),))
     _FREE_AGENTS.put(agent)
 
 
@@ -240,7 +243,12 @@ def share_with_agent(path: Path, agent: AgentUser) -> None:
         # POSIX ACLs: access entries on what exists, default entries on
         # directories so new files inherit them.
         spec = ",".join(f"{t}u:{who}:rwX" for who in (agent.name, op) for t in ("", "d:"))
-        subprocess.run(["setfacl", "-R", "-m", spec, str(path)], check=True, capture_output=True)
+        # No access for "other": the ACL above is the only way in, so other
+        # agent accounts (concurrent runs) cannot read the clone. Default
+        # "other" entries keep files created later closed too.
+        subprocess.run(["chmod", "-R", "o-rwx", str(path)], check=True, capture_output=True)
+        subprocess.run(["setfacl", "-R", "-m", f"{spec},d:o::---", str(path)],
+                       check=True, capture_output=True)
         return
     for who in (agent.name, op):
         subprocess.run(["find", str(path), "-type", "d", "-exec",
@@ -1053,6 +1061,8 @@ def make_env_for_job(job: JobSpec, clone: Path, keys: dict[str, str]) -> dict[st
     if agent:
         env["HWE_AGENT_USER"] = agent.name
         home = run_home(agent, job.slug)
+        # Never resume a stale home (a crashed or rerun attempt of this run).
+        as_agent(agent.name, "/bin/rm", "-rf", str(home), capture_output=True)
         as_agent(agent.name, "/bin/mkdir", "-p", "-m", "700", str(home), check=True,
                  capture_output=True)
         env["HWE_AGENT_HOME"] = str(home)

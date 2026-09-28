@@ -722,7 +722,7 @@ def test_agent_pool_gives_each_job_its_own_account(monkeypatch, tmp_path):
     me = getpass.getuser()
     monkeypatch.setenv("HWE_AGENT_USER", f"{me}, {me}")
     monkeypatch.setattr(runner, "_FREE_AGENTS", None)
-    monkeypatch.setattr(runner, "reset_agent", lambda a: None)
+    monkeypatch.setattr(runner, "reset_agent", lambda a, homes=(): None)
     assert [a.name for a in runner.agent_pool()] == [me, me]
     held, seen = [], []
     def job():
