@@ -134,6 +134,9 @@ class Monitor:
                     c[kind] = c.get(kind, 0) + 1
                     if kind in ("cmd", "read"):
                         for pat, why in HIGH:
+                            # Reading the old flow's scripts is harmless; running them is not.
+                            if kind == "read" and why == "runs the non-scoring FPGA flow":
+                                continue
                             if re.search(pat, text):
                                 self.alert("HIGH", run, why, f"{f.name}: {text}", new)
                         for pat, why in MEDIUM_CMD:
