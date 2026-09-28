@@ -1,0 +1,53 @@
+# WRITE-ONCE. Amendment 02 to prereg.yaml, made 2026-09-28T05:45Z, before any
+# main run started (only smoke rounds, N=1, had run; none is part of the analysis).
+reason: >
+  A leak audit, triggered by the campaign monitor showing a Codex agent searching
+  cores/v1 during the V2.0 smoke, found 16 channels through which agents could read
+  information beyond their own run (research/v2/LEAKS.md): V1's champion RTL and
+  hypothesis log and README's table of V1 winners in every clone; concurrent runs
+  sharing one OS account (each could read the others' clones, and Codex could read
+  every Claude transcript); other runs' process command lines; world-readable temp
+  files; Codex web search and the ChatGPT account's connected apps (201 tools, 90
+  of them GitHub) loaded into every Codex session; Claude Code deferred tools that
+  reach the account. The smokes also found two harness defects: Claude Code's Bash
+  sandbox failed on every command on this host (AppArmor user-namespace
+  restriction), and a silent deletion failure crashed a run and could have let
+  agent-built artifacts reach the eval. Fixed before data; the question, systems,
+  metric, test and verdict rules are unchanged.
+harness: >
+  tag hwe-bench-v2.1 = branch bench-v2.1 = 051c8fd, HARNESS_VERSION 2.1.0
+  (replaces hwe-bench-v2.0). Changes: the agent clone is an allowlist (cores/bench
+  and the eval contract only); one OS account per concurrent run (hwebench,
+  hwebench2, hwebench3) with a fresh HOME per run and a wipe of processes, temp
+  files and the home when it ends, the clone closed to every other account;
+  /proc hidepid; agent umask 007; Codex web search, apps, plugins, browser and
+  computer use off; Claude Code ToolSearch and account/network deferred tools
+  denied; harness deletions retry as the run's account and fail loud. Both CLIs
+  keep their core coding tools and subagents.
+host_changes: >
+  kernel.apparmor_restrict_unprivileged_userns = 0 and the bwrap-userns-restrict
+  AppArmor profile unloaded (Claude Code's sandbox needs nested user namespaces);
+  accounts hwebench2/3; /srv/hwebench/homes (1733); /proc hidepid=invisible with
+  the operator's group exempt; one Codex login shared by the pool through a group
+  file (per-account copies are revoked by refresh-token rotation). All in
+  research/v2/scripts/setup_server.sh.
+validation: >
+  367 harness tests pass on the run host. research/v2/scripts/leak_probe.py: every
+  cross-account check closed. Smoke on the frozen code (bench-v2.1-rc = f20f8a4;
+  the tag adds only the version file and the monitor script): all three systems
+  concurrently, N=1 K=3, 3/3 done, 0 broken, held-out scored for each, no
+  processes, homes or clones left afterwards; Claude session tools = Task, Bash,
+  Edit, NotebookEdit, Read, ReportFindings, Skill, TaskStop, Write, no MCP servers;
+  Codex transcripts contain only command executions, file changes and messages.
+monitoring: >
+  research/v2/scripts/monitor_run.py runs for the whole campaign and reads every
+  transcript and log. Alerts and their resolutions are reported with the results.
+  A run is excluded only under the existing incident_policy (a harness, host or
+  provider failure), never for its score; a confirmed integrity breach by an agent
+  (e.g. an edit to a protected path that the sandbox missed) would be reported and
+  the run shown both with and without it.
+command: >
+  python3 -m tools.bench.runner --models tools/bench/models-v2.yaml --ref bench-v2.1
+  --agent-user hwebench,hwebench2,hwebench3 --reps 6 --interleave --n 15 --k 3
+  --results-jsonl bench/v2/results.jsonl --results-dir bench/v2
+unchanged: question, systems (amendment 01), primary and secondary metrics, tests, verdict rules, budget, runs per system, incident policy
