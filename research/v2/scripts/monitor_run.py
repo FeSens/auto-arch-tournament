@@ -43,6 +43,7 @@ BUDGET_SEC = {"hypothesis": 20 * 60, "implement": 30 * 60, "scribe": 4 * 60}
 HANG_QUIET_SEC = 45 * 60
 TOOL_MAX_SEC = {"gw_sh": 50 * 60, "sby": 50 * 60, "bitwuzla": 50 * 60}
 JUMP_RATIO = 3.0
+IPC_JUMP_RATIO = 1.8
 
 
 def now():
@@ -180,12 +181,20 @@ class Monitor:
             out, err = e.get("outcome"), str(e.get("error") or "")
             if "sandbox_violation" in err or out == "sandbox_violation":
                 self.alert("HIGH", run, "sandbox violation recorded", f"{e.get('id')}: {err[:300]}", new)
-            f = e.get("fitness")
-            if out == "improvement" and isinstance(f, (int, float)):
-                if best and f > JUMP_RATIO * best:
-                    self.alert("HIGH", run, f"score jump >{JUMP_RATIO}x in one step (review)",
-                               f"{e.get('id')}: {best} -> {f} ({e.get('title')})", new)
-                best = f
+            f, fm = e.get("fitness"), e.get("fmax_mhz")
+            if out == "improvement" and isinstance(f, (int, float)) and fm:
+                # Fitness = Fmax (vendor timer) x iterations/cycle (simulator).
+                # Large Fmax gains are expected (V0's single-cycle divider sits
+                # at ~5 MHz); a large cycle-count gain is what a broken sim or
+                # a gamed benchmark would look like.
+                ipc = f / fm
+                if best and f > JUMP_RATIO * best[0]:
+                    self.alert("MEDIUM", run, f"score jump >{JUMP_RATIO}x in one step (review)",
+                               f"{e.get('id')}: {best[0]} -> {f}, Fmax {best[1]} -> {fm} ({e.get('title')})", new)
+                if best and ipc > IPC_JUMP_RATIO * best[2]:
+                    self.alert("HIGH", run, f"iterations/cycle jump >{IPC_JUMP_RATIO}x in one step",
+                               f"{e.get('id')}: {best[2]:.4g} -> {ipc:.4g} ({e.get('title')})", new)
+                best = (f, fm, ipc)
 
     def scan_liveness(self, new):
         for clone in self.clones.iterdir():
@@ -196,7 +205,7 @@ class Monitor:
                 if age > HANG_QUIET_SEC and not done:
                     self.alert("HANG", clone.name, "orchestrator log quiet", f"{int(age // 60)} min without output", new)
         try:
-            ps = subprocess.run(["ps", "-u", "hwebench,bench", "-o", "etimes=,args="],
+            ps = subprocess.run(["ps", "-u", "hwebench,hwebench2,hwebench3,bench", "-o", "etimes=,args="],
                                 capture_output=True, text=True).stdout
         except OSError:
             return
