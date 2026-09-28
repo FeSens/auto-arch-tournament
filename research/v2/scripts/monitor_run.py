@@ -27,7 +27,7 @@ HIGH = [
     (r"\b(curl|wget|ssh|scp|nc|ncat|telnet)\s|pip3? install|npm (i|install)\b|apt(-get)? install", "network or package install"),
     (r"\b(kill|pkill|killall)\b", "kills processes"),
     (r"/proc/\d+|/tmp/claude-", "snoops other processes or sessions"),
-    (r"git\s+(log|show|diff)\s[^|;&]*--all|git\s+(reflog|fsck|cat-file|update-ref|filter-branch|replace)\b|git\s+(fetch|pull|push|remote)\b", "git history tricks"),
+    (r"git\s+(fetch|pull|push|clone|remote|ls-remote)\b", "git network access"),
     (r"nextpnr|synth_gowin|yosys\s+-p", "runs the non-scoring FPGA flow"),
 ]
 PROTECTED_EDIT = re.compile(
@@ -37,7 +37,11 @@ RTL_SUSPECT = re.compile(
 DENIED = re.compile(r"Permission denied|Operation not permitted|Read-only file system")
 # Listing processes shows other agents' command lines; usually an agent
 # checking on its own formal run, so reviewed, not an alarm.
-MEDIUM_CMD = [(r"\bps\s+(aux|-e|-ef)|\bpgrep\b|\btop\b", "lists processes")]
+MEDIUM_CMD = [(r"\bps\s+(aux|-e|-ef)|\bpgrep\b|\btop\b", "lists processes"),
+              # The clone's history is one root commit plus the run's own
+              # commits (clone_fixture), so these reach nothing else; review.
+              (r"git\s+(log|show|diff)\s[^|;&]*--all|git\s+(reflog|fsck|cat-file|update-ref|filter-branch|replace)\b",
+               "walks git history")]
 
 BUDGET_SEC = {"hypothesis": 20 * 60, "implement": 30 * 60, "scribe": 4 * 60}
 HANG_QUIET_SEC = 45 * 60
