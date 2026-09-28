@@ -1,3 +1,4 @@
+import pytest
 """Unit tests for tools/tournament.py pure helpers (no claude / no FPGA)."""
 from tools.tournament import (
     allocate_round_ids,
@@ -5,6 +6,14 @@ from tools.tournament import (
     pick_winner,
 )
 
+
+
+@pytest.fixture(autouse=True)
+def _v1_strict_margin(monkeypatch):
+    """Winner-selection tests use small score gaps; the V2 acceptance margin
+    has its own tests in test_accept_rule.py."""
+    from tools import accept_rule
+    monkeypatch.setattr(accept_rule, "ACCEPT_MARGIN_LN", 0.0)
 
 def test_allocate_round_ids_basic():
     ids = allocate_round_ids(round_id=1, tournament_size=3,

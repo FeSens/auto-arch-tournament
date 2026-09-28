@@ -10,11 +10,11 @@ import math
 from typing import Optional
 
 # V2 acceptance margin, in natural-log units of score. A candidate must beat
-# the champion by more than this to be accepted, so that placement noise
-# (changes that do not alter the circuit still move Fmax) is not recorded
-# as progress. Set from EXP-2026-09-27-v2-placement-noise; 0.0 reproduces
-# V1's strict comparison.
-ACCEPT_MARGIN_LN = 0.0
+# the champion by more than this (4.6%) to be accepted, so that placement
+# luck is not recorded as progress. Set by the pre-registered rule of
+# EXP-2026-09-28-v2-gowin-calibration (2.33 x the score's placement-option
+# noise on 9 designs); 0.0 reproduces V1's strict comparison.
+ACCEPT_MARGIN_LN = 0.045
 
 
 def margin_pct() -> float:

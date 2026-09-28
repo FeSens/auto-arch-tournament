@@ -125,7 +125,9 @@ def test_accept_single_axis_regression_below_target_rejected():
 
 
 # ── accept() — no targets (today's behavior) ──────────────────────────────
-def test_accept_no_targets_pure_fitness_compare():
+def test_accept_no_targets_pure_fitness_compare(monkeypatch):
+    from tools import accept_rule
+    monkeypatch.setattr(accept_rule, "ACCEPT_MARGIN_LN", 0.0)
     assert accept(old=(300, 5000), new=(310, 5500),
                   coremark_target=None, lut_target=None) is True
     assert accept(old=(310, 5500), new=(300, 5000),
