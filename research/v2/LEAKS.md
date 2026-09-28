@@ -32,6 +32,39 @@ agent searching `cores/v1` for past divider work. The harness was frozen as
 | 16 | Claude Code deferred tools | The Claude session offered `ToolSearch`, which loads deferred tools, some reaching the operator's account or the network (cloud triggers, cron, notifications, messaging). No MCP servers or connectors were loaded (`disableClaudeAiConnectors`, strict empty MCP config), and no agent called `ToolSearch` or `Skill` (smoke transcripts: Bash, Edit, Write, Read only) | Session init event in the transcript | `ToolSearch` and those tools denied by name; core tools and subagents (`Task`) stay, matching Codex's core tools and subagents | closed |
 | 12 | Runner code and model list | `tools/bench/` (runner, `models-v2.yaml`) and `tools/site/` in the clone | Audit | Not in the allowlist (the eval does not import them) | closed |
 
+## Measured use of leak 1 (`cores/v1`), in V1 and V2 smokes
+
+Evidence: `research/v2/scripts/v1_contamination_scan.py` ->
+`research/v2/v1_contamination.txt`. It counts tool calls whose command or path
+arguments name a file under `cores/v1/` (tool output excluded, so echoed
+usage text such as `formal/run_all.sh`'s "Example: RTL_DIR=cores/v1/rtl" does
+not count), and compares each final design with the V1 files that differ from V0.
+
+- **V1 (published runs with transcripts, controls and aborted runs excluded):
+  14 of 36 runs read `cores/v1`**: its experiment log (V1's hypotheses and
+  outcomes), its RTL (e.g. `div_unit.sv`), and in 5 runs `cores/v1/LESSONS.md`.
+  By system: gpt-5_4_xhigh 3/3 (all three read LESSONS.md), kimi-k2_6 3/3,
+  gpt-5_6-sol 2/3 (both read LESSONS.md), gpt-5_4-mini 2/3 (log only),
+  gpt-5_6-luna 1/3, gpt-6-astra_max 1/3 (log only), gemini-3_5-flash 1/1,
+  gpt-6-sol_xhigh 1/1; never: gpt-5_5 (high, medium, xhigh; 0/9),
+  gpt-5_6-terra 0/3, gemini-3_1-pro 0/3, claude-opus-5_5_xhigh 0/1.
+- **No verbatim or near-verbatim copy** of a V1-specific file in any V1 final
+  design (the one quick-ratio flag, Opus rep1 `core.sv`, is 0.23 similar to
+  V1's and 0.42 to V0's: not a copy).
+- Within systems that read in some runs and not others, reading runs are not
+  consistently higher or lower (n <= 3 per system; correlational only; the
+  effect of the reads on V1 scores is **not identified**).
+- The prompts invited the reads ("cores/baseline/, cores/v1/ ... are READ-ONLY
+  REFERENCE"), so this is harness design, not agent misconduct; but it makes
+  V1's per-system results depend on a system's propensity to consult a prior
+  solution, which differs sharply between systems (0/9 vs 3/3).
+- V2 smokes: V2.0-dev, the Opus agent read V1's `div_unit.sv`, `ex_stage.sv`,
+  `alu.sv`, `core.sv`, experiment log and `LESSONS.md` before building its own
+  divider; V2.0 smoke2, a GPT-6 Sol agent ran `rg ... 'iterative|restoring
+  divider|divider' cores/baseline cores/v1 ...` and got V1 log lines (clone
+  deleted; the monitor alert is the record). V2.1 smokes: 0 reads (the
+  directory is gone; only echoed usage text mentions it).
+
 ## Channels checked and already closed in V2.0
 
 | Channel | Mitigation |

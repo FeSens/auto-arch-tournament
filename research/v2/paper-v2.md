@@ -103,6 +103,15 @@ own tool (Gowin EDA 1.9.11.03):
 
 ## 5b. Leak audit (measured; details in `research/v2/LEAKS.md`)
 
+- **V1 contamination, measured on V1's own transcripts:** 14 of 36 published
+  V1 runs read `cores/v1` (V1's own champion RTL, hypothesis log and, in 5
+  runs, its `LESSONS.md`), which the prompts called "read-only reference".
+  The propensity is system-specific: gpt-5_4_xhigh and kimi-k2_6 3/3 runs,
+  gpt-5_5 0/9, Opus 0/1. No V1 final design copied a V1-specific file
+  verbatim; whether the reads moved V1 scores is not identified (n <= 3,
+  correlational). So V1 partly measured "consults a prior solution" as well
+  as "designs a CPU". Evidence: `research/v2/v1_contamination.txt`.
+
 - Found before any scored run, after the campaign monitor showed a Codex
   agent searching `cores/v1` for past divider work. 12 channels; the main
   ones:
