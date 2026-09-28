@@ -1,0 +1,61 @@
+# WRITE-ONCE. Amendment 06 to prereg.yaml, written 2026-09-28T22:44Z, after
+# incident 04 and before the campaign restart; its commit time is the
+# authoritative timestamp. No scored run exists.
+reason: >
+  Incident 04: the fourth campaign (harness 2.4.0, started 2026-09-28T19:15:55Z) was
+  stopped at 20:35:20Z (~1.3 h, batch 1, all three runs in round 4) as a harness failure under the
+  incident policy. The three concurrent runs (one per system) shared the host's 20
+  cores per thread, the Linux default. A 10-minute sample (60 points, 20:20-20:30Z)
+  found one run's agents on 11.7 cores on average (peak 25.4) against 2.6 and 1.0 for
+  the other two, with the machine oversubscribed in 29 of 60 samples; when it was,
+  the other runs' own self-checks slowed inside their fixed 30-minute budgets. The
+  scoring evals kept priority and no timeout had occurred, but a run's working
+  conditions depended on another system's thread count.
+  The 2.5 validation smokes surfaced two more shared scratch spaces, both fixed before
+  release: (1) all agents of a run shared one TMPDIR, which the implementation prompt
+  tells them to use; an agent reported a sibling overwriting its logs (smoke10).
+  (2) Codex's sandbox treated the shared /tmp as writable and created /tmp/.codex and
+  /tmp/.agents as mount targets; when the two Codex runs overlapped, one account's
+  Codex could not remove the other's and failed the agent's command (4 times in the
+  2.4 campaign, then filed as benign access denials).
+incident_04_runs: >
+  Reported, not scored: research/runs/EXP-2026-09-28-v2-main/incident_04/ (agent logs,
+  orchestrator logs, experiment logs, runner log, monitor alerts, CPU samples). Per the
+  incident policy all 18 runs restart from V0; the first complete attempt of each is
+  scored.
+harness: >
+  tag hwe-bench-v2.5 = branch bench-v2.5, HARNESS_VERSION 2.5.0 (replaces
+  hwe-bench-v2.4). Changes: (1) every agent command runs in its account's cgroup slice,
+  hweagents-<account>.slice, with equal CPU weight, through a root helper
+  (/usr/local/sbin/hwe-agent-scope, the operator's only root permission); the agents'
+  parent slice has weight 20 against the harness's 100, the ratio nice 10 gave; the
+  runner refuses to start if any pool account misses its slice. Host setup:
+  research/v2/scripts/setup_server.sh, section 6d. (2) Each agent invocation gets a
+  private TMPDIR under its own working directory, removed when it exits. (3) Codex runs
+  with /tmp excluded from its writable roots (exclude_slash_tmp), matching Claude's
+  sandbox. No change to prompts, budgets, evals, scoring or acceptance. Same rules for
+  every system.
+monitoring: >
+  Extends amendments 02 and 05: a denial carrying Codex's "synthetic bubblewrap mount
+  target" error is HIGH (a cross-run collision), not a MEDIUM access denial.
+validation: >
+  379 harness tests pass, including private-TMPDIR, slice-check and Codex-config tests.
+  CPU fairness (research/v2/scripts/cpu_fairness_check.py): with 20, 20 and 2 spinning
+  threads in three accounts, the 2-thread run gets 2.0 cores and the two 20-thread runs
+  split 8.9/9.1 on average over four 30-second trials (per-window jitter about +-10%,
+  alternating); with 20 harness threads added, the agents together get 2.3 of 20 cores.
+  The first slice setup was inert (no cpu controller below hweagents.slice; the
+  2-thread run got 1.0 core, as per-thread sharing gives) and this check caught it.
+  Codex /tmp: real `codex exec --sandbox workspace-write` A/B as an agent account: with
+  /tmp writable, /tmp/.codex appears and /tmp writes succeed; excluded, no mount target
+  appears, /tmp writes fail, TMPDIR writes succeed. Smoke on bench-v2.5-rc (rc3; 3
+  systems, N=2 K=3, 21:44Z to 22:43Z): all three runs done, 0 broken slots, held-out
+  scored, final RTL saved; 0 interference reports and 0 mount-target errors in 253
+  agent messages; one HIGH alert (an agent's pkill inside its own sandboxed call)
+  reviewed as benign in monitor_review.md. The tag adds only the version file and
+  research files to the smoke-tested code.
+command: >
+  python3 -m tools.bench.runner --models tools/bench/models-v2.yaml --ref bench-v2.5
+  --agent-user hwebench,hwebench2,hwebench3 --reps 6 --interleave --n 15 --k 3
+  --results-jsonl bench/v2/results.jsonl --results-dir bench/v2
+unchanged: question, systems, metrics, tests, verdict rules, budget, runs per system, incident policy
