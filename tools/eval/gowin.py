@@ -127,6 +127,26 @@ def parse_reports(outdir: Path) -> dict:
     }
 
 
+def _run_gw_sh(outdir: Path, log: Path, env: dict) -> bool:
+    """Run the build; True if it hit BUILD_TIMEOUT_SEC (its process group is
+    killed)."""
+    import subprocess
+    with log.open("w") as f:
+        proc = subprocess.Popen([str(GOWIN_HOME / "IDE/bin/gw_sh"), "build.tcl"], cwd=outdir,
+                                stdout=f, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL,
+                                env=env, start_new_session=True)
+        try:
+            proc.wait(timeout=BUILD_TIMEOUT_SEC)
+            return False
+        except subprocess.TimeoutExpired:
+            try:
+                os.killpg(proc.pid, 9)
+            except ProcessLookupError:
+                pass
+            proc.wait()
+            return True
+
+
 async def build(worktree: str | Path, rtl_dir: str | Path, bench_sv: str,
                 place_option: int, outdir: str | Path, env: dict | None = None) -> dict:
     worktree, rtl_dir, outdir = Path(worktree).resolve(), Path(rtl_dir).resolve(), Path(outdir).resolve()
@@ -134,22 +154,14 @@ async def build(worktree: str | Path, rtl_dir: str | Path, bench_sv: str,
     outdir.mkdir(parents=True)
     (outdir / "build.tcl").write_text(project_tcl(worktree, rtl_dir, bench_sv, place_option))
     log = outdir / "gw.log"
-    with log.open("w") as f:
-        proc = await asyncio.create_subprocess_exec(
-            str(GOWIN_HOME / "IDE/bin/gw_sh"), "build.tcl", cwd=outdir,
-            stdout=f, stderr=asyncio.subprocess.STDOUT,
-            env=gowin_env(env, outdir), start_new_session=True)
-        try:
-            await asyncio.wait_for(proc.wait(), timeout=BUILD_TIMEOUT_SEC)
-        except asyncio.TimeoutError:
-            try:
-                os.killpg(proc.pid, 9)
-            except ProcessLookupError:
-                pass
-            await proc.wait()
-            return {"place_option": place_option, "placement_failed": True,
-                    "fmax_mhz": None, "timed_out": True,
-                    "reason": f"Gowin build timeout after {BUILD_TIMEOUT_SEC}s"}
+    # A blocking wait in a worker thread, not asyncio's subprocess API: inside
+    # the agents' bubblewrap sandboxes asyncio's child watcher never saw
+    # gw_sh exit, so `make timing` hung after Gowin had finished.
+    timed_out = await asyncio.to_thread(_run_gw_sh, outdir, log, gowin_env(env, outdir))
+    if timed_out:
+        return {"place_option": place_option, "placement_failed": True,
+                "fmax_mhz": None, "timed_out": True,
+                "reason": f"Gowin build timeout after {BUILD_TIMEOUT_SEC}s"}
     res = parse_reports(outdir)
     if res["placement_failed"]:
         errs = [l for l in log.read_text(errors="replace").splitlines() if "ERROR" in l]
