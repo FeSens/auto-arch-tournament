@@ -30,7 +30,9 @@ HIGH = [
     # As a command (start of a line or after ; & | ( or sudo/xargs), not an
     # option (`timeout --kill-after`) or prose ("kill the in-flight ops").
     (r"(^|[;&|(]|\bsudo|\bxargs)\s*(kill|pkill|killall)\s+(-\S+\s+)*[-%$\w]", "kills processes"),
-    (r"/proc/\d+|/tmp/claude-", "snoops other processes or sessions"),
+    # The operator's own Claude session dir (uid 1000); an agent naming its
+    # own account's /tmp/claude-<uid> (a TMPDIR fallback) is not snooping.
+    (r"/proc/\d+|/tmp/claude-1000\b", "snoops other processes or sessions"),
     (r"git\s+(fetch|pull|push|clone|remote|ls-remote)\b", "git network access"),
     (r"nextpnr|synth_gowin|yosys\s+-p", "runs the non-scoring FPGA flow"),
 ]
