@@ -17,14 +17,26 @@ from pathlib import Path
 # Makefile, formal/run_all.sh, and fpga/scripts/ (2026-07-15):
 # verilator (lint + cosim), yosys (synth), nextpnr-himbaechel (P&R),
 # sby + bitwuzla (riscv-formal).
+# V2: FPGA timing comes from Gowin EDA (tools/eval/gowin.py), not nextpnr;
+# yosys stays only because sby (riscv-formal) elaborates the RTL with it.
 REQUIRED_TOOLS: tuple[str, ...] = (
-    "verilator", "yosys", "nextpnr-himbaechel", "sby", "bitwuzla",
+    "verilator", "yosys", "sby", "bitwuzla",
 )
+# Resolved under GOWIN_HOME/IDE/bin, not PATH.
+GOWIN_TOOLS: tuple[str, ...] = ("gw_sh", "GowinSynthesis")
 
 
-# Tools whose exact build affects scores: the gate tools plus the RISC-V
-# compiler that builds CoreMark and the trace programs.
-DIGEST_TOOLS: tuple[str, ...] = REQUIRED_TOOLS + ("riscv32-unknown-elf-gcc",)
+# Tools whose exact build affects scores: the gate tools, the vendor flow,
+# and the RISC-V compiler that builds CoreMark and the trace programs.
+DIGEST_TOOLS: tuple[str, ...] = REQUIRED_TOOLS + GOWIN_TOOLS + ("riscv32-unknown-elf-gcc",)
+
+
+def _which(tool: str) -> str | None:
+    if tool in GOWIN_TOOLS:
+        from tools.eval.gowin import GOWIN_HOME
+        p = GOWIN_HOME / "IDE" / "bin" / tool
+        return str(p) if p.is_file() else None
+    return shutil.which(tool)
 
 HARNESS_VERSION_FILE = Path(__file__).resolve().parents[1] / "HARNESS_VERSION"
 
@@ -48,6 +60,9 @@ def _sha256(path: str) -> str | None:
 
 
 def _version(tool: str) -> str:
+    if tool in GOWIN_TOOLS:
+        from tools.eval.gowin import GOWIN_VERSION
+        return f"Gowin EDA {GOWIN_VERSION}"
     flag = "-V" if tool == "yosys" else "--version"
     try:
         r = subprocess.run([tool, flag], capture_output=True, text=True, timeout=30)
@@ -62,7 +77,7 @@ def toolchain_identity() -> dict:
     tool builds; a missing tool is recorded as such, never skipped."""
     tools = {}
     for t in DIGEST_TOOLS:
-        p = shutil.which(t)
+        p = _which(t)
         tools[t] = {"path": p, "version": _version(t) if p else None,
                     "sha256": _sha256(p) if p else None}
     digest = hashlib.sha256(
@@ -85,13 +100,13 @@ def env_fingerprint() -> dict:
 
 
 def missing_tools() -> list[str]:
-    return [t for t in REQUIRED_TOOLS if shutil.which(t) is None]
+    return [t for t in REQUIRED_TOOLS + GOWIN_TOOLS if _which(t) is None]
 
 
 def report() -> str:
     lines = ["[preflight] toolchain:"]
-    for t in REQUIRED_TOOLS:
-        p = shutil.which(t)
+    for t in REQUIRED_TOOLS + GOWIN_TOOLS:
+        p = _which(t)
         lines.append(f"  {t:20s} {p or 'MISSING'}")
     return "\n".join(lines)
 

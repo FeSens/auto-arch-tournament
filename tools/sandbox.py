@@ -69,8 +69,7 @@ CONTRACT_PATHS = (
 # a replaced binary (size/mtime) or a new binary shadowing it earlier on
 # PATH (different resolved path) both show up as a change.
 EVAL_TOOLS = (
-    "yosys",
-    "nextpnr-himbaechel",
+    "yosys",            # riscv-formal (sby) only; V2 does not synthesize with it
     "verilator",
     "sby",
     "yosys-smtbmc",
@@ -287,6 +286,15 @@ def _riscv_formal_fingerprint(root: Path, rf: Path | None = None,
 
 def _toolchain_fingerprint() -> dict[str, str]:
     fp = {}
+    # The vendor FPGA flow lives outside PATH (tools/eval/gowin.py).
+    from tools.eval.gowin import GOWIN_HOME
+    for name in ("gw_sh", "GowinSynthesis"):
+        p = GOWIN_HOME / "IDE" / "bin" / name
+        try:
+            st = p.resolve().stat()
+            fp[f"gowin:{name}"] = f"{p.resolve()}:{st.st_size}:{st.st_mtime_ns}"
+        except OSError:
+            fp[f"gowin:{name}"] = "<absent>"
     for tool in EVAL_TOOLS:
         where = shutil.which(tool)
         if where is None:

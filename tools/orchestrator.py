@@ -451,7 +451,7 @@ def emit_verilog(worktree: str, target: str | None = None) -> tuple[bool, str]:
 
     SV-source-of-truth project: there is no Chisel emit step. Instead this
     function (1) lints the target's RTL directory (rtl/ or cores/<target>/rtl/)
-    with verilator, (2) synthesizes core_bench via yosys for nextpnr, (3) builds
+    with verilator, (2) [V2: no Yosys synthesis; the FPGA gate uses Gowin], (3) builds
     the bench ELFs (selftest + coremark), and (4) rebuilds the Verilator cosim
     binary against the worktree's RTL. Any failure here is a "broken" outcome
     — the hypothesis didn't even compile.
@@ -503,20 +503,9 @@ def emit_verilog(worktree: str, target: str | None = None) -> tuple[bool, str]:
     if lint.returncode != 0:
         return _fail("lint", lint)
 
-    # 2. Yosys synth (writes generated/synth.json for nextpnr).
-    gen_dir = Path(worktree) / "cores" / target / "generated" if target else Path(worktree) / "generated"
-    gen_dir.mkdir(parents=True, exist_ok=True)
-    # _build_synth_env reads cores/<target>/core.yaml's nret to pick BENCH
-    # (fpga/core_bench.sv for nret=2, fpga/core_bench_si.sv for nret=1).
-    from tools.eval.fpga import _build_synth_env
-    synth_env = _build_synth_env(worktree, target=target) if target else None
-    synth = subprocess.run(
-        ["yosys", "-c", "fpga/scripts/synth.tcl"],
-        cwd=worktree, capture_output=True,
-        env=synth_env,
-    )
-    if synth.returncode != 0:
-        return _fail("yosys synth", synth)
+    # 2. (V2) No Yosys synthesis: FPGA timing and area come from the vendor
+    # flow at the FPGA gate (tools/eval/gowin.py), and formal already
+    # elaborates the RTL.
 
     # 3. Build bench ELFs (selftest + coremark). They are gitignored.
     # Bench programs are shared across cores; no target-specific env needed.
@@ -700,6 +689,8 @@ def _run_baseline_retest(target: str):
         'lutram':        fpga.get('lutram'),
         'bsram':         fpga.get('bsram'),
         'dsp':           fpga.get('dsp'),
+        'critical_path': fpga.get('critical_path'),
+        'logic_levels':  fpga.get('logic_levels'),
         'formal_passed': True,
         'cosim_passed':  True,
         'error':         None,

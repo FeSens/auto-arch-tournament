@@ -98,7 +98,8 @@ class AgentUser:
                          "/usr/sbin", "/sbin"])
 
     def read_roots(self) -> list[str]:
-        roots = []
+        from tools.eval.gowin import GOWIN_HOME
+        roots = [str(GOWIN_HOME)] if GOWIN_HOME.is_dir() else []
         for d in ("toolchain", "local", "bin", "venv"):
             p = self.shared / d
             if p.exists():
@@ -953,6 +954,8 @@ def make_env_for_job(job: JobSpec, clone: Path, keys: dict[str, str]) -> dict[st
         env["HWE_AGENT_HOME"] = str(agent.home)
         env["HWE_AGENT_PATH"] = agent.path
         env["HWE_AGENT_PYTHONUSERBASE"] = str(agent.local)
+        from tools.eval.gowin import GOWIN_HOME
+        env["GOWIN_HOME"] = str(GOWIN_HOME)
     if job.model.provider == "codex":
         # Codex CLI: workspace-write sandbox + clone isolation, and an
         # isolated CODEX_HOME (no operator memories/plugins/MCP/skills).

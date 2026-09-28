@@ -96,6 +96,24 @@ fi
 ln -sfn "$SHARED/bin/claude" /usr/local/bin/claude
 ln -sfn "$SHARED/bin/codex" /usr/local/bin/codex
 
+# 4b. Vendor FPGA flow (V2 timing): Gowin EDA Education 1.9.11.03, plus the
+#     X/GL libraries gw_sh links against (fetched as .debs, not installed).
+if [ ! -x /opt/gowin/IDE/bin/gw_sh ]; then
+  tmp=$(mktemp -d)
+  curl -fsSL -o "$tmp/g.tgz" https://cdn.gowinsemi.com.cn/Gowin_V1.9.11.03_Education_Linux.tar.gz
+  echo "6fd392f7473b24d847b6f8ebdc7a185c591826ba35d8d0e517961030d446f9f7  $tmp/g.tgz" | sha256sum -c
+  mkdir -p /opt/gowin/deps/debs && tar xzf "$tmp/g.tgz" -C /opt/gowin && rm -rf "$tmp"
+  (cd /opt/gowin/deps/debs && apt-get download libasound2t64 libfontconfig1 libgl1 libglvnd0 libglx0 \
+     libglx-mesa0 libnspr4 libnss3 libx11-6 libx11-xcb1 libxcomposite1 libxdamage1 libxfixes3 \
+     libxrandr2 libxtst6 libxcb1 libxau6 libxdmcp6 libxext6 libxrender1 libxi6 libfreetype6 \
+     libexpat1 libpng16-16t64 libbrotli1 && for d in *.deb; do dpkg-deb -x "$d" ../root; done)
+fi
+chown -R root:root /opt/gowin; chmod -R go-w,a+rX /opt/gowin
+# The agent account may not run nextpnr: V2 timing feedback is Gowin's only.
+for f in "$TC"/oss-cad-suite/bin/nextpnr-* "$TC"/oss-cad-suite/libexec/nextpnr-*; do
+  chown "root:$OP" "$f"; chmod 750 "$f"
+done
+
 # 5. Permissions: bin/toolchain/venv read-only for both; clones read-write
 #    for both, inherited by everything created inside.
 chown -R root:root "$SHARED/bin" "$SHARED/venv"

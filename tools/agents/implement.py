@@ -138,6 +138,11 @@ the self-checks below.
    some hypotheses are genuinely wrong and the orchestrator's hard
    gate is the right place to record that, not your watchdog budget.
 
+   To see the timing the evaluator will score (vendor Gowin EDA; the
+   worst paths and the modules they cross), run
+     make timing TARGET={target}
+   (a few minutes). Yosys/nextpnr timing is not what is scored.
+
    Then self-check co-simulation (the next gate; it failed 90 times in
    earlier runs):
      make cosim TARGET={target}
@@ -147,7 +152,8 @@ the self-checks below.
 
    A passing local formal does NOT mean the hypothesis is accepted.
    The orchestrator still runs cosim (RVFI byte-exact vs Python ISS)
-   and FPGA fitness (3-seed nextpnr median Fmax × CoreMark IPC) after
+   and FPGA fitness (Gowin EDA vendor place-and-route: median Fmax over
+   3 placement options × CoreMark IPC) after
    you finish; passing formal locally just means you didn't ship an
    obvious bug.
 5. Write implementation_notes.md in the current directory describing:

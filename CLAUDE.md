@@ -119,7 +119,8 @@ Contract-side files keyed off `nret`:
   `fpga/core_bench_si.sv`.
 - nret=2: `formal/wrapper.sv`, `formal/checks.cfg`,
   `fpga/core_bench.sv`.
-- shared: `formal/run_all.sh`, `fpga/scripts/synth.tcl`,
+- shared: `formal/run_all.sh`, `fpga/constraints/*` (Gowin EDA flow,
+  `tools/eval/gowin.py`),
   `test/cosim/main.cpp` (per-channel drain that gracefully no-ops
   on unused channels).
 

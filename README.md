@@ -3,7 +3,7 @@
 An autonomous research loop pointed at a SystemVerilog RV32IM CPU. Each round
 the agent proposes a microarchitectural hypothesis, implements it in an
 isolated git worktree, then runs it through riscv-formal + Verilator cosim +
-3-seed FPGA place-and-route. Only hypotheses that beat the current champion
+FPGA place-and-route and timing with the vendor's Gowin EDA. Only hypotheses that beat the current champion
 on CoreMark/MHz get merged.
 
 The repo is multi-core: every architecture lives under `cores/<name>/` with
@@ -90,9 +90,9 @@ What `make loop TARGET=<name>` does:
      `LESSONS.md`, `CORE_PHILOSOPHY.md`, `core.yaml`.
    - **Implementation agent** edits `cores/<name>/rtl/` (and optionally
      `cores/<name>/test/test_*.py`) in a per-slot worktree.
-   - **Eval pipeline**: verilator lint → yosys synth → bench `make` → cosim
-     build → riscv-formal → Verilator cosim vs. Python ISS → 3-seed FPGA
-     P&R + CoreMark. Each step is gated; first failure short-circuits with
+   - **Eval pipeline**: verilator lint → bench `make` → cosim build →
+     riscv-formal → Verilator cosim vs. Python ISS → Gowin EDA FPGA flow
+     (3 placement options) + CoreMark. Each step is gated; first failure short-circuits with
      a `broken: <step>: <stderr tail>` outcome.
    - **Scribe** distills one bullet into `cores/<name>/LESSONS.md` so the
      next round's hypothesis agent reads what failed and why.
@@ -114,7 +114,8 @@ make test TARGET=v1          # cocotb unit tests under cores/v1/test/
 make cosim TARGET=v1         # cosim alone (no orchestrator)
 make formal TARGET=v1        # riscv-formal fast suite (ALTOPS — see CLAUDE.md)
 make formal-deep TARGET=v1   # full formal suite WITHOUT ALTOPS — slow, real bitvector arithmetic
-make fpga TARGET=v1          # FPGA eval alone (3-seed P&R + CoreMark)
+make fpga TARGET=v1          # FPGA eval alone (Gowin P&R + CoreMark)
+make timing TARGET=v1        # Gowin Fmax and worst paths
 make bench                   # build selftest.elf / coremark.elf (shared across cores)
 make clean TARGET=v1         # nuke per-core build artifacts
 make test-infra              # pytest under tools/ (no TARGET needed)
@@ -199,9 +200,10 @@ The verifier does the heavy lifting:
   liveness, M-ext discipline. ~105 checks at NRET=2.
 - **Verilator cosim** — random ~22% bus stalls, RVFI byte-identical against
   a Python ISS on `selftest.elf` and `coremark.elf`.
-- **3-seed P&R** — yosys + nextpnr on a Gowin GW2A-LV18 (Tang Nano 20K).
-  Median Fmax × CoreMark iter/cycle = fitness. One seed is a coin flip;
-  three is comparable across rounds.
+- **Vendor P&R and timing** — Gowin EDA on the GW2AR-18C (Tang Nano 20K),
+  median Fmax over 3 placement options × CoreMark iter/cycle = fitness.
+  (V1 used Yosys + nextpnr, whose timing model misses deep-arithmetic and
+  LUT-RAM paths on this part.)
 - **CoreMark CRC validation** — the four canonical 2K-config CRCs.
   CoreMark prints "Correct operation validated." even when it isn't, so
   the bench re-checks them itself.
@@ -241,7 +243,7 @@ cores/                  # per-target architectures
 
 bench/programs/         # selftest.S, crt0.S, link.ld, EEMBC CoreMark — shared, off-limits
 formal/                 # riscv-formal wrapper, checks.cfg, run_all.sh — correctness contract
-fpga/                   # core_bench.sv, synth.tcl, nextpnr scripts, constraints — fitness contract
+fpga/                   # core_bench*.sv, stall generator, constraints — fitness contract
 test/cosim/             # Verilator cosim harness (main.cpp + reference Python ISS)
 tools/                  # orchestrator, worktree manager, eval gates, scribe, plotting
 schemas/                # hypothesis + eval-result JSON schemas
@@ -257,8 +259,7 @@ docs/                   # design notes, blog post
 | Sim            | Verilator ≥ 5.0                                                 |
 | Unit tests     | cocotb ≥ 1.8 (Python harness over Verilator)                    |
 | Formal         | YosysHQ riscv-formal (vendored submodule); sby + bitwuzla       |
-| Synth          | Yosys + `synth_gowin`                                           |
-| Place & route  | nextpnr-himbaechel (Gowin GW2A-LV18QN88C8/I7 = Tang Nano 20K)   |
+| Synth, P&R, STA | Gowin EDA 1.9.11.03 Education (GW2AR-LV18QN88C8/I7 = Tang Nano 20K) |
 | Cross-compiler | xPack riscv-none-elf-gcc 15.x (symlinked to riscv32-unknown-elf)|
 | Orchestrator   | Python 3.11+, jsonschema, pyyaml, matplotlib                    |
 | Coding agent   | Codex CLI (default) or Claude Code (`AGENT=claude`)             |

@@ -436,6 +436,8 @@ def run_slot(
         'lutram':        fpga.get('lutram'),
         'bsram':         fpga.get('bsram'),
         'dsp':           fpga.get('dsp'),
+        'critical_path': fpga.get('critical_path'),
+        'logic_levels':  fpga.get('logic_levels'),
         'formal_passed': True,
         'cosim_passed':  True,
         'error':         None,

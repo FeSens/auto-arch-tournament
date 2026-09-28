@@ -449,7 +449,7 @@ def summarize_event(line: str, provider: Optional[str] = None) -> Optional[str]:
 # Everything else (the operator's HOME, PATH, shell state, unrelated
 # secrets) is dropped.
 _AGENT_ENV_PASS = (
-    "TARGET", "TMPDIR", "LANG", "LC_ALL", "TERM",
+    "TARGET", "TMPDIR", "LANG", "LC_ALL", "TERM", "GOWIN_HOME",
     "CODEX_HOME", "CODEX_MODEL", "CODEX_REASONING_EFFORT",
     "ANTHROPIC_MODEL", "CLAUDE_BENCH_SETTINGS", "CLAUDE_EFFORT",
     "CLAUDE_CODE_OAUTH_TOKEN", "CLAUDE_CODE_DISABLE_AUTO_MEMORY",

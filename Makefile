@@ -1,4 +1,4 @@
-.PHONY: help lint test test-infra cosim formal fpga next loop report bench clean
+.PHONY: help lint test test-infra cosim formal fpga timing next loop report bench clean
 .DEFAULT_GOAL := help
 
 # Resolve OSS CAD Suite path so commands work even when the user hasn't
@@ -79,7 +79,8 @@ help:
 	@echo "  make cosim TARGET=v1    — RVFI cosim against Python ISS"
 	@echo "  make formal TARGET=v1   — riscv-formal fast suite (with ALTOPS)"
 	@echo "  make formal-deep TARGET=v1 — full formal suite without ALTOPS (slow, bitvector-correct)"
-	@echo "  make fpga TARGET=v1     — FPGA fitness eval (Fmax + CoreMark cycles)"
+	@echo "  make fpga TARGET=v1     — FPGA fitness eval (Gowin Fmax + CoreMark cycles)"
+	@echo "  make timing TARGET=v1   — Gowin Fmax and worst paths (placement option 0)"
 	@echo "  make bench              — build selftest + coremark ELFs"
 	@echo "  make next TARGET=v1     — one orchestrator round"
 	@echo "  make loop TARGET=v1 N=10 — N orchestrator rounds (auto-spawns .worktrees/<TARGET> on branch core-<TARGET>; pass WORKTREE= to opt out)"
@@ -131,8 +132,13 @@ formal-deep:
 bench:
 	$(MAKE) -f bench/programs/Makefile all
 
-fpga: cosim-build bench/programs/coremark.elf $(GEN_DIR)/synth.json
+# FPGA timing and area come from the vendor flow, Gowin EDA
+# (tools/eval/gowin.py); V2 does not synthesize with Yosys.
+fpga: cosim-build bench/programs/coremark.elf
 	python3 -m tools.eval.fpga . $(TARGET)
+
+timing:
+	python3 -m tools.eval.gowin $(TARGET)
 
 bench/programs/coremark.elf: bench/programs/Makefile bench/programs/crt0.S \
                               $(wildcard bench/programs/coremark/*.c) \
@@ -140,10 +146,6 @@ bench/programs/coremark.elf: bench/programs/Makefile bench/programs/crt0.S \
                               $(wildcard bench/programs/coremark/baremetal/*.c) \
                               $(wildcard bench/programs/coremark/baremetal/*.h)
 	$(MAKE) -f bench/programs/Makefile bench/programs/coremark.elf
-
-$(GEN_DIR)/synth.json: $(wildcard $(RTL_DIR)/*.sv) fpga/core_bench.sv fpga/scripts/synth.tcl
-	mkdir -p $(GEN_DIR)
-	yosys -c fpga/scripts/synth.tcl
 
 next:
 	AGENT_PROVIDER=$(AGENT) python3 -m tools.orchestrator $(subst --iterations $(N),--iterations 1,$(ORCH_FLAGS)) $(ORCH_TARGET_FLAG)

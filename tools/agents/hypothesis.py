@@ -136,6 +136,11 @@ def _recent_outcomes(log_tail: list, n: int = 5) -> str:
             f"  - {e.get('id','?'):28s}  {e.get('outcome','?'):16s}  "
             f"Δ={delta_s:>8s}  {title}"
         )
+        cp = e.get('critical_path')
+        if isinstance(cp, dict) and e.get('fmax_mhz'):
+            lines.append(
+                f"      Fmax {e['fmax_mhz']} MHz; worst path {cp.get('arrival_ns')} ns, "
+                f"{cp.get('logic_cells')} cells: {' > '.join(cp.get('modules') or [])}")
     return "\n".join(lines)
 
 
@@ -295,9 +300,11 @@ no file means this attempt is lost.
 - Within your first 5 minutes, write a complete, schema-valid YAML at the
   path below, even if you intend to refine it.
 - Refine by overwriting that same file.
-- Run experiments (synthesis, simulation, place-and-route) only if they fit
-  in the remaining time. One place-and-route seed takes several minutes;
-  the evaluator measures timing for you after implementation.
+- Run experiments (simulation, place-and-route) only if they fit in the
+  remaining time. Timing comes from the FPGA vendor's tool (Gowin EDA):
+  `make timing TARGET=<core>` prints the Fmax the evaluator scores and the
+  worst paths, and takes a few minutes; the evaluator measures timing for
+  you after implementation.
 
 """
 

@@ -8,9 +8,19 @@ from tools.bench import preflight
 
 
 def test_required_tools_frozen():
-    assert preflight.REQUIRED_TOOLS == (
-        "verilator", "yosys", "nextpnr-himbaechel", "sby", "bitwuzla",
-    )
+    assert preflight.REQUIRED_TOOLS == ("verilator", "yosys", "sby", "bitwuzla")
+    assert "nextpnr-himbaechel" not in preflight.DIGEST_TOOLS
+    assert preflight.GOWIN_TOOLS == ("gw_sh", "GowinSynthesis")
+
+
+def _fake_gowin(monkeypatch, root, content=b"gowin-a"):
+    from tools.eval import gowin
+    bindir = root / "IDE" / "bin"
+    bindir.mkdir(parents=True, exist_ok=True)
+    for t in preflight.GOWIN_TOOLS:
+        (bindir / t).write_bytes(content)
+    monkeypatch.setattr(gowin, "GOWIN_HOME", root)
+    return bindir
 
 
 def test_env_fingerprint_shape(monkeypatch):
@@ -29,9 +39,13 @@ def test_toolchain_digest_changes_with_a_binary(monkeypatch, tmp_path):
         (tmp_path / t).write_bytes(b"build-a")
     monkeypatch.setattr(shutil, "which", lambda t: str(tmp_path / t))
     monkeypatch.setattr(preflight, "_version", lambda t: "v")
+    bindir = _fake_gowin(monkeypatch, tmp_path / "gowin")
     before = preflight.toolchain_identity()["toolchain_digest"]
-    (tmp_path / "nextpnr-himbaechel").write_bytes(b"build-b")
-    assert preflight.toolchain_identity()["toolchain_digest"] != before
+    (tmp_path / "verilator").write_bytes(b"build-b")
+    mid = preflight.toolchain_identity()["toolchain_digest"]
+    assert mid != before
+    (bindir / "GowinSynthesis").write_bytes(b"gowin-b")
+    assert preflight.toolchain_identity()["toolchain_digest"] != mid
 
 
 def test_fingerprint_is_json_serializable(monkeypatch):
@@ -39,17 +53,23 @@ def test_fingerprint_is_json_serializable(monkeypatch):
     json.dumps(preflight.env_fingerprint())
 
 
-def test_missing_tools_lists_only_absent(monkeypatch):
+def test_missing_tools_lists_only_absent(monkeypatch, tmp_path):
     monkeypatch.setattr(
         shutil, "which",
         lambda t: None if t in ("sby", "bitwuzla") else f"/fake/{t}")
+    _fake_gowin(monkeypatch, tmp_path)
     assert preflight.missing_tools() == ["sby", "bitwuzla"]
+    from tools.eval import gowin
+    monkeypatch.setattr(gowin, "GOWIN_HOME", tmp_path / "absent")
+    assert preflight.missing_tools() == ["sby", "bitwuzla", "gw_sh", "GowinSynthesis"]
 
 
-def test_report_marks_missing(monkeypatch):
+def test_report_marks_missing(monkeypatch, tmp_path):
+    from tools.eval import gowin
     monkeypatch.setattr(shutil, "which", lambda t: None)
+    monkeypatch.setattr(gowin, "GOWIN_HOME", tmp_path / "absent")
     out = preflight.report()
-    assert out.count("MISSING") == len(preflight.REQUIRED_TOOLS)
+    assert out.count("MISSING") == len(preflight.REQUIRED_TOOLS) + len(preflight.GOWIN_TOOLS)
 
 
 # --- free_disk_gb / MIN_FREE_GB ---

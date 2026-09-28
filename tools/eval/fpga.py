@@ -1,6 +1,13 @@
-"""Runs 3 nextpnr seeds in parallel, returns median Fmax and CoreMark iter/sec."""
+"""FPGA fitness: vendor (Gowin EDA) Fmax x CoreMark iterations per cycle.
+
+The Yosys + nextpnr helpers below (run_seed, _run_perturbations, ...) are
+kept for the research scripts that document the V1 flow; the eval uses
+tools/eval/gowin.py.
+"""
 import asyncio, os, re, json, subprocess, statistics
 from pathlib import Path
+
+from tools.eval import gowin
 
 from tools.eval.formal import read_nret
 from tools.eval._subprocess import run_pgroup
@@ -296,55 +303,54 @@ def validate_coremark_uart(uart: str, iterations: int) -> tuple:
         return False, f'coremark_iterations_mismatch: expected {iterations}, got {reported_iterations}'
     return True, None
 
+def _bench_sv(worktree: str, target: str | None) -> str:
+    """The FPGA wrapper for the core's RVFI width (nret)."""
+    if target is None:
+        return "fpga/core_bench.sv"
+    nret = read_nret(Path(worktree) / "cores" / target / "core.yaml")
+    return "fpga/core_bench_si.sv" if nret == 1 else "fpga/core_bench.sv"
+
+
 def measure_fmax(worktree: str, target: str, pairs=None) -> dict:
-    """Fmax only (no CoreMark), median over pairs; every pair re-synthesizes,
-    so no pair may use perturbation 0. Returns {'fmax_mhz': float | None,
-    'pairs': [[k, seed, fmax], ...], 'placed': int}."""
-    pairs = FINAL_PERTURBATIONS if pairs is None else pairs
-    if any(k == 0 for k, _ in pairs):
-        raise ValueError("measure_fmax pairs must all be perturbed (k > 0)")
+    """Fmax only (no CoreMark), for the final champion's headline score.
+    The Gowin flow is deterministic, so this re-measures the same builds the
+    loop scored; a mismatch would mean the flow is not reproducible.
+    Returns {'fmax_mhz': float | None, 'pairs': [[option, fmax, levels]...],
+    'placed': int}. `pairs` is accepted for compatibility and ignored."""
     worktree = str(Path(worktree).resolve())
-    env = os.environ.copy()
-    synth_env = _build_synth_env(worktree, target, base_env=env)
-    res = asyncio.run(_run_perturbations(worktree, f"cores/{target}/generated", env,
-                                         synth_env, pairs=pairs))
-    ok = [r['fmax_mhz'] for r in res if not r['placement_failed']]
-    enough = len(ok) >= -(-2 * len(res) // 3)
-    return {'fmax_mhz': round(statistics.median(ok), 2) if enough else None,
-            'pairs': [[r['perturbation'], r['seed'], r.get('fmax_mhz')] for r in res],
-            'placed': len(ok)}
+    rtl = Path(worktree) / "cores" / target / "rtl"
+    gen = Path(worktree) / "cores" / target / "generated" / "final"
+    res = asyncio.run(gowin.build_all(worktree, rtl, _bench_sv(worktree, target), gen))
+    summ = gowin.summarize(res)
+    return {'fmax_mhz': summ.get('fmax_mhz'),
+            'pairs': [[r['place_option'], r.get('fmax_mhz'), r.get('levels')] for r in res],
+            'placed': sum(1 for r in res if not r['placement_failed'])}
 
 
 def run_fpga_eval(worktree: str, target: str | None = None) -> dict:
     """
-    Args:
-      worktree: path to the repo root (or worktree).
-      target:   optional core name (e.g. 'v1'). When set, injects
-                RTL_DIR=cores/<target>/rtl into the yosys env and resolves
-                generated/ and cosim_sim from cores/<target>/ instead of
-                the repo-root defaults.
+    Vendor place-and-route (tools/eval/gowin.py) for Fmax and area, and the
+    Verilator CoreMark run (with random memory stalls) for cycles.
 
     Returns:
-      {'placement_failed': True}         — all PnR seeds failed
+      {'placement_failed': True, ...}    — the design does not fit or route
       {'bench_failed': True, ...}        — bench didn't reach ebreak, or
                                            reason 'fpga_report_unparsed: ...'
-                                           when LUT4/DFF counts are missing
       {
-        'fmax_mhz': float,               — median of successful seeds
+        'fmax_mhz': float,               — median over gowin.PLACE_OPTIONS
         'ipc_coremark': float,           — iter/cycle
-        'fitness': float,                — CoreMark score: iter/sec = fmax_hz * iter/cycle
+        'fitness': float,                — iter/sec = fmax_hz * iter/cycle
         'cycles': int, 'iterations': int,
-        'seeds': [float, ...],
-        'lut4': int, 'ff': int,
+        'seeds': [float, ...],           — Fmax per placement option
+        'lut4': int (Gowin "Logic": LUT + ALU + ROM16), 'ff': int,
+        'lutram', 'bsram', 'dsp', 'logic_levels': int,
       }
     """
     worktree = str(Path(worktree).resolve())
     env = os.environ.copy()
-    if target is not None:
-        env["RTL_DIR"] = str(Path(worktree) / "cores" / target / "rtl")
-
+    rtl_dir = Path(worktree) / "cores" / target / "rtl" if target is not None else Path(worktree) / "rtl"
     generated_dir = (
-        str(Path(worktree) / "cores" / target / "generated") if target is not None else "generated"
+        Path(worktree) / "cores" / target / "generated" if target is not None else Path(worktree) / "generated"
     )
     sim_bin = (
         str(Path(worktree) / "cores" / target / "obj_dir" / "cosim_sim")
@@ -352,81 +358,34 @@ def run_fpga_eval(worktree: str, target: str | None = None) -> dict:
         else None
     )
 
-    synth_env = _build_synth_env(worktree, target, base_env=os.environ.copy())
-    seed_results = asyncio.run(_run_perturbations(worktree, generated_dir, env, synth_env))
-    successful   = [r for r in seed_results if not r['placement_failed']]
-    all_fmax     = [r['fmax_mhz'] for r in successful]
-    seeds_log    = [r.get('fmax_mhz') for r in seed_results]
-    # Same 2-of-3 bar as V1, scaled to the number of pairs.
-    min_ok = -(-2 * len(seed_results) // 3)
+    results = asyncio.run(gowin.build_all(worktree, rtl_dir, _bench_sv(worktree, target),
+                                          generated_dir, env=env))
+    fp = gowin.summarize(results)
+    if fp['placement_failed']:
+        return fp
+    if fp['lut4'] is None or fp['ff'] is None:
+        # Never substitute 0: 0 logic is the best possible area score.
+        return {'bench_failed': True, 'placement_failed': False,
+                'reason': 'fpga_report_unparsed: no Logic/Register count in Gowin report',
+                'fmax_mhz': fp['fmax_mhz'], 'seeds': fp['seeds']}
 
-    if len(successful) < min_ok:
-        # 0-of-3 or 1-of-3 placements is itself a quality signal: the
-        # design is unroutable or fragile. Single-seed luck is not a
-        # fitness score we'll commit to.
-        return {
-            'placement_failed': True,
-            'seeds': seeds_log,
-            'successful_seeds': len(successful),
-            'min_required':     min_ok,
-        }
-
-    fmax_median = statistics.median(all_fmax)
-    cm          = run_coremark_ipc(worktree, sim_bin, env=env)
-
+    cm = run_coremark_ipc(worktree, sim_bin, env=env)
     if not cm['completed']:
         return {
             'bench_failed': True,
             'reason': cm.get('reason', 'unknown'),
-            'fmax_mhz': round(fmax_median, 2),
-            'seeds': all_fmax,
+            'fmax_mhz': fp['fmax_mhz'],
+            'seeds': fp['seeds'],
             'placement_failed': False,
         }
 
-    fitness = fmax_median * cm['iter_per_cycle'] * 1_000_000  # iter/sec
-
-    # Area of the netlist `make` built (perturbation 0); cell counts do not
-    # depend on the placement seed.
-    area_run = next((r for r in successful if r.get('perturbation', 0) == 0), successful[0])
-    log    = area_run['log']
-    lut4_m = re.search(r'LUT4:\s+(\d+)/',  log)
-    ff_m   = re.search(r'\bDFF:\s+(\d+)/', log)
-    # Memory and DSP cells are not LUT4s; report them so area is not
-    # understated for designs that move logic into RAM or DSP blocks.
-    def _cells(name: str) -> int:
-        m = re.search(rf'\b{name}:\s+(\d+)/', log)
-        return int(m.group(1)) if m else 0
-    if not (lut4_m and ff_m):
-        # Never substitute 0: with a LUT target set, 0 LUT4 is the best
-        # possible area score, so a nextpnr log-format change would turn
-        # every hypothesis into a "win". Fail loudly instead.
-        missing = [n for n, m in (('LUT4', lut4_m), ('DFF', ff_m)) if not m]
-        return {
-            'bench_failed': True,
-            'reason': (f'fpga_report_unparsed: no {"/".join(missing)} count in '
-                       f'nextpnr log (seed {area_run["seed"]})'),
-            'fmax_mhz': round(fmax_median, 2),
-            'seeds': all_fmax,
-            'placement_failed': False,
-        }
-
+    fitness = fp['fmax_mhz'] * cm['iter_per_cycle'] * 1_000_000  # iter/sec
     return {
-        'fmax_mhz':      round(fmax_median, 2),
+        **fp,
         'ipc_coremark':  round(cm['iter_per_cycle'], 6),
         'fitness':       round(fitness, 2),
         'cycles':        cm['cycles'],
         'iterations':    cm['iterations'],
-        'seeds':         all_fmax,
-        'perturbations': [[r['perturbation'], r['seed'], r.get('fmax_mhz')]
-                          for r in seed_results],
-        'lut4':          int(lut4_m.group(1)),
-        'lutram':        _cells('RAM16SDP4'),
-        'bsram':         _cells('BSRAM'),
-        'dsp':           sum(_cells(n) for n in ('MULT36X36', 'MULT18X18', 'MULT9X9',
-                                                 'MULTALU36X18', 'MULTALU18X18',
-                                                 'MULTADDALU18X18', 'ALU54D')),
-        'ff':            int(ff_m.group(1)),
-        'placement_failed': False,
     }
 
 if __name__ == '__main__':

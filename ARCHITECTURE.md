@@ -28,9 +28,13 @@ CoreMark iterations/second (median Fmax x iterations/cycle), 2K working set
 Bracketed by MMIO writes to `0x10000100` (start) / `0x10000104` (stop) —
 only cycles between the markers count.
 
-`make fpga` runs yosys synth + multi-seed nextpnr P&R + CoreMark cosim.
-Median Fmax across seeds × CoreMark iter/cycle = fitness number reported in
-`experiments/log.jsonl`.
+`make fpga` runs the FPGA vendor's flow (Gowin EDA synthesis, place and
+route and timing analysis; `tools/eval/gowin.py`) + CoreMark cosim. Median
+Fmax across Gowin's placement options × CoreMark iter/cycle = fitness number
+reported in `experiments/log.jsonl`. `make timing` prints the same Fmax with
+the worst paths. V2 does not use Yosys or nextpnr for timing: nextpnr's model
+for this part misses deep-arithmetic and LUT-RAM paths
+(`research/v2/NOTES.md`). Yosys remains only inside riscv-formal.
 
 The timed netlist observes only the memory-side outputs (fetch address,
 data address, write data, write enables, read enable). RVFI outputs are
