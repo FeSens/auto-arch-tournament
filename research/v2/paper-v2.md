@@ -108,6 +108,12 @@ own tool (Gowin EDA 1.9.11.03):
 - Ubuntu 26.04 specifics that silently break a harness: Rust coreutils
   (`tail -5 a b` rejected), glibc 2.43 refusing executable-stack libraries
   (uv's libpython -> every cocotb test failed), Python 3.14 vs cocotb 2.0.1.
+- Ubuntu 26.04 restricts unprivileged user namespaces through AppArmor, and
+  Claude Code's Bash sandbox needs one: every agent shell command failed
+  ("apply-seccomp: write /proc/self/setgroups ... Permission denied") while
+  Codex's sandbox worked. Found by the campaign monitor on the smoke run,
+  before any scored run. Unnoticed, it would have handed the comparison to
+  Codex.
 - The harness executes from the fixture clone, so a benchmark run must pin a
   harness tag, not a branch.
 
@@ -129,5 +135,8 @@ own tool (Gowin EDA 1.9.11.03):
   single-draw margin would be 6.5%.
 - Power: the run-to-run spread under Gowin is unknown before the main runs;
   n=6 may end "not distinguishable".
+- Agent clones contain V1-era material both systems can read (`cores/v1`
+  RTL and experiment log, reference cores). Equal access, but it is prior
+  knowledge tuned to V1's timer.
 - One benchmark workload (CoreMark) drives optimization; held-out kernels are
   five small programs.
