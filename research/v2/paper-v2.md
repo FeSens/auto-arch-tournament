@@ -198,6 +198,25 @@ own tool (Gowin EDA 1.9.11.03):
   regression test runs two formal invocations in separate PID namespaces
   (fails on the old script). The monitor now raises HIGH on agent messages
   that report interference from outside their slot.
+- Incident 04 (harness 2.4.0 campaign, stopped after 1.3 h, not scored,
+  `research/runs/EXP-2026-09-28-v2-main/incident_04`): the three
+  concurrent runs (one per system) shared the host's 20 cores per thread,
+  the Linux default. A 10-minute sample (60 points) found one run's agents
+  on 11.7 cores on average (peak 25.4) against 2.6 and 1.0 for the other
+  two, with the machine oversubscribed in half the samples; whenever it
+  was, the other runs' own self-checks slowed inside their fixed 30-minute
+  budgets. The harness's scoring evals kept priority (nice 10 on agents)
+  and no timeout had occurred, but a run's working conditions depended on
+  how many threads another system's agents spawned. Fix (harness 2.5):
+  each agent account runs its commands in its own cgroup slice with equal
+  CPU weight, so contended runs get equal shares whatever their thread
+  count; the agents' parent slice has weight 20 against the harness's 100,
+  the ratio nice 10 gave. The first version was inert (systemd enables the
+  cpu controller below a slice only if a child sets a weight; all agent
+  threads still competed as one pool) and a measured check caught it:
+  with 20, 20 and 2 spinning threads the 2-thread run got 1.0 core, what
+  per-thread sharing gives; after the fix it gets 2.0 and the two
+  20-thread runs split 8.9/9.1 on average over four trials.
 - Paper angle: a comparison of agent CLIs needs per-CLI integration
   testing under the real concurrency, and a monitor that reads outcomes by
   class per system; the bias showed up as one system's "broken" count.
