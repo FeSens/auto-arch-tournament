@@ -48,11 +48,17 @@ chmod -R go-w "$TC"
 # 3. Shared directory.
 mkdir -p "$SHARED"/{clones,bin}
 ln -sfn "$TC" "$SHARED/toolchain"
+# Python 3.13.12 as on the Mac (cocotb 2.0.1 rejects the distro's 3.14),
+# installed by uv under /opt/hwe-python, readable by both accounts.
 if [ ! -x "$SHARED/venv/bin/python3" ]; then
-  python3 -m venv "$SHARED/venv"
-  "$SHARED/venv/bin/pip" install -q cocotb==2.0.1 cocotb-test==0.2.6 pytest==9.0.3 \
-      click==8.2.1 find_libpython psutil==7.2.2 pyyaml==6.0.3 jsonschema==4.26.0 \
-      matplotlib Verilog_VCD
+  command -v uv >/dev/null || curl -LsSf https://astral.sh/uv/install.sh | env UV_INSTALL_DIR=/usr/local/bin sh >/dev/null
+  export UV_PYTHON_INSTALL_DIR=/opt/hwe-python
+  uv python install 3.13.12
+  uv venv -q --python 3.13.12 "$SHARED/venv"
+  uv pip install -q --python "$SHARED/venv/bin/python" cocotb==2.0.1 cocotb-test==0.2.6 \
+      pytest==9.0.3 click==8.2.1 find_libpython psutil==7.2.2 pyyaml==6.0.3 \
+      jsonschema==4.26.0 matplotlib Verilog_VCD
+  chmod -R go-w,a+rX /opt/hwe-python
 fi
 
 # 4. Pinned CLIs.
@@ -69,6 +75,9 @@ if [ ! -x "$SHARED/bin/codex" ]; then
   cp "$(find "$SHARED/bin/codex-pkg" -name codex-package.json | head -1)" "$SHARED/bin/codex.version.json" 2>/dev/null \
     || echo "{\"version\": \"$CODEX_VERSION\"}" > "$SHARED/bin/codex.version.json"
 fi
+
+ln -sfn "$SHARED/bin/claude" /usr/local/bin/claude
+ln -sfn "$SHARED/bin/codex" /usr/local/bin/codex
 
 # 5. Permissions: bin/toolchain/venv read-only for both; clones read-write
 #    for both, inherited by everything created inside.
@@ -90,7 +99,9 @@ for p in "/home/$OP" "$REPO/bench/holdout" "$REPO/bench/LEADERBOARD.md"; do
   if sudo -u "$U" test -r "$p"; then echo "FAIL: $U can read $p"; fail=1; fi
 done
 sudo -u "$OP" sudo -n -u "$U" true || { echo "FAIL: $OP cannot sudo to $U"; fail=1; }
-sudo -u "$U" test -w "$SHARED/clones" || { echo "FAIL: $U cannot write clones"; fail=1; }
+# A real write: test -w ignores the ACL entries that grant it.
+if sudo -u "$U" touch "$SHARED/clones/.w"; then rm -f "$SHARED/clones/.w"
+else echo "FAIL: $U cannot write clones"; fail=1; fi
 AGENT_PATH="$SHARED/bin:$SHARED/venv/bin:$TC/oss-cad-suite/bin:$TC/bin:/usr/bin:/bin"
 if ! sudo -u "$U" env -i HOME="/home/$U" PATH="$AGENT_PATH" /bin/sh -c '
     yosys -V && nextpnr-himbaechel --version && verilator --version && sby --help >/dev/null &&
