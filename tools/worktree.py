@@ -162,9 +162,9 @@ def accept_worktree(hypothesis_id: str,
     # `git checkout target_branch` and `git merge --ff-only` fail
     # with "Your local changes ... would be overwritten by merge",
     # and a clean winning slot in the same round gets discarded.
-    # Observed live: gemini's broken slot 1 (multi-cycle div) leaked
-    # alu.sv / ex_stage.sv via heredoc-bash into the main tree, which
-    # then blocked slot 0's clean +28.5% improvement from landing.
+    # Observed live: a broken slot leaked RTL edits via heredoc-bash into
+    # the main tree, which then blocked another slot's clean improvement
+    # from landing.
     # The contract is: the orchestrator's main checkout never has dirty
     # cores/<target>/ — anything dirty there is by definition a leak.
     scope = f"cores/{target}/" if target else "rtl/"

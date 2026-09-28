@@ -253,9 +253,7 @@ def _build_prompt(log_tail: list, current_fitness: float, baseline_fitness: floa
     if target:
         target_banner = f"""## ⚠️  TARGET CORE: cores/{target}/
 
-You are proposing a hypothesis for **cores/{target}/** ONLY. The repo
-contains other cores (cores/baseline/, cores/v1/, etc.) — those are
-READ-ONLY REFERENCE, not editing targets.
+You are proposing a hypothesis for **cores/{target}/** ONLY.
 
 In your hypothesis YAML, write `changes[i].file` as `rtl/<filename>`
 (or `test/test_<name>.py`) — the SHORT form, RELATIVE to the rtl

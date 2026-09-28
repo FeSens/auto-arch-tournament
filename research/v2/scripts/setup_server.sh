@@ -3,9 +3,11 @@
 #   bash research/v2/scripts/setup_server.sh
 #
 # Same design as setup_bench_user.sh (macOS): the runner runs as the
-# operator account `bench`; only the agent CLIs run as `hwebench`, which
-# cannot read the operator's home (held-out kernels, results). The two
-# accounts share /srv/hwebench: run clones (POSIX default ACLs for both),
+# operator account `bench`; only the agent CLIs run, as one of a pool of
+# agent accounts (hwebench, hwebench2, hwebench3: one per concurrent run,
+# so runs cannot read each other), none of which can read the operator's
+# home (held-out kernels, results). They share /srv/hwebench: run clones
+# (each clone's ACL admits only the account running it), per-run homes,
 # the pinned toolchain (/opt/hwe-toolchain, read-only), a Python venv with
 # the test dependencies, and the pinned CLI binaries.
 #
@@ -16,6 +18,7 @@ set -euo pipefail
 
 OP=bench
 U=hwebench
+POOL="hwebench hwebench2 hwebench3"
 SHARED=/srv/hwebench
 TC=/opt/hwe-toolchain
 CLAUDE_VERSION=2.1.283
@@ -29,15 +32,17 @@ DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --allow-remove-essential c
 
 # 1. Accounts. Neither is in the other's primary group; homes are private.
 id "$OP" >/dev/null 2>&1 || useradd -m -s /bin/bash "$OP"
-id "$U" >/dev/null 2>&1 || useradd -m -U -s /bin/bash "$U"
+for a in $POOL; do id "$a" >/dev/null 2>&1 || useradd -m -U -s /bin/bash "$a"; done
 chmod 750 "/home/$OP"
 # The orchestrator commits in every clone; a neutral identity, not a person's.
-for a in "$OP" "$U"; do
+for a in "$OP" $POOL; do
   sudo -iu "$a" git config --global user.name "HWE Bench"
   sudo -iu "$a" git config --global user.email "hwe-bench@localhost"
 done
-chmod 700 "/home/$U"
-getent group "$OP" | grep -qw "$U" && { echo "FAIL: $U is in group $OP"; exit 1; }
+for a in $POOL; do
+  chmod 700 "/home/$a"
+  getent group "$OP" | grep -qw "$a" && { echo "FAIL: $a is in group $OP"; exit 1; }
+done
 
 # 2. Toolchain (pinned releases; the gcc tarball is checksum-verified).
 if [ ! -x "$TC/oss-cad-suite/bin/yosys" ]; then
@@ -118,14 +123,36 @@ done
 #    for both, inherited by everything created inside.
 chown -R root:root "$SHARED/bin" "$SHARED/venv"
 chmod -R go-w,a+rX "$SHARED/bin" "$SHARED/venv"
+# Clone base: agents may traverse, not list; the runner grants each clone
+# to the one account running it (tools/bench/runner.py).
 chown "$OP:$OP" "$SHARED/clones"
-chmod 770 "$SHARED/clones"
-setfacl -R -m "u:$U:rwX,d:u:$U:rwX,u:$OP:rwX,d:u:$OP:rwX" "$SHARED/clones"
+chmod 711 "$SHARED/clones"
+setfacl -b "$SHARED/clones"
+# Per-run HOMEs: any agent account creates its own, none can list them.
+mkdir -p "$SHARED/homes"
+chmod 1733 "$SHARED/homes"
 
-# 6. The operator may run processes as hwebench (not root), no password.
-echo "$OP ALL=($U) NOPASSWD: ALL" > /etc/sudoers.d/hwebench
+# 6. The operator may run processes as the agent accounts (not root), no password.
+echo "$OP ALL=($(echo $POOL | tr ' ' ',')) NOPASSWD: ALL" > /etc/sudoers.d/hwebench
 chmod 440 /etc/sudoers.d/hwebench
 visudo -cf /etc/sudoers.d/hwebench
+
+# 6b. Agents see only their own processes (other runs' command lines are a
+#     leak); the operator's group sees all.
+GID=$(getent group "$OP" | cut -d: -f3)
+mount -o remount,hidepid=invisible,gid="$GID" /proc
+grep -q hidepid /etc/fstab || echo "proc /proc proc defaults,hidepid=invisible,gid=$GID 0 0" >> /etc/fstab
+
+# 6c. Ubuntu restricts unprivileged user namespaces through AppArmor; Claude
+#     Code's Bash sandbox (nested bubblewrap) needs them, and fails every
+#     command without this ("apply-seccomp: write /proc/self/setgroups").
+echo 'kernel.apparmor_restrict_unprivileged_userns = 0' > /etc/sysctl.d/60-hwe-bench-userns.conf
+sysctl -q -p /etc/sysctl.d/60-hwe-bench-userns.conf
+if [ -f /etc/apparmor.d/bwrap-userns-restrict ]; then
+  mkdir -p /etc/apparmor.d/disable
+  ln -sf /etc/apparmor.d/bwrap-userns-restrict /etc/apparmor.d/disable/bwrap-userns-restrict
+  apparmor_parser -R /etc/apparmor.d/bwrap-userns-restrict 2>/dev/null || true
+fi
 
 # 7. Verify the boundary and the agent environment.
 fail=0
@@ -133,13 +160,19 @@ REPO=/home/$OP/auto-arch-tournament
 for p in "/home/$OP" "$REPO/bench/holdout" "$REPO/bench/LEADERBOARD.md"; do
   if sudo -u "$U" test -r "$p"; then echo "FAIL: $U can read $p"; fail=1; fi
 done
-sudo -u "$OP" sudo -n -u "$U" true || { echo "FAIL: $OP cannot sudo to $U"; fail=1; }
-# A real write: test -w ignores the ACL entries that grant it.
-if sudo -u "$U" touch "$SHARED/clones/.w"; then rm -f "$SHARED/clones/.w"
-else echo "FAIL: $U cannot write clones"; fail=1; fi
+for a in $POOL; do
+  sudo -u "$OP" sudo -n -u "$a" true || { echo "FAIL: $OP cannot sudo to $a"; fail=1; }
+  sudo -u "$a" ls "$SHARED/clones" >/dev/null 2>&1 && { echo "FAIL: $a can list clones"; fail=1; }
+  sudo -u "$a" ls "$SHARED/homes" >/dev/null 2>&1 && { echo "FAIL: $a can list homes"; fail=1; }
+  sudo -u "$a" test -r "/proc/1/cmdline" && { echo "FAIL: $a sees other users' processes"; fail=1; }
+done
+# Claude Code's sandbox: bubblewrap inside bubblewrap.
+sudo -u "$U" bwrap --bind / / --dev /dev --proc /proc --unshare-user --unshare-pid -- \
+  bwrap --ro-bind / / --dev /dev --proc /proc --unshare-user --unshare-pid -- /bin/true \
+  || { echo "FAIL: nested bubblewrap"; fail=1; }
 AGENT_PATH="$SHARED/bin:$SHARED/venv/bin:$TC/oss-cad-suite/bin:$TC/bin:/usr/bin:/bin"
 if ! sudo -u "$U" env -i HOME="/home/$U" PATH="$AGENT_PATH" /bin/sh -c '
-    yosys -V && nextpnr-himbaechel --version && verilator --version && sby --help >/dev/null &&
+    yosys -V && verilator --version && sby --help >/dev/null &&
     bitwuzla --version && riscv32-unknown-elf-gcc --version && make --version &&
     python3 -c "import cocotb_tools.runner, pytest" && codex --version && claude --version &&
     bwrap --ro-bind / / --dev /dev true' > "$SHARED/setup-check.log" 2>&1; then
@@ -152,7 +185,8 @@ OK. Operator: $OP (repo in $REPO); agents: $U; shared: $SHARED.
 Runner PATH for $OP: $SHARED/venv/bin:$TC/oss-cad-suite/bin:$TC/bin:\$PATH
 
 Two logins remain (once):
-  1. Codex, as $U:   sudo -iu $U $SHARED/bin/codex login --device-auth
+  1. Codex, as each of $POOL:
+       sudo -iu <account> $SHARED/bin/codex login --device-auth
   2. Claude token:   run 'claude setup-token' (any machine), then as $OP:
        echo 'CLAUDE_CODE_OAUTH_TOKEN=<token>' >> ~/.bench-keys.env && chmod 600 ~/.bench-keys.env
 EOF

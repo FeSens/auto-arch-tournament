@@ -89,8 +89,8 @@ own tool (Gowin EDA 1.9.11.03):
   together, alternating launch order), Welch t-test + bootstrap on ln score,
   pre-committed "not distinguishable" wording. Pre-registration files are
   write-once (`research/runs/*/prereg.yaml`).
-- Isolation: agent CLIs run as a separate OS account that cannot read the
-  held-out kernels or results; same writable paths for both CLIs (V1:
+- Isolation: agent CLIs run as separate OS accounts (one per concurrent
+  run) that cannot read the held-out kernels, results, or each other; same writable paths for both CLIs (V1:
   Codex could read anything, Claude could not). Found and fixed on Linux:
   Codex's sandbox blocked its own formal self-check (Claude's did not).
 - Quota handling: provider limits pause and rerun the attempt from scratch;
@@ -100,6 +100,29 @@ own tool (Gowin EDA 1.9.11.03):
 - No Yosys/nextpnr in the loop: scoring, build gate, `make fpga`,
   `make timing`, prompts and logged critical paths are Gowin's; the agent
   account cannot run nextpnr. Yosys remains only inside riscv-formal.
+
+## 5b. Leak audit (measured; details in `research/v2/LEAKS.md`)
+
+- Found before any scored run, after the campaign monitor showed a Codex
+  agent searching `cores/v1` for past divider work. 12 channels; the main
+  ones:
+  - V1's winners were in every clone: `cores/v1` (champion RTL, 60+ logged
+    hypotheses) and README's table of V1's 10 accepted winners in merge
+    order. V1 kept them on purpose ("read-only reference") and the prompts
+    pointed agents at them.
+  - Concurrent runs shared one OS account: any agent could read the other
+    live runs' clones, and Codex could read every Claude transcript in the
+    shared home.
+  - `ps` showed other runs' command lines; files in `/tmp` were
+    world-readable; Codex's default web search mode could reach the
+    benchmark's published results.
+- Fixes (harness 2.1.0): the clone is an allowlist (target core + eval
+  contract); one OS account per concurrent run, a fresh HOME per run, a
+  wipe between runs; `/proc` hidepid; umask 007; Codex web search off.
+- Paper angle: running agents concurrently on one host is a shared-machine
+  security problem; a denylist chosen for convenience in V1 handed every
+  agent the previous generation's ideas. Allowlist + separate OS principals
+  + a live transcript monitor.
 
 ## 6. Engineering lessons worth a short section or appendix
 
@@ -135,8 +158,5 @@ own tool (Gowin EDA 1.9.11.03):
   single-draw margin would be 6.5%.
 - Power: the run-to-run spread under Gowin is unknown before the main runs;
   n=6 may end "not distinguishable".
-- Agent clones contain V1-era material both systems can read (`cores/v1`
-  RTL and experiment log, reference cores). Equal access, but it is prior
-  knowledge tuned to V1's timer.
 - One benchmark workload (CoreMark) drives optimization; held-out kernels are
   five small programs.

@@ -657,10 +657,10 @@ def test_main_clone_base_mkdir_oserror_fails_cleanly(tmp_path, monkeypatch, caps
 
 
 def test_clone_fixture_strips_published_results(tmp_path, monkeypatch):
-    """Other runs' results (bench/<model>/rep*/, leaderboard, results.jsonl,
-    research diary, docs, site) must be absent from the clone AND from
-    every reachable object, while eval inputs and deliberate references
-    (bench/programs, bench/reference-cores.md, README.md) survive."""
+    """The clone is an allowlist (V2.1): other runs' results, V1 material
+    (cores/v1, README's winner table, reference cores), runner code and
+    docs must be absent from the clone AND from every reachable object,
+    while the target core and the eval inputs survive."""
     ref = "main"
     repo_root = tmp_path / "repo"
     _make_fixture_repo(repo_root, ref, with_holdout=False)
@@ -674,6 +674,15 @@ def test_clone_fixture_strips_published_results(tmp_path, monkeypatch):
         "site/index.html": "<html>\n",
         "bench/programs/crt0.S": "_start:\n",
         "bench/reference-cores.md": "VexRiscv\n",
+        "cores/v1/experiments/log.jsonl": '{"title": "v1 winner"}\n',
+        "cores/v1/rtl/core.sv": "module core; endmodule\n",
+        "cores/vexriscv/README.md": "reference\n",
+        "cores/bench/rtl/core.sv": "module core; endmodule\n",
+        "README.md": "| Banked Registered I-Fetch Replay Predictor |\n",
+        "BENCH_METHODOLOGY.md": "methods\n",
+        "tools/bench/models-v2.yaml": "models: []\n",
+        "tools/eval/fpga.py": "# eval\n",
+        "CLAUDE.md": "contract\n",
     }
     for rel, body in files.items():
         f = repo_root / rel
@@ -691,11 +700,41 @@ def test_clone_fixture_strips_published_results(tmp_path, monkeypatch):
     clone_fixture(repo_root, ref, dest)
 
     for gone in ("bench/gpt-5_6-luna", "bench/LEADERBOARD.md",
-                 "bench/results.jsonl", "research", "docs", "site"):
+                 "bench/results.jsonl", "research", "docs", "site",
+                 "bench/reference-cores.md", "cores/v1", "cores/vexriscv", "README.md",
+                 "BENCH_METHODOLOGY.md", "tools/bench"):
         assert not (dest / gone).exists(), gone
-    for kept in ("bench/programs/crt0.S", "bench/reference-cores.md", "README.md"):
+    for kept in ("bench/programs/crt0.S", "cores/bench/rtl/core.sv", "tools/eval/fpga.py",
+                 "CLAUDE.md"):
         assert (dest / kept).exists(), kept
     objs = _git_out(["rev-list", "--objects", "--all"], dest).stdout
-    for leaked in ("gpt-5_6-luna", "LEADERBOARD", "results.jsonl", "research/", "site/"):
+    for leaked in ("gpt-5_6-luna", "LEADERBOARD", "results.jsonl", "research/", "site/",
+                   "cores/v1", "vexriscv", "README.md", "models-v2"):
         assert leaked not in objs, leaked
     assert _git_out(["status", "--porcelain"], dest).stdout.strip() == ""
+
+
+def test_agent_pool_gives_each_job_its_own_account(monkeypatch, tmp_path):
+    """Concurrent runs hold different accounts; a job's thread sees its own,
+    and release hands the account back (after wiping what the run left)."""
+    import getpass
+    import threading
+    me = getpass.getuser()
+    monkeypatch.setenv("HWE_AGENT_USER", f"{me}, {me}")
+    monkeypatch.setattr(runner, "_FREE_AGENTS", None)
+    monkeypatch.setattr(runner, "reset_agent", lambda a: None)
+    assert [a.name for a in runner.agent_pool()] == [me, me]
+    held, seen = [], []
+    def job():
+        a = runner.acquire_agent()
+        held.append(a)
+        seen.append(runner.agent_user() is a)
+    ts = [threading.Thread(target=job) for _ in range(2)]
+    for t in ts:
+        t.start()
+    for t in ts:
+        t.join()
+    assert len(held) == 2 and all(seen) and runner._FREE_AGENTS.empty()
+    for a in held:
+        runner.release_agent(a, tmp_path / "gone")
+    assert runner._FREE_AGENTS.qsize() == 2

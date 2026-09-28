@@ -207,7 +207,7 @@ def test_env_under_agent_user(tmp_path, monkeypatch):
     from tools.bench import runner
     monkeypatch.setenv("HWE_AGENT_USER", getpass.getuser())
     shared = tmp_path / "shared"
-    for d in ("toolchain", "bin", "venv"):
+    for d in ("toolchain", "bin", "venv", "homes"):
         (shared / d).mkdir(parents=True)
     monkeypatch.setattr(runner, "AGENT_SHARED", shared)
     clone = tmp_path / "clone"
@@ -218,10 +218,17 @@ def test_env_under_agent_user(tmp_path, monkeypatch):
     assert env["HWE_AGENT_PATH"].startswith(f"{shared}/bin:{shared}/venv/bin:")
     fs = json.loads(env["CLAUDE_BENCH_SETTINGS"])["sandbox"]["filesystem"]
     assert str(shared / "toolchain") in fs["allowRead"]
+    # A fresh HOME per run; the account's real home (its Codex login) is
+    # unreadable to Claude's sandbox too.
+    assert env["HWE_AGENT_HOME"] == str(shared / "homes" / "opus-rep1")
+    assert Path(env["HWE_AGENT_HOME"]).is_dir()
     assert env["HWE_AGENT_HOME"] in fs["denyRead"]
+    assert str(Path.home()) in fs["denyRead"]
+    assert env["HWE_AGENT_USER"] == getpass.getuser()
     codex = JobSpec(model=ModelEntry(name="gpt", provider="codex",
                                      model="gpt-6-sol", oauth=True), rep=1)
     env = make_env_for_job(codex, clone, {})
     link = Path(env["CODEX_HOME"]) / "auth.json"
     assert link.is_symlink()
-    assert str(link.readlink()) == str(Path(env["HWE_AGENT_HOME"]) / ".codex" / "auth.json")
+    assert str(link.readlink()) == str(Path.home() / ".codex" / "auth.json")
+    assert 'web_search = "disabled"' in (Path(env["CODEX_HOME"]) / "config.toml").read_text()

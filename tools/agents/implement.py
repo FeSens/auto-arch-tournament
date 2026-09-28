@@ -50,9 +50,7 @@ def _build_prompt(hypothesis: dict, worktree: str,
     if target:
         target_banner = f"""## ⚠️  TARGET CORE: cores/{target}/
 
-You are working on **cores/{target}/** ONLY. The repository may contain
-other cores (cores/baseline/, cores/v1/, etc.) that are visible from this
-worktree — they are READ-ONLY REFERENCE, not your editing surface.
+You are working on **cores/{target}/** ONLY.
 
 Edit ONLY: {rtl_rel}/*.sv  and  cores/{target}/test/test_*.py
 Do NOT edit any other core's directory. The orchestrator's sandbox

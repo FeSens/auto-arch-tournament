@@ -481,10 +481,11 @@ def as_agent_user(cmd: list[str], environ: Optional[dict] = None) -> list[str]:
         "GIT_CONFIG_KEY_0": "safe.directory", "GIT_CONFIG_VALUE_0": "*",
     })
     assigns = [f"{k}={v}" for k, v in sorted(keep.items()) if v != ""]
-    # umask 002: files the agent creates stay writable for the operator's
-    # group as well as through the clone directory's inherited ACL.
+    # umask 007: nothing the agent writes is readable by other accounts
+    # (concurrent runs hold different accounts; /tmp is shared). Inside the
+    # clone the directory's default ACL still gives the operator access.
     return ["sudo", "-n", "-u", user, "/usr/bin/env", "-i", *assigns,
-            "/bin/sh", "-c", 'umask 002; exec "$@"', "sh", *cmd]
+            "/bin/sh", "-c", 'umask 007; exec "$@"', "sh", *cmd]
 
 
 def run_agent_streaming(

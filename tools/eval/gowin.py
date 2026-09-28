@@ -1,13 +1,9 @@
 """Vendor place-and-route and timing for the FPGA fitness (HWE Bench V2).
 
 V2 times designs with Gowin EDA (the FPGA vendor's own synthesis, place and
-route and static timing analysis) instead of Yosys + nextpnr. nextpnr's
-timing model for this part misses whole classes of paths: a single-cycle
-32-bit divider that Gowin times at 6.9 MHz (133 logic levels) is reported
-at 122.6 MHz, and V1's best design (48.9 MHz under Gowin) at ~240 MHz
-(research/v2/NOTES.md, 2026-09-28). The vendor flow is also insensitive to
-circuit-neutral netlist changes that moved nextpnr's Fmax by 10-40%
-(research/runs/EXP-2026-09-28-gowin-pilot).
+route and static timing analysis) instead of Yosys + nextpnr, whose timing
+model for this part misses whole classes of paths. The vendor flow is also
+deterministic and insensitive to circuit-neutral netlist changes.
 
 Fmax is the median over Gowin's placement algorithms (PLACE_OPTIONS), each
 a full build of the same RTL; results are deterministic for a given input.

@@ -28,7 +28,9 @@ import os
 import re
 import shutil
 import signal
+import queue
 import subprocess
+import threading
 import sys
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -122,13 +124,87 @@ class AgentUser:
         return out
 
 
-def agent_user() -> Optional[AgentUser]:
-    name = os.environ.get("HWE_AGENT_USER", "").strip()
-    if not name:
-        return None
+def agent_pool() -> list[AgentUser]:
+    """HWE_AGENT_USER: one account, or a comma-separated pool. Each running
+    job holds its own account (acquire_agent), so concurrent runs cannot
+    read each other's clones, homes, temp files or processes."""
     import pwd
-    pw = pwd.getpwnam(name)
-    return AgentUser(name=name, uid=pw.pw_uid, home=Path(pw.pw_dir), shared=AGENT_SHARED)
+    out = []
+    for name in os.environ.get("HWE_AGENT_USER", "").split(","):
+        name = name.strip()
+        if name:
+            pw = pwd.getpwnam(name)
+            out.append(AgentUser(name=name, uid=pw.pw_uid, home=Path(pw.pw_dir),
+                                 shared=AGENT_SHARED))
+    return out
+
+
+_JOB = threading.local()
+_FREE_AGENTS: "queue.Queue[AgentUser] | None" = None
+_FREE_LOCK = threading.Lock()
+
+
+def agent_user() -> Optional[AgentUser]:
+    """The account of the job running on this thread, else the pool's first."""
+    held = getattr(_JOB, "agent", None)
+    if held is not None:
+        return held
+    pool = agent_pool()
+    return pool[0] if pool else None
+
+
+def run_home(agent: AgentUser, slug: str) -> Path:
+    """Per-run HOME (Claude's ~/.claude transcripts, caches, shell state).
+    The account's real home only holds its Codex login."""
+    return agent.shared / "homes" / slug
+
+
+def reset_agent(agent: AgentUser) -> None:
+    """Leave nothing of a finished run for the account's next run: its
+    processes, per-run homes and files in the shared temp dirs."""
+    as_agent(agent.name, "/usr/bin/pkill", "-KILL", "-u", agent.name, capture_output=True)
+    script = ('for d in /tmp /var/tmp /dev/shm "$1"; do '
+              'find "$d" -mindepth 1 -maxdepth 1 -user "$2" -exec rm -rf {} + 2>/dev/null; done; true')
+    as_agent(agent.name, "/bin/sh", "-c", script, "sh", str(agent.shared / "homes"), agent.name,
+             capture_output=True)
+
+
+def acquire_agent() -> Optional[AgentUser]:
+    global _FREE_AGENTS
+    with _FREE_LOCK:
+        if _FREE_AGENTS is None:
+            pool = agent_pool()
+            if not pool:
+                return None
+            _FREE_AGENTS = queue.Queue()
+            for a in pool:
+                _FREE_AGENTS.put(a)
+    agent = _FREE_AGENTS.get()
+    _JOB.agent = agent
+    return agent
+
+
+def release_agent(agent: Optional[AgentUser], clone: Path) -> None:
+    """Revoke the account's access to the finished run's clone, wipe what
+    the run left, and hand the account to the next job."""
+    _JOB.agent = None
+    if agent is None:
+        return
+    if not IS_MAC and clone.exists():
+        # Every path into the clone goes through its top directory.
+        subprocess.run(["setfacl", "-x", f"u:{agent.name},d:u:{agent.name}", str(clone)],
+                       capture_output=True)
+    reset_agent(agent)
+    _FREE_AGENTS.put(agent)
+
+
+def lock_clone_base(base: Path) -> None:
+    """Agents may traverse the clone base but not list it; each clone's own
+    ACL admits only the account running it."""
+    if IS_MAC:
+        return
+    subprocess.run(["setfacl", "-b", str(base)], capture_output=True)
+    os.chmod(base, 0o711)
 
 
 def check_agent_user(agent: AgentUser) -> Optional[str]:
@@ -139,7 +215,7 @@ def check_agent_user(agent: AgentUser) -> Optional[str]:
         return f"sudo failed: {e}"
     if r.returncode != 0:
         return "cannot sudo to it without a password (run setup_bench_user.sh)"
-    for d in ("clones", "toolchain", "bin", "local" if IS_MAC else "venv"):
+    for d in ("clones", "toolchain", "bin", "local" if IS_MAC else "venv", *(() if IS_MAC else ("homes",))):
         if not (agent.shared / d).is_dir():
             return f"{agent.shared / d} missing (run setup_bench_user.sh)"
     if as_agent(agent.name, "/bin/test", "-r", str(Path.home()),
@@ -149,6 +225,9 @@ def check_agent_user(agent: AgentUser) -> Optional[str]:
 
 
 def as_agent(user: str, *cmd: str, **kw) -> subprocess.CompletedProcess:
+    import getpass
+    if user == getpass.getuser():   # tests run the "agent" as themselves
+        return subprocess.run(list(cmd), **kw)
     return subprocess.run(["sudo", "-n", "-u", user, *cmd], **kw)
 
 
@@ -192,8 +271,9 @@ def rmtree_shared(path: Path) -> None:
     """Delete a clone; anything the agent account left undeletable for
     the operator is removed as that account."""
     shutil.rmtree(path, ignore_errors=True)
-    agent = agent_user()
-    if agent and path.exists():
+    for agent in agent_pool():
+        if not path.exists():
+            break
         as_agent(agent.name, "/bin/rm", "-rf", str(path), capture_output=True)
         shutil.rmtree(path, ignore_errors=True)
 DEFAULT_RESULTS_DIR = REPO_ROOT / "bench"
@@ -398,23 +478,34 @@ def provenance(repo_root: Path, ref: str) -> dict:
     }
 
 
-# Paths in a fixture clone that optimization agents must never see:
-# held-out kernels (E3), plus every published result of this benchmark.
-# bench/ keeps only its eval inputs (programs/, reference-cores.md).
-# Deliberately NOT stripped: README.md and cores/v1/, which the agent
-# prompts present as read-only reference (a design decision, not a leak).
-_BENCH_KEEP = frozenset({"programs", "reference-cores.md"})
-_AGENT_INVISIBLE_TOP = ("research", "docs", "site", "paper")
+# What an agent's clone contains: its target core and the contract the
+# evaluator runs, nothing else (an allowlist; V2.1). V1 used a denylist
+# and deliberately kept other material; V2's leak audit
+# (research/v2/LEAKS.md) found it handed agents prior results: README.md
+# lists V1's accepted winners in merge order, cores/v1/ holds V1's
+# champion RTL and its full hypothesis log, and the reference cores and
+# other paths are prior designs tuned to V1's timer. Held-out kernels
+# (bench/holdout) and every published result are outside the list too.
+_AGENT_VISIBLE = {
+    ".": {".git", ".gitignore", ".gitmodules", "CLAUDE.md", "ARCHITECTURE.md", "Makefile",
+          "setup.sh", "LICENSE", "NOTICE", "cores", "bench", "formal", "fpga", "schemas",
+          "test", "tools"},
+    "cores": {"bench"},
+    "bench": {"programs"},
+    "tools": {"HARNESS_VERSION", "__init__.py", "accept_rule.py", "agents", "eval",
+              "orchestrator.py", "plot.py", "sandbox.py", "tournament.py", "worktree.py"},
+}
 
 
 def agent_invisible_paths(dest: Path) -> list[str]:
-    """Repo-relative paths clone_fixture strips from a fixture clone."""
-    paths = ["bench/holdout"]
-    bench = dest / "bench"
-    if bench.is_dir():
-        paths += sorted(f"bench/{p.name}" for p in bench.iterdir()
-                        if p.name not in _BENCH_KEEP and p.name != "holdout")
-    paths += [p for p in _AGENT_INVISIBLE_TOP if (dest / p).exists()]
+    """Repo-relative paths clone_fixture strips from a fixture clone:
+    everything outside _AGENT_VISIBLE."""
+    paths = []
+    for parent, keep in _AGENT_VISIBLE.items():
+        d = dest / parent
+        if d.is_dir():
+            paths += sorted(str((d / p.name).relative_to(dest)) for p in d.iterdir()
+                            if p.name not in keep)
     return paths
 
 
@@ -739,6 +830,10 @@ _CODEX_ISOLATED_CONFIG = """\
 # gates see the same toolchain.
 allow_login_shell = false
 
+# No web search (live or OpenAI's cached index): the benchmark's own
+# published results are on the web.
+web_search = "disabled"
+
 [features]
 memories = false
 
@@ -956,7 +1051,11 @@ def make_env_for_job(job: JobSpec, clone: Path, keys: dict[str, str]) -> dict[st
     env["TARGET"] = "bench"
     agent = agent_user()
     if agent:
-        env["HWE_AGENT_HOME"] = str(agent.home)
+        env["HWE_AGENT_USER"] = agent.name
+        home = run_home(agent, job.slug)
+        as_agent(agent.name, "/bin/mkdir", "-p", "-m", "700", str(home), check=True,
+                 capture_output=True)
+        env["HWE_AGENT_HOME"] = str(home)
         env["HWE_AGENT_PATH"] = agent.path
         env["HWE_AGENT_PYTHONUSERBASE"] = str(agent.local)
         from tools.eval.gowin import GOWIN_HOME
@@ -988,8 +1087,11 @@ def make_env_for_job(job: JobSpec, clone: Path, keys: dict[str, str]) -> dict[st
         if agent:
             # Login: CLAUDE_CODE_OAUTH_TOKEN (`claude setup-token`) from the
             # keys file; the agent account has no Keychain session.
-            env["CLAUDE_BENCH_SETTINGS"] = json.dumps(claude_isolation_settings(
-                clone, uid=agent.uid, home=agent.home, read_roots=agent.read_roots()))
+            settings = claude_isolation_settings(
+                clone, uid=agent.uid, home=home, read_roots=agent.read_roots())
+            # The account's real home holds its Codex login.
+            settings["sandbox"]["filesystem"]["denyRead"].append(str(agent.home))
+            env["CLAUDE_BENCH_SETTINGS"] = json.dumps(settings)
         else:
             env["CLAUDE_BENCH_SETTINGS"] = json.dumps(claude_isolation_settings(clone))
         if job.model.variant is not None:
@@ -1033,7 +1135,16 @@ def append_results_row(results_jsonl: Path, row: dict) -> None:
         f.write(json.dumps(row, separators=(",", ":")) + "\n")
 
 
-def run_one_job(
+def run_one_job(job: JobSpec, **kw) -> dict:
+    """_run_one_job holding its own agent account for the whole run."""
+    agent = acquire_agent()
+    try:
+        return _run_one_job(job, **kw)
+    finally:
+        release_agent(agent, kw["clone_base"] / job.slug)
+
+
+def _run_one_job(
     job: JobSpec,
     *,
     repo_root: Path,
@@ -1461,12 +1572,16 @@ def main() -> int:
 
     if args.agent_user:
         os.environ["HWE_AGENT_USER"] = args.agent_user
-        problem = check_agent_user(agent_user())
-        if problem:
-            print(f"[bench] FATAL: agent user {args.agent_user}: {problem}", file=sys.stderr)
-            return 2
+        for a in agent_pool():
+            problem = check_agent_user(a)
+            if problem:
+                print(f"[bench] FATAL: agent user {a.name}: {problem}", file=sys.stderr)
+                return 2
         if args.clone_base == DEFAULT_CLONE_BASE:
             args.clone_base = AGENT_SHARED / "clones"
+        lock_clone_base(args.clone_base)
+        for a in agent_pool():
+            reset_agent(a)
 
     models = load_models(args.models)
     keys = load_keyfile(args.keys_file)
@@ -1491,15 +1606,24 @@ def main() -> int:
             and not env_with_keys.get("CLAUDE_CODE_OAUTH_TOKEN"):
         missing.append("CLAUDE_CODE_OAUTH_TOKEN")
     if args.agent_user and any(j.model.provider == "codex" for j in jobs):
-        agent = agent_user()
-        if as_agent(agent.name, "/bin/test", "-s", str(agent.home / ".codex" / "auth.json"),
-                    capture_output=True).returncode != 0:
-            missing.append(f"Codex login for {agent.name} "
-                           f"(sudo -iu {agent.name} {agent.shared}/bin/codex login --device-auth)")
+        for agent in agent_pool():
+            if as_agent(agent.name, "/bin/test", "-s", str(agent.home / ".codex" / "auth.json"),
+                        capture_output=True).returncode != 0:
+                missing.append(f"Codex login for {agent.name} "
+                               f"(sudo -iu {agent.name} {agent.shared}/bin/codex login --device-auth)")
     if missing:
         print(f"[bench] FATAL: missing API key env vars: {missing}", file=sys.stderr)
         print(f"[bench] put them in {args.keys_file} or export in your shell.")
         return 2
+
+    if args.agent_user:
+        concurrent = (max(len(b) for b in interleaved_batches(jobs)) if args.interleave
+                      else max(1, args.parallel))
+        if len(agent_pool()) < concurrent:
+            print(f"[bench] FATAL: {concurrent} concurrent runs need as many agent accounts "
+                  f"(--agent-user a,b,c); got {len(agent_pool())}. Runs sharing an account "
+                  f"can read each other's work.", file=sys.stderr)
+            return 2
 
     if args.dry_run:
         print("[bench] dry-run — exiting without running jobs")
