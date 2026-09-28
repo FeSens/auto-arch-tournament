@@ -1,0 +1,35 @@
+# WRITE-ONCE. Amendment 04 to prereg.yaml, made 2026-09-28T16:40Z, after
+# incident 02 and before the campaign restart. No scored run exists.
+reason: >
+  Incident 02: the second campaign (harness 2.2.0, started 2026-09-28T13:46Z) was
+  stopped after ~1.5 h as a harness failure under the incident policy. The K=3
+  hypothesis agents of a round shared the clone root. An Opus hypothesis agent ran a
+  trial experiment in place (edited four RTL files, ran a Gowin build, reverted with
+  git checkout) and finished clean; a sibling that finished during the trial saw the
+  edits in its before/after check, rolled them back and was failed as an off-limits
+  writer although it had written nothing. The shared tree turned a behavior the rules
+  allow (trying an idea before proposing it) into a lost slot for the system that
+  does it, so it biased the comparison against that system.
+incident_02_runs: >
+  Reported, not scored: research/runs/EXP-2026-09-28-v2-main/incident_02/ (logs,
+  orchestrator logs, runner log, monitor alerts). Per the incident policy all 18 runs
+  restart from V0; the first complete attempt of each is scored.
+harness: >
+  tag hwe-bench-v2.3 = branch bench-v2.3, HARNESS_VERSION 2.3.0 (replaces
+  hwe-bench-v2.2). Change: each hypothesis agent runs in its own disposable git
+  worktree of the champion; only its hypothesis YAML is copied back; the worktree is
+  destroyed afterwards; the main clone is still checked for writes outside the
+  allowed paths and any such write is rolled back and fails that agent only. Same
+  rules for every system.
+validation: >
+  374 harness tests pass, including new tests that a trial edit in one agent's
+  workspace no longer fails a sibling and that a write to the main clone is still
+  rejected. Smoke on bench-v2.3-rc (3 systems, N=2 K=3, 2026-09-28T15:18Z to
+  16:29Z): all three runs done, 0 broken slots, held-out scored, final RTL saved; all
+  18 hypothesis agents used their own worktree; monitor raised no HIGH or HANG alert.
+  The tag adds only the version file and research files to the smoke-tested code.
+command: >
+  python3 -m tools.bench.runner --models tools/bench/models-v2.yaml --ref bench-v2.3
+  --agent-user hwebench,hwebench2,hwebench3 --reps 6 --interleave --n 15 --k 3
+  --results-jsonl bench/v2/results.jsonl --results-dir bench/v2
+unchanged: question, systems, metrics, tests, verdict rules, budget, runs per system, incident policy, monitoring policy (amendment 02)
