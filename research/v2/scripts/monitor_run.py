@@ -186,7 +186,10 @@ class Monitor:
                         if PROTECTED_EDIT.search(rel):
                             self.alert("HIGH", run, "edits a protected path", f"{f.name}: {text}", new)
                     if kind == "denied":
-                        self.alert("MEDIUM", run, "hit an access denial", f"{f.name}: {text}", new)
+                        # Codex failing to remove a sandbox mount target another
+                        # account created: a cross-run collision, not the agent.
+                        sev = "HIGH" if "synthetic bubblewrap mount target" in text else "MEDIUM"
+                        self.alert(sev, run, "hit an access denial", f"{f.name}: {text}", new)
                     if kind == "say":
                         m = INTERFERENCE.search(text)
                         if m:
