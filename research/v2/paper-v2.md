@@ -190,7 +190,7 @@ own tool (Gowin EDA 1.9.11.03):
   run, sharing the same riscv-formal checkout, deleted my work directory
   mid-run", Opus; "staging directory disappeared before SBY wrote
   `reg_ch0/PASS`", Luna; Sol renamed its core to dodge the collision). The
-  same reports are in every smoke run from smoke3 on (2 to 7 per run),
+  same reports are in smokes 3, 4, 5, 6 and 8 (up to 7 in one run),
   including the one that validated harness 2.3; the monitor missed them
   because it scanned commands, not what agents say. Fix (harness 2.4): unique work
   dirs (mktemp name, plain mkdir so permissions follow umask), a flock held
