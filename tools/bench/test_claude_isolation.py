@@ -202,15 +202,20 @@ def test_env_under_agent_user(tmp_path, monkeypatch):
     shared toolchain, and a Codex auth link into the agent's own login."""
     import getpass
     from pathlib import Path
+    from tools.bench import runner
     monkeypatch.setenv("HWE_AGENT_USER", getpass.getuser())
+    shared = tmp_path / "shared"
+    for d in ("toolchain", "bin", "venv"):
+        (shared / d).mkdir(parents=True)
+    monkeypatch.setattr(runner, "AGENT_SHARED", shared)
     clone = tmp_path / "clone"
     clone.mkdir()
     claude = JobSpec(model=ModelEntry(name="opus", provider="claude",
                                       model="claude-opus-5-5", oauth=True), rep=1)
     env = make_env_for_job(claude, clone, {})
-    assert env["HWE_AGENT_PATH"].startswith("/Users/Shared/hwebench/bin:")
+    assert env["HWE_AGENT_PATH"].startswith(f"{shared}/bin:{shared}/venv/bin:")
     fs = json.loads(env["CLAUDE_BENCH_SETTINGS"])["sandbox"]["filesystem"]
-    assert "/Users/Shared/hwebench/toolchain" in fs["allowRead"]
+    assert str(shared / "toolchain") in fs["allowRead"]
     assert env["HWE_AGENT_HOME"] in fs["denyRead"]
     codex = JobSpec(model=ModelEntry(name="gpt", provider="codex",
                                      model="gpt-6-sol", oauth=True), rep=1)

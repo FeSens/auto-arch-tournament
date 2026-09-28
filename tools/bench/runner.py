@@ -64,7 +64,10 @@ DEFAULT_CLONE_BASE = REPO_ROOT / ".claude" / "bench-runs"
 # CLIs run as that account, which cannot read the operator's home. The
 # account shares one directory with the operator: clones, a copy of the
 # toolchain, and the pinned CLI binaries.
-AGENT_SHARED = Path("/Users/Shared/hwebench")
+# macOS: research/v2/scripts/setup_bench_user.sh; Linux (the V2 run host):
+# research/v2/scripts/setup_server.sh, which adds a shared venv.
+IS_MAC = sys.platform == "darwin"
+AGENT_SHARED = Path("/Users/Shared/hwebench") if IS_MAC else Path("/srv/hwebench")
 _DIR_ACE = ("list,add_file,search,delete,add_subdirectory,delete_child,readattr,"
             "writeattr,readextattr,writeextattr,readsecurity,file_inherit,directory_inherit")
 _FILE_ACE = "read,write,append,execute,delete,readattr,writeattr,readextattr,writeextattr,readsecurity"
@@ -86,7 +89,7 @@ class AgentUser:
     @property
     def path(self) -> str:
         tc = self.shared / "toolchain"
-        dirs = [self.shared / "bin", self.local / "bin",
+        dirs = [self.shared / "bin", self.shared / "venv" / "bin", self.local / "bin",
                 tc / "oss-cad-suite" / "bin", tc / "bin"]
         py = shutil.which("python3")
         if py and not Path(py).resolve().is_relative_to(Path.home()):
@@ -95,7 +98,14 @@ class AgentUser:
                          "/usr/sbin", "/sbin"])
 
     def read_roots(self) -> list[str]:
-        return [str(self.shared / d) for d in ("toolchain", "local", "bin")]
+        roots = []
+        for d in ("toolchain", "local", "bin", "venv"):
+            p = self.shared / d
+            if p.exists():
+                roots.append(str(p))
+                if p.resolve() != p:
+                    roots.append(str(p.resolve()))
+        return roots
 
     def cli_versions(self) -> dict:
         out = {}
@@ -117,7 +127,7 @@ def agent_user() -> Optional[AgentUser]:
         return None
     import pwd
     pw = pwd.getpwnam(name)
-    return AgentUser(name=name, uid=pw.pw_uid, home=Path(pw.pw_dir))
+    return AgentUser(name=name, uid=pw.pw_uid, home=Path(pw.pw_dir), shared=AGENT_SHARED)
 
 
 def check_agent_user(agent: AgentUser) -> Optional[str]:
@@ -128,7 +138,7 @@ def check_agent_user(agent: AgentUser) -> Optional[str]:
         return f"sudo failed: {e}"
     if r.returncode != 0:
         return "cannot sudo to it without a password (run setup_bench_user.sh)"
-    for d in ("clones", "toolchain", "local", "bin"):
+    for d in ("clones", "toolchain", "bin", "local" if IS_MAC else "venv"):
         if not (agent.shared / d).is_dir():
             return f"{agent.shared / d} missing (run setup_bench_user.sh)"
     if as_agent(agent.name, "/bin/test", "-r", str(Path.home()),
@@ -146,6 +156,12 @@ def share_with_agent(path: Path, agent: AgentUser) -> None:
     the operator the same on whatever the agent creates there later
     (inherited ACEs; tempfile.mkdtemp's 0700 dirs included)."""
     op = os.environ.get("USER") or Path.home().name
+    if not IS_MAC:
+        # POSIX ACLs: access entries on what exists, default entries on
+        # directories so new files inherit them.
+        spec = ",".join(f"{t}u:{who}:rwX" for who in (agent.name, op) for t in ("", "d:"))
+        subprocess.run(["setfacl", "-R", "-m", spec, str(path)], check=True, capture_output=True)
+        return
     for who in (agent.name, op):
         subprocess.run(["find", str(path), "-type", "d", "-exec",
                         "chmod", "+a", f"user:{who} allow {_DIR_ACE}", "{}", "+"],
@@ -158,6 +174,13 @@ def share_with_agent(path: Path, agent: AgentUser) -> None:
 def lock_from_agent(path: Path, agent: AgentUser) -> None:
     """Make path (the eval's riscv-formal copy) unwritable and
     undeletable for the agent account."""
+    if not IS_MAC:
+        # No per-entry delete deny on Linux: strip the ACLs inside, and make
+        # the parent sticky so the agent can only remove its own entries.
+        subprocess.run(["setfacl", "-R", "-b", str(path)], check=True, capture_output=True)
+        subprocess.run(["chmod", "-R", "go-w", str(path)], check=True, capture_output=True)
+        subprocess.run(["chmod", "+t", str(path.parent)], check=True, capture_output=True)
+        return
     subprocess.run(["chmod", "-R", "-N", str(path)], check=True, capture_output=True)
     subprocess.run(["chmod", "-R", "go-w", str(path)], check=True, capture_output=True)
     subprocess.run(["chmod", "+a", f"user:{agent.name} deny delete", str(path)],
@@ -851,7 +874,8 @@ def claude_isolation_settings(clone: Path, uid: int | None = None,
                 reads.append(str(f))
     if rf.exists():
         reads.append(str(rf.resolve()))
-    claude_tmp = claude_tmp or Path(f"/private/tmp/claude-{uid}")
+    sys_tmp = "/private/tmp" if IS_MAC else "/tmp"
+    claude_tmp = claude_tmp or Path(f"{sys_tmp}/claude-{uid}")
     # Claude names each project's temp subtree after its cwd with every
     # non-alphanumeric turned into '-'; the rep's own (clone root and
     # slot worktrees) stay readable.
@@ -883,7 +907,7 @@ def claude_isolation_settings(clone: Path, uid: int | None = None,
                 # (2026-09-26 incident). formal/riscv-formal stays writable
                 # for the agents' own formal runs, as it is for Codex.
                 "denyWrite": [str(rf_eval)],
-                "denyRead": [str(home), "/private/tmp", *other_sessions],
+                "denyRead": [str(home), sys_tmp, *other_sessions],
                 "allowRead": [*reads, str(claude_tmp)],
             },
             "network": {"allowedDomains": []},
