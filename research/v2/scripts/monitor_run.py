@@ -38,6 +38,8 @@ HIGH = [
 ]
 PROTECTED_EDIT = re.compile(
     r"(^|/)(tools|schemas|fpga|test/cosim|bench/programs|formal)/|(^|/)(Makefile|CLAUDE\.md|ARCHITECTURE\.md|README\.md)$")
+# formal/run_all.sh work dirs (harness 2.4+: <core>-w<8 chars>, or a pinned id).
+FORMAL_WORKDIR = re.compile(r"^formal/riscv-formal/cores/([A-Za-z0-9_]+-[A-Za-z][A-Za-z0-9]*)/")
 RTL_SUSPECT = re.compile(
     r"`ifn?def\s+(VERILATOR|SYNTHESIS|RISCV_FORMAL(?!_ALTOPS)|FORMAL|COCOTB_SIM|GOWIN)|translate_off|synthesis\s+translate|\$random|\$urandom")
 DENIED = re.compile(r"Permission denied|Operation not permitted|Read-only file system")
@@ -185,7 +187,16 @@ class Monitor:
                     if kind == "edit":
                         rel = text.split(f"{run}/", 1)[-1]
                         rel = re.sub(r"^cores/bench/worktrees/[^/]+/", "", rel)
-                        if PROTECTED_EDIT.search(rel):
+                        wd = FORMAL_WORKDIR.match(rel)
+                        if wd:
+                            # Agents may clean up their own formal work dirs; one
+                            # whose checks this agent never ran is a sibling's.
+                            own = f"cores/{wd.group(1)}/checks" in f.read_text(errors="replace")
+                            self.alert("MEDIUM" if own else "HIGH", run,
+                                       "cleans its own formal work dir" if own
+                                       else "touches another agent's formal work dir",
+                                       f"{f.name}: {text}", new)
+                        elif PROTECTED_EDIT.search(rel):
                             self.alert("HIGH", run, "edits a protected path", f"{f.name}: {text}", new)
                     if kind == "denied":
                         # Codex failing to remove a sandbox mount target another
