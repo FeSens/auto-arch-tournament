@@ -70,6 +70,13 @@ if [ ! -x "$SHARED/venv/bin/python3" ]; then
       jsonschema==4.26.0 matplotlib Verilog_VCD
   chmod -R go-w,a+rX /opt/hwe-python
 fi
+# python-build-standalone marks libpython as needing an executable stack;
+# glibc >= 2.41 then refuses to dlopen it, which breaks every cocotb test
+# (Verilator loads libpython through the VPI). It does not need one.
+DEBIAN_FRONTEND=noninteractive apt-get install -y -qq patchelf >/dev/null
+for lib in /opt/hwe-python/cpython-3.13.12-*/lib/libpython3.13.so.1.0; do
+  patchelf --clear-execstack "$lib"
+done
 
 # 4. Pinned CLIs.
 if [ ! -x "$SHARED/bin/claude" ]; then
