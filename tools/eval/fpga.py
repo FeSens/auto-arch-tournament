@@ -320,7 +320,7 @@ def measure_fmax(worktree: str, target: str, pairs=None) -> dict:
     worktree = str(Path(worktree).resolve())
     rtl = Path(worktree) / "cores" / target / "rtl"
     gen = Path(worktree) / "cores" / target / "generated" / "final"
-    res = asyncio.run(gowin.build_all(worktree, rtl, _bench_sv(worktree, target), gen))
+    res = gowin.build_all(worktree, rtl, _bench_sv(worktree, target), gen)
     summ = gowin.summarize(res)
     return {'fmax_mhz': summ.get('fmax_mhz'),
             'pairs': [[r['place_option'], r.get('fmax_mhz'), r.get('levels')] for r in res],
@@ -358,8 +358,8 @@ def run_fpga_eval(worktree: str, target: str | None = None) -> dict:
         else None
     )
 
-    results = asyncio.run(gowin.build_all(worktree, rtl_dir, _bench_sv(worktree, target),
-                                          generated_dir, env=env))
+    results = gowin.build_all(worktree, rtl_dir, _bench_sv(worktree, target),
+                              generated_dir, env=env)
     fp = gowin.summarize(results)
     if fp['placement_failed']:
         return fp

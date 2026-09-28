@@ -46,7 +46,7 @@ def test_missing_reports_are_a_failed_placement(tmp_path):
 
 
 def _fake(fmax_by_option, logic=12312):
-    async def build_all(worktree, rtl_dir, bench_sv, gen_dir, env=None, options=gowin.PLACE_OPTIONS):
+    def build_all(worktree, rtl_dir, bench_sv, gen_dir, env=None, options=gowin.PLACE_OPTIONS):
         return [{"place_option": p, "placement_failed": fmax_by_option[p] is None,
                  "fmax_mhz": fmax_by_option[p], "levels": 10, "logic": logic, "regs": 460,
                  "lutram": 0, "bsram": 4, "dsp": 1, "reason": "does not fit"}
@@ -110,7 +110,7 @@ def test_build_timeout_counts_as_failed(monkeypatch, tmp_path):
     monkeypatch.setattr(gowin, "BUILD_TIMEOUT_SEC", 1)
     rtl = tmp_path / "rtl"
     rtl.mkdir()
-    r = asyncio.run(gowin.build(tmp_path, rtl, "fpga/core_bench_si.sv", 0, tmp_path / "out"))
+    r = gowin.build(tmp_path, rtl, "fpga/core_bench_si.sv", 0, tmp_path / "out")
     assert r['placement_failed'] is True and r.get('timed_out') is True
 
 

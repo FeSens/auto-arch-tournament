@@ -14,7 +14,7 @@ a full build of the same RTL; results are deterministic for a given input.
 """
 from __future__ import annotations
 
-import asyncio
+from concurrent.futures import ThreadPoolExecutor
 import os
 import re
 import shutil
@@ -147,17 +147,17 @@ def _run_gw_sh(outdir: Path, log: Path, env: dict) -> bool:
             return True
 
 
-async def build(worktree: str | Path, rtl_dir: str | Path, bench_sv: str,
+def build(worktree: str | Path, rtl_dir: str | Path, bench_sv: str,
                 place_option: int, outdir: str | Path, env: dict | None = None) -> dict:
     worktree, rtl_dir, outdir = Path(worktree).resolve(), Path(rtl_dir).resolve(), Path(outdir).resolve()
     shutil.rmtree(outdir, ignore_errors=True)
     outdir.mkdir(parents=True)
     (outdir / "build.tcl").write_text(project_tcl(worktree, rtl_dir, bench_sv, place_option))
     log = outdir / "gw.log"
-    # A blocking wait in a worker thread, not asyncio's subprocess API: inside
-    # the agents' bubblewrap sandboxes asyncio's child watcher never saw
-    # gw_sh exit, so `make timing` hung after Gowin had finished.
-    timed_out = await asyncio.to_thread(_run_gw_sh, outdir, log, gowin_env(env, outdir))
+    # Plain threads and blocking waits, no asyncio: agents run `make timing`
+    # inside sandboxes that block socket sends (Codex's network filter), and
+    # asyncio wakes its event loop through a socket, so it hung there.
+    timed_out = _run_gw_sh(outdir, log, gowin_env(env, outdir))
     if timed_out:
         return {"place_option": place_option, "placement_failed": True,
                 "fmax_mhz": None, "timed_out": True,
@@ -169,11 +169,12 @@ async def build(worktree: str | Path, rtl_dir: str | Path, bench_sv: str,
     return {"place_option": place_option, **res}
 
 
-async def build_all(worktree, rtl_dir, bench_sv, gen_dir, env=None,
-                    options=PLACE_OPTIONS) -> list[dict]:
-    return await asyncio.gather(*(
-        build(worktree, rtl_dir, bench_sv, p, Path(gen_dir) / f"gowin_p{p}", env)
-        for p in options))
+def build_all(worktree, rtl_dir, bench_sv, gen_dir, env=None,
+              options=PLACE_OPTIONS) -> list[dict]:
+    with ThreadPoolExecutor(max_workers=len(options)) as ex:
+        futs = [ex.submit(build, worktree, rtl_dir, bench_sv, p,
+                          Path(gen_dir) / f"gowin_p{p}", env) for p in options]
+        return [f.result() for f in futs]
 
 
 def summarize(results: list[dict]) -> dict:
@@ -210,8 +211,8 @@ def main(argv=None) -> int:
     a = ap.parse_args(argv)
     wt = Path(a.worktree).resolve()
     opts = PLACE_OPTIONS if a.all_options else PLACE_OPTIONS[:1]
-    res = asyncio.run(build_all(wt, wt / "cores" / a.target / "rtl", _bench_sv(str(wt), a.target),
-                                wt / "cores" / a.target / "generated" / "timing", options=opts))
+    res = build_all(wt, wt / "cores" / a.target / "rtl", _bench_sv(str(wt), a.target),
+                                wt / "cores" / a.target / "generated" / "timing", options=opts)
     for r in res:
         if r["placement_failed"]:
             print(f"place_option {r['place_option']}: FAILED ({r.get('reason')})")

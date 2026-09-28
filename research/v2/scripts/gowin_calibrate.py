@@ -22,7 +22,7 @@ async def main():
     async def one(d, p, tag):
         async with sem:
             out = Path(a.work) / f"{d}_p{p}_{tag}"
-            r = await gowin.build(REPO, REPO / designs[d], "fpga/core_bench_si.sv", p, out)
+            r = await asyncio.to_thread(gowin.build, REPO, REPO / designs[d], "fpga/core_bench_si.sv", p, out)
         row = {"design": d, "place_option": p, "run": tag,
                **{k: r.get(k) for k in ("fmax_mhz", "levels", "logic", "regs", "lutram",
                                          "bsram", "dsp", "placement_failed", "reason")}}
