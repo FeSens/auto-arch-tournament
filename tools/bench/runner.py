@@ -738,6 +738,13 @@ memories = false
 
 [projects."{clone}"]
 trust_level = "trusted"
+
+# Slot worktrees reach riscv-formal through a symlink to the clone's copy,
+# which is outside the agent's cwd; without this, Codex agents cannot run
+# `make formal` (Claude's sandbox already allows the whole clone). The
+# eval's own copy (.tmp/riscv-formal-eval) is not listed.
+[sandbox_workspace_write]
+writable_roots = ["{clone}/formal/riscv-formal"]
 """
 
 
@@ -765,7 +772,8 @@ def isolated_codex_home(clone: Path, user_home: Path | None = None,
     user_home = user_home or _user_codex_home()
     home = clone / ".codex-home"
     if home.exists():
-        shutil.rmtree(home)
+        # Codex leaves 0700 dirs owned by the agent account (tmp/arg0).
+        rmtree_shared(home)
     home.mkdir(parents=True)
     auth = user_home / "auth.json"
     if link_unchecked:
