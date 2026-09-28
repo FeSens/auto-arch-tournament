@@ -9,7 +9,8 @@ A=~/monitor/alerts.jsonl
 cd ~/auto-arch-tournament
 sig() {
   for f in /srv/hwebench/clones/*/cores/bench/experiments/log.jsonl; do
-    [ -f "$f" ] && echo "$f $(wc -l < "$f")"; done
+    # completed rounds: baseline line + 3 slot entries per round (K=3)
+    [ -f "$f" ] && echo "$f $(( ($(wc -l < "$f") - 1) / 3 ))"; done
   [ -f "$R" ] && wc -l < "$R"
   [ -f "$A" ] && grep -c '"severity": "\(HIGH\|HANG\)"' "$A"
 }
