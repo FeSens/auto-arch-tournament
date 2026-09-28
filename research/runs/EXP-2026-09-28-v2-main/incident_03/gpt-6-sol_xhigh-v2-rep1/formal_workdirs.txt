@@ -1,0 +1,14 @@
+total 80
+drwxrwx---+ 10 bench     bench     4096 2026-09-28T20:04:07 .
+drwxrwx---+ 13 bench     bench     4096 2026-09-28T19:04:20 ..
+drwxrwx---+  3 hwebench2 hwebench2 4096 2026-09-28T20:03:15 bench-2
+drwxrwx---+  3 hwebench2 hwebench2 4096 2026-09-28T18:46:59 benchdivcheck-2
+drwxrwx---+  3 hwebench2 hwebench2 4096 2026-09-28T18:42:22 bench_prediction_check-2
+drwxrwx---+  3 hwebench2 hwebench2 4096 2026-09-28T20:04:07 bench_r4s0_unique-3
+drwxrwx---+  4 bench     bench     4096 2026-09-28T18:32:28 nerv
+drwxrwx---+  2 bench     bench     4096 2026-09-28T18:32:28 picorv32
+drwxrwx---+  2 bench     bench     4096 2026-09-28T18:32:28 serv
+drwxrwx---+  2 bench     bench     4096 2026-09-28T18:32:28 VexRiscv
+
+/srv/hwebench/clones/gpt-6-sol_xhigh-v2-rep1/formal/:
+-rw-rw----+  1 bench bench 255106 2026-09-28T18:33:28 last_run-1860244.log

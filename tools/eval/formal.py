@@ -9,7 +9,7 @@ If genchecks.py crashes mid-run and only emits one .sby task that
 vacuously passes, the old `passed > 0 and failed == 0` rule would
 return success. EXPECTED_MIN_CHECKS prevents that.
 """
-import os, shutil, subprocess, json, re
+import os, shutil, subprocess, json, re, uuid
 from pathlib import Path
 
 import yaml
@@ -85,50 +85,23 @@ def _build_formal_env(worktree: Path, target: str | None,
     return env
 
 
-def _cleanup_formal_workdir(worktree_path: Path, target: str | None) -> None:
-    """Remove this run's per-PID riscv-formal work dir after the tally has
-    been parsed.
+def _cleanup_formal_workdir(worktree_path: Path, core_name: str | None,
+                            work_id: str) -> None:
+    """Remove this run's riscv-formal work dir once the tally is parsed.
 
-    formal/run_all.sh (contract, read-only) names each run's work dir
-    `formal/riscv-formal/cores/<CORE_NAME>-<$$>` and only reaps stale ones
-    itself on the *next* invocation for the same CORE_NAME. A target
-    that's only formal-checked once per orchestrator iteration would
-    otherwise leave one SBY work dir (SMT traces, yosys IR, per-check
-    engine logs -- often 100+ MB) behind per iteration for the life of a
-    rep. formal.py has no way to learn its own bash child's PID through
-    run_pgroup's CompletedProcess return value, so this globs
-    `cores/<target>-*` rather than a single exact path (documented
-    fallback, task-7 brief Step 3).
-
-    Only removes a match whose PID suffix names a process that is no
-    longer alive -- mirroring run_all.sh's own stale-work-dir reaper --
-    so a concurrent invocation (e.g. the agent self-checking via
-    `bash formal/run_all.sh` mid-implementation while the orchestrator's
-    own end-of-iteration eval is also in flight) is never touched.
+    run_formal() pins the dir name through FORMAL_WORK_ID, so this removes
+    exactly `formal/riscv-formal/cores/<CORE_NAME>-<work_id>` and nothing
+    else: never a concurrent agent self-check's dir (formal/run_all.sh
+    names those with mktemp and reaps its own leftovers by flock). An SBY
+    work dir runs to 100+ MB, one per slot eval, so it must not be left.
 
     Guard: BENCH_KEEP_FORMAL_WORKDIR=1 skips cleanup entirely (debugging).
-    The captured output tail (in the returned dict) and
-    formal/last_run-<PID>.log are untouched either way.
+    formal/last_run-<work_id>.log is kept either way.
     """
-    if target is None or os.environ.get("BENCH_KEEP_FORMAL_WORKDIR") == "1":
+    if not core_name or os.environ.get("BENCH_KEEP_FORMAL_WORKDIR") == "1":
         return
-    cores_dir = worktree_path / "formal" / "riscv-formal" / "cores"
-    if not cores_dir.is_dir():
-        return
-    prefix = f"{target}-"
-    for stale in cores_dir.glob(f"{prefix}*"):
-        pid_str = stale.name[len(prefix):]
-        if not pid_str.isdigit():
-            continue
-        pid = int(pid_str)
-        try:
-            os.kill(pid, 0)
-        except ProcessLookupError:
-            shutil.rmtree(stale, ignore_errors=True)
-        except PermissionError:
-            # Process exists (owned by someone else) -- not our dir to
-            # remove while it may still be in use.
-            continue
+    shutil.rmtree(worktree_path / "formal" / "riscv-formal" / "cores"
+                  / f"{core_name}-{work_id}", ignore_errors=True)
 
 
 def run_formal(worktree: str, target: str | None = None) -> dict:
@@ -155,11 +128,10 @@ def run_formal(worktree: str, target: str | None = None) -> dict:
                 'detail': f'formal/run_all.sh missing in {worktree}'}
 
     env = _build_formal_env(worktree_path, target)
-
-    # The per-PID SBY work dir this invocation creates under
-    # formal/riscv-formal/cores/ is cleaned up in `finally` below, once
-    # the tally (or failing-check log tail) has been captured, success
-    # and failure runs both. See _cleanup_formal_workdir's docstring.
+    # Pin the work dir name so exactly this run's dir is removed in
+    # `finally`, once the tally (or failing-check log tail) is captured.
+    work_id = "h" + uuid.uuid4().hex[:15]
+    env = {**env, "FORMAL_WORK_ID": work_id}
     try:
         try:
             from tools.eval._slots import eval_jobs, eval_slot
@@ -242,7 +214,7 @@ def run_formal(worktree: str, target: str | None = None) -> dict:
             'detail': output[-4000:],
         }
     finally:
-        _cleanup_formal_workdir(worktree_path, target)
+        _cleanup_formal_workdir(worktree_path, env.get("CORE_NAME"), work_id)
 
 
 if __name__ == '__main__':

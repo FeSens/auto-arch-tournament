@@ -323,10 +323,12 @@ def take_snapshot(root: str | Path = ".") -> dict[str, str]:
 
 # A harness-only riscv-formal copy (bench clones make one). Agents run
 # their own formal self-checks in formal/riscv-formal; the eval runs
-# against this copy instead. formal/run_all.sh reaps per-PID work dirs
-# whose `kill -0` fails, and from inside an agent sandbox kill -0 on any
+# against this copy instead. run_all.sh used to reap per-PID work dirs
+# whose `kill -0` failed, and from inside an agent sandbox kill -0 on any
 # outside PID fails, so a shared copy let an agent's self-check delete
-# the harness's live formal run (2026-09-26 incident).
+# the harness's live formal run (2026-09-26 incident). It now names dirs
+# with mktemp and reaps by flock (V2 incident 03); the separate copy also
+# keeps agents from planting files in what the eval reads.
 EVAL_RISCV_FORMAL = Path(".tmp") / "riscv-formal-eval"
 
 

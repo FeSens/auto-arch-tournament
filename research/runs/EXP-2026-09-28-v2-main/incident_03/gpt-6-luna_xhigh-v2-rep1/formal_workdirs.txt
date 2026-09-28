@@ -1,0 +1,20 @@
+total 80
+drwxrwx---+ 10 bench     bench     4096 2026-09-28T19:54:36 .
+drwxrwx---+ 11 bench     bench     4096 2026-09-28T20:09:52 ..
+drwxrwx---+  3 hwebench3 hwebench3 4096 2026-09-28T20:04:50 bench-2
+drwxrwx---+  3 hwebench3 hwebench3 4096 2026-09-28T19:52:43 bench_btbf_check_20260928-4
+drwxrwx---+  3 hwebench3 hwebench3 4096 2026-09-28T19:54:36 bench_btbf_check_fast_20260928-3
+drwxrwx---+  3 hwebench3 hwebench3 4096 2026-09-28T18:41:38 bench_onehot_selfcheck-2
+drwxrwx---+  4 bench     bench     4096 2026-09-28T18:32:33 nerv
+drwxrwx---+  2 bench     bench     4096 2026-09-28T18:32:33 picorv32
+drwxrwx---+  2 bench     bench     4096 2026-09-28T18:32:33 serv
+drwxrwx---+  2 bench     bench     4096 2026-09-28T18:32:33 VexRiscv
+
+/srv/hwebench/clones/gpt-6-luna_xhigh-v2-rep1/cores/bench/worktrees/hyp-20260928-001-r3s0/formal/:
+-rw-rw----+ 1 bench bench 257667 2026-09-28T19:49:48 last_run-2059878.log
+/srv/hwebench/clones/gpt-6-luna_xhigh-v2-rep1/cores/bench/worktrees/hyp-20260928-002-r3s1/formal/:
+-rw-rw----+ 1 hwebench3 hwebench3 252080 2026-09-28T20:05:58 last_run-2.log
+/srv/hwebench/clones/gpt-6-luna_xhigh-v2-rep1/cores/bench/worktrees/hyp-20260928-003-r3s2/formal/:
+-rw-rw----+ 1 bench bench 258590 2026-09-28T20:07:55 last_run-2098465.log
+/srv/hwebench/clones/gpt-6-luna_xhigh-v2-rep1/formal/:
+-rw-rw----+  1 bench bench 255727 2026-09-28T18:33:33 last_run-1861742.log

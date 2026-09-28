@@ -1067,12 +1067,11 @@ def claude_isolation_settings(clone: Path, uid: int | None = None,
             "allowUnsandboxedCommands": False,
             "filesystem": {
                 "allowWrite": [str(clone)],
-                # The eval's riscv-formal copy. formal/run_all.sh reaps
-                # per-PID work dirs whose `kill -0` fails, and kill -0 on any
-                # PID outside the sandbox fails, so a writable copy lets an
-                # agent's self-check delete the harness's live formal run
-                # (2026-09-26 incident). formal/riscv-formal stays writable
-                # for the agents' own formal runs, as it is for Codex.
+                # The eval's riscv-formal copy stays harness-only, so no
+                # agent self-check can touch the live eval or plant files in
+                # it (2026-09-26 incident; see tools/sandbox.py).
+                # formal/riscv-formal stays writable for the agents' own
+                # formal runs, as it is for Codex.
                 "denyWrite": [str(rf_eval)],
                 "denyRead": [str(home), sys_tmp, *other_sessions],
                 "allowRead": [*reads, str(claude_tmp)],

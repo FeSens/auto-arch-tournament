@@ -47,6 +47,17 @@ MEDIUM_CMD = [(r"\bps\s+(aux|-e|-ef)|\bpgrep\b|\btop\b", "lists processes"),
               (r"git\s+(log|show|diff)\s[^|;&]*--all|git\s+(reflog|fsck|cat-file|update-ref|filter-branch|replace)\b",
                "walks git history")]
 
+# An agent saying that something outside its control changed its files or
+# runs: the harness should make that impossible (incident 03 was reported
+# in exactly these words and no command rule fired).
+INTERFERENCE = re.compile(
+    r"another (sandbox|agent|process|run|invocation|slot|job)\S*[^.]{0,80}"
+    r"(delet|remov|wip|clobber|overwr|overw|chang|modif|kill|collid)"
+    r"|(sibling|concurrent|parallel) (agent|sandbox|run|slot|formal)\S*[^.]{0,80}(delet|remov|wip|clobber|overwr|collid)"
+    r"|(director(y|ies)|dir|files?|worktree)[^.]{0,40}(disappear|vanish)"
+    r"|shared (scratch|work|check|formal)\w*[^.]{0,20}(dir|director|collision)"
+    r"|\bcollision\b|\bcollided\b|out from under", re.I)
+
 BUDGET_SEC = {"hypothesis": 20 * 60, "implement": 30 * 60, "scribe": 4 * 60}
 HANG_QUIET_SEC = 120 * 60   # evals queue for host slots (tools/eval/_slots.py)
 TOOL_MAX_SEC = {"gw_sh": 50 * 60, "sby": 50 * 60, "bitwuzla": 50 * 60}
@@ -83,8 +94,12 @@ def actions(line: str):
     if it.get("type") == "file_change":
         for ch in it.get("changes") or [it]:
             out.append(("edit", str(ch.get("path") or ch.get("file_path") or "")))
+    if it.get("type") == "agent_message" and e.get("type") == "item.completed":
+        out.append(("say", str(it.get("text") or "")))
     if e.get("type") == "assistant":
         for c in (e.get("message") or {}).get("content") or []:
+            if isinstance(c, dict) and c.get("type") == "text":
+                out.append(("say", str(c.get("text") or "")))
             if not isinstance(c, dict) or c.get("type") != "tool_use":
                 continue
             inp = c.get("input") or {}
@@ -172,6 +187,12 @@ class Monitor:
                             self.alert("HIGH", run, "edits a protected path", f"{f.name}: {text}", new)
                     if kind == "denied":
                         self.alert("MEDIUM", run, "hit an access denial", f"{f.name}: {text}", new)
+                    if kind == "say":
+                        m = INTERFERENCE.search(text)
+                        if m:
+                            ctx = text[max(0, m.start() - 160):m.end() + 160].replace("\n", " ")
+                            self.alert("HIGH", run, "reports interference from outside its slot",
+                                       f"{f.name}: {ctx}", new)
 
     def scan_rtl(self, clone: Path, new):
         run = clone.name

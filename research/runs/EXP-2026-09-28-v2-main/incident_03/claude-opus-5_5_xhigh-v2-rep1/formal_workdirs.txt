@@ -1,0 +1,15 @@
+total 56
+drwxrwx---+  7 bench    bench    4096 2026-09-28T20:09:12 .
+drwxrwx---+ 11 bench    bench    4096 2026-09-28T18:32:23 ..
+drwxrwx---+  3 hwebench hwebench 4096 2026-09-28T20:09:12 bench-3
+drwxrwx---+  4 bench    bench    4096 2026-09-28T18:32:23 nerv
+drwxrwx---+  2 bench    bench    4096 2026-09-28T18:32:23 picorv32
+drwxrwx---+  2 bench    bench    4096 2026-09-28T18:32:23 serv
+drwxrwx---+  2 bench    bench    4096 2026-09-28T18:32:23 VexRiscv
+
+/srv/hwebench/clones/claude-opus-5_5_xhigh-v2-rep1/cores/bench/worktrees/hyp-20260928-001-r5s0/formal/:
+/srv/hwebench/clones/claude-opus-5_5_xhigh-v2-rep1/cores/bench/worktrees/hyp-20260928-002-r5s1/formal/:
+/srv/hwebench/clones/claude-opus-5_5_xhigh-v2-rep1/cores/bench/worktrees/hyp-20260928-003-r5s2/formal/:
+-rw-rw----+ 1 bench bench 260163 2026-09-28T20:11:34 last_run-2134928.log
+/srv/hwebench/clones/claude-opus-5_5_xhigh-v2-rep1/formal/:
+-rw-rw----+  1 bench bench 258832 2026-09-28T18:33:23 last_run-1859103.log

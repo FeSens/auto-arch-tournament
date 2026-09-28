@@ -30,18 +30,50 @@ fi
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 RISCV_FORMAL="$SCRIPT_DIR/riscv-formal"
-# PID-suffixed work dir + log so two concurrent invocations (e.g., the
-# agent self-checking mid-implementation while the orchestrator runs
-# its end-of-iteration eval) don't race on `rm -rf checks/` or
-# truncate each other's last_run.log. Was observed live in the
-# nret=1 verify run: two slots got broken: make_failed_during_execution
-# because the agent invoked `bash formal/run_all.sh` 6+ times in quick
-# succession, each invocation wiping the previous one's checks/ dir
-# mid-SBY (yosys-smtbmc crashed with `FileNotFoundError: 'engine_0/trace0.vcd'`).
-# genchecks.py derives @core@ from cwd's basename (genchecks.py:39), so
-# the PID-suffixed dir maps cleanly to @core@="$CORE_NAME-$$".
-CORE_DIR="$RISCV_FORMAL/cores/$CORE_NAME-$$"
-LOG="$SCRIPT_DIR/last_run-$$.log"
+# Per-invocation work dir + log, unique among every process sharing this
+# riscv-formal checkout (the K concurrent agents of a run share it through
+# their worktrees' symlink). The name used to be "$CORE_NAME-$$", but an
+# agent's sandboxed shell runs in its own PID namespace where $$ is 2 or 3
+# for every agent, so siblings wrote into one dir and wiped each other's
+# checks mid-SBY (V2 incident 03). mktemp gives a unique name instead.
+# FORMAL_WORK_ID pins the suffix so tools/eval/formal.py can remove exactly
+# its own dir afterwards. genchecks.py derives @core@ from the dir's
+# basename (genchecks.py:39), so @core@ = "$CORE_NAME-<suffix>".
+mkdir -p "$RISCV_FORMAL/cores"
+if [ -n "${FORMAL_WORK_ID:-}" ]; then
+    if [[ ! "$FORMAL_WORK_ID" =~ ^[A-Za-z][A-Za-z0-9]*$ ]]; then
+        echo "ERROR: FORMAL_WORK_ID must be a letter followed by letters/digits" >&2
+        exit 2
+    fi
+    CORE_DIR="$RISCV_FORMAL/cores/$CORE_NAME-$FORMAL_WORK_ID"
+    mkdir "$CORE_DIR"
+else
+    # mktemp picks the name; mkdir creates it (atomic, fails if it exists)
+    # so the dir gets the usual umask and default-ACL permissions, which
+    # `mktemp -d` would replace with 0700.
+    CORE_DIR=
+    for _ in 1 2 3 4 5 6 7 8; do
+        try="$(mktemp -u "$RISCV_FORMAL/cores/$CORE_NAME-wXXXXXXXX")"
+        if mkdir "$try" 2>/dev/null; then CORE_DIR="$try"; break; fi
+    done
+    if [ -z "$CORE_DIR" ]; then
+        echo "ERROR: could not create a work dir under $RISCV_FORMAL/cores" >&2
+        exit 1
+    fi
+fi
+WORK_ID="${CORE_DIR##*-}"
+LOG="$SCRIPT_DIR/last_run-$WORK_ID.log"
+
+# Hold a lock on the work dir for this run's lifetime. The reaper below
+# only removes dirs whose lock nobody holds; flock works across users and
+# PID namespaces, unlike the old `kill -0 <pid>` test (from inside a
+# sandbox every outside PID looks dead). Without flock(1), nothing is reaped.
+HAVE_FLOCK=
+if command -v flock >/dev/null 2>&1; then
+    exec 9>"$CORE_DIR/.owner.lock"
+    flock 9
+    HAVE_FLOCK=1
+fi
 
 # Auto-detect single-issue cores from core.yaml when WRAPPER + CHECKS_CFG
 # are both unset and $1 (checks-cfg-path) wasn't given either. Explicit
@@ -92,26 +124,24 @@ if [ -d "$PROJECT_ROOT/.toolchain/oss-cad-suite/bin" ]; then
     export PATH="$PROJECT_ROOT/.toolchain/oss-cad-suite/bin:$PATH"
 fi
 
-# Reap stale per-PID work dirs + logs whose owning process has exited.
-# Bounds disk growth from long runs (an agent that invokes run_all.sh
-# dozens of times leaves dozens of $CORE_NAME-<pid>/ dirs otherwise).
-# kill -0 returns 0 iff <pid> exists; non-existent / non-numeric names
-# fall through to cleanup. Concurrent live runs are protected because
-# their PIDs are still alive.
+# Reap work dirs (and their logs) left by runs that have ended: the lock
+# file exists, is over 10 minutes old, and nobody holds it. A dir with no
+# lock file (older script versions, or one created a moment ago and not yet
+# locked) is never touched. Bounds disk growth from agents that invoke
+# run_all.sh dozens of times.
 shopt -s nullglob
-for stale in "$RISCV_FORMAL/cores/$CORE_NAME-"*; do
-    pid="${stale##*-}"
-    if [[ "$pid" =~ ^[0-9]+$ ]] && ! kill -0 "$pid" 2>/dev/null; then
-        rm -rf "$stale"
-    fi
-done
-for stale_log in "$SCRIPT_DIR"/last_run-*.log; do
-    pid="${stale_log##*-}"
-    pid="${pid%.log}"
-    if [[ "$pid" =~ ^[0-9]+$ ]] && ! kill -0 "$pid" 2>/dev/null; then
-        rm -f "$stale_log"
-    fi
-done
+if [ -n "$HAVE_FLOCK" ]; then
+    for stale in "$RISCV_FORMAL/cores/$CORE_NAME-"*; do
+        [ "$stale" = "$CORE_DIR" ] && continue
+        lock="$stale/.owner.lock"
+        [ -f "$lock" ] || continue
+        [ -n "$(find "$lock" -mmin +10 2>/dev/null)" ] || continue
+        if flock -n "$lock" true 2>/dev/null; then
+            rm -rf "$stale"
+            rm -f "$SCRIPT_DIR/last_run-${stale##*-}.log"
+        fi
+    done
+fi
 shopt -u nullglob
 
 # Truncate the run log; genchecks + make are tee'd here in full.
@@ -153,9 +183,9 @@ awk '/^\[verilog-files\]/{exit} {print}' "$CHECKS_CFG" > "$STAGED_CFG"
 } >> "$STAGED_CFG"
 
 # genchecks.py derives @core@ from the cwd's basename (genchecks.py:39),
-# so cd-ing into $CORE_DIR (= $RISCV_FORMAL/cores/$CORE_NAME-$$) yields
-# @core@="$CORE_NAME-$$". The [verilog-files] lines we just wrote
-# reference that @core@, so all paths resolve into this PID-private dir.
+# so cd-ing into $CORE_DIR (= $RISCV_FORMAL/cores/$CORE_NAME-<suffix>)
+# yields @core@="$CORE_NAME-<suffix>". The [verilog-files] lines we just
+# wrote reference that @core@, so all paths resolve into this private dir.
 cd "$CORE_DIR"
 rm -rf checks/
 echo "=== genchecks ===" | tee -a "$LOG"

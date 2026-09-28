@@ -440,9 +440,9 @@ def render_failure_modes_section(aggs: list[ModelAgg]) -> str:
         "couldn't place the design on the target FPGA. "
         "`make_failed_during_execution` = formal/run_all.sh's `*.sby` glob "
         "found zero tasks at tally time (usually an agent wiped the checks "
-        "dir mid-run; the PID-suffix fix in `formal/run_all.sh` removes the "
-        "race but the class is still emitted if anything else corrupts the "
-        "checks dir)."
+        "dir mid-run; `formal/run_all.sh` now gives every run a unique dir "
+        "and reaps only dirs whose lock is free, but the class is still "
+        "emitted if anything else corrupts the checks dir)."
     )
     lines.append("")
     any_broken = False
