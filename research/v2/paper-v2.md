@@ -190,9 +190,8 @@ own tool (Gowin EDA 1.9.11.03):
   run, sharing the same riscv-formal checkout, deleted my work directory
   mid-run", Opus; "staging directory disappeared before SBY wrote
   `reg_ch0/PASS`", Luna; Sol renamed its core to dodge the collision). The
-  same reports are in the smoke run that validated harness 2.3, so the
-  defect predates V2's multi-account setup; the monitor missed it because
-  it scanned commands, not what agents say. Fix (harness 2.4): unique work
+  same reports are in the smoke run that validated harness 2.3; the
+  monitor missed them because it scanned commands, not what agents say. Fix (harness 2.4): unique work
   dirs (mktemp name, plain mkdir so permissions follow umask), a flock held
   for the run's lifetime, reaping only dirs whose lock is free and older
   than 10 minutes, the harness removing exactly its own pinned dir; a
