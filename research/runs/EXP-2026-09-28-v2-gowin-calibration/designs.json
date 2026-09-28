@@ -1,0 +1,11 @@
+{
+  "V0": "research/v2/designs/V0/rtl",
+  "gpt-5_6-sol_rep1": "research/v2/designs/gpt-5_6-sol_rep1/rtl",
+  "gpt-5_6-terra_rep3": "research/v2/designs/gpt-5_6-terra_rep3/rtl",
+  "gpt-6-astra_max_rep1": "research/v2/designs/gpt-6-astra_max_rep1/rtl",
+  "gpt-6-astra_max_rep2": "research/v2/designs/gpt-6-astra_max_rep2/rtl",
+  "gpt-6-astra_max_rep3": "research/v2/designs/gpt-6-astra_max_rep3/rtl",
+  "gpt-6-sol_xhigh_rep1": "research/v2/designs/gpt-6-sol_xhigh_rep1/rtl",
+  "smoke-claude-opus-5_5_xhigh-v2": "research/v2/designs/smoke-claude-opus-5_5_xhigh-v2/rtl",
+  "smoke-gpt-6-sol_xhigh-v2": "research/v2/designs/smoke-gpt-6-sol_xhigh-v2/rtl"
+}

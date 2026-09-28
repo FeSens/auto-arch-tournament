@@ -1,0 +1,32 @@
+# WRITE-ONCE. Pre-registered 2026-09-28 before any run of this experiment.
+id: EXP-2026-09-28-v2-gowin-calibration
+supersedes: EXP-2026-09-28-v2-noise-server (flow changed to Gowin EDA; see its notes.md)
+question: >
+  Under the V2 fitness flow (Gowin EDA 1.9.11.03 Education, GW2AR-LV18QN88C8/I7,
+  V2 wrapper with the stall generator; score = median Fmax over place_option
+  0/1/2), how large is the measurement noise of a design's score, and what
+  acceptance margin does the loop need?
+known_before_running: >
+  Pilot (EXP-2026-09-28-gowin-pilot): builds are deterministic for a given
+  input and unaffected by unused modules or unused wires inside `core`; the
+  only remaining free variable is the placement algorithm (0/1/2), which moved
+  one design by ~2% and V0 by ~6%.
+designs: designs.json here (V0, 6 V1 GPT finals, the two V2 smoke-test champions)
+procedure: >
+  For every design, build place_option 0, 1, 2 with tools/eval/gowin.py (the
+  scorer's own code), then rebuild place_option 0 once more in a different
+  directory (reproducibility check). One row per build.
+metrics:
+  sigma_opt: per design, SD of ln(Fmax) over the 3 placement options; pooled RMS over designs
+  sigma_score: 0.67 * sigma_opt (SD of the median of 3 normal draws is ~0.67 sigma)
+  reproducible: fraction of designs whose repeat build equals the first to the reported digit
+decision_rules:
+  margin: ACCEPT_MARGIN_LN = 2.33 * sigma_score, rounded up to the next 0.005.
+  reproducibility: if any repeat build differs, the flow is not deterministic;
+    stop and report instead of setting a margin.
+  fit: a design that does not fit is reported and excluded from sigma.
+scope: >
+  The placement options are the flow's only measurable noise; this does not
+  bound how much a small functional edit moves Fmax, which is a real property
+  of the new design under the vendor's timer, not measurement noise.
+outputs: runs.jsonl, notes.md in this directory
