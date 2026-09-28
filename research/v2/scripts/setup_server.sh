@@ -22,6 +22,11 @@ CLAUDE_VERSION=2.1.283
 CODEX_VERSION=0.156.1
 [ "$(id -u)" = 0 ] || { echo "run as root"; exit 1; }
 
+# 0. GNU coreutils. Ubuntu 26.04 defaults to the Rust uutils (tail, head,
+#    sort, ...), which reject GNU usages like `tail -5 a b` that the harness
+#    scripts and the agents' shell habits rely on.
+DEBIAN_FRONTEND=noninteractive apt-get install -y -qq coreutils-from-gnu >/dev/null
+
 # 1. Accounts. Neither is in the other's primary group; homes are private.
 id "$OP" >/dev/null 2>&1 || useradd -m -s /bin/bash "$OP"
 id "$U" >/dev/null 2>&1 || useradd -m -U -s /bin/bash "$U"
