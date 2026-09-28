@@ -13,7 +13,7 @@ sig() {
     [ -f "$f" ] && echo "$f $(( ($(wc -l < "$f") - 1) / 3 ))"; done
   # a missing file counts as 0 so its creation is not a wake
   cat "$R" 2>/dev/null | wc -l
-  grep -c '"severity": "\(HIGH\|HANG\)"' "$A" 2>/dev/null || true
+  cat "$A" 2>/dev/null | grep -c '"severity": "\(HIGH\|HANG\)"'
 }
 start=$(sig); t0=$(date +%s); why="10-minute check"
 while :; do
