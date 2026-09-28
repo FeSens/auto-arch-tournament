@@ -1,0 +1,47 @@
+{"design": "V0", "k": 28, "fmax_mhz": 5.14, "levels": 150, "logic": 12312, "regs": 460}
+{"design": "V0", "k": 14, "fmax_mhz": 5.14, "levels": 150, "logic": 12312, "regs": 460}
+{"design": "V0", "k": 7, "fmax_mhz": 5.14, "levels": 150, "logic": 12312, "regs": 460}
+{"design": "V0", "k": 0, "fmax_mhz": 5.14, "levels": 150, "logic": 12312, "regs": 460}
+{"design": "V0", "k": 21, "fmax_mhz": 5.14, "levels": 150, "logic": 12312, "regs": 460}
+{"design": "V0", "k": 35, "fmax_mhz": 5.14, "levels": 150, "logic": 12312, "regs": 460}
+{"design": "V0", "k": 49, "fmax_mhz": 5.14, "levels": 150, "logic": 12312, "regs": 460}
+{"design": "V0", "k": 56, "fmax_mhz": 5.14, "levels": 150, "logic": 12312, "regs": 460}
+{"design": "gpt-5_6-sol_rep1", "k": 0, "fmax_mhz": 5.131, "levels": 146, "logic": 12772, "regs": 527}
+{"design": "V0", "k": 42, "fmax_mhz": 5.14, "levels": 150, "logic": 12312, "regs": 460}
+{"design": "gpt-5_6-sol_rep1", "k": 14, "fmax_mhz": 5.131, "levels": 146, "logic": 12772, "regs": 527}
+{"design": "gpt-5_6-sol_rep1", "k": 7, "fmax_mhz": 5.131, "levels": 146, "logic": 12772, "regs": 527}
+{"design": "gpt-5_6-terra_rep3", "k": 14, "fmax_mhz": 4.989, "levels": 153, "logic": 8337, "regs": 452}
+{"design": "gpt-5_6-terra_rep3", "k": 0, "fmax_mhz": 4.989, "levels": 153, "logic": 8337, "regs": 452}
+{"design": "gpt-5_6-terra_rep3", "k": 21, "fmax_mhz": 4.989, "levels": 153, "logic": 8337, "regs": 452}
+{"design": "gpt-5_6-terra_rep3", "k": 7, "fmax_mhz": 4.989, "levels": 153, "logic": 8337, "regs": 452}
+{"design": "gpt-5_6-terra_rep3", "k": 28, "fmax_mhz": 4.989, "levels": 153, "logic": 8337, "regs": 452}
+{"design": "gpt-5_6-terra_rep3", "k": 35, "fmax_mhz": 4.989, "levels": 153, "logic": 8337, "regs": 452}
+{"design": "gpt-5_6-terra_rep3", "k": 42, "fmax_mhz": 4.989, "levels": 153, "logic": 8337, "regs": 452}
+{"design": "gpt-5_6-terra_rep3", "k": 49, "fmax_mhz": 4.989, "levels": 153, "logic": 8337, "regs": 452}
+{"design": "gpt-5_6-terra_rep3", "k": 56, "fmax_mhz": 4.989, "levels": 153, "logic": 8337, "regs": 452}
+{"design":"opus-5_5_rep1","k":7,"wrapper":"main","fmax_mhz":48.918,"levels":13,"logic":2872,"regs":1257}
+{"design":"opus-5_5_rep1","k":0,"wrapper":"main","fmax_mhz":48.918,"levels":13,"logic":2872,"regs":1257}
+{"design":"opus-5_5_rep1","k":14,"wrapper":"main","fmax_mhz":48.918,"levels":13,"logic":2872,"regs":1257}
+{"design":"opus-5_5_rep1","k":21,"wrapper":"main","fmax_mhz":48.918,"levels":13,"logic":2872,"regs":1257}
+{"design":"opus-5_5_rep1","k":28,"wrapper":"main","fmax_mhz":48.918,"levels":13,"logic":2872,"regs":1257}
+{"design":"opus-5_5_rep1","k":35,"wrapper":"main","fmax_mhz":48.918,"levels":13,"logic":2872,"regs":1257}
+{"design":"gpt-5_6-sol_rep1","k":56,"wrapper":"v2","fmax_mhz":5.131,"levels":146,"logic":12772,"regs":527}
+{"design":"gpt-5_6-sol_rep1","k":28,"wrapper":"v2","fmax_mhz":5.131,"levels":146,"logic":12772,"regs":527}
+{"design":"gpt-5_6-sol_rep1","k":49,"wrapper":"v2","fmax_mhz":5.131,"levels":146,"logic":12772,"regs":527}
+{"design":"gpt-5_6-sol_rep1","k":35,"wrapper":"v2","fmax_mhz":5.131,"levels":146,"logic":12772,"regs":527}
+{"design":"gpt-5_6-sol_rep1","k":21,"wrapper":"v2","fmax_mhz":5.131,"levels":146,"logic":12772,"regs":527}
+{"design":"gpt-5_6-sol_rep1","k":42,"wrapper":"v2","fmax_mhz":5.131,"levels":146,"logic":12772,"regs":527}
+{"design":"opus-5_5_rep1","k":42,"wrapper":"main","fmax_mhz":48.918,"levels":13,"logic":2872,"regs":1257}
+{"design":"opus-5_5_rep1","k":49,"wrapper":"main","fmax_mhz":48.918,"levels":13,"logic":2872,"regs":1257}
+{"design":"opus-5_5_rep1","k":56,"wrapper":"main","fmax_mhz":48.918,"levels":13,"logic":2872,"regs":1257}
+{"design":"opus-5_5_rep1","inpad":49,"wrapper":"main","fmax_mhz":48.918,"levels":13,"logic":2872,"regs":1257}
+{"design":"opus-5_5_rep1","inpad":28,"wrapper":"main","fmax_mhz":48.918,"levels":13,"logic":2872,"regs":1257}
+{"design":"opus-5_5_rep1","inpad":14,"wrapper":"main","fmax_mhz":48.918,"levels":13,"logic":2872,"regs":1257}
+{"design":"opus-5_5_rep1","inpad":42,"wrapper":"main","fmax_mhz":48.918,"levels":13,"logic":2872,"regs":1257}
+{"design":"opus-5_5_rep1","place":3,"error":"(file build.tcl line 22)"}
+{"design":"opus-5_5_rep1","inpad":21,"wrapper":"main","fmax_mhz":48.918,"levels":13,"logic":2872,"regs":1257}
+{"design":"opus-5_5_rep1","inpad":56,"wrapper":"main","fmax_mhz":48.918,"levels":13,"logic":2872,"regs":1257}
+{"design":"opus-5_5_rep1","inpad":35,"wrapper":"main","fmax_mhz":48.918,"levels":13,"logic":2872,"regs":1257}
+{"design":"opus-5_5_rep1","inpad":7,"wrapper":"main","fmax_mhz":48.918,"levels":13,"logic":2872,"regs":1257}
+{"design":"opus-5_5_rep1","place":1,"wrapper":"main","fmax_mhz":49.916,"levels":14,"logic":2872,"regs":1257}
+{"design":"opus-5_5_rep1","place":2,"wrapper":"main","fmax_mhz":49.916,"levels":14,"logic":2872,"regs":1257}
