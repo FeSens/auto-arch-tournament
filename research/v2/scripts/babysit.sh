@@ -11,8 +11,9 @@ sig() {
   for f in /srv/hwebench/clones/*/cores/bench/experiments/log.jsonl; do
     # completed rounds: baseline line + 3 slot entries per round (K=3)
     [ -f "$f" ] && echo "$f $(( ($(wc -l < "$f") - 1) / 3 ))"; done
-  [ -f "$R" ] && wc -l < "$R"
-  [ -f "$A" ] && grep -c '"severity": "\(HIGH\|HANG\)"' "$A"
+  # a missing file counts as 0 so its creation is not a wake
+  cat "$R" 2>/dev/null | wc -l
+  grep -c '"severity": "\(HIGH\|HANG\)"' "$A" 2>/dev/null || true
 }
 start=$(sig); t0=$(date +%s); why="10-minute check"
 while :; do
