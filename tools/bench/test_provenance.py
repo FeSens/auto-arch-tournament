@@ -15,13 +15,15 @@ def test_provenance_records_commits_and_dirty(tmp_path):
     (tmp_path / "tools" / "a.py").write_text("")
     _git(tmp_path, "add", "-A")
     _git(tmp_path, "-c", "commit.gpgsign=false", "commit", "-qm", "init")
-    _git(tmp_path, "tag", "fixture-v1")
+    _git(tmp_path, "-c", "tag.gpgsign=false", "tag", "fixture-v1")
     head = subprocess.run(["git", "-C", str(tmp_path), "rev-parse", "HEAD"],
                           capture_output=True, text=True).stdout.strip()
 
     p = provenance(tmp_path, "fixture-v1")
+    from tools.bench import preflight
     assert p == {"fixture_ref": "fixture-v1", "fixture_commit": head,
-                 "runner_commit": head, "runner_dirty": False}
+                 "runner_commit": head, "runner_dirty": False,
+                 "harness_version": preflight.harness_version()}
 
     (tmp_path / "tools" / "a.py").write_text("x = 1\n")
     assert provenance(tmp_path, "fixture-v1")["runner_dirty"] is True
