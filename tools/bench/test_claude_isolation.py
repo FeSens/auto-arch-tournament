@@ -46,7 +46,9 @@ def test_sandbox_confines_bash_to_clone(tmp_path):
     assert fs["allowWrite"] == [str(clone.resolve())]
     # Agents may run formal in their own copy; the eval's copy is read-only.
     assert fs["denyWrite"] == [str(clone.resolve() / ".tmp" / "riscv-formal-eval")]
-    assert str(home) in fs["denyRead"] and "/private/tmp" in fs["denyRead"]
+    from tools.bench.runner import IS_MAC
+    assert str(home) in fs["denyRead"]
+    assert ("/private/tmp" if IS_MAC else "/tmp") in fs["denyRead"]
     # Other Claude sessions' temp dirs are denied; the rep's own are not.
     assert str(ctmp / "-Users-me-other-project") in fs["denyRead"]
     assert str(ctmp / "leftover_scratch.py") in fs["denyRead"]

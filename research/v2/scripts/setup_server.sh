@@ -26,6 +26,11 @@ CODEX_VERSION=0.156.1
 id "$OP" >/dev/null 2>&1 || useradd -m -s /bin/bash "$OP"
 id "$U" >/dev/null 2>&1 || useradd -m -U -s /bin/bash "$U"
 chmod 750 "/home/$OP"
+# The orchestrator commits in every clone; a neutral identity, not a person's.
+for a in "$OP" "$U"; do
+  sudo -iu "$a" git config --global user.name "HWE Bench"
+  sudo -iu "$a" git config --global user.email "hwe-bench@localhost"
+done
 chmod 700 "/home/$U"
 getent group "$OP" | grep -qw "$U" && { echo "FAIL: $U is in group $OP"; exit 1; }
 
