@@ -27,9 +27,10 @@ lock = threading.Lock()
 
 
 def pad_module(k: int) -> str:
-    body = "\n".join(f"  assign y[{i}] = a[{i}] ^ a[{(i + 1) % 32}];" for i in range(k))
+    # k unused wires; valid for any k (the final measurement uses k > 100).
+    body = "".join(f"  wire w{i} = a[{i % 32}] ^ a[{(i + 1) % 32}];\n" for i in range(k))
     return ("module zz_calib_pad(input logic [31:0] a, output logic [31:0] y);\n"
-            f"{body}\nendmodule\n")
+            f"{body}  assign y = a;\nendmodule\n")
 
 
 FLOW = ""   # synth_gowin options (--flow); "" = the harness's flow
@@ -79,11 +80,17 @@ def main() -> None:
     ap.add_argument("--flow", default="", help="extra synth_gowin options")
     ap.add_argument("--only", nargs="+", help="design subset")
     ap.add_argument("--seeds", type=int, nargs="+", help="seeds for every k (overrides defaults)")
+    ap.add_argument("--ks", type=int, nargs="+", help="perturbations (overrides KS)")
+    ap.add_argument("--k0-seeds", type=int, nargs="+", help="seeds for k=0 only")
     a = ap.parse_args()
-    global FLOW, SEEDS, DEFAULT_SEEDS
+    global FLOW, SEEDS, DEFAULT_SEEDS, KS
     FLOW = a.flow
     if a.seeds:
         SEEDS, DEFAULT_SEEDS = {}, a.seeds
+    if a.k0_seeds:
+        SEEDS = {0: a.k0_seeds}
+    if a.ks:
+        KS = a.ks
     designs = json.loads(a.designs.read_text())
     if a.only:
         designs = {n: designs[n] for n in a.only}

@@ -95,3 +95,27 @@ changes the mapped netlist, not only placement.
 
 EXP-2026-09-27-v2-synth-flow (pre-registered) compares -family gw2a, with
 -noabc9, and with -retime on 3 designs x 9 variants x 2 seeds.
+
+## 2026-09-28: run host; platform changes the netlist (measured)
+
+V2 runs move to a Hetzner EX63 (20 cores, Ubuntu 26.04), set up by
+research/v2/scripts/setup_server.sh with the same pinned versions as the Mac
+(oss-cad-suite 2026-04-24, Yosys 0.64+149 2dc69a757, nextpnr-0.10-45,
+Verilator 5.047, gcc 15.2.0-1, Python 3.13.12, cocotb 2.0.1, Claude Code
+2.1.283, Codex 0.156.1).
+
+Same inputs, same versions, different host (wrapper_compare.sh, seeds 1-3):
+
+| design | Mac LUT4, MHz | Linux LUT4, MHz |
+|---|---|---|
+| V0 k=0 | 9723: 97.20 / 100.66 / 111.21 | 9699: 131.60 / 142.86 / 147.17 |
+| terra k=9 | 7830: 65.49 / 62.98 / 66.28 | 7661: 123.84 / 150.72 / 147.08 |
+
+The host is one more neutral perturbation. Every V2 number (calibration,
+loop, final scores) must come from the run host; Mac numbers are pilots.
+The run host is deterministic: V0 k=0 seed 1 rerun in another directory gave a
+byte-identical synth.json and 131.60 MHz (n=1 repeat).
+
+Synth flow decision: -family gw2a (research/runs/EXP-2026-09-27-v2-synth-flow/notes.md).
+Pad module redefined as k unused wires (valid for k > 32). Calibration re-run on
+the host: EXP-2026-09-28-v2-noise-server.

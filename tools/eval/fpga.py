@@ -33,7 +33,9 @@ SEEDS = [1, 2, 3]
 # neutral changes like this move a design's Fmax by far more than nextpnr
 # seeds do (EXP-2026-09-27-v2-placement-noise), so one netlist is one
 # draw. Set from that calibration; see research/v2/NOTES.md.
-PERTURBATIONS = [(0, 1), (0, 2), (0, 3)]
+# 9 pairs: one wave on the run host (EXP-2026-09-28-v2-noise-server fixes
+# P=9 and derives the acceptance margin for it).
+PERTURBATIONS = [(0, 1)] + [(7 * i, i + 1) for i in range(1, 9)]
 # The final champion's Fmax for the headline score is measured afresh on
 # perturbations and seeds the loop never used: the loop's number was
 # selected for being high (winner's curse) and rests on fewer draws.
@@ -140,9 +142,10 @@ async def _run_all_seeds(worktree: str, generated_dir: str = "generated", env: d
 def pad_module(k: int) -> str:
     """The unused module behind perturbation k (identical to the
     calibration driver's)."""
-    body = "\n".join(f"  assign y[{i}] = a[{i}] ^ a[{(i + 1) % 32}];" for i in range(k))
+    # k unused wires; valid for any k (the final measurement uses k > 100).
+    body = "".join(f"  wire w{i} = a[{i % 32}] ^ a[{(i + 1) % 32}];\n" for i in range(k))
     return ("module zz_calib_pad(input logic [31:0] a, output logic [31:0] y);\n"
-            f"{body}\nendmodule\n")
+            f"{body}  assign y = a;\nendmodule\n")
 
 
 async def _synth_variant(k: int, worktree: str, generated_dir: str,

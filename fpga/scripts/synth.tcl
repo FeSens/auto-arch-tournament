@@ -47,6 +47,8 @@ if {[info exists ::env(SYNTH_PAD)] && $::env(SYNTH_PAD) ne ""} {
 read_verilog -sv fpga/bench_stall_gen.sv
 read_verilog -sv $bench_sv
 
-synth_gowin -top core_bench -json $gen_dir/synth.json
+# -family gw2a: the part is a GW2A-18C; without it synth_gowin maps for its
+# default gw1n (V1 did). EXP-2026-09-27-v2-synth-flow.
+synth_gowin -top core_bench -family gw2a -json $gen_dir/synth.json
 
 stat

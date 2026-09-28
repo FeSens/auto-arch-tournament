@@ -1,0 +1,42 @@
+# WRITE-ONCE. Pre-registered 2026-09-28 before any run of this experiment.
+id: EXP-2026-09-28-v2-noise-server
+supersedes: >
+  EXP-2026-09-27-v2-placement-noise (Mac, gw1n synthesis, stopped at 235 rows).
+  Its numbers do not transfer: the same toolchain versions on the Linux run host
+  give different netlists (V0 LUT4 9699 vs 9723 on the Mac, Fmax 131.6-147.2 vs
+  97.2-111.2 MHz, seeds 1-3), and synth.tcl now passes -family gw2a
+  (EXP-2026-09-27-v2-synth-flow, decision A).
+question: >
+  On the V2 run host, how much does a design's score vary under circuit-neutral
+  netlist perturbations, and what acceptance margin does the loop's 9-pair score
+  need so that a design no better than the champion is rarely accepted?
+host: Hetzner EX63 (Intel Core Ultra 7 265, 20 cores), Ubuntu 26.04, /opt/hwe-toolchain
+  (oss-cad-suite 2026-04-24, Yosys 0.64+149 2dc69a757). Run-to-run determinism
+  checked once: V0 k=0 seed 1 rerun in another directory gave a byte-identical
+  synth.json and 131.60 MHz both times.
+harness: v2 branch at the commit that adds this file; flow synth_gowin -family gw2a;
+  pad module = k unused wires (tools/eval/fpga.py pad_module, same text in calibrate.py).
+designs: research/v2/designs/designs.json (V0 + 6 V1 finals; Opus V1 rep1 excluded,
+  it does not fit the device under V2).
+perturbations: k = 0 and k in {7, 14, ..., 112} (16 values; the loop uses 7..56,
+  the final measurement 101..115).
+seeds: k=0 -> 1..5; k>0 -> 1, 2.
+fixed_in_advance:
+  loop_pairs: 9 (k=0 seed 1, k=7i seed i+1 for i=1..8), one wave of parallel jobs
+  final_pairs: 15 (k=100+i, seed 100+i, i=1..15), disjoint from the loop's
+metrics:
+  sigma_between: per design, SD over its 17 variants of ln(mean Fmax over seeds 1-2), pooled RMS over designs
+  sigma_seed: per design, pooled SD of ln(Fmax) between seeds within a variant, pooled RMS
+  sigma_P: SD of ln(median of P draws), each draw = a variant chosen with replacement
+    from the design's 17 and one of its seeds at random; 20,000 Monte Carlo samples per
+    design; pooled RMS; for P = 9 (loop) and P = 15 (final)
+decision_rules:
+  margin: ACCEPT_MARGIN_LN = 2.33 * sigma_9 (one-sided 5% false-accept for a
+    candidate equal to the champion, both scored with 9 independent pairs).
+  final: sigma_15 is reported as the measurement-noise component of each run's
+    headline score; it enters the power statement of the main comparison.
+failures: >
+  A pair that fails placement is recorded; a variant counts only with >= 1 placed
+  seed. A design with more than 1/3 failed variants is reported and excluded from
+  the pooled sigmas.
+outputs: runs.jsonl, notes.md in this directory

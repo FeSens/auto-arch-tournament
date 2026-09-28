@@ -23,7 +23,8 @@ fi
 ln -s "$REPO/.toolchain" "$WORK/.toolchain"
 # SYNTH_ARGS (flow experiments): extra synth_gowin options, applied to the copy.
 if [ -n "${SYNTH_ARGS:-}" ]; then
-  sed -i '' "s|synth_gowin -top core_bench|synth_gowin -top core_bench ${SYNTH_ARGS}|" "$WORK/fpga/scripts/synth.tcl"
+  sed -i.orig "s|synth_gowin -top core_bench|synth_gowin -top core_bench ${SYNTH_ARGS}|" "$WORK/fpga/scripts/synth.tcl"
+  rm -f "$WORK/fpga/scripts/synth.tcl.orig"
   grep -q "synth_gowin -top core_bench ${SYNTH_ARGS}" "$WORK/fpga/scripts/synth.tcl"
 fi
 cd "$WORK"
