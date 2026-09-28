@@ -1,0 +1,162 @@
+{"design": "V0", "k": 0, "seed": 1, "fmax_mhz": 97.2, "flow": "-family gw2a", "lut4": 9723, "dff": 1437, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "V0", "k": 0, "seed": 2, "fmax_mhz": 100.66, "flow": "-family gw2a", "lut4": 9723, "dff": 1437, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "V0", "k": 5, "seed": 1, "fmax_mhz": 99.25, "flow": "-family gw2a", "lut4": 9744, "dff": 1437, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "V0", "k": 5, "seed": 2, "fmax_mhz": 100.19, "flow": "-family gw2a", "lut4": 9744, "dff": 1437, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "V0", "k": 13, "seed": 1, "fmax_mhz": 86.69, "flow": "-family gw2a", "lut4": 9605, "dff": 1437, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "V0", "k": 13, "seed": 2, "fmax_mhz": 87.01, "flow": "-family gw2a", "lut4": 9605, "dff": 1437, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "V0", "k": 9, "seed": 1, "fmax_mhz": 136.71, "flow": "-family gw2a", "lut4": 9705, "dff": 1437, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "V0", "k": 9, "seed": 2, "fmax_mhz": 146.48, "flow": "-family gw2a", "lut4": 9705, "dff": 1437, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "V0", "k": 25, "seed": 2, "fmax_mhz": 144.86, "flow": "-family gw2a", "lut4": 9724, "dff": 1437, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "V0", "k": 25, "seed": 1, "fmax_mhz": 139.53, "flow": "-family gw2a", "lut4": 9724, "dff": 1437, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "V0", "k": 17, "seed": 2, "fmax_mhz": 118.62, "flow": "-family gw2a", "lut4": 9624, "dff": 1437, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "V0", "k": 17, "seed": 1, "fmax_mhz": 120.0, "flow": "-family gw2a", "lut4": 9624, "dff": 1437, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "V0", "k": 21, "seed": 2, "fmax_mhz": 137.25, "flow": "-family gw2a", "lut4": 9559, "dff": 1437, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "V0", "k": 21, "seed": 1, "fmax_mhz": 135.83, "flow": "-family gw2a", "lut4": 9559, "dff": 1437, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "V0", "k": 29, "seed": 1, "fmax_mhz": 143.86, "flow": "-family gw2a", "lut4": 10097, "dff": 1437, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "V0", "k": 29, "seed": 2, "fmax_mhz": 145.84, "flow": "-family gw2a", "lut4": 10097, "dff": 1437, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "V0", "k": 33, "seed": 1, "fmax_mhz": 84.8, "flow": "-family gw2a", "lut4": 9833, "dff": 1439, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "V0", "k": 33, "seed": 2, "fmax_mhz": 90.75, "flow": "-family gw2a", "lut4": 9833, "dff": 1439, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-sol_rep1", "k": 9, "seed": 1, "fmax_mhz": 177.09, "flow": "-family gw2a", "lut4": 10419, "dff": 1535, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-sol_rep1", "k": 9, "seed": 2, "fmax_mhz": 176.8, "flow": "-family gw2a", "lut4": 10419, "dff": 1535, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-sol_rep1", "k": 5, "seed": 2, "fmax_mhz": 185.77, "flow": "-family gw2a", "lut4": 10247, "dff": 1536, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-sol_rep1", "k": 5, "seed": 1, "fmax_mhz": 197.55, "flow": "-family gw2a", "lut4": 10247, "dff": 1536, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-sol_rep1", "k": 0, "seed": 2, "fmax_mhz": 188.15, "flow": "-family gw2a", "lut4": 10061, "dff": 1536, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-sol_rep1", "k": 0, "seed": 1, "fmax_mhz": 199.92, "flow": "-family gw2a", "lut4": 10061, "dff": 1536, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-sol_rep1", "k": 13, "seed": 2, "fmax_mhz": 214.96, "flow": "-family gw2a", "lut4": 10383, "dff": 1536, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-sol_rep1", "k": 13, "seed": 1, "fmax_mhz": 200.92, "flow": "-family gw2a", "lut4": 10383, "dff": 1536, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-sol_rep1", "k": 21, "seed": 1, "fmax_mhz": 200.6, "flow": "-family gw2a", "lut4": 10660, "dff": 1536, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-sol_rep1", "k": 21, "seed": 2, "fmax_mhz": 205.89, "flow": "-family gw2a", "lut4": 10660, "dff": 1536, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-sol_rep1", "k": 17, "seed": 1, "fmax_mhz": 125.61, "flow": "-family gw2a", "lut4": 10132, "dff": 1536, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-sol_rep1", "k": 17, "seed": 2, "fmax_mhz": 143.84, "flow": "-family gw2a", "lut4": 10132, "dff": 1536, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-sol_rep1", "k": 25, "seed": 2, "fmax_mhz": 166.69, "flow": "-family gw2a", "lut4": 10254, "dff": 1536, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-sol_rep1", "k": 25, "seed": 1, "fmax_mhz": 169.49, "flow": "-family gw2a", "lut4": 10254, "dff": 1536, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-terra_rep3", "k": 0, "seed": 1, "fmax_mhz": 125.72, "flow": "-family gw2a", "lut4": 7782, "dff": 1468, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-terra_rep3", "k": 0, "seed": 2, "fmax_mhz": 141.64, "flow": "-family gw2a", "lut4": 7782, "dff": 1468, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-sol_rep1", "k": 29, "seed": 1, "fmax_mhz": 200.72, "flow": "-family gw2a", "lut4": 10165, "dff": 1536, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-sol_rep1", "k": 29, "seed": 2, "fmax_mhz": 214.0, "flow": "-family gw2a", "lut4": 10165, "dff": 1536, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-sol_rep1", "k": 33, "seed": 1, "fmax_mhz": 200.72, "flow": "-family gw2a", "lut4": 10165, "dff": 1536, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-sol_rep1", "k": 33, "seed": 2, "fmax_mhz": 214.0, "flow": "-family gw2a", "lut4": 10165, "dff": 1536, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-terra_rep3", "k": 5, "seed": 2, "fmax_mhz": 147.04, "flow": "-family gw2a", "lut4": 7757, "dff": 1469, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-terra_rep3", "k": 5, "seed": 1, "fmax_mhz": 169.06, "flow": "-family gw2a", "lut4": 7757, "dff": 1469, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-terra_rep3", "k": 9, "seed": 1, "fmax_mhz": 147.32, "flow": "-family gw2a", "lut4": 7773, "dff": 1468, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-terra_rep3", "k": 9, "seed": 2, "fmax_mhz": 138.18, "flow": "-family gw2a", "lut4": 7773, "dff": 1468, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-terra_rep3", "k": 17, "seed": 2, "fmax_mhz": 126.86, "flow": "-family gw2a", "lut4": 7790, "dff": 1469, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-terra_rep3", "k": 17, "seed": 1, "fmax_mhz": 140.55, "flow": "-family gw2a", "lut4": 7790, "dff": 1469, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-terra_rep3", "k": 21, "seed": 1, "fmax_mhz": 135.87, "flow": "-family gw2a", "lut4": 7794, "dff": 1468, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-terra_rep3", "k": 21, "seed": 2, "fmax_mhz": 144.74, "flow": "-family gw2a", "lut4": 7794, "dff": 1468, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-terra_rep3", "k": 13, "seed": 1, "fmax_mhz": 51.24, "flow": "-family gw2a", "lut4": 7840, "dff": 1469, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-terra_rep3", "k": 13, "seed": 2, "fmax_mhz": 50.53, "flow": "-family gw2a", "lut4": 7840, "dff": 1469, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-terra_rep3", "k": 29, "seed": 2, "fmax_mhz": 151.31, "flow": "-family gw2a", "lut4": 7797, "dff": 1469, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-terra_rep3", "k": 29, "seed": 1, "fmax_mhz": 157.98, "flow": "-family gw2a", "lut4": 7797, "dff": 1469, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-terra_rep3", "k": 25, "seed": 2, "fmax_mhz": 69.65, "flow": "-family gw2a", "lut4": 7820, "dff": 1468, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-terra_rep3", "k": 25, "seed": 1, "fmax_mhz": 69.39, "flow": "-family gw2a", "lut4": 7820, "dff": 1468, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-terra_rep3", "k": 33, "seed": 1, "fmax_mhz": 156.62, "flow": "-family gw2a", "lut4": 7809, "dff": 1468, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-terra_rep3", "k": 33, "seed": 2, "fmax_mhz": 142.96, "flow": "-family gw2a", "lut4": 7809, "dff": 1468, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "V0", "k": 13, "seed": 2, "fmax_mhz": null, "flow": "-family gw2a -noabc9", "lut4": 42410, "dff": 1469, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "V0", "k": 13, "seed": 1, "fmax_mhz": null, "flow": "-family gw2a -noabc9", "lut4": 42410, "dff": 1469, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "V0", "k": 9, "seed": 2, "fmax_mhz": null, "flow": "-family gw2a -noabc9", "lut4": 42437, "dff": 1469, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "V0", "k": 9, "seed": 1, "fmax_mhz": null, "flow": "-family gw2a -noabc9", "lut4": 42437, "dff": 1469, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "V0", "k": 5, "seed": 1, "fmax_mhz": null, "flow": "-family gw2a -noabc9", "lut4": 42441, "dff": 1469, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "V0", "k": 5, "seed": 2, "fmax_mhz": null, "flow": "-family gw2a -noabc9", "lut4": 42441, "dff": 1469, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "V0", "k": 0, "seed": 1, "fmax_mhz": null, "flow": "-family gw2a -noabc9", "lut4": 42441, "dff": 1469, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "V0", "k": 0, "seed": 2, "fmax_mhz": null, "flow": "-family gw2a -noabc9", "lut4": 42441, "dff": 1469, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "V0", "k": 25, "seed": 1, "fmax_mhz": null, "flow": "-family gw2a -noabc9", "lut4": 41712, "dff": 1469, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "V0", "k": 25, "seed": 2, "fmax_mhz": null, "flow": "-family gw2a -noabc9", "lut4": 41712, "dff": 1469, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "V0", "k": 29, "seed": 1, "fmax_mhz": null, "flow": "-family gw2a -noabc9", "lut4": 41842, "dff": 1469, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "V0", "k": 29, "seed": 2, "fmax_mhz": null, "flow": "-family gw2a -noabc9", "lut4": 41842, "dff": 1469, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "V0", "k": 17, "seed": 1, "fmax_mhz": null, "flow": "-family gw2a -noabc9", "lut4": 42441, "dff": 1469, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "V0", "k": 17, "seed": 2, "fmax_mhz": null, "flow": "-family gw2a -noabc9", "lut4": 42441, "dff": 1469, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "V0", "k": 21, "seed": 1, "fmax_mhz": null, "flow": "-family gw2a -noabc9", "lut4": 42441, "dff": 1469, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "V0", "k": 21, "seed": 2, "fmax_mhz": null, "flow": "-family gw2a -noabc9", "lut4": 42441, "dff": 1469, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "V0", "k": 33, "seed": 2, "fmax_mhz": null, "flow": "-family gw2a -noabc9", "lut4": 42174, "dff": 1469, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "V0", "k": 33, "seed": 1, "fmax_mhz": null, "flow": "-family gw2a -noabc9", "lut4": 42174, "dff": 1469, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-sol_rep1", "k": 0, "seed": 2, "fmax_mhz": null, "flow": "-family gw2a -noabc9", "lut4": 42710, "dff": 1536, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-sol_rep1", "k": 0, "seed": 1, "fmax_mhz": null, "flow": "-family gw2a -noabc9", "lut4": 42710, "dff": 1536, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-sol_rep1", "k": 9, "seed": 1, "fmax_mhz": null, "flow": "-family gw2a -noabc9", "lut4": 42416, "dff": 1536, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-sol_rep1", "k": 9, "seed": 2, "fmax_mhz": null, "flow": "-family gw2a -noabc9", "lut4": 42416, "dff": 1536, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-sol_rep1", "k": 5, "seed": 1, "fmax_mhz": null, "flow": "-family gw2a -noabc9", "lut4": 45175, "dff": 1536, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-sol_rep1", "k": 5, "seed": 2, "fmax_mhz": null, "flow": "-family gw2a -noabc9", "lut4": 45175, "dff": 1536, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-sol_rep1", "k": 13, "seed": 1, "fmax_mhz": null, "flow": "-family gw2a -noabc9", "lut4": 44737, "dff": 1536, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-sol_rep1", "k": 13, "seed": 2, "fmax_mhz": null, "flow": "-family gw2a -noabc9", "lut4": 44737, "dff": 1536, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-sol_rep1", "k": 25, "seed": 2, "fmax_mhz": null, "flow": "-family gw2a -noabc9", "lut4": 42096, "dff": 1536, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-sol_rep1", "k": 25, "seed": 1, "fmax_mhz": null, "flow": "-family gw2a -noabc9", "lut4": 42096, "dff": 1536, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-sol_rep1", "k": 17, "seed": 1, "fmax_mhz": null, "flow": "-family gw2a -noabc9", "lut4": 45129, "dff": 1536, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-sol_rep1", "k": 17, "seed": 2, "fmax_mhz": null, "flow": "-family gw2a -noabc9", "lut4": 45129, "dff": 1536, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-sol_rep1", "k": 21, "seed": 1, "fmax_mhz": null, "flow": "-family gw2a -noabc9", "lut4": 45129, "dff": 1536, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-sol_rep1", "k": 21, "seed": 2, "fmax_mhz": null, "flow": "-family gw2a -noabc9", "lut4": 45129, "dff": 1536, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-sol_rep1", "k": 29, "seed": 1, "fmax_mhz": null, "flow": "-family gw2a -noabc9", "lut4": 41507, "dff": 1536, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-sol_rep1", "k": 29, "seed": 2, "fmax_mhz": null, "flow": "-family gw2a -noabc9", "lut4": 41507, "dff": 1536, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-sol_rep1", "k": 33, "seed": 1, "fmax_mhz": null, "flow": "-family gw2a -noabc9", "lut4": 41507, "dff": 1536, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-sol_rep1", "k": 33, "seed": 2, "fmax_mhz": null, "flow": "-family gw2a -noabc9", "lut4": 41507, "dff": 1536, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-terra_rep3", "k": 0, "seed": 2, "fmax_mhz": null, "flow": "-family gw2a -noabc9", "lut4": 43073, "dff": 1500, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-terra_rep3", "k": 0, "seed": 1, "fmax_mhz": null, "flow": "-family gw2a -noabc9", "lut4": 43073, "dff": 1500, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-terra_rep3", "k": 5, "seed": 1, "fmax_mhz": null, "flow": "-family gw2a -noabc9", "lut4": 45675, "dff": 1500, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-terra_rep3", "k": 5, "seed": 2, "fmax_mhz": null, "flow": "-family gw2a -noabc9", "lut4": 45675, "dff": 1500, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-terra_rep3", "k": 9, "seed": 2, "fmax_mhz": null, "flow": "-family gw2a -noabc9", "lut4": 44924, "dff": 1500, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-terra_rep3", "k": 9, "seed": 1, "fmax_mhz": null, "flow": "-family gw2a -noabc9", "lut4": 44924, "dff": 1500, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-terra_rep3", "k": 13, "seed": 1, "fmax_mhz": null, "flow": "-family gw2a -noabc9", "lut4": 44436, "dff": 1500, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-terra_rep3", "k": 13, "seed": 2, "fmax_mhz": null, "flow": "-family gw2a -noabc9", "lut4": 44436, "dff": 1500, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-terra_rep3", "k": 17, "seed": 1, "fmax_mhz": null, "flow": "-family gw2a -noabc9", "lut4": 44436, "dff": 1500, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-terra_rep3", "k": 17, "seed": 2, "fmax_mhz": null, "flow": "-family gw2a -noabc9", "lut4": 44436, "dff": 1500, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-terra_rep3", "k": 21, "seed": 2, "fmax_mhz": null, "flow": "-family gw2a -noabc9", "lut4": 42955, "dff": 1500, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-terra_rep3", "k": 21, "seed": 1, "fmax_mhz": null, "flow": "-family gw2a -noabc9", "lut4": 42955, "dff": 1500, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-terra_rep3", "k": 25, "seed": 1, "fmax_mhz": null, "flow": "-family gw2a -noabc9", "lut4": 43520, "dff": 1500, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-terra_rep3", "k": 25, "seed": 2, "fmax_mhz": null, "flow": "-family gw2a -noabc9", "lut4": 43520, "dff": 1500, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-terra_rep3", "k": 29, "seed": 1, "fmax_mhz": null, "flow": "-family gw2a -noabc9", "lut4": 43520, "dff": 1500, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-terra_rep3", "k": 29, "seed": 2, "fmax_mhz": null, "flow": "-family gw2a -noabc9", "lut4": 43520, "dff": 1500, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-terra_rep3", "k": 33, "seed": 2, "fmax_mhz": null, "flow": "-family gw2a -noabc9", "lut4": 42456, "dff": 1500, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-terra_rep3", "k": 33, "seed": 1, "fmax_mhz": null, "flow": "-family gw2a -noabc9", "lut4": 42456, "dff": 1500, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "V0", "k": 5, "seed": 1, "fmax_mhz": 86.68, "flow": "-family gw2a -retime", "lut4": 11125, "dff": 1420, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "V0", "k": 5, "seed": 2, "fmax_mhz": 87.7, "flow": "-family gw2a -retime", "lut4": 11125, "dff": 1420, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "V0", "k": 9, "seed": 1, "fmax_mhz": 86.68, "flow": "-family gw2a -retime", "lut4": 11125, "dff": 1420, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "V0", "k": 9, "seed": 2, "fmax_mhz": 87.7, "flow": "-family gw2a -retime", "lut4": 11125, "dff": 1420, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "V0", "k": 0, "seed": 1, "fmax_mhz": 86.68, "flow": "-family gw2a -retime", "lut4": 11125, "dff": 1420, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "V0", "k": 0, "seed": 2, "fmax_mhz": 87.7, "flow": "-family gw2a -retime", "lut4": 11125, "dff": 1420, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "V0", "k": 13, "seed": 1, "fmax_mhz": 86.68, "flow": "-family gw2a -retime", "lut4": 11125, "dff": 1420, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "V0", "k": 13, "seed": 2, "fmax_mhz": 87.7, "flow": "-family gw2a -retime", "lut4": 11125, "dff": 1420, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "V0", "k": 21, "seed": 1, "fmax_mhz": 86.68, "flow": "-family gw2a -retime", "lut4": 11125, "dff": 1420, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "V0", "k": 21, "seed": 2, "fmax_mhz": 87.7, "flow": "-family gw2a -retime", "lut4": 11125, "dff": 1420, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "V0", "k": 17, "seed": 1, "fmax_mhz": 86.68, "flow": "-family gw2a -retime", "lut4": 11125, "dff": 1420, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "V0", "k": 17, "seed": 2, "fmax_mhz": 87.7, "flow": "-family gw2a -retime", "lut4": 11125, "dff": 1420, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "V0", "k": 25, "seed": 1, "fmax_mhz": 86.68, "flow": "-family gw2a -retime", "lut4": 11125, "dff": 1420, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "V0", "k": 25, "seed": 2, "fmax_mhz": 87.7, "flow": "-family gw2a -retime", "lut4": 11125, "dff": 1420, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "V0", "k": 29, "seed": 1, "fmax_mhz": 86.68, "flow": "-family gw2a -retime", "lut4": 11125, "dff": 1420, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "V0", "k": 29, "seed": 2, "fmax_mhz": 87.7, "flow": "-family gw2a -retime", "lut4": 11125, "dff": 1420, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "V0", "k": 33, "seed": 1, "fmax_mhz": 86.68, "flow": "-family gw2a -retime", "lut4": 11125, "dff": 1420, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "V0", "k": 33, "seed": 2, "fmax_mhz": 87.7, "flow": "-family gw2a -retime", "lut4": 11125, "dff": 1420, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-sol_rep1", "k": 0, "seed": 2, "fmax_mhz": 85.32, "flow": "-family gw2a -retime", "lut4": 11493, "dff": 1503, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-sol_rep1", "k": 0, "seed": 1, "fmax_mhz": 87.19, "flow": "-family gw2a -retime", "lut4": 11493, "dff": 1503, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-sol_rep1", "k": 5, "seed": 2, "fmax_mhz": 85.32, "flow": "-family gw2a -retime", "lut4": 11493, "dff": 1503, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-sol_rep1", "k": 5, "seed": 1, "fmax_mhz": 87.19, "flow": "-family gw2a -retime", "lut4": 11493, "dff": 1503, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-sol_rep1", "k": 9, "seed": 2, "fmax_mhz": 85.32, "flow": "-family gw2a -retime", "lut4": 11493, "dff": 1503, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-sol_rep1", "k": 9, "seed": 1, "fmax_mhz": 87.19, "flow": "-family gw2a -retime", "lut4": 11493, "dff": 1503, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-sol_rep1", "k": 13, "seed": 2, "fmax_mhz": 85.32, "flow": "-family gw2a -retime", "lut4": 11493, "dff": 1503, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-sol_rep1", "k": 13, "seed": 1, "fmax_mhz": 87.19, "flow": "-family gw2a -retime", "lut4": 11493, "dff": 1503, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-sol_rep1", "k": 17, "seed": 2, "fmax_mhz": 85.32, "flow": "-family gw2a -retime", "lut4": 11493, "dff": 1503, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-sol_rep1", "k": 17, "seed": 1, "fmax_mhz": 87.19, "flow": "-family gw2a -retime", "lut4": 11493, "dff": 1503, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-sol_rep1", "k": 21, "seed": 2, "fmax_mhz": 85.32, "flow": "-family gw2a -retime", "lut4": 11493, "dff": 1503, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-sol_rep1", "k": 21, "seed": 1, "fmax_mhz": 87.19, "flow": "-family gw2a -retime", "lut4": 11493, "dff": 1503, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-sol_rep1", "k": 25, "seed": 2, "fmax_mhz": 85.32, "flow": "-family gw2a -retime", "lut4": 11493, "dff": 1503, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-sol_rep1", "k": 25, "seed": 1, "fmax_mhz": 87.19, "flow": "-family gw2a -retime", "lut4": 11493, "dff": 1503, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-terra_rep3", "k": 0, "seed": 1, "fmax_mhz": 166.0, "flow": "-family gw2a -retime", "lut4": 9400, "dff": 1533, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-terra_rep3", "k": 0, "seed": 2, "fmax_mhz": 140.35, "flow": "-family gw2a -retime", "lut4": 9400, "dff": 1533, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-terra_rep3", "k": 5, "seed": 1, "fmax_mhz": 166.0, "flow": "-family gw2a -retime", "lut4": 9400, "dff": 1533, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-terra_rep3", "k": 5, "seed": 2, "fmax_mhz": 140.35, "flow": "-family gw2a -retime", "lut4": 9400, "dff": 1533, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-sol_rep1", "k": 29, "seed": 2, "fmax_mhz": 85.32, "flow": "-family gw2a -retime", "lut4": 11493, "dff": 1503, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-sol_rep1", "k": 29, "seed": 1, "fmax_mhz": 87.19, "flow": "-family gw2a -retime", "lut4": 11493, "dff": 1503, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-sol_rep1", "k": 33, "seed": 2, "fmax_mhz": 85.32, "flow": "-family gw2a -retime", "lut4": 11493, "dff": 1503, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-sol_rep1", "k": 33, "seed": 1, "fmax_mhz": 87.19, "flow": "-family gw2a -retime", "lut4": 11493, "dff": 1503, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-terra_rep3", "k": 9, "seed": 1, "fmax_mhz": 166.0, "flow": "-family gw2a -retime", "lut4": 9400, "dff": 1533, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-terra_rep3", "k": 9, "seed": 2, "fmax_mhz": 140.35, "flow": "-family gw2a -retime", "lut4": 9400, "dff": 1533, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-terra_rep3", "k": 13, "seed": 1, "fmax_mhz": 166.0, "flow": "-family gw2a -retime", "lut4": 9400, "dff": 1533, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-terra_rep3", "k": 13, "seed": 2, "fmax_mhz": 140.35, "flow": "-family gw2a -retime", "lut4": 9400, "dff": 1533, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-terra_rep3", "k": 17, "seed": 1, "fmax_mhz": 166.0, "flow": "-family gw2a -retime", "lut4": 9400, "dff": 1533, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-terra_rep3", "k": 17, "seed": 2, "fmax_mhz": 140.35, "flow": "-family gw2a -retime", "lut4": 9400, "dff": 1533, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-terra_rep3", "k": 21, "seed": 2, "fmax_mhz": 63.56, "flow": "-family gw2a -retime", "lut4": 8803, "dff": 1548, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-terra_rep3", "k": 21, "seed": 1, "fmax_mhz": 60.79, "flow": "-family gw2a -retime", "lut4": 8803, "dff": 1548, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-terra_rep3", "k": 25, "seed": 2, "fmax_mhz": 63.56, "flow": "-family gw2a -retime", "lut4": 8803, "dff": 1548, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-terra_rep3", "k": 25, "seed": 1, "fmax_mhz": 60.79, "flow": "-family gw2a -retime", "lut4": 8803, "dff": 1548, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-terra_rep3", "k": 29, "seed": 2, "fmax_mhz": 63.56, "flow": "-family gw2a -retime", "lut4": 8803, "dff": 1548, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-terra_rep3", "k": 29, "seed": 1, "fmax_mhz": 60.79, "flow": "-family gw2a -retime", "lut4": 8803, "dff": 1548, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-terra_rep3", "k": 33, "seed": 2, "fmax_mhz": 63.56, "flow": "-family gw2a -retime", "lut4": 8803, "dff": 1548, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
+{"design": "gpt-5_6-terra_rep3", "k": 33, "seed": 1, "fmax_mhz": 60.79, "flow": "-family gw2a -retime", "lut4": 8803, "dff": 1548, "ram16sdp4": 0, "bsram": 4, "mult36x36": 1}
