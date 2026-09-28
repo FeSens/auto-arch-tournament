@@ -8,9 +8,11 @@ R=$1; D=$2; L=$3; MAX=${4:-600}
 A=~/monitor/alerts.jsonl
 cd ~/auto-arch-tournament
 sig() {
-  for f in /srv/hwebench/clones/*/cores/bench/experiments/log.jsonl; do
-    # completed rounds: baseline line + 3 slot entries per round (K=3)
-    [ -f "$f" ] && echo "$f $(( ($(wc -l < "$f") - 1) / 3 ))"; done
+  for c in /srv/hwebench/clones/*/; do
+    # completed rounds: baseline line + 3 slot entries per round (K=3);
+    # a log not written yet counts as 0 rounds
+    n=$(cat "$c/cores/bench/experiments/log.jsonl" 2>/dev/null | wc -l)
+    echo "$c $(( n > 0 ? (n - 1) / 3 : 0 ))"; done
   # a missing file counts as 0 so its creation is not a wake
   cat "$R" 2>/dev/null | wc -l
   cat "$A" 2>/dev/null | grep -c '"severity": "\(HIGH\|HANG\)"'
