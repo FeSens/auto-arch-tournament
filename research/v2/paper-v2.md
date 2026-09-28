@@ -190,8 +190,9 @@ own tool (Gowin EDA 1.9.11.03):
   run, sharing the same riscv-formal checkout, deleted my work directory
   mid-run", Opus; "staging directory disappeared before SBY wrote
   `reg_ch0/PASS`", Luna; Sol renamed its core to dodge the collision). The
-  same reports are in the smoke run that validated harness 2.3; the
-  monitor missed them because it scanned commands, not what agents say. Fix (harness 2.4): unique work
+  same reports are in every smoke run from smoke3 on (2 to 7 per run),
+  including the one that validated harness 2.3; the monitor missed them
+  because it scanned commands, not what agents say. Fix (harness 2.4): unique work
   dirs (mktemp name, plain mkdir so permissions follow umask), a flock held
   for the run's lifetime, reaping only dirs whose lock is free and older
   than 10 minutes, the harness removing exactly its own pinned dir; a
@@ -216,7 +217,12 @@ own tool (Gowin EDA 1.9.11.03):
   threads still competed as one pool) and a measured check caught it:
   with 20, 20 and 2 spinning threads the 2-thread run got 1.0 core, what
   per-thread sharing gives; after the fix it gets 2.0 and the two
-  20-thread runs split 8.9/9.1 on average over four trials.
+  20-thread runs split 8.9/9.1 on average over four trials. The 2.5
+  validation smoke then surfaced one more shared scratch space through the
+  new monitor rule: the runner set one TMPDIR per run, the implementation
+  prompt tells agents to stage scratch files there, and an Opus agent
+  reported a sibling slot overwriting its logs. Each agent invocation now
+  gets a private TMPDIR under its own worktree, removed when it exits.
 - Paper angle: a comparison of agent CLIs needs per-CLI integration
   testing under the real concurrency, and a monitor that reads outcomes by
   class per system; the bias showed up as one system's "broken" count.
