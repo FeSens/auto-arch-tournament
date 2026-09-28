@@ -285,6 +285,16 @@ def load_done_set(results_jsonl: Path) -> set[tuple[str, int]]:
     return done
 
 
+def interleaved_batches(jobs: list[JobSpec]) -> list[list[JobSpec]]:
+    """V2 schedule: one batch per rep holding that rep's run of every
+    system, started together, so time of day, provider load and host
+    contention hit all systems alike. Launch order alternates by rep."""
+    by_rep: dict[int, list[JobSpec]] = {}
+    for j in jobs:
+        by_rep.setdefault(j.rep, []).append(j)
+    return [b if rep % 2 else b[::-1] for rep, b in sorted(by_rep.items())]
+
+
 def enumerate_jobs(
     models: list[ModelEntry],
     reps: int,
@@ -1385,6 +1395,9 @@ def main() -> int:
     ap.add_argument("--agent-user", default=os.environ.get("HWE_AGENT_USER") or None,
                     help="run the agent CLIs as this account (V2 isolation; "
                          "see research/v2/scripts/setup_bench_user.sh)")
+    ap.add_argument("--interleave", action="store_true",
+                    help="run each rep's jobs for all models together, rep by rep "
+                         "(V2 schedule; overrides --parallel)")
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--skip-preflight", action="store_true",
                     help="skip the toolchain pre-flight check (debug only)")
@@ -1479,7 +1492,26 @@ def main() -> int:
     args.results_jsonl.parent.mkdir(parents=True, exist_ok=True)
 
     failures = 0
-    if args.parallel <= 1:
+    job_kw = dict(repo_root=REPO_ROOT, ref=args.ref, clone_base=args.clone_base,
+                  results_dir=args.results_dir, results_jsonl=args.results_jsonl,
+                  keys=keys, n=args.n, k=args.k, timeout_sec=args.timeout_sec,
+                  max_cost_usd=args.max_cost, keep_clone=args.keep_clones)
+    if args.interleave:
+        for batch in interleaved_batches(jobs):
+            print(f"[bench] batch: {', '.join(j.slug for j in batch)}", flush=True)
+            with ThreadPoolExecutor(max_workers=len(batch)) as ex:
+                futs = {}
+                for j in batch:
+                    futs[ex.submit(run_one_job, j, **job_kw)] = j
+                    time.sleep(5)   # launch order is the listed order
+                for fut in as_completed(futs):
+                    try:
+                        if fut.result()["status"] != "done":
+                            failures += 1
+                    except Exception as e:
+                        print(f"[bench] {futs[fut].slug}: exception {e}", file=sys.stderr)
+                        failures += 1
+    elif args.parallel <= 1:
         for j in jobs:
             row = run_one_job(
                 j,
