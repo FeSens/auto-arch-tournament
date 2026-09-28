@@ -912,9 +912,16 @@ def _sync_auth_file(iso, real) -> bool:
         return False
     if new <= old:
         return False
+    # The agent accounts share one login through a symlink into a group
+    # directory (a copy per account would be revoked by the next refresh's
+    # token rotation): write through the link and keep the file's mode.
+    real = real.resolve()
+    # Never wider than before: owner-only, or owner+group for the shared file.
+    shared = real.exists() and real.stat().st_mode & 0o020
+    mode = 0o660 if shared else 0o600
     tmp = real.with_name(real.name + ".bench-sync")
     shutil.copy2(iso, tmp)
-    os.chmod(tmp, 0o600)
+    os.chmod(tmp, mode)
     os.replace(tmp, real)
     return True
 
@@ -1099,8 +1106,9 @@ def make_env_for_job(job: JobSpec, clone: Path, keys: dict[str, str]) -> dict[st
             # keys file; the agent account has no Keychain session.
             settings = claude_isolation_settings(
                 clone, uid=agent.uid, home=home, read_roots=agent.read_roots())
-            # The account's real home holds its Codex login.
-            settings["sandbox"]["filesystem"]["denyRead"].append(str(agent.home))
+            # The account's real home and the shared auth dir hold the Codex login.
+            settings["sandbox"]["filesystem"]["denyRead"] += [
+                str(agent.home), str(agent.shared / "auth")]
             env["CLAUDE_BENCH_SETTINGS"] = json.dumps(settings)
         else:
             env["CLAUDE_BENCH_SETTINGS"] = json.dumps(claude_isolation_settings(clone))

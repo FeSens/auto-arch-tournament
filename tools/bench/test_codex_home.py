@@ -53,3 +53,24 @@ def test_sync_back_only_when_symlink_replaced_by_newer_token(tmp_path):
     assert sync_codex_auth_back(home, user) is True
     assert json.loads((user / "auth.json").read_text())["last_refresh"] == "2026-09-24T00:00:00Z"
     assert oct(os.stat(user / "auth.json").st_mode & 0o777) == "0o600"
+
+
+def test_sync_back_writes_through_a_shared_login_link(tmp_path):
+    """Pool accounts link ~/.codex/auth.json to one group file; a refresh is
+    written into that file (link kept, group mode kept)."""
+    shared = tmp_path / "auth" / "auth.json"
+    shared.parent.mkdir()
+    shared.write_text(json.dumps({"last_refresh": "2026-09-01T00:00:00Z"}))
+    os.chmod(shared, 0o660)
+    user = tmp_path / "home" / ".codex"
+    user.mkdir(parents=True)
+    (user / "auth.json").symlink_to(shared)
+    clone = tmp_path / "clone"
+    clone.mkdir()
+    home = isolated_codex_home(clone, user)
+    (home / "auth.json").unlink()
+    (home / "auth.json").write_text(json.dumps({"last_refresh": "2026-09-24T00:00:00Z"}))
+    assert sync_codex_auth_back(home, user) is True
+    assert (user / "auth.json").is_symlink()
+    assert json.loads(shared.read_text())["last_refresh"] == "2026-09-24T00:00:00Z"
+    assert oct(os.stat(shared).st_mode & 0o777) == "0o660"

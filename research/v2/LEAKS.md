@@ -46,6 +46,10 @@ agent searching `cores/v1` for past divider work. The harness was frozen as
 
 - The agent can read its own run's history (log of its earlier hypotheses
   and their outcomes). That is the loop's design, identical for all systems.
+- The pool shares one Codex login (a group-readable file linked from each
+  account's home; per-account copies would be revoked by token rotation).
+  Any agent account can read that token; it carries no benchmark
+  information. Claude's sandbox is denied the directory.
 - The agent can read its own CLI login token (it runs as the account that
   owns it). Not information about the benchmark.
 - Gowin, the toolchain and the contract files are public knowledge.

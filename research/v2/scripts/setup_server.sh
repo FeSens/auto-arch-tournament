@@ -137,6 +137,18 @@ echo "$OP ALL=($(echo $POOL | tr ' ' ',')) NOPASSWD: ALL" > /etc/sudoers.d/hwebe
 chmod 440 /etc/sudoers.d/hwebench
 visudo -cf /etc/sudoers.d/hwebench
 
+# 6a. One Codex login shared by the pool: a copy per account would be revoked
+#     by the next refresh (ChatGPT rotates refresh tokens), so each
+#     account's ~/.codex/auth.json links to a group-owned file.
+getent group hwecodex >/dev/null || groupadd hwecodex
+for a in $POOL; do
+  usermod -aG hwecodex "$a"
+  install -d -o "$a" -g "$a" -m 700 "/home/$a/.codex"
+  ln -sfn "$SHARED/auth/auth.json" "/home/$a/.codex/auth.json"
+  chown -h "$a:$a" "/home/$a/.codex/auth.json"
+done
+install -d -o root -g hwecodex -m 2770 "$SHARED/auth"
+
 # 6b. Agents see only their own processes (other runs' command lines are a
 #     leak); the operator's group sees all.
 GID=$(getent group "$OP" | cut -d: -f3)
@@ -185,8 +197,10 @@ OK. Operator: $OP (repo in $REPO); agents: $U; shared: $SHARED.
 Runner PATH for $OP: $SHARED/venv/bin:$TC/oss-cad-suite/bin:$TC/bin:\$PATH
 
 Two logins remain (once):
-  1. Codex, as each of $POOL:
-       sudo -iu <account> $SHARED/bin/codex login --device-auth
+  1. Codex, once (the pool shares it):
+       sudo -iu $U $SHARED/bin/codex login --device-auth
+       then: mv the new /home/$U/.codex/auth.json to $SHARED/auth/auth.json
+       (chgrp hwecodex, chmod 660) and restore the link
   2. Claude token:   run 'claude setup-token' (any machine), then as $OP:
        echo 'CLAUDE_CODE_OAUTH_TOKEN=<token>' >> ~/.bench-keys.env && chmod 600 ~/.bench-keys.env
 EOF
