@@ -1198,6 +1198,18 @@ def run_one_job(job: JobSpec, **kw) -> dict:
     agent = acquire_agent()
     try:
         return _run_one_job(job, **kw)
+    except Exception as e:
+        # Never lose a run without a trace (a harness failure under the
+        # incident policy); the clone stays until the rerun re-clones it.
+        import traceback
+        traceback.print_exc()
+        # "harness_error" is not a final status (load_done_set): a restart
+        # reruns the run from V0, and both attempts stay on record.
+        row = {"model": job.model.name, "rep": job.rep, "status": "harness_error",
+               "notes": f"runner exception: {type(e).__name__}: {e}"[:400],
+               "ended_at": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds")}
+        append_results_row(kw["results_jsonl"], row)
+        return row
     finally:
         release_agent(agent, kw["clone_base"] / job.slug)
 
@@ -1487,9 +1499,7 @@ def _run_one_job(
 
     # V2: keep the final design readable without the bundle (V1 lost the
     # final RTL of every run that predates bundles).
-    final_rtl = clone / "cores" / "bench" / "rtl"
-    if final_rtl.is_dir():
-        shutil.copytree(final_rtl, out_dir / "final-rtl", dirs_exist_ok=True)
+    save_final_rtl(clone, out_dir)
 
     # V2 headline metric: the final champion on the held-out kernels, which
     # the agents never see. Scored from the bundle, like tools.bench.transfer.
@@ -1502,6 +1512,22 @@ def _run_one_job(
         rmtree_shared(clone)
 
     return row
+
+
+def save_final_rtl(clone: Path, out_dir: Path) -> None:
+    """Copy the final design (git-tracked cores/bench/rtl) to out_dir/final-rtl.
+
+    The accepted design is what git tracks; the working tree also holds
+    agent debris, e.g. Claude Code's sandbox writes a 0700 .claude/ dir
+    (agent-owned, unreadable to the operator) wherever it works, and copying
+    it crashed the finish of a Claude run in the V2.2 smoke."""
+    tracked = subprocess.run(
+        ["git", "ls-files", "-z", "--", "cores/bench/rtl"],
+        cwd=str(clone), capture_output=True, text=True).stdout.split("\0")
+    for rel in filter(None, tracked):
+        dst = out_dir / "final-rtl" / Path(rel).relative_to("cores/bench/rtl")
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(clone / rel, dst)
 
 
 def score_holdout(rep_dir: Path) -> dict:

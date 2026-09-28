@@ -762,3 +762,44 @@ def test_claude_sandbox_placeholders_are_not_offlimits_writes(tmp_path, monkeypa
     assert dirty_state(dest) == {}
     (dest / "cores" / "bench" / "rogue.sv").write_text("module rogue; endmodule\n")
     assert list(dirty_state(dest)) == ["cores/bench/rogue.sv"]   # real writes still show
+
+
+def test_final_rtl_is_the_tracked_design_not_agent_debris(tmp_path, monkeypatch):
+    """Saving the final design copies git-tracked RTL only: an unreadable
+    agent-written dir (Claude's sandbox .claude/) in rtl/ must not crash
+    the finish of a run."""
+    import os
+    ref = "main"
+    repo_root = tmp_path / "repo"
+    _make_fixture_repo(repo_root, ref, with_holdout=False)
+    rtl = repo_root / "cores" / "bench" / "rtl"
+    rtl.mkdir(parents=True, exist_ok=True)
+    (rtl / "core.sv").write_text("module core; endmodule\n")
+    subprocess.run(["git", "add", "-A"], cwd=str(repo_root), check=True)
+    subprocess.run(["git", "-c", "user.email=t@t", "-c", "user.name=t", "commit", "--no-gpg-sign",
+                    "-q", "-m", "rtl"], cwd=str(repo_root), check=True)
+    subprocess.run(["git", "-c", "tag.gpgSign=false", "tag", "-f", ref], cwd=str(repo_root),
+                   check=True, capture_output=True)
+    monkeypatch.setattr(runner, "find_riscv_formal", lambda: None)
+    dest = tmp_path / "clone"
+    clone_fixture(repo_root, ref, dest)
+    locked = dest / "cores" / "bench" / "rtl" / ".claude"
+    locked.mkdir()
+    (locked / ".cc-writes").write_text("x")
+    os.chmod(locked, 0)
+    try:
+        runner.save_final_rtl(dest, tmp_path / "out")
+        assert [p.name for p in (tmp_path / "out" / "final-rtl").iterdir()] == ["core.sv"]
+    finally:
+        os.chmod(locked, 0o700)
+
+
+def test_runner_exception_records_a_rerunnable_row(tmp_path, monkeypatch):
+    monkeypatch.setattr(runner, "_run_one_job", lambda job, **kw: (_ for _ in ()).throw(PermissionError("x")))
+    monkeypatch.setattr(runner, "acquire_agent", lambda: None)
+    monkeypatch.setattr(runner, "release_agent", lambda a, c: None)
+    res = tmp_path / "results.jsonl"
+    job = JobSpec(model=ModelEntry(name="m", provider="claude", model="x", oauth=True), rep=1)
+    row = runner.run_one_job(job, clone_base=tmp_path, results_jsonl=res)
+    assert row["status"] == "harness_error" and "PermissionError" in row["notes"]
+    assert ("m", 1) not in runner.load_done_set(res)     # a restart reruns it
