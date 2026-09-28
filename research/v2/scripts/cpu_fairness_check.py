@@ -57,7 +57,10 @@ def main() -> int:
     p1 = phase(False)
     print(f"phase 1 (agents only, {ncpu} cores): " + ", ".join(f"{a} {c:.1f}" for a, c in p1.items()))
     big = [p1["hwebench"], p1["hwebench2"]]
-    if abs(big[0] - big[1]) > 0.15 * max(big):
+    # One window's split jitters by about +-10% and the larger share
+    # alternates between accounts from trial to trial (measured 2026-09-28,
+    # 8.1/9.9, 9.5/8.5, 8.6/9.4, 9.4/8.6 over 30 s), so allow 25% per window.
+    if abs(big[0] - big[1]) > 0.25 * max(big):
         print("FAIL: the two 20-thread runs did not split evenly"); ok = False
     if p1["hwebench3"] < 1.6:
         print("FAIL: the 2-thread run did not get its 2 cores"); ok = False

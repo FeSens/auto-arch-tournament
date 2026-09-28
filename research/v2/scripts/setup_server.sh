@@ -182,6 +182,15 @@ Description=HWE Bench agent CLIs (one child slice per agent account)
 [Slice]
 CPUWeight=20
 EOF
+# The children need an explicit weight too: without one systemd does not
+# enable the cpu controller inside hweagents.slice and every agent thread
+# competes in one pool (per-thread sharing again). The prefix drop-in
+# covers every hweagents-<acct>.slice.
+mkdir -p /etc/systemd/system/hweagents-.slice.d
+cat > /etc/systemd/system/hweagents-.slice.d/10-cpu.conf <<'EOF'
+[Slice]
+CPUWeight=100
+EOF
 cat > /usr/local/sbin/hwe-agent-scope <<'EOF'
 #!/bin/sh
 # hwe-agent-scope ACCOUNT CMD...: run CMD as bench agent ACCOUNT inside
@@ -220,6 +229,9 @@ for a in $POOL; do
   sudo -u "$OP" sudo -n /usr/local/sbin/hwe-agent-scope "$a" cat /proc/self/cgroup \
     | grep -q "/hweagents.slice/hweagents-$a.slice/" \
     || { echo "FAIL: $a's commands do not run in hweagents-$a.slice"; fail=1; }
+  sudo -u "$OP" sudo -n /usr/local/sbin/hwe-agent-scope "$a" sh -c \
+    'cat "/sys/fs/cgroup$(dirname "$(cut -d: -f3 /proc/self/cgroup)")/cpu.weight"' | grep -qx 100 \
+    || { echo "FAIL: hweagents-$a.slice has no CPU weight"; fail=1; }
 done
 # Claude Code's sandbox: bubblewrap inside bubblewrap.
 sudo -u "$U" bwrap --bind / / --dev /dev --proc /proc --unshare-user --unshare-pid -- \
