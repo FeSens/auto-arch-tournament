@@ -1043,7 +1043,14 @@ def claude_isolation_settings(clone: Path, uid: int | None = None,
         "autoMemoryEnabled": False,
         "permissions": {
             "allow": ["Bash", *(f"Read(/{r}/**)" for r in reads)],
-            "deny": ["WebFetch", "WebSearch"],
+            # No web, and nothing that reaches the operator's account or
+            # other sessions: ToolSearch is the only way to load Claude
+            # Code's deferred tools (cloud triggers, cron, notifications,
+            # messaging), the counterpart of Codex's connected apps, which
+            # are off too. Core tools and subagents stay, as for Codex.
+            "deny": ["WebFetch", "WebSearch", "ToolSearch", "RemoteTrigger", "CronCreate",
+                     "CronDelete", "CronList", "PushNotification", "SendMessage",
+                     "SendUserFile", "ListAgents", "Monitor"],
         },
         "sandbox": {
             "enabled": True,

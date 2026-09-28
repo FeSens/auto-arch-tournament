@@ -224,6 +224,8 @@ def test_env_under_agent_user(tmp_path, monkeypatch):
     assert Path(env["HWE_AGENT_HOME"]).is_dir()
     assert env["HWE_AGENT_HOME"] in fs["denyRead"]
     assert str(Path.home()) in fs["denyRead"]
+    deny = json.loads(env["CLAUDE_BENCH_SETTINGS"])["permissions"]["deny"]
+    assert {"WebFetch", "WebSearch", "ToolSearch", "RemoteTrigger"} <= set(deny)
     assert env["HWE_AGENT_USER"] == getpass.getuser()
     codex = JobSpec(model=ModelEntry(name="gpt", provider="codex",
                                      model="gpt-6-sol", oauth=True), rep=1)
