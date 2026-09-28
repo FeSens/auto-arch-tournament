@@ -224,6 +224,24 @@ def check_agent_user(agent: AgentUser) -> Optional[str]:
     if as_agent(agent.name, "/bin/test", "-r", str(Path.home()),
                 capture_output=True).returncode == 0:
         return f"it can read {Path.home()}"
+    if not IS_MAC:
+        return check_agent_slice(agent.name)
+    return None
+
+
+def check_agent_slice(name: str) -> Optional[str]:
+    """None if agent commands launched for this account land in its CPU
+    slice (equal share per concurrent run; setup_server.sh, 6d)."""
+    from tools.agents._runtime import agent_launch_prefix
+    want = f"/hweagents.slice/hweagents-{name}.slice/"
+    try:
+        r = subprocess.run([*agent_launch_prefix(name), "/bin/cat", "/proc/self/cgroup"],
+                           capture_output=True, text=True, timeout=30)
+    except (OSError, subprocess.TimeoutExpired) as e:
+        return f"CPU slice check failed: {e}"
+    if want not in r.stdout:
+        return (f"its commands do not run in {want.strip('/')} "
+                f"(got {r.stdout.strip() or r.stderr.strip()!r}; run setup_server.sh, 6d)")
     return None
 
 

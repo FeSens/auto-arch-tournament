@@ -458,6 +458,20 @@ _AGENT_ENV_PASS = (
 _AGENT_ENV_PREFIXES = ("AGENT_", "BENCH_", "HWE_")
 
 
+# Root helper that runs a command as a bench agent account inside that
+# account's CPU slice, hweagents-<account>.slice (setup_server.sh, 6d).
+AGENT_SCOPE = "/usr/local/sbin/hwe-agent-scope"
+
+
+def agent_launch_prefix(user: str, platform: str = sys.platform) -> list[str]:
+    """How to become the agent account. On Linux (the run host) through
+    AGENT_SCOPE, so each concurrent run gets an equal CPU share however many
+    threads its agents spawn; macOS (pilot hosts) has no cgroups."""
+    if platform == "darwin":
+        return ["sudo", "-n", "-u", user]
+    return ["sudo", "-n", AGENT_SCOPE, user]
+
+
 def as_agent_user(cmd: list[str], environ: Optional[dict] = None) -> list[str]:
     """Wrap cmd to run as HWE_AGENT_USER (V2 isolation) with a clean
     environment; unchanged when the variable is unset.
@@ -484,10 +498,12 @@ def as_agent_user(cmd: list[str], environ: Optional[dict] = None) -> list[str]:
     # umask 007: nothing the agent writes is readable by other accounts
     # (concurrent runs hold different accounts; /tmp is shared). Inside the
     # clone the directory's default ACL still gives the operator access.
-    # nice 10: the agents' own self-checks (formal, Gowin) yield the CPU to
-    # the harness's scoring evals, so a score never depends on how hard
-    # another run's agent is working (same for every system).
-    return ["sudo", "-n", "-u", user, "/usr/bin/nice", "-n", "10", "/usr/bin/env", "-i", *assigns,
+    # CPU: the account's slice (agent_launch_prefix) gives every concurrent
+    # run an equal share, and the agents' parent slice yields to the
+    # harness's scoring evals, so neither a score nor a run's working
+    # conditions depend on how hard another run's agents are working.
+    # nice 10 still orders the agents behind the harness on macOS.
+    return [*agent_launch_prefix(user), "/usr/bin/nice", "-n", "10", "/usr/bin/env", "-i", *assigns,
             "/bin/sh", "-c", 'umask 007; exec "$@"', "sh", *cmd]
 
 

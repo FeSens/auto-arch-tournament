@@ -803,3 +803,17 @@ def test_runner_exception_records_a_rerunnable_row(tmp_path, monkeypatch):
     row = runner.run_one_job(job, clone_base=tmp_path, results_jsonl=res)
     assert row["status"] == "harness_error" and "PermissionError" in row["notes"]
     assert ("m", 1) not in runner.load_done_set(res)     # a restart reruns it
+
+
+def test_check_agent_slice_requires_the_accounts_own_slice(monkeypatch):
+    import subprocess as sp
+    from tools.bench import runner
+    out = {"v": ""}
+    monkeypatch.setattr(runner.subprocess, "run",
+                        lambda cmd, **kw: sp.CompletedProcess(cmd, 0, out["v"], ""))
+    out["v"] = "0::/hweagents.slice/hweagents-hwebench2.slice/run-p1-i2.scope\n"
+    assert runner.check_agent_slice("hwebench2") is None
+    out["v"] = "0::/hweagents.slice/hweagents-hwebench.slice/run-p1-i2.scope\n"
+    assert "hweagents-hwebench2.slice" in runner.check_agent_slice("hwebench2")
+    out["v"] = "0::/user.slice/user-0.slice/session-3.scope\n"
+    assert runner.check_agent_slice("hwebench2") is not None

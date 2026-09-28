@@ -67,7 +67,7 @@ def test_timeout_is_never_treated_as_quota(tmp_path):
 
 
 def test_agent_user_wrapper_drops_operator_env():
-    from tools.agents._runtime import as_agent_user
+    from tools.agents._runtime import agent_launch_prefix, as_agent_user
     env = {"HWE_AGENT_USER": "hwebench", "HWE_AGENT_HOME": "/Users/hwebench",
            "HWE_AGENT_PATH": "/Users/Shared/hwebench/bin:/usr/bin",
            "HWE_AGENT_PYTHONUSERBASE": "/Users/Shared/hwebench/local",
@@ -75,12 +75,18 @@ def test_agent_user_wrapper_drops_operator_env():
            "AGENT_PROVIDER": "codex", "TMPDIR": "/c/.tmp",
            "HARNESS_EVAL_SLOTS": "3", "HARNESS_EVAL_LOCK_DIR": "/Users/op/.slots"}
     cmd = as_agent_user(["codex", "exec", "hi"], env)
-    assert cmd[:9] == ["sudo", "-n", "-u", "hwebench", "/usr/bin/nice", "-n", "10",
+    assert cmd[:9] == [*agent_launch_prefix("hwebench"), "/usr/bin/nice", "-n", "10",
                        "/usr/bin/env", "-i"]
     assert cmd[-3:] == ["codex", "exec", "hi"]
-    assigns = cmd[9:cmd.index("/bin/sh")]
+    assigns = cmd[cmd.index("-i") + 1:cmd.index("/bin/sh")]
     assert not any(a.startswith("HARNESS_EVAL") for a in assigns)
     assert "HOME=/Users/hwebench" in assigns and "CODEX_HOME=/c/.codex-home" in assigns
     assert "PATH=/Users/Shared/hwebench/bin:/usr/bin" in assigns
     assert not any(a.startswith("SECRET_TOKEN=") or a == "HOME=/Users/op" for a in assigns)
     assert as_agent_user(["codex"], {"HOME": "/x"}) == ["codex"]
+
+
+def test_agent_launch_goes_through_the_cpu_slice_helper_on_linux():
+    from tools.agents._runtime import AGENT_SCOPE, agent_launch_prefix
+    assert agent_launch_prefix("hwebench2", "linux") == ["sudo", "-n", AGENT_SCOPE, "hwebench2"]
+    assert agent_launch_prefix("hwebench2", "darwin") == ["sudo", "-n", "-u", "hwebench2"]

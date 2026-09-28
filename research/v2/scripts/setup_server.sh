@@ -166,6 +166,55 @@ if [ -f /etc/apparmor.d/bwrap-userns-restrict ]; then
   apparmor_parser -R /etc/apparmor.d/bwrap-userns-restrict 2>/dev/null || true
 fi
 
+# 6d. Equal CPU per concurrent run (V2 harness 2.5). Linux shares CPU per
+#     thread, so a run whose agents spawn more solver threads took more of
+#     the machine from the other systems' concurrent runs (measured
+#     2026-09-28: 11.7 vs 2.6 vs 1.0 cores, oversubscribed half the time).
+#     Each agent command runs in its account's slice, hweagents-<acct>.slice;
+#     sibling slices have equal weight, so contended runs get equal shares
+#     however many threads they spawn. The parent's weight (20 vs 100 for
+#     user.slice, where the runner and its scoring evals live) keeps the
+#     harness first, the same ratio nice 10 gave before.
+cat > /etc/systemd/system/hweagents.slice <<'EOF'
+[Unit]
+Description=HWE Bench agent CLIs (one child slice per agent account)
+
+[Slice]
+CPUWeight=20
+EOF
+# The children need an explicit weight too: without one systemd does not
+# enable the cpu controller inside hweagents.slice and every agent thread
+# competes in one pool (per-thread sharing again). The prefix drop-in
+# covers every hweagents-<acct>.slice.
+mkdir -p /etc/systemd/system/hweagents-.slice.d
+cat > /etc/systemd/system/hweagents-.slice.d/10-cpu.conf <<'EOF'
+[Slice]
+CPUWeight=100
+EOF
+cat > /usr/local/sbin/hwe-agent-scope <<'EOF'
+#!/bin/sh
+# hwe-agent-scope ACCOUNT CMD...: run CMD as bench agent ACCOUNT inside
+# hweagents-ACCOUNT.slice (equal CPU weight per concurrent run).
+# Installed by research/v2/scripts/setup_server.sh; the operator may run
+# only this as root (/etc/sudoers.d/hwebench-scope).
+set -eu
+acct=${1:-}
+case $acct in
+  hwebench|hwebench[0-9]|hwebench[0-9][0-9]) ;;
+  *) echo "hwe-agent-scope: '$acct' is not a bench agent account" >&2; exit 2 ;;
+esac
+id -u "$acct" >/dev/null 2>&1 || { echo "hwe-agent-scope: no account $acct" >&2; exit 2; }
+shift
+exec /usr/bin/systemd-run --scope --quiet --collect --slice="hweagents-$acct.slice" \
+  -- /usr/bin/sudo -n -u "$acct" "$@"
+EOF
+chown root:root /usr/local/sbin/hwe-agent-scope
+chmod 755 /usr/local/sbin/hwe-agent-scope
+echo "$OP ALL=(root) NOPASSWD: /usr/local/sbin/hwe-agent-scope" > /etc/sudoers.d/hwebench-scope
+chmod 440 /etc/sudoers.d/hwebench-scope
+visudo -cf /etc/sudoers.d/hwebench-scope
+systemctl daemon-reload
+
 # 7. Verify the boundary and the agent environment.
 fail=0
 REPO=/home/$OP/auto-arch-tournament
@@ -177,6 +226,12 @@ for a in $POOL; do
   sudo -u "$a" ls "$SHARED/clones" >/dev/null 2>&1 && { echo "FAIL: $a can list clones"; fail=1; }
   sudo -u "$a" ls "$SHARED/homes" >/dev/null 2>&1 && { echo "FAIL: $a can list homes"; fail=1; }
   sudo -u "$a" test -r "/proc/1/cmdline" && { echo "FAIL: $a sees other users' processes"; fail=1; }
+  sudo -u "$OP" sudo -n /usr/local/sbin/hwe-agent-scope "$a" cat /proc/self/cgroup \
+    | grep -q "/hweagents.slice/hweagents-$a.slice/" \
+    || { echo "FAIL: $a's commands do not run in hweagents-$a.slice"; fail=1; }
+  sudo -u "$OP" sudo -n /usr/local/sbin/hwe-agent-scope "$a" sh -c \
+    'cat "/sys/fs/cgroup$(dirname "$(cut -d: -f3 /proc/self/cgroup)")/cpu.weight"' | grep -qx 100 \
+    || { echo "FAIL: hweagents-$a.slice has no CPU weight"; fail=1; }
 done
 # Claude Code's sandbox: bubblewrap inside bubblewrap.
 sudo -u "$U" bwrap --bind / / --dev /dev --proc /proc --unshare-user --unshare-pid -- \
