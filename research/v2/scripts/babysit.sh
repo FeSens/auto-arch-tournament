@@ -30,6 +30,7 @@ echo "== $(date -u +%H:%M) UTC, woke: $why; $(uptime | sed 's/.*load/load/')"
 python3 research/v2/scripts/status_table.py --results "$R" --rundir "$D"
 echo "== broken slots:"
 for f in /srv/hwebench/clones/*/cores/bench/experiments/log.jsonl; do
+  [ -f "$f" ] || continue   # no clones left (glob unmatched)
   python3 - "$f" <<'PY'
 import json, sys
 for l in open(sys.argv[1]):

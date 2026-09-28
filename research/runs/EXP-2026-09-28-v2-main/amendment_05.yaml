@@ -1,0 +1,50 @@
+# WRITE-ONCE. Amendment 05 to prereg.yaml, made 2026-09-28T19:16Z, after
+# incident 03 and before the campaign restart. No scored run exists.
+reason: >
+  Incident 03: the third campaign (harness 2.3.0, started 2026-09-28T16:32Z) was
+  stopped at 18:12Z (~1.7 h, batch 1, rounds 3-5) as a harness failure under the
+  incident policy. The K=3 agents of a run share one riscv-formal checkout through
+  their worktrees' symlink. formal/run_all.sh named its work dir "<core>-$$" and
+  reaped dirs whose PID failed `kill -0`; both agent sandboxes run each shell command
+  in its own PID namespace, where $$ is 2 or 3 for every agent and every outside PID
+  looks dead. Sibling agents therefore staged formal checks in one dir and deleted
+  each other's live runs: agents of all three systems reported lost or false formal
+  results in their own words and spent time working around it. The harness's scoring
+  eval was not affected (it runs in a separate harness-only copy). The smoke that
+  validated harness 2.3 (amendment 04) had the same defect: its agents reported it 11
+  times, but the monitor scanned commands only, not agent messages, and I signed that
+  smoke off as clean.
+incident_03_runs: >
+  Reported, not scored: research/runs/EXP-2026-09-28-v2-main/incident_03/ (agent logs,
+  orchestrator logs, experiment logs, formal work dir listings, runner log, monitor
+  alerts). Per the incident policy all 18 runs restart from V0; the first complete
+  attempt of each is scored.
+harness: >
+  tag hwe-bench-v2.4 = branch bench-v2.4, HARNESS_VERSION 2.4.0 (replaces
+  hwe-bench-v2.3). Change: every formal/run_all.sh invocation gets its own work dir
+  (mktemp name created with mkdir, so permissions follow umask and ACLs), holds a
+  flock on it while running, and reaps only dirs whose lock is free and over 10
+  minutes old; the harness pins its own dir name (FORMAL_WORK_ID) and removes exactly
+  that dir. No change to what formal checks, the checks, the tally, or any score.
+  Same rules for every system.
+monitoring: >
+  Extends amendment 02: the campaign monitor also reads agent messages and raises HIGH
+  when an agent reports interference from outside its slot (another agent, process or
+  sandbox changing or deleting its files or runs). Replayed on the incident-03 and
+  smoke8 logs it flags every such report.
+validation: >
+  376 harness tests pass, including a regression test that runs two formal
+  invocations concurrently in separate PID namespaces (fails on the 2.3 script, passes
+  on 2.4). The real formal suite run twice at once in the incident's shape (harness
+  path and a PID-namespaced agent path, same checkout) passed 53/53 both. Smoke on
+  bench-v2.4-rc (3 systems, N=2 K=3, 18:18Z to 19:14Z): all three runs done, 0 broken
+  slots, held-out scored, final RTL saved; agent formal runs used distinct work dirs
+  (at least 20 named in the transcripts), none PID-named; 0 interference reports in 281 agent messages (smoke8: 11); one
+  HIGH alert (an agent's pkill of its own trial Gowin run) reviewed as benign in
+  monitor_review.md. The tag adds only the version file and research files to the
+  smoke-tested code.
+command: >
+  python3 -m tools.bench.runner --models tools/bench/models-v2.yaml --ref bench-v2.4
+  --agent-user hwebench,hwebench2,hwebench3 --reps 6 --interleave --n 15 --k 3
+  --results-jsonl bench/v2/results.jsonl --results-dir bench/v2
+unchanged: question, systems, metrics, tests, verdict rules, budget, runs per system, incident policy
