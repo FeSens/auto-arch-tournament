@@ -1,4 +1,4 @@
-# WRITE-ONCE. Amendment 04 to prereg.yaml, made 2026-09-28T16:40Z, after
+# WRITE-ONCE. Amendment 04 to prereg.yaml, made 2026-09-28T16:32Z, after
 # incident 02 and before the campaign restart. No scored run exists.
 reason: >
   Incident 02: the second campaign (harness 2.2.0, started 2026-09-28T13:46Z) was
@@ -33,3 +33,7 @@ command: >
   --agent-user hwebench,hwebench2,hwebench3 --reps 6 --interleave --n 15 --k 3
   --results-jsonl bench/v2/results.jsonl --results-dir bench/v2
 unchanged: question, systems, metrics, tests, verdict rules, budget, runs per system, incident policy, monitoring policy (amendment 02)
+launched: >
+  2026-09-28T16:32:21Z, tmux main on hwe-bench, results in bench/v2/. The header time
+  was first written as 16:40Z by mistake and corrected to the commit time (600b64f,
+  16:32:01Z) right after launch; no other field changed.
