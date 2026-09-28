@@ -119,3 +119,31 @@ byte-identical synth.json and 131.60 MHz (n=1 repeat).
 Synth flow decision: -family gw2a (research/runs/EXP-2026-09-27-v2-synth-flow/notes.md).
 Pad module redefined as k unused wires (valid for k > 32). Calibration re-run on
 the host: EXP-2026-09-28-v2-noise-server.
+
+## 2026-09-28: nextpnr's Gowin timing misses deep arithmetic (measured)
+
+Prompted by testing the vendor flow (Gowin EDA 1.9.11.03 Education, Linux,
+headless gw_sh; research/v2/scripts/gowin_build.sh). V0 under Gowin: 5.14 MHz,
+critical path 150 logic levels through the single-cycle 32-bit divider in
+alu.sv (`a / b`, `a % b`). nextpnr reports 124-147 MHz for the same RTL.
+
+Controlled test (research/v2/timing_check/{add,div}.sv): register -> one 32-bit
+operation -> register, result fed back into the input LFSR so nothing can be
+optimized away. Same part, one seed / default placement each:
+
+| design | Yosys+nextpnr | Gowin EDA |
+|---|---|---|
+| add | 370.64 MHz, 79 LUT4 | 302.85 MHz, 6 levels, 77 logic |
+| div | 122.64 MHz, 2140 LUT4 | 6.91 MHz, 133 levels, 2223 logic |
+
+Both flows keep the divider (similar area). A combinational 32/32 divider
+chains 32 subtract-and-select stages; ~7 MHz is physically plausible, 122 MHz
+is not. nextpnr's own worst path for the divider was ~49 cells, i.e. about one
+carry chain: it apparently does not time through from one ALU chain into the
+next, so deep arithmetic is nearly free under the V1 metric.
+
+Consequences (inferred): V1 Fmax understated the cost of deep combinational
+arithmetic (V0 itself relies on it); agents could gain score by moving logic
+into carry chains; part of the "synthesis chaos" may be which paths the timer
+happens to see. Scope: n=1 build per cell; the 18x gap is not a noise effect,
+but the exact missing arc in nextpnr is not identified.
