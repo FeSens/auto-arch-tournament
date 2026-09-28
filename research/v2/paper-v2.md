@@ -223,6 +223,17 @@ own tool (Gowin EDA 1.9.11.03):
   prompt tells agents to stage scratch files there, and an Opus agent
   reported a sibling slot overwriting its logs. Each agent invocation now
   gets a private TMPDIR under its own worktree, removed when it exits.
+  The next smoke surfaced a cross-run collision between the two Codex
+  systems: Codex's sandbox treated the shared /tmp as writable, so it
+  created /tmp/.codex and /tmp/.agents as bubblewrap mount targets and
+  removed them afterwards, and when the Sol and Luna runs overlapped, one
+  account's Codex could not remove the other's and failed the agent's
+  command ("failed to remove synthetic bubblewrap mount target
+  /tmp/.codex: Operation not permitted"; 4 times in the 2.4 campaign's
+  first 1.3 h). It had been filed as a benign access denial. Codex now
+  runs with /tmp excluded from its writable roots (verified: no mount
+  targets appear, /tmp writes fail, TMPDIR writes work), matching Claude's
+  sandbox, which never allowed /tmp.
 - Paper angle: a comparison of agent CLIs needs per-CLI integration
   testing under the real concurrency, and a monitor that reads outcomes by
   class per system; the bias showed up as one system's "broken" count.
