@@ -176,6 +176,29 @@ own tool (Gowin EDA 1.9.11.03):
   that experiments. Fix (harness 2.3): each hypothesis agent works in its
   own disposable worktree of the champion; its YAML is copied out; the
   main clone is still checked for absolute-path writes.
+- Incident 03 (harness 2.3.0 campaign, stopped after 1.7 h, not scored,
+  `research/runs/EXP-2026-09-28-v2-main/incident_03`): the K=3 agents of a
+  run shared one riscv-formal checkout (their worktrees symlink it), and
+  `formal/run_all.sh` named its work dir `<core>-$$` and reaped dirs whose
+  PID failed `kill -0`. Both agent sandboxes (Claude Code and Codex) run
+  shells in their own PID namespace, where `$$` is 2 or 3 for every agent
+  and every outside PID looks dead. So siblings staged formal checks in one
+  dir and deleted each other's live runs. The harness's own formal eval
+  was never hit (it runs in a separate harness-only copy since a
+  2026-09-26 fix), but agents lost time and got false formal results: all
+  three systems reported it in their own words ("Another sandbox's formal
+  run, sharing the same riscv-formal checkout, deleted my work directory
+  mid-run", Opus; "staging directory disappeared before SBY wrote
+  `reg_ch0/PASS`", Luna; Sol renamed its core to dodge the collision). The
+  same reports are in the smoke run that validated harness 2.3, so the
+  defect predates V2's multi-account setup; the monitor missed it because
+  it scanned commands, not what agents say. Fix (harness 2.4): unique work
+  dirs (mktemp name, plain mkdir so permissions follow umask), a flock held
+  for the run's lifetime, reaping only dirs whose lock is free and older
+  than 10 minutes, the harness removing exactly its own pinned dir; a
+  regression test runs two formal invocations in separate PID namespaces
+  (fails on the old script). The monitor now raises HIGH on agent messages
+  that report interference from outside their slot.
 - Paper angle: a comparison of agent CLIs needs per-CLI integration
   testing under the real concurrency, and a monitor that reads outcomes by
   class per system; the bias showed up as one system's "broken" count.
