@@ -72,11 +72,14 @@ def test_agent_user_wrapper_drops_operator_env():
            "HWE_AGENT_PATH": "/Users/Shared/hwebench/bin:/usr/bin",
            "HWE_AGENT_PYTHONUSERBASE": "/Users/Shared/hwebench/local",
            "HOME": "/Users/op", "SECRET_TOKEN": "x", "CODEX_HOME": "/c/.codex-home",
-           "AGENT_PROVIDER": "codex", "TMPDIR": "/c/.tmp"}
+           "AGENT_PROVIDER": "codex", "TMPDIR": "/c/.tmp",
+           "HARNESS_EVAL_SLOTS": "3", "HARNESS_EVAL_LOCK_DIR": "/Users/op/.slots"}
     cmd = as_agent_user(["codex", "exec", "hi"], env)
-    assert cmd[:6] == ["sudo", "-n", "-u", "hwebench", "/usr/bin/env", "-i"]
+    assert cmd[:9] == ["sudo", "-n", "-u", "hwebench", "/usr/bin/nice", "-n", "10",
+                       "/usr/bin/env", "-i"]
     assert cmd[-3:] == ["codex", "exec", "hi"]
-    assigns = cmd[6:cmd.index("/bin/sh")]
+    assigns = cmd[9:cmd.index("/bin/sh")]
+    assert not any(a.startswith("HARNESS_EVAL") for a in assigns)
     assert "HOME=/Users/hwebench" in assigns and "CODEX_HOME=/c/.codex-home" in assigns
     assert "PATH=/Users/Shared/hwebench/bin:/usr/bin" in assigns
     assert not any(a.startswith("SECRET_TOKEN=") or a == "HOME=/Users/op" for a in assigns)

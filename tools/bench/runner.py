@@ -660,6 +660,15 @@ def clone_fixture(repo_root: Path, ref: str, dest: Path) -> None:
     extras = (
         "\n# bench runner — keep these out of git status / sandbox\n"
         ".tmp/\n.codex-home/\n__pycache__/\n*.pyc\n"
+        # Claude Code's Linux sandbox (bubblewrap) mounts over these names
+        # and leaves empty placeholder files in the directory a command runs
+        # from while it runs. Hypothesis agents share the clone root, so one
+        # agent's check saw another's live placeholders and was rolled back
+        # as an off-limits write (4 of 15 Opus hypothesis slots in the first
+        # V2.1 batch; Codex is unaffected). Ignored paths never reach the
+        # eval: purge_ignored_outputs deletes them before every build.
+        ".bash_profile\n.bashrc\n.gitconfig\n.gitmodules\n.idea\n.mcp.json\n"
+        ".profile\n.ripgreprc\n.vscode\n.zprofile\n.zshrc\n"
         # Cocotb pytest writes test/results.xml when the impl agent runs
         # `make test` locally to validate. The orchestrator's sandbox
         # only allows test_*.py changes, so an unignored results.xml
@@ -1165,6 +1174,13 @@ def make_env_for_job(job: JobSpec, clone: Path, keys: dict[str, str]) -> dict[st
     for k, v in keys.items():
         if not env.get(k):
             env[k] = v
+    # Host-wide cap on the harness's heavy evals (tools/eval/_slots.py): three
+    # concurrent evals, formal at -j6, on the 20-core run host. Not passed to
+    # agents (no AGENT_/BENCH_/HWE_ prefix).
+    if agent:
+        env["HARNESS_EVAL_SLOTS"] = "3"
+        env["HARNESS_EVAL_JOBS"] = "6"
+        env["HARNESS_EVAL_LOCK_DIR"] = str(Path.home() / ".hwe-eval-slots")
     # For multi-job parallel runs, isolate yosys/nextpnr scratch dirs:
     env["TMPDIR"] = str((clone / ".tmp").resolve())
     Path(env["TMPDIR"]).mkdir(parents=True, exist_ok=True)

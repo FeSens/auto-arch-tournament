@@ -738,3 +738,27 @@ def test_agent_pool_gives_each_job_its_own_account(monkeypatch, tmp_path):
     for a in held:
         runner.release_agent(a, tmp_path / "gone")
     assert runner._FREE_AGENTS.qsize() == 2
+
+
+def test_claude_sandbox_placeholders_are_not_offlimits_writes(tmp_path, monkeypatch):
+    """Claude Code's bubblewrap sandbox leaves empty files (.bashrc, .mcp.json,
+    .vscode ...) where a command runs; they must not count as the agent's
+    off-limits writes (they cost Opus 4 of 15 hypothesis slots)."""
+    from tools.sandbox import dirty_state
+    ref = "main"
+    repo_root = tmp_path / "repo"
+    _make_fixture_repo(repo_root, ref, with_holdout=False)
+    monkeypatch.setattr(runner, "find_riscv_formal", lambda: None)
+    dest = tmp_path / "clone"
+    clone_fixture(repo_root, ref, dest)
+    for d in (dest, dest / "cores", dest / "cores" / "bench"):
+        d.mkdir(parents=True, exist_ok=True)
+        for f in (".bashrc", ".bash_profile", ".gitconfig", ".gitmodules", ".mcp.json",
+                  ".profile", ".ripgreprc", ".zprofile", ".zshrc"):
+            (d / f).touch()
+        for sub in (".idea", ".vscode"):
+            (d / sub).mkdir(exist_ok=True)
+            (d / sub / "x").touch()
+    assert dirty_state(dest) == {}
+    (dest / "cores" / "bench" / "rogue.sv").write_text("module rogue; endmodule\n")
+    assert list(dirty_state(dest)) == ["cores/bench/rogue.sv"]   # real writes still show

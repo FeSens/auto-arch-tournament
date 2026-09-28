@@ -48,7 +48,7 @@ MEDIUM_CMD = [(r"\bps\s+(aux|-e|-ef)|\bpgrep\b|\btop\b", "lists processes"),
                "walks git history")]
 
 BUDGET_SEC = {"hypothesis": 20 * 60, "implement": 30 * 60, "scribe": 4 * 60}
-HANG_QUIET_SEC = 45 * 60
+HANG_QUIET_SEC = 120 * 60   # evals queue for host slots (tools/eval/_slots.py)
 TOOL_MAX_SEC = {"gw_sh": 50 * 60, "sby": 50 * 60, "bitwuzla": 50 * 60}
 JUMP_RATIO = 3.0
 IPC_JUMP_RATIO = 1.8

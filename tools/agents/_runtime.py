@@ -484,7 +484,10 @@ def as_agent_user(cmd: list[str], environ: Optional[dict] = None) -> list[str]:
     # umask 007: nothing the agent writes is readable by other accounts
     # (concurrent runs hold different accounts; /tmp is shared). Inside the
     # clone the directory's default ACL still gives the operator access.
-    return ["sudo", "-n", "-u", user, "/usr/bin/env", "-i", *assigns,
+    # nice 10: the agents' own self-checks (formal, Gowin) yield the CPU to
+    # the harness's scoring evals, so a score never depends on how hard
+    # another run's agent is working (same for every system).
+    return ["sudo", "-n", "-u", user, "/usr/bin/nice", "-n", "10", "/usr/bin/env", "-i", *assigns,
             "/bin/sh", "-c", 'umask 007; exec "$@"', "sh", *cmd]
 
 

@@ -162,12 +162,17 @@ def run_formal(worktree: str, target: str | None = None) -> dict:
     # and failure runs both. See _cleanup_formal_workdir's docstring.
     try:
         try:
-            result = run_pgroup(
-                ["bash", str(run_script)],
-                cwd=worktree_path, capture_output=True, text=True,
-                timeout=2700,  # 45 min ceiling for all ~45 checks running in parallel via make -j
-                env=env,
-            )
+            from tools.eval._slots import eval_jobs, eval_slot
+            if eval_jobs():
+                env = {**env, "JOBS": eval_jobs()}
+            # The ceiling starts once a host eval slot is held (_slots.py).
+            with eval_slot("formal"):
+                result = run_pgroup(
+                    ["bash", str(run_script)],
+                    cwd=worktree_path, capture_output=True, text=True,
+                    timeout=2700,  # 45 min ceiling for all ~45 checks running in parallel via make -j
+                    env=env,
+                )
         except subprocess.TimeoutExpired as e:
             # The formal harness exceeded its wall-clock ceiling. This MUST
             # not propagate: an unhandled TimeoutExpired in run_slot kills

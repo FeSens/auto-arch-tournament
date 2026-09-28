@@ -169,7 +169,8 @@ def build(worktree: str | Path, rtl_dir: str | Path, bench_sv: str,
 
 def build_all(worktree, rtl_dir, bench_sv, gen_dir, env=None,
               options=PLACE_OPTIONS) -> list[dict]:
-    with ThreadPoolExecutor(max_workers=len(options)) as ex:
+    from tools.eval._slots import eval_slot
+    with eval_slot("gowin"), ThreadPoolExecutor(max_workers=len(options)) as ex:
         futs = [ex.submit(build, worktree, rtl_dir, bench_sv, p,
                           Path(gen_dir) / f"gowin_p{p}", env) for p in options]
         return [f.result() for f in futs]
