@@ -263,13 +263,15 @@ def main():
     ap.add_argument("--state", type=Path, default=Path.home() / "monitor")
     ap.add_argument("--loop", type=int, default=0, help="poll every SEC; exit on the first HIGH/HANG")
     ap.add_argument("--until", default="", help="with --loop: also exit when this file contains 'SMOKE-EXIT' or 'matrix done'")
+    ap.add_argument("--keep-going", action="store_true",
+                    help="with --loop: record HIGH/HANG alerts and keep polling (babysit.sh reacts to them)")
     a = ap.parse_args()
     m = Monitor(a.clones, a.state)
     while True:
         new = m.pass_once()
         for r in new:
             print(json.dumps(r), flush=True)
-        if any(r["severity"] in ("HIGH", "HANG") for r in new):
+        if any(r["severity"] in ("HIGH", "HANG") for r in new) and not a.keep_going:
             return 3
         if not a.loop:
             return 0
