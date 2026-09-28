@@ -113,6 +113,10 @@ own tool (Gowin EDA 1.9.11.03):
   - Concurrent runs shared one OS account: any agent could read the other
     live runs' clones, and Codex could read every Claude transcript in the
     shared home.
+  - Codex loaded the ChatGPT account's connected apps into every agent
+    session (201 tools, 90 of them GitHub, which reaches this benchmark's
+    own repository). No agent called one, but the channel was open; it is
+    on by default in the CLI version under test.
   - `ps` showed other runs' command lines; files in `/tmp` were
     world-readable; Codex's default web search mode could reach the
     benchmark's published results.

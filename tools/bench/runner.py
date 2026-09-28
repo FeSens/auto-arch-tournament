@@ -842,8 +842,25 @@ allow_login_shell = false
 # published results are on the web.
 web_search = "disabled"
 
+# Features on by default in Codex 0.156 that reach outside the run: the
+# ChatGPT account's connected apps and plugins (the V2.1 smoke offered agents
+# 201 app tools, 90 of them GitHub, which could read this benchmark's own
+# repository), browser and computer use, remote plugin installs. Core tools
+# (shell, apply_patch, view_image, subagents) stay on; Claude Code has
+# equivalents. research/v2/LEAKS.md.
 [features]
 memories = false
+apps = false
+plugins = false
+remote_plugin = false
+plugin_sharing = false
+browser_use = false
+browser_use_external = false
+browser_use_full_cdp_access = false
+computer_use = false
+in_app_browser = false
+skill_mcp_dependency_install = false
+tool_suggest = false
 
 [projects."{clone}"]
 trust_level = "trusted"
