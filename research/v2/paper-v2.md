@@ -137,6 +137,15 @@ own tool (Gowin EDA 1.9.11.03):
   Codex's sandbox worked. Found by the campaign monitor on the smoke run,
   before any scored run. Unnoticed, it would have handed the comparison to
   Codex.
+- Separate OS accounts expose harness assumptions that one account hid:
+  POSIX ACLs give the operator access through the ACL mask, and any
+  `chmod 0700` by the agent (Gowin does it to its XDG runtime dir) zeroes
+  that mask. `shutil.rmtree(..., ignore_errors=True)` then silently left
+  agent-built directories behind: in the V2.1 smoke it crashed a GPT-6 Sol
+  run (the eval could not recreate its build dir), and the same silent
+  failure in the pre-eval purge would have let agent-built artifacts reach
+  the eval. Fix: every harness deletion retries as the run's account and
+  raises if anything survives (`tools/eval/_subprocess.py:remove_path`).
 - The harness executes from the fixture clone, so a benchmark run must pin a
   harness tag, not a branch.
 

@@ -191,4 +191,5 @@ def destroy_worktree(hypothesis_id: str, target: str | None = None):
     path = str((_worktree_base(target) / hypothesis_id).resolve())
     subprocess.run(["git", "worktree", "remove", "--force", path], check=False)
     subprocess.run(["git", "branch", "-D", _branch_name(hypothesis_id, target)], check=False)
-    shutil.rmtree(path, ignore_errors=True)
+    from tools.eval._subprocess import remove_path
+    remove_path(path, must=False)

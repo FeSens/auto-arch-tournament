@@ -42,6 +42,8 @@ import shutil
 import subprocess
 from pathlib import Path
 
+from tools.eval._subprocess import remove_path
+
 # Paths whose content defines the eval contract (CLAUDE.md "Don't-touch
 # list"), relative to a checkout root. Missing paths are skipped, so
 # fixture clones that strip e.g. bench/holdout are fine.
@@ -203,12 +205,10 @@ def purge_ignored_outputs(worktree: str | Path, target: str | None = None) -> li
         if _keep(rel, target):
             continue
         p = root / rel.rstrip("/")
-        if p.is_symlink() or p.is_file():
-            p.unlink(missing_ok=True)
-        elif p.is_dir():
-            shutil.rmtree(p, ignore_errors=True)
-        else:
+        if not (p.is_symlink() or p.exists()):
             continue
+        # Raises if anything survives: the eval must only see what it builds.
+        remove_path(p)
         purged.append(rel)
     return purged
 

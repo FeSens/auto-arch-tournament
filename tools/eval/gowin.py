@@ -17,6 +17,8 @@ import shutil
 import statistics
 from pathlib import Path
 
+from tools.eval._subprocess import remove_path
+
 GOWIN_HOME = Path(os.environ.get("GOWIN_HOME", "/opt/gowin"))
 GOWIN_VERSION = "1.9.11.03 Education"
 PART = "GW2AR-LV18QN88C8/I7"      # Tang Nano 20K
@@ -146,7 +148,7 @@ def _run_gw_sh(outdir: Path, log: Path, env: dict) -> bool:
 def build(worktree: str | Path, rtl_dir: str | Path, bench_sv: str,
                 place_option: int, outdir: str | Path, env: dict | None = None) -> dict:
     worktree, rtl_dir, outdir = Path(worktree).resolve(), Path(rtl_dir).resolve(), Path(outdir).resolve()
-    shutil.rmtree(outdir, ignore_errors=True)
+    remove_path(outdir)
     outdir.mkdir(parents=True)
     (outdir / "build.tcl").write_text(project_tcl(worktree, rtl_dir, bench_sv, place_option))
     log = outdir / "gw.log"

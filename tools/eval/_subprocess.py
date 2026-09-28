@@ -123,3 +123,31 @@ def install_tree_reaper(signals=_REAPER_SIGNALS) -> None:
 
     for sig in signals:
         signal.signal(sig, _reap)
+
+
+def remove_path(path, *, must: bool = True) -> None:
+    """Delete a file or tree the agent may have written.
+
+    Agents run as HWE_AGENT_USER; a directory they chmod (Gowin makes its
+    XDG runtime dir 0700) zeroes the POSIX ACL mask that gives the operator
+    access, and shutil.rmtree then silently leaves it behind. Retry as the
+    agent account, which owns those entries. must=True raises if anything
+    survives: callers rely on the path being gone (a fresh build dir, the
+    purge of agent-built artifacts before the eval)."""
+    import shutil
+    from pathlib import Path
+    p = Path(path)
+
+    def gone() -> bool:
+        return not (p.exists() or p.is_symlink())
+
+    if p.is_symlink() or p.is_file():
+        p.unlink(missing_ok=True)
+    elif p.is_dir():
+        shutil.rmtree(p, ignore_errors=True)
+    user = os.environ.get("HWE_AGENT_USER", "").strip()
+    if not gone() and user:
+        subprocess.run(["sudo", "-n", "-u", user, "/bin/rm", "-rf", "--", str(p)],
+                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=300)
+    if must and not gone():
+        raise RuntimeError(f"cannot remove {p} (not owned by the operator or {user or 'no agent account'})")
