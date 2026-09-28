@@ -898,6 +898,14 @@ trust_level = "trusted"
 # eval's own copy (.tmp/riscv-formal-eval) is not listed.
 [sandbox_workspace_write]
 writable_roots = ["{clone}/formal/riscv-formal"]
+# /tmp is shared by the accounts of concurrent runs. With it writable, Codex
+# protects /tmp/.codex and /tmp/.agents by creating them as bubblewrap mount
+# targets and removing them afterwards; another account's Codex then fails
+# its command ("failed to remove synthetic bubblewrap mount target
+# /tmp/.codex: Operation not permitted"), which hit the two Codex runs
+# whenever they overlapped. Agents stage scratch files in their private
+# TMPDIR (still writable), and Claude's sandbox never allowed /tmp either.
+exclude_slash_tmp = true
 """
 
 

@@ -28,6 +28,10 @@ def test_isolated_home_has_only_auth_symlink_and_minimal_config(tmp_path):
     assert "memories = false" in cfg and str(clone.resolve()) in cfg
     # Top-level key (before any table), so it is not scoped to [features].
     assert cfg.index("allow_login_shell = false") < cfg.index("[features]")
+    # /tmp is shared across the accounts of concurrent runs: not writable,
+    # or Codex's /tmp/.codex mount targets collide between accounts.
+    import tomllib
+    assert tomllib.loads(cfg)["sandbox_workspace_write"]["exclude_slash_tmp"] is True
 
 
 def test_isolated_home_is_recreated_fresh(tmp_path):
