@@ -343,6 +343,26 @@ own tool (Gowin EDA 1.9.11.03):
   not as an argument; both CLIs answer a 304 KB prompt through the full
   launch path, and the monitor raises HIGH when the harness cannot start an
   agent.
+- Incident 08 (harness 2.8.0 campaign, batch 1, runs not stopped, scored;
+  `research/runs/EXP-2026-09-28-v2-main/incident_08`, amendment 10): the
+  runner writes a finished run's git bundle from inside the run's clone to
+  `<results-dir>/<model>/rep<N>/repo.bundle`, and scores the held-out
+  kernels only from that bundle. The campaign was launched with a relative
+  results dir, so git resolved the path inside the clone and failed, the
+  held-out scoring was skipped without an error, and the clone was deleted.
+  Every smoke had used absolute paths. All 15 rounds of the three rep1 runs
+  had run and each champion was preserved (final RTL, experiment log), so
+  the metric was recomputed with the runner's own scoring code rather than
+  the runs repeated: Opus from the fixture's root tree (identical in every
+  clone) plus its saved final RTL, Sol and Luna from bundles a read-only
+  watcher kept of their live clones until deletion (RTL byte-identical to
+  the saved final RTL). For each, the loop's own eval on the rebuilt tree
+  reproduced the champion's log row exactly (CoreMark, cycles, LUT4, Fmax
+  per placement option) before `score_holdout` ran. Held-out iter/s: Opus
+  7,769.6, Sol 5,767.6, Luna 3,042.7, 5 of 5 kernels validated in each.
+  Reps 2-6 run under the same 2.8.0 harness, relaunched with absolute paths
+  at the batch boundary (a watcher killed the runner the second the rep2
+  batch began, before any rep2 agent started).
 - Paper angle: a comparison of agent CLIs needs per-CLI integration
   testing under the real concurrency, and a monitor that reads outcomes by
   class per system; the bias showed up as one system's "broken" count.
