@@ -1,0 +1,180 @@
+# Agent scopes of the harness 2.5.0 campaign (journald, systemd scope units), 2026-09-28T22:44Z to 2026-09-29T02:05Z.
+# linger_s = scope end minus the last write to the agent's own log (when the agent CLI exited); '-' = no log to compare.
+# Command lines are omitted: they carried the Claude OAuth token (incident 05).
+unit	start_utc	end_utc	run	provider	kind	hyp	linger_s	cpu	wall
+run-p2879884-i2897273.scope	22:44:22	22:44:22	-	-	slice-check	-	-	-	-
+run-p2879901-i2897274.scope	22:44:22	22:44:22	-	-	slice-check	-	-	-	-
+run-p2879918-i2908677.scope	22:44:23	22:44:23	-	-	slice-check	-	-	-	-
+run-p2886918-i2894125.scope	22:46:41	22:46:46	claude-opus-5_5_xhigh-v2-rep1	claude	scribe	-	-	516ms	4.947s
+run-p2886998-i2916735.scope	22:46:45	22:47:00	gpt-6-sol_xhigh-v2-rep1	codex	scribe	-	-	692ms	15.483s
+run-p2887217-i2878562.scope	22:46:46	22:49:35	claude-opus-5_5_xhigh-v2-rep1	claude	hypothesis	hyp-20260929-001-r1s0	-0.2	2.763s	2min 48.565s
+run-p2887221-i2878563.scope	22:46:46	22:51:34	claude-opus-5_5_xhigh-v2-rep1	claude	hypothesis	hyp-20260929-003-r1s2	-1.0	14.964s	4min 48.347s
+run-p2887227-i2874900.scope	22:46:46	22:49:20	claude-opus-5_5_xhigh-v2-rep1	claude	hypothesis	hyp-20260929-002-r1s1	-0.5	2.125s	2min 33.887s
+run-p2887395-i2882059.scope	22:46:50	22:47:02	gpt-6-luna_xhigh-v2-rep1	codex	scribe	-	-	529ms	12.096s
+run-p2887699-i2886382.scope	22:47:01	22:51:16	gpt-6-sol_xhigh-v2-rep1	codex	hypothesis	hyp-20260929-002-r1s1	0.4	3.115s	4min 15.043s
+run-p2887701-i2878607.scope	22:47:01	22:49:03	gpt-6-sol_xhigh-v2-rep1	codex	hypothesis	hyp-20260929-003-r1s2	-0.4	1.866s	2min 2.789s
+run-p2887703-i2894167.scope	22:47:01	22:49:01	gpt-6-sol_xhigh-v2-rep1	codex	hypothesis	hyp-20260929-001-r1s0	0.8	1.488s	1min 59.956s
+run-p2888231-i2882121.scope	22:47:02	22:48:02	gpt-6-luna_xhigh-v2-rep1	codex	hypothesis	hyp-20260929-001-r1s0	0.4	1.126s	59.710s
+run-p2888232-i2874969.scope	22:47:02	22:48:54	gpt-6-luna_xhigh-v2-rep1	codex	hypothesis	hyp-20260929-003-r1s2	0.0	1.311s	1min 51.672s
+run-p2888233-i2901278.scope	22:47:02	22:49:36	gpt-6-luna_xhigh-v2-rep1	codex	hypothesis	hyp-20260929-002-r1s1	0.2	1.587s	2min 33.677s
+run-p2889661-i2894320.scope	22:48:02	22:58:22	gpt-6-luna_xhigh-v2-rep1	codex	implementation	hyp-20260929-001-r1s0	-0.8	4min 28.808s	10min 20.377s
+run-p2890453-i2897873.scope	22:48:54	22:58:40	gpt-6-luna_xhigh-v2-rep1	codex	implementation	hyp-20260929-003-r1s2	-0.8	4min 16.824s	9min 46.448s
+run-p2890730-i2894397.scope	22:49:01	22:59:34	gpt-6-sol_xhigh-v2-rep1	codex	implementation	hyp-20260929-001-r1s0	-0.3	9min 42.420s	10min 33.149s
+run-p2890921-i2897915.scope	22:49:03	22:58:37	gpt-6-sol_xhigh-v2-rep1	codex	implementation	hyp-20260929-003-r1s2	-0.6	10min 9.011s	9min 33.649s
+run-p2893241-i2913335.scope	22:49:20	22:57:38	claude-opus-5_5_xhigh-v2-rep1	claude	implementation	hyp-20260929-002-r1s1	-0.3	4min 58.490s	8min 17.655s
+run-p2893523-i2898039.scope	22:49:35	22:55:43	claude-opus-5_5_xhigh-v2-rep1	claude	implementation	hyp-20260929-001-r1s0	-0.7	5min 3.993s	6min 8.364s
+run-p2893593-i2913375.scope	22:49:36	23:03:56	gpt-6-luna_xhigh-v2-rep1	codex	implementation	hyp-20260929-002-r1s1	-0.8	7min 26.909s	14min 20.430s
+run-p2896756-i2921203.scope	22:51:16	23:04:00	gpt-6-sol_xhigh-v2-rep1	codex	implementation	hyp-20260929-002-r1s1	-0.5	53min 55.751s	12min 44.257s
+run-p2897187-i2901714.scope	22:51:35	22:57:59	claude-opus-5_5_xhigh-v2-rep1	claude	implementation	hyp-20260929-003-r1s2	-0.8	5min 45.539s	6min 24.653s
+run-p2953846-i2928214.scope	23:05:41	23:05:50	claude-opus-5_5_xhigh-v2-rep1	claude	scribe	hyp-20260929-001-r1s0	-0.0	726ms	8.597s
+run-p2953988-i2940051.scope	23:05:50	23:06:34	claude-opus-5_5_xhigh-v2-rep1	claude	scribe	hyp-20260929-002-r1s1	-0.5	1.518s	44.300s
+run-p2956406-i2952071.scope	23:06:34	23:07:16	claude-opus-5_5_xhigh-v2-rep1	claude	scribe	hyp-20260929-003-r1s2	-0.8	1.267s	42.164s
+run-p2958669-i2991334.scope	23:07:07	23:07:45	gpt-6-luna_xhigh-v2-rep1	codex	scribe	hyp-20260929-001-r1s0	-0.7	713ms	38.181s
+run-p2958929-i2952302.scope	23:07:16	23:13:14	claude-opus-5_5_xhigh-v2-rep1	claude	hypothesis	hyp-20260929-001-r2s0	-0.9	37.993s	5min 58.060s
+run-p2958933-i2983081.scope	23:07:16	23:12:15	claude-opus-5_5_xhigh-v2-rep1	claude	hypothesis	hyp-20260929-002-r2s1	-0.6	21.336s	4min 58.687s
+run-p2958939-i2998325.scope	23:07:16	23:12:05	claude-opus-5_5_xhigh-v2-rep1	claude	hypothesis	hyp-20260929-003-r2s2	-0.3	22.535s	4min 48.368s
+run-p2959325-i2971487.scope	23:07:45	23:08:08	gpt-6-luna_xhigh-v2-rep1	codex	scribe	hyp-20260929-002-r1s1	-0.7	607ms	22.854s
+run-p2959858-i2952388.scope	23:08:08	23:08:43	gpt-6-luna_xhigh-v2-rep1	codex	scribe	hyp-20260929-003-r1s2	-0.1	-	-
+run-p2960140-i2998394.scope	23:08:16	23:09:02	gpt-6-sol_xhigh-v2-rep1	codex	scribe	hyp-20260929-001-r1s0	-0.3	1.428s	45.853s
+run-p2960565-i2975874.scope	23:08:43	23:11:06	gpt-6-luna_xhigh-v2-rep1	codex	hypothesis	hyp-20260929-003-r2s2	0.3	1.985s	2min 23.026s
+run-p2960569-i2975875.scope	23:08:43	23:10:43	gpt-6-luna_xhigh-v2-rep1	codex	hypothesis	hyp-20260929-002-r2s1	-0.4	1.506s	2min 723ms
+run-p2960574-i2991430.scope	23:08:43	23:10:10	gpt-6-luna_xhigh-v2-rep1	codex	hypothesis	hyp-20260929-001-r2s0	-0.1	998ms	1min 27.299s
+run-p2961371-i2964178.scope	23:09:02	23:09:57	gpt-6-sol_xhigh-v2-rep1	codex	scribe	hyp-20260929-002-r1s1	-0.1	999ms	54.661s
+run-p2962031-i2952629.scope	23:09:57	23:11:07	gpt-6-sol_xhigh-v2-rep1	codex	scribe	hyp-20260929-003-r1s2	-0.2	1.697s	1min 9.999s
+run-p2962363-i2940662.scope	23:10:10	23:13:22	gpt-6-luna_xhigh-v2-rep1	codex	implementation	hyp-20260929-001-r2s0	-0.6	2min 48.188s	3min 12.034s
+run-p2962909-i2995408.scope	23:10:44	23:16:32	gpt-6-luna_xhigh-v2-rep1	codex	implementation	hyp-20260929-002-r2s1	-0.9	4min 48.974s	5min 48.901s
+run-p2964796-i2958640.scope	23:11:06	23:19:12	gpt-6-luna_xhigh-v2-rep1	codex	implementation	hyp-20260929-003-r2s2	-0.3	9min 21.149s	8min 5.934s
+run-p2965331-i2998698.scope	23:11:07	23:12:34	gpt-6-sol_xhigh-v2-rep1	codex	hypothesis	hyp-20260929-001-r2s0	-0.0	1.297s	1min 27.064s
+run-p2965337-i2995544.scope	23:11:07	23:14:30	gpt-6-sol_xhigh-v2-rep1	codex	hypothesis	hyp-20260929-002-r2s1	0.2	2.110s	3min 22.884s
+run-p2965344-i2947011.scope	23:11:07	23:15:24	gpt-6-sol_xhigh-v2-rep1	codex	hypothesis	hyp-20260929-003-r2s2	0.3	2.851s	4min 16.774s
+run-p2968272-i2968735.scope	23:12:05	23:20:06	claude-opus-5_5_xhigh-v2-rep1	claude	implementation	hyp-20260929-003-r2s2	-0.9	8min 56.185s	8min 1.487s
+run-p2968638-i2976380.scope	23:12:15	23:19:44	claude-opus-5_5_xhigh-v2-rep1	claude	implementation	hyp-20260929-002-r2s1	-0.1	5min 22.810s	7min 28.399s
+run-p2968990-i2968802.scope	23:12:34	23:17:06	gpt-6-sol_xhigh-v2-rep1	codex	implementation	hyp-20260929-001-r2s0	-0.3	4min 5.164s	4min 31.815s
+run-p2969868-i2991904.scope	23:13:15	23:22:31	claude-opus-5_5_xhigh-v2-rep1	claude	implementation	hyp-20260929-001-r2s0	-0.4	12min 40.520s	9min 16.377s
+run-p2975753-i2972222.scope	23:14:30	23:23:03	gpt-6-sol_xhigh-v2-rep1	codex	implementation	hyp-20260929-002-r2s1	-0.2	5min 46.979s	8min 32.831s
+run-p2976683-i2999276.scope	23:15:24	23:25:00	gpt-6-sol_xhigh-v2-rep1	codex	implementation	hyp-20260929-003-r2s2	-1.0	17min 43.393s	9min 36.712s
+run-p3008361-i2997877.scope	23:22:58	23:23:12	gpt-6-luna_xhigh-v2-rep1	codex	scribe	hyp-20260929-001-r2s0	-0.9	543ms	13.928s
+run-p3008728-i3043749.scope	23:23:13	23:23:45	gpt-6-luna_xhigh-v2-rep1	codex	scribe	hyp-20260929-002-r2s1	-0.6	-	-
+run-p3011036-i3008520.scope	23:23:45	23:24:35	gpt-6-luna_xhigh-v2-rep1	codex	scribe	hyp-20260929-003-r2s2	-1.0	820ms	50.277s
+run-p3013849-i2989986.scope	23:24:36	23:27:17	gpt-6-luna_xhigh-v2-rep1	codex	hypothesis	hyp-20260929-002-r3s1	-0.2	1.333s	2min 41.424s
+run-p3013853-i3012911.scope	23:24:36	23:26:13	gpt-6-luna_xhigh-v2-rep1	codex	hypothesis	hyp-20260929-001-r3s0	0.3	1.124s	1min 36.974s
+run-p3013857-i3012912.scope	23:24:36	23:26:41	gpt-6-luna_xhigh-v2-rep1	codex	hypothesis	hyp-20260929-003-r3s2	0.2	1.502s	2min 5.048s
+run-p3018663-i3020755.scope	23:26:06	23:26:22	claude-opus-5_5_xhigh-v2-rep1	claude	scribe	hyp-20260929-001-r2s0	-0.4	879ms	15.671s
+run-p3019127-i3013325.scope	23:26:13	23:43:53	gpt-6-luna_xhigh-v2-rep1	codex	implementation	hyp-20260929-001-r3s0	-0.3	12min 12.413s	17min 40.055s
+run-p3019351-i3059983.scope	23:26:22	23:27:46	claude-opus-5_5_xhigh-v2-rep1	claude	scribe	hyp-20260929-002-r2s1	-1.0	1.762s	1min 24.469s
+run-p3019643-i3009016.scope	23:26:41	23:44:52	gpt-6-luna_xhigh-v2-rep1	codex	implementation	hyp-20260929-003-r3s2	-0.7	15min 5.117s	18min 11.373s
+run-p3021003-i3056174.scope	23:27:17	23:35:24	gpt-6-luna_xhigh-v2-rep1	codex	implementation	hyp-20260929-002-r3s1	-0.3	5min 19.410s	8min 6.600s
+run-p3023124-i3009238.scope	23:27:47	23:28:58	claude-opus-5_5_xhigh-v2-rep1	claude	scribe	hyp-20260929-003-r2s2	-0.9	9.128s	1min 11.796s
+run-p3023847-i3005984.scope	23:28:36	23:29:04	gpt-6-sol_xhigh-v2-rep1	codex	scribe	hyp-20260929-001-r2s0	-0.5	834ms	28.380s
+run-p3024301-i3052403.scope	23:28:59	23:34:12	claude-opus-5_5_xhigh-v2-rep1	claude	hypothesis	hyp-20260929-001-r3s0	-0.6	33.737s	5min 13.554s
+run-p3024306-i3001674.scope	23:28:59	23:34:57	claude-opus-5_5_xhigh-v2-rep1	claude	hypothesis	hyp-20260929-002-r3s1	-0.2	42.975s	5min 58.097s
+run-p3024308-i3001675.scope	23:28:59	23:31:51	claude-opus-5_5_xhigh-v2-rep1	claude	hypothesis	hyp-20260929-003-r3s2	-0.8	1.864s	2min 52.747s
+run-p3024500-i3056301.scope	23:29:04	23:30:31	gpt-6-sol_xhigh-v2-rep1	codex	scribe	hyp-20260929-002-r2s1	-0.5	1.924s	1min 26.809s
+run-p3029215-i3052672.scope	23:30:31	23:30:55	gpt-6-sol_xhigh-v2-rep1	codex	scribe	hyp-20260929-003-r2s2	-0.5	639ms	23.888s
+run-p3030469-i3056568.scope	23:30:55	23:32:21	gpt-6-sol_xhigh-v2-rep1	codex	hypothesis	hyp-20260929-001-r3s0	0.3	1.482s	1min 25.529s
+run-p3030473-i3001931.scope	23:30:55	23:32:58	gpt-6-sol_xhigh-v2-rep1	codex	hypothesis	hyp-20260929-002-r3s1	-0.1	1.414s	2min 2.910s
+run-p3030477-i3021318.scope	23:30:55	23:42:56	gpt-6-sol_xhigh-v2-rep1	codex	hypothesis	hyp-20260929-003-r3s2	0.0	3min 531ms	12min 819ms
+run-p3033324-i3052852.scope	23:31:51	23:38:30	claude-opus-5_5_xhigh-v2-rep1	claude	implementation	hyp-20260929-003-r3s2	-1.0	14min 54.837s	6min 38.997s
+run-p3033743-i3002038.scope	23:32:21	23:38:20	gpt-6-sol_xhigh-v2-rep1	codex	implementation	hyp-20260929-001-r3s0	-0.1	7min 52.548s	5min 58.842s
+run-p3036296-i3025579.scope	23:32:58	23:46:26	gpt-6-sol_xhigh-v2-rep1	codex	implementation	hyp-20260929-002-r3s1	-0.3	26min 52.475s	13min 27.691s
+run-p3040124-i3029417.scope	23:34:12	23:41:03	claude-opus-5_5_xhigh-v2-rep1	claude	implementation	hyp-20260929-001-r3s0	-0.6	13min 3.183s	6min 50.868s
+run-p3040587-i3045792.scope	23:34:57	23:40:25	claude-opus-5_5_xhigh-v2-rep1	claude	implementation	hyp-20260929-002-r3s1	-0.1	13min 39.528s	5min 27.771s
+run-p3068777-i3026797.scope	23:42:56	23:53:40	gpt-6-sol_xhigh-v2-rep1	codex	implementation	hyp-20260929-003-r3s2	-0.8	15min 12.889s	10min 44.235s
+run-p3083911-i3105864.scope	23:47:19	23:47:38	claude-opus-5_5_xhigh-v2-rep1	claude	scribe	hyp-20260929-001-r3s0	-1.0	916ms	19.629s
+run-p3084089-i3055374.scope	23:47:39	23:48:23	claude-opus-5_5_xhigh-v2-rep1	claude	scribe	hyp-20260929-002-r3s1	-0.3	1.386s	44.160s
+run-p3085094-i3090563.scope	23:48:23	23:49:02	claude-opus-5_5_xhigh-v2-rep1	claude	scribe	hyp-20260929-003-r3s2	-0.2	1.330s	38.735s
+run-p3086956-i3094234.scope	23:48:50	23:49:54	gpt-6-luna_xhigh-v2-rep1	codex	scribe	hyp-20260929-001-r3s0	-0.9	860ms	1min 4.078s
+run-p3087262-i3117776.scope	23:49:02	23:55:25	claude-opus-5_5_xhigh-v2-rep1	claude	hypothesis	hyp-20260929-002-r4s1	-0.1	21.831s	6min 22.790s
+run-p3087266-i3078620.scope	23:49:02	23:55:48	claude-opus-5_5_xhigh-v2-rep1	claude	hypothesis	hyp-20260929-001-r4s0	-0.3	21.315s	6min 45.962s
+run-p3087272-i3082509.scope	23:49:02	23:54:06	claude-opus-5_5_xhigh-v2-rep1	claude	hypothesis	hyp-20260929-003-r4s2	-0.2	21.546s	5min 3.861s
+run-p3088062-i3114011.scope	23:49:55	23:50:32	gpt-6-luna_xhigh-v2-rep1	codex	scribe	hyp-20260929-002-r3s1	-0.9	789ms	37.915s
+run-p3088651-i3078732.scope	23:50:33	23:51:11	gpt-6-luna_xhigh-v2-rep1	codex	scribe	hyp-20260929-003-r3s2	-0.1	612ms	38.043s
+run-p3090989-i3118034.scope	23:51:11	23:52:56	gpt-6-luna_xhigh-v2-rep1	codex	hypothesis	hyp-20260929-002-r4s1	0.1	1.217s	1min 44.959s
+run-p3090991-i3094511.scope	23:51:11	23:53:38	gpt-6-luna_xhigh-v2-rep1	codex	hypothesis	hyp-20260929-003-r4s2	-0.1	1.142s	2min 27.090s
+run-p3090995-i3063391.scope	23:51:11	23:52:52	gpt-6-luna_xhigh-v2-rep1	codex	hypothesis	hyp-20260929-001-r4s0	-0.4	953ms	1min 41.492s
+run-p3092800-i3094658.scope	23:52:52	23:56:02	gpt-6-luna_xhigh-v2-rep1	codex	implementation	hyp-20260929-001-r4s0	-0.9	3min 16.248s	3min 9.995s
+run-p3093014-i3094666.scope	23:52:56	00:03:47	gpt-6-luna_xhigh-v2-rep1	codex	implementation	hyp-20260929-002-r4s1	-0.3	8min 966ms	10min 50.962s
+run-p3093522-i3063453.scope	23:53:38	00:16:56	gpt-6-luna_xhigh-v2-rep1	codex	implementation	hyp-20260929-003-r4s2	-0.6	2h 14min 17.383s	23min 18.136s
+run-p3097813-i3121878.scope	23:54:06	00:02:28	claude-opus-5_5_xhigh-v2-rep1	claude	implementation	hyp-20260929-003-r4s2	-0.3	20min 47.888s	8min 21.926s
+run-p3101065-i3063776.scope	23:55:25	00:04:07	claude-opus-5_5_xhigh-v2-rep1	claude	implementation	hyp-20260929-002-r4s1	-0.5	14min 30.014s	8min 42.311s
+run-p3101529-i3114972.scope	23:55:48	00:04:19	claude-opus-5_5_xhigh-v2-rep1	claude	implementation	hyp-20260929-001-r4s0	-0.8	14min 25.812s	8min 31.426s
+run-p3106074-i3102246.scope	23:56:42	23:57:16	gpt-6-sol_xhigh-v2-rep1	codex	scribe	hyp-20260929-001-r3s0	-0.5	909ms	34.144s
+run-p3106520-i3075408.scope	23:57:16	23:58:02	gpt-6-sol_xhigh-v2-rep1	codex	scribe	hyp-20260929-002-r3s1	-1.0	1.323s	46.355s
+run-p3108265-i3067610.scope	23:58:03	23:59:59	gpt-6-sol_xhigh-v2-rep1	codex	scribe	hyp-20260929-003-r3s2	-0.2	2.187s	1min 56.080s
+run-p3115657-i3122316.scope	23:59:59	00:08:41	gpt-6-sol_xhigh-v2-rep1	codex	hypothesis	hyp-20260929-002-r4s1	-0.3	5min 34.554s	8min 42.182s
+run-p3115660-i3122317.scope	23:59:59	00:03:27	gpt-6-sol_xhigh-v2-rep1	codex	hypothesis	hyp-20260929-001-r4s0	0.1	52.555s	3min 27.774s
+run-p3115662-i3095378.scope	23:59:59	00:07:27	gpt-6-sol_xhigh-v2-rep1	codex	hypothesis	hyp-20260929-003-r4s2	-0.1	51.850s	7min 28.056s
+run-p3125344-i3122681.scope	00:03:27	00:08:15	gpt-6-sol_xhigh-v2-rep1	codex	implementation	hyp-20260929-001-r4s0	-0.9	6min 46.089s	4min 48.433s
+run-p3135899-i3116550.scope	00:07:27	00:12:55	gpt-6-sol_xhigh-v2-rep1	codex	implementation	hyp-20260929-003-r4s2	-0.9	5min 28.258s	5min 28.229s
+run-p3136885-i3131529.scope	00:08:03	00:09:04	claude-opus-5_5_xhigh-v2-rep1	claude	scribe	hyp-20260929-001-r4s0	-0.7	2.185s	1min 1.447s
+run-p3138966-i3131706.scope	00:08:41	00:13:09	gpt-6-sol_xhigh-v2-rep1	codex	implementation	hyp-20260929-002-r4s1	-0.9	7min 38.801s	4min 28.060s
+run-p3139798-i3167300.scope	00:09:04	00:10:00	claude-opus-5_5_xhigh-v2-rep1	claude	scribe	hyp-20260929-002-r4s1	-1.0	1.599s	56.164s
+run-p3146067-i3151447.scope	00:10:01	00:11:20	claude-opus-5_5_xhigh-v2-rep1	claude	scribe	hyp-20260929-003-r4s2	-0.9	6.895s	1min 19.689s
+run-p3148259-i3151630.scope	00:11:21	00:17:44	claude-opus-5_5_xhigh-v2-rep1	claude	hypothesis	hyp-20260929-001-r5s0	-0.9	1min 51.003s	6min 23.731s
+run-p3148264-i3159453.scope	00:11:21	00:16:02	claude-opus-5_5_xhigh-v2-rep1	claude	hypothesis	hyp-20260929-003-r5s2	-0.8	8.298s	4min 41.643s
+run-p3148272-i3159454.scope	00:11:21	00:15:49	claude-opus-5_5_xhigh-v2-rep1	claude	hypothesis	hyp-20260929-002-r5s1	-1.0	21.424s	4min 28.736s
+run-p3154893-i3175073.scope	00:15:29	00:15:58	gpt-6-sol_xhigh-v2-rep1	codex	scribe	hyp-20260929-001-r4s0	-0.0	743ms	28.815s
+run-p3155245-i3175090.scope	00:15:50	00:24:18	claude-opus-5_5_xhigh-v2-rep1	claude	implementation	hyp-20260929-002-r5s1	-1.0	14min 58.312s	8min 28.881s
+run-p3155379-i3120697.scope	00:15:58	00:16:20	gpt-6-sol_xhigh-v2-rep1	codex	scribe	hyp-20260929-002-r4s1	-0.9	696ms	22.725s
+run-p3155565-i3124577.scope	00:16:02	00:27:00	claude-opus-5_5_xhigh-v2-rep1	claude	implementation	hyp-20260929-003-r5s2	-0.7	37min 41.861s	10min 57.737s
+run-p3155790-i3168078.scope	00:16:21	00:17:33	gpt-6-sol_xhigh-v2-rep1	codex	scribe	hyp-20260929-003-r4s2	-0.2	1.495s	1min 12.199s
+run-p3156906-i3179312.scope	00:17:33	00:23:43	gpt-6-sol_xhigh-v2-rep1	codex	hypothesis	hyp-20260929-003-r5s2	-0.1	20.937s	6min 10.186s
+run-p3156910-i3179313.scope	00:17:33	00:29:55	gpt-6-sol_xhigh-v2-rep1	codex	hypothesis	hyp-20260929-002-r5s1	-0.3	9min 51.701s	12min 22.190s
+run-p3156914-i3129191.scope	00:17:33	00:29:13	gpt-6-sol_xhigh-v2-rep1	codex	hypothesis	hyp-20260929-001-r5s0	0.4	8min 33.763s	11min 39.652s
+run-p3157685-i3129277.scope	00:17:45	00:26:50	claude-opus-5_5_xhigh-v2-rep1	claude	implementation	hyp-20260929-001-r5s0	-0.4	14min 39.401s	9min 5.374s
+run-p3168281-i3144628.scope	00:23:43	00:35:07	gpt-6-sol_xhigh-v2-rep1	codex	implementation	hyp-20260929-003-r5s2	-0.7	20min 5.171s	11min 24.049s
+run-p3172585-i3148641.scope	00:25:16	00:26:23	gpt-6-luna_xhigh-v2-rep1	codex	scribe	hyp-20260929-001-r4s0	-0.8	1.190s	1min 7.732s
+run-p3178310-i3199877.scope	00:26:23	00:26:40	gpt-6-luna_xhigh-v2-rep1	codex	scribe	hyp-20260929-002-r4s1	-1.0	-	-
+run-p3178811-i3169047.scope	00:26:41	00:27:00	gpt-6-luna_xhigh-v2-rep1	codex	scribe	hyp-20260929-003-r4s2	-0.9	515ms	19.824s
+run-p3179926-i3176419.scope	00:27:01	00:28:39	gpt-6-luna_xhigh-v2-rep1	codex	hypothesis	hyp-20260929-001-r5s0	0.1	1.320s	1min 38.214s
+run-p3179933-i3192393.scope	00:27:01	00:29:39	gpt-6-luna_xhigh-v2-rep1	codex	hypothesis	hyp-20260929-002-r5s1	-0.4	1.595s	2min 38.606s
+run-p3179937-i3176422.scope	00:27:01	00:28:03	gpt-6-luna_xhigh-v2-rep1	codex	hypothesis	hyp-20260929-003-r5s2	-0.5	894ms	1min 2.706s
+run-p3187365-i3216012.scope	00:28:39	00:41:47	gpt-6-luna_xhigh-v2-rep1	codex	implementation	hyp-20260929-001-r5s0	-0.6	58min 18.192s	13min 8.206s
+run-p3190209-i3200501.scope	00:29:13	00:35:24	gpt-6-sol_xhigh-v2-rep1	codex	implementation	hyp-20260929-001-r5s0	-0.5	8min 38.700s	6min 11.376s
+run-p3191263-i3216301.scope	00:29:39	00:59:03	gpt-6-luna_xhigh-v2-rep1	codex	implementation	hyp-20260929-002-r5s1	-0.7	1h 50min 36.399s	29min 23.810s
+run-p3192553-i3196886.scope	00:29:55	00:35:40	gpt-6-sol_xhigh-v2-rep1	codex	implementation	hyp-20260929-002-r5s1	-0.1	8min 16.983s	5min 44.371s
+run-p3194854-i3223670.scope	00:30:53	00:31:49	claude-opus-5_5_xhigh-v2-rep1	claude	scribe	hyp-20260929-001-r5s0	-1.0	2.096s	56.218s
+run-p3198753-i3231979.scope	00:31:50	00:32:19	claude-opus-5_5_xhigh-v2-rep1	claude	scribe	hyp-20260929-002-r5s1	-0.7	1.258s	29.493s
+run-p3201301-i3224341.scope	00:32:19	00:33:55	claude-opus-5_5_xhigh-v2-rep1	claude	scribe	hyp-20260929-003-r5s2	-0.4	2.388s	1min 35.477s
+run-p3204865-i3240104.scope	00:33:55	00:38:41	claude-opus-5_5_xhigh-v2-rep1	claude	hypothesis	hyp-20260929-002-r6s1	-0.2	2.423s	4min 45.634s
+run-p3204876-i3220986.scope	00:33:55	00:38:34	claude-opus-5_5_xhigh-v2-rep1	claude	hypothesis	hyp-20260929-003-r6s2	-0.2	2.327s	4min 38.538s
+run-p3204879-i3240108.scope	00:33:55	00:39:16	claude-opus-5_5_xhigh-v2-rep1	claude	hypothesis	hyp-20260929-001-r6s0	-0.9	28.076s	5min 21.239s
+run-p3213878-i3193361.scope	00:38:22	00:39:02	gpt-6-sol_xhigh-v2-rep1	codex	scribe	hyp-20260929-001-r5s0	-0.7	1.017s	39.848s
+run-p3214188-i3213060.scope	00:38:34	00:57:47	claude-opus-5_5_xhigh-v2-rep1	claude	implementation	hyp-20260929-003-r6s2	-0.3	59min 32.862s	19min 12.944s
+run-p3214438-i3209381.scope	00:38:41	00:59:27	claude-opus-5_5_xhigh-v2-rep1	claude	implementation	hyp-20260929-002-r6s1	-0.8	31min 987ms	20min 46.487s
+run-p3214806-i3216798.scope	00:39:02	00:39:30	gpt-6-sol_xhigh-v2-rep1	codex	scribe	hyp-20260929-002-r5s1	-0.8	766ms	27.938s
+run-p3215050-i3216812.scope	00:39:17	00:50:05	claude-opus-5_5_xhigh-v2-rep1	claude	implementation	hyp-20260929-001-r6s0	-0.3	11min 579ms	10min 48.226s
+run-p3215175-i3213133.scope	00:39:30	00:40:52	gpt-6-sol_xhigh-v2-rep1	codex	scribe	hyp-20260929-003-r5s2	-0.9	1.339s	1min 21.971s
+run-p3216647-i3209605.scope	00:40:53	00:43:16	gpt-6-sol_xhigh-v2-rep1	codex	hypothesis	hyp-20260929-001-r6s0	-0.2	2.465s	2min 23.448s
+run-p3216650-i3248259.scope	00:40:53	00:47:02	gpt-6-sol_xhigh-v2-rep1	codex	hypothesis	hyp-20260929-002-r6s1	-0.5	46.107s	6min 9.710s
+run-p3216655-i3174313.scope	00:40:53	00:43:25	gpt-6-sol_xhigh-v2-rep1	codex	hypothesis	hyp-20260929-003-r6s2	-0.0	2.152s	2min 32.355s
+run-p3224256-i3245276.scope	00:43:16	01:02:17	gpt-6-sol_xhigh-v2-rep1	codex	implementation	hyp-20260929-001-r6s0	-0.7	31min 30.227s	19min 1.063s
+run-p3225700-i3222001.scope	00:43:25	00:52:13	gpt-6-sol_xhigh-v2-rep1	codex	implementation	hyp-20260929-003-r6s2	-0.8	10min 15.460s	8min 48.233s
+run-p3235386-i3222753.scope	00:47:02	01:03:22	gpt-6-sol_xhigh-v2-rep1	codex	implementation	hyp-20260929-002-r6s1	-0.8	27min 48.925s	16min 19.901s
+run-p3280375-i3250601.scope	01:05:14	01:05:43	gpt-6-luna_xhigh-v2-rep1	codex	scribe	hyp-20260929-001-r5s0	-0.6	716ms	28.982s
+run-p3281373-i3250648.scope	01:05:43	01:06:31	gpt-6-luna_xhigh-v2-rep1	codex	scribe	hyp-20260929-002-r5s1	-0.2	763ms	47.443s
+run-p3283535-i3310612.scope	01:06:31	01:06:53	gpt-6-luna_xhigh-v2-rep1	codex	scribe	hyp-20260929-003-r5s2	-0.4	486ms	22.044s
+run-p3283799-i3274203.scope	01:06:32	01:07:01	claude-opus-5_5_xhigh-v2-rep1	claude	scribe	hyp-20260929-001-r6s0	-1.0	1.007s	29.635s
+run-p3287404-i3318734.scope	01:06:53	01:11:20	gpt-6-luna_xhigh-v2-rep1	codex	hypothesis	hyp-20260929-002-r6s1	-0.0	1.379s	4min 26.798s
+run-p3287406-i3230960.scope	01:06:53	01:08:09	gpt-6-luna_xhigh-v2-rep1	codex	hypothesis	hyp-20260929-003-r6s2	0.0	964ms	1min 15.778s
+run-p3287412-i3322209.scope	01:06:53	01:12:53	gpt-6-luna_xhigh-v2-rep1	codex	hypothesis	hyp-20260929-001-r6s0	-0.1	1.438s	5min 59.857s
+run-p3289427-i3251056.scope	01:07:02	01:08:16	claude-opus-5_5_xhigh-v2-rep1	claude	scribe	hyp-20260929-002-r6s1	-0.5	1.639s	1min 14.328s
+run-p3292051-i3303022.scope	01:07:54	01:08:59	gpt-6-sol_xhigh-v2-rep1	codex	scribe	hyp-20260929-001-r6s0	-0.0	1.546s	1min 4.647s
+run-p3292434-i3311072.scope	01:08:09	01:12:32	gpt-6-luna_xhigh-v2-rep1	codex	implementation	hyp-20260929-003-r6s2	-0.7	4min 45.129s	4min 23.274s
+run-p3292635-i3303081.scope	01:08:16	01:09:39	claude-opus-5_5_xhigh-v2-rep1	claude	scribe	hyp-20260929-003-r6s2	-0.1	1.879s	1min 22.460s
+run-p3293223-i3315126.scope	01:08:59	01:10:18	gpt-6-sol_xhigh-v2-rep1	codex	scribe	hyp-20260929-002-r6s1	-0.4	1.479s	1min 19.297s
+run-p3295485-i3303251.scope	01:09:39	01:13:57	claude-opus-5_5_xhigh-v2-rep1	claude	hypothesis	hyp-20260929-001-r7s0	-0.4	15.993s	4min 18.129s
+run-p3295489-i3322688.scope	01:09:39	01:14:56	claude-opus-5_5_xhigh-v2-rep1	claude	hypothesis	hyp-20260929-003-r7s2	-0.1	2.842s	5min 16.800s
+run-p3295495-i3259706.scope	01:09:39	01:14:22	claude-opus-5_5_xhigh-v2-rep1	claude	hypothesis	hyp-20260929-002-r7s1	-0.7	15.763s	4min 43.436s
+run-p3295926-i3255560.scope	01:10:18	01:11:18	gpt-6-sol_xhigh-v2-rep1	codex	scribe	hyp-20260929-003-r6s2	-0.3	1.328s	59.742s
+run-p3296693-i3259761.scope	01:11:18	01:14:14	gpt-6-sol_xhigh-v2-rep1	codex	hypothesis	hyp-20260929-003-r7s2	0.1	1.529s	2min 55.661s
+run-p3296696-i3303347.scope	01:11:18	01:16:36	gpt-6-sol_xhigh-v2-rep1	codex	hypothesis	hyp-20260929-001-r7s0	-0.7	1min 3.310s	5min 18.416s
+run-p3296701-i3231421.scope	01:11:18	01:13:18	gpt-6-sol_xhigh-v2-rep1	codex	hypothesis	hyp-20260929-002-r7s1	0.3	1.644s	1min 59.592s
+run-p3297199-i3322827.scope	01:11:20	01:35:42	gpt-6-luna_xhigh-v2-rep1	codex	implementation	hyp-20260929-002-r6s1	-0.7	1h 13min 46.475s	24min 22.190s
+run-p3299899-i3307517.scope	01:12:53	01:32:59	gpt-6-luna_xhigh-v2-rep1	codex	implementation	hyp-20260929-001-r6s0	-0.0	1h 8min 54.215s	20min 5.454s
+run-p3300664-i3303632.scope	01:13:18	01:34:06	gpt-6-sol_xhigh-v2-rep1	codex	implementation	hyp-20260929-002-r7s1	-0.7	39min 51.182s	20min 48.468s
+run-p3301239-i3275418.scope	01:13:57	02:01:32	claude-opus-5_5_xhigh-v2-rep1	claude	implementation	hyp-20260929-001-r7s0	1788.3	6h 5min 19.556s	47min 34.995s
+run-p3302307-i3294981.scope	01:14:14	01:38:38	gpt-6-sol_xhigh-v2-rep1	codex	implementation	hyp-20260929-003-r7s2	-0.2	36min 3.848s	24min 23.975s
+run-p3302515-i3294985.scope	01:14:22	01:23:48	claude-opus-5_5_xhigh-v2-rep1	claude	implementation	hyp-20260929-002-r7s1	-0.4	19min 47.336s	9min 25.475s
+run-p3304422-i3284725.scope	01:14:56	01:27:01	claude-opus-5_5_xhigh-v2-rep1	claude	implementation	hyp-20260929-003-r7s2	-0.6	14min 48.601s	12min 5.333s
+run-p3318677-i3351345.scope	01:16:37	01:36:29	gpt-6-sol_xhigh-v2-rep1	codex	implementation	hyp-20260929-001-r7s0	-0.7	25min 5.717s	19min 52.663s
