@@ -379,7 +379,12 @@ own tool (Gowin EDA 1.9.11.03):
   orchestrator's worktree and branch git commands run one at a time under a
   lock, and a failed worktree add is retried from a clean slate (up to three
   attempts, each retry logged). In a test with three slot threads, no two of
-  these commands overlap; the same test fails on 2.8.0.
+  these commands overlap; the same test fails on 2.8.0. The smoke of the new
+  system (GPT-6.1 Sol, below) then found that a run stopped before its first
+  round could not be rerun: its clone kept files only the agent account
+  could delete, the runner had already revoked that account's access, and
+  the rerun's clone failure was recorded as a final `failed`, so the run
+  would never have been repeated. Fixed in 2.8.2 before any scored run.
 - Paper angle: a comparison of agent CLIs needs per-CLI integration
   testing under the real concurrency, and a monitor that reads outcomes by
   class per system; the bias showed up as one system's "broken" count.
