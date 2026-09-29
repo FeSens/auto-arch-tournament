@@ -18,6 +18,7 @@ import json
 import re
 import subprocess
 import time
+from collections import Counter
 from pathlib import Path
 
 HIGH = [
@@ -65,6 +66,8 @@ INTERFERENCE = re.compile(
 BUDGET_SEC = {"hypothesis": 20 * 60, "implement": 30 * 60, "scribe": 4 * 60}
 HANG_QUIET_SEC = 120 * 60   # evals queue for host slots (tools/eval/_slots.py)
 TOOL_MAX_SEC = {"gw_sh": 50 * 60, "sby": 50 * 60, "bitwuzla": 50 * 60}
+AGENT_CGROUPS = Path("/sys/fs/cgroup/hweagents.slice")
+SCOPE_GRACE_SEC = 60        # an agent scope without its agent CLI (scan_scopes)
 JUMP_RATIO = 3.0
 IPC_JUMP_RATIO = 1.8
 
@@ -133,6 +136,7 @@ class Monitor:
         self.seen = set(json.loads(self.seen_path.read_text())) if self.seen_path.exists() else set()
         self.counts_path = state / "counts.json"
         self.counts = json.loads(self.counts_path.read_text()) if self.counts_path.exists() else {}
+        self.scope_seen = {}
 
     def alert(self, sev, run, what, detail, new):
         key = f"{sev}|{run}|{what}|{detail[:160]}"
@@ -279,6 +283,35 @@ class Monitor:
                 if re.search(rf"(^|/){tool}(\s|$)", args) and secs > cap:
                     self.alert("HANG", run, f"{tool} running long", f"{secs // 60} min: {args[:160]}", new)
 
+    def scan_scopes(self, new):
+        """Each agent command runs in a scope of its own (hwe-agent-scope),
+        which the helper empties when the command exits. A scope without an
+        agent CLI in it for long is something an agent left running
+        (incident 05) and the helper failed to kill."""
+        alive = set()
+        for scope in AGENT_CGROUPS.glob("hweagents-*.slice/*.scope"):
+            try:
+                pids = (scope / "cgroup.procs").read_text().split()
+            except OSError:
+                continue
+            comms = []
+            for pid in pids:
+                try:
+                    comms.append(Path(f"/proc/{pid}/comm").read_text().strip())
+                except OSError:
+                    pass
+            if not comms or {"claude", "codex"} & set(comms):
+                continue
+            alive.add(scope.name)
+            first = self.scope_seen.setdefault(scope.name, time.time())
+            if time.time() - first > SCOPE_GRACE_SEC:
+                acct = scope.parent.name.removeprefix("hweagents-").removesuffix(".slice")
+                top = ", ".join(f"{n} {c}" for c, n in Counter(comms).most_common(4))
+                self.alert("HIGH", acct, "processes outlived their agent",
+                           f"{scope.name}: {top}", new)
+        for name in set(self.scope_seen) - alive:
+            del self.scope_seen[name]
+
     def pass_once(self):
         new = []
         if self.clones.is_dir():
@@ -288,6 +321,7 @@ class Monitor:
                     self.scan_rtl(clone, new)
                     self.scan_outcomes(clone, new)
             self.scan_liveness(new)
+        self.scan_scopes(new)
         self.offsets_path.write_text(json.dumps(self.offsets))
         self.seen_path.write_text(json.dumps(sorted(self.seen)))
         self.counts_path.write_text(json.dumps(self.counts, indent=1))

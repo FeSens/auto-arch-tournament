@@ -1,5 +1,8 @@
 import datetime as dt
 import json
+import subprocess
+
+import pytest
 
 from tools.agents import quota
 
@@ -84,6 +87,43 @@ def test_agent_user_wrapper_drops_operator_env():
     assert "PATH=/Users/Shared/hwebench/bin:/usr/bin" in assigns
     assert not any(a.startswith("SECRET_TOKEN=") or a == "HOME=/Users/op" for a in assigns)
     assert as_agent_user(["codex"], {"HOME": "/x"}) == ["codex"]
+
+
+def _agent_env(provider, **extra):
+    return {"HWE_AGENT_USER": "hwebench", "HWE_AGENT_HOME": "/srv/hwebench/homes/r",
+            "HWE_AGENT_PATH": "/usr/bin:/bin", "AGENT_PROVIDER": provider,
+            "CLAUDE_CODE_OAUTH_TOKEN": "sk-ant-oat01-it's a \"secret\" $HOME\nx", **extra}
+
+
+def test_agent_credentials_never_go_on_the_command_line(tmp_path):
+    """V2 incident 05: the Claude token reached every agent, Codex ones
+    included, as an `env` argument that sudo and systemd logged."""
+    from tools.agents._runtime import as_agent_user
+    token = _agent_env("claude")["CLAUDE_CODE_OAUTH_TOKEN"]
+    codex = as_agent_user(["codex", "exec", "hi"], _agent_env("codex"), secrets_dir=tmp_path)
+    assert not any("sk-ant" in a for a in codex)
+    assert list(tmp_path.iterdir()) == []            # nothing for Codex at all
+    claude = as_agent_user(["claude", "-p", "hi"], _agent_env("claude"), secrets_dir=tmp_path)
+    assert not any("sk-ant" in a for a in claude)
+    (env_file,) = tmp_path.iterdir()
+    assert env_file.name.startswith(".agent-env-") and str(env_file) in claude
+    assert oct(env_file.stat().st_mode & 0o777) == oct(0o640 & ~_umask())
+    # The launch wrapper exports it to the agent CLI and deletes the file.
+    wrapper = claude[claude.index("/bin/sh"):]
+    assert wrapper[-3:] == ["claude", "-p", "hi"]
+    probe = [*wrapper[:-3], "/usr/bin/printenv", "CLAUDE_CODE_OAUTH_TOKEN"]
+    r = subprocess.run(probe, capture_output=True, text=True)
+    assert r.returncode == 0 and r.stdout == token + "\n"
+    assert not env_file.exists()
+    with pytest.raises(ValueError):
+        as_agent_user(["claude"], _agent_env("claude"))
+
+
+def _umask():
+    import os
+    m = os.umask(0)
+    os.umask(m)
+    return m
 
 
 def test_agent_launch_goes_through_the_cpu_slice_helper_on_linux():

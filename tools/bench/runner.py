@@ -225,7 +225,7 @@ def check_agent_user(agent: AgentUser) -> Optional[str]:
                 capture_output=True).returncode == 0:
         return f"it can read {Path.home()}"
     if not IS_MAC:
-        return check_agent_slice(agent.name)
+        return check_agent_slice(agent.name) or check_agent_reaping(agent.name)
     return None
 
 
@@ -242,6 +242,34 @@ def check_agent_slice(name: str) -> Optional[str]:
     if want not in r.stdout:
         return (f"its commands do not run in {want.strip('/')} "
                 f"(got {r.stdout.strip() or r.stderr.strip()!r}; run setup_server.sh, 6d)")
+    return None
+
+
+def check_agent_reaping(name: str) -> Optional[str]:
+    """None if nothing an agent command starts can outlive it: the launch
+    helper kills whatever the command left in its scope (setup_server.sh,
+    6d), and the account cannot schedule cron or at jobs (6e). V2 incident
+    05: an agent's backgrounded formal solvers ran on after the agent."""
+    from tools.agents._runtime import agent_launch_prefix
+    try:
+        r = subprocess.run([*agent_launch_prefix(name), "/bin/sh", "-c",
+                            "sleep 300 >/dev/null 2>&1 & echo $!"],
+                           capture_output=True, text=True, timeout=60)
+    except (OSError, subprocess.TimeoutExpired) as e:
+        return f"leftover-process check failed: {e}"
+    pid = r.stdout.strip()
+    if not pid.isdigit():
+        return f"leftover-process check failed: {r.stdout.strip() or r.stderr.strip()!r}"
+    if Path(f"/proc/{pid}").exists():
+        as_agent(name, "/bin/kill", "-KILL", pid, capture_output=True)
+        return ("a process its command started outlived the command "
+                "(install the current hwe-agent-scope: setup_server.sh, 6d)")
+    for tool in ("/usr/bin/crontab", "/usr/bin/at"):
+        if not Path(tool).exists():
+            continue
+        r = as_agent(name, tool, "-l", capture_output=True, text=True)
+        if "not allowed" not in r.stderr and "permission" not in r.stderr.lower():
+            return f"it may schedule jobs with {tool} (setup_server.sh, 6e)"
     return None
 
 
@@ -1199,6 +1227,10 @@ def make_env_for_job(job: JobSpec, clone: Path, keys: dict[str, str]) -> dict[st
     for k, v in keys.items():
         if not env.get(k):
             env[k] = v
+    # The Claude login token belongs to Claude runs only (V2 incident 05: it
+    # reached the Codex agents too). Codex reads its own login file.
+    if job.model.provider != "claude":
+        env.pop("CLAUDE_CODE_OAUTH_TOKEN", None)
     # Host-wide cap on the harness's heavy evals (tools/eval/_slots.py): three
     # concurrent evals, formal at -j6, on the 20-core run host. Not passed to
     # agents (no AGENT_/BENCH_/HWE_ prefix).

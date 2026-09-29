@@ -29,6 +29,7 @@ from __future__ import annotations
 
 import json
 import os
+import shlex
 import shutil
 import subprocess
 import sys
@@ -453,10 +454,17 @@ _AGENT_ENV_PASS = (
     "TARGET", "TMPDIR", "LANG", "LC_ALL", "TERM", "GOWIN_HOME",
     "CODEX_HOME", "CODEX_MODEL", "CODEX_REASONING_EFFORT",
     "ANTHROPIC_MODEL", "CLAUDE_BENCH_SETTINGS", "CLAUDE_EFFORT",
-    "CLAUDE_CODE_OAUTH_TOKEN", "CLAUDE_CODE_DISABLE_AUTO_MEMORY",
+    "CLAUDE_CODE_DISABLE_AUTO_MEMORY",
     "DISABLE_TELEMETRY", "DISABLE_ERROR_REPORTING", "DISABLE_AUTOUPDATER",
 )
 _AGENT_ENV_PREFIXES = ("AGENT_", "BENCH_", "HWE_")
+
+# Credentials an agent CLI reads from its environment, by the provider that
+# owns them. An agent gets only its own provider's, and never on a command
+# line: the launch command shows in the host's process list and sudo and
+# systemd log it. V2 incident 05: the Claude login token went to every
+# agent, the Codex ones included, as an `env` argument.
+_AGENT_SECRETS = {"CLAUDE_CODE_OAUTH_TOKEN": "claude"}
 
 
 # Root helper that runs a command as a bench agent account inside that
@@ -473,18 +481,36 @@ def agent_launch_prefix(user: str, platform: str = sys.platform) -> list[str]:
     return ["sudo", "-n", AGENT_SCOPE, user]
 
 
-def as_agent_user(cmd: list[str], environ: Optional[dict] = None) -> list[str]:
+def _write_agent_secrets(secrets_dir: Path, secrets: dict[str, str]) -> Path:
+    """The agent's credentials as a shell file its launch wrapper sources and
+    deletes. In the invocation's private TMPDIR: inside the clone, whose ACL
+    admits only the operator and the run's own account."""
+    path = Path(secrets_dir) / f".agent-env-{uuid.uuid4().hex[:12]}"
+    fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o640)
+    with os.fdopen(fd, "w") as f:
+        for k, v in sorted(secrets.items()):
+            f.write(f"export {k}={shlex.quote(v)}\n")
+    return path
+
+
+def as_agent_user(cmd: list[str], environ: Optional[dict] = None,
+                  secrets_dir: Optional[Path] = None) -> list[str]:
     """Wrap cmd to run as HWE_AGENT_USER (V2 isolation) with a clean
     environment; unchanged when the variable is unset.
 
     The runner stays the operator; the agent CLI runs as an account that
     cannot read the operator's home (held-out kernels, results, other
-    sessions). See research/v2/scripts/setup_bench_user.sh."""
+    sessions). See research/v2/scripts/setup_bench_user.sh. Credentials
+    (_AGENT_SECRETS) of the agent's own provider travel in a file under
+    secrets_dir, never in the command."""
     env = os.environ if environ is None else environ
     user = env.get("HWE_AGENT_USER", "").strip()
     if not user:
         return cmd
     home = env["HWE_AGENT_HOME"]
+    provider = env.get("AGENT_PROVIDER", "")
+    secrets = {k: env[k] for k, owner in _AGENT_SECRETS.items()
+               if owner == provider and env.get(k)}
     keep = {k: v for k, v in env.items()
             if k in _AGENT_ENV_PASS or k.startswith(_AGENT_ENV_PREFIXES)}
     keep.update({
@@ -504,8 +530,14 @@ def as_agent_user(cmd: list[str], environ: Optional[dict] = None) -> list[str]:
     # harness's scoring evals, so neither a score nor a run's working
     # conditions depend on how hard another run's agents are working.
     # nice 10 still orders the agents behind the harness on macOS.
-    return [*agent_launch_prefix(user), "/usr/bin/nice", "-n", "10", "/usr/bin/env", "-i", *assigns,
-            "/bin/sh", "-c", 'umask 007; exec "$@"', "sh", *cmd]
+    launch = [*agent_launch_prefix(user), "/usr/bin/nice", "-n", "10", "/usr/bin/env", "-i", *assigns]
+    if not secrets:
+        return [*launch, "/bin/sh", "-c", 'umask 007; exec "$@"', "sh", *cmd]
+    if secrets_dir is None:
+        raise ValueError("agent credentials need a secrets_dir; they never go on a command line")
+    env_file = _write_agent_secrets(secrets_dir, secrets)
+    return [*launch, "/bin/sh", "-c", 'umask 007; f=$1; shift; . "$f"; rm -f -- "$f"; exec "$@"',
+            "sh", str(env_file), *cmd]
 
 
 def run_agent_streaming(
@@ -541,7 +573,7 @@ def run_agent_streaming(
 
 def _run_agent_streaming(cmd, cwd, log_path, timeout_sec, mode, p, env) -> tuple[int, bool]:
     proc = subprocess.Popen(
-        as_agent_user(cmd, env), cwd=cwd, env=env,
+        as_agent_user(cmd, env, secrets_dir=Path(env["TMPDIR"])), cwd=cwd, env=env,
         stdin=subprocess.DEVNULL,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
