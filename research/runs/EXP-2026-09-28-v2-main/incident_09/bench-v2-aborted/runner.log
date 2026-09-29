@@ -1,0 +1,87 @@
+[preflight] toolchain:
+  verilator            /opt/hwe-toolchain/oss-cad-suite/bin/verilator
+  yosys                /opt/hwe-toolchain/oss-cad-suite/bin/yosys
+  sby                  /opt/hwe-toolchain/oss-cad-suite/bin/sby
+  bitwuzla             /opt/hwe-toolchain/oss-cad-suite/bin/bitwuzla
+  gw_sh                /opt/gowin/IDE/bin/gw_sh
+  GowinSynthesis       /opt/gowin/IDE/bin/GowinSynthesis
+[bench] 18 job(s) queued (0 already done)
+        - claude-opus-5_5_xhigh-v2-rep1  ->  claude:claude-opus-5-5
+        - claude-opus-5_5_xhigh-v2-rep2  ->  claude:claude-opus-5-5
+        - claude-opus-5_5_xhigh-v2-rep3  ->  claude:claude-opus-5-5
+        - claude-opus-5_5_xhigh-v2-rep4  ->  claude:claude-opus-5-5
+        - claude-opus-5_5_xhigh-v2-rep5  ->  claude:claude-opus-5-5
+        - claude-opus-5_5_xhigh-v2-rep6  ->  claude:claude-opus-5-5
+        - gpt-6-sol_xhigh-v2-rep1  ->  codex:gpt-6-sol
+        - gpt-6-sol_xhigh-v2-rep2  ->  codex:gpt-6-sol
+        - gpt-6-sol_xhigh-v2-rep3  ->  codex:gpt-6-sol
+        - gpt-6-sol_xhigh-v2-rep4  ->  codex:gpt-6-sol
+        - gpt-6-sol_xhigh-v2-rep5  ->  codex:gpt-6-sol
+        - gpt-6-sol_xhigh-v2-rep6  ->  codex:gpt-6-sol
+        - gpt-6-luna_xhigh-v2-rep1  ->  codex:gpt-6-luna
+        - gpt-6-luna_xhigh-v2-rep2  ->  codex:gpt-6-luna
+        - gpt-6-luna_xhigh-v2-rep3  ->  codex:gpt-6-luna
+        - gpt-6-luna_xhigh-v2-rep4  ->  codex:gpt-6-luna
+        - gpt-6-luna_xhigh-v2-rep5  ->  codex:gpt-6-luna
+        - gpt-6-luna_xhigh-v2-rep6  ->  codex:gpt-6-luna
+[bench] config: N=15 K=3 reps=6 parallel=1
+[bench] clone base: /srv/hwebench/clones
+[bench] results: bench/v2/results.jsonl
+[bench] batch: claude-opus-5_5_xhigh-v2-rep1, gpt-6-sol_xhigh-v2-rep1, gpt-6-luna_xhigh-v2-rep1
+
+[bench] === claude-opus-5_5_xhigh-v2-rep1 starting at 2026-09-29T10:14:29+00:00 ===
+
+[bench] === gpt-6-sol_xhigh-v2-rep1 starting at 2026-09-29T10:14:34+00:00 ===
+
+[bench] === gpt-6-luna_xhigh-v2-rep1 starting at 2026-09-29T10:14:39+00:00 ===
+[bench] claude-opus-5_5_xhigh-v2-rep1 sandbox probe: confined
+[bench] gpt-6-sol_xhigh-v2-rep1 sandbox probe: confined
+[bench] gpt-6-luna_xhigh-v2-rep1 sandbox probe: confined
+  [bench] warn: git bundle failed: fatal: Unable to create '/srv/hwebench/clones/claude-opus-5_5_xhigh-v2-rep1/bench/v2/claude-opus-5_5_xhigh-v2/rep1/repo.bundle.lock': No such file or directory
+
+[bench] === claude-opus-5_5_xhigh-v2-rep1 done in 23888s, fitness=308.79, cost=$0.00 ===
+  [bench] warn: git bundle failed: fatal: Unable to create '/srv/hwebench/clones/gpt-6-sol_xhigh-v2-rep1/bench/v2/gpt-6-sol_xhigh-v2/rep1/repo.bundle.lock': No such file or directory
+
+[bench] === gpt-6-sol_xhigh-v2-rep1 done in 26578s, fitness=223.78, cost=$0.00 ===
+  [bench] warn: git bundle failed: fatal: Unable to create '/srv/hwebench/clones/gpt-6-luna_xhigh-v2-rep1/bench/v2/gpt-6-luna_xhigh-v2/rep1/repo.bundle.lock': No such file or directory
+
+[bench] === gpt-6-luna_xhigh-v2-rep1 done in 27957s, fitness=119.44, cost=$0.00 ===
+[bench] batch: gpt-6-sol_xhigh-v2-rep2, gpt-6-luna_xhigh-v2-rep2, claude-opus-5_5_xhigh-v2-rep2
+
+[bench] === gpt-6-sol_xhigh-v2-rep2 starting at 2026-09-29T18:00:37+00:00 ===
+[preflight] toolchain:
+  verilator            /opt/hwe-toolchain/oss-cad-suite/bin/verilator
+  yosys                /opt/hwe-toolchain/oss-cad-suite/bin/yosys
+  sby                  /opt/hwe-toolchain/oss-cad-suite/bin/sby
+  bitwuzla             /opt/hwe-toolchain/oss-cad-suite/bin/bitwuzla
+  gw_sh                /opt/gowin/IDE/bin/gw_sh
+  GowinSynthesis       /opt/gowin/IDE/bin/GowinSynthesis
+[bench] 15 job(s) queued (3 already done)
+        - claude-opus-5_5_xhigh-v2-rep2  ->  claude:claude-opus-5-5
+        - claude-opus-5_5_xhigh-v2-rep3  ->  claude:claude-opus-5-5
+        - claude-opus-5_5_xhigh-v2-rep4  ->  claude:claude-opus-5-5
+        - claude-opus-5_5_xhigh-v2-rep5  ->  claude:claude-opus-5-5
+        - claude-opus-5_5_xhigh-v2-rep6  ->  claude:claude-opus-5-5
+        - gpt-6-sol_xhigh-v2-rep2  ->  codex:gpt-6-sol
+        - gpt-6-sol_xhigh-v2-rep3  ->  codex:gpt-6-sol
+        - gpt-6-sol_xhigh-v2-rep4  ->  codex:gpt-6-sol
+        - gpt-6-sol_xhigh-v2-rep5  ->  codex:gpt-6-sol
+        - gpt-6-sol_xhigh-v2-rep6  ->  codex:gpt-6-sol
+        - gpt-6-luna_xhigh-v2-rep2  ->  codex:gpt-6-luna
+        - gpt-6-luna_xhigh-v2-rep3  ->  codex:gpt-6-luna
+        - gpt-6-luna_xhigh-v2-rep4  ->  codex:gpt-6-luna
+        - gpt-6-luna_xhigh-v2-rep5  ->  codex:gpt-6-luna
+        - gpt-6-luna_xhigh-v2-rep6  ->  codex:gpt-6-luna
+[bench] config: N=15 K=3 reps=6 parallel=1
+[bench] clone base: /srv/hwebench/clones
+[bench] results: /home/bench/auto-arch-tournament/bench/v2/results.jsonl
+[bench] batch: gpt-6-sol_xhigh-v2-rep2, gpt-6-luna_xhigh-v2-rep2, claude-opus-5_5_xhigh-v2-rep2
+
+[bench] === gpt-6-sol_xhigh-v2-rep2 starting at 2026-09-29T18:01:08+00:00 ===
+
+[bench] === gpt-6-luna_xhigh-v2-rep2 starting at 2026-09-29T18:01:13+00:00 ===
+
+[bench] === claude-opus-5_5_xhigh-v2-rep2 starting at 2026-09-29T18:01:18+00:00 ===
+[bench] gpt-6-sol_xhigh-v2-rep2 sandbox probe: confined
+[bench] claude-opus-5_5_xhigh-v2-rep2 sandbox probe: confined
+[bench] gpt-6-luna_xhigh-v2-rep2 sandbox probe: confined
