@@ -94,8 +94,9 @@ INTERFERENCE = re.compile(
 COLLISION = re.compile(
     r"(?<!-)" + "".join(f"(?<!{w} )" for w in _RTL_COLLISIONS)
     + r"\b(collision|collided)\b"
-    r"(?! (tests?|cases?|vectors?|coverage|schedules?|guards?|bypass\w*|detect\w*|handling)\b)", re.I)
-_CTX = r"(dir|director|path|file|log|formal|run|sandbox|agent|slot|job|process|scratch|tmp|staging|workspace)\w*"
+    r"(?! (tests?|cases?|vectors?|coverage|schedules?|guards?|bypass\w*|detect\w*|handling|cancel\w*)\b)", re.I)
+# \b: "redirect" is not a dir (22:56Z, Opus rep2 r10s0: "the collision cancel ... after a redirect")
+_CTX = r"\b(dir|director|path|file|log|formal|run|sandbox|agent|slot|job|process|scratch|tmp|staging|workspace)\w*"
 COLLISION_CTX = re.compile(
     _CTX + r"[^.]{0,40}\b(collision|collided)\b|\b(collision|collided)\b[^.]{0,40}" + _CTX, re.I)
 
