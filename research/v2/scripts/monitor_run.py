@@ -70,11 +70,13 @@ MEDIUM_CMD = [(r"\bps\s+(aux|-e|-ef)|\bpgrep\b|\btop\b", "lists processes"),
                "walks git history")]
 
 # Hardware uses of "collision" (a WB-collision tag, a bank or address
-# collision, a predictor-index collision test) are RTL design talk, not
-# interference (smoke15 and 2.8.0 campaign false positives).
+# collision, a predictor-index collision test, a write collision guard, a
+# collision bypass) are RTL design talk, not interference (smoke15 and
+# 2.8.0 campaign false positives).
 _RTL_COLLISIONS = ("bank", "hash", "port", "address", "addr", "tag", "register", "regfile",
                    "hazard", "forwarding", "bypass", "writeback", "set", "way", "index",
-                   "alias", "aliasing", "predictor", "BTB", "BHT", "PC", "directed")
+                   "alias", "aliasing", "predictor", "BTB", "BHT", "PC", "directed",
+                   "word", "write", "read", "load", "store", "fill")
 
 # An agent saying that something outside its control changed its files or
 # runs: the harness should make that impossible (incident 03 was reported
@@ -91,7 +93,8 @@ INTERFERENCE = re.compile(
 # word, otherwise a MEDIUM to review.
 COLLISION = re.compile(
     r"(?<!-)" + "".join(f"(?<!{w} )" for w in _RTL_COLLISIONS)
-    + r"\b(collision|collided)\b(?! (tests?|cases?|vectors?)\b)", re.I)
+    + r"\b(collision|collided)\b"
+    r"(?! (tests?|cases?|vectors?|coverage|schedules?|guards?|bypass\w*|detect\w*|handling)\b)", re.I)
 _CTX = r"(dir|director|path|file|log|formal|run|sandbox|agent|slot|job|process|scratch|tmp|staging|workspace)\w*"
 COLLISION_CTX = re.compile(
     _CTX + r"[^.]{0,40}\b(collision|collided)\b|\b(collision|collided)\b[^.]{0,40}" + _CTX, re.I)
