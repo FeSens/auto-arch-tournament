@@ -6,8 +6,19 @@ by the orchestrator at run start; functions here take it as a parameter
 so the same module supports both the default `main` flow and sandbox
 research branches without state.
 """
-import subprocess, shutil
+import subprocess, shutil, sys, threading, time
 from pathlib import Path
+
+# Serializes this process's changes to the repo's worktree metadata
+# (.git/worktrees/<name>/). The orchestrator creates and removes slot
+# worktrees from parallel threads, and `git worktree add` writes a new
+# entry's files one by one: another `git worktree add -b` or `git branch
+# -D` that reads the half-written entry dies with "failed to read
+# .git/worktrees/<name>/commondir: Success" (V2 2.8.0 campaign, incident
+# 09: a hypothesis slot lost to it). One orchestrator process owns a
+# clone, so a thread lock covers every writer the harness has.
+_WORKTREE_LOCK = threading.RLock()
+_ADD_ATTEMPTS = 3
 
 
 def _worktree_base(target: str | None) -> Path:
@@ -68,18 +79,36 @@ def create_worktree(hypothesis_id: str, base_branch: str = "main",
     # are shared across all worktrees of the same repo, so the stale ref
     # would block `git worktree add -b`. Nuke it first if present —
     # hypothesis branches are per-iteration ephemeral anyway.
-    subprocess.run(
-        ["git", "worktree", "prune"],
-        check=False, capture_output=True,
-    )
-    subprocess.run(
-        ["git", "branch", "-D", branch],
-        check=False, capture_output=True,
-    )
-    subprocess.run(
-        ["git", "worktree", "add", "-b", branch, path, base_branch],
-        check=True
-    )
+    # Retried: something outside this process (an agent's git command, a
+    # CLI sandbox touching .git/worktrees) could still catch an entry
+    # mid-write; each retry starts from a clean slate.
+    for attempt in range(1, _ADD_ATTEMPTS + 1):
+        with _WORKTREE_LOCK:
+            subprocess.run(
+                ["git", "worktree", "prune"],
+                check=False, capture_output=True,
+            )
+            subprocess.run(
+                ["git", "branch", "-D", branch],
+                check=False, capture_output=True,
+            )
+            add = subprocess.run(
+                ["git", "worktree", "add", "-b", branch, path, base_branch],
+                capture_output=True, text=True,
+            )
+            sys.stdout.write(add.stdout)
+            sys.stderr.write(add.stderr)
+            if add.returncode == 0:
+                break
+            subprocess.run(["git", "worktree", "remove", "--force", path],
+                           check=False, capture_output=True)
+            shutil.rmtree(path, ignore_errors=True)
+        if attempt == _ADD_ATTEMPTS:
+            raise subprocess.CalledProcessError(add.returncode, add.args, add.stdout, add.stderr)
+        print(f"  [worktree] git worktree add {hypothesis_id} failed "
+              f"(attempt {attempt} of {_ADD_ATTEMPTS}), retrying: {add.stderr.strip()[-200:]}",
+              flush=True)
+        time.sleep(2 * attempt)
 
     # Assume-unchanged any tracked .pyc / __pycache__ paths in the
     # sub-worktree's index. Some fixture branches accidentally
@@ -174,12 +203,13 @@ def accept_worktree(hypothesis_id: str,
     )
 
     # Merge into the active branch. Idempotent checkout — no-op if already on it.
-    subprocess.run(["git", "checkout", target_branch], check=True)
-    subprocess.run(
-        ["git", "merge", "--ff-only", _branch_name(hypothesis_id, target)],
-        check=True
-    )
-    destroy_worktree(hypothesis_id, target=target)
+    with _WORKTREE_LOCK:
+        subprocess.run(["git", "checkout", target_branch], check=True)
+        subprocess.run(
+            ["git", "merge", "--ff-only", _branch_name(hypothesis_id, target)],
+            check=True
+        )
+        destroy_worktree(hypothesis_id, target=target)
 
 def destroy_worktree(hypothesis_id: str, target: str | None = None):
     """Removes worktree and deletes the branch.
@@ -189,7 +219,8 @@ def destroy_worktree(hypothesis_id: str, target: str | None = None):
         target        -- core target name, or None for the default layout.
     """
     path = str((_worktree_base(target) / hypothesis_id).resolve())
-    subprocess.run(["git", "worktree", "remove", "--force", path], check=False)
-    subprocess.run(["git", "branch", "-D", _branch_name(hypothesis_id, target)], check=False)
+    with _WORKTREE_LOCK:
+        subprocess.run(["git", "worktree", "remove", "--force", path], check=False)
+        subprocess.run(["git", "branch", "-D", _branch_name(hypothesis_id, target)], check=False)
     from tools.eval._subprocess import remove_path
     remove_path(path, must=False)
