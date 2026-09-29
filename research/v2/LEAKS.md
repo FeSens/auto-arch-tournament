@@ -77,6 +77,7 @@ not count), and compares each final design with the V1 files that differ from V0
 | Network for tools the agent runs | Claude: WebFetch/WebSearch denied, Bash sandbox with no allowed domains (off from 2.5 rc2 to 2.6.0, leak 18; fails closed and probed per run from 2.7); Codex: workspace-write sandbox, network off |
 | The eval's own riscv-formal copy | Unwritable and undeletable for the agent; fingerprinted before and after |
 | nextpnr (a different timer) | Not executable by agent accounts |
+| Sibling slots of the same run (their worktrees and branches) | Not a leak by the definition above (the run's own work, one system), and a write there could only cost that system its own slot. Claude's Bash sandbox may write anywhere in the run's clone, Codex's only in its worktree. Audit (2.8.0 campaign, 13:50Z): 23,317 tool calls in every archived transcript from incident 03 on, no implementation or hypothesis agent named a sibling's worktree or branch (scribes read the finished round's results by design); the monitor raises HIGH on any such reference |
 | System logs (sudo logs every agent command line, prompts included) | `/var/log/auth.log` is `syslog:adm 0640` and the journal is `systemd-journal`/`adm`; agent accounts are in neither (checked: `journalctl` as `hwebench` opens no files) |
 
 ## Accepted

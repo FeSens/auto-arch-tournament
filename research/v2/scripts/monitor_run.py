@@ -123,6 +123,31 @@ def strip_heredocs(cmd: str) -> str:
     return _HEREDOC.sub("<<heredoc>>", cmd)
 
 
+# Slot ids are hyp-<date>-<n>-r<round>s<slot>; a slot's worktree is
+# cores/bench/worktrees/<id> and its branch bench-<id>. Claude's Bash
+# sandbox may write anywhere in the run's clone (Codex's only in its
+# worktree), so a sibling's worktree is reachable. A same-round sibling's
+# id in any form (a relative ../<id> path included), or any other slot's
+# worktree or branch, has no legitimate use: siblings are not logged until
+# the round ends, and past rounds' worktrees and branches are gone.
+SLOT_ID = re.compile(r"(worktrees/|bench-)?(hyp-\d{8}-\d{3}-r(\d+)s\d+)")
+
+
+def sibling_slots(f: Path, text: str) -> list[str]:
+    """Other slots' ids named in a tool call, judged by the transcript's own
+    slot id (in its archived name or its worktree path); [] when the
+    transcript belongs to no slot. Scribes are exempt: they run after the
+    round is logged and read the whole round's results by design."""
+    own = SLOT_ID.search(str(f))
+    if not own or "scribe" in f.name:
+        return []
+    found = set()
+    for m in SLOT_ID.finditer(text):
+        if m.group(2) != own.group(2) and (m.group(1) or m.group(3) == own.group(3)):
+            found.add(m.group(2))
+    return sorted(found)
+
+
 def now():
     return dt.datetime.now().isoformat(timespec="seconds")
 
@@ -132,6 +157,8 @@ def actions(line: str):
     try:
         e = json.loads(line)
     except (json.JSONDecodeError, ValueError):
+        return []
+    if not isinstance(e, dict):  # a bare number or string line in a log
         return []
     out = []
     it = e.get("item") or {}
@@ -240,6 +267,11 @@ class Monitor:
                         for m in re.finditer(r"/srv/hwebench/clones/([A-Za-z0-9_.-]+)", text):
                             if m.group(1) != run:
                                 self.alert("HIGH", run, "touches another run's clone", f"{f.name}: {text}", new)
+                    if kind in ("cmd", "read", "edit"):
+                        other = sibling_slots(f, text)
+                        if other:
+                            self.alert("HIGH", run, "touches another slot's worktree or branch",
+                                       f"{f.name}: {', '.join(other)}: {text}", new)
                     if kind == "edit":
                         rel = text.split(f"{run}/", 1)[-1]
                         rel = re.sub(r"^cores/bench/worktrees/[^/]+/", "", rel)
