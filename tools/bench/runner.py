@@ -808,11 +808,13 @@ def clone_fixture(repo_root: Path, ref: str, dest: Path) -> None:
     # isn't supported on the underlying filesystem. Either way, never
     # inherit a prior run's SBY work dirs into a fresh rep clone.
     rf_src = find_riscv_formal()
-    if rf_src is None:
-        return
     # Two copies: formal/riscv-formal for the agents' own formal runs, and
     # a harness-only one the eval uses (tools/sandbox.py EVAL_RISCV_FORMAL).
-    for rf_dest in (dest / "formal" / "riscv-formal", dest / EVAL_RISCV_FORMAL):
+    # Without a checkout (unit tests) there is nothing to copy, but the
+    # clone is still granted to the account below: an early return here
+    # once skipped that and left the agent unable to write its clone.
+    for rf_dest in ((dest / "formal" / "riscv-formal", dest / EVAL_RISCV_FORMAL)
+                    if rf_src is not None else ()):
         rf_dest.parent.mkdir(parents=True, exist_ok=True)
         if not rf_dest.exists():
             # APFS clonefile (cp -c) is copy-on-write: ~zero extra disk
@@ -836,7 +838,8 @@ def clone_fixture(repo_root: Path, ref: str, dest: Path) -> None:
     agent = agent_user()
     if agent:
         share_with_agent(dest, agent)
-        lock_from_agent(dest / EVAL_RISCV_FORMAL, agent)
+        if (dest / EVAL_RISCV_FORMAL).exists():
+            lock_from_agent(dest / EVAL_RISCV_FORMAL, agent)
 
 
 def install_opencode_config(clone: Path) -> None:
