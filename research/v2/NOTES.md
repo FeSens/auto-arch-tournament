@@ -164,3 +164,24 @@ routing cannot close in 4 ns on this part, so nextpnr is also missing arcs
 outside carry chains, likely through LUT-RAM (RAM16SDP4) reads (inferred,
 not isolated). V1's largest gain was scored on logic the timer did not see,
 and the design only fit because the V1 wrapper let the stall logic be pruned.
+
+## 2026-09-29: formal evals run one at a time host-wide (measured, 2.8.0 campaign)
+
+The harness's formal gate still takes V1's machine-wide lock
+(`/tmp/auto-arch-tournament.formal.lock`, `tools/tournament.py` `phase_gate`;
+`AAT_MACHINE_LOCK_DIR` is unset under the runner). So at most one harness formal
+eval runs on the host at a time, across all three runs; the cap of three
+concurrent harness evals (`HARNESS_EVAL_SLOTS=3`, amendment 03) binds only the
+Gowin builds. Seen at 16:17Z: Opus r14s1 and r14s2 (agents done 15:57Z) waited
+with no child process, their orchestrator thread in `flock`, while Luna r12s1's
+formal eval spent 21+ minutes on `reg_ch0`.
+
+Effect on results: none found. The 45-minute formal ceiling starts inside
+`eval_slot`, after the lock is held, so waiting never counts toward a timeout;
+agents' budgets end before their slot's eval starts; formal verdicts do not
+depend on when they run. Effect on wall time: a slow formal in one run delays
+the other runs' rounds (cross-run coupling in time only), and one formal at -j6
+leaves cores idle. Kept for the whole campaign (all 18 runs under 2.8.0).
+Candidate for 2.9: `AAT_MACHINE_LOCK_DIR=off` under the runner, since
+`eval_slot` already caps harness evals host-wide; then three formal evals at -j6
+can overlap, so the timeout headroom must be re-measured before the change.
