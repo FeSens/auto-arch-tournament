@@ -268,8 +268,15 @@ class Monitor:
                             if re.search(pat, text, re.M):
                                 self.alert("MEDIUM", run, why, f"{f.name}: {text}", new)
                         for m in re.finditer(r"/srv/hwebench/clones/([A-Za-z0-9_.-]+)", text):
-                            if m.group(1) != run:
+                            if m.group(1) == run:
+                                continue
+                            if re.fullmatch(r".+-rep\d+", m.group(1)):
                                 self.alert("HIGH", run, "touches another run's clone", f"{f.name}: {text}", new)
+                            else:
+                                # e.g. GPT-6.1 Sol checking every ancestor dir for an
+                                # AGENTS.md (the clone base is traversable, not listable)
+                                self.alert("MEDIUM", run, "names a path in the clone base outside its clone (review)",
+                                           f"{f.name}: {text}", new)
                     if kind in ("cmd", "read", "edit"):
                         other = sibling_slots(f, text)
                         if other:
@@ -447,7 +454,9 @@ def main():
     ap.add_argument("--clones", type=Path, default=Path("/srv/hwebench/clones"))
     ap.add_argument("--state", type=Path, default=Path.home() / "monitor")
     ap.add_argument("--loop", type=int, default=0, help="poll every SEC; exit on the first HIGH/HANG")
-    ap.add_argument("--until", default="", help="with --loop: also exit when this file contains 'SMOKE-EXIT' or 'matrix done'")
+    ap.add_argument("--until", nargs="*", default=[],
+                    help="with --loop: also exit once every one of these runner logs contains "
+                         "'SMOKE-EXIT' or 'matrix done' (amendment 11: one log per runner)")
     ap.add_argument("--keep-going", action="store_true",
                     help="with --loop: record HIGH/HANG alerts and keep polling (babysit.sh reacts to them)")
     a = ap.parse_args()
@@ -460,7 +469,9 @@ def main():
             return 3
         if not a.loop:
             return 0
-        if a.until and Path(a.until).exists() and re.search(r"SMOKE-EXIT|matrix done", Path(a.until).read_text(errors="replace")[-2000:]):
+        if a.until and all(Path(u).exists() and re.search(r"SMOKE-EXIT|matrix done",
+                                                          Path(u).read_text(errors="replace")[-2000:])
+                           for u in a.until):
             print("run finished", flush=True)
             return 0
         time.sleep(a.loop)
