@@ -391,12 +391,22 @@ def run_slot(
     with phase_gate('fpga'):
         fpga = run_fpga_eval(worktree, target=target)
     if fpga.get('placement_failed'):
+        # As in broken(): keep the diff for the scribe, then remove the
+        # worktree and its branch. Through harness 2.8.0 this path kept
+        # them, so a design that failed placement stayed in the clone,
+        # readable by later rounds' agents, until the run ended.
+        diff = ""
+        try:
+            diff = _capture_slot_diff(worktree, target, target_branch)
+        except Exception:
+            pass
+        destroy_worktree(worktree_id, target=target)
         return {
             **hyp, 'outcome': 'placement_failed', 'formal_passed': True,
             'cosim_passed': True, 'error': 'placement_failed',
             'seeds': fpga.get('seeds'),
             'slot': slot,
-            '_diff': _capture_slot_diff(worktree, target, target_branch),
+            '_diff': diff,
         }
     if fpga.get('bench_failed'):
         reason = fpga.get('reason', '')

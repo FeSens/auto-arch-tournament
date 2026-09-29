@@ -217,3 +217,69 @@ def test_machine_lock_off_and_unlocked_phases(tmp_path, monkeypatch):
     with _machine_lock("formal"):
         pass
     assert list(tmp_path.iterdir()) == []
+
+
+import tools.tournament as tournament
+
+
+def _stub_slot_pipeline(monkeypatch, tmp_path, fpga_result):
+    """run_slot with every agent and gate stubbed; returns the list of
+    worktree ids destroy_worktree was called with."""
+    import contextlib
+    import tools.agents.implement as implement
+    import tools.eval.cosim as cosim
+    import tools.eval.formal as formal
+    import tools.eval.fpga as fpga
+    import tools.eval.rvfi_lint as rvfi_lint
+    import tools.orchestrator as orch
+    import tools.sandbox as sandbox
+    import tools.worktree as worktree
+
+    destroyed = []
+    monkeypatch.setattr(orch, "validate_hypothesis",
+                        lambda p: {"id": "hyp-20260929-002-r11s1", "title": "t", "category": "structural"})
+    monkeypatch.setattr(orch, "offlimits_changes", lambda *a, **k: [])
+    monkeypatch.setattr(orch, "emit_verilog", lambda *a, **k: (True, ""))
+    monkeypatch.setattr(worktree, "create_worktree", lambda *a, **k: str(tmp_path))
+    monkeypatch.setattr(worktree, "destroy_worktree", lambda wid, **k: destroyed.append(wid))
+    monkeypatch.setattr(implement, "run_implementation_agent", lambda *a, **k: True)
+    monkeypatch.setattr(sandbox, "take_snapshot", lambda *a, **k: {})
+    monkeypatch.setattr(sandbox, "snapshot_changes", lambda *a, **k: [])
+    monkeypatch.setattr(sandbox, "purge_ignored_outputs", lambda *a, **k: None)
+    monkeypatch.setattr(sandbox, "use_eval_riscv_formal", lambda *a, **k: None)
+    monkeypatch.setattr(rvfi_lint, "check_ch0_contract", lambda *a, **k: {"passed": True})
+    monkeypatch.setattr(formal, "run_formal", lambda *a, **k: {"passed": True})
+    monkeypatch.setattr(cosim, "run_cosim", lambda *a, **k: {"passed": True})
+    monkeypatch.setattr(fpga, "run_fpga_eval", lambda *a, **k: fpga_result)
+    monkeypatch.setattr(tournament, "phase_gate", lambda phase: contextlib.nullcontext())
+    monkeypatch.setattr(tournament, "_capture_slot_diff", lambda *a, **k: "the diff")
+    return destroyed
+
+
+def _run_stubbed_slot():
+    return tournament.run_slot(
+        slot=1, hyp_id="hyp-20260929-002-r11s1",
+        allowed_yaml_ids=["hyp-20260929-002-r11s1"], log_tail=[],
+        current_best=100.0, current_lut=None, baseline=12.0,
+        fixed_hyp_path="hyp.yaml", targets=None, target="bench")
+
+
+def test_placement_failed_slot_removes_its_worktree(monkeypatch, tmp_path):
+    # Through harness 2.8.0 a design that failed placement kept its worktree
+    # and branch in the clone for the rest of the run (V2 2.8.0 campaign,
+    # Luna r11s1 and Opus r13s2); the coordinator assumed the slot had
+    # removed them, as broken slots do.
+    destroyed = _stub_slot_pipeline(
+        monkeypatch, tmp_path, {"placement_failed": True, "seeds": [None, None, None]})
+    entry = _run_stubbed_slot()
+    assert entry["outcome"] == "placement_failed"
+    assert entry["_diff"] == "the diff"
+    assert destroyed == ["hyp-20260929-002-r11s1"]
+
+
+def test_broken_slot_removes_its_worktree(monkeypatch, tmp_path):
+    destroyed = _stub_slot_pipeline(
+        monkeypatch, tmp_path, {"bench_failed": True, "reason": "coremark crc mismatch"})
+    entry = _run_stubbed_slot()
+    assert entry["outcome"] == "broken"
+    assert destroyed == ["hyp-20260929-002-r11s1"]
