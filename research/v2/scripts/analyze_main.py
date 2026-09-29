@@ -14,7 +14,8 @@ Incident policy: the scored run of a (system, rep) is the first complete one
 (status done with a held-out score) in order of completion; every attempt is
 listed. Runs are never dropped for being low.
 
-    research/v2/scripts/analyze_main.py bench/v2/results.jsonl [--json out.json]
+    research/v2/scripts/analyze_main.py bench/v2/results.jsonl \
+        --rescored research/runs/EXP-2026-09-28-v2-main/incident_08/holdout_rescored.jsonl [--json out.json]
 
 Standard library only (the run host has no scipy): Student t via the
 regularized incomplete beta function.
@@ -144,8 +145,29 @@ def verdict(res: dict, p: float, a: str, b: str) -> str:
 
 # ---- runs ------------------------------------------------------------------
 
-def load(results: Path) -> tuple[dict, list[dict]]:
+HOLDOUT_FIELDS = ("holdout_geomean_iter_s", "holdout_kernels", "holdout_fmax_mhz",
+                  "loop_fmax_mhz", "holdout_fmax_pairs", "holdout_error")
+
+
+def load(results: Path, rescored: list[Path] = ()) -> tuple[dict, list[dict]]:
+    """Result rows, with held-out scores recomputed after the run (incident 08:
+    the 2.8.0 runner's bundle, and so its held-out scoring, failed under a
+    relative --results-dir) merged into the attempt they belong to, matched
+    by model, rep and start time. A rescored value never creates an attempt."""
     rows = [json.loads(l) for l in results.read_text().splitlines() if l.strip()]
+    for path in rescored:
+        for l in path.read_text().splitlines():
+            if not l.strip():
+                continue
+            fix = json.loads(l)
+            hits = [r for r in rows if (r.get("model"), r.get("rep"), r.get("started_at"))
+                    == (fix["model"], fix["rep"], fix["attempt_started_at"])]
+            if len(hits) != 1:
+                raise SystemExit(f"rescored row matches {len(hits)} attempts: {fix['model']} rep {fix['rep']}")
+            if hits[0].get("holdout_geomean_iter_s") is not None:
+                raise SystemExit(f"{fix['model']} rep {fix['rep']} already has a held-out score")
+            hits[0].update({k: fix.get(k) for k in HOLDOUT_FIELDS})
+            hits[0]["holdout_source"] = f"rescored ({path.name})"
     rows.sort(key=lambda r: r.get("ended_at") or "")
     scored: dict[tuple[str, int], dict] = {}
     for r in rows:
@@ -161,17 +183,20 @@ def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("results", type=Path)
     ap.add_argument("--json", type=Path, help="also write the numbers here")
+    ap.add_argument("--rescored", type=Path, action="append", default=[],
+                    help="held-out scores recomputed after a run (incident 08 holdout_rescored.jsonl)")
     args = ap.parse_args()
-    scored, rows = load(args.results)
+    scored, rows = load(args.results, args.rescored)
 
     print("## Attempts (order of completion)\n")
-    print("| system | rep | status | held-out iter/s | scored |")
-    print("|---|---|---|---|---|")
+    print("| system | rep | status | held-out iter/s | held-out source | scored |")
+    print("|---|---|---|---|---|---|")
     for r in rows:
         key = (r.get("model"), r.get("rep"))
         s = r.get("holdout_geomean_iter_s")
         print(f"| {SHORT.get(r.get('model'), r.get('model'))} | {r.get('rep')} | {r.get('status')} | "
-              f"{'' if s is None else f'{s:.1f}'} | {'yes' if scored.get(key) is r else ''} |")
+              f"{'' if s is None else f'{s:.1f}'} | {r.get('holdout_source', 'runner' if s is not None else '')} | "
+              f"{'yes' if scored.get(key) is r else ''} |")
 
     ln = {m: [math.log(r["holdout_geomean_iter_s"]) for (mm, _), r in sorted(scored.items()) if mm == m]
           for m in SHORT}

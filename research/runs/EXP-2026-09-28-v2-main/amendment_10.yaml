@@ -1,0 +1,56 @@
+# WRITE-ONCE. Amendment 10 to prereg.yaml, written 2026-09-29 during batch 1
+# (rep1) of the 2.8.0 campaign, after Opus rep1 finished and before Sol and
+# Luna rep1 finished; its commit time is the authoritative timestamp.
+reason: >
+  Incident 08: the runner writes each finished run's git bundle with `git bundle
+  create <results-dir>/<model>/rep<N>/repo.bundle` from inside the run's clone, and
+  scores the held-out kernels only when that bundle exists. The campaign was
+  launched with relative results paths (`--results-dir bench/v2`), so git resolved
+  the path inside the clone and failed ("Unable to create
+  '/srv/hwebench/clones/claude-opus-5_5_xhigh-v2-rep1/bench/v2/.../repo.bundle.lock'").
+  Opus rep1 finished at 16:52:37Z (done, CoreMark 308.79) with no bundle and no
+  held-out score, and no holdout_error either (the scoring was skipped, not failed);
+  then the runner deleted the clone. Its final RTL, experiment log, orchestrator log
+  and transcripts were saved as usual. Every smoke that validated held-out scoring
+  used absolute results paths, so none hit this. The same failure would hit every
+  run of the campaign.
+handling: >
+  Not a stopped run: all 15 rounds ran and the champion is preserved. The primary
+  metric is recomputed from the preserved champion with the runner's own code, and
+  the attempt stays the scored one (the incident policy's re-run applies to runs a
+  failure stopped). Opus rep1: the champion tree is rebuilt as the fixture's root
+  tree (identical in every clone of the campaign: tree 6ca282be) with the rep's saved
+  final-rtl/ as cores/bench/rtl; the loop's own eval on the rebuilt tree reproduces
+  the champion's log row exactly (CoreMark 308.79, 3,547,028 cycles, 2,600 LUT4, Fmax
+  108.227 / 109.53 / 109.53 MHz over the three placement options); then
+  tools.bench.runner.score_holdout, the runner's scoring path, on a bundle of that
+  tree: 7,769.58 iter/s, 5 of 5 kernels validated, final Fmax 109.53 MHz. Sol and
+  Luna rep1: a watcher (incident_08/rescue_watch.sh, read-only on the clone) keeps a
+  `git bundle --all` of each live clone current until the runner deletes it; their
+  held-out scores come from those bundles through the same score_holdout path, after
+  the same check against the champion's log row. Results rows are not edited: the
+  recomputed scores are in incident_08/holdout_rescored.jsonl, and
+  research/v2/scripts/analyze_main.py merges them into the attempt they belong to
+  (matched by model, rep and start time).
+harness: >
+  Unchanged: HARNESS_VERSION 2.8.0, tag hwe-bench-v2.8, for all 18 runs. Reps 2 to 6
+  run under a relaunch of the same runner with absolute results paths; the runner
+  skips (model, rep) pairs that already have a final row. To keep any rep2 agent
+  from starting under the old launch, a watcher (incident_08/boundary_stop.sh) kills
+  the runner's process group the moment the rep2 batch line appears; the relaunch
+  follows. No change to prompts, budgets, evals, scoring or acceptance.
+command: >
+  python3 -m tools.bench.runner --models tools/bench/models-v2.yaml --ref bench-v2.8
+  --agent-user hwebench,hwebench2,hwebench3 --reps 6 --interleave --n 15 --k 3
+  --results-jsonl /home/bench/auto-arch-tournament/bench/v2/results.jsonl
+  --results-dir /home/bench/auto-arch-tournament/bench/v2
+also_found_today: >
+  Documented, unchanged for the campaign, reviewed as not affecting results
+  (monitor_review.md, NOTES.md): a slot whose design fails placement keeps its
+  worktree until the run ends (harness bug since V1; fixed on v2.9-dev 2addee8); the
+  harness's formal evals run one at a time host-wide (V1's machine lock), which costs
+  wall time only.
+unchanged: question, systems, metrics, tests, verdict rules, budget, runs per system, incident policy
+launched: >
+  To be filled in after the relaunch (time, and the state the boundary watcher
+  recorded).
