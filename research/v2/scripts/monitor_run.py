@@ -15,6 +15,7 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import json
+import os
 import re
 import subprocess
 import time
@@ -67,6 +68,15 @@ BUDGET_SEC = {"hypothesis": 20 * 60, "implement": 30 * 60, "scribe": 4 * 60}
 HANG_QUIET_SEC = 120 * 60   # evals queue for host slots (tools/eval/_slots.py)
 TOOL_MAX_SEC = {"gw_sh": 50 * 60, "sby": 50 * 60, "bitwuzla": 50 * 60}
 AGENT_CGROUPS = Path("/sys/fs/cgroup/hweagents.slice")
+# Processes of an agent scope that run on the host by design: the CLIs, their
+# sandbox launchers and network bridges, the launch wrapper, and the CLIs'
+# own git and ripgrep calls. Anything else outside a PID namespace is an
+# agent command outside its sandbox (incident 06).
+SANDBOX_HOST_OK = {"claude", "codex", "codex-code-mode", "codex-linux-san", "bwrap", "sudo",
+                   "nice", "env", "socat", "rg", "git", "sh"}
+SANDBOX_FAIL = re.compile(r"Sandbox is (?:required|enabled) but failed|sandbox (?:is )?unavailable|"
+                          r"(?:^|\n)bwrap: ", re.I)
+CLK_TCK = os.sysconf("SC_CLK_TCK")
 SCOPE_GRACE_SEC = 60        # an agent scope without its agent CLI (scan_scopes)
 JUMP_RATIO = 3.0
 IPC_JUMP_RATIO = 1.8
@@ -98,6 +108,8 @@ def actions(line: str):
         o = str(it.get("aggregated_output") or "")
         if DENIED.search(o):
             out.append(("denied", f"{it.get('command')} -> {o[-200:]}"))
+        if SANDBOX_FAIL.search(o):
+            out.append(("nosandbox", f"{it.get('command')} -> {o[-200:]}"))
     if it.get("type") == "file_change":
         for ch in it.get("changes") or [it]:
             out.append(("edit", str(ch.get("path") or ch.get("file_path") or "")))
@@ -118,11 +130,13 @@ def actions(line: str):
                 out.append(("read", str(inp.get("file_path") or inp.get("path") or inp.get("pattern") or "")))
     if e.get("type") == "user":
         for c in (e.get("message") or {}).get("content") or []:
-            if isinstance(c, dict) and c.get("type") == "tool_result" and c.get("is_error"):
+            if isinstance(c, dict) and c.get("type") == "tool_result":
                 t = c.get("content")
                 t = t if isinstance(t, str) else json.dumps(t)
-                if DENIED.search(t):
+                if c.get("is_error") and DENIED.search(t):
                     out.append(("denied", t[-200:]))
+                if SANDBOX_FAIL.search(t):
+                    out.append(("nosandbox", t[-200:]))
     return out
 
 
@@ -207,6 +221,8 @@ class Monitor:
                         # account created: a cross-run collision, not the agent.
                         sev = "HIGH" if "synthetic bubblewrap mount target" in text else "MEDIUM"
                         self.alert(sev, run, "hit an access denial", f"{f.name}: {text}", new)
+                    if kind == "nosandbox":
+                        self.alert("HIGH", run, "sandbox failed to start", f"{f.name}: {text}", new)
                     if kind == "say":
                         m = INTERFERENCE.search(text)
                         if m:
@@ -289,17 +305,32 @@ class Monitor:
         agent CLI in it for long is something an agent left running
         (incident 05) and the helper failed to kill."""
         alive = set()
+        try:
+            uptime = float(Path("/proc/uptime").read_text().split()[0])
+        except (OSError, ValueError):
+            return
         for scope in AGENT_CGROUPS.glob("hweagents-*.slice/*.scope"):
             try:
                 pids = (scope / "cgroup.procs").read_text().split()
             except OSError:
                 continue
-            comms = []
+            comms, outside = [], []
             for pid in pids:
                 try:
-                    comms.append(Path(f"/proc/{pid}/comm").read_text().strip())
-                except OSError:
-                    pass
+                    comm = Path(f"/proc/{pid}/comm").read_text().strip()
+                    status = Path(f"/proc/{pid}/status").read_text()
+                    started = int(Path(f"/proc/{pid}/stat").read_text().rsplit(")", 1)[1].split()[19])
+                except (OSError, ValueError, IndexError):
+                    continue
+                comms.append(comm)
+                nspid = next((l.split()[1:] for l in status.splitlines() if l.startswith("NSpid:")), [])
+                age = uptime - started / CLK_TCK
+                if len(nspid) == 1 and comm not in SANDBOX_HOST_OK and age > 5:
+                    outside.append(comm)
+            if outside:
+                acct = scope.parent.name.removeprefix("hweagents-").removesuffix(".slice")
+                top = ", ".join(f"{n} {c}" for c, n in Counter(outside).most_common(4))
+                self.alert("HIGH", acct, "agent command outside its sandbox", f"{scope.name}: {top}", new)
             if not comms or {"claude", "codex"} & set(comms):
                 continue
             alive.add(scope.name)

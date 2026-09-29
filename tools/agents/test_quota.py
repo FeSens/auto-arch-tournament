@@ -157,3 +157,35 @@ def test_each_agent_invocation_gets_a_private_tmpdir(tmp_path, monkeypatch):
     for ws, d in seen:
         assert d.parent == ws.resolve() / ".tmp" and d.name.startswith("agent-")
         assert not d.exists()          # removed when the agent exits
+
+
+def test_agent_tmpdir_uses_the_runs_short_base(tmp_path, monkeypatch):
+    """Incident 06: under the worktree, TMPDIR was long enough that Claude
+    Code's sandbox sockets (Unix paths <= 107 bytes) could not be created and
+    the sandbox fell back to running every command unconfined."""
+    from pathlib import Path
+    from tools.agents import _runtime
+    base = tmp_path / "t" / "0123abcd"
+    base.mkdir(parents=True)
+    ws = tmp_path / "ws"
+    ws.mkdir()
+    monkeypatch.delenv("HWE_AGENT_USER", raising=False)
+    monkeypatch.setenv("HWE_AGENT_TMP", str(base))
+    out = ws / "tmpdir.txt"
+    _runtime.run_agent_streaming(["/bin/sh", "-c", f'echo "$TMPDIR" > {out}'],
+                                 cwd=str(ws), log_path=ws / "agent.log", timeout_sec=30,
+                                 provider="claude")
+    d = Path(out.read_text().strip())
+    assert d.parent == base and len(d.name) == 8 and not d.exists()
+
+
+def test_agent_tmpdir_length_is_capped_for_agent_accounts(tmp_path, monkeypatch):
+    from tools.agents import _runtime
+    long_base = tmp_path / ("x" * 60)
+    long_base.mkdir()
+    monkeypatch.setenv("HWE_AGENT_USER", "hwebench")
+    monkeypatch.setenv("HWE_AGENT_TMP", str(long_base))
+    with pytest.raises(RuntimeError, match="longer than"):
+        _runtime.run_agent_streaming(["/bin/true"], cwd=str(tmp_path), log_path=tmp_path / "a.log",
+                                     timeout_sec=30, provider="claude")
+    assert list(long_base.iterdir()) == []
