@@ -40,5 +40,6 @@ for l in open(sys.argv[1]):
 PY
 done
 echo "== HIGH/HANG alerts (last 5):"; grep '"severity": "\(HIGH\|HANG\)"' "$A" 2>/dev/null | tail -n 5 | cut -c1-220
+echo "== collision mentions to review (MEDIUM, last 3):"; grep 'mentions a collision' "$A" 2>/dev/null | tail -n 3 | cut -c1-260
 echo "== eval queue:"; grep -h 'host eval slot' /srv/hwebench/clones/*/.tmp/orchestrator.log 2>/dev/null | tail -n 2
 echo "== runner:"; grep '===\|matrix\|exception' "$L" | tail -n 4 | cut -c1-200
