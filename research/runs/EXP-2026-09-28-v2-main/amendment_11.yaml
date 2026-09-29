@@ -128,3 +128,11 @@ validation: >
   codex_cli 0.159.0, cli_dir cli/codex-0.159.0, harness 2.8.2, runner clean. Two HIGH
   alerts were a monitor false positive (monitor_review.md, 19:15).
 unchanged: question, metrics, tests, verdict rules, budget (N=15, K=3), runs per system (6), incident policy
+launched: >
+  Commit beef65a (this amendment) is bench-v2.8.2 and tag hwe-bench-v2.8.2. With no
+  agent process and no clone on the host, runner A started at 19:39:06Z in tmux main-a
+  ("10 job(s) queued"; batch 1: Luna rep2 19:39:06Z, Opus rep2 19:39:11Z) and runner B
+  at 19:39:26Z in tmux main-b ("6 job(s) queued"; GPT-6.1 Sol rep1), with the commands
+  above; logs bench/v2/runner-opus-luna.log and bench/v2/runner-sol61.log. All three
+  sandbox probes: confined. The monitor follows both runners (--until both logs). This
+  field was filled in afterwards.
