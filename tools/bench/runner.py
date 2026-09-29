@@ -1663,18 +1663,21 @@ def score_holdout(rep_dir: Path) -> dict:
 def run_sandbox_probe(clone: Path, env: dict, attempts: int = 2) -> dict:
     """The job's agent CLI runs one harness command through its agents'
     exact launch path; the verdict says whether it ran confined
-    (tools/bench/sandbox_probe.py). V2 incident 06. A second attempt only
+    (tools/agents/sandbox_probe.py). V2 incident 06. A second attempt only
     when the agent did not run the command at all."""
     probe_dir = clone / ".tmp" / "sandbox-probe"
     verdict: dict = {"ok": False, "reasons": ["probe did not run"]}
     for i in range(attempts):
+        (probe_dir / "verdict.json").unlink(missing_ok=True)
+        r = None
         try:
-            subprocess.run([sys.executable, "-m", "tools.bench.sandbox_probe", str(probe_dir)],
-                           cwd=str(clone), env={**env, "PWD": str(clone.resolve())},
-                           capture_output=True, text=True, timeout=900)
+            r = subprocess.run([sys.executable, "-m", "tools.agents.sandbox_probe", str(probe_dir)],
+                               cwd=str(clone), env={**env, "PWD": str(clone.resolve())},
+                               capture_output=True, text=True, timeout=900)
             verdict = json.loads((probe_dir / "verdict.json").read_text())
         except (OSError, ValueError, subprocess.TimeoutExpired) as e:
-            verdict = {"ok": False, "reasons": [f"probe error: {type(e).__name__}: {e}"]}
+            tail = (r.stderr or "").strip().splitlines()[-1:] if r is not None else []
+            verdict = {"ok": False, "reasons": [f"probe error: {type(e).__name__}: {e}", *tail]}
         verdict["attempt"] = i + 1
         if verdict.get("ok") or not any("did not run" in r for r in verdict.get("reasons", [])):
             break

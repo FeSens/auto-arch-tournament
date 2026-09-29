@@ -1,10 +1,10 @@
-"""The pre-run sandbox probe (tools/bench/sandbox_probe.py) and the runner's
+"""The pre-run sandbox probe (tools/agents/sandbox_probe.py) and the runner's
 use of it (V2 incident 06: Claude's sandbox silently off)."""
 import json
 import subprocess
 
 from tools.bench import runner
-from tools.bench.sandbox_probe import judge
+from tools.agents.sandbox_probe import judge
 
 HOST = {"pidns": "pid:[4026531836]", "mntns": "mnt:[4026531832]"}
 CONFINED = {"pidns": "pid:[4026532886]", "mntns": "mnt:[4026532885]",

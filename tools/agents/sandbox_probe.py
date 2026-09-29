@@ -10,7 +10,7 @@ every command unconfined without saying so, for two campaigns and three
 smokes. Nothing checked that the sandbox was actually there.
 
 Run inside the clone with the job's environment (tools/bench/runner.py
-run_sandbox_probe):  python3 -m tools.bench.sandbox_probe <out_dir>
+run_sandbox_probe):  python3 -m tools.agents.sandbox_probe <out_dir>
 Writes <out_dir>/verdict.json and exits 0 when confined, 1 otherwise."""
 from __future__ import annotations
 
@@ -20,7 +20,7 @@ import sys
 from pathlib import Path
 
 PROBE_SH = """#!/bin/sh
-# HWE Bench harness sandbox probe (tools/bench/sandbox_probe.py).
+# HWE Bench harness sandbox probe (tools/agents/sandbox_probe.py).
 out="$1"; home="$2"
 {
   echo "pidns=$(readlink /proc/self/ns/pid)"
