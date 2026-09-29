@@ -40,10 +40,11 @@ def per_round(log):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--results", type=Path, required=True)
+    ap.add_argument("--results", type=Path, nargs="+", required=True,
+                    help="results files; a later file's row for a run wins (amendment 11)")
     ap.add_argument("--rundir", type=Path, required=True)
     a = ap.parse_args()
-    done = {(r["model"], r["rep"]): r for r in entries(a.results)}
+    done = {(r["model"], r["rep"]): r for f in a.results for r in entries(f)}
     runs = {}
     for k, r in done.items():
         runs[k] = (r, entries(a.rundir / r["model"] / f"rep{r['rep']}" / "log.jsonl"))

@@ -4,6 +4,8 @@
 # (d) the runner log says the campaign/smoke ended, (e) the monitor died;
 # then print a status report. Re-armed after every wake.
 # Usage: babysit.sh <results.jsonl> <rundir> <runner.log> [MAX_SEC]
+# (several results files or runner logs: pass them space-separated in one
+# quoted argument)
 R=$1; D=$2; L=$3; MAX=${4:-600}
 A=~/monitor/alerts.jsonl
 cd ~/auto-arch-tournament
@@ -14,20 +16,20 @@ sig() {
     n=$(cat "$c/cores/bench/experiments/log.jsonl" 2>/dev/null | wc -l)
     echo "$c $(( n > 0 ? (n - 1) / 3 : 0 ))"; done
   # a missing file counts as 0 so its creation is not a wake
-  cat "$R" 2>/dev/null | wc -l
+  cat $R 2>/dev/null | wc -l
   cat "$A" 2>/dev/null | grep -c '"severity": "\(HIGH\|HANG\)"'
 }
 start=$(sig); t0=$(date +%s); why="10-minute check"
 while :; do
   sleep 20
-  if grep -q 'matrix done\|SMOKE-EXIT' "$L" 2>/dev/null; then why="runner finished"; break; fi
+  if grep -q 'matrix done\|SMOKE-EXIT' $L 2>/dev/null; then why="runner finished"; break; fi
   if ! pgrep -f '[m]onitor_run.py.* --loop' >/dev/null; then why="monitor not running"; break; fi
   now=$(sig)
   if [ "$now" != "$start" ]; then why="progress or alert"; break; fi
   [ $(( $(date +%s) - t0 )) -ge "$MAX" ] && break
 done
 echo "== $(date -u +%H:%M) UTC, woke: $why; $(uptime | sed 's/.*load/load/')"
-python3 research/v2/scripts/status_table.py --results "$R" --rundir "$D"
+python3 research/v2/scripts/status_table.py --results $R --rundir "$D"
 echo "== broken slots:"
 for f in /srv/hwebench/clones/*/cores/bench/experiments/log.jsonl; do
   [ -f "$f" ] || continue   # no clones left (glob unmatched)
