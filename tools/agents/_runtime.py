@@ -471,9 +471,11 @@ _AGENT_SECRETS = {"CLAUDE_CODE_OAUTH_TOKEN": "claude"}
 # account's CPU slice, hweagents-<account>.slice (setup_server.sh, 6d).
 AGENT_SCOPE = "/usr/local/sbin/hwe-agent-scope"
 
-# Longest agent TMPDIR: Claude Code's sandbox binds Unix sockets at
-# $TMPDIR/claude-<uid>/claude-socks-<16 hex>.sock, and a socket path may
-# not exceed 107 bytes (48 + 14 + 34 leaves room).
+# Longest agent TMPDIR. Claude Code's sandbox binds its proxy bridges' Unix
+# sockets under TMPDIR, and a Unix socket path may not exceed 107 bytes;
+# measured on the run host with Claude Code 2.1.283, the sandbox starts with
+# a 74-character TMPDIR and fails from 75 on (V2 incident 06). 48 leaves
+# room for a longer socket name in another CLI version.
 AGENT_TMPDIR_MAX = 48
 
 
