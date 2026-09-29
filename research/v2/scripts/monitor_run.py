@@ -43,6 +43,19 @@ HIGH = [
 ]
 
 
+def unwrapped(cmd: str) -> str:
+    """The script inside Codex's `/bin/bash -c "..."`: every Codex command is
+    wrapped, so a rule anchored at a command start saw only the quote
+    (a Codex agent's `pkill` went unflagged until 2026-09-30)."""
+    try:
+        parts = shlex.split(cmd)
+    except ValueError:
+        return cmd
+    if len(parts) >= 3 and parts[0].endswith("bash") and parts[1] in ("-c", "-lc"):
+        return parts[2]
+    return cmd
+
+
 def unquoted(cmd: str) -> str:
     """The command with quoted strings blanked, after unwrapping Codex's
     `/bin/bash -c "..."`: a word inside an rg or grep pattern is not a
@@ -122,7 +135,9 @@ JUMP_RATIO = 3.0
 IPC_JUMP_RATIO = 1.8
 
 
-_HEREDOC = re.compile(r"<<-?\s*(['\"]?)(\w+)\1[^\n]*\n.*?^\s*\2\s*$", re.S | re.M)
+# The terminator may carry the closing quote of Codex's `/bin/bash -c "..."`
+# (GPT-6.1 Sol rep1 r6s1, 23:18Z: a hypothesis text line "kill validity ...").
+_HEREDOC = re.compile(r"<<-?\s*(['\"]?)(\w+)\1[^\n]*\n.*?^\s*\2\s*['\"]?\s*$", re.S | re.M)
 
 
 def strip_heredocs(cmd: str) -> str:
@@ -261,7 +276,8 @@ class Monitor:
                             # Reading the old flow's scripts is harmless; running them is not.
                             if kind == "read" and why == "runs the non-scoring FPGA flow":
                                 continue
-                            subject = unquoted(text) if why == "runs the non-scoring FPGA flow" else text
+                            subject = (unquoted(text) if why == "runs the non-scoring FPGA flow"
+                                       else unwrapped(text) if why == "kills processes" else text)
                             hit = re.search(pat, subject, re.M)
                             if hit and why == "runs the non-scoring FPGA flow" and "nextpnr" not in hit.group(0) \
                                     and "synth" not in text and not re.search(r"yosys(\s+-\S+)*\s+-s\b", subject):
