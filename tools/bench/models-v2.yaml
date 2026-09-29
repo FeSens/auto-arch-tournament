@@ -1,17 +1,22 @@
-# HWE Bench V2 main comparison (research/v2/prereg_main_DRAFT.yaml).
-# Run with --agent-user hwebench; the CLI versions come from the pinned
-# copies in /Users/Shared/hwebench/bin and are recorded per row.
+# HWE Bench V2 main comparison (research/runs/EXP-2026-09-28-v2-main,
+# prereg.yaml and amendments). Run with --agent-user; the CLI versions come
+# from the pinned copies in /srv/hwebench/bin (a model's cli_dir, under
+# /srv/hwebench, overrides them) and are recorded per row.
+# Amendment 11: GPT-6.1 Sol replaces GPT-6 Sol (its rep1, gpt-6-sol_xhigh-v2,
+# stays an unscored pilot); it needs Codex 0.159.0, the pinned 0.156.1 is
+# refused for it, so it runs its own CLI. Luna stays on the pinned CLI.
 models:
   - name: claude-opus-5_5_xhigh-v2
     provider: claude
     model: claude-opus-5-5
     variant: xhigh
     oauth: true
-  - name: gpt-6-sol_xhigh-v2
+  - name: gpt-6_1-sol_xhigh-v2
     provider: codex
-    model: gpt-6-sol
+    model: gpt-6.1-sol
     variant: xhigh
     oauth: true
+    cli_dir: cli/codex-0.159.0
   - name: gpt-6-luna_xhigh-v2
     provider: codex
     model: gpt-6-luna

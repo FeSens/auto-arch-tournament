@@ -111,17 +111,22 @@ class AgentUser:
                     roots.append(str(p.resolve()))
         return roots
 
-    def cli_versions(self) -> dict:
+    def cli_versions(self, cli_dir: Path | None = None) -> dict:
+        """Versions of the pinned CLIs; a model's own CLI dir (ModelEntry.
+        cli_dir) overrides the one it holds."""
         out = {}
-        try:
-            out["claude_cli"] = (self.shared / "bin" / "claude.version").read_text().strip()
-        except OSError:
-            pass
-        try:
-            out["codex_cli"] = json.loads(
-                (self.shared / "bin" / "codex.version.json").read_text()).get("version")
-        except (OSError, ValueError):
-            pass
+        for d in (self.shared / "bin", cli_dir):
+            if d is None:
+                continue
+            try:
+                out["claude_cli"] = (d / "claude.version").read_text().strip()
+            except OSError:
+                pass
+            try:
+                out["codex_cli"] = json.loads(
+                    (d / "codex.version.json").read_text()).get("version")
+            except (OSError, ValueError):
+                pass
         return out
 
 
@@ -381,6 +386,12 @@ class ModelEntry:
     # Prompt profile: "full" (default) or "naive" (E1c control: strips
     # lesson log, outcomes, metrics, and architecture docs from prompts).
     prompt_profile: str = "full"
+    # This model's own agent CLI, when it needs another version than the
+    # pinned one in <shared>/bin (a model the pinned CLI cannot reach). A
+    # directory, relative to the agent shared dir, laid out like bin/: the
+    # provider's executable plus claude.version / codex.version.json. It
+    # goes first on the agent's PATH for this model's runs only.
+    cli_dir: str | None = None
 
 
 @dataclass
@@ -408,9 +419,27 @@ def load_models(path: Path) -> list[ModelEntry]:
             provider=m.get("provider", "codex"),
             variant=m.get("variant"),
             prompt_profile=m.get("prompt_profile", "full") or "full",
+            cli_dir=m.get("cli_dir") or None,
         ))
     if not out:
         raise ValueError(f"{path}: no models defined")
+    return out
+
+
+def model_cli_dir(model: ModelEntry, agent: "AgentUser | None") -> Path | None:
+    if not model.cli_dir:
+        return None
+    return (agent.shared if agent else AGENT_SHARED) / model.cli_dir
+
+
+def cli_dir_problems(models: list[ModelEntry]) -> list[str]:
+    """A model whose CLI dir lacks its provider's CLI would silently run the
+    pinned one instead, so the runner refuses to start."""
+    out = []
+    for m in models:
+        d = model_cli_dir(m, agent_user())
+        if d is not None and not os.access(d / m.provider, os.X_OK):
+            out.append(f"{m.name}: no executable {m.provider} in cli_dir {d}")
     return out
 
 
@@ -1186,7 +1215,8 @@ def make_env_for_job(job: JobSpec, clone: Path, keys: dict[str, str]) -> dict[st
             tmp.mkdir(mode=0o700)
             share_with_agent(tmp, agent)
             env["HWE_AGENT_TMP"] = str(tmp)
-        env["HWE_AGENT_PATH"] = agent.path
+        cli_dir = model_cli_dir(job.model, agent)
+        env["HWE_AGENT_PATH"] = agent.path if cli_dir is None else f"{cli_dir}:{agent.path}"
         env["HWE_AGENT_PYTHONUSERBASE"] = str(agent.local)
         from tools.eval.gowin import GOWIN_HOME
         env["GOWIN_HOME"] = str(GOWIN_HOME)
@@ -1217,8 +1247,11 @@ def make_env_for_job(job: JobSpec, clone: Path, keys: dict[str, str]) -> dict[st
         if agent:
             # Login: CLAUDE_CODE_OAUTH_TOKEN (`claude setup-token`) from the
             # keys file; the agent account has no Keychain session.
+            roots = agent.read_roots()
+            if model_cli_dir(job.model, agent) is not None:
+                roots.append(str(model_cli_dir(job.model, agent)))
             settings = claude_isolation_settings(
-                clone, uid=agent.uid, home=home, read_roots=agent.read_roots())
+                clone, uid=agent.uid, home=home, read_roots=roots)
             # The account's real home and the shared auth dir hold the Codex login.
             settings["sandbox"]["filesystem"]["denyRead"] += [
                 str(agent.home), str(agent.shared / "auth")]
@@ -1356,7 +1389,9 @@ def _run_one_job(
     agent = agent_user()
     if agent:
         row["agent_user"] = agent.name
-        row.update(agent.cli_versions())
+        row.update(agent.cli_versions(model_cli_dir(job.model, agent)))
+        if job.model.cli_dir:
+            row["cli_dir"] = job.model.cli_dir
 
     # 1. Fresh clone of the fixture.
     try:
@@ -1814,7 +1849,8 @@ def main() -> int:
 
     print(f"[bench] {len(jobs)} job(s) queued ({len(done)} already done)")
     for j in jobs:
-        print(f"        - {j.slug}  ->  {j.model.provider}:{j.model.model}")
+        print(f"        - {j.slug}  ->  {j.model.provider}:{j.model.model}"
+              + (f"  (cli {j.model.cli_dir})" if j.model.cli_dir else ""))
     print(f"[bench] config: N={args.n} K={args.k} reps={args.reps} parallel={args.parallel}")
     print(f"[bench] clone base: {args.clone_base}")
     print(f"[bench] results: {args.results_jsonl}")
@@ -1834,6 +1870,14 @@ def main() -> int:
     if missing:
         print(f"[bench] FATAL: missing API key env vars: {missing}", file=sys.stderr)
         print(f"[bench] put them in {args.keys_file} or export in your shell.")
+        return 2
+
+    models_used = list({j.model.name: j.model for j in jobs}.values())
+    bad_cli = cli_dir_problems(models_used)
+    if not args.agent_user:
+        bad_cli += [f"{m.name}: cli_dir needs --agent-user" for m in models_used if m.cli_dir]
+    if bad_cli:
+        print(f"[bench] FATAL: {bad_cli}", file=sys.stderr)
         return 2
 
     if args.agent_user:
