@@ -74,7 +74,7 @@ AGENT_CGROUPS = Path("/sys/fs/cgroup/hweagents.slice")
 # agent command outside its sandbox (incident 06).
 SANDBOX_HOST_OK = {"claude", "codex", "codex-code-mode", "codex-linux-san", "bwrap", "sudo",
                    "nice", "env", "socat", "rg", "git", "sh"}
-SANDBOX_FAIL = re.compile(r"Sandbox is required but failed|sandbox (?:is )?unavailable|"
+SANDBOX_FAIL = re.compile(r"Sandbox is (?:required|enabled) but failed|sandbox (?:is )?unavailable|"
                           r"(?:^|\n)bwrap: ", re.I)
 CLK_TCK = os.sysconf("SC_CLK_TCK")
 SCOPE_GRACE_SEC = 60        # an agent scope without its agent CLI (scan_scopes)
