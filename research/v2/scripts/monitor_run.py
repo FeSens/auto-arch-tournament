@@ -257,6 +257,11 @@ class Monitor:
             out, err = e.get("outcome"), str(e.get("error") or "")
             if "sandbox_violation" in err or out == "sandbox_violation":
                 self.alert("HIGH", run, "sandbox violation recorded", f"{e.get('id')}: {err[:300]}", new)
+            if out == "broken" and "[Errno" in err:
+                # The harness could not start the agent at all (an OS error
+                # from the launch, e.g. E2BIG in incident 07): a harness
+                # failure, not an agent outcome.
+                self.alert("HIGH", run, "agent launch failed (harness)", f"{e.get('id')}: {err[:300]}", new)
             f, fm = e.get("fitness"), e.get("fmax_mhz")
             if out == "improvement" and isinstance(f, (int, float)) and fm:
                 # Fitness = Fmax (vendor timer) x iterations/cycle (simulator).
