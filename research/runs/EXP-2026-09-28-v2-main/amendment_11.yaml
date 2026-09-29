@@ -1,0 +1,130 @@
+# WRITE-ONCE. Amendment 11 to prereg.yaml, written 2026-09-29 after incident 09
+# stopped the rep2 batch of the 2.8.0 campaign and before any rep2-6 or GPT-6.1 Sol
+# run of this amendment started; its commit time is the authoritative timestamp.
+reason: >
+  Two changes, both made while no scored run was in progress. (1) Incident 09: the
+  orchestrator creates a round's slot worktrees from parallel threads, and git does
+  not lock its worktree metadata. In Opus rep2 round 2 (18:36Z), slot r2s0's `git
+  worktree add` read sibling r2s2's .git/worktrees/<name>/commondir while r2s2's own
+  add had created it but not yet written it, and died ("fatal: failed to read
+  .../commondir: Success"); the slot counted as broken before its agent started. An
+  empty commondir reproduces the failure every time; the empty `config.worktree`
+  placeholders Claude's sandbox leaves in the same directory do not. First such
+  failure in about 1,088 worktree creations across all archived runs; it can hit
+  any system. (2) GPT-6.1 Sol was released on 2026-09-29, and the operator chose to
+  replace GPT-6 Sol with it: GPT-6.1 Sol becomes the Codex primary system and runs
+  6 fresh reps.
+incident_09_handling: >
+  The rep2 batch (GPT-6 Sol, Luna, Opus, started 18:01Z) was stopped at 18:41:01Z
+  and archived as incident_09 (per-run logs, orchestrator logs, agent transcripts,
+  sandbox probe verdicts, the runner log). The runner wrote the three rep2 rows to
+  bench/v2/results.jsonl as status failed (orchestrator exit 129 or -9, the stop);
+  they are reported attempts and are not scored. Under the incident policy, rep2
+  reruns from V0. bench/v2/results.jsonl is not edited: the 2.8.2 runs write new
+  results files (below), and research/v2/scripts/analyze_main.py reads all of them.
+harness: >
+  HARNESS_VERSION 2.8.2, tag hwe-bench-v2.8.2 (branch bench-v2.8.2); 2.8.1 was tagged
+  first and superseded by 2.8.2 before any scored run used it (smoke17 below). Changes
+  from 2.8.0: (a) the orchestrator's worktree and branch git commands run one at a time
+  under a lock, and a failed `git worktree add` is retried from a clean slate, up to
+  three attempts, each retry logged ("[worktree] git worktree add ... failed (attempt
+  N of 3), retrying"); (b) a model may name its own agent CLI directory
+  (models yaml `cli_dir`), which goes first on that model's agents' PATH and whose
+  version is recorded in the row; (c) runner --first-rep, so a relaunch can start
+  at rep2 in a new results file; (d) the runner's Codex config pins two features
+  off that Codex 0.159.0 turns on by default and 0.156.1 has off
+  (daemon_auto_start, write_stdin_approval). With the harness config, `codex
+  features list` then gives the same enabled set under both CLIs, and 0.156.1's
+  output is byte-identical to 2.8.0's, so Luna's agent setup is unchanged; (e)
+  a rerun deletes the clone its stopped attempt left (the runner gives the account
+  its access to the clone back first; release_agent had revoked it, so the account's
+  0700 files survived and the rerun's `git clone` failed), and a clone failure is
+  harness_error (rerunnable), not the final status failed. No change to prompts,
+  budgets, evals, scoring or acceptance. 2.8.0 and 2.8.2 behave identically except when two worktree commands
+  would have overlapped, so the rep1 runs of Opus and Luna (2.8.0) stay scored
+  ((b) to (e) change nothing for a run that is not rerun and has no cli_dir).
+systems:
+  - name: claude-opus-5_5_xhigh-v2
+    unchanged: Claude Code 2.1.283 (pinned, /srv/hwebench/bin), claude-opus-5-5, xhigh
+    runs: rep1 (2.8.0, scored) plus reps 2-6 on 2.8.2
+  - name: gpt-6_1-sol_xhigh-v2
+    cli: >
+      Codex CLI 0.159.0, pinned in /srv/hwebench/cli/codex-0.159.0 (GitHub release
+      codex-package-x86_64-unknown-linux-musl.tar.gz, sha256 35da65d7e8644e28ea0a4d4e3d8c15b40c6b492356d4cf21986c7e341f83a24e;
+      its bin/codex is byte-identical to the npm @openai/codex 0.159.0 linux-x64
+      binary). The pinned 0.156.1 is refused for this model: "The 'gpt-6.1-sol'
+      model is not supported when using Codex with a ChatGPT account."
+    model: gpt-6.1-sol
+    effort: xhigh
+    checked: >
+      Listed by `codex debug models` under 0.159.0, not under 0.156.1; answered one
+      prompt at xhigh through 0.159.0 as hwebench3 (2026-09-29); smoke17 below.
+    runs: reps 1-6 on 2.8.2
+  - name: gpt-6-luna_xhigh-v2
+    unchanged: Codex CLI 0.156.1 (pinned, /srv/hwebench/bin), gpt-6-luna, xhigh
+    runs: rep1 (2.8.0, scored) plus reps 2-6 on 2.8.2
+  - name: gpt-6-sol_xhigh-v2
+    status: >
+      Replaced. Its rep1 (2.8.0, done, CoreMark 223.78 iter/s, held-out 5,767.6
+      iter/s, incident 08 rescored) and its stopped rep2 attempt are reported as an
+      unscored pilot and enter no test.
+analysis:
+  primary: >
+    Opus 5.5 vs GPT-6.1 Sol: Welch two-sided on ln(held-out score), alpha 0.05, ratio
+    of geometric means with its 95% CI plus the 10,000-sample bootstrap CI, as in
+    prereg.yaml with GPT-6.1 Sol in GPT-6 Sol's place.
+  secondary: >
+    Luna vs GPT-6.1 Sol and Luna vs Opus, Holm-adjusted across the two at family
+    alpha 0.05, as in amendment 01 with GPT-6.1 Sol in GPT-6 Sol's place.
+  verdict_rules: unchanged
+schedule: >
+  Deviation from amendment 01's "rep r of all three systems starts together": two
+  runners from the same checkout and tag, on disjoint agent accounts. Runner A:
+  Opus and Luna reps 2-6, --interleave (rep r of both together, launch order
+  rotating), accounts hwebench and hwebench2. Runner B: GPT-6.1 Sol reps 1-6 one
+  after another, account hwebench3. Three runs stay in progress at once, the load
+  every earlier run of the campaign had: the harness's eval slots (3) and formal
+  lock are host-wide file locks shared by both runners, and each account has its
+  own CPU slice. Starting GPT-6.1 Sol's rep1 alone as a batch would have left two
+  accounts idle for about 7 h and run it under a lighter host load than any other
+  run. What is not matched: GPT-6.1 Sol's rep r and the others' rep r start at
+  different times of day, and whichever runner finishes last runs its final hours
+  with fewer concurrent runs (reported with each run's start and end time). Eval
+  timeouts start only once an eval holds a slot, so scoring does not depend on the
+  load; agents' own self-checks do.
+shared_quota: >
+  GPT-6.1 Sol and Luna share the one Codex subscription quota (amendment 01 policy
+  unchanged: pauses rerun the interrupted attempt from scratch and are logged).
+results_files: >
+  bench/v2/results.jsonl (2.8.0: rep1 of three systems, the stopped rep2 attempts),
+  bench/v2/results-opus-luna.jsonl (runner A), bench/v2/results-sol61.jsonl (runner
+  B); rep dirs under bench/v2/<model>/rep<N> as before.
+commands:
+  runner_a: >
+    python3 -m tools.bench.runner --models tools/bench/models-v2.yaml --ref bench-v2.8.2
+    --agent-user hwebench,hwebench2 --only claude-opus-5_5_xhigh-v2 gpt-6-luna_xhigh-v2
+    --first-rep 2 --reps 6 --interleave --n 15 --k 3
+    --results-jsonl /home/bench/auto-arch-tournament/bench/v2/results-opus-luna.jsonl
+    --results-dir /home/bench/auto-arch-tournament/bench/v2
+  runner_b: >
+    python3 -m tools.bench.runner --models tools/bench/models-v2.yaml --ref bench-v2.8.2
+    --agent-user hwebench3 --only gpt-6_1-sol_xhigh-v2 --reps 6 --n 15 --k 3
+    --results-jsonl /home/bench/auto-arch-tournament/bench/v2/results-sol61.jsonl
+    --results-dir /home/bench/auto-arch-tournament/bench/v2
+validation: >
+  smoke16 (bench-v2.8.1-rc: the orchestrator of 2.8.1/2.8.2; GPT-6 Sol, Luna, Opus,
+  N=1, K=3, 18:45-19:13Z): 3 of 3 done, held-out scored by the runner (Opus 2,672,
+  GPT-6 Sol 2,576, Luna 329 iter/s), 0 broken slots, 0 worktree retries needed, all
+  probes confined. smoke17 (GPT-6.1 Sol alone, N=1, K=3, account hwebench): the first
+  attempt ran the runner from a worktree without the riscv-formal checkout, so the
+  clone had no formal/riscv-formal; Codex 0.159.0's bubblewrap refused that missing
+  writable root and the sandbox probe failed closed (harness_error; the campaign
+  checkout has the checkout). The rerun then failed to clone over that attempt's
+  leftover clone, which 2.8.2 (e) fixes; on 2.8.2 the rerun deleted it, the probe was
+  confined (own PID and mount namespaces, network blocked, same as Luna's), and the
+  agents ran /srv/hwebench/cli/codex-0.159.0 (their Codex sessions record model
+  gpt-6.1-sol, effort xhigh, cli 0.159.0). Done in 1,545 s: CoreMark 93.86, held-out
+  2,393.5 iter/s scored by the runner, 1 accepted / 2 rejected / 0 broken, row
+  codex_cli 0.159.0, cli_dir cli/codex-0.159.0, harness 2.8.2, runner clean. Two HIGH
+  alerts were a monitor false positive (monitor_review.md, 19:15).
+unchanged: question, metrics, tests, verdict rules, budget (N=15, K=3), runs per system (6), incident policy
