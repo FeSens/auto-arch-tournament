@@ -267,3 +267,45 @@ def test_claude_token_only_in_claude_jobs(tmp_path, monkeypatch):
     monkeypatch.setenv("CLAUDE_CODE_OAUTH_TOKEN", "tok-exported")
     assert "CLAUDE_CODE_OAUTH_TOKEN" not in make_env_for_job(codex, clone, {})
     assert make_env_for_job(claude, clone, {})["CLAUDE_CODE_OAUTH_TOKEN"] == "tok-exported"
+
+
+def test_model_cli_dir_goes_first_on_that_models_path_only(tmp_path, monkeypatch):
+    """V2 amendment 11: GPT-6.1 Sol needs Codex 0.159.0, the pinned 0.156.1
+    is refused for it; Luna stays on the pinned CLI."""
+    import getpass
+    from pathlib import Path
+    from tools.bench import runner
+    monkeypatch.setenv("HWE_AGENT_USER", getpass.getuser())
+    shared = tmp_path / "shared"
+    for d in ("toolchain", "bin", "venv", "homes", "tmp", "cli/codex-new"):
+        (shared / d).mkdir(parents=True)
+    (shared / "bin" / "codex.version.json").write_text('{"version": "0.156.1"}')
+    (shared / "bin" / "claude.version").write_text("2.1.283")
+    (shared / "cli/codex-new" / "codex.version.json").write_text('{"version": "0.159.0"}')
+    monkeypatch.setattr(runner, "AGENT_SHARED", shared)
+    clone = tmp_path / "clone"
+    clone.mkdir()
+    new = ModelEntry(name="sol61", provider="codex", model="gpt-6.1-sol", oauth=True,
+                     cli_dir="cli/codex-new")
+    old = ModelEntry(name="luna", provider="codex", model="gpt-6-luna", oauth=True)
+    env = make_env_for_job(JobSpec(model=new, rep=1), clone, {})
+    assert env["HWE_AGENT_PATH"].startswith(f"{shared}/cli/codex-new:{shared}/bin:")
+    env = make_env_for_job(JobSpec(model=old, rep=1), clone, {})
+    assert env["HWE_AGENT_PATH"].startswith(f"{shared}/bin:")
+    assert "cli/" not in env["HWE_AGENT_PATH"]
+    agent = runner.agent_user()
+    assert agent.cli_versions(runner.model_cli_dir(new, agent)) == {
+        "claude_cli": "2.1.283", "codex_cli": "0.159.0"}
+    assert agent.cli_versions(runner.model_cli_dir(old, agent))["codex_cli"] == "0.156.1"
+    # A CLI dir without the provider's executable would run the pinned CLI
+    # instead: refused before any run starts.
+    assert runner.cli_dir_problems([new, old]) == [
+        f"sol61: no executable codex in cli_dir {shared}/cli/codex-new"]
+    exe = shared / "cli/codex-new" / "codex"
+    exe.write_text("#!/bin/sh\n")
+    exe.chmod(0o755)
+    assert runner.cli_dir_problems([new, old]) == []
+    cfg = tmp_path / "models.yaml"
+    cfg.write_text("models:\n  - {name: a, model: m, provider: codex, cli_dir: cli/x}\n"
+                   "  - {name: b, model: m, provider: codex}\n")
+    assert [m.cli_dir for m in runner.load_models(cfg)] == ["cli/x", None]
