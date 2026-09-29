@@ -53,6 +53,11 @@ MEDIUM_CMD = [(r"\bps\s+(aux|-e|-ef)|\bpgrep\b|\btop\b", "lists processes"),
               (r"git\s+(log|show|diff)\s[^|;&]*--all|git\s+(reflog|fsck|cat-file|update-ref|filter-branch|replace)\b",
                "walks git history")]
 
+# Hardware uses of "collision" (a WB-collision tag, a bank or address
+# collision) are RTL design talk, not interference (smoke15 false positive).
+_RTL_COLLISIONS = ("bank", "hash", "port", "address", "addr", "tag", "register", "regfile",
+                   "hazard", "forwarding", "bypass", "writeback", "set", "way", "index")
+
 # An agent saying that something outside its control changed its files or
 # runs: the harness should make that impossible (incident 03 was reported
 # in exactly these words and no command rule fired).
@@ -62,7 +67,8 @@ INTERFERENCE = re.compile(
     r"|(sibling|concurrent|parallel) (agent|sandbox|run|slot|formal)\S*[^.]{0,80}(delet|remov|wip|clobber|overwr|collid)"
     r"|(director(y|ies)|dir|files?|worktree)[^.]{0,40}(disappear|vanish)"
     r"|shared (scratch|work|check|formal)\w*[^.]{0,20}(dir|director|collision)"
-    r"|\bcollision\b|\bcollided\b|out from under", re.I)
+    r"|(?<!-)" + "".join(f"(?<!{w} )" for w in _RTL_COLLISIONS) + r"\b(collision|collided)\b"
+    r"|out from under", re.I)
 
 BUDGET_SEC = {"hypothesis": 20 * 60, "implement": 30 * 60, "scribe": 4 * 60}
 HANG_QUIET_SEC = 120 * 60   # evals queue for host slots (tools/eval/_slots.py)
