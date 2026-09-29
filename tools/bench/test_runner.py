@@ -817,3 +817,32 @@ def test_check_agent_slice_requires_the_accounts_own_slice(monkeypatch):
     assert "hweagents-hwebench2.slice" in runner.check_agent_slice("hwebench2")
     out["v"] = "0::/user.slice/user-0.slice/session-3.scope\n"
     assert runner.check_agent_slice("hwebench2") is not None
+
+
+def test_check_agent_reaping_refuses_leftovers_and_schedulers(monkeypatch, tmp_path):
+    """V2 incident 05: an agent's backgrounded solvers outlived the agent."""
+    import subprocess as sp
+    from pathlib import Path as P
+    from tools.bench import runner
+    state = {"pid": "999999999", "cron": "You (hwebench) are not allowed to use this program (crontab)\n",
+             "at": "You do not have permission to use at.\n"}
+    monkeypatch.setattr(runner.subprocess, "run",
+                        lambda cmd, **kw: sp.CompletedProcess(cmd, 0, state["pid"] + "\n", ""))
+    killed = []
+
+    def fake_as_agent(user, *cmd, **kw):
+        if cmd[0] == "/bin/kill":
+            killed.append(cmd[-1])
+            return sp.CompletedProcess(cmd, 0, "", "")
+        return sp.CompletedProcess(cmd, 1, "", state["cron" if cmd[0].endswith("crontab") else "at"])
+    monkeypatch.setattr(runner, "as_agent", fake_as_agent)
+    assert runner.check_agent_reaping("hwebench") is None
+    state["pid"] = str(__import__("os").getpid())       # a pid that is alive
+    assert "outlived" in runner.check_agent_reaping("hwebench")
+    assert killed == [state["pid"]]
+    state["pid"] = "999999999"
+    state["cron"] = "no crontab for hwebench\n"
+    msg = runner.check_agent_reaping("hwebench")
+    assert msg is not None and "crontab" in msg
+    state["pid"] = "garbage"
+    assert "failed" in runner.check_agent_reaping("hwebench")

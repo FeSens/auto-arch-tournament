@@ -191,10 +191,17 @@ cat > /etc/systemd/system/hweagents-.slice.d/10-cpu.conf <<'EOF'
 [Slice]
 CPUWeight=100
 EOF
+#     Each command also gets a scope of its own, and when it exits the
+#     helper kills whatever it left there (V2 harness 2.6, incident 05: an
+#     agent's backgrounded formal solvers ran on after the agent, in its
+#     run's slice). The fixed description keeps the command line, which
+#     holds the agent prompt, out of the unit name and the journal.
 cat > /usr/local/sbin/hwe-agent-scope <<'EOF'
 #!/bin/sh
-# hwe-agent-scope ACCOUNT CMD...: run CMD as bench agent ACCOUNT inside
-# hweagents-ACCOUNT.slice (equal CPU weight per concurrent run).
+# hwe-agent-scope ACCOUNT CMD...: run CMD as bench agent ACCOUNT in a scope
+# of its own inside hweagents-ACCOUNT.slice (equal CPU weight per concurrent
+# run). When CMD exits, or this helper is signalled, every process left in
+# the scope is killed: nothing an agent starts outlives the agent.
 # Installed by research/v2/scripts/setup_server.sh; the operator may run
 # only this as root (/etc/sudoers.d/hwebench-scope).
 set -eu
@@ -205,8 +212,25 @@ case $acct in
 esac
 id -u "$acct" >/dev/null 2>&1 || { echo "hwe-agent-scope: no account $acct" >&2; exit 2; }
 shift
-exec /usr/bin/systemd-run --scope --quiet --collect --slice="hweagents-$acct.slice" \
-  -- /usr/bin/sudo -n -u "$acct" "$@"
+unit="hweagent-$acct-$(od -An -N8 -tx1 /dev/urandom | tr -d ' \n')"
+cg="/sys/fs/cgroup/hweagents.slice/hweagents-$acct.slice/$unit.scope"
+reap() {
+  # cgroup.kill: SIGKILL to every process in the scope, new forks included.
+  if [ -e "$cg/cgroup.kill" ]; then echo 1 > "$cg/cgroup.kill" 2>/dev/null || true; fi
+  i=0
+  while [ "$i" -lt 100 ] && grep -qs '^populated 1' "$cg/cgroup.events"; do
+    sleep 0.1; i=$((i + 1))
+  done
+}
+trap 'reap; exit 129' HUP
+trap 'reap; exit 130' INT
+trap 'reap; exit 143' TERM
+rc=0
+/usr/bin/systemd-run --scope --quiet --collect --unit="$unit" \
+  --description="hwe-bench agent command ($acct)" --slice="hweagents-$acct.slice" \
+  -- /usr/bin/sudo -n -u "$acct" "$@" || rc=$?
+reap
+exit "$rc"
 EOF
 chown root:root /usr/local/sbin/hwe-agent-scope
 chmod 755 /usr/local/sbin/hwe-agent-scope
@@ -214,6 +238,13 @@ echo "$OP ALL=(root) NOPASSWD: /usr/local/sbin/hwe-agent-scope" > /etc/sudoers.d
 chmod 440 /etc/sudoers.d/hwebench-scope
 visudo -cf /etc/sudoers.d/hwebench-scope
 systemctl daemon-reload
+
+# 6e. No scheduled jobs: a cron or at job runs outside every scope and would
+#     outlive the run into the account's next run (V2 harness 2.6).
+for f in /etc/cron.deny /etc/at.deny; do
+  touch "$f"
+  for a in $POOL; do grep -qx "$a" "$f" || echo "$a" >> "$f"; done
+done
 
 # 7. Verify the boundary and the agent environment.
 fail=0
@@ -232,6 +263,10 @@ for a in $POOL; do
   sudo -u "$OP" sudo -n /usr/local/sbin/hwe-agent-scope "$a" sh -c \
     'cat "/sys/fs/cgroup$(dirname "$(cut -d: -f3 /proc/self/cgroup)")/cpu.weight"' | grep -qx 100 \
     || { echo "FAIL: hweagents-$a.slice has no CPU weight"; fail=1; }
+  pid=$(sudo -u "$OP" sudo -n /usr/local/sbin/hwe-agent-scope "$a" sh -c 'sleep 300 >/dev/null 2>&1 & echo $!')
+  if [ -d "/proc/$pid" ]; then echo "FAIL: a process $a started outlived its command"; kill -9 "$pid"; fail=1; fi
+  sudo -u "$a" crontab -l 2>&1 | grep -q 'not allowed' || { echo "FAIL: $a may use crontab"; fail=1; }
+  sudo -u "$a" at -l 2>&1 | grep -qi 'permission' || { echo "FAIL: $a may use at"; fail=1; }
 done
 # Claude Code's sandbox: bubblewrap inside bubblewrap.
 sudo -u "$U" bwrap --bind / / --dev /dev --proc /proc --unshare-user --unshare-pid -- \

@@ -237,3 +237,27 @@ def test_env_under_agent_user(tmp_path, monkeypatch):
     assert 'web_search = "disabled"' in cfg
     for off in ("memories", "apps", "plugins", "remote_plugin", "browser_use", "computer_use"):
         assert f"\n{off} = false\n" in cfg, off
+
+
+def test_claude_token_only_in_claude_jobs(tmp_path, monkeypatch):
+    """V2 incident 05: the Claude login token went into every job's
+    environment and from there to the Codex agents too."""
+    import getpass
+    from tools.bench import runner
+    monkeypatch.setenv("HWE_AGENT_USER", getpass.getuser())
+    shared = tmp_path / "shared"
+    for d in ("toolchain", "bin", "venv", "homes"):
+        (shared / d).mkdir(parents=True)
+    monkeypatch.setattr(runner, "AGENT_SHARED", shared)
+    clone = tmp_path / "clone"
+    clone.mkdir()
+    keys = {"CLAUDE_CODE_OAUTH_TOKEN": "tok-from-file"}
+    claude = JobSpec(model=ModelEntry(name="opus", provider="claude",
+                                      model="claude-opus-5-5", oauth=True), rep=1)
+    codex = JobSpec(model=ModelEntry(name="gpt", provider="codex",
+                                     model="gpt-6-sol", oauth=True), rep=1)
+    assert make_env_for_job(claude, clone, keys)["CLAUDE_CODE_OAUTH_TOKEN"] == "tok-from-file"
+    assert "CLAUDE_CODE_OAUTH_TOKEN" not in make_env_for_job(codex, clone, keys)
+    monkeypatch.setenv("CLAUDE_CODE_OAUTH_TOKEN", "tok-exported")
+    assert "CLAUDE_CODE_OAUTH_TOKEN" not in make_env_for_job(codex, clone, {})
+    assert make_env_for_job(claude, clone, {})["CLAUDE_CODE_OAUTH_TOKEN"] == "tok-exported"
