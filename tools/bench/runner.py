@@ -482,12 +482,13 @@ def enumerate_jobs(
     reps: int,
     done: set[tuple[str, int]],
     only_models: Optional[list[str]] = None,
+    first_rep: int = 1,
 ) -> list[JobSpec]:
     jobs: list[JobSpec] = []
     for m in models:
         if only_models and m.name not in only_models:
             continue
-        for r in range(1, reps + 1):
+        for r in range(first_rep, reps + 1):
             if (m.name, r) in done:
                 continue
             jobs.append(JobSpec(model=m, rep=r))
@@ -1756,6 +1757,9 @@ def main() -> int:
     ap.add_argument("--models", type=Path, default=DEFAULT_MODELS_YAML)
     ap.add_argument("--ref", default=DEFAULT_REF)
     ap.add_argument("--reps", type=int, default=3, help="J = reps per model")
+    ap.add_argument("--first-rep", type=int, default=1,
+                    help="run reps first-rep..reps (a relaunch writing a new results file "
+                         "for reps an earlier file already holds)")
     ap.add_argument("--n", type=int, default=15, help="N = orchestrator rounds per rep")
     ap.add_argument("--k", type=int, default=3, help="K = parallel hypothesis slots")
     ap.add_argument("--parallel", type=int, default=1,
@@ -1841,7 +1845,8 @@ def main() -> int:
     models = load_models(args.models)
     keys = load_keyfile(args.keys_file)
     done = load_done_set(args.results_jsonl)
-    jobs = enumerate_jobs(models, args.reps, done, only_models=args.only)
+    jobs = enumerate_jobs(models, args.reps, done, only_models=args.only,
+                          first_rep=args.first_rep)
 
     if not jobs:
         print("no jobs to run (all already in results.jsonl). Use --only to override.")
