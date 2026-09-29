@@ -329,6 +329,20 @@ own tool (Gowin EDA 1.9.11.03):
   - The monitor raises HIGH on either CLI's sandbox-failure message and on
     any agent-account process in the host PID namespace other than the CLIs
     and their launchers.
+- Incident 07 (harness 2.7.0 campaign, stopped after 2.1 h, not scored,
+  `research/runs/EXP-2026-09-28-v2-main/incident_07`): the harness passed
+  each agent's prompt to its CLI as one command-line argument, and Linux
+  caps a single argument at 128 KiB. The hypothesis and implementation
+  prompts inline the core's RTL and its lessons file, which grow over a run.
+  In round 7 the Opus run's prompt (96 KB of RTL, 16 KB of lessons) passed
+  the cap, and every later slot failed to launch ("Argument list too long");
+  with no slot able to run, the run could not change its RTL again. The Sol
+  and Luna runs, with about 63-65 KB of RTL, had not reached the cap. V1 ran
+  on macOS, which has no per-argument limit, and no earlier V2 run had grown
+  this far. Fix (harness 2.8): the prompt goes to the CLI on standard input,
+  not as an argument; both CLIs answer a 304 KB prompt through the full
+  launch path, and the monitor raises HIGH when the harness cannot start an
+  agent.
 - Paper angle: a comparison of agent CLIs needs per-CLI integration
   testing under the real concurrency, and a monitor that reads outcomes by
   class per system; the bias showed up as one system's "broken" count.
