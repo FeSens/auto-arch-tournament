@@ -60,5 +60,6 @@ command: >
   --results-jsonl bench/v2/results.jsonl --results-dir bench/v2
 unchanged: question, systems, metrics, tests, verdict rules, budget, runs per system, incident policy
 launched: >
-  right after this commit, tmux main on hwe-bench, results in bench/v2/; the launch
-  time is recorded in bench/v2/runner.log and in the follow-up commit that adds it here.
+  2026-09-29T03:49:37Z, tmux main on hwe-bench, results in bench/v2/ (amendment commit
+  8f83137 at 03:49:29Z, before launch; this field was filled in afterwards, as its
+  first version said it would be).
