@@ -100,6 +100,14 @@ def test_enumerate_jobs_skips_done():
     assert {(j.model.name, j.rep) for j in jobs} == {("b", 1), ("b", 2)}
 
 
+def test_enumerate_jobs_first_rep():
+    # V2 amendment 11: Opus and Luna relaunch at rep2 into a new results
+    # file; their rep1 rows live in the earlier one.
+    models = [ModelEntry(name="a", model="x"), ModelEntry(name="b", model="y")]
+    jobs = enumerate_jobs(models, reps=4, done={("a", 3)}, first_rep=2)
+    assert [(j.model.name, j.rep) for j in jobs] == [("a", 2), ("a", 4), ("b", 2), ("b", 3), ("b", 4)]
+
+
 def test_enumerate_jobs_only_filter():
     models = [
         ModelEntry(name="a", model="x/a", key_env="K"),
