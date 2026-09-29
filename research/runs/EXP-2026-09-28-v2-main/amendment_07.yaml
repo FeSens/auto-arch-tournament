@@ -1,0 +1,64 @@
+# WRITE-ONCE. Amendment 07 to prereg.yaml, written 2026-09-29, after
+# incident 05 and before the campaign restart; its commit time is the
+# authoritative timestamp. No scored run exists.
+reason: >
+  Incident 05: the fifth campaign (harness 2.5.0, started 2026-09-28T22:44:23Z) was
+  stopped at 2026-09-29T02:01:32Z (~3.3 h, batch 1, rounds 6-7) as a harness failure
+  under the incident policy, for two isolation gaps; neither changed a score.
+  (1) Every V2 harness (2.0 to 2.5) passed the Claude login token to every agent, the
+  GPT systems' Codex agents included, as an argument of the command that launches the
+  agent; Codex passes it on to the agent's shell commands (verified with a dummy
+  value). Those commands have no network, so no agent could call Anthropic's API with
+  it, but what an agent prints reaches its provider and the harness's files. No agent
+  transcript, Codex session file, result file or archive on the host contains the
+  token (all searched). The launch command also reached sudo's log and the systemd
+  journal (root-only).
+  (2) An Opus implementation agent backgrounded its formal self-check and ended its
+  session; its solver processes, reparented to init and so outside the harness's
+  process-tree kill, ran on in the run's CPU slice for 30 minutes after the agent
+  exited. 1 of 176 agent invocations in the journal; no other slot shared the CPU with
+  them, but nothing stopped the next round's agents from doing so.
+incident_05_runs: >
+  Reported, not scored: research/runs/EXP-2026-09-28-v2-main/incident_05/ (agent and
+  hypothesis-agent logs, orchestrator logs, experiment logs, runner log and results
+  dir, monitor alerts, agent scope lifetimes from the journal without command lines).
+  Per the incident policy all 18 runs restart from V0; the first complete attempt of
+  each is scored.
+harness: >
+  tag hwe-bench-v2.6 = branch bench-v2.6, HARNESS_VERSION 2.6.0 (replaces
+  hwe-bench-v2.5). Changes: (1) an agent gets only its own provider's credential (the
+  Claude token only for Claude runs; Codex reads its login file), in a file under the
+  invocation's private TMPDIR that the launch wrapper sources and deletes, never on a
+  command line. (2) Each agent command runs in a systemd scope of its own; the root
+  helper kills everything left in it (cgroup.kill) when the command exits or is
+  killed, and the scope's journal description no longer carries the command line.
+  (3) The agent accounts may not use cron or at. (4) The runner refuses to start
+  unless, for every pool account, a detached test process dies with its command and
+  cron and at are denied. Host setup: research/v2/scripts/setup_server.sh, sections
+  6d and 6e. No change to prompts, budgets, evals, scoring or acceptance. Same rules
+  for every system.
+monitoring: >
+  Extends amendments 02, 05 and 06: an agent scope with no agent CLI in it for over
+  60 s (processes that outlived their agent) is HIGH.
+validation: >
+  382 harness tests pass, 385 with the opt-in live tests on the run host
+  (tools/agents/test_agent_scope_live.py): a detached, signal-ignoring process already
+  reparented away from its command dies with the command and on the harness's timeout
+  path (both tests fail on the 2.5 helper), and only a Claude agent's environment gets
+  the Claude token. The runner's new startup check passes for all three accounts; cron
+  and at refuse them. Smoke13 on bench-v2.6-rc (rc1; 3 systems, N=2 K=3, 02:18Z to
+  03:48Z): all three runs done, 0 broken slots, held-out scored, final RTL saved; all 63
+  agent commands ran in scopes of their own; sampled while the round-1 hypothesis agents
+  ran, the 6 Codex agents' environments had no Claude token and the 3 Claude agents'
+  had it; 0 journal entries with the token; two Luna implementation agents hit the
+  30-minute timeout and were killed, leaving 0 processes in the account; 0 HIGH or HANG
+  alerts, 0 interference reports in 413 agent messages. The tag adds only the version
+  file and research files to the smoke-tested code.
+command: >
+  python3 -m tools.bench.runner --models tools/bench/models-v2.yaml --ref bench-v2.6
+  --agent-user hwebench,hwebench2,hwebench3 --reps 6 --interleave --n 15 --k 3
+  --results-jsonl bench/v2/results.jsonl --results-dir bench/v2
+unchanged: question, systems, metrics, tests, verdict rules, budget, runs per system, incident policy
+launched: >
+  right after this commit, tmux main on hwe-bench, results in bench/v2/; the launch
+  time is recorded in bench/v2/runner.log and in the follow-up commit that adds it here.
