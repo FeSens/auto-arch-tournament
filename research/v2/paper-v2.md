@@ -237,6 +237,38 @@ own tool (Gowin EDA 1.9.11.03):
   runs with /tmp excluded from its writable roots (verified: no mount
   targets appear, /tmp writes fail, TMPDIR writes work), matching Claude's
   sandbox, which never allowed /tmp.
+- Incident 05 (harness 2.5.0 campaign, stopped after 3.3 h in rounds 6-7,
+  not scored, `research/runs/EXP-2026-09-28-v2-main/incident_05`): two
+  isolation gaps, neither of which changed a score.
+  (1) Every V2 harness (2.0 to 2.5) handed the Claude login token
+  (`CLAUDE_CODE_OAUTH_TOKEN`) to every agent, the two GPT systems' Codex
+  agents included, as an argument of the `env` command that launches the
+  agent. A probe with a dummy value showed that Codex 0.156.1 passes it on
+  to the agent's shell commands (`printenv` finds it), so a GPT agent could
+  have used Anthropic's models through it. No agent transcript, Codex
+  session file or archive on the host contains the token (all searched), so
+  none read it. The launch command also went into sudo's log and, as the
+  systemd scope's description, into the journal (both root-only).
+  (2) An Opus implementation agent started its formal self-check in the
+  background (`( ... run_all.sh ... ) &`), polled it with `sleep`, and ended
+  its session before it finished. Its solver processes had been reparented
+  to init, so the harness's process-tree kill never saw them, and they ran
+  on in the run's CPU slice for 30 minutes after the agent exited (16
+  solvers at first), into time the run's next round would use. The journal
+  shows 1 such case in 176 agent invocations (every other scope ended within
+  0.8 s of its agent); the run was waiting on a harness eval, so no other
+  slot shared the CPU with them.
+  Fix (harness 2.6): an agent gets only its own provider's credential, in a
+  file under its private TMPDIR that the launch wrapper sources and deletes,
+  never on a command line. Each agent command runs in a scope of its own,
+  and the root helper kills everything left in it (`cgroup.kill`) when the
+  command exits or is killed. The agent accounts may not use cron or at,
+  whose jobs would run outside every scope and into the account's next run.
+  The runner refuses to start unless a detached test process dies with its
+  command, and the monitor raises HIGH on an agent scope without its agent
+  CLI. Live tests with a real agent account: a detached, signal-ignoring,
+  reparented process dies with its command and on the harness's timeout
+  path (both tests fail on the 2.5 helper).
 - Paper angle: a comparison of agent CLIs needs per-CLI integration
   testing under the real concurrency, and a monitor that reads outcomes by
   class per system; the bias showed up as one system's "broken" count.
