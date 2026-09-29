@@ -217,7 +217,10 @@ own tool (Gowin EDA 1.9.11.03):
   threads still competed as one pool) and a measured check caught it:
   with 20, 20 and 2 spinning threads the 2-thread run got 1.0 core, what
   per-thread sharing gives; after the fix it gets 2.0 and the two
-  20-thread runs split 8.9/9.1 on average over four trials. The 2.5
+  20-thread runs split 8.9/9.1 on average over four trials. Live in the
+  2.5 campaign (2026-09-29 00:00Z, load average 54): with 24 runnable
+  solver threads in the Opus run and 21 in the Luna run, the two got 10.2
+  and 9.7 cores over 15 s. The 2.5
   validation smoke then surfaced one more shared scratch space through the
   new monitor rule: the runner set one TMPDIR per run, the implementation
   prompt tells agents to stage scratch files there, and an Opus agent
