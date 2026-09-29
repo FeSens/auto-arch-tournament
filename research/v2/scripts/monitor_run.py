@@ -227,7 +227,12 @@ class Monitor:
                             if kind == "read" and why == "runs the non-scoring FPGA flow":
                                 continue
                             subject = unquoted(text) if why == "runs the non-scoring FPGA flow" else text
-                            if re.search(pat, subject, re.M):
+                            hit = re.search(pat, subject, re.M)
+                            if hit and why == "runs the non-scoring FPGA flow" and "nextpnr" not in hit.group(0) \
+                                    and "synth" not in text and not re.search(r"yosys(\s+-\S+)*\s+-s\b", subject):
+                                # yosys only parsing the agent's RTL (a syntax check), no synthesis.
+                                self.alert("MEDIUM", run, "runs yosys without synthesis (review)", f"{f.name}: {text}", new)
+                            elif hit:
                                 self.alert("HIGH", run, why, f"{f.name}: {text}", new)
                         for pat, why in MEDIUM_CMD:
                             if re.search(pat, text, re.M):
