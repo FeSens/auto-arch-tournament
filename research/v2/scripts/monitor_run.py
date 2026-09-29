@@ -87,6 +87,8 @@ INTERFERENCE = re.compile(
     r"|(sibling|concurrent|parallel) (agent|sandbox|run|slot|formal)\S*[^.]{0,80}(delet|remov|wip|clobber|overwr|collid)"
     r"|(director(y|ies)|dir|files?|worktree)[^.]{0,40}(disappear|vanish)"
     r"|shared (scratch|work|check|formal)\w*[^.]{0,20}(dir|director|collision)"
+    r"|(delet|remov|wip|clobber|overwr|kill)\w*[^.]{0,40}\bby (another|a sibling|a concurrent|a parallel|other|some other) "
+    r"(sandbox|agent|process|run|invocation|slot|job)"
     r"|out from under", re.I)
 # "collision" alone is common RTL talk (branch-predictor aliasing, a
 # WB-collision tag): HIGH only next to a file, directory, run or sandbox
@@ -94,9 +96,11 @@ INTERFERENCE = re.compile(
 COLLISION = re.compile(
     r"(?<!-)" + "".join(f"(?<!{w} )" for w in _RTL_COLLISIONS)
     + r"\b(collision|collided)\b"
-    r"(?! (tests?|cases?|vectors?|coverage|schedules?|guards?|bypass\w*|detect\w*|handling|cancel\w*)\b)", re.I)
-# \b: "redirect" is not a dir (22:56Z, Opus rep2 r10s0: "the collision cancel ... after a redirect")
-_CTX = r"\b(dir|director|path|file|log|formal|run|sandbox|agent|slot|job|process|scratch|tmp|staging|workspace)\w*"
+    r"(?! (tests?|cases?|vectors?|coverage|schedules?|guards?|bypass\w*|detect\w*|handling|cancel\w*|logic|checks?)\b)", re.I)
+# Whole words: "redirect", "logic", "direction", "processor" are RTL, not
+# directories, logs or processes (Opus rep2 r10s0 22:56Z, r10s2 23:16Z).
+_CTX = (r"\b(dirs?|director(y|ies)|paths?|files?|logs?|formal|runs?|sandbox(es)?|agents?|slots?|jobs?"
+        r"|process(es)?|scratch|tmp|staging|workspaces?)\b")
 COLLISION_CTX = re.compile(
     _CTX + r"[^.]{0,40}\b(collision|collided)\b|\b(collision|collided)\b[^.]{0,40}" + _CTX, re.I)
 
