@@ -54,9 +54,11 @@ MEDIUM_CMD = [(r"\bps\s+(aux|-e|-ef)|\bpgrep\b|\btop\b", "lists processes"),
                "walks git history")]
 
 # Hardware uses of "collision" (a WB-collision tag, a bank or address
-# collision) are RTL design talk, not interference (smoke15 false positive).
+# collision, a predictor-index collision test) are RTL design talk, not
+# interference (smoke15 and 2.8.0 campaign false positives).
 _RTL_COLLISIONS = ("bank", "hash", "port", "address", "addr", "tag", "register", "regfile",
-                   "hazard", "forwarding", "bypass", "writeback", "set", "way", "index")
+                   "hazard", "forwarding", "bypass", "writeback", "set", "way", "index",
+                   "alias", "aliasing", "predictor", "BTB", "BHT", "PC", "directed")
 
 # An agent saying that something outside its control changed its files or
 # runs: the harness should make that impossible (incident 03 was reported
@@ -67,7 +69,7 @@ INTERFERENCE = re.compile(
     r"|(sibling|concurrent|parallel) (agent|sandbox|run|slot|formal)\S*[^.]{0,80}(delet|remov|wip|clobber|overwr|collid)"
     r"|(director(y|ies)|dir|files?|worktree)[^.]{0,40}(disappear|vanish)"
     r"|shared (scratch|work|check|formal)\w*[^.]{0,20}(dir|director|collision)"
-    r"|(?<!-)" + "".join(f"(?<!{w} )" for w in _RTL_COLLISIONS) + r"\b(collision|collided)\b"
+    r"|(?<!-)" + "".join(f"(?<!{w} )" for w in _RTL_COLLISIONS) + r"\b(collision|collided)\b(?! (tests?|cases?|vectors?)\b)"
     r"|out from under", re.I)
 
 BUDGET_SEC = {"hypothesis": 20 * 60, "implement": 30 * 60, "scribe": 4 * 60}
