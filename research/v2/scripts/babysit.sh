@@ -21,7 +21,7 @@ start=$(sig); t0=$(date +%s); why="10-minute check"
 while :; do
   sleep 20
   if grep -q 'matrix done\|SMOKE-EXIT' "$L" 2>/dev/null; then why="runner finished"; break; fi
-  if ! pgrep -f '[m]onitor_run.py --loop' >/dev/null; then why="monitor not running"; break; fi
+  if ! pgrep -f '[m]onitor_run.py.* --loop' >/dev/null; then why="monitor not running"; break; fi
   now=$(sig)
   if [ "$now" != "$start" ]; then why="progress or alert"; break; fi
   [ $(( $(date +%s) - t0 )) -ge "$MAX" ] && break
