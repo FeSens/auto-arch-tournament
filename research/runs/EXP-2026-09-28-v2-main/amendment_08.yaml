@@ -83,4 +83,6 @@ command: >
   --results-jsonl bench/v2/results.jsonl --results-dir bench/v2
 unchanged: question, systems, metrics, tests, verdict rules, budget, runs per system, incident policy
 launched: >
-  To be filled in after launch.
+  2026-09-29T06:56:12Z, tmux main on hwe-bench, results in bench/v2/ (amendment commit
+  f50ce01 at 06:55:55Z, before launch; this field was filled in afterwards, as its
+  first version said it would be). All three batch-1 sandbox probes: confined.
