@@ -257,7 +257,9 @@ own tool (Gowin EDA 1.9.11.03):
   its session before it finished. Its solver processes had been reparented
   to init, so the harness's process-tree kill never saw them, and they ran
   on in the run's CPU slice for 30 minutes after the agent exited (16
-  solvers at first), into time the run's next round would use. The journal
+  solvers at first), into time the run's next round would use. They ran in
+  the host's PID namespace because the agent's sandbox was off (incident
+  06). The journal
   shows 1 such case in 176 agent invocations (every other scope ended within
   0.8 s of its agent); the run was waiting on a harness eval, so no other
   slot shared the CPU with them.
@@ -272,6 +274,61 @@ own tool (Gowin EDA 1.9.11.03):
   CLI. Live tests with a real agent account: a detached, signal-ignoring,
   reparented process dies with its command and on the harness's timeout
   path (both tests fail on the 2.5 helper).
+- Incident 06 (harness 2.6.0 campaign, stopped after 1.7 h in rounds 4-6,
+  not scored, `research/runs/EXP-2026-09-28-v2-main/incident_06`): from
+  harness 2.5 rc2 on, the Claude agents' shell commands ran without Claude
+  Code's sandbox, in the 2.5 and 2.6 campaigns and their smokes. Codex was
+  not affected. The 2.5 fix above put each agent's private TMPDIR under its
+  worktree. Claude Code's sandbox binds its network proxy's Unix sockets
+  under TMPDIR, and a Unix socket path may not exceed 107 bytes. Measured on
+  the run host (Claude Code 2.1.283), the sandbox starts with a TMPDIR of up
+  to 74 characters and fails from 75 on; the worktree TMPDIRs had 118. When
+  the sandbox fails, Claude Code by default warns and runs the rest of the
+  session unconfined ("Sandbox is enabled but failed to initialize: Failed
+  to create bridge sockets after 5 attempts. Sandboxing is disabled for the
+  rest of this session"). All 102 archived hypothesis and implementation
+  sessions show that message at their first or second shell command. The
+  scribes, whose TMPDIR under the clone root has exactly 74 characters,
+  stayed sandboxed.
+  Unconfined, a command ran as the run's agent account in the host's PID and
+  mount namespaces, with network access. The account boundary held: the
+  account cannot read other runs' clones, the operator's files or the
+  credential store, and /proc shows it only its own processes, so nothing
+  reached another run. Within a run, an agent could see and signal its
+  sibling slots' processes.
+  An audit of all 2,083 shell commands in the affected Opus transcripts
+  found no network use and no access outside the run's clone and the
+  agent's own CLI home. 22 commands listed processes to follow a formal
+  self-check. With the sandbox off, these counted the sibling slots' solvers
+  too (up to 91 at once), and three showed sibling agents' CLI command
+  lines, which carry their prompts (the same hypotheses are in the clone's
+  shared files). Two ran `pkill -f` with a pattern that matches any slot's
+  formal run. Claude Code refused one because the pattern also matched its
+  own CLI. The other, by implementation agent r6s1 at 05:28:46Z, raised the
+  monitor's HIGH alert that led to this incident. By the transcripts'
+  timestamps no sibling had a formal run at that moment (r6s2's ended at
+  05:24:58Z, r6s0's began at 05:30:16Z), so it stopped only the agent's own.
+  The failure was on record throughout. The message is in the transcripts
+  from the first affected smoke on, and 13 Opus agents said in their final
+  message that their commands ran unsandboxed. No monitor rule matched it,
+  and the 2.5 and 2.6 validations checked outcomes (scores, broken slots,
+  process scopes, credentials), not whether each sandbox actually started.
+  The namespace evidence cited under incident 03 dated from 2.3.
+  Fix (harness 2.7):
+  - The Claude sandbox fails closed (`sandbox.failIfUnavailable`): a command
+    that cannot be sandboxed fails instead of running unconfined.
+  - Agents' private TMPDIRs go under a short per-run base outside the clone
+    (26 characters, the same for every run), and the launcher refuses a
+    TMPDIR over 48 characters.
+  - Before its first round, each run starts one agent through the full
+    launch path. The agent reports its PID and mount namespaces, whether it
+    can reach the network and, for Claude, whether it can see the account's
+    home. The run stops as a harness error unless the command ran confined.
+    A negative control with the sandbox disabled fails this check (host
+    namespaces, network open, home visible).
+  - The monitor raises HIGH on either CLI's sandbox-failure message and on
+    any agent-account process in the host PID namespace other than the CLIs
+    and their launchers.
 - Paper angle: a comparison of agent CLIs needs per-CLI integration
   testing under the real concurrency, and a monitor that reads outcomes by
   class per system; the bias showed up as one system's "broken" count.
