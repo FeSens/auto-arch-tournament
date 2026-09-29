@@ -131,6 +131,11 @@ setfacl -b "$SHARED/clones"
 # Per-run HOMEs: any agent account creates its own, none can list them.
 mkdir -p "$SHARED/homes"
 chmod 1733 "$SHARED/homes"
+# Per-run temp bases for the agents' private TMPDIRs (short paths: Claude
+# Code's sandbox sockets live there; V2 harness 2.7). Like the clone base:
+# the runner grants each run's base to the one account running it.
+install -d -o "$OP" -g "$OP" -m 711 "$SHARED/tmp"
+setfacl -b "$SHARED/tmp"
 
 # 6. The operator may run processes as the agent accounts (not root), no password.
 echo "$OP ALL=($(echo $POOL | tr ' ' ',')) NOPASSWD: ALL" > /etc/sudoers.d/hwebench

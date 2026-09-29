@@ -207,7 +207,7 @@ def test_env_under_agent_user(tmp_path, monkeypatch):
     from tools.bench import runner
     monkeypatch.setenv("HWE_AGENT_USER", getpass.getuser())
     shared = tmp_path / "shared"
-    for d in ("toolchain", "bin", "venv", "homes"):
+    for d in ("toolchain", "bin", "venv", "homes", "tmp"):
         (shared / d).mkdir(parents=True)
     monkeypatch.setattr(runner, "AGENT_SHARED", shared)
     clone = tmp_path / "clone"
@@ -227,6 +227,12 @@ def test_env_under_agent_user(tmp_path, monkeypatch):
     deny = json.loads(env["CLAUDE_BENCH_SETTINGS"])["permissions"]["deny"]
     assert {"WebFetch", "WebSearch", "ToolSearch", "RemoteTrigger"} <= set(deny)
     assert env["HWE_AGENT_USER"] == getpass.getuser()
+    # Fail closed, and the run's short temp base (incident 06) is writable.
+    sb = json.loads(env["CLAUDE_BENCH_SETTINGS"])["sandbox"]
+    assert sb["failIfUnavailable"] is True and sb["allowUnsandboxedCommands"] is False
+    assert env["HWE_AGENT_TMP"].startswith(str(shared / "tmp") + "/")
+    assert Path(env["HWE_AGENT_TMP"]).is_dir()
+    assert env["HWE_AGENT_TMP"] in fs["allowWrite"] and env["HWE_AGENT_TMP"] in fs["allowRead"]
     codex = JobSpec(model=ModelEntry(name="gpt", provider="codex",
                                      model="gpt-6-sol", oauth=True), rep=1)
     env = make_env_for_job(codex, clone, {})
@@ -246,7 +252,7 @@ def test_claude_token_only_in_claude_jobs(tmp_path, monkeypatch):
     from tools.bench import runner
     monkeypatch.setenv("HWE_AGENT_USER", getpass.getuser())
     shared = tmp_path / "shared"
-    for d in ("toolchain", "bin", "venv", "homes"):
+    for d in ("toolchain", "bin", "venv", "homes", "tmp"):
         (shared / d).mkdir(parents=True)
     monkeypatch.setattr(runner, "AGENT_SHARED", shared)
     clone = tmp_path / "clone"

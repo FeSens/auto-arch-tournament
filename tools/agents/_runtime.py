@@ -471,6 +471,11 @@ _AGENT_SECRETS = {"CLAUDE_CODE_OAUTH_TOKEN": "claude"}
 # account's CPU slice, hweagents-<account>.slice (setup_server.sh, 6d).
 AGENT_SCOPE = "/usr/local/sbin/hwe-agent-scope"
 
+# Longest agent TMPDIR: Claude Code's sandbox binds Unix sockets at
+# $TMPDIR/claude-<uid>/claude-socks-<16 hex>.sock, and a socket path may
+# not exceed 107 bytes (48 + 14 + 34 leaves room).
+AGENT_TMPDIR_MAX = 48
+
 
 def agent_launch_prefix(user: str, platform: str = sys.platform) -> list[str]:
     """How to become the agent account. On Linux (the run host) through
@@ -483,8 +488,8 @@ def agent_launch_prefix(user: str, platform: str = sys.platform) -> list[str]:
 
 def _write_agent_secrets(secrets_dir: Path, secrets: dict[str, str]) -> Path:
     """The agent's credentials as a shell file its launch wrapper sources and
-    deletes. In the invocation's private TMPDIR: inside the clone, whose ACL
-    admits only the operator and the run's own account."""
+    deletes. In the invocation's private TMPDIR, whose ACL admits only the
+    operator and the run's own account."""
     path = Path(secrets_dir) / f".agent-env-{uuid.uuid4().hex[:12]}"
     fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o640)
     with os.fdopen(fd, "w") as f:
@@ -557,11 +562,23 @@ def run_agent_streaming(
     p = provider or get_provider()
     # A private TMPDIR per agent invocation: the K concurrent agents of a
     # run used to share the run's <clone>/.tmp, and one agent's scratch
-    # files overwrote a sibling's (V2 smoke10). Under the agent's own
-    # working directory (its worktree for implementation and hypothesis
-    # agents); plain mkdir, so the clone's default ACL gives the agent
-    # account write access (mkdtemp's 0700 would zero it).
-    tmpdir = Path(cwd).resolve() / ".tmp" / f"agent-{uuid.uuid4().hex[:12]}"
+    # files overwrote a sibling's (V2 smoke10). Under the run's short temp
+    # base (HWE_AGENT_TMP, runner.make_env_for_job) when agents run as an
+    # account: Claude Code puts its sandbox's Unix sockets in TMPDIR, whose
+    # paths may not exceed 107 bytes, and a TMPDIR under the worktree was
+    # long enough that the sandbox could not start and every command ran
+    # unconfined (V2 incident 06). The base has the same length for every
+    # run, so no system's path depends on its name. Plain mkdir, so the
+    # base's default ACL gives the agent account access (mkdtemp's 0700
+    # would zero it).
+    base = os.environ.get("HWE_AGENT_TMP", "").strip()
+    if base:
+        tmpdir = Path(base) / uuid.uuid4().hex[:8]
+    else:
+        tmpdir = Path(cwd).resolve() / ".tmp" / f"agent-{uuid.uuid4().hex[:12]}"
+    if os.environ.get("HWE_AGENT_USER", "").strip() and len(str(tmpdir)) > AGENT_TMPDIR_MAX:
+        raise RuntimeError(f"agent TMPDIR {tmpdir} is longer than {AGENT_TMPDIR_MAX} characters; "
+                           "Claude Code's sandbox sockets would not fit (set HWE_AGENT_TMP)")
     tmpdir.mkdir(parents=True)
     env = {**os.environ, "TMPDIR": str(tmpdir)}
     try:

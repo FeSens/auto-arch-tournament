@@ -846,3 +846,40 @@ def test_check_agent_reaping_refuses_leftovers_and_schedulers(monkeypatch, tmp_p
     assert msg is not None and "crontab" in msg
     state["pid"] = "garbage"
     assert "failed" in runner.check_agent_reaping("hwebench")
+
+
+def test_run_one_job_stops_before_the_orchestrator_when_the_sandbox_probe_fails(tmp_path, monkeypatch):
+    """V2 incident 06: no scored work unless the agents' commands run in
+    their sandbox; the run is left rerunnable (harness_error)."""
+    import getpass
+    _stub_clone_fixture(monkeypatch)
+    monkeypatch.setenv("HWE_AGENT_USER", getpass.getuser())
+    shared = tmp_path / "shared"
+    for d in ("toolchain", "bin", "venv", "homes", "tmp"):
+        (shared / d).mkdir(parents=True)
+    monkeypatch.setattr(runner, "AGENT_SHARED", shared)
+    monkeypatch.setattr(runner, "_FREE_AGENTS", None)
+    # The test's "agent" is the current user: never run the account reset
+    # (pkill -u) against it.
+    monkeypatch.setattr(runner, "reset_agent", lambda *a, **k: None)
+    monkeypatch.setattr(runner, "run_sandbox_probe", lambda clone, env: {
+        "ok": False, "reasons": ["pidns is the host's (pid:[4026531836]): no sandbox"],
+        "observed": {}, "attempt": 1})
+
+    real_popen = runner.subprocess.Popen
+
+    def no_orchestrator(cmd, *a, **k):
+        if "tools.orchestrator" in cmd:
+            raise AssertionError("the orchestrator started")
+        return real_popen(cmd, *a, **k)
+    monkeypatch.setattr(runner.subprocess, "Popen", no_orchestrator)
+    model = ModelEntry(name="opus", model="claude-opus-5-5", provider="claude", oauth=True)
+    results_dir = tmp_path / "results"
+    row = run_one_job(JobSpec(model=model, rep=1), repo_root=tmp_path / "repo", ref="main",
+                      clone_base=tmp_path / "clones", results_dir=results_dir,
+                      results_jsonl=results_dir / "results.jsonl", keys={},
+                      n=1, k=1, timeout_sec=1, max_cost_usd=1.0, keep_clone=False)
+    assert row["status"] == "harness_error"
+    assert "sandbox probe failed: pidns is the host's" in row["notes"]
+    assert row["sandbox_probe"]["ok"] is False
+    assert runner.load_done_set(results_dir / "results.jsonl") == set()

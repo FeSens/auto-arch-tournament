@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
+import hashlib
 import json
 import os
 import re
@@ -159,6 +160,16 @@ def run_home(agent: AgentUser, slug: str) -> Path:
     return agent.shared / "homes" / slug
 
 
+def run_tmp(agent: AgentUser, slug: str) -> Path:
+    """Per-run base of the agents' private TMPDIRs (tools/agents/_runtime.py
+    run_agent_streaming). Outside the clone and the same length for every
+    run: Claude Code's sandbox sockets live in TMPDIR and a Unix socket path
+    may not exceed 107 bytes; under the clone the length grew with the
+    system's name, and a TMPDIR under the worktree left Claude's sandbox
+    unable to start (V2 incident 06)."""
+    return agent.shared / "tmp" / hashlib.sha1(slug.encode()).hexdigest()[:8]
+
+
 def reset_agent(agent: AgentUser, homes: tuple[Path, ...] = ()) -> None:
     """Leave nothing of a finished run for the account's next run: its
     processes, the given per-run homes (the homes directory is not
@@ -197,7 +208,9 @@ def release_agent(agent: Optional[AgentUser], clone: Path) -> None:
         subprocess.run(["setfacl", "-x", f"u:{agent.name},d:u:{agent.name}", str(clone)],
                        capture_output=True)
         os.chmod(clone, 0o700)
-    reset_agent(agent, (run_home(agent, clone.name),))
+    reset_agent(agent, (run_home(agent, clone.name), run_tmp(agent, clone.name)))
+    from tools.eval._subprocess import remove_path
+    remove_path(run_tmp(agent, clone.name), must=False)
     _FREE_AGENTS.put(agent)
 
 
@@ -218,7 +231,7 @@ def check_agent_user(agent: AgentUser) -> Optional[str]:
         return f"sudo failed: {e}"
     if r.returncode != 0:
         return "cannot sudo to it without a password (run setup_bench_user.sh)"
-    for d in ("clones", "toolchain", "bin", "local" if IS_MAC else "venv", *(() if IS_MAC else ("homes",))):
+    for d in ("clones", "toolchain", "bin", "local" if IS_MAC else "venv", *(() if IS_MAC else ("homes", "tmp"))):
         if not (agent.shared / d).is_dir():
             return f"{agent.shared / d} missing (run setup_bench_user.sh)"
     if as_agent(agent.name, "/bin/test", "-r", str(Path.home()),
@@ -1117,6 +1130,10 @@ def claude_isolation_settings(clone: Path, uid: int | None = None,
         },
         "sandbox": {
             "enabled": True,
+            # Refuse to run a command unconfined when the sandbox cannot
+            # start; the default (false) runs it without one, silently
+            # (V2 incident 06).
+            "failIfUnavailable": True,
             "autoAllowBashIfSandboxed": True,
             "allowUnsandboxedCommands": False,
             "filesystem": {
@@ -1159,6 +1176,13 @@ def make_env_for_job(job: JobSpec, clone: Path, keys: dict[str, str]) -> dict[st
         as_agent(agent.name, "/bin/mkdir", "-p", "-m", "700", str(home), check=True,
                  capture_output=True)
         env["HWE_AGENT_HOME"] = str(home)
+        if not IS_MAC:
+            tmp = run_tmp(agent, job.slug)
+            from tools.eval._subprocess import remove_path
+            remove_path(tmp)                    # a crashed or rerun attempt's
+            tmp.mkdir(mode=0o700)
+            share_with_agent(tmp, agent)
+            env["HWE_AGENT_TMP"] = str(tmp)
         env["HWE_AGENT_PATH"] = agent.path
         env["HWE_AGENT_PYTHONUSERBASE"] = str(agent.local)
         from tools.eval.gowin import GOWIN_HOME
@@ -1195,6 +1219,11 @@ def make_env_for_job(job: JobSpec, clone: Path, keys: dict[str, str]) -> dict[st
             # The account's real home and the shared auth dir hold the Codex login.
             settings["sandbox"]["filesystem"]["denyRead"] += [
                 str(agent.home), str(agent.shared / "auth")]
+            if env.get("HWE_AGENT_TMP"):
+                fs = settings["sandbox"]["filesystem"]
+                fs["allowWrite"].append(env["HWE_AGENT_TMP"])
+                fs["allowRead"].append(env["HWE_AGENT_TMP"])
+                settings["permissions"]["allow"].append(f"Read(/{env['HWE_AGENT_TMP']}/**)")
             env["CLAUDE_BENCH_SETTINGS"] = json.dumps(settings)
         else:
             env["CLAUDE_BENCH_SETTINGS"] = json.dumps(claude_isolation_settings(clone))
@@ -1364,6 +1393,27 @@ def _run_one_job(
         _copy_early_forensics(out_dir, fp_path, orch_log_path)
         _finalize(row, started, results_jsonl)
         return row
+
+    # 3b. Before any scored work: the agents' commands must run in their
+    # sandbox. Not scored and rerunnable (harness_error) when they do not.
+    if agent and job.model.provider in ("claude", "codex"):
+        probe = run_sandbox_probe(clone, env)
+        row["sandbox_probe"] = {k: probe.get(k) for k in ("ok", "reasons", "observed", "attempt")}
+        print(f"[bench] {job.slug} sandbox probe: "
+              f"{'confined' if probe.get('ok') else 'FAILED ' + '; '.join(probe.get('reasons', []))}",
+              flush=True)
+        probe_dir = clone / ".tmp" / "sandbox-probe"
+        if probe_dir.is_dir():
+            out_dir.mkdir(parents=True, exist_ok=True)
+            for f in ("verdict.json", "agent.log"):
+                if (probe_dir / f).is_file():
+                    shutil.copy2(probe_dir / f, out_dir / f"sandbox-probe-{f}")
+        if not probe.get("ok"):
+            row["status"] = "harness_error"
+            row["notes"] = f"sandbox probe failed: {'; '.join(probe.get('reasons', []))}"[:400]
+            _copy_early_forensics(out_dir, fp_path, orch_log_path)
+            _finalize(row, started, results_jsonl)
+            return row
 
     # Invoke tools.orchestrator directly instead of routing through the
     # Makefile `loop:` rule. The Makefile rule used to assemble exactly
@@ -1610,6 +1660,27 @@ def score_holdout(rep_dir: Path) -> dict:
     }
 
 
+def run_sandbox_probe(clone: Path, env: dict, attempts: int = 2) -> dict:
+    """The job's agent CLI runs one harness command through its agents'
+    exact launch path; the verdict says whether it ran confined
+    (tools/bench/sandbox_probe.py). V2 incident 06. A second attempt only
+    when the agent did not run the command at all."""
+    probe_dir = clone / ".tmp" / "sandbox-probe"
+    verdict: dict = {"ok": False, "reasons": ["probe did not run"]}
+    for i in range(attempts):
+        try:
+            subprocess.run([sys.executable, "-m", "tools.bench.sandbox_probe", str(probe_dir)],
+                           cwd=str(clone), env={**env, "PWD": str(clone.resolve())},
+                           capture_output=True, text=True, timeout=900)
+            verdict = json.loads((probe_dir / "verdict.json").read_text())
+        except (OSError, ValueError, subprocess.TimeoutExpired) as e:
+            verdict = {"ok": False, "reasons": [f"probe error: {type(e).__name__}: {e}"]}
+        verdict["attempt"] = i + 1
+        if verdict.get("ok") or not any("did not run" in r for r in verdict.get("reasons", [])):
+            break
+    return verdict
+
+
 def _copy_early_forensics(out_dir: Path, fp_path: Path, orch_log_path: Path) -> None:
     """Mirror the finalize-block forensics copy for run_one_job's
     early-return paths (fence install failure, missing API key). Those
@@ -1721,6 +1792,8 @@ def main() -> int:
         if args.clone_base == DEFAULT_CLONE_BASE:
             args.clone_base = AGENT_SHARED / "clones"
         lock_clone_base(args.clone_base)
+        if not IS_MAC:
+            lock_clone_base(AGENT_SHARED / "tmp")   # the per-run temp bases (run_tmp)
         for a in agent_pool():
             reset_agent(a)
 
