@@ -244,11 +244,14 @@ own tool (Gowin EDA 1.9.11.03):
   (`CLAUDE_CODE_OAUTH_TOKEN`) to every agent, the two GPT systems' Codex
   agents included, as an argument of the `env` command that launches the
   agent. A probe with a dummy value showed that Codex 0.156.1 passes it on
-  to the agent's shell commands (`printenv` finds it), so a GPT agent could
-  have used Anthropic's models through it. No agent transcript, Codex
-  session file or archive on the host contains the token (all searched), so
-  none read it. The launch command also went into sudo's log and, as the
-  systemd scope's description, into the journal (both root-only).
+  to the agent's shell commands (`printenv` finds it). Those commands have
+  no network (a probe's `curl` could not resolve any host), so a GPT agent
+  could not call Anthropic's API with it, but anything it printed would
+  have gone into its transcript, which Codex sends to OpenAI, and into
+  files the harness keeps. No agent transcript, Codex session file, result
+  file or archive on the host contains the token (all searched). The launch
+  command also went into sudo's log and, as the systemd scope's
+  description, into the journal (both root-only).
   (2) An Opus implementation agent started its formal self-check in the
   background (`( ... run_all.sh ... ) &`), polled it with `sleep`, and ended
   its session before it finished. Its solver processes had been reparented
