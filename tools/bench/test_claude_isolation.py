@@ -90,7 +90,7 @@ def test_cmd_isolated_when_settings_present(monkeypatch):
     assert cmd[cmd.index("--effort") + 1] == "xhigh"
     for tool in ("WebFetch", "WebSearch", "SendMessage", "PushNotification"):
         assert tool in cmd
-    assert cmd[2] == "do it"
+    assert "do it" not in cmd and cmd.stdin == "do it"   # the prompt goes on stdin
 
 
 def test_cmd_legacy_without_settings(monkeypatch):

@@ -249,6 +249,19 @@ def archive_agent_log(log_path: Path, name: str, repo: Path = Path(".")) -> None
         pass
 
 
+class AgentCmd(list):
+    """An agent CLI's argv plus the prompt it reads on stdin
+    (run_agent_streaming feeds it). Prompts travel on stdin, not argv:
+    Linux caps a single argument at 128 KiB (MAX_ARG_STRLEN), and the
+    hypothesis prompt, which inlines the core's RTL and lessons, outgrew
+    it in round 7 of an Opus run, so every later slot of that run failed
+    to launch (V2 incident 07)."""
+
+    def __init__(self, argv: list[str], stdin: str):
+        super().__init__(argv)
+        self.stdin = stdin
+
+
 def build_agent_cmd(
     prompt: str,
     cwd: str,
@@ -293,8 +306,8 @@ def build_agent_cmd(
         codex_effort = os.environ.get("CODEX_REASONING_EFFORT", "xhigh").strip()
         if codex_effort:
             cmd += ["-c", f"model_reasoning_effort={codex_effort}"]
-        cmd.append(prompt)
-        return cmd
+        cmd.append("-")  # the prompt, from stdin (AgentCmd)
+        return AgentCmd(cmd, prompt)
     if p == "claude":
         isolation = os.environ.get("CLAUDE_BENCH_SETTINGS", "").strip()
         if isolation:
@@ -303,8 +316,9 @@ def build_agent_cmd(
             # Bash confined by the OS sandbox; file tools auto-approved only
             # inside cwd (acceptEdits), so reads/writes elsewhere are denied
             # in -p mode.
+            # -p with no prompt argument: the prompt comes on stdin (AgentCmd).
             cmd = [
-                "claude", "-p", prompt,
+                "claude", "-p",
                 "--output-format", "stream-json",
                 "--verbose",
                 "--setting-sources", "",
@@ -318,16 +332,14 @@ def build_agent_cmd(
                 cmd += ["--effort", effort]
         else:
             cmd = [
-                "claude", "-p", prompt,
+                "claude", "-p",
                 "--dangerously-skip-permissions",
                 "--output-format", "stream-json",
                 "--verbose",
             ]
         if model:
-            # Insert after the prompt so cmd[2] stays the positional prompt
-            # for any debugging tools that key on argv shape.
-            cmd[3:3] = ["--model", model]
-        return cmd
+            cmd[2:2] = ["--model", model]
+        return AgentCmd(cmd, prompt)
     if p == "opencode":
         # Opencode reads its model from --model; OPENCODE_MODEL env var
         # is the bench-runner convention. No useful default.
@@ -591,14 +603,31 @@ def run_agent_streaming(
 
 
 def _run_agent_streaming(cmd, cwd, log_path, timeout_sec, mode, p, env) -> tuple[int, bool]:
+    prompt = getattr(cmd, "stdin", None)
     proc = subprocess.Popen(
-        as_agent_user(cmd, env, secrets_dir=Path(env["TMPDIR"])), cwd=cwd, env=env,
-        stdin=subprocess.DEVNULL,
+        as_agent_user(list(cmd), env, secrets_dir=Path(env["TMPDIR"])), cwd=cwd, env=env,
+        stdin=subprocess.DEVNULL if prompt is None else subprocess.PIPE,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         text=True, bufsize=1,
     )
     timed_out = {'flag': False}
+
+    def feed():
+        # Own thread: the prompt can exceed the pipe buffer, and the CLI's
+        # output must keep draining meanwhile.
+        try:
+            proc.stdin.write(prompt)
+        except (BrokenPipeError, OSError):
+            pass  # the CLI exited early; its log and return code say why
+        finally:
+            try:
+                proc.stdin.close()
+            except (BrokenPipeError, OSError):
+                pass
+
+    if prompt is not None:
+        threading.Thread(target=feed, daemon=True).start()
 
     def watchdog():
         try:

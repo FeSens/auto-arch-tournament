@@ -101,3 +101,28 @@ def test_only_the_claude_agent_gets_the_claude_token(agent_dir):
         r = subprocess.run(cmd, cwd=agent_dir, capture_output=True, text=True, timeout=60)
         assert r.stdout == want, (provider, r.stderr)
         assert [p.name for p in agent_dir.iterdir()] == []    # the credentials file is gone
+
+
+def test_a_large_prompt_reaches_the_agent_on_stdin(agent_dir, tmp_path, monkeypatch):
+    """Incident 07: prompts travel on stdin through sudo, the scope helper,
+    env and the credentials wrapper, with no 128 KiB argument limit."""
+    from tools.agents import _runtime
+    big = "x" * 300_000 + "\nend\n"
+    env = _env("claude")
+    for k, v in env.items():
+        monkeypatch.setenv(k, v)
+    base = Path("/srv/hwebench/tmp") / uuid.uuid4().hex[:8]    # as runner.run_tmp
+    base.mkdir()
+    subprocess.run(["setfacl", "-m", f"u:{ACCOUNT}:rwx,d:u:{ACCOUNT}:rwx,d:u:{os.getuid()}:rwx",
+                    str(base)], check=True)
+    monkeypatch.setenv("HWE_AGENT_TMP", str(base))
+    try:
+        cmd = _runtime.AgentCmd(["/bin/sh", "-c", "wc -c"], big)
+        log = tmp_path / "agent.log"
+        rc, timed_out = _runtime.run_agent_streaming(cmd, cwd=str(agent_dir), log_path=log,
+                                                     timeout_sec=60, provider="claude")
+        assert (rc, timed_out) == (0, False)
+        assert log.read_text().split() == [str(len(big))]
+    finally:
+        subprocess.run(["sudo", "-n", "-u", ACCOUNT, "/bin/rm", "-rf", str(base)], capture_output=True)
+        subprocess.run(["rm", "-rf", str(base)], capture_output=True)

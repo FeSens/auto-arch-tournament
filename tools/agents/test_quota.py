@@ -189,3 +189,41 @@ def test_agent_tmpdir_length_is_capped_for_agent_accounts(tmp_path, monkeypatch)
         _runtime.run_agent_streaming(["/bin/true"], cwd=str(tmp_path), log_path=tmp_path / "a.log",
                                      timeout_sec=30, provider="claude")
     assert list(long_base.iterdir()) == []
+
+
+BIG_PROMPT = "hypothesis context line\n" * 13000     # ~300 KB, over Linux's 128 KiB per argument
+
+
+@pytest.mark.parametrize("provider", ["claude", "codex"])
+def test_prompt_goes_on_stdin_not_argv(provider, tmp_path):
+    """Incident 07: the hypothesis prompt outgrew MAX_ARG_STRLEN (128 KiB)
+    and every later slot of the run failed with E2BIG."""
+    from tools.agents import _runtime
+    cmd = _runtime.build_agent_cmd(BIG_PROMPT, str(tmp_path), provider=provider,
+                                   output_last_message=tmp_path / "last.txt")
+    assert cmd.stdin == BIG_PROMPT
+    assert max(len(a) for a in cmd) < 4096
+    if provider == "codex":
+        assert cmd[-1] == "-"
+
+
+def test_run_agent_streaming_feeds_a_large_prompt_on_stdin(tmp_path, monkeypatch):
+    from tools.agents import _runtime
+    monkeypatch.delenv("HWE_AGENT_USER", raising=False)
+    monkeypatch.delenv("HWE_AGENT_TMP", raising=False)
+    out = tmp_path / "got.txt"
+    cmd = _runtime.AgentCmd(["/bin/sh", "-c", f"cat > {out}; echo done"], BIG_PROMPT)
+    rc, timed_out = _runtime.run_agent_streaming(cmd, cwd=str(tmp_path), log_path=tmp_path / "a.log",
+                                                 timeout_sec=60, provider="claude")
+    assert (rc, timed_out) == (0, False)
+    assert out.read_text() == BIG_PROMPT
+
+
+def test_a_cli_that_ignores_its_stdin_does_not_hang_the_launcher(tmp_path, monkeypatch):
+    from tools.agents import _runtime
+    monkeypatch.delenv("HWE_AGENT_USER", raising=False)
+    monkeypatch.delenv("HWE_AGENT_TMP", raising=False)
+    cmd = _runtime.AgentCmd(["/bin/sh", "-c", "exit 4"], BIG_PROMPT)
+    rc, timed_out = _runtime.run_agent_streaming(cmd, cwd=str(tmp_path), log_path=tmp_path / "a.log",
+                                                 timeout_sec=60, provider="claude")
+    assert (rc, timed_out) == (4, False)
