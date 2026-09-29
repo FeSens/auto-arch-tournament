@@ -1,0 +1,62 @@
+# WRITE-ONCE. Amendment 09 to prereg.yaml, written 2026-09-29, after
+# incident 07 and before the campaign restart; its commit time is the
+# authoritative timestamp. No scored run exists.
+reason: >
+  Incident 07: the seventh campaign (harness 2.7.0, started 2026-09-29T06:56:12Z) was
+  stopped at 09:03:24Z (~2.1 h; Opus rep1 in round 8, Sol and Luna rep1 in round 6) as
+  a harness failure under the incident policy. The harness passed each agent's prompt
+  to its CLI as one command-line argument, and Linux caps a single argument at 128 KiB
+  (MAX_ARG_STRLEN). The hypothesis and implementation prompts inline the core's RTL and
+  its lessons file, which grow over a run. In round 7 the Opus run's prompt (96 KB of
+  RTL, 16 KB of lessons) passed the cap: all 6 slots of rounds 7 and 8 failed to launch
+  ("[Errno 7] Argument list too long: 'sudo'"), and with no slot able to run, the run
+  could not change its RTL again. Both CLIs received prompts the same way; the Sol and
+  Luna runs (about 63-65 KB of RTL) had not reached the cap. V1 ran on macOS, which has
+  no per-argument limit, and no earlier V2 run had grown this far. Separately reviewed,
+  not a harness failure: about 0.1% of Claude shell commands fail once when Claude
+  Code's sandbox bind-mounts git worktree metadata that the orchestrator removes at
+  that moment (1 of 893 in the 2.3/2.4 campaigns, 1 in this one); the command fails
+  closed and the agent reruns it (monitor_review.md, 08:28).
+incident_07_runs: >
+  Reported, not scored: research/runs/EXP-2026-09-28-v2-main/incident_07/ (agent and
+  hypothesis-agent logs, the sessions still running at the stop, orchestrator logs,
+  experiment logs, sandbox-probe verdicts, runner log and results dir, monitor
+  alerts). Per the incident policy all 18 runs restart from V0; the first complete
+  attempt of each is scored.
+harness: >
+  tag hwe-bench-v2.8 = branch bench-v2.8, HARNESS_VERSION 2.8.0 (replaces
+  hwe-bench-v2.7). Change: the prompt goes to the agent CLI on standard input (claude
+  -p with no prompt argument; codex exec -), written by the launcher in a thread of
+  its own, so no argument carries it. The prompt text is unchanged. No change to
+  prompts, budgets, evals, scoring or acceptance. Same rules for every system.
+monitoring: >
+  Extends amendments 02 and 05 to 08: a slot broken because the harness could not
+  start its agent (an OS error from the launch) is HIGH.
+validation: >
+  393 harness tests pass, and the 4 opt-in live tests pass on the run host (new: a
+  300 KB prompt reaches a command run as an agent account through sudo, the scope
+  helper and the credentials wrapper; unit tests: a prompt over the argument limit
+  stays off the argv and arrives intact, and a CLI that ignores its stdin does not
+  hang the launcher). Live, through the runner's full launch path with the real CLIs:
+  Claude (Opus 5.5 xhigh) and Codex (GPT-6 Sol xhigh) each answered a 136 KB and a
+  304 KB prompt correctly (a marker at its start, the instruction at its end); the
+  2.7 launch fails with E2BIG above 128 KiB. Replayed on incident 07's log, the new
+  monitor rule flags all 6 failed slots. Smoke15 on bench-v2.8-rc (rc1; 3 systems,
+  N=2 K=3, 09:09Z to 10:13Z): all three runs done, 0 broken slots, held-out scored (5
+  of 5 kernels validated in each), final RTL saved; all three sandbox probes confined
+  (network blocked); 0 sandbox-failure messages and 0 bwrap errors in the 57 agent
+  sessions; namespace samples every 15 s for the whole run, 2,922 samples of agent
+  commands, all in sandbox namespaces, none of an agent command in the host's
+  namespace; 0 processes left in the accounts, temp bases removed; 0 journal entries
+  with the Claude token or E2BIG (66 agent scopes). Its only HIGH alert (a Luna
+  agent's "WB-collision tag", register-writeback logic) was a false positive of the
+  interference rule, which now ignores hardware uses of "collision"; a replay over
+  every archived transcript keeps all 32 earlier interference reports. The tag adds
+  only the version file and research files to the smoke-tested code.
+command: >
+  python3 -m tools.bench.runner --models tools/bench/models-v2.yaml --ref bench-v2.8
+  --agent-user hwebench,hwebench2,hwebench3 --reps 6 --interleave --n 15 --k 3
+  --results-jsonl bench/v2/results.jsonl --results-dir bench/v2
+unchanged: question, systems, metrics, tests, verdict rules, budget, runs per system, incident policy
+launched: >
+  To be filled in after launch.
