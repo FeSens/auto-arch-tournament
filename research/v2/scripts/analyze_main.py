@@ -14,7 +14,11 @@ Incident policy: the scored run of a (system, rep) is the first complete one
 (status done with a held-out score) in order of completion; every attempt is
 listed. Runs are never dropped for being low.
 
+Amendment 11: GPT-6.1 Sol replaces GPT-6 Sol as "Sol" in every test; GPT-6
+Sol's one run (rep1) is listed as an unscored pilot.
+
     research/v2/scripts/analyze_main.py bench/v2/results.jsonl \
+        bench/v2/results-opus-luna.jsonl bench/v2/results-sol61.jsonl \
         --rescored research/runs/EXP-2026-09-28-v2-main/incident_08/holdout_rescored.jsonl [--json out.json]
 
 Standard library only (the run host has no scipy): Student t via the
@@ -29,11 +33,12 @@ import random
 import statistics
 from pathlib import Path
 
-PRIMARY = ("claude-opus-5_5_xhigh-v2", "gpt-6-sol_xhigh-v2")
-SECONDARY = [("gpt-6-luna_xhigh-v2", "gpt-6-sol_xhigh-v2"),
+PRIMARY = ("claude-opus-5_5_xhigh-v2", "gpt-6_1-sol_xhigh-v2")
+SECONDARY = [("gpt-6-luna_xhigh-v2", "gpt-6_1-sol_xhigh-v2"),
              ("gpt-6-luna_xhigh-v2", "claude-opus-5_5_xhigh-v2")]
-SHORT = {"claude-opus-5_5_xhigh-v2": "Opus", "gpt-6-sol_xhigh-v2": "Sol",
+SHORT = {"claude-opus-5_5_xhigh-v2": "Opus", "gpt-6_1-sol_xhigh-v2": "Sol 6.1",
          "gpt-6-luna_xhigh-v2": "Luna"}
+PILOTS = {"gpt-6-sol_xhigh-v2": "GPT-6 Sol (pilot)"}
 ALPHA = 0.05
 BOOT = 10_000
 SEED = 20260928
@@ -149,12 +154,13 @@ HOLDOUT_FIELDS = ("holdout_geomean_iter_s", "holdout_kernels", "holdout_fmax_mhz
                   "loop_fmax_mhz", "holdout_fmax_pairs", "holdout_error")
 
 
-def load(results: Path, rescored: list[Path] = ()) -> tuple[dict, list[dict]]:
+def load(results: Path | list[Path], rescored: list[Path] = ()) -> tuple[dict, list[dict]]:
     """Result rows, with held-out scores recomputed after the run (incident 08:
     the 2.8.0 runner's bundle, and so its held-out scoring, failed under a
     relative --results-dir) merged into the attempt they belong to, matched
     by model, rep and start time. A rescored value never creates an attempt."""
-    rows = [json.loads(l) for l in results.read_text().splitlines() if l.strip()]
+    rows = [json.loads(l) for f in ([results] if isinstance(results, Path) else results)
+            for l in f.read_text().splitlines() if l.strip()]
     for path in rescored:
         for l in path.read_text().splitlines():
             if not l.strip():
@@ -181,7 +187,8 @@ def load(results: Path, rescored: list[Path] = ()) -> tuple[dict, list[dict]]:
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    ap.add_argument("results", type=Path)
+    ap.add_argument("results", type=Path, nargs="+",
+                    help="results files (amendment 11: the 2.8.0 file plus each 2.8.1 runner's)")
     ap.add_argument("--json", type=Path, help="also write the numbers here")
     ap.add_argument("--rescored", type=Path, action="append", default=[],
                     help="held-out scores recomputed after a run (incident 08 holdout_rescored.jsonl)")
@@ -194,9 +201,11 @@ def main() -> None:
     for r in rows:
         key = (r.get("model"), r.get("rep"))
         s = r.get("holdout_geomean_iter_s")
-        print(f"| {SHORT.get(r.get('model'), r.get('model'))} | {r.get('rep')} | {r.get('status')} | "
+        name = SHORT.get(r.get("model")) or PILOTS.get(r.get("model"), r.get("model"))
+        used = "pilot" if r.get("model") in PILOTS else ("yes" if scored.get(key) is r else "")
+        print(f"| {name} | {r.get('rep')} | {r.get('status')} | "
               f"{'' if s is None else f'{s:.1f}'} | {r.get('holdout_source', 'runner' if s is not None else '')} | "
-              f"{'yes' if scored.get(key) is r else ''} |")
+              f"{used} |")
 
     ln = {m: [math.log(r["holdout_geomean_iter_s"]) for (mm, _), r in sorted(scored.items()) if mm == m]
           for m in SHORT}

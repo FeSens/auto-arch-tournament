@@ -360,9 +360,26 @@ own tool (Gowin EDA 1.9.11.03):
   reproduced the champion's log row exactly (CoreMark, cycles, LUT4, Fmax
   per placement option) before `score_holdout` ran. Held-out iter/s: Opus
   7,769.6, Sol 5,767.6, Luna 3,042.7, 5 of 5 kernels validated in each.
-  Reps 2-6 run under the same 2.8.0 harness, relaunched with absolute paths
-  at the batch boundary (a watcher killed the runner the second the rep2
-  batch began, before any rep2 agent started).
+  The runner was relaunched with absolute paths at the batch boundary (a
+  watcher killed it the second the rep2 batch began, before any rep2 agent
+  started); incident 09 then moved reps 2-6 to harness 2.8.1.
+- Incident 09 (harness 2.8.0 campaign, rep2 batch stopped after 40 min, not
+  scored; `research/runs/EXP-2026-09-28-v2-main/incident_09`, amendment 11):
+  the orchestrator creates each round's slot worktrees from parallel threads,
+  and git does not lock its worktree metadata. In Opus rep2 round 2, slot
+  r2s0's `git worktree add` read sibling r2s2's
+  `.git/worktrees/<name>/commondir`, which r2s2's own add had created but not
+  yet written, and died ("failed to read .../commondir: Success"); the slot
+  counted as broken before its agent started. An empty `commondir`
+  reproduces the failure every time; the empty placeholder files Claude's
+  sandbox leaves in the same directory do not. It was the first such failure
+  in about 1,088 worktree creations across all archived runs, and it could
+  hit any system. The three rep2 runs were stopped at 18:41:01Z, are reported
+  as attempts, and rep2 reruns from V0. Fix (harness 2.8.1): the
+  orchestrator's worktree and branch git commands run one at a time under a
+  lock, and a failed worktree add is retried from a clean slate (up to three
+  attempts, each retry logged). In a test with three slot threads, no two of
+  these commands overlap; the same test fails on 2.8.0.
 - Paper angle: a comparison of agent CLIs needs per-CLI integration
   testing under the real concurrency, and a monitor that reads outcomes by
   class per system; the bias showed up as one system's "broken" count.
@@ -394,8 +411,12 @@ own tool (Gowin EDA 1.9.11.03):
 
 ## 7. Results (pending)
 
-- Main comparison, Claude Opus 5.5 (xhigh, Claude Code) vs GPT-6 Sol (xhigh,
-  Codex CLI), 6 + 6 runs, N=15, K=3: **pending**.
+- Main comparison, Claude Opus 5.5 (xhigh, Claude Code) vs GPT-6.1 Sol
+  (xhigh, Codex CLI), plus GPT-6 Luna (xhigh, Codex CLI), 6 runs each, N=15,
+  K=3: **pending**. GPT-6.1 Sol was released during the campaign and replaced
+  GPT-6 Sol after one GPT-6 Sol run (amendment 11); that run is reported as a
+  pilot, not scored. GPT-6.1 Sol needs Codex CLI 0.159.0 (the pinned 0.156.1
+  is refused for it), so it runs its own pinned CLI; Luna stays on 0.156.1.
 - Smoke test only (one round each, old timer, not a result): both systems ran
   end to end as the isolated account; held-out scoring and provenance worked.
 - V2 smoke champions under Gowin: Opus 47.7 MHz, GPT 32.7 MHz; both replaced

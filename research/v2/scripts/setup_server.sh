@@ -98,6 +98,24 @@ if [ ! -x "$SHARED/bin/codex" ]; then
     || echo "{\"version\": \"$CODEX_VERSION\"}" > "$SHARED/bin/codex.version.json"
 fi
 
+# 4a. Per-model CLIs (models yaml `cli_dir`, laid out like bin/): a model the
+#     pinned CLI cannot reach. Amendment 11: GPT-6.1 Sol is refused by Codex
+#     0.156.1 ("not supported when using Codex with a ChatGPT account").
+#     Package sha256 35da65d7...a83a24e; its bin/codex (d2752c52...56b72f)
+#     is byte-identical to the npm @openai/codex 0.159.0 linux-x64 binary.
+CODEX_SOL61_VERSION=0.159.0
+D="$SHARED/cli/codex-$CODEX_SOL61_VERSION"
+if [ ! -x "$D/codex" ]; then
+  tmp=$(mktemp -d)
+  curl -fsSL -o "$tmp/p.tgz" "https://github.com/openai/codex/releases/download/rust-v$CODEX_SOL61_VERSION/codex-package-x86_64-unknown-linux-musl.tar.gz"
+  echo "35da65d7e8644e28ea0a4d4e3d8c15b40c6b492356d4cf21986c7e341f83a24e  $tmp/p.tgz" | sha256sum -c --quiet
+  install -d -m 755 "$SHARED/cli" "$D" "$D/codex-pkg"
+  tar xzf "$tmp/p.tgz" -C "$D/codex-pkg" --no-same-owner && rm -rf "$tmp"
+  chmod -R go-w,a+rX "$D"
+  ln -sfn "$D/codex-pkg/bin/codex" "$D/codex"
+  install -m 644 "$D/codex-pkg/codex-package.json" "$D/codex.version.json"
+fi
+
 ln -sfn "$SHARED/bin/claude" /usr/local/bin/claude
 ln -sfn "$SHARED/bin/codex" /usr/local/bin/codex
 
