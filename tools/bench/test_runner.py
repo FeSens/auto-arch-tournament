@@ -891,3 +891,35 @@ def test_run_one_job_stops_before_the_orchestrator_when_the_sandbox_probe_fails(
     assert "sandbox probe failed: pidns is the host's" in row["notes"]
     assert row["sandbox_probe"]["ok"] is False
     assert runner.load_done_set(results_dir / "results.jsonl") == set()
+
+
+def test_rmtree_shared_gives_the_account_its_way_back_in(tmp_path, monkeypatch):
+    """A run stopped by a failed sandbox probe keeps its clone, and
+    release_agent revoked the account's ACL entry on its top directory; the
+    rerun must still delete what the account left (amendment 11 smoke)."""
+    clone = tmp_path / "clone"
+    locked = clone / ".codex-home" / "tmp"
+    locked.mkdir(parents=True)
+    (locked / "arg0").write_text("x")
+    locked.chmod(0o500)          # undeletable for the operator's rmtree
+    calls = []
+    monkeypatch.setattr(runner, "IS_MAC", False)
+    monkeypatch.setattr(runner, "agent_pool",
+                        lambda: [runner.AgentUser(name="hwe-x", uid=1, home=tmp_path)])
+
+    def fake_run(cmd, *a, **k):
+        calls.append(("run", cmd[0]))
+        return subprocess.CompletedProcess(cmd, 0)
+
+    def fake_as_agent(name, *cmd, **k):
+        calls.append(("as_agent", name, cmd[0]))
+        if ("run", "setfacl") in calls:  # the account is let back in first
+            locked.chmod(0o700)
+            (locked / "arg0").unlink()
+        return subprocess.CompletedProcess(cmd, 0)
+
+    monkeypatch.setattr(runner.subprocess, "run", fake_run)
+    monkeypatch.setattr(runner, "as_agent", fake_as_agent)
+    runner.rmtree_shared(clone)
+    assert calls[:2] == [("run", "setfacl"), ("as_agent", "hwe-x", "/bin/rm")]
+    assert not clone.exists()

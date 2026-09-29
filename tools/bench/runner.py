@@ -341,11 +341,18 @@ def lock_from_agent(path: Path, agent: AgentUser) -> None:
 
 def rmtree_shared(path: Path) -> None:
     """Delete a clone; anything the agent account left undeletable for
-    the operator is removed as that account."""
+    the operator is removed as that account. A run that stopped early (a
+    failed sandbox probe) keeps its clone, and release_agent then took the
+    account's way in (the top directory's ACL entry); the account gets it
+    back first, or the rerun's clone of that run fails ("destination path
+    ... already exists", GPT-6.1 Sol smoke, amendment 11)."""
     shutil.rmtree(path, ignore_errors=True)
     for agent in agent_pool():
         if not path.exists():
             break
+        if not IS_MAC and path.is_dir():
+            subprocess.run(["setfacl", "-m", f"u:{agent.name}:rwx", str(path)],
+                           capture_output=True)
         as_agent(agent.name, "/bin/rm", "-rf", str(path), capture_output=True)
         shutil.rmtree(path, ignore_errors=True)
 DEFAULT_RESULTS_DIR = REPO_ROOT / "bench"
@@ -1404,6 +1411,8 @@ def _run_one_job(
     try:
         clone_fixture(repo_root, ref, clone)
     except subprocess.CalledProcessError as e:
+        # A harness failure, so rerunnable: "failed" is final (load_done_set).
+        row["status"] = "harness_error"
         row["notes"] = f"clone failed: {e.stderr.decode() if e.stderr else e}"[:400]
         _finalize(row, started, results_jsonl)
         return row
