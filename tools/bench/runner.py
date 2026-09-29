@@ -962,6 +962,12 @@ computer_use = false
 in_app_browser = false
 skill_mcp_dependency_install = false
 tool_suggest = false
+# Off in 0.156.1, on by default in 0.159.0 (GPT-6.1 Sol's CLI, amendment 11);
+# pinned off so both Codex systems keep 0.156.1's behaviour: no daemon that
+# outlives the agent's command, and writes to a running command's stdin
+# need no approval (there is no one to approve them).
+daemon_auto_start = false
+write_stdin_approval = false
 
 [projects."{clone}"]
 trust_level = "trusted"

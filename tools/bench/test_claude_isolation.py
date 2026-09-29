@@ -241,7 +241,8 @@ def test_env_under_agent_user(tmp_path, monkeypatch):
     assert str(link.readlink()) == str(Path.home() / ".codex" / "auth.json")
     cfg = (Path(env["CODEX_HOME"]) / "config.toml").read_text()
     assert 'web_search = "disabled"' in cfg
-    for off in ("memories", "apps", "plugins", "remote_plugin", "browser_use", "computer_use"):
+    for off in ("memories", "apps", "plugins", "remote_plugin", "browser_use", "computer_use",
+                "daemon_auto_start", "write_stdin_approval"):
         assert f"\n{off} = false\n" in cfg, off
 
 
