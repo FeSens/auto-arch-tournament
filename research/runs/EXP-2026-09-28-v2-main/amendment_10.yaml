@@ -52,5 +52,11 @@ also_found_today: >
   wall time only.
 unchanged: question, systems, metrics, tests, verdict rules, budget, runs per system, incident policy
 launched: >
-  To be filled in after the relaunch (time, and the state the boundary watcher
-  recorded).
+  Batch 1 ended with Luna rep1 at 18:00:37Z (done, 119.44). The boundary watcher saw
+  the rep2 batch line and killed the runner's process group at 18:00:37Z, the second
+  the first rep2 job (Sol) had begun its fixture clone: no agent, probe or scope had
+  started (no process of the agent accounts; a 226 MB raw checkout, removed). The
+  rescue watcher's last Luna bundle was taken at 18:00:36Z (HEAD cb696fc, the final
+  round's last log commit). Relaunch at 18:01:08Z, tmux main on hwe-bench, with the
+  command above ("15 job(s) queued (3 already done)"); all three rep2 sandbox probes:
+  confined. This field was filled in afterwards, as its first version said it would be.
