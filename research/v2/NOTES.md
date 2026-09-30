@@ -216,3 +216,36 @@ runs, 28 commands) found no globs, the r6s1 deletion targeted its own run
 slots); other runs' clones are not writable by that account. Kept for this
 campaign; for V3, `chmod +t` on `riscv-formal/cores/` (only a dir's owner or the
 operator may delete it) or a private checkout for the harness's formal evals.
+
+## 2026-09-30: a cosim eval filled host memory (measured, 2.8.2 campaign)
+
+At 15:55Z the harness's cosim of Luna rep4 slot r7s1 (operator uid,
+`tools/eval/cosim.py`) ran its trace ELFs x 2 stall modes at once through a
+thread pool; four `test/cosim/run_cosim.py` processes each held 11 to 17 GB
+after 33 s and 30 to 34 GB after 80 s. RAM (64 GB) filled and swap reached
+31.6 of 32.7 GB. The kernel OOM killer took one of them (PID 41168, 32.3 GB
+anon RSS) at 15:57:23Z; the others ended at the 120 s per-ELF timeout by
+15:57:52Z, and free memory was back to 61 GB. Nothing else was killed: the
+three orchestrators and every live agent (GPT-6.1 Sol's r5 agents, then 9 min
+old) carried on. The Claude Code babysit shell was reaped for memory pressure
+(a monitoring loss, not a run effect).
+
+Cause: `run_cosim.py` (a contract file) captures the simulator's whole stdout
+and parses every RVFI line into a Python dict, up to 50 M cycles; a design
+that never reaches `ebreak` emits tens of millions of retire records, and the
+Python reference keeps up to 10 M more. The same thing happened once before,
+agent side: Sep 29 12:54:48Z (2.8.0 campaign) the OOM killer took an agent's
+own `python3` (uid 1003, hweagents-hwebench3 scope, 31 GB), not recorded at
+the time. No memory limit exists on either side (`hweagents.slice`
+MemoryMax=infinity; operator evals run unconfined).
+
+Effect on results: the killed process belongs to the eval of the slot that
+caused it, which fails cosim either way (no `ebreak` within the limits). The
+OOM killer picks by size, so a well-behaved eval or agent (well under 1 GB)
+is not the victim while a runaway is alive; the cost to other runs is about
+two minutes of heavy swapping (wall time; agent budgets and the 45 min formal
+ceiling are wall-clock). Kept for this campaign (contract file, no harness
+edits mid-campaign). For V3: stream-parse the trace (or cap trace ELFs far
+below 50 M cycles), bound concurrent trace processes, and give harness evals
+and `hweagents.slice` a MemoryMax so one runaway cannot push the host into
+swap.
