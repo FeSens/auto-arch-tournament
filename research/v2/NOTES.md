@@ -185,3 +185,11 @@ leaves cores idle. Kept for the whole campaign (all 18 runs under 2.8.0).
 Candidate for 2.9: `AAT_MACHINE_LOCK_DIR=off` under the runner, since
 `eval_slot` already caps harness evals host-wide; then three formal evals at -j6
 can overlap, so the timeout headroom must be re-measured before the change.
+
+Cost seen in the 2.8.2 campaign (amendment 11, two runners): Opus rep2's champion
+line needed 35 to 45 min per formal eval from round 10 on (four timeouts at the
+2700 s ceiling: r11s1, r11s2, r15s1 on `pc_fwd_ch0`/`insn_add_ch0`), and GPT-6.1
+Sol's round-10 slot 2 held the lock 45 min on `pc_fwd_ch0` (06:00-06:43Z Sep 30).
+In those windows the host sat at load 1 with every other run's slots queued in
+`flock` and no agent running. The Opus/Luna rep2 batch took 9.2 h against 6.6
+to 7.8 h for rep1. Same verdict as above: wall time only, fixed for this campaign.
