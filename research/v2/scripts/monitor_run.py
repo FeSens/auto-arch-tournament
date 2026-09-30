@@ -235,7 +235,10 @@ class Monitor:
         self.scope_seen = {}
 
     def alert(self, sev, run, what, detail, new):
-        key = f"{sev}|{run}|{what}|{detail[:160]}"
+        # A transcript and its archived copy (.tmp/agent-logs/impl.* or scribe.*)
+        # are the same event: key on the text, not the file it came from.
+        name, sep, body = detail.partition(": ")
+        key = f"{sev}|{run}|{what}|{(body if sep and name.endswith('.log') else detail)[:160]}"
         if key in self.seen:
             return
         self.seen.add(key)
