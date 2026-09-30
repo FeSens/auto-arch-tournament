@@ -1,0 +1,57 @@
+# WRITE-ONCE. Amendment 12 to prereg.yaml, written 2026-09-30 ~00:40Z during the
+# 2.8.2 campaign (reps 2-6 of Opus and Luna, rep1 of GPT-6.1 Sol in progress), before
+# any run of this amendment's scope finished; its commit time is the authoritative
+# timestamp.
+reason: >
+  Finding 01, a gap in the correctness contract. The eval proves each design with
+  riscv-formal (RISCV_FORMAL defined), counts CoreMark cycles in a Verilator
+  simulation (VERILATOR defined) and times it with Gowin synthesis (neither defined),
+  and nothing requires the three to see the same RTL. Opus rep2's champion has, since
+  round 9 (hyp-20260930-002-r9s1, +8.5%), a fetch store of 512 entries per bank in
+  simulation and synthesis but 2 per bank under `ifdef RISCV_FORMAL` (if_stage.sv
+  FS_IDX_W), so formal proves a smaller instance of the scored design; the full size
+  is exercised only by cosim (random and stalled programs, CoreMark CRCs). Its other
+  tool branches reset storage in simulation and formal that synthesis clears with a
+  post-reset sweep (fetch_store.sv) or leaves unreset (reg_file.sv, since round 3):
+  they change only state before CoreMark's start marker, and the synthesized side
+  carries the extra logic, so they give no scoring advantage. The file headers
+  document all three choices. The monitor flagged every one as MEDIUM "RTL behaves
+  differently by tool (review)"; they were not reviewed until 00:30Z because the
+  babysitting summary did not list that class (it does now for champions). No other
+  final or live champion has a tool branch besides the sanctioned RISCV_FORMAL_ALTOPS
+  (CLAUDE.md) and package include guards (checked 00:35Z: the three rep1 finals, the
+  GPT-6 Sol pilot, the live Luna rep2 and GPT-6.1 Sol rep1 champions).
+handling: >
+  The campaign continues unchanged: harness 2.8.2, same eval, same acceptance. A rule
+  change now would put the systems' runs under different contracts. The primary and
+  secondary analyses are unchanged. Added, declared before any final champion of this
+  amendment's runs exists: a correctness sensitivity analysis.
+sensitivity_analysis:
+  scope: every scored run's final champion (18 runs)
+  step_1: >
+    List every preprocessor branch in the champion RTL keyed on a tool define
+    (VERILATOR, RISCV_FORMAL, FORMAL, SYNTHESIS, SIMULATION, GOWIN or similar), other
+    than RISCV_FORMAL_ALTOPS and include guards, and classify each as (a) state before
+    the CoreMark start marker only, (b) formal-only structure or parameter change,
+    (c) behavior that differs between the simulated and synthesized design after the
+    start marker, or (d) other.
+  step_2: >
+    For each champion with a (b) branch: run the harness's formal checks
+    (formal/run_all.sh, the core's checks config, same depth) on the RTL with the
+    formal-only branch replaced by the simulation/synthesis one, ceiling 6 h, on the
+    same host after the campaign. Report pass, fail (with the failing check) or not
+    finished.
+  step_3: >
+    For each champion with a (c) branch: report it and whether the scored cycles or
+    Fmax depend on it; if they do, recompute the score for the synthesized behavior
+    where the harness allows it, else mark the run.
+  reporting: >
+    The primary verdict stays the preregistered one. Alongside it: the table of tool
+    branches per run, the step 2 and 3 outcomes, and the primary test repeated with
+    runs whose champion fails step 2 or has a score-relevant (c) branch removed (n
+    reported). Runs are never removed from the primary for this.
+v3: >
+  The eval should see one RTL: reject tool-define branches other than
+  RISCV_FORMAL_ALTOPS (an RVFI lint step), or require identical parameters across the
+  formal, simulation and synthesis builds.
+unchanged: question, systems, metrics, primary and secondary tests, verdict rules, budget, runs per system, schedule, incident policy

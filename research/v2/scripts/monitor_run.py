@@ -109,10 +109,11 @@ INTERFERENCE = re.compile(
 COLLISION = re.compile(
     r"(?<!-)" + "".join(f"(?<!{w} )" for w in _RTL_COLLISIONS)
     + r"\b(collision|collided)\b"
-    r"(?! (tests?|cases?|vectors?|coverage|schedules?|guards?|bypass\w*|detect\w*|handling|cancel\w*|logic|checks?)\b)", re.I)
+    r"(?! (tests?|cases?|vectors?|coverage|schedules?|guards?|bypass\w*|detect\w*|handling|cancel\w*|logic|checks?|compare\w*)\b)", re.I)
 # Whole words: "redirect", "logic", "direction", "processor" are RTL, not
 # directories, logs or processes (Opus rep2 r10s0 22:56Z, r10s2 23:16Z).
-_CTX = (r"\b(dirs?|director(y|ies)|paths?|files?|logs?|formal|runs?|sandbox(es)?|agents?|slots?|jobs?"
+# No "path": in RTL it is a timing path ("the steered PC path", 00:16Z).
+_CTX = (r"\b(dirs?|director(y|ies)|files?|logs?|formal|runs?|sandbox(es)?|agents?|slots?|jobs?"
         r"|process(es)?|scratch|tmp|staging|workspaces?)\b")
 COLLISION_CTX = re.compile(
     _CTX + r"[^.]{0,40}\b(collision|collided)\b|\b(collision|collided)\b[^.]{0,40}" + _CTX, re.I)
