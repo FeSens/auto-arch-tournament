@@ -202,3 +202,17 @@ cores/{target}/rtl/ and cores/{target}/test/test_*.py changes. An agent that wro
 self-check logs to cores/bench/*-local.log and hit its 30 min budget before deleting
 them got `sandbox_violation` (slot broken). Identical rules for all systems, so the
 campaign keeps them; for V3, state the gate's allowed set verbatim in the prompt.
+
+Shared formal work dirs within a run (2.8.2 campaign, Opus rep4 r6s1, Sep 30 ~15:02Z):
+every worktree's `formal/riscv-formal` is a symlink to the clone's one checkout, and
+`riscv-formal/cores/` carries no sticky bit while the agent account has rwx through a
+default ACL. Each `run_all.sh` call writes its own `cores/bench-w<random>/`, and the
+harness's own formal evals of this run's slots land in the same directory, so an
+agent can delete a sibling slot's or a harness eval's work dir. Not observed: an
+audit of every agent `rm` of a `riscv-formal/cores/` path (all finished and live
+runs, 28 commands) found no globs, the r6s1 deletion targeted its own run
+(`bench-wkUFnqir6`, created by its own `run_all.sh` at 15:00:43Z), and no harness
+`formal_failed` so far is a missing-file error. Reach is one run (one model's
+slots); other runs' clones are not writable by that account. Kept for this
+campaign; for V3, `chmod +t` on `riscv-formal/cores/` (only a dir's owner or the
+operator may delete it) or a private checkout for the harness's formal evals.
