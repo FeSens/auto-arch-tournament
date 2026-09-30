@@ -9,6 +9,8 @@ from pathlib import Path
 CLONES = Path("/srv/hwebench/clones")
 RESCORED = Path("research/runs/EXP-2026-09-28-v2-main/incident_08/holdout_rescored.jsonl")
 PILOTS = {"gpt-6-sol_xhigh-v2"}   # amendment 11: replaced by GPT-6.1 Sol, rep1 kept as a pilot
+# Row order: by model (primary comparison first, pilot next to its successor), then by rep.
+MODEL_ORDER = ["claude-opus-5_5_xhigh-v2", "gpt-6_1-sol_xhigh-v2", "gpt-6-sol_xhigh-v2", "gpt-6-luna_xhigh-v2"]
 # External reference (research/v2/reference_vexriscv): VexRiscv GenFullNoMmuMaxPerf in the
 # harness's Gowin flow (median of place options 0-2). Its CoreMark is Fmax x the published
 # 2.57 CoreMark/MHz, not a bench measurement; no held-out score (not run on the bench programs).
@@ -44,6 +46,12 @@ def per_round(log):
     return rounds
 
 
+def champion(log):
+    """The current champion's log entry: the last accepted one (the baseline counts)."""
+    imp = [e for e in log if e.get("outcome") == "improvement" and isinstance(e.get("fitness"), (int, float))]
+    return imp[-1] if imp else {}
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--results", type=Path, nargs="+", required=True,
@@ -71,27 +79,34 @@ def main():
             runs[k] = (None, entries(c / "cores/bench/experiments/log.jsonl"))
     nr = max([max(per_round(l) or {0: 0}) for _, l in runs.values()] or [0])
     head = ["run", "status"] + [f"r{i}" for i in range(1, nr + 1)] + \
-           ["final", "Fmax MHz", "held-out iter/s", "acc/rej/broken"]
+           ["final", "Fmax MHz", "LUT4", "held-out iter/s", "acc/rej/broken"]
     print("| " + " | ".join(head) + " |")
     print("|" + "---|" * len(head))
-    for (model, rep), (r, log) in sorted(runs.items(), key=lambda kv: (kv[0][1], kv[0][0])):
+    for (model, rep), (r, log) in sorted(runs.items(), key=lambda kv: (
+            MODEL_ORDER.index(kv[0][0]) if kv[0][0] in MODEL_ORDER else len(MODEL_ORDER), kv[0][0], kv[0][1])):
         pr = per_round(log)
         cnt = {o: sum(1 for e in log if e.get("outcome") == o) for o in ("improvement", "regression", "broken")}
         acc = cnt["improvement"] - (1 if log and log[0].get("id", "").startswith("baseline") else 0)
         status = (r or {}).get("status", "running")
         cells = [f"{model} rep{rep}" + (" (pilot)" if model in PILOTS else ""), status] + [f"{pr[i]:.1f}" if pr.get(i) is not None else "" for i in range(1, nr + 1)]
         final = (r or {}).get("final_fitness")
-        cells += [f"{final:.2f}" if final else "", 
-                  f"{(r or {}).get('holdout_fmax_mhz') or ''}",
+        champ = champion(log)
+        # Done: the held-out re-run Fmax. Running: the current champion's loop Fmax (dagger).
+        fmax = (r or {}).get("holdout_fmax_mhz") if r else (f"{champ['fmax_mhz']}\u2020" if champ.get("fmax_mhz") else "")
+        lut = f"{champ['lut4']:,}" + ("" if r else "\u2020") if champ.get("lut4") else ""
+        cells += [f"{final:.2f}" if final else "",
+                  f"{fmax or ''}", lut,
                   f"{(r or {}).get('holdout_geomean_iter_s'):.0f}" if (r or {}).get("holdout_geomean_iter_s") else "",
                   f"{acc}/{cnt['regression']}/{cnt['broken']}"]
         print("| " + " | ".join(cells) + " |")
     v = VEXRISCV
     print("| " + " | ".join(["VexRiscv (reference)", "external"] + [""] * nr + [
-        f"{v['fmax_mhz'] * v['coremark_per_mhz']:.1f}*", f"{v['fmax_mhz']}", "n/a", ""]) + " |")
+        f"{v['fmax_mhz'] * v['coremark_per_mhz']:.1f}*", f"{v['fmax_mhz']}", f"{v['lut4']:,}", "n/a", ""]) + " |")
     print(f"\n*VexRiscv GenFullNoMmuMaxPerf in the same Gowin flow: {v['fmax_mhz']} MHz, {v['lut4']:,} LUT4; "
           f"CoreMark = Fmax x published {v['coremark_per_mhz']} CoreMark/MHz (indicative, not a bench "
           f"measurement); not run on the held-out programs.")
+    print("\u2020 Running rep: the current champion's loop measurement (Fmax, LUT4). Done reps show the "
+          "held-out re-run Fmax and the final champion's LUT4.")
 
 
 if __name__ == "__main__":
