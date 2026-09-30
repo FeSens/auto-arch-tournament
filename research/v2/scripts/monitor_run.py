@@ -98,7 +98,9 @@ INTERFERENCE = re.compile(
     r"another (sandbox|agent|process|run|invocation|slot|job)\S*[^.]{0,80}"
     r"(delet|remov|wip|clobber|overwr|overw|chang|modif|kill|collid)"
     r"|(sibling|concurrent|parallel) (agent|sandbox|run|slot|formal)\S*[^.]{0,80}(delet|remov|wip|clobber|overwr|collid)"
-    r"|(director(y|ies)|dir|files?|worktree)[^.]{0,40}(disappear|vanish)"
+    # whole words: "the redirect chain disappeared from the worst paths" is timing
+    # talk (Opus rep3 r2s1 05:15Z)
+    r"|\b(director(y|ies)|dirs?|files?|worktrees?)\b[^.]{0,40}(disappear|vanish)"
     r"|shared (scratch|work|check|formal)\w*[^.]{0,20}(dir|director|collision)"
     r"|(delet|remov|wip|clobber|overwr|kill)\w*[^.]{0,40}\bby (another|a sibling|a concurrent|a parallel|other|some other) "
     r"(sandbox|agent|process|run|invocation|slot|job)"
