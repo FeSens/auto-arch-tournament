@@ -194,3 +194,11 @@ its 2700 s timeout (about 06:44Z).
 In those windows the host sat at load 1 with every other run's slots queued in
 `flock` and no agent running. The Opus/Luna rep2 batch took 9.2 h against 6.6
 to 7.8 h for rep1. Same verdict as above: wall time only, fixed for this campaign.
+
+Prompt vs gate wording (2.8.2 campaign, GPT-6.1 Sol rep1 r14s1, Sep 30 ~11:35Z): the
+implementation prompt forbids helper scripts "outside cores/{target}/" and asks for
+scratch under $TMPDIR or ./.tmp, while the sandbox gate accepts only
+cores/{target}/rtl/ and cores/{target}/test/test_*.py changes. An agent that wrote
+self-check logs to cores/bench/*-local.log and hit its 30 min budget before deleting
+them got `sandbox_violation` (slot broken). Identical rules for all systems, so the
+campaign keeps them; for V3, state the gate's allowed set verbatim in the prompt.
