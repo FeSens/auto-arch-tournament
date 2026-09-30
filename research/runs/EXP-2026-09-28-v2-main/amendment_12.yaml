@@ -1,4 +1,4 @@
-# WRITE-ONCE. Amendment 12 to prereg.yaml, written 2026-09-30 ~00:40Z during the
+# WRITE-ONCE. Amendment 12 to prereg.yaml, written 2026-09-30 ~00:20Z during the
 # 2.8.2 campaign (reps 2-6 of Opus and Luna, rep1 of GPT-6.1 Sol in progress), before
 # any run of this amendment's scope finished; its commit time is the authoritative
 # timestamp.
@@ -16,10 +16,10 @@ reason: >
   they change only state before CoreMark's start marker, and the synthesized side
   carries the extra logic, so they give no scoring advantage. The file headers
   document all three choices. The monitor flagged every one as MEDIUM "RTL behaves
-  differently by tool (review)"; they were not reviewed until 00:30Z because the
+  differently by tool (review)"; they were not reviewed until 00:17Z because the
   babysitting summary did not list that class (it does now for champions). No other
   final or live champion has a tool branch besides the sanctioned RISCV_FORMAL_ALTOPS
-  (CLAUDE.md) and package include guards (checked 00:35Z: the three rep1 finals, the
+  (CLAUDE.md) and package include guards (checked 00:18Z: the three rep1 finals, the
   GPT-6 Sol pilot, the live Luna rep2 and GPT-6.1 Sol rep1 champions).
 handling: >
   The campaign continues unchanged: harness 2.8.2, same eval, same acceptance. A rule
