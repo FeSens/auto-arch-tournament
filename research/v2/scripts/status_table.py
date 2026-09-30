@@ -9,6 +9,10 @@ from pathlib import Path
 CLONES = Path("/srv/hwebench/clones")
 RESCORED = Path("research/runs/EXP-2026-09-28-v2-main/incident_08/holdout_rescored.jsonl")
 PILOTS = {"gpt-6-sol_xhigh-v2"}   # amendment 11: replaced by GPT-6.1 Sol, rep1 kept as a pilot
+# External reference (research/v2/reference_vexriscv): VexRiscv GenFullNoMmuMaxPerf in the
+# harness's Gowin flow (median of place options 0-2). Its CoreMark is Fmax x the published
+# 2.57 CoreMark/MHz, not a bench measurement; no held-out score (not run on the bench programs).
+VEXRISCV = {"fmax_mhz": 87.764, "lut4": 2997, "coremark_per_mhz": 2.57}
 
 
 def entries(path: Path):
@@ -82,6 +86,12 @@ def main():
                   f"{(r or {}).get('holdout_geomean_iter_s'):.0f}" if (r or {}).get("holdout_geomean_iter_s") else "",
                   f"{acc}/{cnt['regression']}/{cnt['broken']}"]
         print("| " + " | ".join(cells) + " |")
+    v = VEXRISCV
+    print("| " + " | ".join(["VexRiscv (reference)", "external"] + [""] * nr + [
+        f"{v['fmax_mhz'] * v['coremark_per_mhz']:.1f}*", f"{v['fmax_mhz']}", "n/a", ""]) + " |")
+    print(f"\n*VexRiscv GenFullNoMmuMaxPerf in the same Gowin flow: {v['fmax_mhz']} MHz, {v['lut4']:,} LUT4; "
+          f"CoreMark = Fmax x published {v['coremark_per_mhz']} CoreMark/MHz (indicative, not a bench "
+          f"measurement); not run on the held-out programs.")
 
 
 if __name__ == "__main__":
