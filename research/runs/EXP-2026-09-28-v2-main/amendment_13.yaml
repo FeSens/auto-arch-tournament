@@ -1,0 +1,92 @@
+# WRITE-ONCE. Amendment 13 to prereg.yaml, written 2026-10-01 (about 03:00Z) while the
+# main campaign runs (Opus and Luna rep5, GPT-6.1 Sol rep2) and before any run of the
+# systems it adds started; its commit time is the authoritative timestamp.
+reason: >
+  The operator asked to extend the V2 ranking with three more systems, each at xhigh:
+  GPT-6 Astra, GPT-5.5 and Claude Sonnet 5.5 (2026-09-30), and to start them as the
+  main campaign frees agent accounts (2026-10-01: "when luna finish run 6 finish,
+  start astra; when opus 5.5 finish, start sonnet 5.5"). Added before any of their
+  data, so the primary and secondary analyses of the main campaign are unaffected.
+harness: >
+  Unchanged: HARNESS_VERSION 2.8.2, fixture tag bench-v2.8.2, N=15, K=3, budgets,
+  prompts, evals, held-out scoring, acceptance margin, incident policy. 6 reps per
+  added system. The only files that change are tools/bench/models-v2.yaml (three new
+  entries; the running runners read it once at start) and one new CLI directory.
+systems:
+  - name: gpt-6-astra_xhigh-v2
+    cli: Codex CLI 0.156.1 (the pinned copy in /srv/hwebench/bin, the same as Luna)
+    model: gpt-6-astra
+    effort: xhigh
+    checked: >
+      Listed by `codex debug models` under 0.156.1; answered one prompt through it as the
+      operator (2026-10-01), and the Codex session records model gpt-6-astra, effort xhigh.
+  - name: claude-sonnet-5-5_xhigh-v2
+    cli: >
+      Claude Code 2.1.284, pinned in /srv/hwebench/cli/claude-2.1.284 (a root-owned copy of
+      the operator's 2.1.284 binary, sha256 5cd90aabd83f8a15136c35aa37bb1d92b348993573316643dc3fe4e04afbf88f;
+      models yaml cli_dir, the 2.8.2 mechanism amendment 11 added for GPT-6.1 Sol).
+    model: claude-sonnet-5-5
+    effort: xhigh
+    why_not_the_pinned_cli: >
+      The pinned 2.1.283 answers for claude-sonnet-5-5 but does not know the model
+      ("[claude-code:unrecognized_model]"). A local forwarding proxy that recorded only the
+      request-body fields (never headers) showed what each CLI sends to /v1/messages:
+      2.1.283 with Opus 5.5 and 2.1.284 with Sonnet 5.5 both send thinking adaptive,
+      output_config.effort xhigh, max_tokens 128000 and the per-turn-control beta, while
+      2.1.283 with Sonnet 5.5 sends max_tokens 32000 and no per-turn-control beta. 2.1.284
+      therefore gives Sonnet the request settings the pinned CLI gives Opus. The CLI
+      version differs from Opus's (2.1.283) and is recorded in every row.
+  - name: gpt-5_5_xhigh-v2
+    cli: Codex CLI 0.156.1 (pinned, as Luna and Astra)
+    model: gpt-5.5
+    effort: xhigh
+    checked: listed by `codex debug models` under 0.156.1; answered one prompt at xhigh (session effort xhigh)
+schedule: >
+  Each added system runs its 6 reps one after another on one account, in its own runner
+  from the same checkout and tag, and starts when the account it takes is free.
+  GPT-6 Astra: on the account Luna's rep6 frees (runner C, tmux main-c, results
+  bench/v2/results-astra.jsonl, log bench/v2/runner-astra.log). Sonnet 5.5: on the account
+  Opus 5.5's rep6 frees, after smoke18 (runner D, tmux main-d, results
+  bench/v2/results-sonnet55.jsonl, log bench/v2/runner-sonnet55.log). Both are started by
+  research/v2/scripts/extension_launcher.py (tmux ext-launch, log
+  bench/v2/ext-launcher.log), which waits until the predecessor's rep6 row is done and
+  runner A has released the account (release_agent kills every process of the account),
+  and starts nothing if that rep6 did not end done (its rerun comes first). GPT-5.5: on
+  hwebench3 after GPT-6.1 Sol's rep6; its start waits for the operator's confirmation
+  and is recorded in this file's launched field. Three runs stay in progress at once,
+  as in amendment 11.
+smoke18: >
+  Sonnet 5.5 is the first system on a new Claude CLI directory, so it gets a one-round
+  smoke (N=1, K=3, results bench/v2/smoke-ext/results-smoke-sonnet55.jsonl, unscored) on
+  its account before its rep1. Its reps start only if the smoke row is done, harness
+  2.8.2, sandbox probe confined, claude_cli 2.1.284, cli_dir cli/claude-2.1.284, and
+  held-out scored. Astra runs the CLI and harness path Luna has run 30-odd times, so it
+  starts without a smoke and its first round is watched.
+not_matched: >
+  The added systems run after the main ones (from about 2026-10-01 to 10-04), with
+  different concurrent partners, at different times of day, and against provider model
+  versions and quotas that may have changed. No main system is rerun alongside them as a
+  drift anchor (no account is free for one); comparisons between an added system and a
+  main system carry this period difference and are reported with it. GPT-6 Astra and
+  GPT-5.5 share the Codex subscription quota with GPT-6.1 Sol; Sonnet 5.5 shares the
+  Claude quota with Opus's rep6 while that runs. Quota pauses rerun the interrupted
+  attempt (amendment 01 policy).
+analysis:
+  primary: unchanged (Opus 5.5 vs GPT-6.1 Sol, amendment 11)
+  secondary: unchanged (Luna vs GPT-6.1 Sol, Luna vs Opus, Holm across the two, amendment 11)
+  extension: >
+    Every pairwise comparison between the systems with 6 scored reps in which at least one
+    is an added system (12 pairs if all three added systems complete, 7 if GPT-5.5 is
+    not run; the unscored pilot GPT-6 Sol is not included). Each: Welch two-sided on ln(held-out score), ratio of geometric means
+    with its 95% CI and the 10,000-sample bootstrap CI, as in prereg.yaml. Holm-adjusted
+    across the whole extension family at family alpha 0.05; the same verdict wording
+    ("ranks higher" / "not distinguishable at n=6"). Descriptive: all scored systems
+    ordered by geometric-mean held-out score, with bootstrap rank intervals.
+  verdict_rules: unchanged
+results_files: >
+  bench/v2/results-astra.jsonl, bench/v2/results-sonnet55.jsonl and, if started,
+  bench/v2/results-gpt55.jsonl; rep dirs under bench/v2/<model>/rep<N>.
+unchanged: question, metrics, tests and verdict rules of the main campaign, budget (N=15, K=3), runs per system (6), incident policy
+launched: >
+  To be filled in afterwards with each runner's start time, account and first probe
+  verdict.

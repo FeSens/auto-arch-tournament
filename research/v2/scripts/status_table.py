@@ -10,7 +10,9 @@ CLONES = Path("/srv/hwebench/clones")
 RESCORED = Path("research/runs/EXP-2026-09-28-v2-main/incident_08/holdout_rescored.jsonl")
 PILOTS = {"gpt-6-sol_xhigh-v2"}   # amendment 11: replaced by GPT-6.1 Sol, rep1 kept as a pilot
 # Row order: by model (primary comparison first, pilot next to its successor), then by rep.
-MODEL_ORDER = ["claude-opus-5_5_xhigh-v2", "gpt-6_1-sol_xhigh-v2", "gpt-6-sol_xhigh-v2", "gpt-6-luna_xhigh-v2"]
+MODEL_ORDER = ["claude-opus-5_5_xhigh-v2", "gpt-6_1-sol_xhigh-v2", "gpt-6-sol_xhigh-v2", "gpt-6-luna_xhigh-v2",
+               # amendment 13 extension systems
+               "claude-sonnet-5-5_xhigh-v2", "gpt-6-astra_xhigh-v2", "gpt-5_5_xhigh-v2"]
 # External reference (research/v2/reference_vexriscv): VexRiscv GenFullNoMmuMaxPerf in the
 # harness's Gowin flow (median of place options 0-2). Its CoreMark is Fmax x the published
 # 2.57 CoreMark/MHz, not a bench measurement; no held-out score (not run on the bench programs).

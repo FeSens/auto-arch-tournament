@@ -5,6 +5,10 @@
 # Amendment 11: GPT-6.1 Sol replaces GPT-6 Sol (its rep1, gpt-6-sol_xhigh-v2,
 # stays an unscored pilot); it needs Codex 0.159.0, the pinned 0.156.1 is
 # refused for it, so it runs its own CLI. Luna stays on the pinned CLI.
+# Amendment 13 (extension systems): GPT-6 Astra and GPT-5.5 run on the pinned
+# Codex 0.156.1; Sonnet 5.5 runs Claude Code 2.1.284, because the pinned 2.1.283
+# does not know claude-sonnet-5-5 and sends it 32,000 max output tokens instead
+# of the 128,000 it sends Opus 5.5 (2.1.284 sends Sonnet what 2.1.283 sends Opus).
 models:
   - name: claude-opus-5_5_xhigh-v2
     provider: claude
@@ -20,5 +24,21 @@ models:
   - name: gpt-6-luna_xhigh-v2
     provider: codex
     model: gpt-6-luna
+    variant: xhigh
+    oauth: true
+  - name: gpt-6-astra_xhigh-v2
+    provider: codex
+    model: gpt-6-astra
+    variant: xhigh
+    oauth: true
+  - name: claude-sonnet-5-5_xhigh-v2
+    provider: claude
+    model: claude-sonnet-5-5
+    variant: xhigh
+    oauth: true
+    cli_dir: cli/claude-2.1.284
+  - name: gpt-5_5_xhigh-v2
+    provider: codex
+    model: gpt-5.5
     variant: xhigh
     oauth: true
