@@ -101,3 +101,9 @@ launched: >
   probe confined. Sonnet 5.5: smoke18 started 2026-10-01T08:45:40Z on hwebench2 (Opus's
   rep6 ran on hwebench2 and ended done at 08:44:34Z), cli/claude-2.1.284, probe confined;
   agents run /srv/hwebench/cli/claude-2.1.284/claude with claude-sonnet-5-5 at effort xhigh.
+  The smoke row (bench/v2/smoke-ext/results-smoke-sonnet55.jsonl, unscored) passed every
+  smoke18 check: done, harness 2.8.2, probe confined, claude_cli 2.1.284, cli_dir
+  cli/claude-2.1.284, held-out scored (CoreMark 105.21, held-out 2683 iter/s, 5 kernels
+  validated). Sonnet 5.5 reps: launched 2026-10-01T09:06:08Z by the launcher in tmux
+  main-d on hwebench2, runner D; rep1 starts from a fresh clone (fixture root only, created
+  09:06:09Z; the smoke's artifacts stay in bench/v2/smoke-ext); rep1 sandbox probe confined.
