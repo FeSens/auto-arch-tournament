@@ -89,4 +89,9 @@ results_files: >
 unchanged: question, metrics, tests and verdict rules of the main campaign, budget (N=15, K=3), runs per system (6), incident policy
 launched: >
   To be filled in afterwards with each runner's start time, account and first probe
-  verdict.
+  verdict. GPT-5.5 start confirmed by the operator at about 01:33Z on 2026-10-01 ("GPT-5.5
+  start when sol fnishes its 6 reps"), before any extension run started: runner E, tmux
+  main-e, on the account GPT-6.1 Sol's rep6 frees (hwebench3, runner B), results
+  bench/v2/results-gpt55.jsonl, log bench/v2/runner-gpt55.log, started by the same
+  launcher (restarted 01:35Z with this entry). GPT-5.5 reps after the other added
+  systems finish run with fewer concurrent runs; each row's start and end time is reported.

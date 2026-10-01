@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""Start the amendment-13 extension runs as runner A frees its accounts.
+"""Start the amendment-13 extension runs as the main runners free their accounts.
 
 GPT-6 Astra takes the account that Luna's rep6 frees; Sonnet 5.5 the one
 that Opus 5.5's rep6 frees, after a one-round smoke because its CLI dir is
-new (amendment 11 did the same for GPT-6.1 Sol's). A system starts only when
-its predecessor's rep6 row is `done` and runner A has released the account:
+new (amendment 11 did the same for GPT-6.1 Sol's); GPT-5.5 the one GPT-6.1
+Sol's rep6 frees (runner B). A system starts only when its predecessor's
+rep6 row is `done` and that runner has released the account:
 release_agent kills every process of the account (pkill -u), so a runner
 started earlier on it would lose its agents. Anything unexpected (a rep6 that
 is not done, a smoke that fails a check, a tmux session that already exists)
@@ -28,8 +29,8 @@ from pathlib import Path
 
 REPO = Path("/home/bench/auto-arch-tournament")
 V2 = REPO / "bench" / "v2"
-RESULTS_A = V2 / "results-opus-luna.jsonl"
-RUNNER_A_LOG = V2 / "runner-opus-luna.log"
+RESULTS_A, RUNNER_A_LOG = V2 / "results-opus-luna.jsonl", V2 / "runner-opus-luna.log"
+RESULTS_B, RUNNER_B_LOG = V2 / "results-sol61.jsonl", V2 / "runner-sol61.log"
 LOG = V2 / "ext-launcher.log"
 SMOKE_DIR = V2 / "smoke-ext"
 REF = "bench-v2.8.2"
@@ -37,10 +38,16 @@ LAST_REP = 6
 
 PLAN = [
     {"after": "gpt-6-luna_xhigh-v2", "model": "gpt-6-astra_xhigh-v2",
+     "results": RESULTS_A, "runner_log": RUNNER_A_LOG,
      "tag": "astra", "session": "main-c", "smoke": None},
     {"after": "claude-opus-5_5_xhigh-v2", "model": "claude-sonnet-5-5_xhigh-v2",
+     "results": RESULTS_A, "runner_log": RUNNER_A_LOG,
      "tag": "sonnet55", "session": "main-d",
      "smoke": {"claude_cli": "2.1.284", "cli_dir": "cli/claude-2.1.284"}},
+    # Operator, 2026-10-01: "GPT-5.5 start when sol fnishes its 6 reps".
+    {"after": "gpt-6_1-sol_xhigh-v2", "model": "gpt-5_5_xhigh-v2",
+     "results": RESULTS_B, "runner_log": RUNNER_B_LOG,
+     "tag": "gpt55", "session": "main-e", "smoke": None},
 ]
 
 _lock = threading.Lock()
@@ -75,13 +82,13 @@ def account_idle(acct: str) -> bool:
     return subprocess.run(["pgrep", "-u", acct], capture_output=True).returncode == 1
 
 
-def released(row: dict) -> bool:
-    """runner A printed the run's end, removed its temp base (the last step of
+def released(row: dict, runner_log: Path) -> bool:
+    """The runner printed the run's end, removed its temp base (the last step of
     release_agent) and the account has no process left."""
     slug = f"{row['model']}-rep{row['rep']}"
     tmp = Path("/srv/hwebench/tmp") / hashlib.sha1(slug.encode()).hexdigest()[:8]
     # _finalize's "=== <slug> <status> in <N>s", not the "=== <slug> starting at" line.
-    ended = re.search(rf"=== {re.escape(slug)} \w+ in \d+s", RUNNER_A_LOG.read_text(errors="replace"))
+    ended = re.search(rf"=== {re.escape(slug)} \w+ in \d+s", runner_log.read_text(errors="replace"))
     return ended and not tmp.exists() and account_idle(row["agent_user"])
 
 
@@ -129,15 +136,15 @@ def launch(p: dict) -> None:
         return
     log(f"{p['tag']}: waiting for {p['after']} rep{LAST_REP} to finish and free its account")
     while True:
-        row = last_row(RESULTS_A, p["after"], LAST_REP)
+        row = last_row(p["results"], p["after"], LAST_REP)
         if row is not None:
             if row.get("status") != "done":
                 log(f"ALERT {p['tag']}: {p['after']} rep{LAST_REP} ended with status "
                     f"{row.get('status')!r}; its rerun comes first, not starting {p['model']}")
                 return
-            if released(row):
+            if released(row, p["runner_log"]):
                 time.sleep(30)
-                if released(row):
+                if released(row, p["runner_log"]):
                     break
         time.sleep(60)
     acct = row["agent_user"]
