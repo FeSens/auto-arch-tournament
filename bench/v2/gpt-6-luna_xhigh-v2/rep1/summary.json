@@ -1,0 +1,51 @@
+{
+  "model": "gpt-6-luna_xhigh-v2",
+  "rep": 1,
+  "started_at": "2026-09-29T10:14:39+00:00",
+  "ended_at": null,
+  "wall_clock_sec": null,
+  "iterations": 46,
+  "accepted": 4,
+  "rejected": 38,
+  "broken": 2,
+  "final_fitness": 119.44,
+  "baseline_fitness": 12.12,
+  "best_fitness": 119.44,
+  "best_round": 19,
+  "delta_pct": 885.4785478547856,
+  "total_tokens_in": 100934117,
+  "total_tokens_out": 1776990,
+  "total_cost_usd": 0.0,
+  "orchestrator_exit": 0,
+  "status": "done",
+  "notes": "",
+  "fixture_ref": "bench-v2.8",
+  "fixture_commit": "952fdcd9fc5950b15e10e79437ec0ba2875ec27b",
+  "runner_commit": "952fdcd9fc5950b15e10e79437ec0ba2875ec27b",
+  "runner_dirty": false,
+  "harness_version": "2.8.0",
+  "agent_user": "hwebench3",
+  "claude_cli": "2.1.283",
+  "codex_cli": "0.156.1",
+  "sandbox_probe": {
+    "ok": true,
+    "reasons": [],
+    "observed": {
+      "pidns": "pid:[4026532887]",
+      "mntns": "mnt:[4026532885]",
+      "network": "blocked",
+      "account_home": "visible"
+    },
+    "attempt": 1
+  },
+  "broken_by_class": {
+    "hypothesis_gen_failed": 1,
+    "formal_failed": 1
+  },
+  "best_lut4": 3236,
+  "best_ff": 697,
+  "best_fmax_mhz": 50.987,
+  "best_iterations": 10,
+  "best_cycles": 4268850,
+  "best_ipc_coremark": 2e-06
+}

@@ -1,0 +1,18 @@
+{
+  "iterations": 46,
+  "accepted": 8,
+  "rejected": 38,
+  "broken": 0,
+  "broken_by_class": {},
+  "baseline_fitness": 12.12,
+  "final_fitness": 174.44,
+  "best_fitness": 181.72,
+  "best_round": 45,
+  "delta_pct": 1339.2739273927393,
+  "best_lut4": 5361,
+  "best_ff": 1334,
+  "best_fmax_mhz": 73.102,
+  "best_iterations": 10,
+  "best_cycles": 4022833,
+  "best_ipc_coremark": 2e-06
+}

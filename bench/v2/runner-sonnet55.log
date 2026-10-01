@@ -1,0 +1,24 @@
+[preflight] toolchain:
+  verilator            /opt/hwe-toolchain/oss-cad-suite/bin/verilator
+  yosys                /opt/hwe-toolchain/oss-cad-suite/bin/yosys
+  sby                  /opt/hwe-toolchain/oss-cad-suite/bin/sby
+  bitwuzla             /opt/hwe-toolchain/oss-cad-suite/bin/bitwuzla
+  gw_sh                /opt/gowin/IDE/bin/gw_sh
+  GowinSynthesis       /opt/gowin/IDE/bin/GowinSynthesis
+[bench] 6 job(s) queued (0 already done)
+        - claude-sonnet-5-5_xhigh-v2-rep1  ->  claude:claude-sonnet-5-5  (cli cli/claude-2.1.284)
+        - claude-sonnet-5-5_xhigh-v2-rep2  ->  claude:claude-sonnet-5-5  (cli cli/claude-2.1.284)
+        - claude-sonnet-5-5_xhigh-v2-rep3  ->  claude:claude-sonnet-5-5  (cli cli/claude-2.1.284)
+        - claude-sonnet-5-5_xhigh-v2-rep4  ->  claude:claude-sonnet-5-5  (cli cli/claude-2.1.284)
+        - claude-sonnet-5-5_xhigh-v2-rep5  ->  claude:claude-sonnet-5-5  (cli cli/claude-2.1.284)
+        - claude-sonnet-5-5_xhigh-v2-rep6  ->  claude:claude-sonnet-5-5  (cli cli/claude-2.1.284)
+[bench] config: N=15 K=3 reps=6 parallel=1
+[bench] clone base: /srv/hwebench/clones
+[bench] results: /home/bench/auto-arch-tournament/bench/v2/results-sonnet55.jsonl
+
+[bench] === claude-sonnet-5-5_xhigh-v2-rep1 starting at 2026-10-01T09:06:09+00:00 ===
+[bench] claude-sonnet-5-5_xhigh-v2-rep1 sandbox probe: confined
+[bench] === claude-sonnet-5-5_xhigh-v2-rep1 done in 24276s, fitness=225.9, cost=$0.00 ===
+
+[bench] === claude-sonnet-5-5_xhigh-v2-rep2 starting at 2026-10-01T15:50:45+00:00 ===
+[bench] claude-sonnet-5-5_xhigh-v2-rep2 sandbox probe: confined

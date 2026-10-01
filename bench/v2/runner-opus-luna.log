@@ -1,0 +1,68 @@
+[preflight] toolchain:
+  verilator            /opt/hwe-toolchain/oss-cad-suite/bin/verilator
+  yosys                /opt/hwe-toolchain/oss-cad-suite/bin/yosys
+  sby                  /opt/hwe-toolchain/oss-cad-suite/bin/sby
+  bitwuzla             /opt/hwe-toolchain/oss-cad-suite/bin/bitwuzla
+  gw_sh                /opt/gowin/IDE/bin/gw_sh
+  GowinSynthesis       /opt/gowin/IDE/bin/GowinSynthesis
+[bench] 10 job(s) queued (0 already done)
+        - claude-opus-5_5_xhigh-v2-rep2  ->  claude:claude-opus-5-5
+        - claude-opus-5_5_xhigh-v2-rep3  ->  claude:claude-opus-5-5
+        - claude-opus-5_5_xhigh-v2-rep4  ->  claude:claude-opus-5-5
+        - claude-opus-5_5_xhigh-v2-rep5  ->  claude:claude-opus-5-5
+        - claude-opus-5_5_xhigh-v2-rep6  ->  claude:claude-opus-5-5
+        - gpt-6-luna_xhigh-v2-rep2  ->  codex:gpt-6-luna
+        - gpt-6-luna_xhigh-v2-rep3  ->  codex:gpt-6-luna
+        - gpt-6-luna_xhigh-v2-rep4  ->  codex:gpt-6-luna
+        - gpt-6-luna_xhigh-v2-rep5  ->  codex:gpt-6-luna
+        - gpt-6-luna_xhigh-v2-rep6  ->  codex:gpt-6-luna
+[bench] config: N=15 K=3 reps=6 parallel=1
+[bench] clone base: /srv/hwebench/clones
+[bench] results: /home/bench/auto-arch-tournament/bench/v2/results-opus-luna.jsonl
+[bench] batch: gpt-6-luna_xhigh-v2-rep2, claude-opus-5_5_xhigh-v2-rep2
+
+[bench] === gpt-6-luna_xhigh-v2-rep2 starting at 2026-09-29T19:39:06+00:00 ===
+
+[bench] === claude-opus-5_5_xhigh-v2-rep2 starting at 2026-09-29T19:39:11+00:00 ===
+[bench] gpt-6-luna_xhigh-v2-rep2 sandbox probe: confined
+[bench] claude-opus-5_5_xhigh-v2-rep2 sandbox probe: confined
+[bench] === gpt-6-luna_xhigh-v2-rep2 done in 26467s, fitness=145.89, cost=$0.00 ===
+[bench] === claude-opus-5_5_xhigh-v2-rep2 done in 33111s, fitness=287.27, cost=$0.00 ===
+[bench] batch: claude-opus-5_5_xhigh-v2-rep3, gpt-6-luna_xhigh-v2-rep3
+
+[bench] === claude-opus-5_5_xhigh-v2-rep3 starting at 2026-09-30T04:51:03+00:00 ===
+
+[bench] === gpt-6-luna_xhigh-v2-rep3 starting at 2026-09-30T04:51:08+00:00 ===
+[bench] claude-opus-5_5_xhigh-v2-rep3 sandbox probe: confined
+[bench] gpt-6-luna_xhigh-v2-rep3 sandbox probe: confined
+[bench] === gpt-6-luna_xhigh-v2-rep3 done in 28090s, fitness=158.07, cost=$0.00 ===
+[bench] === claude-opus-5_5_xhigh-v2-rep3 done in 29884s, fitness=251.74, cost=$0.00 ===
+[bench] batch: gpt-6-luna_xhigh-v2-rep4, claude-opus-5_5_xhigh-v2-rep4
+
+[bench] === gpt-6-luna_xhigh-v2-rep4 starting at 2026-09-30T13:09:08+00:00 ===
+
+[bench] === claude-opus-5_5_xhigh-v2-rep4 starting at 2026-09-30T13:09:13+00:00 ===
+[bench] claude-opus-5_5_xhigh-v2-rep4 sandbox probe: confined
+[bench] gpt-6-luna_xhigh-v2-rep4 sandbox probe: confined
+[bench] === claude-opus-5_5_xhigh-v2-rep4 done in 19962s, fitness=247.3, cost=$0.00 ===
+[bench] === gpt-6-luna_xhigh-v2-rep4 done in 22169s, fitness=130.81, cost=$0.00 ===
+[bench] batch: claude-opus-5_5_xhigh-v2-rep5, gpt-6-luna_xhigh-v2-rep5
+
+[bench] === claude-opus-5_5_xhigh-v2-rep5 starting at 2026-09-30T19:18:38+00:00 ===
+
+[bench] === gpt-6-luna_xhigh-v2-rep5 starting at 2026-09-30T19:18:43+00:00 ===
+[bench] claude-opus-5_5_xhigh-v2-rep5 sandbox probe: confined
+[bench] gpt-6-luna_xhigh-v2-rep5 sandbox probe: confined
+[bench] === claude-opus-5_5_xhigh-v2-rep5 done in 25243s, fitness=292.99, cost=$0.00 ===
+[bench] === gpt-6-luna_xhigh-v2-rep5 done in 27387s, fitness=165.41, cost=$0.00 ===
+[bench] batch: gpt-6-luna_xhigh-v2-rep6, claude-opus-5_5_xhigh-v2-rep6
+
+[bench] === gpt-6-luna_xhigh-v2-rep6 starting at 2026-10-01T02:55:10+00:00 ===
+
+[bench] === claude-opus-5_5_xhigh-v2-rep6 starting at 2026-10-01T02:55:15+00:00 ===
+[bench] gpt-6-luna_xhigh-v2-rep6 sandbox probe: confined
+[bench] claude-opus-5_5_xhigh-v2-rep6 sandbox probe: confined
+[bench] === claude-opus-5_5_xhigh-v2-rep6 done in 20958s, fitness=296.83, cost=$0.00 ===
+[bench] === gpt-6-luna_xhigh-v2-rep6 done in 21636s, fitness=112.96, cost=$0.00 ===
+
+[bench] matrix done — 10/10 successful

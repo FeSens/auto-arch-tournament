@@ -1,0 +1,17 @@
+{
+ "ok": true,
+ "provider": "claude",
+ "reasons": [],
+ "observed": {
+  "pidns": "pid:[4026533246]",
+  "mntns": "mnt:[4026533245]",
+  "network": "blocked",
+  "account_home": "hidden"
+ },
+ "host": {
+  "pidns": "pid:[4026531836]",
+  "mntns": "mnt:[4026531832]"
+ },
+ "agent_rc": 0,
+ "timed_out": false
+}

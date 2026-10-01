@@ -1,0 +1,14 @@
+2026-10-01T01:01:18+00:00 extension launcher started: gpt-6-astra_xhigh-v2 after gpt-6-luna_xhigh-v2 rep6, claude-sonnet-5-5_xhigh-v2 after claude-opus-5_5_xhigh-v2 rep6
+2026-10-01T01:01:18+00:00 astra: waiting for gpt-6-luna_xhigh-v2 rep6 to finish and free its account
+2026-10-01T01:01:18+00:00 sonnet55: waiting for claude-opus-5_5_xhigh-v2 rep6 to finish and free its account
+2026-10-01T01:35:10+00:00 extension launcher started: gpt-6-astra_xhigh-v2 after gpt-6-luna_xhigh-v2 rep6, claude-sonnet-5-5_xhigh-v2 after claude-opus-5_5_xhigh-v2 rep6, gpt-5_5_xhigh-v2 after gpt-6_1-sol_xhigh-v2 rep6
+2026-10-01T01:35:10+00:00 astra: waiting for gpt-6-luna_xhigh-v2 rep6 to finish and free its account
+2026-10-01T01:35:10+00:00 gpt55: waiting for gpt-6_1-sol_xhigh-v2 rep6 to finish and free its account
+2026-10-01T01:35:10+00:00 sonnet55: waiting for claude-opus-5_5_xhigh-v2 rep6 to finish and free its account
+2026-10-01T08:45:40+00:00 sonnet55: claude-opus-5_5_xhigh-v2 rep6 done (296.83), hwebench2 released and idle
+2026-10-01T08:45:40+00:00 sonnet55: smoke (N=1, K=3) on hwebench2: python3 -m tools.bench.runner --models tools/bench/models-v2.yaml --ref bench-v2.8.2 --agent-user hwebench2 --only claude-sonnet-5-5_xhigh-v2 --reps 1 --n 1 --k 3 --results-jsonl /home/bench/auto-arch-tournament/bench/v2/smoke-ext/results-smoke-sonnet55.jsonl --results-dir /home/bench/auto-arch-tournament/bench/v2/smoke-ext
+2026-10-01T08:56:40+00:00 astra: gpt-6-luna_xhigh-v2 rep6 done (112.96), hwebench released and idle
+2026-10-01T08:56:40+00:00 astra: launched in tmux main-c on hwebench: python3 -m tools.bench.runner --models tools/bench/models-v2.yaml --ref bench-v2.8.2 --agent-user hwebench --only gpt-6-astra_xhigh-v2 --reps 6 --n 15 --k 3 --results-jsonl /home/bench/auto-arch-tournament/bench/v2/results-astra.jsonl --results-dir /home/bench/auto-arch-tournament/bench/v2
+2026-10-01T09:06:08+00:00 sonnet55: smoke runner exit 0
+2026-10-01T09:06:08+00:00 sonnet55: smoke passed (CoreMark 105.21, held-out 2683.1 iter/s, claude_cli 2.1.284)
+2026-10-01T09:06:08+00:00 sonnet55: launched in tmux main-d on hwebench2: python3 -m tools.bench.runner --models tools/bench/models-v2.yaml --ref bench-v2.8.2 --agent-user hwebench2 --only claude-sonnet-5-5_xhigh-v2 --reps 6 --n 15 --k 3 --results-jsonl /home/bench/auto-arch-tournament/bench/v2/results-sonnet55.jsonl --results-dir /home/bench/auto-arch-tournament/bench/v2
