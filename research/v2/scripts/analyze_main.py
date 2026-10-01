@@ -17,8 +17,16 @@ listed. Runs are never dropped for being low.
 Amendment 11: GPT-6.1 Sol replaces GPT-6 Sol as "Sol" in every test; GPT-6
 Sol's one run (rep1) is listed as an unscored pilot.
 
+Amendment 13 adds GPT-6 Astra, Sonnet 5.5 and GPT-5.5. Extension family: every
+pair of systems with 6 scored runs in which at least one is an added system,
+the same Welch test and bootstrap, Holm-adjusted across the whole family at
+0.05. Descriptive: every system with at least 2 scored runs ordered by
+geometric-mean held-out score, with 95% bootstrap rank intervals. The primary
+and secondary tests are unchanged.
+
     research/v2/scripts/analyze_main.py bench/v2/results.jsonl \
         bench/v2/results-opus-luna.jsonl bench/v2/results-sol61.jsonl \
+        bench/v2/results-astra.jsonl bench/v2/results-sonnet55.jsonl bench/v2/results-gpt55.jsonl \
         --rescored research/runs/EXP-2026-09-28-v2-main/incident_08/holdout_rescored.jsonl [--json out.json]
 
 Standard library only (the run host has no scipy): Student t via the
@@ -37,7 +45,10 @@ PRIMARY = ("claude-opus-5_5_xhigh-v2", "gpt-6_1-sol_xhigh-v2")
 SECONDARY = [("gpt-6-luna_xhigh-v2", "gpt-6_1-sol_xhigh-v2"),
              ("gpt-6-luna_xhigh-v2", "claude-opus-5_5_xhigh-v2")]
 SHORT = {"claude-opus-5_5_xhigh-v2": "Opus", "gpt-6_1-sol_xhigh-v2": "Sol 6.1",
-         "gpt-6-luna_xhigh-v2": "Luna"}
+         "gpt-6-luna_xhigh-v2": "Luna", "gpt-6-astra_xhigh-v2": "Astra",
+         "claude-sonnet-5-5_xhigh-v2": "Sonnet 5.5", "gpt-5_5_xhigh-v2": "GPT-5.5"}
+ADDED = ("gpt-6-astra_xhigh-v2", "claude-sonnet-5-5_xhigh-v2", "gpt-5_5_xhigh-v2")
+FULL_N = 6
 PILOTS = {"gpt-6-sol_xhigh-v2": "GPT-6 Sol (pilot)"}
 ALPHA = 0.05
 BOOT = 10_000
@@ -129,6 +140,22 @@ def bootstrap_ratio(a: list[float], b: list[float], n: int = BOOT, seed: int = S
         statistics.fmean(rng.choices(a, k=len(a))) - statistics.fmean(rng.choices(b, k=len(b)))
         for _ in range(n))
     return [math.exp(diffs[int(0.025 * n)]), math.exp(diffs[int(0.975 * n) - 1])]
+
+
+def rank_intervals(ln: dict[str, list[float]], n: int = BOOT, seed: int = SEED) -> dict[str, list[int]]:
+    """95% percentile interval of each system's rank (1 = highest geometric
+    mean) when every system's runs are resampled with replacement."""
+    rng = random.Random(seed)
+    ranks: dict[str, list[int]] = {m: [] for m in ln}
+    for _ in range(n):
+        means = {m: statistics.fmean(rng.choices(xs, k=len(xs))) for m, xs in ln.items()}
+        for i, m in enumerate(sorted(means, key=means.get, reverse=True), 1):
+            ranks[m].append(i)
+    out = {}
+    for m, rs in ranks.items():
+        rs.sort()
+        out[m] = [rs[int(0.025 * n)], rs[int(0.975 * n) - 1]]
+    return out
 
 
 def holm(ps: list[float]) -> list[float]:
@@ -245,6 +272,38 @@ def main() -> None:
             print(f"{name}: ratio {r['ratio']:.3f}, 95% CI [{r['ci95'][0]:.3f}, {r['ci95'][1]:.3f}], "
                   f"bootstrap [{r['boot95'][0]:.3f}, {r['boot95'][1]:.3f}]; p = {r['p']:.4f}, "
                   f"Holm p = {r['p_holm']:.4f}. {r['verdict']}")
+
+    full = [m for m in SHORT if len(ln[m]) == FULL_N]
+    ext = [(a, b) for i, a in enumerate(full) for b in full[i + 1:] if a in ADDED or b in ADDED]
+    if ext:
+        res = [welch(ln[a], ln[b]) for a, b in ext]
+        for r, p_adj, (a, b) in zip(res, holm([r["p"] for r in res]), ext):
+            r["p_holm"] = p_adj
+            r["boot95"] = bootstrap_ratio(ln[a], ln[b])
+            r["verdict"] = verdict(r, p_adj, a, b)
+        out["extension"] = {f"{SHORT[a]} vs {SHORT[b]}": r for r, (a, b) in zip(res, ext)}
+        print(f"\n## Extension (amendment 13, Holm across the {len(ext)} pairs)\n")
+        for name, r in out["extension"].items():
+            print(f"{name}: ratio {r['ratio']:.3f}, 95% CI [{r['ci95'][0]:.3f}, {r['ci95'][1]:.3f}], "
+                  f"bootstrap [{r['boot95'][0]:.3f}, {r['boot95'][1]:.3f}]; p = {r['p']:.4f}, "
+                  f"Holm p = {r['p_holm']:.4f}. {r['verdict']}")
+    pending = [SHORT[m] for m in ADDED if 0 < len(ln[m]) < FULL_N]
+    if pending:
+        print(f"\nExtension: not yet {FULL_N} scored runs for {', '.join(pending)}; their pairs are left out.")
+
+    ranked = {m: xs for m, xs in ln.items() if len(xs) >= 2}
+    if ranked:
+        ri = rank_intervals(ranked)
+        order = sorted(ranked, key=lambda m: statistics.fmean(ranked[m]), reverse=True)
+        out["ranking"] = [{"system": SHORT[m], "n": len(ranked[m]),
+                           "geomean": math.exp(statistics.fmean(ranked[m])), "rank95": ri[m]}
+                          for m in order]
+        print("\n## Descriptive ranking (amendment 13; 95% bootstrap rank interval)\n")
+        print("| rank | system | n | geomean held-out iter/s | rank interval |")
+        print("|---|---|---|---|---|")
+        for i, row in enumerate(out["ranking"], 1):
+            print(f"| {i} | {row['system']} | {row['n']} | {row['geomean']:.1f} | "
+                  f"{row['rank95'][0]} to {row['rank95'][1]} |")
     if args.json:
         args.json.write_text(json.dumps(out, indent=2) + "\n")
 
