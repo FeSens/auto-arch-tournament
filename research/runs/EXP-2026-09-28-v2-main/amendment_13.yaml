@@ -95,3 +95,9 @@ launched: >
   bench/v2/results-gpt55.jsonl, log bench/v2/runner-gpt55.log, started by the same
   launcher (restarted 01:35Z with this entry). GPT-5.5 reps after the other added
   systems finish run with fewer concurrent runs; each row's start and end time is reported.
+  GPT-6 Astra: launched 2026-10-01T08:56:40Z by the launcher in tmux main-c on hwebench
+  (Luna's rep6 ran on hwebench; it ended done at 08:55:47Z and runner A released the
+  account), runner C, jobs codex:gpt-6-astra with the pinned Codex 0.156.1; rep1 sandbox
+  probe confined. Sonnet 5.5: smoke18 started 2026-10-01T08:45:40Z on hwebench2 (Opus's
+  rep6 ran on hwebench2 and ended done at 08:44:34Z), cli/claude-2.1.284, probe confined;
+  agents run /srv/hwebench/cli/claude-2.1.284/claude with claude-sonnet-5-5 at effort xhigh.
