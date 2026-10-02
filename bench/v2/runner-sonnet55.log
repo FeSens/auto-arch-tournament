@@ -22,3 +22,7 @@
 
 [bench] === claude-sonnet-5-5_xhigh-v2-rep2 starting at 2026-10-01T15:50:45+00:00 ===
 [bench] claude-sonnet-5-5_xhigh-v2-rep2 sandbox probe: confined
+[bench] === claude-sonnet-5-5_xhigh-v2-rep2 done in 33649s, fitness=249.61, cost=$0.00 ===
+
+[bench] === claude-sonnet-5-5_xhigh-v2-rep3 starting at 2026-10-02T01:11:35+00:00 ===
+[bench] claude-sonnet-5-5_xhigh-v2-rep3 sandbox probe: confined
