@@ -249,3 +249,31 @@ edits mid-campaign). For V3: stream-parse the trace (or cap trace ELFs far
 below 50 M cycles), bound concurrent trace processes, and give harness evals
 and `hweagents.slice` a MemoryMax so one runaway cannot push the host into
 swap.
+
+## 2026-10-01/02: two more memory events (measured, 2.8.2 campaign)
+
+Both on Sonnet 5.5 runs; details in the EXP-2026-09-28-v2-main monitor_review rows.
+
+- 21:16Z to 22:01Z: the harness's own formal eval of Sonnet rep2 r8s2 (bench,
+  `make -j6`) grew to 59.7 GB in its six heavy checks (causal, liveness, ill,
+  pc_fwd, pc_bwd and one more) while every agent waited for the formal lock.
+  Swap filled; at 21:59:28Z the kernel killed bench's user `dbus-daemon` first
+  (systemd user services run at oom_score_adj 200, which outranks any solver)
+  and then one solver (10.5 GB). The 45 min ceiling ended the eval at 22:01Z
+  (`formal_failed: timeout`, the outcome it was heading for anyway). Runners,
+  tmux, the monitor and the launcher run at oom_score_adj 0 in session scopes
+  and survived; dbus is socket-activated and came back. The same design family
+  had peaked at 59.6 GB at r4s2 (17:50Z) without a kill. Formal evals have no
+  memory bound either: for V3, add one to the eval scope or size `-j` to memory.
+- 03:38Z to 03:40Z: implementation agent r5s2 of Sonnet rep3 ran
+  `python3 -m tools.eval.cosim . bench` in the background; one process reached
+  61 GB in about 90 s (the 09-30 cosim mechanism, agent side), available memory
+  fell to 0.6 GB, and it ended when the agent's Bash command returned (Claude's
+  per-command PID namespace teardown), before any kill.
+- Agent-side formal bursts (all three slots of a Sonnet round at `-j20` each)
+  reached 39 GB resident at 18:59Z with no kill.
+
+Count so far in the 2.8.2 campaign: two kernel OOM events (09-30 15:57Z cosim
+eval, 10-01 21:59Z formal eval) and one near miss (10-02 03:39Z agent cosim);
+none changed a scored outcome. The per-account MemoryMax amendment is pending
+the operator's decision; it would bound the agent-side cases only.
