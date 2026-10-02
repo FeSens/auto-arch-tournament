@@ -277,3 +277,14 @@ Count so far in the 2.8.2 campaign: two kernel OOM events (09-30 15:57Z cosim
 eval, 10-01 21:59Z formal eval) and one near miss (10-02 03:39Z agent cosim);
 none changed a scored outcome. The per-account MemoryMax amendment is pending
 the operator's decision; it would bound the agent-side cases only.
+
+## 2026-10-02: hypothesis YAML copy-back fails on an agent-owned file (2.8.2 campaign)
+
+Sonnet 5.5 rep3 r12s0 broke as `hypothesis_gen_failed: [Errno 1] Operation not
+permitted` on the main clone's `experiments/hypotheses/<id>.yaml`. The agent wrote its
+YAML in its hypgen workspace (correct) and then also copied it into the main clone by
+absolute path, which the hypothesis allow list permits. The harness copies the workspace
+YAML out with `shutil.copy2`; copy2 writes the data (the ACL allows it) and then runs
+copystat, whose utime/chmod need ownership, so it raises EPERM on a file the agent
+account owns. First occurrence in all runs. V3 fix: `shutil.copyfile` for the copy-back,
+or reject a main-clone hypothesis write up front with an explicit error.
