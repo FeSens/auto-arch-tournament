@@ -2,7 +2,7 @@
 
 Interim, written 2026-10-01 ~09:10Z with 14 of the 18 scored runs final (Opus 5.5
 reps 1-6, Luna reps 1-6, GPT-6.1 Sol reps 1-2); GPT-6.1 Sol rep3 added 12:57Z, rep4
-2026-10-02 02:20Z. GPT-6.1 Sol reps 5-6 are added when they finish. Found by `research/v2/scripts/tool_branches.py bench/v2` (every
+2026-10-02 02:20Z, rep5 16:35Z. GPT-6.1 Sol rep6 is added when it finishes. Found by `research/v2/scripts/tool_branches.py bench/v2` (every
 `ifdef/`ifndef/`elsif other than RISCV_FORMAL_ALTOPS and include guards, including
 `ifndef X / `include package guards), then classified by reading each branch.
 
@@ -24,7 +24,8 @@ start marker, (d) other.
 | GPT-6.1 Sol reps 1-2 | none (`ifndef CORE_PKG_DEFINED / `include package guards only) | | |
 | GPT-6.1 Sol rep3 | if_stage.sv:151 `ifdef RISCV_FORMAL (8 lines; plus the `ifndef CORE_PKG_DEFINED package guard) | two immediate assertions on its fetch queue (`occupancy_q <= 2`, and no live redirect masked while recovery is pending) and no logic; riscv-formal's `chformal -early` keeps DUT assertions as extra proof obligations, so formal proves more than simulation and synthesis check and no behavior differs by tool | (d) |
 | GPT-6.1 Sol rep4 | none (`ifndef CORE_PKG_DEFINED / `include package guards only) | | |
-| GPT-6.1 Sol reps 5-6 | pending | | |
+| GPT-6.1 Sol rep5 | none (`ifndef CORE_PKG_DEFINED / `include package guards only) | | |
+| GPT-6.1 Sol rep6 | pending | | |
 
 So far one run needs step 2 (Opus rep2, class (b): formal on the full-size fetch store,
 ceiling 6 h, after the campaign) and none has a class (c) branch, so step 3 has nothing
