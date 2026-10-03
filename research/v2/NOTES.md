@@ -332,3 +332,11 @@ itself (a MemoryMax on the eval scope, or `-j` sized to memory, with an OOM in
 the eval mapped to `formal_failed`); the pending per-account agent cap does not
 reach evals run as bench. Shorter formal ceilings for designs whose solvers pass
 some memory mark would also give the lock back sooner.
+
+Addendum (08:35Z): a second system did it. Sonnet 5.5 rep6 r15s1 ran `rm -rf
+formal/riscv-formal/cores/bench-w*` and removed sibling r15s2's live work dir
+(r15s2 re-ran its self-check and passed); the same wildcard appears once in that
+run's round 12. Harness evals stay out of reach (`.tmp/riscv-formal-eval` is
+bench-only), so this costs sibling agents time, not scores. The V3 fix above
+(per-slot formal work dir, or a sticky `cores/` plus a prompt note) now covers
+two systems.
