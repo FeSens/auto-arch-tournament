@@ -53,6 +53,7 @@ whose champion fails step 2 or has a score-relevant (c) branch removed, n report
 | Sonnet 5.5 rep6 | none (final champion r14s1, row 2026-10-03 08:54Z; `ifndef CORE_PKG_DEFINED package guard only) | | |
 | GPT-5.5 rep1 | none (final champion r14s2, row 2026-10-03 10:39Z; `ifndef CORE_PKG_DEFINED package guard only) | | |
 | GPT-5.5 rep2 | none (final champion from round 11, row 2026-10-03 16:06Z; `ifndef CORE_PKG_DEFINED package guards only) | | |
+| GPT-5.5 rep3 | none (final champion from round 15, row 2026-10-03 20:29Z; `ifndef CORE_PKG_DEFINED package guards only) | | |
 
 Extension runs needing step 2 so far: Sonnet 5.5 rep5 (formal on the RAM16SDP4 register
 file, ceiling 6 h, after the campaign, with Opus rep2's). Sonnet 5.5 is final (6 of 6): rep5
