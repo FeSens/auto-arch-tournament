@@ -31,3 +31,20 @@ So far one run needs step 2 (Opus rep2, class (b): formal on the full-size fetch
 ceiling 6 h, after the campaign) and none has a class (c) branch, so step 3 has nothing
 to recompute yet. Not part of amendment 12's scope but listed for completeness: the
 unscored GPT-6 Sol pilot has no tool branch.
+
+## Extension runs (amendment 13)
+
+Amendment 12's scope is the 18 main runs; amendment 13 does not mention it. Written
+2026-10-03 ~00:05Z, before the first extension champion with a class (b) candidate
+(Sonnet 5.5 rep5) has a results row: the same three steps are applied to every extension
+run's final champion and reported in this separate table, with the same rules (the
+extension verdicts stay the amendment 13 ones; the extension family is repeated with runs
+whose champion fails step 2 or has a score-relevant (c) branch removed, n reported).
+
+| run | branch | what it does | class |
+|---|---|---|---|
+| GPT-6 Astra rep1 | none | | |
+| GPT-6 Astra rep2 | if_stage.sv:39 `ifdef YOSYS | the 4-entry fetch FIFO is `logic [65:0] entries [0:3]` under Yosys and `if_id_t entries [0:3]` otherwise; if_id_t is a 66-bit packed struct and every access is a whole entry, so both arms are bit-identical (the comment says Yosys drops the unpacked dimension of the struct typedef) | (d) |
+| GPT-6 Astra rep3 | none | | |
+| Sonnet 5.5 reps 1-4 | none | | |
+| Sonnet 5.5 rep5 | pending (live champion since r9: reg_file.sv:61 `ifdef RISCV_FORMAL, the register file as 32 flop words under formal, 16x4 RAM16SDP4 slices otherwise; monitor_review 20:36Z, bounded equivalence 20:53Z) | | |
