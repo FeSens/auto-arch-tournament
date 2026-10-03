@@ -38,3 +38,6 @@
 
 [bench] === gpt-6_1-sol_xhigh-v2-rep6 starting at 2026-10-02T16:32:37+00:00 ===
 [bench] gpt-6_1-sol_xhigh-v2-rep6 sandbox probe: confined
+[bench] === gpt-6_1-sol_xhigh-v2-rep6 done in 39320s, fitness=218.36, cost=$0.00 ===
+
+[bench] matrix done — 6/6 successful
