@@ -107,3 +107,9 @@ launched: >
   validated). Sonnet 5.5 reps: launched 2026-10-01T09:06:08Z by the launcher in tmux
   main-d on hwebench2, runner D; rep1 starts from a fresh clone (fixture root only, created
   09:06:09Z; the smoke's artifacts stay in bench/v2/smoke-ext); rep1 sandbox probe confined.
+  GPT-5.5: launched 2026-10-03T03:28:41Z by the launcher in tmux main-e on hwebench3
+  (GPT-6.1 Sol's rep6 ran on hwebench3 and ended done at 03:27:58Z; runner B printed
+  "matrix done, 6/6 successful", the account had no process left and the rep6 temp base
+  was gone), runner E, jobs codex:gpt-5.5 with the pinned Codex 0.156.1 (no cli_dir);
+  rep1 sandbox probe confined, and its probe session records model gpt-5.5, effort xhigh,
+  cli_version 0.156.1. The launcher then exited (all three added systems started).
