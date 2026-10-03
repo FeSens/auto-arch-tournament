@@ -39,6 +39,7 @@ how far that figure is from the bench's build (rv32im, `-O3`, 2K,
 
 | Core | Commit | Config | Fmax MHz | LUT4 | FF | CM/MHz | Basis | Score |
 |---|---|---|---|---|---|---|---|---|
+| VexiiRiscv | 4e38f271 | rv32im branchPredict, no caches | 85.950 | 3,499 | 1,614 | 2.99 | official, marked "too early" by its authors | 257.0 |
 | VexRiscv MaxPerf | baf7dc82 | GenFullNoMmuMaxPerf, 8 KB I$ and D$ | 87.764 | 2,997 | 1,186 | 2.57 | official | 225.6 |
 | Hazard3 | 8af99293 | rv32im, fast mul, branch predictor | 50.449 | 2,801 | 650 | 4.10 | official, different ISA (Zba/Zbb/Zbkb/Zbs, tuned flags) | 206.8 |
 | VexRiscv NoCache | baf7dc82 | GenFullNoMmuNoCache | 88.486 | 2,519 | 957 | 2.30 | official | 203.5 |
@@ -49,11 +50,15 @@ how far that figure is from the bench's build (rv32im, `-O3`, 2K,
 | NEORV32 | 7f769c7a | multi-cycle, fast mul and shifter | 92.028 | 2,058 | 820 | 0.95 | official upper bound (rv32imc, caches) | 87.4 |
 | PicoRV32 | ef203c2b | fast mul, div, barrel shifter | 114.828 | 2,486 | 930 | 0.553 | third-party (slow multiplier) | 63.5 |
 
-VexiiRiscv (4e38f271, `rv32im branchPredict`, published 2.99, marked "too
-early" by its authors) is pending.
-
 ## Per-core notes
 
+- **VexiiRiscv.** `sbt "Test/runMain vexiiriscv.Generate --xlen=32 --with-rvm
+  --allow-bypass-from=0 --relaxed-branch --relaxed-btb --fetch-fork-at=1
+  --with-btb --with-gshare --with-ras --regfile-async"`, the parameters of the
+  `rv32im branchPredict` entry in `src/test/scala/vexiiriscv/scratchpad/Synt.scala`
+  that the performance page reports. Every fetch and LSU command gets one
+  response (stores included), with its id echoed. Critical path: execute
+  source operand to the trap unit's tval register (14 levels).
 - **VexRiscv NoCache.** `sbt "runMain vexriscv.demo.GenFullNoMmuNoCache"`.
   IBusSimple and DBusSimple respond one cycle after the command; stores have no
   response. Critical path: decode-to-execute RS2, ALU, then the
