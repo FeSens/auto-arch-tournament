@@ -288,3 +288,26 @@ YAML out with `shutil.copy2`; copy2 writes the data (the ACL allows it) and then
 copystat, whose utime/chmod need ownership, so it raises EPERM on a file the agent
 account owns. First occurrence in all runs. V3 fix: `shutil.copyfile` for the copy-back,
 or reject a main-clone hypothesis write up front with an explicit error.
+
+## 2026-10-03: a slot deleted a sibling's live formal work dir (2.8.2 campaign, GPT-5.5 rep1)
+
+The shared-work-dir risk noted on 2026-09-30 ("Shared formal work dirs within a run",
+not observed then) happened once. GPT-5.5 rep1 implementation agent r4s0, tidying up
+before it finished (~07:20 CEST), said "The only stray files are formal work
+directories created by the formal script under the shared `riscv-formal` checkout"
+and ran `rm -r` on three exact `formal/riscv-formal/cores/bench-w*` dirs: its own
+(bench-wo0JMvTYY), r4s2's (bench-we4OufSiY, whose run had already ended with exit 0)
+and r4s1's (bench-wQIcW2vpF, live). r4s1's self-check then failed with
+`FileNotFoundError: 'reg_ch0/PASS'` after reaching `Status: passed`, and its agent
+reran formal with fewer jobs ("the generated work directory disappeared"). No glob,
+no malice: the agent took every `bench-w*` dir it saw as its own leftovers (they
+show up as untracked content of the riscv-formal checkout in each worktree's view).
+
+Reach: one run (one model's slots, one account). The harness's formal evals now run
+in the clone's `.tmp/riscv-formal-eval` (each worktree's `formal/riscv-formal` link
+is switched there for the eval; owned by the operator), so no eval or score was
+touched; the cost is sibling self-check time inside the same system's run. Kept for
+the campaign (a permission change now would give the remaining runs a different
+setup); V3: per-slot work dirs (a `WORK_DIR` under the slot's TMPDIR) or `chmod +t`
+on `riscv-formal/cores/`, and say in the prompt that `formal/riscv-formal/cores/` is
+shared.
