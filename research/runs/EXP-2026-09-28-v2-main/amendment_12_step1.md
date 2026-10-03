@@ -46,6 +46,7 @@ whose champion fails step 2 or has a score-relevant (c) branch removed, n report
 | GPT-6 Astra rep1 | none | | |
 | GPT-6 Astra rep2 | if_stage.sv:39 `ifdef YOSYS | the 4-entry fetch FIFO is `logic [65:0] entries [0:3]` under Yosys and `if_id_t entries [0:3]` otherwise; if_id_t is a 66-bit packed struct and every access is a whole entry, so both arms are bit-identical (the comment says Yosys drops the unpacked dimension of the struct typedef) | (d) |
 | GPT-6 Astra rep3 | none | | |
+| GPT-6 Astra rep4 | none | | |
 | Sonnet 5.5 reps 1-4 | none | | |
 | Sonnet 5.5 rep5 | reg_file.sv:61 `ifdef RISCV_FORMAL (final champion r9s1, row 2026-10-03 00:02Z) | the register file is 32 flop words under formal and two copies of 16x4 RAM16SDP4 slices (one per read port) in simulation and synthesis; same async read, sync write, no reset, half split and x0 mask, so formal proves a different structure of the same function. The header gives the reason (the slices' SMT arrays made the `reg` check take over 6 min per check). Operator's bounded equivalence of the two arms at 20:53Z (yosys miter, zero initial contents, 8 steps): equal; the final file is byte-identical to the checked one | (b) |
 | Sonnet 5.5 rep6 | pending | | |

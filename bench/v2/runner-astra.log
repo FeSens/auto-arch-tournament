@@ -30,3 +30,7 @@
 
 [bench] === gpt-6-astra_xhigh-v2-rep4 starting at 2026-10-02T16:37:47+00:00 ===
 [bench] gpt-6-astra_xhigh-v2-rep4 sandbox probe: confined
+[bench] === gpt-6-astra_xhigh-v2-rep4 done in 38472s, fitness=195.55, cost=$0.00 ===
+
+[bench] === gpt-6-astra_xhigh-v2-rep5 starting at 2026-10-03T03:18:59+00:00 ===
+[bench] gpt-6-astra_xhigh-v2-rep5 sandbox probe: confined

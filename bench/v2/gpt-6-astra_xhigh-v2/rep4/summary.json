@@ -1,0 +1,102 @@
+{
+  "model": "gpt-6-astra_xhigh-v2",
+  "rep": 4,
+  "started_at": "2026-10-02T16:37:47+00:00",
+  "ended_at": null,
+  "wall_clock_sec": null,
+  "iterations": 46,
+  "accepted": 11,
+  "rejected": 34,
+  "broken": 1,
+  "final_fitness": 195.55,
+  "baseline_fitness": 12.12,
+  "best_fitness": 195.55,
+  "best_round": 31,
+  "delta_pct": 1513.4488448844886,
+  "total_tokens_in": 172923849,
+  "total_tokens_out": 1877783,
+  "total_cost_usd": 0.0,
+  "orchestrator_exit": 0,
+  "status": "done",
+  "notes": "",
+  "fixture_ref": "bench-v2.8.2",
+  "fixture_commit": "beef65abd11702478996e2bfc6c6b043340eeaab",
+  "runner_commit": "18f3398d6d298262c15dc191cfd25542031d7b97",
+  "runner_dirty": false,
+  "harness_version": "2.8.2",
+  "agent_user": "hwebench",
+  "claude_cli": "2.1.283",
+  "codex_cli": "0.156.1",
+  "sandbox_probe": {
+    "ok": true,
+    "reasons": [],
+    "observed": {
+      "pidns": "pid:[4026532887]",
+      "mntns": "mnt:[4026532885]",
+      "network": "blocked",
+      "account_home": "visible"
+    },
+    "attempt": 1
+  },
+  "broken_by_class": {
+    "formal_failed": 1
+  },
+  "best_lut4": 5048,
+  "best_ff": 1832,
+  "best_fmax_mhz": 82.887,
+  "best_iterations": 10,
+  "best_cycles": 4238604,
+  "best_ipc_coremark": 2e-06,
+  "holdout_geomean_iter_s": 4889.226403199729,
+  "holdout_kernels": {
+    "dhrystone": {
+      "cycles": 3167530,
+      "reps": 6000,
+      "iter_s": 157006.24777034472,
+      "validated": true
+    },
+    "aha-mont64": {
+      "cycles": 2769126,
+      "reps": 200,
+      "iter_s": 5986.5098229549685,
+      "validated": true
+    },
+    "crc32": {
+      "cycles": 2888491,
+      "reps": 90,
+      "iter_s": 2582.604550265173,
+      "validated": true
+    },
+    "matmult-int": {
+      "cycles": 1563273,
+      "reps": 15,
+      "iter_s": 795.3217384295641,
+      "validated": true
+    },
+    "edn": {
+      "cycles": 2863829,
+      "reps": 50,
+      "iter_s": 1447.135984725345,
+      "validated": true
+    }
+  },
+  "holdout_fmax_mhz": 82.887,
+  "loop_fmax_mhz": 82.887,
+  "holdout_fmax_pairs": [
+    [
+      0,
+      77.823,
+      14
+    ],
+    [
+      1,
+      82.887,
+      14
+    ],
+    [
+      2,
+      82.887,
+      14
+    ]
+  ]
+}
