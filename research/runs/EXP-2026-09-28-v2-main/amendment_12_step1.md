@@ -52,6 +52,7 @@ whose champion fails step 2 or has a score-relevant (c) branch removed, n report
 | Sonnet 5.5 rep5 | reg_file.sv:61 `ifdef RISCV_FORMAL (final champion r9s1, row 2026-10-03 00:02Z) | the register file is 32 flop words under formal and two copies of 16x4 RAM16SDP4 slices (one per read port) in simulation and synthesis; same async read, sync write, no reset, half split and x0 mask, so formal proves a different structure of the same function. The header gives the reason (the slices' SMT arrays made the `reg` check take over 6 min per check). Operator's bounded equivalence of the two arms at 20:53Z (yosys miter, zero initial contents, 8 steps): equal; the final file is byte-identical to the checked one | (b) |
 | Sonnet 5.5 rep6 | none (final champion r14s1, row 2026-10-03 08:54Z; `ifndef CORE_PKG_DEFINED package guard only) | | |
 | GPT-5.5 rep1 | none (final champion r14s2, row 2026-10-03 10:39Z; `ifndef CORE_PKG_DEFINED package guard only) | | |
+| GPT-5.5 rep2 | none (final champion from round 11, row 2026-10-03 16:06Z; `ifndef CORE_PKG_DEFINED package guards only) | | |
 
 Extension runs needing step 2 so far: Sonnet 5.5 rep5 (formal on the RAM16SDP4 register
 file, ceiling 6 h, after the campaign, with Opus rep2's). Sonnet 5.5 is final (6 of 6): rep5
