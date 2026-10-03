@@ -13,10 +13,24 @@ PILOTS = {"gpt-6-sol_xhigh-v2"}   # amendment 11: replaced by GPT-6.1 Sol, rep1 
 MODEL_ORDER = ["claude-opus-5_5_xhigh-v2", "gpt-6_1-sol_xhigh-v2", "gpt-6-sol_xhigh-v2", "gpt-6-luna_xhigh-v2",
                # amendment 13 extension systems
                "claude-sonnet-5-5_xhigh-v2", "gpt-6-astra_xhigh-v2", "gpt-5_5_xhigh-v2"]
-# External reference (research/v2/reference_vexriscv): VexRiscv GenFullNoMmuMaxPerf in the
-# harness's Gowin flow (median of place options 0-2). Its CoreMark is Fmax x the published
-# 2.57 CoreMark/MHz, not a bench measurement; no held-out score (not run on the bench programs).
-VEXRISCV = {"fmax_mhz": 87.764, "lut4": 2997, "coremark_per_mhz": 2.57}
+# External references (research/v2/reference_vexriscv, research/v2/reference_cores): open-source
+# cores in the harness's Gowin flow (median of place options 0-2). Their CoreMark is Fmax x a
+# published CoreMark/MHz, not a bench measurement; no held-out score (not run on the bench programs).
+REFERENCES = Path("research/v2/reference_cores/references.json")
+
+
+def references():
+    out = []
+    for ref in json.loads(REFERENCES.read_text()) if REFERENCES.is_file() else []:
+        res = Path(ref["result"])
+        if not res.is_file():
+            continue
+        s = json.loads(res.read_text())["summary"]
+        if s.get("placement_failed"):
+            continue
+        out.append({**ref, "fmax_mhz": s["fmax_mhz"], "lut4": s["lut4"],
+                    "score": s["fmax_mhz"] * ref["coremark_per_mhz"]})
+    return sorted(out, key=lambda r: -r["score"])
 
 
 def entries(path: Path):
@@ -101,12 +115,14 @@ def main():
                   f"{(r or {}).get('holdout_geomean_iter_s'):.0f}" if (r or {}).get("holdout_geomean_iter_s") else "",
                   f"{acc}/{cnt['regression']}/{cnt['broken']}"]
         print("| " + " | ".join(cells) + " |")
-    v = VEXRISCV
-    print("| " + " | ".join(["VexRiscv (reference)", "external"] + [""] * nr + [
-        f"{v['fmax_mhz'] * v['coremark_per_mhz']:.1f}*", f"{v['fmax_mhz']}", f"{v['lut4']:,}", "n/a", ""]) + " |")
-    print(f"\n*VexRiscv GenFullNoMmuMaxPerf in the same Gowin flow: {v['fmax_mhz']} MHz, {v['lut4']:,} LUT4; "
-          f"CoreMark = Fmax x published {v['coremark_per_mhz']} CoreMark/MHz (indicative, not a bench "
-          f"measurement); not run on the held-out programs.")
+    refs = references()
+    for v in refs:
+        print("| " + " | ".join([f"{v['name']} (reference)", "external"] + [""] * nr + [
+            f"{v['score']:.1f}*", f"{v['fmax_mhz']}", f"{v['lut4']:,}", "n/a", ""]) + " |")
+    if refs:
+        print("\n*References: open-source cores in the same Gowin flow; CoreMark = Fmax x published "
+              "CoreMark/MHz (indicative, not a bench measurement; basis per core in "
+              "research/v2/reference_cores/README.md); not run on the held-out programs.")
     print("\u2020 Running rep: the current champion's loop measurement (Fmax, LUT4). Done reps show the "
           "held-out re-run Fmax and the final champion's LUT4.")
 

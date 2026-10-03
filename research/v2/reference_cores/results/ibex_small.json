@@ -1,0 +1,330 @@
+{
+ "core": "ibex_small",
+ "results": [
+  {
+   "place_option": 0,
+   "placement_failed": false,
+   "fmax_mhz": 45.329,
+   "levels": 22,
+   "logic": 3645,
+   "regs": 970,
+   "lutram": 0,
+   "bsram": 6,
+   "dsp": 1,
+   "critical_paths": [
+    {
+     "from": "cpu/u_ibex_core/if_stage_i/instr_rdata_id_o_27_s0",
+     "to": "cpu/gen_regfile_fpga.register_file_i/mem_mem_0_0_s",
+     "slack_ns": -17.061,
+     "arrival_ns": 27.355,
+     "logic_cells": 38,
+     "modules": [
+      "clock_ibuf",
+      "cpu/u_ibex_core/ex_block_i/alu_i",
+      "cpu/u_ibex_core/wb_stage_i",
+      "cpu/u_ibex_core/ex_block_i/alu_i",
+      "cpu/u_ibex_core/id_stage_i",
+      "cpu/u_ibex_core/if_stage_i"
+     ]
+    },
+    {
+     "from": "cpu/u_ibex_core/if_stage_i/instr_rdata_id_o_27_s0",
+     "to": "cpu/gen_regfile_fpga.register_file_i/mem_mem_0_0_s",
+     "slack_ns": -17.033,
+     "arrival_ns": 27.327,
+     "logic_cells": 38,
+     "modules": [
+      "clock_ibuf",
+      "cpu/u_ibex_core/ex_block_i/alu_i",
+      "cpu/u_ibex_core/wb_stage_i",
+      "cpu/u_ibex_core/ex_block_i/alu_i",
+      "cpu/u_ibex_core/id_stage_i",
+      "cpu/u_ibex_core/if_stage_i"
+     ]
+    },
+    {
+     "from": "cpu/u_ibex_core/if_stage_i/instr_rdata_id_o_27_s0",
+     "to": "cpu/gen_regfile_fpga.register_file_i/mem_mem_0_0_s",
+     "slack_ns": -16.95,
+     "arrival_ns": 27.245,
+     "logic_cells": 38,
+     "modules": [
+      "clock_ibuf",
+      "cpu/u_ibex_core/ex_block_i/alu_i",
+      "cpu/u_ibex_core/wb_stage_i",
+      "cpu/u_ibex_core/ex_block_i/alu_i",
+      "cpu/u_ibex_core/id_stage_i",
+      "cpu/u_ibex_core/if_stage_i"
+     ]
+    },
+    {
+     "from": "cpu/u_ibex_core/if_stage_i/instr_rdata_id_o_27_s0",
+     "to": "cpu/u_ibex_core/if_stage_i/gen_prefetch_buffer.prefetch_buffer_i/fetch_addr_q_25_s0",
+     "slack_ns": -16.86,
+     "arrival_ns": 27.154,
+     "logic_cells": 21,
+     "modules": [
+      "clock_ibuf",
+      "cpu/u_ibex_core/ex_block_i/alu_i",
+      "cpu/u_ibex_core/wb_stage_i",
+      "cpu/u_ibex_core/ex_block_i/alu_i",
+      "cpu/u_ibex_core/if_stage_i/gen_prefetch_buffer.prefetch_buffer_i"
+     ]
+    },
+    {
+     "from": "cpu/u_ibex_core/if_stage_i/instr_rdata_id_o_27_s0",
+     "to": "cpu/u_ibex_core/cs_registers_i/minstret_counter_i/counter_q_8_s1",
+     "slack_ns": -16.798,
+     "arrival_ns": 27.092,
+     "logic_cells": 38,
+     "modules": [
+      "clock_ibuf",
+      "cpu/u_ibex_core/ex_block_i/alu_i",
+      "cpu/u_ibex_core/wb_stage_i",
+      "cpu/u_ibex_core/ex_block_i/alu_i",
+      "cpu/u_ibex_core/id_stage_i",
+      "cpu/u_ibex_core/if_stage_i",
+      "cpu/u_ibex_core/cs_registers_i/minstret_counter_i"
+     ]
+    }
+   ]
+  },
+  {
+   "place_option": 1,
+   "placement_failed": false,
+   "fmax_mhz": 47.107,
+   "levels": 21,
+   "logic": 3645,
+   "regs": 970,
+   "lutram": 0,
+   "bsram": 6,
+   "dsp": 1,
+   "critical_paths": [
+    {
+     "from": "cpu/u_ibex_core/if_stage_i/instr_rdata_id_o_12_s0",
+     "to": "cpu/u_ibex_core/cs_registers_i/minstret_counter_i/counter_q_9_s1",
+     "slack_ns": -16.228,
+     "arrival_ns": 26.523,
+     "logic_cells": 39,
+     "modules": [
+      "clock_ibuf",
+      "cpu/u_ibex_core/id_stage_i",
+      "cpu/u_ibex_core/ex_block_i/alu_i",
+      "cpu/u_ibex_core/wb_stage_i",
+      "cpu/u_ibex_core/ex_block_i/alu_i",
+      "cpu/u_ibex_core/id_stage_i",
+      "cpu/u_ibex_core/if_stage_i",
+      "cpu/u_ibex_core/cs_registers_i/minstret_counter_i"
+     ]
+    },
+    {
+     "from": "cpu/u_ibex_core/if_stage_i/instr_rdata_id_o_12_s0",
+     "to": "cpu/gen_regfile_fpga.register_file_i/mem_mem_0_0_s0",
+     "slack_ns": -16.228,
+     "arrival_ns": 26.522,
+     "logic_cells": 39,
+     "modules": [
+      "clock_ibuf",
+      "cpu/u_ibex_core/id_stage_i",
+      "cpu/u_ibex_core/ex_block_i/alu_i",
+      "cpu/u_ibex_core/wb_stage_i",
+      "cpu/u_ibex_core/ex_block_i/alu_i",
+      "cpu/u_ibex_core/id_stage_i",
+      "cpu/u_ibex_core/if_stage_i"
+     ]
+    },
+    {
+     "from": "cpu/u_ibex_core/if_stage_i/instr_rdata_id_o_12_s0",
+     "to": "cpu/gen_regfile_fpga.register_file_i/mem_mem_0_0_s0",
+     "slack_ns": -16.223,
+     "arrival_ns": 26.517,
+     "logic_cells": 39,
+     "modules": [
+      "clock_ibuf",
+      "cpu/u_ibex_core/id_stage_i",
+      "cpu/u_ibex_core/ex_block_i/alu_i",
+      "cpu/u_ibex_core/wb_stage_i",
+      "cpu/u_ibex_core/ex_block_i/alu_i",
+      "cpu/u_ibex_core/id_stage_i",
+      "cpu/u_ibex_core/if_stage_i"
+     ]
+    },
+    {
+     "from": "cpu/u_ibex_core/if_stage_i/instr_rdata_id_o_12_s0",
+     "to": "cpu/gen_regfile_fpga.register_file_i/mem_mem_0_0_s0",
+     "slack_ns": -16.223,
+     "arrival_ns": 26.517,
+     "logic_cells": 39,
+     "modules": [
+      "clock_ibuf",
+      "cpu/u_ibex_core/id_stage_i",
+      "cpu/u_ibex_core/ex_block_i/alu_i",
+      "cpu/u_ibex_core/wb_stage_i",
+      "cpu/u_ibex_core/ex_block_i/alu_i",
+      "cpu/u_ibex_core/id_stage_i",
+      "cpu/u_ibex_core/if_stage_i"
+     ]
+    },
+    {
+     "from": "cpu/u_ibex_core/if_stage_i/instr_rdata_id_o_12_s0",
+     "to": "cpu/u_ibex_core/cs_registers_i/minstret_counter_i/counter_q_8_s1",
+     "slack_ns": -16.221,
+     "arrival_ns": 26.516,
+     "logic_cells": 39,
+     "modules": [
+      "clock_ibuf",
+      "cpu/u_ibex_core/id_stage_i",
+      "cpu/u_ibex_core/ex_block_i/alu_i",
+      "cpu/u_ibex_core/wb_stage_i",
+      "cpu/u_ibex_core/ex_block_i/alu_i",
+      "cpu/u_ibex_core/id_stage_i",
+      "cpu/u_ibex_core/if_stage_i",
+      "cpu/u_ibex_core/cs_registers_i/minstret_counter_i"
+     ]
+    }
+   ]
+  },
+  {
+   "place_option": 2,
+   "placement_failed": false,
+   "fmax_mhz": 47.107,
+   "levels": 21,
+   "logic": 3645,
+   "regs": 970,
+   "lutram": 0,
+   "bsram": 6,
+   "dsp": 1,
+   "critical_paths": [
+    {
+     "from": "cpu/u_ibex_core/if_stage_i/instr_rdata_id_o_12_s0",
+     "to": "cpu/u_ibex_core/cs_registers_i/minstret_counter_i/counter_q_9_s1",
+     "slack_ns": -16.228,
+     "arrival_ns": 26.523,
+     "logic_cells": 39,
+     "modules": [
+      "clock_ibuf",
+      "cpu/u_ibex_core/id_stage_i",
+      "cpu/u_ibex_core/ex_block_i/alu_i",
+      "cpu/u_ibex_core/wb_stage_i",
+      "cpu/u_ibex_core/ex_block_i/alu_i",
+      "cpu/u_ibex_core/id_stage_i",
+      "cpu/u_ibex_core/if_stage_i",
+      "cpu/u_ibex_core/cs_registers_i/minstret_counter_i"
+     ]
+    },
+    {
+     "from": "cpu/u_ibex_core/if_stage_i/instr_rdata_id_o_12_s0",
+     "to": "cpu/gen_regfile_fpga.register_file_i/mem_mem_0_0_s0",
+     "slack_ns": -16.228,
+     "arrival_ns": 26.522,
+     "logic_cells": 39,
+     "modules": [
+      "clock_ibuf",
+      "cpu/u_ibex_core/id_stage_i",
+      "cpu/u_ibex_core/ex_block_i/alu_i",
+      "cpu/u_ibex_core/wb_stage_i",
+      "cpu/u_ibex_core/ex_block_i/alu_i",
+      "cpu/u_ibex_core/id_stage_i",
+      "cpu/u_ibex_core/if_stage_i"
+     ]
+    },
+    {
+     "from": "cpu/u_ibex_core/if_stage_i/instr_rdata_id_o_12_s0",
+     "to": "cpu/gen_regfile_fpga.register_file_i/mem_mem_0_0_s0",
+     "slack_ns": -16.223,
+     "arrival_ns": 26.517,
+     "logic_cells": 39,
+     "modules": [
+      "clock_ibuf",
+      "cpu/u_ibex_core/id_stage_i",
+      "cpu/u_ibex_core/ex_block_i/alu_i",
+      "cpu/u_ibex_core/wb_stage_i",
+      "cpu/u_ibex_core/ex_block_i/alu_i",
+      "cpu/u_ibex_core/id_stage_i",
+      "cpu/u_ibex_core/if_stage_i"
+     ]
+    },
+    {
+     "from": "cpu/u_ibex_core/if_stage_i/instr_rdata_id_o_12_s0",
+     "to": "cpu/gen_regfile_fpga.register_file_i/mem_mem_0_0_s0",
+     "slack_ns": -16.223,
+     "arrival_ns": 26.517,
+     "logic_cells": 39,
+     "modules": [
+      "clock_ibuf",
+      "cpu/u_ibex_core/id_stage_i",
+      "cpu/u_ibex_core/ex_block_i/alu_i",
+      "cpu/u_ibex_core/wb_stage_i",
+      "cpu/u_ibex_core/ex_block_i/alu_i",
+      "cpu/u_ibex_core/id_stage_i",
+      "cpu/u_ibex_core/if_stage_i"
+     ]
+    },
+    {
+     "from": "cpu/u_ibex_core/if_stage_i/instr_rdata_id_o_12_s0",
+     "to": "cpu/u_ibex_core/cs_registers_i/minstret_counter_i/counter_q_8_s1",
+     "slack_ns": -16.221,
+     "arrival_ns": 26.516,
+     "logic_cells": 39,
+     "modules": [
+      "clock_ibuf",
+      "cpu/u_ibex_core/id_stage_i",
+      "cpu/u_ibex_core/ex_block_i/alu_i",
+      "cpu/u_ibex_core/wb_stage_i",
+      "cpu/u_ibex_core/ex_block_i/alu_i",
+      "cpu/u_ibex_core/id_stage_i",
+      "cpu/u_ibex_core/if_stage_i",
+      "cpu/u_ibex_core/cs_registers_i/minstret_counter_i"
+     ]
+    }
+   ]
+  }
+ ],
+ "summary": {
+  "placement_failed": false,
+  "fmax_mhz": 47.107,
+  "seeds": [
+   45.329,
+   47.107,
+   47.107
+  ],
+  "perturbations": [
+   [
+    0,
+    45.329,
+    22
+   ],
+   [
+    1,
+    47.107,
+    21
+   ],
+   [
+    2,
+    47.107,
+    21
+   ]
+  ],
+  "lut4": 3645,
+  "ff": 970,
+  "lutram": 0,
+  "bsram": 6,
+  "dsp": 1,
+  "logic_levels": 22,
+  "critical_path": {
+   "from": "cpu/u_ibex_core/if_stage_i/instr_rdata_id_o_27_s0",
+   "to": "cpu/gen_regfile_fpga.register_file_i/mem_mem_0_0_s",
+   "slack_ns": -17.061,
+   "arrival_ns": 27.355,
+   "logic_cells": 38,
+   "modules": [
+    "clock_ibuf",
+    "cpu/u_ibex_core/ex_block_i/alu_i",
+    "cpu/u_ibex_core/wb_stage_i",
+    "cpu/u_ibex_core/ex_block_i/alu_i",
+    "cpu/u_ibex_core/id_stage_i",
+    "cpu/u_ibex_core/if_stage_i"
+   ]
+  }
+ }
+}

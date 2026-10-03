@@ -1,0 +1,361 @@
+{
+ "core": "ibex_maxperf",
+ "results": [
+  {
+   "place_option": 0,
+   "placement_failed": false,
+   "fmax_mhz": 40.211,
+   "levels": 24,
+   "logic": 4185,
+   "regs": 1025,
+   "lutram": 0,
+   "bsram": 6,
+   "dsp": 2,
+   "critical_paths": [
+    {
+     "from": "cpu/u_ibex_core/if_stage_i/instr_rdata_id_o_0_s0",
+     "to": "cpu/u_ibex_core/if_stage_i/gen_prefetch_buffer.prefetch_buffer_i/fifo_i/rdata_q_36_s0",
+     "slack_ns": -19.869,
+     "arrival_ns": 30.163,
+     "logic_cells": 50,
+     "modules": [
+      "clock_ibuf",
+      "cpu/u_ibex_core/wb_stage_i",
+      "cpu/u_ibex_core/id_stage_i",
+      "cpu/u_ibex_core/ex_block_i/alu_i",
+      "cpu/u_ibex_core/id_stage_i",
+      "cpu/u_ibex_core/if_stage_i/gen_prefetch_buffer.prefetch_buffer_i",
+      "cpu/u_ibex_core/ex_block_i/alu_i",
+      "cpu/u_ibex_core/if_stage_i/gen_prefetch_buffer.prefetch_buffer_i",
+      "cpu/u_ibex_core/if_stage_i/gen_prefetch_buffer.prefetch_buffer_i/fifo_i",
+      "cpu/u_ibex_core/if_stage_i/compressed_decoder_i",
+      "cpu/u_ibex_core/if_stage_i/gen_prefetch_buffer.prefetch_buffer_i/fifo_i"
+     ]
+    },
+    {
+     "from": "cpu/u_ibex_core/if_stage_i/instr_rdata_id_o_0_s0",
+     "to": "cpu/u_ibex_core/if_stage_i/gen_prefetch_buffer.prefetch_buffer_i/fifo_i/rdata_q_44_s0",
+     "slack_ns": -19.857,
+     "arrival_ns": 30.151,
+     "logic_cells": 50,
+     "modules": [
+      "clock_ibuf",
+      "cpu/u_ibex_core/wb_stage_i",
+      "cpu/u_ibex_core/id_stage_i",
+      "cpu/u_ibex_core/ex_block_i/alu_i",
+      "cpu/u_ibex_core/id_stage_i",
+      "cpu/u_ibex_core/if_stage_i/gen_prefetch_buffer.prefetch_buffer_i",
+      "cpu/u_ibex_core/ex_block_i/alu_i",
+      "cpu/u_ibex_core/if_stage_i/gen_prefetch_buffer.prefetch_buffer_i",
+      "cpu/u_ibex_core/if_stage_i/gen_prefetch_buffer.prefetch_buffer_i/fifo_i",
+      "cpu/u_ibex_core/if_stage_i/compressed_decoder_i",
+      "cpu/u_ibex_core/if_stage_i/gen_prefetch_buffer.prefetch_buffer_i/fifo_i"
+     ]
+    },
+    {
+     "from": "cpu/u_ibex_core/if_stage_i/instr_rdata_id_o_0_s0",
+     "to": "cpu/u_ibex_core/if_stage_i/gen_prefetch_buffer.prefetch_buffer_i/fetch_addr_q_30_s0",
+     "slack_ns": -19.849,
+     "arrival_ns": 30.143,
+     "logic_cells": 50,
+     "modules": [
+      "clock_ibuf",
+      "cpu/u_ibex_core/wb_stage_i",
+      "cpu/u_ibex_core/id_stage_i",
+      "cpu/u_ibex_core/ex_block_i/alu_i",
+      "cpu/u_ibex_core/id_stage_i",
+      "cpu/u_ibex_core/if_stage_i/gen_prefetch_buffer.prefetch_buffer_i",
+      "cpu/u_ibex_core/ex_block_i/alu_i",
+      "cpu/u_ibex_core/if_stage_i/gen_prefetch_buffer.prefetch_buffer_i"
+     ]
+    },
+    {
+     "from": "cpu/u_ibex_core/if_stage_i/instr_rdata_id_o_0_s0",
+     "to": "cpu/u_ibex_core/if_stage_i/gen_prefetch_buffer.prefetch_buffer_i/fifo_i/instr_addr_q_3_s0",
+     "slack_ns": -19.84,
+     "arrival_ns": 30.134,
+     "logic_cells": 50,
+     "modules": [
+      "clock_ibuf",
+      "cpu/u_ibex_core/wb_stage_i",
+      "cpu/u_ibex_core/id_stage_i",
+      "cpu/u_ibex_core/ex_block_i/alu_i",
+      "cpu/u_ibex_core/id_stage_i",
+      "cpu/u_ibex_core/if_stage_i/gen_prefetch_buffer.prefetch_buffer_i",
+      "cpu/u_ibex_core/ex_block_i/alu_i",
+      "cpu/u_ibex_core/if_stage_i/gen_prefetch_buffer.prefetch_buffer_i",
+      "cpu/u_ibex_core/if_stage_i/gen_prefetch_buffer.prefetch_buffer_i/fifo_i",
+      "cpu/u_ibex_core/if_stage_i/compressed_decoder_i",
+      "cpu/u_ibex_core/if_stage_i/gen_prefetch_buffer.prefetch_buffer_i/fifo_i"
+     ]
+    },
+    {
+     "from": "cpu/u_ibex_core/if_stage_i/instr_rdata_id_o_0_s0",
+     "to": "cpu/u_ibex_core/if_stage_i/gen_prefetch_buffer.prefetch_buffer_i/fifo_i/instr_addr_q_5_s0",
+     "slack_ns": -19.84,
+     "arrival_ns": 30.134,
+     "logic_cells": 50,
+     "modules": [
+      "clock_ibuf",
+      "cpu/u_ibex_core/wb_stage_i",
+      "cpu/u_ibex_core/id_stage_i",
+      "cpu/u_ibex_core/ex_block_i/alu_i",
+      "cpu/u_ibex_core/id_stage_i",
+      "cpu/u_ibex_core/if_stage_i/gen_prefetch_buffer.prefetch_buffer_i",
+      "cpu/u_ibex_core/ex_block_i/alu_i",
+      "cpu/u_ibex_core/if_stage_i/gen_prefetch_buffer.prefetch_buffer_i",
+      "cpu/u_ibex_core/if_stage_i/gen_prefetch_buffer.prefetch_buffer_i/fifo_i",
+      "cpu/u_ibex_core/if_stage_i/compressed_decoder_i",
+      "cpu/u_ibex_core/if_stage_i/gen_prefetch_buffer.prefetch_buffer_i/fifo_i"
+     ]
+    }
+   ]
+  },
+  {
+   "place_option": 1,
+   "placement_failed": false,
+   "fmax_mhz": 45.451,
+   "levels": 24,
+   "logic": 4185,
+   "regs": 1025,
+   "lutram": 0,
+   "bsram": 6,
+   "dsp": 2,
+   "critical_paths": [
+    {
+     "from": "cpu/u_ibex_core/if_stage_i/instr_rdata_id_o_27_s0",
+     "to": "cpu/u_ibex_core/if_stage_i/gen_prefetch_buffer.prefetch_buffer_i/fifo_i/rdata_q_56_s0",
+     "slack_ns": -17.002,
+     "arrival_ns": 27.296,
+     "logic_cells": 50,
+     "modules": [
+      "clock_ibuf",
+      "cpu/u_ibex_core/ex_block_i/alu_i",
+      "cpu/u_ibex_core/id_stage_i",
+      "cpu/u_ibex_core/if_stage_i/gen_prefetch_buffer.prefetch_buffer_i",
+      "cpu/u_ibex_core/ex_block_i/alu_i",
+      "cpu/u_ibex_core/if_stage_i/gen_prefetch_buffer.prefetch_buffer_i",
+      "cpu/u_ibex_core/if_stage_i/gen_prefetch_buffer.prefetch_buffer_i/fifo_i",
+      "cpu/u_ibex_core/if_stage_i/compressed_decoder_i",
+      "cpu/u_ibex_core/if_stage_i/gen_prefetch_buffer.prefetch_buffer_i/fifo_i"
+     ]
+    },
+    {
+     "from": "cpu/u_ibex_core/if_stage_i/instr_rdata_id_o_27_s0",
+     "to": "cpu/gen_regfile_fpga.register_file_i/mem_mem_0_0_s0",
+     "slack_ns": -17.001,
+     "arrival_ns": 27.296,
+     "logic_cells": 48,
+     "modules": [
+      "clock_ibuf",
+      "cpu/u_ibex_core/ex_block_i/alu_i",
+      "cpu/u_ibex_core/id_stage_i",
+      "cpu/u_ibex_core/if_stage_i/gen_prefetch_buffer.prefetch_buffer_i",
+      "cpu/u_ibex_core/ex_block_i/alu_i",
+      "cpu/u_ibex_core/if_stage_i/gen_prefetch_buffer.prefetch_buffer_i",
+      "cpu/u_ibex_core/if_stage_i"
+     ]
+    },
+    {
+     "from": "cpu/u_ibex_core/if_stage_i/instr_rdata_id_o_27_s0",
+     "to": "cpu/gen_regfile_fpga.register_file_i/mem_mem_0_0_s",
+     "slack_ns": -17.001,
+     "arrival_ns": 27.296,
+     "logic_cells": 48,
+     "modules": [
+      "clock_ibuf",
+      "cpu/u_ibex_core/ex_block_i/alu_i",
+      "cpu/u_ibex_core/id_stage_i",
+      "cpu/u_ibex_core/if_stage_i/gen_prefetch_buffer.prefetch_buffer_i",
+      "cpu/u_ibex_core/ex_block_i/alu_i",
+      "cpu/u_ibex_core/if_stage_i/gen_prefetch_buffer.prefetch_buffer_i",
+      "cpu/u_ibex_core/if_stage_i"
+     ]
+    },
+    {
+     "from": "cpu/u_ibex_core/if_stage_i/instr_rdata_id_o_27_s0",
+     "to": "cpu/u_ibex_core/if_stage_i/gen_prefetch_buffer.prefetch_buffer_i/fetch_addr_q_21_s0",
+     "slack_ns": -17.001,
+     "arrival_ns": 27.295,
+     "logic_cells": 50,
+     "modules": [
+      "clock_ibuf",
+      "cpu/u_ibex_core/ex_block_i/alu_i",
+      "cpu/u_ibex_core/id_stage_i",
+      "cpu/u_ibex_core/if_stage_i/gen_prefetch_buffer.prefetch_buffer_i",
+      "cpu/u_ibex_core/ex_block_i/alu_i",
+      "cpu/u_ibex_core/if_stage_i/gen_prefetch_buffer.prefetch_buffer_i",
+      "n43_s4",
+      "cpu/u_ibex_core/if_stage_i/gen_prefetch_buffer.prefetch_buffer_i"
+     ]
+    },
+    {
+     "from": "cpu/u_ibex_core/if_stage_i/instr_rdata_id_o_27_s0",
+     "to": "cpu/u_ibex_core/if_stage_i/gen_prefetch_buffer.prefetch_buffer_i/fetch_addr_q_24_s0",
+     "slack_ns": -17.001,
+     "arrival_ns": 27.295,
+     "logic_cells": 50,
+     "modules": [
+      "clock_ibuf",
+      "cpu/u_ibex_core/ex_block_i/alu_i",
+      "cpu/u_ibex_core/id_stage_i",
+      "cpu/u_ibex_core/if_stage_i/gen_prefetch_buffer.prefetch_buffer_i",
+      "cpu/u_ibex_core/ex_block_i/alu_i",
+      "cpu/u_ibex_core/if_stage_i/gen_prefetch_buffer.prefetch_buffer_i",
+      "n43_s4",
+      "cpu/u_ibex_core/if_stage_i/gen_prefetch_buffer.prefetch_buffer_i"
+     ]
+    }
+   ]
+  },
+  {
+   "place_option": 2,
+   "placement_failed": false,
+   "fmax_mhz": 45.451,
+   "levels": 24,
+   "logic": 4185,
+   "regs": 1025,
+   "lutram": 0,
+   "bsram": 6,
+   "dsp": 2,
+   "critical_paths": [
+    {
+     "from": "cpu/u_ibex_core/if_stage_i/instr_rdata_id_o_27_s0",
+     "to": "cpu/u_ibex_core/if_stage_i/gen_prefetch_buffer.prefetch_buffer_i/fifo_i/rdata_q_56_s0",
+     "slack_ns": -17.002,
+     "arrival_ns": 27.296,
+     "logic_cells": 50,
+     "modules": [
+      "clock_ibuf",
+      "cpu/u_ibex_core/ex_block_i/alu_i",
+      "cpu/u_ibex_core/id_stage_i",
+      "cpu/u_ibex_core/if_stage_i/gen_prefetch_buffer.prefetch_buffer_i",
+      "cpu/u_ibex_core/ex_block_i/alu_i",
+      "cpu/u_ibex_core/if_stage_i/gen_prefetch_buffer.prefetch_buffer_i",
+      "cpu/u_ibex_core/if_stage_i/gen_prefetch_buffer.prefetch_buffer_i/fifo_i",
+      "cpu/u_ibex_core/if_stage_i/compressed_decoder_i",
+      "cpu/u_ibex_core/if_stage_i/gen_prefetch_buffer.prefetch_buffer_i/fifo_i"
+     ]
+    },
+    {
+     "from": "cpu/u_ibex_core/if_stage_i/instr_rdata_id_o_27_s0",
+     "to": "cpu/gen_regfile_fpga.register_file_i/mem_mem_0_0_s0",
+     "slack_ns": -17.001,
+     "arrival_ns": 27.296,
+     "logic_cells": 48,
+     "modules": [
+      "clock_ibuf",
+      "cpu/u_ibex_core/ex_block_i/alu_i",
+      "cpu/u_ibex_core/id_stage_i",
+      "cpu/u_ibex_core/if_stage_i/gen_prefetch_buffer.prefetch_buffer_i",
+      "cpu/u_ibex_core/ex_block_i/alu_i",
+      "cpu/u_ibex_core/if_stage_i/gen_prefetch_buffer.prefetch_buffer_i",
+      "cpu/u_ibex_core/if_stage_i"
+     ]
+    },
+    {
+     "from": "cpu/u_ibex_core/if_stage_i/instr_rdata_id_o_27_s0",
+     "to": "cpu/gen_regfile_fpga.register_file_i/mem_mem_0_0_s",
+     "slack_ns": -17.001,
+     "arrival_ns": 27.296,
+     "logic_cells": 48,
+     "modules": [
+      "clock_ibuf",
+      "cpu/u_ibex_core/ex_block_i/alu_i",
+      "cpu/u_ibex_core/id_stage_i",
+      "cpu/u_ibex_core/if_stage_i/gen_prefetch_buffer.prefetch_buffer_i",
+      "cpu/u_ibex_core/ex_block_i/alu_i",
+      "cpu/u_ibex_core/if_stage_i/gen_prefetch_buffer.prefetch_buffer_i",
+      "cpu/u_ibex_core/if_stage_i"
+     ]
+    },
+    {
+     "from": "cpu/u_ibex_core/if_stage_i/instr_rdata_id_o_27_s0",
+     "to": "cpu/u_ibex_core/if_stage_i/gen_prefetch_buffer.prefetch_buffer_i/fetch_addr_q_21_s0",
+     "slack_ns": -17.001,
+     "arrival_ns": 27.295,
+     "logic_cells": 50,
+     "modules": [
+      "clock_ibuf",
+      "cpu/u_ibex_core/ex_block_i/alu_i",
+      "cpu/u_ibex_core/id_stage_i",
+      "cpu/u_ibex_core/if_stage_i/gen_prefetch_buffer.prefetch_buffer_i",
+      "cpu/u_ibex_core/ex_block_i/alu_i",
+      "cpu/u_ibex_core/if_stage_i/gen_prefetch_buffer.prefetch_buffer_i",
+      "n43_s4",
+      "cpu/u_ibex_core/if_stage_i/gen_prefetch_buffer.prefetch_buffer_i"
+     ]
+    },
+    {
+     "from": "cpu/u_ibex_core/if_stage_i/instr_rdata_id_o_27_s0",
+     "to": "cpu/u_ibex_core/if_stage_i/gen_prefetch_buffer.prefetch_buffer_i/fetch_addr_q_24_s0",
+     "slack_ns": -17.001,
+     "arrival_ns": 27.295,
+     "logic_cells": 50,
+     "modules": [
+      "clock_ibuf",
+      "cpu/u_ibex_core/ex_block_i/alu_i",
+      "cpu/u_ibex_core/id_stage_i",
+      "cpu/u_ibex_core/if_stage_i/gen_prefetch_buffer.prefetch_buffer_i",
+      "cpu/u_ibex_core/ex_block_i/alu_i",
+      "cpu/u_ibex_core/if_stage_i/gen_prefetch_buffer.prefetch_buffer_i",
+      "n43_s4",
+      "cpu/u_ibex_core/if_stage_i/gen_prefetch_buffer.prefetch_buffer_i"
+     ]
+    }
+   ]
+  }
+ ],
+ "summary": {
+  "placement_failed": false,
+  "fmax_mhz": 45.451,
+  "seeds": [
+   40.211,
+   45.451,
+   45.451
+  ],
+  "perturbations": [
+   [
+    0,
+    40.211,
+    24
+   ],
+   [
+    1,
+    45.451,
+    24
+   ],
+   [
+    2,
+    45.451,
+    24
+   ]
+  ],
+  "lut4": 4185,
+  "ff": 1025,
+  "lutram": 0,
+  "bsram": 6,
+  "dsp": 2,
+  "logic_levels": 24,
+  "critical_path": {
+   "from": "cpu/u_ibex_core/if_stage_i/instr_rdata_id_o_0_s0",
+   "to": "cpu/u_ibex_core/if_stage_i/gen_prefetch_buffer.prefetch_buffer_i/fifo_i/rdata_q_36_s0",
+   "slack_ns": -19.869,
+   "arrival_ns": 30.163,
+   "logic_cells": 50,
+   "modules": [
+    "clock_ibuf",
+    "cpu/u_ibex_core/wb_stage_i",
+    "cpu/u_ibex_core/id_stage_i",
+    "cpu/u_ibex_core/ex_block_i/alu_i",
+    "cpu/u_ibex_core/id_stage_i",
+    "cpu/u_ibex_core/if_stage_i/gen_prefetch_buffer.prefetch_buffer_i",
+    "cpu/u_ibex_core/ex_block_i/alu_i",
+    "cpu/u_ibex_core/if_stage_i/gen_prefetch_buffer.prefetch_buffer_i",
+    "cpu/u_ibex_core/if_stage_i/gen_prefetch_buffer.prefetch_buffer_i/fifo_i",
+    "cpu/u_ibex_core/if_stage_i/compressed_decoder_i",
+    "cpu/u_ibex_core/if_stage_i/gen_prefetch_buffer.prefetch_buffer_i/fifo_i"
+   ]
+  }
+ }
+}

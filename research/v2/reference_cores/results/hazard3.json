@@ -1,0 +1,380 @@
+{
+ "core": "hazard3",
+ "results": [
+  {
+   "place_option": 0,
+   "placement_failed": false,
+   "fmax_mhz": 52.035,
+   "levels": 19,
+   "logic": 2801,
+   "regs": 650,
+   "lutram": 0,
+   "bsram": 6,
+   "dsp": 2,
+   "critical_paths": [
+    {
+     "from": "cpu/core/frontend/buf_contents_31_s0",
+     "to": "cpu/core/x_rs2_select_regs_xm_mw_1_s0",
+     "slack_ns": -14.218,
+     "arrival_ns": 24.512,
+     "logic_cells": 23,
+     "modules": [
+      "clock_ibuf",
+      "cpu/core",
+      "cpu/core/alu",
+      "cpu/core",
+      "cpu/core/decode_u",
+      "cpu/core",
+      "cpu/core/has_muldiv.muldiv",
+      "cpu/core",
+      "cpu/core/decode_u",
+      "cpu/core"
+     ]
+    },
+    {
+     "from": "cpu/core/frontend/buf_contents_31_s0",
+     "to": "cpu/core/x_rs1_select_regs_xm_mw_2_s0",
+     "slack_ns": -14.211,
+     "arrival_ns": 24.505,
+     "logic_cells": 22,
+     "modules": [
+      "clock_ibuf",
+      "cpu/core",
+      "cpu/core/alu",
+      "cpu/core",
+      "cpu/core/decode_u",
+      "cpu/core",
+      "cpu/core/has_muldiv.muldiv",
+      "cpu/core",
+      "cpu/core/decode_u",
+      "cpu/core"
+     ]
+    },
+    {
+     "from": "cpu/core/frontend/buf_contents_31_s0",
+     "to": "cpu/core/x_rs2_select_regs_xm_mw_0_s0",
+     "slack_ns": -14.066,
+     "arrival_ns": 24.36,
+     "logic_cells": 23,
+     "modules": [
+      "clock_ibuf",
+      "cpu/core",
+      "cpu/core/alu",
+      "cpu/core",
+      "cpu/core/decode_u",
+      "cpu/core",
+      "cpu/core/has_muldiv.muldiv",
+      "cpu/core",
+      "cpu/core/decode_u",
+      "cpu/core"
+     ]
+    },
+    {
+     "from": "cpu/core/frontend/buf_contents_31_s0",
+     "to": "cpu/core/x_rs1_select_regs_xm_mw_1_s0",
+     "slack_ns": -14.012,
+     "arrival_ns": 24.306,
+     "logic_cells": 22,
+     "modules": [
+      "clock_ibuf",
+      "cpu/core",
+      "cpu/core/alu",
+      "cpu/core",
+      "cpu/core/decode_u",
+      "cpu/core",
+      "cpu/core/has_muldiv.muldiv",
+      "cpu/core",
+      "cpu/core/decode_u",
+      "cpu/core"
+     ]
+    },
+    {
+     "from": "cpu/core/frontend/buf_contents_31_s0",
+     "to": "cpu/core/x_rs2_select_regs_xm_mw_2_s0",
+     "slack_ns": -13.975,
+     "arrival_ns": 24.269,
+     "logic_cells": 23,
+     "modules": [
+      "clock_ibuf",
+      "cpu/core",
+      "cpu/core/alu",
+      "cpu/core",
+      "cpu/core/decode_u",
+      "cpu/core",
+      "cpu/core/has_muldiv.muldiv",
+      "cpu/core",
+      "cpu/core/decode_u",
+      "cpu/core"
+     ]
+    }
+   ]
+  },
+  {
+   "place_option": 1,
+   "placement_failed": false,
+   "fmax_mhz": 50.449,
+   "levels": 19,
+   "logic": 2801,
+   "regs": 650,
+   "lutram": 0,
+   "bsram": 6,
+   "dsp": 2,
+   "critical_paths": [
+    {
+     "from": "cpu/core/frontend/buf_contents_4_s0",
+     "to": "cpu/core/x_rs2_select_regs_xm_mw_0_s0",
+     "slack_ns": -14.822,
+     "arrival_ns": 25.116,
+     "logic_cells": 21,
+     "modules": [
+      "clock_ibuf",
+      "cpu/core",
+      "cpu/core/alu",
+      "cpu/core",
+      "cpu/core/decode_u",
+      "cpu/core",
+      "cpu/core/has_muldiv.muldiv",
+      "cpu/core",
+      "cpu/core/decode_u",
+      "cpu/core"
+     ]
+    },
+    {
+     "from": "cpu/core/frontend/buf_contents_4_s0",
+     "to": "cpu/core/x_rs2_select_regs_xm_mw_2_s0",
+     "slack_ns": -14.822,
+     "arrival_ns": 25.116,
+     "logic_cells": 21,
+     "modules": [
+      "clock_ibuf",
+      "cpu/core",
+      "cpu/core/alu",
+      "cpu/core",
+      "cpu/core/decode_u",
+      "cpu/core",
+      "cpu/core/has_muldiv.muldiv",
+      "cpu/core",
+      "cpu/core/decode_u",
+      "cpu/core"
+     ]
+    },
+    {
+     "from": "cpu/core/frontend/buf_contents_4_s0",
+     "to": "cpu/core/x_rs2_select_regs_xm_mw_1_s0",
+     "slack_ns": -14.806,
+     "arrival_ns": 25.1,
+     "logic_cells": 21,
+     "modules": [
+      "clock_ibuf",
+      "cpu/core",
+      "cpu/core/alu",
+      "cpu/core",
+      "cpu/core/decode_u",
+      "cpu/core",
+      "cpu/core/has_muldiv.muldiv",
+      "cpu/core",
+      "cpu/core/decode_u",
+      "cpu/core"
+     ]
+    },
+    {
+     "from": "cpu/core/frontend/buf_contents_4_s0",
+     "to": "cpu/core/x_rs1_select_regs_xm_mw_0_s0",
+     "slack_ns": -14.771,
+     "arrival_ns": 25.065,
+     "logic_cells": 23,
+     "modules": [
+      "clock_ibuf",
+      "cpu/core",
+      "cpu/core/alu",
+      "cpu/core",
+      "cpu/core/decode_u",
+      "cpu/core",
+      "cpu/core/has_muldiv.muldiv",
+      "cpu/core",
+      "cpu/core/decode_u",
+      "cpu/core"
+     ]
+    },
+    {
+     "from": "cpu/core/frontend/buf_contents_4_s0",
+     "to": "cpu/core/x_rs1_select_regs_xm_mw_1_s0",
+     "slack_ns": -14.771,
+     "arrival_ns": 25.065,
+     "logic_cells": 23,
+     "modules": [
+      "clock_ibuf",
+      "cpu/core",
+      "cpu/core/alu",
+      "cpu/core",
+      "cpu/core/decode_u",
+      "cpu/core",
+      "cpu/core/has_muldiv.muldiv",
+      "cpu/core",
+      "cpu/core/decode_u",
+      "cpu/core"
+     ]
+    }
+   ]
+  },
+  {
+   "place_option": 2,
+   "placement_failed": false,
+   "fmax_mhz": 50.449,
+   "levels": 19,
+   "logic": 2801,
+   "regs": 650,
+   "lutram": 0,
+   "bsram": 6,
+   "dsp": 2,
+   "critical_paths": [
+    {
+     "from": "cpu/core/frontend/buf_contents_4_s0",
+     "to": "cpu/core/x_rs2_select_regs_xm_mw_0_s0",
+     "slack_ns": -14.822,
+     "arrival_ns": 25.116,
+     "logic_cells": 21,
+     "modules": [
+      "clock_ibuf",
+      "cpu/core",
+      "cpu/core/alu",
+      "cpu/core",
+      "cpu/core/decode_u",
+      "cpu/core",
+      "cpu/core/has_muldiv.muldiv",
+      "cpu/core",
+      "cpu/core/decode_u",
+      "cpu/core"
+     ]
+    },
+    {
+     "from": "cpu/core/frontend/buf_contents_4_s0",
+     "to": "cpu/core/x_rs2_select_regs_xm_mw_2_s0",
+     "slack_ns": -14.822,
+     "arrival_ns": 25.116,
+     "logic_cells": 21,
+     "modules": [
+      "clock_ibuf",
+      "cpu/core",
+      "cpu/core/alu",
+      "cpu/core",
+      "cpu/core/decode_u",
+      "cpu/core",
+      "cpu/core/has_muldiv.muldiv",
+      "cpu/core",
+      "cpu/core/decode_u",
+      "cpu/core"
+     ]
+    },
+    {
+     "from": "cpu/core/frontend/buf_contents_4_s0",
+     "to": "cpu/core/x_rs2_select_regs_xm_mw_1_s0",
+     "slack_ns": -14.806,
+     "arrival_ns": 25.1,
+     "logic_cells": 21,
+     "modules": [
+      "clock_ibuf",
+      "cpu/core",
+      "cpu/core/alu",
+      "cpu/core",
+      "cpu/core/decode_u",
+      "cpu/core",
+      "cpu/core/has_muldiv.muldiv",
+      "cpu/core",
+      "cpu/core/decode_u",
+      "cpu/core"
+     ]
+    },
+    {
+     "from": "cpu/core/frontend/buf_contents_4_s0",
+     "to": "cpu/core/x_rs1_select_regs_xm_mw_0_s0",
+     "slack_ns": -14.771,
+     "arrival_ns": 25.065,
+     "logic_cells": 23,
+     "modules": [
+      "clock_ibuf",
+      "cpu/core",
+      "cpu/core/alu",
+      "cpu/core",
+      "cpu/core/decode_u",
+      "cpu/core",
+      "cpu/core/has_muldiv.muldiv",
+      "cpu/core",
+      "cpu/core/decode_u",
+      "cpu/core"
+     ]
+    },
+    {
+     "from": "cpu/core/frontend/buf_contents_4_s0",
+     "to": "cpu/core/x_rs1_select_regs_xm_mw_1_s0",
+     "slack_ns": -14.771,
+     "arrival_ns": 25.065,
+     "logic_cells": 23,
+     "modules": [
+      "clock_ibuf",
+      "cpu/core",
+      "cpu/core/alu",
+      "cpu/core",
+      "cpu/core/decode_u",
+      "cpu/core",
+      "cpu/core/has_muldiv.muldiv",
+      "cpu/core",
+      "cpu/core/decode_u",
+      "cpu/core"
+     ]
+    }
+   ]
+  }
+ ],
+ "summary": {
+  "placement_failed": false,
+  "fmax_mhz": 50.449,
+  "seeds": [
+   52.035,
+   50.449,
+   50.449
+  ],
+  "perturbations": [
+   [
+    0,
+    52.035,
+    19
+   ],
+   [
+    1,
+    50.449,
+    19
+   ],
+   [
+    2,
+    50.449,
+    19
+   ]
+  ],
+  "lut4": 2801,
+  "ff": 650,
+  "lutram": 0,
+  "bsram": 6,
+  "dsp": 2,
+  "logic_levels": 19,
+  "critical_path": {
+   "from": "cpu/core/frontend/buf_contents_31_s0",
+   "to": "cpu/core/x_rs2_select_regs_xm_mw_1_s0",
+   "slack_ns": -14.218,
+   "arrival_ns": 24.512,
+   "logic_cells": 23,
+   "modules": [
+    "clock_ibuf",
+    "cpu/core",
+    "cpu/core/alu",
+    "cpu/core",
+    "cpu/core/decode_u",
+    "cpu/core",
+    "cpu/core/has_muldiv.muldiv",
+    "cpu/core",
+    "cpu/core/decode_u",
+    "cpu/core"
+   ]
+  }
+ }
+}

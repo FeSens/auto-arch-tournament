@@ -1,0 +1,358 @@
+{
+ "core": "ueriscv",
+ "results": [
+  {
+   "place_option": 0,
+   "placement_failed": false,
+   "fmax_mhz": 46.329,
+   "levels": 22,
+   "logic": 4952,
+   "regs": 2320,
+   "lutram": 0,
+   "bsram": 4,
+   "dsp": 2,
+   "critical_paths": [
+    {
+     "from": "cpu/u_lsu/mem_unaligned_e2_q_s0",
+     "to": "cpu/u_fetch/branch_pc_q_27_s1",
+     "slack_ns": -16.585,
+     "arrival_ns": 26.879,
+     "logic_cells": 52,
+     "modules": [
+      "clock_ibuf",
+      "cpu/u_exec",
+      "cpu/u_issue/u_pipe_ctrl",
+      "cpu/u_issue",
+      "cpu/u_exec",
+      "cpu/u_issue",
+      "cpu/u_exec",
+      "cpu/u_issue",
+      "cpu/u_fetch"
+     ]
+    },
+    {
+     "from": "cpu/u_lsu/mem_unaligned_e2_q_s0",
+     "to": "cpu/u_fetch/branch_pc_q_3_s1",
+     "slack_ns": -16.572,
+     "arrival_ns": 26.867,
+     "logic_cells": 52,
+     "modules": [
+      "clock_ibuf",
+      "cpu/u_exec",
+      "cpu/u_issue/u_pipe_ctrl",
+      "cpu/u_issue",
+      "cpu/u_exec",
+      "cpu/u_issue",
+      "cpu/u_exec",
+      "cpu/u_issue",
+      "cpu/u_fetch"
+     ]
+    },
+    {
+     "from": "cpu/u_lsu/mem_unaligned_e2_q_s0",
+     "to": "cpu/u_fetch/branch_pc_q_19_s1",
+     "slack_ns": -16.559,
+     "arrival_ns": 26.854,
+     "logic_cells": 52,
+     "modules": [
+      "clock_ibuf",
+      "cpu/u_exec",
+      "cpu/u_issue/u_pipe_ctrl",
+      "cpu/u_issue",
+      "cpu/u_exec",
+      "cpu/u_issue",
+      "cpu/u_exec",
+      "cpu/u_issue",
+      "cpu/u_fetch"
+     ]
+    },
+    {
+     "from": "dmem_0_dmem_0_0_0_s",
+     "to": "cpu/u_fetch/branch_pc_q_22_s1",
+     "slack_ns": -16.551,
+     "arrival_ns": 26.845,
+     "logic_cells": 17,
+     "modules": [
+      "clock_ibuf",
+      "cpu/u_lsu",
+      "cpu/u_issue/u_pipe_ctrl",
+      "cpu/u_issue",
+      "cpu/u_exec",
+      "cpu/u_fetch"
+     ]
+    },
+    {
+     "from": "cpu/u_fetch/skid_valid_q_s0",
+     "to": "cpu/u_exec/result_q_27_s0",
+     "slack_ns": -16.534,
+     "arrival_ns": 26.828,
+     "logic_cells": 29,
+     "modules": [
+      "clock_ibuf",
+      "cpu/u_fetch",
+      "cpu/u_exec",
+      "cpu/u_issue",
+      "cpu/u_exec",
+      "cpu/u_exec/u_alu"
+     ]
+    }
+   ]
+  },
+  {
+   "place_option": 1,
+   "placement_failed": false,
+   "fmax_mhz": 44.49,
+   "levels": 22,
+   "logic": 4952,
+   "regs": 2320,
+   "lutram": 0,
+   "bsram": 4,
+   "dsp": 2,
+   "critical_paths": [
+    {
+     "from": "d_ack_q_s0",
+     "to": "cpu/u_fetch/branch_pc_q_6_s1",
+     "slack_ns": -17.477,
+     "arrival_ns": 27.771,
+     "logic_cells": 52,
+     "modules": [
+      "clock_ibuf",
+      "cpu/u_exec",
+      "cpu/u_issue/u_pipe_ctrl",
+      "cpu/u_issue",
+      "cpu/u_exec",
+      "cpu/u_issue",
+      "cpu/u_exec",
+      "cpu/u_issue",
+      "cpu/u_fetch"
+     ]
+    },
+    {
+     "from": "d_ack_q_s0",
+     "to": "cpu/u_fetch/branch_pc_q_18_s1",
+     "slack_ns": -17.477,
+     "arrival_ns": 27.771,
+     "logic_cells": 52,
+     "modules": [
+      "clock_ibuf",
+      "cpu/u_exec",
+      "cpu/u_issue/u_pipe_ctrl",
+      "cpu/u_issue",
+      "cpu/u_exec",
+      "cpu/u_issue",
+      "cpu/u_exec",
+      "cpu/u_issue",
+      "cpu/u_fetch"
+     ]
+    },
+    {
+     "from": "d_ack_q_s0",
+     "to": "cpu/u_fetch/branch_pc_q_31_s1",
+     "slack_ns": -17.477,
+     "arrival_ns": 27.771,
+     "logic_cells": 52,
+     "modules": [
+      "clock_ibuf",
+      "cpu/u_exec",
+      "cpu/u_issue/u_pipe_ctrl",
+      "cpu/u_issue",
+      "cpu/u_exec",
+      "cpu/u_issue",
+      "cpu/u_exec",
+      "cpu/u_issue",
+      "cpu/u_fetch"
+     ]
+    },
+    {
+     "from": "d_ack_q_s0",
+     "to": "cpu/u_fetch/branch_pc_q_15_s1",
+     "slack_ns": -17.474,
+     "arrival_ns": 27.768,
+     "logic_cells": 52,
+     "modules": [
+      "clock_ibuf",
+      "cpu/u_exec",
+      "cpu/u_issue/u_pipe_ctrl",
+      "cpu/u_issue",
+      "cpu/u_exec",
+      "cpu/u_issue",
+      "cpu/u_exec",
+      "cpu/u_issue",
+      "cpu/u_fetch"
+     ]
+    },
+    {
+     "from": "d_ack_q_s0",
+     "to": "cpu/u_fetch/branch_pc_q_16_s1",
+     "slack_ns": -17.474,
+     "arrival_ns": 27.768,
+     "logic_cells": 52,
+     "modules": [
+      "clock_ibuf",
+      "cpu/u_exec",
+      "cpu/u_issue/u_pipe_ctrl",
+      "cpu/u_issue",
+      "cpu/u_exec",
+      "cpu/u_issue",
+      "cpu/u_exec",
+      "cpu/u_issue",
+      "cpu/u_fetch"
+     ]
+    }
+   ]
+  },
+  {
+   "place_option": 2,
+   "placement_failed": false,
+   "fmax_mhz": 44.49,
+   "levels": 22,
+   "logic": 4952,
+   "regs": 2320,
+   "lutram": 0,
+   "bsram": 4,
+   "dsp": 2,
+   "critical_paths": [
+    {
+     "from": "d_ack_q_s0",
+     "to": "cpu/u_fetch/branch_pc_q_6_s1",
+     "slack_ns": -17.477,
+     "arrival_ns": 27.771,
+     "logic_cells": 52,
+     "modules": [
+      "clock_ibuf",
+      "cpu/u_exec",
+      "cpu/u_issue/u_pipe_ctrl",
+      "cpu/u_issue",
+      "cpu/u_exec",
+      "cpu/u_issue",
+      "cpu/u_exec",
+      "cpu/u_issue",
+      "cpu/u_fetch"
+     ]
+    },
+    {
+     "from": "d_ack_q_s0",
+     "to": "cpu/u_fetch/branch_pc_q_18_s1",
+     "slack_ns": -17.477,
+     "arrival_ns": 27.771,
+     "logic_cells": 52,
+     "modules": [
+      "clock_ibuf",
+      "cpu/u_exec",
+      "cpu/u_issue/u_pipe_ctrl",
+      "cpu/u_issue",
+      "cpu/u_exec",
+      "cpu/u_issue",
+      "cpu/u_exec",
+      "cpu/u_issue",
+      "cpu/u_fetch"
+     ]
+    },
+    {
+     "from": "d_ack_q_s0",
+     "to": "cpu/u_fetch/branch_pc_q_31_s1",
+     "slack_ns": -17.477,
+     "arrival_ns": 27.771,
+     "logic_cells": 52,
+     "modules": [
+      "clock_ibuf",
+      "cpu/u_exec",
+      "cpu/u_issue/u_pipe_ctrl",
+      "cpu/u_issue",
+      "cpu/u_exec",
+      "cpu/u_issue",
+      "cpu/u_exec",
+      "cpu/u_issue",
+      "cpu/u_fetch"
+     ]
+    },
+    {
+     "from": "d_ack_q_s0",
+     "to": "cpu/u_fetch/branch_pc_q_15_s1",
+     "slack_ns": -17.474,
+     "arrival_ns": 27.768,
+     "logic_cells": 52,
+     "modules": [
+      "clock_ibuf",
+      "cpu/u_exec",
+      "cpu/u_issue/u_pipe_ctrl",
+      "cpu/u_issue",
+      "cpu/u_exec",
+      "cpu/u_issue",
+      "cpu/u_exec",
+      "cpu/u_issue",
+      "cpu/u_fetch"
+     ]
+    },
+    {
+     "from": "d_ack_q_s0",
+     "to": "cpu/u_fetch/branch_pc_q_16_s1",
+     "slack_ns": -17.474,
+     "arrival_ns": 27.768,
+     "logic_cells": 52,
+     "modules": [
+      "clock_ibuf",
+      "cpu/u_exec",
+      "cpu/u_issue/u_pipe_ctrl",
+      "cpu/u_issue",
+      "cpu/u_exec",
+      "cpu/u_issue",
+      "cpu/u_exec",
+      "cpu/u_issue",
+      "cpu/u_fetch"
+     ]
+    }
+   ]
+  }
+ ],
+ "summary": {
+  "placement_failed": false,
+  "fmax_mhz": 44.49,
+  "seeds": [
+   46.329,
+   44.49,
+   44.49
+  ],
+  "perturbations": [
+   [
+    0,
+    46.329,
+    22
+   ],
+   [
+    1,
+    44.49,
+    22
+   ],
+   [
+    2,
+    44.49,
+    22
+   ]
+  ],
+  "lut4": 4952,
+  "ff": 2320,
+  "lutram": 0,
+  "bsram": 4,
+  "dsp": 2,
+  "logic_levels": 22,
+  "critical_path": {
+   "from": "cpu/u_lsu/mem_unaligned_e2_q_s0",
+   "to": "cpu/u_fetch/branch_pc_q_27_s1",
+   "slack_ns": -16.585,
+   "arrival_ns": 26.879,
+   "logic_cells": 52,
+   "modules": [
+    "clock_ibuf",
+    "cpu/u_exec",
+    "cpu/u_issue/u_pipe_ctrl",
+    "cpu/u_issue",
+    "cpu/u_exec",
+    "cpu/u_issue",
+    "cpu/u_exec",
+    "cpu/u_issue",
+    "cpu/u_fetch"
+   ]
+  }
+ }
+}

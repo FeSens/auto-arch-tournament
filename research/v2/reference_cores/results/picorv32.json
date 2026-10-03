@@ -1,0 +1,252 @@
+{
+ "core": "picorv32",
+ "results": [
+  {
+   "place_option": 0,
+   "placement_failed": false,
+   "fmax_mhz": 111.749,
+   "levels": 8,
+   "logic": 2486,
+   "regs": 930,
+   "lutram": 0,
+   "bsram": 6,
+   "dsp": 2,
+   "critical_paths": [
+    {
+     "from": "cpu/instr_sub_s0",
+     "to": "cpu/alu_out_q_21_s0",
+     "slack_ns": -3.949,
+     "arrival_ns": 14.243,
+     "logic_cells": 26,
+     "modules": [
+      "clock_ibuf",
+      "cpu"
+     ]
+    },
+    {
+     "from": "cpu/instr_sub_s0",
+     "to": "cpu/alu_out_q_18_s0",
+     "slack_ns": -3.949,
+     "arrival_ns": 14.243,
+     "logic_cells": 22,
+     "modules": [
+      "clock_ibuf",
+      "cpu"
+     ]
+    },
+    {
+     "from": "cpu/reg_op1_11_s0",
+     "to": "cpu/decoder_trigger_s0",
+     "slack_ns": -3.894,
+     "arrival_ns": 14.188,
+     "logic_cells": 25,
+     "modules": [
+      "clock_ibuf",
+      "cpu"
+     ]
+    },
+    {
+     "from": "cpu/instr_sub_s0",
+     "to": "cpu/alu_out_q_30_s0",
+     "slack_ns": -3.892,
+     "arrival_ns": 14.186,
+     "logic_cells": 34,
+     "modules": [
+      "clock_ibuf",
+      "cpu"
+     ]
+    },
+    {
+     "from": "cpu/instr_sub_s0",
+     "to": "cpu/alu_out_q_16_s0",
+     "slack_ns": -3.879,
+     "arrival_ns": 14.173,
+     "logic_cells": 21,
+     "modules": [
+      "clock_ibuf",
+      "cpu"
+     ]
+    }
+   ]
+  },
+  {
+   "place_option": 1,
+   "placement_failed": false,
+   "fmax_mhz": 114.828,
+   "levels": 10,
+   "logic": 2486,
+   "regs": 930,
+   "lutram": 0,
+   "bsram": 6,
+   "dsp": 2,
+   "critical_paths": [
+    {
+     "from": "cpu/pcpi_div/dividend_0_s0",
+     "to": "cpu/pcpi_div/quotient_30_s0",
+     "slack_ns": -3.709,
+     "arrival_ns": 14.003,
+     "logic_cells": 37,
+     "modules": [
+      "clock_ibuf",
+      "cpu/pcpi_div"
+     ]
+    },
+    {
+     "from": "cpu/pcpi_div/dividend_0_s0",
+     "to": "cpu/pcpi_div/quotient_16_s0",
+     "slack_ns": -3.704,
+     "arrival_ns": 13.998,
+     "logic_cells": 37,
+     "modules": [
+      "clock_ibuf",
+      "cpu/pcpi_div"
+     ]
+    },
+    {
+     "from": "cpu/pcpi_div/dividend_0_s0",
+     "to": "cpu/pcpi_div/quotient_17_s0",
+     "slack_ns": -3.703,
+     "arrival_ns": 13.997,
+     "logic_cells": 37,
+     "modules": [
+      "clock_ibuf",
+      "cpu/pcpi_div"
+     ]
+    },
+    {
+     "from": "cpu/pcpi_div/dividend_0_s0",
+     "to": "cpu/pcpi_div/dividend_5_s0",
+     "slack_ns": -3.689,
+     "arrival_ns": 13.983,
+     "logic_cells": 37,
+     "modules": [
+      "clock_ibuf",
+      "cpu/pcpi_div"
+     ]
+    },
+    {
+     "from": "cpu/pcpi_div/dividend_0_s0",
+     "to": "cpu/pcpi_div/dividend_7_s0",
+     "slack_ns": -3.689,
+     "arrival_ns": 13.983,
+     "logic_cells": 37,
+     "modules": [
+      "clock_ibuf",
+      "cpu/pcpi_div"
+     ]
+    }
+   ]
+  },
+  {
+   "place_option": 2,
+   "placement_failed": false,
+   "fmax_mhz": 114.828,
+   "levels": 10,
+   "logic": 2486,
+   "regs": 930,
+   "lutram": 0,
+   "bsram": 6,
+   "dsp": 2,
+   "critical_paths": [
+    {
+     "from": "cpu/pcpi_div/dividend_0_s0",
+     "to": "cpu/pcpi_div/quotient_30_s0",
+     "slack_ns": -3.709,
+     "arrival_ns": 14.003,
+     "logic_cells": 37,
+     "modules": [
+      "clock_ibuf",
+      "cpu/pcpi_div"
+     ]
+    },
+    {
+     "from": "cpu/pcpi_div/dividend_0_s0",
+     "to": "cpu/pcpi_div/quotient_16_s0",
+     "slack_ns": -3.704,
+     "arrival_ns": 13.998,
+     "logic_cells": 37,
+     "modules": [
+      "clock_ibuf",
+      "cpu/pcpi_div"
+     ]
+    },
+    {
+     "from": "cpu/pcpi_div/dividend_0_s0",
+     "to": "cpu/pcpi_div/quotient_17_s0",
+     "slack_ns": -3.703,
+     "arrival_ns": 13.997,
+     "logic_cells": 37,
+     "modules": [
+      "clock_ibuf",
+      "cpu/pcpi_div"
+     ]
+    },
+    {
+     "from": "cpu/pcpi_div/dividend_0_s0",
+     "to": "cpu/pcpi_div/dividend_5_s0",
+     "slack_ns": -3.689,
+     "arrival_ns": 13.983,
+     "logic_cells": 37,
+     "modules": [
+      "clock_ibuf",
+      "cpu/pcpi_div"
+     ]
+    },
+    {
+     "from": "cpu/pcpi_div/dividend_0_s0",
+     "to": "cpu/pcpi_div/dividend_7_s0",
+     "slack_ns": -3.689,
+     "arrival_ns": 13.983,
+     "logic_cells": 37,
+     "modules": [
+      "clock_ibuf",
+      "cpu/pcpi_div"
+     ]
+    }
+   ]
+  }
+ ],
+ "summary": {
+  "placement_failed": false,
+  "fmax_mhz": 114.828,
+  "seeds": [
+   111.749,
+   114.828,
+   114.828
+  ],
+  "perturbations": [
+   [
+    0,
+    111.749,
+    8
+   ],
+   [
+    1,
+    114.828,
+    10
+   ],
+   [
+    2,
+    114.828,
+    10
+   ]
+  ],
+  "lut4": 2486,
+  "ff": 930,
+  "lutram": 0,
+  "bsram": 6,
+  "dsp": 2,
+  "logic_levels": 8,
+  "critical_path": {
+   "from": "cpu/instr_sub_s0",
+   "to": "cpu/alu_out_q_21_s0",
+   "slack_ns": -3.949,
+   "arrival_ns": 14.243,
+   "logic_cells": 26,
+   "modules": [
+    "clock_ibuf",
+    "cpu"
+   ]
+  }
+ }
+}

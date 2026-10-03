@@ -1,0 +1,271 @@
+{
+ "core": "neorv32",
+ "results": [
+  {
+   "place_option": 0,
+   "placement_failed": false,
+   "fmax_mhz": 84.198,
+   "levels": 12,
+   "logic": 2058,
+   "regs": 820,
+   "lutram": 8,
+   "bsram": 6,
+   "dsp": 2,
+   "critical_paths": [
+    {
+     "from": "cpu/cpu_inst/cpu_regfile_inst/rs2_rs2_0_0_s",
+     "to": "cpu/cpu_inst/cpu_frontend_inst/fetch.state_0_s1",
+     "slack_ns": -6.877,
+     "arrival_ns": 17.171,
+     "logic_cells": 38,
+     "modules": [
+      "clock_ibuf",
+      "cpu/cpu_inst/cpu_alu_inst",
+      "cpu/cpu_inst/cpu_control_inst",
+      "cpu/cpu_inst/cpu_frontend_inst"
+     ]
+    },
+    {
+     "from": "cpu/cpu_inst/cpu_regfile_inst/rs2_rs2_0_0_s",
+     "to": "cpu/cpu_inst/cpu_frontend_inst/fetch.state_1_s1",
+     "slack_ns": -6.877,
+     "arrival_ns": 17.171,
+     "logic_cells": 38,
+     "modules": [
+      "clock_ibuf",
+      "cpu/cpu_inst/cpu_alu_inst",
+      "cpu/cpu_inst/cpu_control_inst",
+      "cpu/cpu_inst/cpu_frontend_inst"
+     ]
+    },
+    {
+     "from": "cpu/cpu_inst/cpu_regfile_inst/rs2_rs2_0_0_s",
+     "to": "cpu/cpu_inst/cpu_control_inst/exec.pc2_28_s2",
+     "slack_ns": -6.877,
+     "arrival_ns": 17.171,
+     "logic_cells": 37,
+     "modules": [
+      "clock_ibuf",
+      "cpu/cpu_inst/cpu_alu_inst",
+      "cpu/cpu_inst/cpu_control_inst"
+     ]
+    },
+    {
+     "from": "cpu/cpu_inst/cpu_regfile_inst/rs2_rs2_0_0_s",
+     "to": "cpu/cpu_inst/cpu_control_inst/exec.pc2_13_s2",
+     "slack_ns": -6.874,
+     "arrival_ns": 17.168,
+     "logic_cells": 37,
+     "modules": [
+      "clock_ibuf",
+      "cpu/cpu_inst/cpu_alu_inst",
+      "cpu/cpu_inst/cpu_control_inst"
+     ]
+    },
+    {
+     "from": "cpu/cpu_inst/cpu_regfile_inst/rs2_rs2_0_0_s",
+     "to": "cpu/cpu_inst/cpu_control_inst/exec.pc2_1_s2",
+     "slack_ns": -6.87,
+     "arrival_ns": 17.165,
+     "logic_cells": 36,
+     "modules": [
+      "clock_ibuf",
+      "cpu/cpu_inst/cpu_alu_inst",
+      "cpu/cpu_inst/cpu_control_inst"
+     ]
+    }
+   ]
+  },
+  {
+   "place_option": 1,
+   "placement_failed": false,
+   "fmax_mhz": 92.028,
+   "levels": 11,
+   "logic": 2058,
+   "regs": 820,
+   "lutram": 8,
+   "bsram": 6,
+   "dsp": 2,
+   "critical_paths": [
+    {
+     "from": "cpu/cpu_inst/cpu_regfile_inst/rs2_rs2_0_0_s",
+     "to": "cpu/cpu_inst/cpu_control_inst/exec.pc2_30_s2",
+     "slack_ns": -5.866,
+     "arrival_ns": 16.161,
+     "logic_cells": 37,
+     "modules": [
+      "clock_ibuf",
+      "cpu/cpu_inst/cpu_alu_inst",
+      "cpu/cpu_inst/cpu_control_inst"
+     ]
+    },
+    {
+     "from": "cpu/cpu_inst/cpu_regfile_inst/rs2_rs2_0_0_s",
+     "to": "cpu/cpu_inst/cpu_control_inst/exec.pc2_25_s2",
+     "slack_ns": -5.866,
+     "arrival_ns": 16.16,
+     "logic_cells": 37,
+     "modules": [
+      "clock_ibuf",
+      "cpu/cpu_inst/cpu_alu_inst",
+      "cpu/cpu_inst/cpu_control_inst"
+     ]
+    },
+    {
+     "from": "cpu/cpu_inst/cpu_regfile_inst/rs2_rs2_0_0_s",
+     "to": "cpu/cpu_inst/cpu_control_inst/exec.pc2_16_s2",
+     "slack_ns": -5.864,
+     "arrival_ns": 16.159,
+     "logic_cells": 37,
+     "modules": [
+      "clock_ibuf",
+      "cpu/cpu_inst/cpu_alu_inst",
+      "cpu/cpu_inst/cpu_control_inst"
+     ]
+    },
+    {
+     "from": "cpu/cpu_inst/cpu_regfile_inst/rs2_rs2_0_0_s",
+     "to": "cpu/cpu_inst/cpu_control_inst/exec.pc2_26_s2",
+     "slack_ns": -5.864,
+     "arrival_ns": 16.159,
+     "logic_cells": 37,
+     "modules": [
+      "clock_ibuf",
+      "cpu/cpu_inst/cpu_alu_inst",
+      "cpu/cpu_inst/cpu_control_inst"
+     ]
+    },
+    {
+     "from": "cpu/cpu_inst/cpu_regfile_inst/rs1_rs1_0_0_s",
+     "to": "cpu/cpu_inst/cpu_regfile_inst/rs1_rs1_0_0_s",
+     "slack_ns": -5.864,
+     "arrival_ns": 16.158,
+     "logic_cells": 7,
+     "modules": [
+      "clock_ibuf",
+      "cpu/cpu_inst/cpu_alu_inst",
+      "cpu/cpu_inst"
+     ]
+    }
+   ]
+  },
+  {
+   "place_option": 2,
+   "placement_failed": false,
+   "fmax_mhz": 92.028,
+   "levels": 11,
+   "logic": 2058,
+   "regs": 820,
+   "lutram": 8,
+   "bsram": 6,
+   "dsp": 2,
+   "critical_paths": [
+    {
+     "from": "cpu/cpu_inst/cpu_regfile_inst/rs2_rs2_0_0_s",
+     "to": "cpu/cpu_inst/cpu_control_inst/exec.pc2_30_s2",
+     "slack_ns": -5.866,
+     "arrival_ns": 16.161,
+     "logic_cells": 37,
+     "modules": [
+      "clock_ibuf",
+      "cpu/cpu_inst/cpu_alu_inst",
+      "cpu/cpu_inst/cpu_control_inst"
+     ]
+    },
+    {
+     "from": "cpu/cpu_inst/cpu_regfile_inst/rs2_rs2_0_0_s",
+     "to": "cpu/cpu_inst/cpu_control_inst/exec.pc2_25_s2",
+     "slack_ns": -5.866,
+     "arrival_ns": 16.16,
+     "logic_cells": 37,
+     "modules": [
+      "clock_ibuf",
+      "cpu/cpu_inst/cpu_alu_inst",
+      "cpu/cpu_inst/cpu_control_inst"
+     ]
+    },
+    {
+     "from": "cpu/cpu_inst/cpu_regfile_inst/rs2_rs2_0_0_s",
+     "to": "cpu/cpu_inst/cpu_control_inst/exec.pc2_16_s2",
+     "slack_ns": -5.864,
+     "arrival_ns": 16.159,
+     "logic_cells": 37,
+     "modules": [
+      "clock_ibuf",
+      "cpu/cpu_inst/cpu_alu_inst",
+      "cpu/cpu_inst/cpu_control_inst"
+     ]
+    },
+    {
+     "from": "cpu/cpu_inst/cpu_regfile_inst/rs2_rs2_0_0_s",
+     "to": "cpu/cpu_inst/cpu_control_inst/exec.pc2_26_s2",
+     "slack_ns": -5.864,
+     "arrival_ns": 16.159,
+     "logic_cells": 37,
+     "modules": [
+      "clock_ibuf",
+      "cpu/cpu_inst/cpu_alu_inst",
+      "cpu/cpu_inst/cpu_control_inst"
+     ]
+    },
+    {
+     "from": "cpu/cpu_inst/cpu_regfile_inst/rs1_rs1_0_0_s",
+     "to": "cpu/cpu_inst/cpu_regfile_inst/rs1_rs1_0_0_s",
+     "slack_ns": -5.864,
+     "arrival_ns": 16.158,
+     "logic_cells": 7,
+     "modules": [
+      "clock_ibuf",
+      "cpu/cpu_inst/cpu_alu_inst",
+      "cpu/cpu_inst"
+     ]
+    }
+   ]
+  }
+ ],
+ "summary": {
+  "placement_failed": false,
+  "fmax_mhz": 92.028,
+  "seeds": [
+   84.198,
+   92.028,
+   92.028
+  ],
+  "perturbations": [
+   [
+    0,
+    84.198,
+    12
+   ],
+   [
+    1,
+    92.028,
+    11
+   ],
+   [
+    2,
+    92.028,
+    11
+   ]
+  ],
+  "lut4": 2058,
+  "ff": 820,
+  "lutram": 8,
+  "bsram": 6,
+  "dsp": 2,
+  "logic_levels": 12,
+  "critical_path": {
+   "from": "cpu/cpu_inst/cpu_regfile_inst/rs2_rs2_0_0_s",
+   "to": "cpu/cpu_inst/cpu_frontend_inst/fetch.state_0_s1",
+   "slack_ns": -6.877,
+   "arrival_ns": 17.171,
+   "logic_cells": 38,
+   "modules": [
+    "clock_ibuf",
+    "cpu/cpu_inst/cpu_alu_inst",
+    "cpu/cpu_inst/cpu_control_inst",
+    "cpu/cpu_inst/cpu_frontend_inst"
+   ]
+  }
+ }
+}
