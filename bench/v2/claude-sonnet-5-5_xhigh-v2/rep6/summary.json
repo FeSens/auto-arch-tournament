@@ -1,0 +1,105 @@
+{
+  "model": "claude-sonnet-5-5_xhigh-v2",
+  "rep": 6,
+  "started_at": "2026-10-03T00:02:01+00:00",
+  "ended_at": null,
+  "wall_clock_sec": null,
+  "iterations": 46,
+  "accepted": 9,
+  "rejected": 33,
+  "broken": 4,
+  "final_fitness": 267.36,
+  "baseline_fitness": 12.12,
+  "best_fitness": 267.36,
+  "best_round": 42,
+  "delta_pct": 2105.940594059406,
+  "total_tokens_in": 196017495,
+  "total_tokens_out": 2793139,
+  "total_cost_usd": 0.0,
+  "orchestrator_exit": 0,
+  "status": "done",
+  "notes": "",
+  "fixture_ref": "bench-v2.8.2",
+  "fixture_commit": "beef65abd11702478996e2bfc6c6b043340eeaab",
+  "runner_commit": "53185104df44d13320b4323f4d6992f6658e55d3",
+  "runner_dirty": false,
+  "harness_version": "2.8.2",
+  "agent_user": "hwebench2",
+  "claude_cli": "2.1.284",
+  "codex_cli": "0.156.1",
+  "cli_dir": "cli/claude-2.1.284",
+  "sandbox_probe": {
+    "ok": true,
+    "reasons": [],
+    "observed": {
+      "pidns": "pid:[4026533007]",
+      "mntns": "mnt:[4026533006]",
+      "network": "blocked",
+      "account_home": "hidden"
+    },
+    "attempt": 1
+  },
+  "broken_by_class": {
+    "sandbox_violation": 1,
+    "formal_failed": 3
+  },
+  "best_lut4": 6340,
+  "best_ff": 1941,
+  "best_fmax_mhz": 100.388,
+  "best_iterations": 10,
+  "best_cycles": 3754779,
+  "best_ipc_coremark": 3e-06,
+  "api_equivalent_cost_usd": 106.43083659999996,
+  "holdout_geomean_iter_s": 6563.350548490076,
+  "holdout_kernels": {
+    "dhrystone": {
+      "cycles": 3041174,
+      "reps": 6000,
+      "iter_s": 198057.72376062666,
+      "validated": true
+    },
+    "aha-mont64": {
+      "cycles": 2340025,
+      "reps": 200,
+      "iter_s": 8580.079272657344,
+      "validated": true
+    },
+    "crc32": {
+      "cycles": 2388770,
+      "reps": 90,
+      "iter_s": 3782.2477676796007,
+      "validated": true
+    },
+    "matmult-int": {
+      "cycles": 1405711,
+      "reps": 15,
+      "iter_s": 1071.2159184924924,
+      "validated": true
+    },
+    "edn": {
+      "cycles": 2837487,
+      "reps": 50,
+      "iter_s": 1768.9596463349435,
+      "validated": true
+    }
+  },
+  "holdout_fmax_mhz": 100.388,
+  "loop_fmax_mhz": 100.388,
+  "holdout_fmax_pairs": [
+    [
+      0,
+      90.459,
+      8
+    ],
+    [
+      1,
+      100.388,
+      7
+    ],
+    [
+      2,
+      100.388,
+      7
+    ]
+  ]
+}

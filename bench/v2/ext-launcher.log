@@ -12,3 +12,6 @@
 2026-10-01T09:06:08+00:00 sonnet55: smoke runner exit 0
 2026-10-01T09:06:08+00:00 sonnet55: smoke passed (CoreMark 105.21, held-out 2683.1 iter/s, claude_cli 2.1.284)
 2026-10-01T09:06:08+00:00 sonnet55: launched in tmux main-d on hwebench2: python3 -m tools.bench.runner --models tools/bench/models-v2.yaml --ref bench-v2.8.2 --agent-user hwebench2 --only claude-sonnet-5-5_xhigh-v2 --reps 6 --n 15 --k 3 --results-jsonl /home/bench/auto-arch-tournament/bench/v2/results-sonnet55.jsonl --results-dir /home/bench/auto-arch-tournament/bench/v2
+2026-10-03T03:28:41+00:00 gpt55: gpt-6_1-sol_xhigh-v2 rep6 done (218.36), hwebench3 released and idle
+2026-10-03T03:28:41+00:00 gpt55: launched in tmux main-e on hwebench3: python3 -m tools.bench.runner --models tools/bench/models-v2.yaml --ref bench-v2.8.2 --agent-user hwebench3 --only gpt-5_5_xhigh-v2 --reps 6 --n 15 --k 3 --results-jsonl /home/bench/auto-arch-tournament/bench/v2/results-gpt55.jsonl --results-dir /home/bench/auto-arch-tournament/bench/v2
+2026-10-03T03:28:41+00:00 extension launcher finished
