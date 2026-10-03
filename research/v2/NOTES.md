@@ -311,3 +311,24 @@ the campaign (a permission change now would give the remaining runs a different
 setup); V3: per-slot work dirs (a `WORK_DIR` under the slot's TMPDIR) or `chmod +t`
 on `riscv-formal/cores/`, and say in the prompt that `formal/riscv-formal/cores/` is
 shared.
+
+## 2026-10-03: two formal-eval OOM kills in one Sonnet round (measured, 2.8.2 campaign)
+
+Sonnet 5.5 rep6 round 12; monitor_review rows 06:49Z, 06:52Z and 07:53Z. The
+harness's formal evals of r12s2 (06:06Z to 06:51Z) and then r12s1 (06:55Z to
+07:40Z) each grew to about 60 GB in six heavy checks at `make -j6`, the 10-01
+21:59Z pattern. Each time the kernel OOM killer took exactly one solver
+(06:48:56Z and 07:37:04Z, bitwuzla at 10.6 GB each) and nothing else, and each
+eval then hit the 2700 s ceiling (`formal_failed: timeout`, which it was heading
+for anyway). The other runs' agents had all finished and were waiting in the
+formal lock queue, so the cost to them was queue wait (about 1.5 h of formal
+lock held by two evals that both timed out), not swapping. The Claude Code
+babysit shells were reaped once (a monitoring loss).
+
+Count in the 2.8.2 campaign now: four kernel OOM events (09-30 cosim eval, 10-01
+formal eval, 10-03 two formal evals) and one near miss; none changed a scored
+outcome. For V3 the fix that covers these is a memory bound on the harness eval
+itself (a MemoryMax on the eval scope, or `-j` sized to memory, with an OOM in
+the eval mapped to `formal_failed`); the pending per-account agent cap does not
+reach evals run as bench. Shorter formal ceilings for designs whose solvers pass
+some memory mark would also give the lock back sooner.
