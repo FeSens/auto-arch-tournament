@@ -372,3 +372,23 @@ Hazard3, which beats two.
   directly comparable.
 - Ibex mainline merged CHERIoT in 2026-08. The rows pin e4bcf749, the newest
   mainline commit with no CHERIoT RTL, to match the published configs.
+
+## 2026-10-04: cosim runaway, ended by the operator before the OOM killer
+
+Same class as the 2026-09-30 entry. At 02:26Z the harness's cosim of GPT-5.5
+rep5 slot r2s1 (bench, `run_cosim.py`, trace ELFs x stall modes in parallel)
+grew three processes to 25, 17 and 15 GB within 30 s. MemAvailable fell to
+226 MB at 02:26:41Z. Two ended by themselves within 40 s; the third kept
+growing at about 0.85 GB/s, reaching 57 GB at 02:27:38Z with 1.4 GB
+available. The operator killed it (PID 90218, SIGKILL) at 02:27:50Z. That is
+the outcome the kernel OOM killer would have given seconds later, with no
+swap storm first. The slot was recorded `cosim_failed: random1.elf
+[--istall --dstall]`, the verdict it gets either way, since the design never
+reaches `ebreak` within the limits. No kernel OOM kill; memory back to 61 GB
+by 02:27:52Z; the r2 agents of the other slots carried on. Third harness-cosim
+runaway in 2.8.2 (2026-09-30 Luna, 2026-10-03 GPT-5.5 rep3 r13s1 and r14s1
+filled RAM briefly without a kill, now this). The proposed per-account
+MemoryMax on `hweagents-<acct>.slice` would not cover it: harness evals run as
+bench. The V3 fix in the 2026-09-30 entry (stream-parse the trace, bound
+concurrent trace processes, MemoryMax on harness evals) is the one that
+applies.
