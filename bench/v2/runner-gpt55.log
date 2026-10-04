@@ -30,3 +30,7 @@
 
 [bench] === gpt-5_5_xhigh-v2-rep4 starting at 2026-10-03T20:29:12+00:00 ===
 [bench] gpt-5_5_xhigh-v2-rep4 sandbox probe: confined
+[bench] === gpt-5_5_xhigh-v2-rep4 done in 19503s, fitness=139.91, cost=$0.00 ===
+
+[bench] === gpt-5_5_xhigh-v2-rep5 starting at 2026-10-04T01:54:15+00:00 ===
+[bench] gpt-5_5_xhigh-v2-rep5 sandbox probe: confined
