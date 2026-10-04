@@ -65,3 +65,6 @@ is its only step 2 run and none of its champions has a class (c) branch. GPT-6 A
 final (6 of 6): no step 2 run (rep2's `ifdef YOSYS is class (d), bit-identical arms). GPT-5.5 is final (6 of 6):
 no step 2 run and no class (c) branch (all six champions: package guards only). Step 2 thus
 has two runs in all: Opus rep2 (main) and Sonnet 5.5 rep5 (extension).
+
+Step 2 outcome (2026-10-04, amendment_12_step2.md): both pass all 53 checks on the
+simulated and synthesized arm. No run is removed in the sensitivity repeat.

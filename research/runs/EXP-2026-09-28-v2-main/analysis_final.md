@@ -11,8 +11,10 @@ GPT-6.1 Sol vs GPT-6 Astra, and Luna vs GPT-5.5. The systems form three tiers, w
 rank intervals also show: {Opus 5.5, Sonnet 5.5} > {GPT-6.1 Sol, GPT-6 Astra} > {GPT-5.5, Luna}.
 Every pair across tiers separates (Holm p 0.0000 to 0.0076). No pair within a tier does.
 
-Amendment 12's correctness sensitivity analysis (step 2 on Opus rep2 and Sonnet 5.5 rep5) runs
-after this; its outcome and the primary repeated without failing runs are reported separately.
+Amendment 12's correctness sensitivity analysis (amendment_12_step2.md, run 10:04Z to 10:27Z):
+Opus rep2 and Sonnet 5.5 rep5 both pass all 53 formal checks on the simulated and synthesized
+arm of their formal-only branch, and no champion has a class (c) branch. No run is removed, so
+the sensitivity repeat is the analysis below unchanged.
 
 Command: `python3 research/v2/scripts/analyze_main.py bench/v2/results.jsonl bench/v2/results-opus-luna.jsonl bench/v2/results-sol61.jsonl bench/v2/results-astra.jsonl bench/v2/results-sonnet55.jsonl bench/v2/results-gpt55.jsonl --rescored research/runs/EXP-2026-09-28-v2-main/incident_08/holdout_rescored.jsonl --json research/runs/EXP-2026-09-28-v2-main/analysis_final.json`
 

@@ -1,0 +1,13 @@
+{
+ "case": "sonnet55-rep5",
+ "control": false,
+ "started_at": "2026-10-04T10:03:59Z",
+ "tree": "/home/bench/a12step2/sonnet55-rep5",
+ "rc": 0,
+ "finished": true,
+ "elapsed_s": 1378,
+ "passed": 53,
+ "failed": 0,
+ "failed_checks": [],
+ "verdict": "pass"
+}

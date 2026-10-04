@@ -1,0 +1,13 @@
+{
+ "case": "opus-rep2",
+ "control": true,
+ "started_at": "2026-10-04T10:03:56Z",
+ "tree": "/home/bench/a12step2/opus-rep2-control",
+ "rc": 0,
+ "finished": true,
+ "elapsed_s": 345,
+ "passed": 53,
+ "failed": 0,
+ "failed_checks": [],
+ "verdict": "pass"
+}

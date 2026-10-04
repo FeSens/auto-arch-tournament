@@ -422,3 +422,29 @@ Two V3 items:
   so a failure can raise it. Under that rule Opus rep6's new-15 geomean is
   2309 instead of 1971. No scored result is affected (every scored run
   validates all five). Count a failed kernel as zero instead.
+
+## 2026-10-04: campaign complete; final analysis and amendment 12 step 2
+
+GPT-5.5 rep6 finished at 10:03Z, the last run of V2. All six systems have 6
+scored runs (36 runs; the GPT-6 Sol pilot is the 37th, unscored). Final
+analysis: `research/runs/EXP-2026-09-28-v2-main/analysis_final.md`.
+
+- Primary: Opus 5.5 vs GPT-6.1 Sol 1.320 [1.183, 1.473], p = 0.0005, Opus
+  ranks higher. Amendment 01: both pairs with Luna separate.
+- Amendment 13, 12 pairs, Holm: 9 separate. The three that do not are Opus vs
+  Sonnet 5.5, Sol vs Astra and GPT-5.5 vs Luna. So the result is three tiers:
+  {Opus 5.5, Sonnet 5.5} > {GPT-6.1 Sol, GPT-6 Astra} > {GPT-5.5, Luna}, with
+  rank intervals 1-2, 3-4 and 5-6. Every pair across tiers separates (Holm p
+  at most 0.0076).
+- The extended suite, rerun at 6 of 6 for every system, gives the same tiers
+  on the 15 unseen kernels, with the same three pairs indistinguishable
+  (run-level Kendall tau 0.956).
+- Amendment 12 step 2: both class (b) champions pass all 53 checks with the
+  formal-only branch replaced by the synthesized one (Opus rep2 with its
+  512-entry fetch store, 372 s; Sonnet 5.5 rep5 with its RAM-slice register
+  file, 1,378 s). No run is removed in the sensitivity repeat. The contract
+  gap stays a V3 item (formal must see the scored RTL).
+
+Operations over the campaign's last day: one harness cosim runaway ended by
+the operator ahead of the OOM killer (02:27Z, GPT-5.5 rep5 r2s1). The guard
+started after it never had to fire.

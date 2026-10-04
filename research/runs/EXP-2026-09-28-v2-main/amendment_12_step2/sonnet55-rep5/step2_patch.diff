@@ -1,0 +1,36 @@
+--- final-rtl/reg_file.sv
++++ step2/reg_file.sv
+@@ -58,25 +58,6 @@
+   logic [31:0] rd1_lo, rd1_hi;
+   logic [31:0] rd2_lo, rd2_hi;
+ 
+-`ifdef RISCV_FORMAL
+-  // Formal model only (riscv-formal defines RISCV_FORMAL; synthesis and
+-  // simulation never do). Same behaviour as the LUT-RAM slices below (async
+-  // read, sync write, no reset, same half split / x0 mask downstream), but
+-  // built from plain 32-bit flop words: 64 SMT arrays with 20 deep store
+-  // chains made the `reg` check take far longer than the rest of the suite
+-  // (> 6 min vs ~10 s per check), while this model finishes in ~1 min. The
+-  // RAM slice mapping itself is covered by test_reg_file.py and cosim.
+-  logic [1023:0] flat;
+-  for (genvar i = 0; i < 32; i++) begin : g_f
+-    logic [31:0] q;
+-    always_ff @(posedge clock) if (w_en && w_addr == i[4:0]) q <= w_data;
+-    assign flat[i*32 +: 32] = q;
+-  end
+-  assign rd1_lo = flat[{1'b0, rs1_addr[3:0], 5'b0} +: 32];
+-  assign rd1_hi = flat[{1'b1, rs1_addr[3:0], 5'b0} +: 32];
+-  assign rd2_lo = flat[{1'b0, rs2_addr[3:0], 5'b0} +: 32];
+-  assign rd2_hi = flat[{1'b1, rs2_addr[3:0], 5'b0} +: 32];
+-`else
+   for (genvar h = 0; h < 2; h++) begin : g_half
+     // Write-enable of this half; the low 4 address bits index the slice.
+     logic we_h;
+@@ -102,7 +83,6 @@
+       end
+     end
+   end
+-`endif
+ 
+   logic nz1, nz2;
+ 
