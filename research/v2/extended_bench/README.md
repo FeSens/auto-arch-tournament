@@ -56,19 +56,21 @@ kernel per system and per reference core, with an overall ranking.
     fails the kernel, and the geomean is taken over the kernels that pass,
     with `all_validated` false.
 
-## Findings (GPT-5.5 at 4 of 6 runs; rerun when it finishes)
+## Findings (final: every system at 6 runs, rerun 2026-10-04 after the campaign)
 
-- **Correctness generalizes.** All 700 champion runs (35 runs x 20
-  kernels) complete with correct results.
+- **Correctness generalizes.** All 740 champion runs (37 runs, the pilot
+  included, x 20 kernels) complete with correct results.
 - **The ranking holds on the 15 unseen kernels.** The system order on the
   new-15 geomean is the held-out order: Opus 5.5 > Sonnet 5.5 >
-  GPT-6.1 Sol > GPT-6 Astra > Luna > GPT-5.5. Kendall tau between runs'
-  held-out and new-15 scores is 0.954. Opus 5.5 has the highest system
-  geomean on all 15 new kernels.
+  GPT-6.1 Sol > GPT-6 Astra > GPT-5.5 > Luna, with the same rank intervals
+  (1-2, 1-2, 3-4, 3-4, 5-6, 5-6). Kendall tau between runs' held-out and
+  new-15 scores is 0.956. Opus 5.5 has the highest system geomean on all
+  15 new kernels.
 - **The pairwise verdicts match the pre-registered ones.** Opus vs Sol is
-  1.279 [1.167, 1.402] (held-out: 1.320). Opus vs Sonnet and Sol vs Astra
-  are not distinguishable, as on held-out. Every other pair among the five
-  systems with 6 runs separates (Holm p 0.0002 to 0.0065).
+  1.279 [1.167, 1.402] (held-out: 1.320). Opus vs Sonnet, Sol vs Astra and
+  GPT-5.5 vs Luna are not distinguishable, the same three pairs as on
+  held-out. The other 12 of the 15 pairs separate (Holm p 0.0000 to
+  0.0081), so the three tiers of the held-out analysis reappear.
 - **One contract violation the V2 gates missed.** Opus 5.5 rep6's champion
   makes an out-of-range fetch on 10 of the 15 new kernels, at addresses
   0xFFFFFF20 to 0xFFFFFFF8. Its next-fetch predictor (`fetch_pred.sv`) is

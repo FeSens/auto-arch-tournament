@@ -3130,6 +3130,396 @@
   }
  },
  {
+  "model": "gpt-5_5_xhigh-v2",
+  "rep": 5,
+  "fmax_mhz": 91.55,
+  "holdout_geomean_iter_s": 4368.978382836063,
+  "kernels": {
+   "aha-mont64": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 3202792,
+    "reps": 200,
+    "iter_s": 5716.887016078472
+   },
+   "crc32": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 4214556,
+    "reps": 90,
+    "iter_s": 1955.0102074809304
+   },
+   "depthconv": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 3022488,
+    "reps": 874,
+    "iter_s": 26473.124128201667
+   },
+   "dhrystone": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 3916065,
+    "reps": 6000,
+    "iter_s": 140268.35611768445
+   },
+   "edn": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 3304792,
+    "reps": 50,
+    "iter_s": 1385.1098647055549
+   },
+   "huffbench": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 3312569,
+    "reps": 8,
+    "iter_s": 221.097281294367
+   },
+   "matmult-int": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 1873280,
+    "reps": 15,
+    "iter_s": 733.0724718141441
+   },
+   "md5sum": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 3311887,
+    "reps": 39,
+    "iter_s": 1078.071202308533
+   },
+   "nettle-aes": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 3056030,
+    "reps": 39,
+    "iter_s": 1168.3294993831867
+   },
+   "nettle-sha256": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 3254120,
+    "reps": 240,
+    "iter_s": 6752.055855346453
+   },
+   "nsichneu": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 3016085,
+    "reps": 681,
+    "iter_s": 20671.018887067174
+   },
+   "picojpeg": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 3122805,
+    "reps": 3,
+    "iter_s": 87.94977592260804
+   },
+   "qrduino": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 3086066,
+    "reps": 3,
+    "iter_s": 88.99680045728121
+   },
+   "sglib-combined": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 3052721,
+    "reps": 19,
+    "iter_s": 569.8031362839906
+   },
+   "slre": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 3009774,
+    "reps": 75,
+    "iter_s": 2281.317467690265
+   },
+   "statemate": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 3239659,
+    "reps": 1795,
+    "iter_s": 50725.16891438266
+   },
+   "tarfind": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 3460373,
+    "reps": 32,
+    "iter_s": 846.6139343937778
+   },
+   "ud": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2949377,
+    "reps": 926,
+    "iter_s": 28743.460059531215
+   },
+   "wikisort": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 3308716,
+    "reps": 2,
+    "iter_s": 55.33868727325041
+   },
+   "xgboost": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 5993167,
+    "reps": 1,
+    "iter_s": 15.2757298436703
+   }
+  },
+  "check": {
+   "aha-mont64": {
+    "scored_cycles": 3202792,
+    "cycles": 3202792,
+    "match": true
+   },
+   "crc32": {
+    "scored_cycles": 4214556,
+    "cycles": 4214556,
+    "match": true
+   },
+   "dhrystone": {
+    "scored_cycles": 3916065,
+    "cycles": 3916065,
+    "match": true
+   },
+   "edn": {
+    "scored_cycles": 3304792,
+    "cycles": 3304792,
+    "match": true
+   },
+   "matmult-int": {
+    "scored_cycles": 1873280,
+    "cycles": 1873280,
+    "match": true
+   }
+  }
+ },
+ {
+  "model": "gpt-5_5_xhigh-v2",
+  "rep": 6,
+  "fmax_mhz": 63.581,
+  "holdout_geomean_iter_s": 3609.913036347889,
+  "kernels": {
+   "aha-mont64": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2896973,
+    "reps": 200,
+    "iter_s": 4389.47825885847
+   },
+   "crc32": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 3073181,
+    "reps": 90,
+    "iter_s": 1862.0087785262242
+   },
+   "depthconv": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2714093,
+    "reps": 874,
+    "iter_s": 20474.535692034133
+   },
+   "dhrystone": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 3389923,
+    "reps": 6000,
+    "iter_s": 112535.29947435384
+   },
+   "edn": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2915936,
+    "reps": 50,
+    "iter_s": 1090.233118971061
+   },
+   "huffbench": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2776914,
+    "reps": 8,
+    "iter_s": 183.17023861740046
+   },
+   "matmult-int": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 1560047,
+    "reps": 15,
+    "iter_s": 611.3373507336638
+   },
+   "md5sum": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2790460,
+    "reps": 39,
+    "iter_s": 888.6201558166038
+   },
+   "nettle-aes": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2954824,
+    "reps": 39,
+    "iter_s": 839.1900837410283
+   },
+   "nettle-sha256": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2790176,
+    "reps": 240,
+    "iter_s": 5468.988336219651
+   },
+   "nsichneu": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2464830,
+    "reps": 681,
+    "iter_s": 17566.591205072968
+   },
+   "picojpeg": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2524346,
+    "reps": 3,
+    "iter_s": 75.5613533168591
+   },
+   "qrduino": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2455287,
+    "reps": 3,
+    "iter_s": 77.68664111364578
+   },
+   "sglib-combined": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2477574,
+    "reps": 19,
+    "iter_s": 487.5894726050564
+   },
+   "slre": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2562880,
+    "reps": 75,
+    "iter_s": 1860.6313990510675
+   },
+   "statemate": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2883492,
+    "reps": 1795,
+    "iter_s": 39579.75087151273
+   },
+   "tarfind": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2823856,
+    "reps": 32,
+    "iter_s": 720.5013286796494
+   },
+   "ud": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2642071,
+    "reps": 926,
+    "iter_s": 22284.036273060035
+   },
+   "wikisort": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2856199,
+    "reps": 2,
+    "iter_s": 44.52140764701619
+   },
+   "xgboost": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 5223253,
+    "reps": 1,
+    "iter_s": 12.172682426066668
+   }
+  },
+  "check": {
+   "aha-mont64": {
+    "scored_cycles": 2896973,
+    "cycles": 2896973,
+    "match": true
+   },
+   "crc32": {
+    "scored_cycles": 3073181,
+    "cycles": 3073181,
+    "match": true
+   },
+   "dhrystone": {
+    "scored_cycles": 3389923,
+    "cycles": 3389923,
+    "match": true
+   },
+   "edn": {
+    "scored_cycles": 2915936,
+    "cycles": 2915936,
+    "match": true
+   },
+   "matmult-int": {
+    "scored_cycles": 1560047,
+    "cycles": 1560047,
+    "match": true
+   }
+  }
+ },
+ {
   "model": "gpt-6-astra_xhigh-v2",
   "rep": 1,
   "fmax_mhz": 73.79,
