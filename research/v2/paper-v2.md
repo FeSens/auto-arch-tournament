@@ -414,27 +414,63 @@ own tool (Gowin EDA 1.9.11.03):
 - The harness executes from the fixture clone, so a benchmark run must pin a
   harness tag, not a branch.
 
-## 7. Results (pending)
+## 7. Results
 
-- Main comparison, Claude Opus 5.5 (xhigh, Claude Code) vs GPT-6.1 Sol
-  (xhigh, Codex CLI), plus GPT-6 Luna (xhigh, Codex CLI), 6 runs each, N=15,
-  K=3: **pending**. GPT-6.1 Sol was released during the campaign and replaced
-  GPT-6 Sol after one GPT-6 Sol run (amendment 11); that run is reported as a
-  pilot, not scored. GPT-6.1 Sol needs Codex CLI 0.159.0 (the pinned 0.156.1
-  is refused for it), so it runs its own pinned CLI; Luna stays on 0.156.1.
-- Smoke test only (one round each, old timer, not a result): both systems ran
-  end to end as the isolated account; held-out scoring and provenance worked.
-- V2 smoke champions under Gowin: Opus 47.7 MHz, GPT 32.7 MHz; both replaced
-  V0's single-cycle divider in round 1 (n=1 round each, not a comparison).
+Six systems, 6 scored runs each (36 runs), N = 15 rounds, K = 3 slots, harness 2.8.2 for
+every scored run. All runs start from V0 (5.4 MHz, CoreMark score 12.1). GPT-6.1 Sol replaced
+GPT-6 Sol after one run (amendment 11); that run is an unscored pilot. Sonnet 5.5, GPT-6 Astra
+and GPT-5.5 were added mid-campaign under amendment 13, with the same contract. Analysis:
+`research/runs/EXP-2026-09-28-v2-main/analysis_final.md`.
+
+Table 1. Final champions, geometric mean over 6 runs. Held-out is the pre-registered metric
+(Gowin Fmax x geomean iterations per cycle over five hidden kernels). Rank interval: 95%
+bootstrap.
+
+| System (CLI) | Held-out iter/s | Rank interval | CoreMark score | Fmax MHz (median) | LUT4 (median) |
+|---|---|---|---|---|---|
+| Opus 5.5 (Claude Code) | 7,024 | 1 to 2 | 280 | 107.8 | 3,161 |
+| Sonnet 5.5 (Claude Code) | 6,418 | 1 to 2 | 259 | 103.8 | 4,232 |
+| GPT-6.1 Sol (Codex CLI) | 5,320 | 3 to 4 | 215 | 90.7 | 4,716 |
+| GPT-6 Astra (Codex CLI) | 5,014 | 3 to 4 | 201 | 83.6 | 5,546 |
+| GPT-5.5 (Codex CLI) | 3,595 | 5 to 6 | 143 | 63.9 | 2,948 |
+| GPT-6 Luna (Codex CLI) | 3,538 | 5 to 6 | 137 | 64.6 | 2,934 |
+
+- Primary test (pre-registered): Opus 5.5 vs GPT-6.1 Sol, ratio 1.320, 95% CI [1.183, 1.473],
+  p = 0.0005. Opus 5.5 ranks higher.
+- Amendment 01: GPT-6.1 Sol and Opus 5.5 both rank above Luna (Holm p 0.0007 and < 0.0001).
+- Amendment 13, 12 pairs, Holm: 9 separate. The three that do not are Opus 5.5 vs Sonnet 5.5
+  (1.095 [0.967, 1.238]), GPT-6.1 Sol vs GPT-6 Astra (1.061 [0.949, 1.187]) and GPT-5.5 vs Luna
+  (0.984 [0.828, 1.170]). Every pair in different tiers separates (Holm p at most 0.0076).
+- Run-to-run SD of ln(held-out score): 0.05 to 0.15 per system. At n = 6 that resolves
+  differences of about 20% or more. It does not resolve the 6 to 10% gaps inside each tier.
+- Transfer to unseen workloads (exploratory, not pre-registered): on 15 further Embench-IoT
+  kernels no agent saw, the system order, the rank intervals and the three indistinguishable
+  pairs are the same as on the held-out five. Run-level Kendall tau between the two scores is
+  0.956, and Opus 5.5 leads on all 15 kernels. All 740 champion-kernel runs give correct
+  results (`research/v2/extended_bench/`).
+- Human-designed reference cores, measured on the same Gowin flow and stall model: VexRiscv
+  MaxPerf, the best of ten, reaches 6,216 held-out iter/s, between tier 1 and tier 2. The other
+  nine (VexRiscv NoCache 4,524 down to PicoRV32 1,741) score below every tier 2 champion
+  (`research/v2/reference_cores/`).
+- Correctness sensitivity (amendment 12): two champions had a formal-only branch. Opus rep2
+  shrank its fetch store under formal; Sonnet 5.5 rep5 swapped its RAM register file for flops.
+  Both pass all 53 checks when formal sees the synthesized RTL, so no run is removed.
 
 ## 8. Limitations to state
 
+- n = 6 per system separates tiers, not systems within a tier.
+- No textbook-edit baseline and no no-lessons ablation were run. The ten reference cores are
+  the human baseline instead.
+- Two contract gaps found after scoring, neither changing a scored result: formal has no bound
+  on the fetch address (Opus 5.5 rep6 puts wrong-path addresses below 0 on 10 of the 15
+  extended kernels, with correct results), and formal could check different RTL than
+  simulation and synthesis (amendment 12; both affected champions pass on the synthesized RTL).
+- Three systems joined mid-campaign; same harness, host and budget, but not interleaved with
+  the first three.
 - Gowin EDA Education edition: closed source, one version, one part; results
   are relative to that vendor's timer and placement.
 - The placement-option median is effectively one value (options 1 and 2
   coincide), so the margin's independence assumption does not hold; the
   single-draw margin would be 6.5%.
-- Power: the run-to-run spread under Gowin is unknown before the main runs;
-  n=6 may end "not distinguishable".
-- One benchmark workload (CoreMark) drives optimization; held-out kernels are
-  five small programs.
+- One benchmark workload (CoreMark) drives optimization. The held-out five are small
+  programs; the 15-kernel extended suite is exploratory, not pre-registered.
