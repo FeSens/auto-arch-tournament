@@ -1,0 +1,494 @@
+{
+ "design": "claude-opus-5_5_xhigh-v2_rep1",
+ "group": "agent",
+ "system": "claude-opus-5_5_xhigh-v2",
+ "rep": 1,
+ "registry_entry": {
+  "name": "claude-opus-5_5_xhigh-v2_rep1",
+  "group": "agent",
+  "system": "claude-opus-5_5_xhigh-v2",
+  "rep": 1,
+  "kind": "core_si",
+  "rtl_dir": "bench/v2/claude-opus-5_5_xhigh-v2/rep1/final-rtl"
+ },
+ "sources": [
+  {
+   "origin": "/home/bench/auto-arch-tournament/bench/v2/claude-opus-5_5_xhigh-v2/rep1/final-rtl/core_pkg.sv",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "f8889dce86a0e271b6d0dd55cc95ac6c5459576c253c5b309f077deb7e4b555a"
+  },
+  {
+   "origin": "/home/bench/auto-arch-tournament/bench/v2/claude-opus-5_5_xhigh-v2/rep1/final-rtl/alu.sv",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "f2a8471d17d7e7c152e08c13af2bb31f16f6b00d7748012d7ef9763756aedfcd"
+  },
+  {
+   "origin": "/home/bench/auto-arch-tournament/bench/v2/claude-opus-5_5_xhigh-v2/rep1/final-rtl/branch_pred.sv",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "8e84d797b526058fc60a75dd398138b58bc6880f35172681b5187472e5ed02b3"
+  },
+  {
+   "origin": "/home/bench/auto-arch-tournament/bench/v2/claude-opus-5_5_xhigh-v2/rep1/final-rtl/core.sv",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "f11d934a46e7972806794bb2e11f0fb457b327b5fdf48d129c60d339a825578b"
+  },
+  {
+   "origin": "/home/bench/auto-arch-tournament/bench/v2/claude-opus-5_5_xhigh-v2/rep1/final-rtl/decoder.sv",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "dcdf0402b952b0460973c7a843d014839c53b66eaf26fa1b7e4e75be082d7011"
+  },
+  {
+   "origin": "/home/bench/auto-arch-tournament/bench/v2/claude-opus-5_5_xhigh-v2/rep1/final-rtl/divider.sv",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "586e58d7a2db88d949a0448904a62bf263aded6c86e9f5aae4226d8734e66737"
+  },
+  {
+   "origin": "/home/bench/auto-arch-tournament/bench/v2/claude-opus-5_5_xhigh-v2/rep1/final-rtl/ex_stage.sv",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "86ea25d878a038a6d8d7aadfc013eb64b51c48adc8eeb6c50e10be6f30f480b2"
+  },
+  {
+   "origin": "/home/bench/auto-arch-tournament/bench/v2/claude-opus-5_5_xhigh-v2/rep1/final-rtl/fetch_store.sv",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "ed6ac7601f4a51cccc1b468bf6b6f788aa62acfcdd08d1b37d0a0ec038795536"
+  },
+  {
+   "origin": "/home/bench/auto-arch-tournament/bench/v2/claude-opus-5_5_xhigh-v2/rep1/final-rtl/forward_unit.sv",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "99de458d8f1e8799168803ee2606b127105b5816db69d4cd9c4454fa587bf07d"
+  },
+  {
+   "origin": "/home/bench/auto-arch-tournament/bench/v2/claude-opus-5_5_xhigh-v2/rep1/final-rtl/hazard_unit.sv",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "e187fc5c9aa39d3a8c507bd28b2d7ea279e2bfd4783cca4d4175c53d2caa0964"
+  },
+  {
+   "origin": "/home/bench/auto-arch-tournament/bench/v2/claude-opus-5_5_xhigh-v2/rep1/final-rtl/id_stage.sv",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "30b708a0da54cead5083fb292f821fa3270a5b99d5e4e515927b3e76fee19850"
+  },
+  {
+   "origin": "/home/bench/auto-arch-tournament/bench/v2/claude-opus-5_5_xhigh-v2/rep1/final-rtl/if_stage.sv",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "b9d239ca29f640d543ab8634164150880574fd601c2aeb1a44ea39e41e5531bf"
+  },
+  {
+   "origin": "/home/bench/auto-arch-tournament/bench/v2/claude-opus-5_5_xhigh-v2/rep1/final-rtl/imm_gen.sv",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "3aa248f872bb38d2d3fb90e5af49d5e388df0975bd02053c5f42031b3b1bf7af"
+  },
+  {
+   "origin": "/home/bench/auto-arch-tournament/bench/v2/claude-opus-5_5_xhigh-v2/rep1/final-rtl/loop_buf.sv",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "14a40f33875d1ebed3c55c3ceaab32de2f8ff3d1ed5aa35d3d2f5c87bbd9659f"
+  },
+  {
+   "origin": "/home/bench/auto-arch-tournament/bench/v2/claude-opus-5_5_xhigh-v2/rep1/final-rtl/mem_stage.sv",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "f556f9eeafd4b886393cbeb5cbe4aa1a587260dcd117113eaa8d900680cfe1f5"
+  },
+  {
+   "origin": "/home/bench/auto-arch-tournament/bench/v2/claude-opus-5_5_xhigh-v2/rep1/final-rtl/reg_file.sv",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "7b6f009030c096c7f06fdeab19b53f8046d1e54a62c9d9466f4ab494f82a0c34"
+  },
+  {
+   "origin": "/home/bench/auto-arch-tournament/bench/v2/claude-opus-5_5_xhigh-v2/rep1/final-rtl/wb_stage.sv",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "c8f46c9b03487325e8c24580004eb1a2960be6d5a4452e84aa3e746c626c574b"
+  },
+  {
+   "origin": "/home/bench/auto-arch-tournament/fpga/bench_stall_gen.sv",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "d8c73f04cc214f500eb467ddee496884ff2390c2a0a68f16d4a2a8a839e3753e"
+  },
+  {
+   "origin": "/home/bench/auto-arch-tournament/fpga/core_bench_si.sv",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "cb242939810217c84701833a2e4bbb21157eb5e0e080c8bee200dd9cf4e76393"
+  }
+ ],
+ "include_dirs": [
+  "root/home/bench/auto-arch-tournament/bench/v2/claude-opus-5_5_xhigh-v2/rep1/final-rtl"
+ ],
+ "flow": {
+  "tool": "2026.1",
+  "part": "xc7a200tsbg484-1",
+  "spec": "research/runs/EXP-2026-09-28-v2-main/amendment_15.yaml part_c_cross_fpga"
+ },
+ "top": "core_bench",
+ "part": "xc7a200tsbg484-1",
+ "source_sha256": "0fecb2f82ead7e0b76130b244180ee41968e8a7b75d3278fd8206144b541bc85",
+ "n_files": 19,
+ "started_at": "2026-10-04T19:26:59Z",
+ "status": "ok",
+ "complete": true,
+ "pass1_synth": {
+  "status": "ok",
+  "period": 5.0,
+  "sec_read": 2.9,
+  "sec_synth": 30.55,
+  "wall_sec": 39.9,
+  "warnings": 162,
+  "critical_warnings": 0,
+  "vivado_version": "2026.1"
+ },
+ "vivado_version": "2026.1",
+ "pass1": {
+  "status": "ok",
+  "directive": "Default",
+  "period": 5.0,
+  "wns": -2.348,
+  "fmax_mhz": 136.091,
+  "logic_levels": 9,
+  "startpoint": "cpu/u_id/reg_q_reg[rs2_val][0]/C",
+  "endpoint": "cpu/u_lsb/dist_q_reg[0]/CE",
+  "requirement": 5.0,
+  "datapath_delay": 7.159,
+  "logic_delay": 1.94,
+  "net_delay": 5.219,
+  "skew": 0.051,
+  "uncertainty": 0.035,
+  "wns_all_groups": -2.348,
+  "worst_group_all": "clock",
+  "whs": 0.032,
+  "hd_clk_src": "BUFGCTRL_X0Y0",
+  "sec_open": 9.941,
+  "sec_opt": 2.856,
+  "sec_place": 39.726,
+  "sec_physopt": 15.251,
+  "sec_route": 71.501,
+  "wall_sec": 143.8,
+  "warnings": 6,
+  "critical_warnings": 0,
+  "vivado_version": "2026.1",
+  "route_nets_with_errors": 0,
+  "util": {
+   "slice_luts": 2831,
+   "lut_as_logic": 1733,
+   "lut_as_memory": 1098,
+   "slice_registers": 938,
+   "f7_muxes": 548,
+   "f8_muxes": 256,
+   "block_ram_tile": 1.5,
+   "dsps": 4,
+   "slices": 799,
+   "lut_as_distributed_ram": 1098,
+   "lut_as_shift_register": 0
+  },
+  "worst_path": {
+   "via_dmem": false,
+   "instances": [
+    "cpu/u_id",
+    "cpu/u_lsb"
+   ]
+  }
+ },
+ "F1": 136.091,
+ "P2": 6.981,
+ "pass2_synth": {
+  "status": "ok",
+  "period": 6.981,
+  "sec_read": 2.748,
+  "sec_synth": 31.63,
+  "wall_sec": 40.9,
+  "warnings": 162,
+  "critical_warnings": 0
+ },
+ "pass2": {
+  "Default": {
+   "status": "ok",
+   "directive": "Default",
+   "period": 6.981,
+   "wns": -0.589,
+   "fmax_mhz": 132.1,
+   "logic_levels": 8,
+   "startpoint": "cpu/u_ex/reg_q_reg[mem_addr][2]_rep__3/C",
+   "endpoint": "cpu/u_ex/u_mul/reg_q[rs1_val][4]_i_1_psdsp/D",
+   "requirement": 6.981,
+   "datapath_delay": 7.438,
+   "logic_delay": 1.997,
+   "net_delay": 5.441,
+   "skew": -0.038,
+   "uncertainty": 0.035,
+   "wns_all_groups": -0.589,
+   "worst_group_all": "clock",
+   "whs": 0.098,
+   "hd_clk_src": "BUFGCTRL_X0Y0",
+   "sec_open": 9.464,
+   "sec_opt": 2.948,
+   "sec_place": 48.88,
+   "sec_physopt": 2.854,
+   "sec_route": 50.277,
+   "wall_sec": 118.9,
+   "warnings": 6,
+   "critical_warnings": 0,
+   "vivado_version": "2026.1",
+   "route_nets_with_errors": 0,
+   "worst_path": {
+    "via_dmem": true,
+    "instances": [
+     "dmem_reg_256_511_4_4",
+     "cpu/u_ex",
+     "cpu/u_id",
+     "cpu/u_ex"
+    ]
+   }
+  },
+  "Explore": {
+   "status": "ok",
+   "directive": "Explore",
+   "period": 6.981,
+   "wns": -0.516,
+   "fmax_mhz": 133.387,
+   "logic_levels": 9,
+   "startpoint": "cpu/u_ex/reg_q_reg[mem_addr][3]_rep__1/C",
+   "endpoint": "cpu/u_ex/reg_q[rs2_val][27]_i_1_psdsp/D",
+   "requirement": 6.981,
+   "datapath_delay": 7.337,
+   "logic_delay": 2.121,
+   "net_delay": 5.216,
+   "skew": -0.043,
+   "uncertainty": 0.035,
+   "wns_all_groups": -0.516,
+   "worst_group_all": "clock",
+   "whs": 0.1,
+   "hd_clk_src": "BUFGCTRL_X0Y0",
+   "sec_open": 9.79,
+   "sec_opt": 2.92,
+   "sec_place": 101.812,
+   "sec_physopt": 3.042,
+   "sec_route": 65.299,
+   "wall_sec": 187.0,
+   "warnings": 6,
+   "critical_warnings": 0,
+   "vivado_version": "2026.1",
+   "route_nets_with_errors": 0,
+   "worst_path": {
+    "via_dmem": true,
+    "instances": [
+     "dmem_reg_256_511_15_15",
+     "cpu/u_ex",
+     "cpu/u_id",
+     "cpu/u_ex"
+    ]
+   }
+  },
+  "ExtraTimingOpt": {
+   "status": "ok",
+   "directive": "ExtraTimingOpt",
+   "period": 6.981,
+   "wns": -0.57,
+   "fmax_mhz": 132.433,
+   "logic_levels": 8,
+   "startpoint": "cpu/u_ex/reg_q_reg[mem_addr][3]_rep__1/C",
+   "endpoint": "cpu/u_id/reg_q[rs1_val][25]_i_1_psdsp/D",
+   "requirement": 6.981,
+   "datapath_delay": 7.447,
+   "logic_delay": 2.217,
+   "net_delay": 5.23,
+   "skew": -0.038,
+   "uncertainty": 0.035,
+   "wns_all_groups": -0.57,
+   "worst_group_all": "clock",
+   "whs": 0.066,
+   "hd_clk_src": "BUFGCTRL_X0Y0",
+   "sec_open": 9.274,
+   "sec_opt": 3.035,
+   "sec_place": 196.544,
+   "sec_physopt": 10.199,
+   "sec_route": 56.784,
+   "wall_sec": 280.1,
+   "warnings": 6,
+   "critical_warnings": 0,
+   "vivado_version": "2026.1",
+   "route_nets_with_errors": 0,
+   "worst_path": {
+    "via_dmem": true,
+    "instances": [
+     "dmem_reg_256_511_15_15",
+     "cpu/u_ex",
+     "cpu/u_id"
+    ]
+   }
+  }
+ },
+ "fmax_p2": {
+  "Default": 132.1,
+  "Explore": 133.387,
+  "ExtraTimingOpt": 132.433
+ },
+ "fmax_mhz": 132.433,
+ "area": {
+  "slice_luts": 2774,
+  "lut_as_logic": 1676,
+  "lut_as_memory": 1098,
+  "slice_registers": 909,
+  "f7_muxes": 548,
+  "f8_muxes": 256,
+  "block_ram_tile": 1.5,
+  "dsps": 4,
+  "slices": 811,
+  "lut_as_distributed_ram": 1098,
+  "lut_as_shift_register": 0
+ },
+ "area_hier": [
+  {
+   "instance": "core_bench",
+   "depth": 0,
+   "Module": "(top)",
+   "Total LUTs": 2774,
+   "Logic LUTs": 1676,
+   "LUTRAMs": 1098,
+   "SRLs": 0,
+   "FFs": 909,
+   "RAMB36": 1,
+   "RAMB18": 1,
+   "DSP Blocks": 4
+  },
+  {
+   "instance": "(core_bench)",
+   "depth": 1,
+   "Module": "(top)",
+   "Total LUTs": 1025,
+   "Logic LUTs": 1,
+   "LUTRAMs": 1024,
+   "SRLs": 0,
+   "FFs": 32,
+   "RAMB36": 0,
+   "RAMB18": 0,
+   "DSP Blocks": 0
+  },
+  {
+   "instance": "cpu",
+   "depth": 1,
+   "Module": "core",
+   "Total LUTs": 1690,
+   "Logic LUTs": 1616,
+   "LUTRAMs": 74,
+   "SRLs": 0,
+   "FFs": 843,
+   "RAMB36": 1,
+   "RAMB18": 1,
+   "DSP Blocks": 4
+  },
+  {
+   "instance": "u_ex",
+   "depth": 2,
+   "Module": "ex_stage",
+   "Total LUTs": 470,
+   "Logic LUTs": 470,
+   "LUTRAMs": 0,
+   "SRLs": 0,
+   "FFs": 367,
+   "RAMB36": 0,
+   "RAMB18": 0,
+   "DSP Blocks": 4
+  },
+  {
+   "instance": "u_id",
+   "depth": 2,
+   "Module": "id_stage",
+   "Total LUTs": 645,
+   "Logic LUTs": 645,
+   "LUTRAMs": 0,
+   "SRLs": 0,
+   "FFs": 288,
+   "RAMB36": 0,
+   "RAMB18": 0,
+   "DSP Blocks": 0
+  },
+  {
+   "instance": "u_if",
+   "depth": 2,
+   "Module": "if_stage",
+   "Total LUTs": 98,
+   "Logic LUTs": 98,
+   "LUTRAMs": 0,
+   "SRLs": 0,
+   "FFs": 32,
+   "RAMB36": 0,
+   "RAMB18": 0,
+   "DSP Blocks": 0
+  },
+  {
+   "instance": "u_lsb",
+   "depth": 2,
+   "Module": "loop_buf",
+   "Total LUTs": 323,
+   "Logic LUTs": 301,
+   "LUTRAMs": 22,
+   "SRLs": 0,
+   "FFs": 83,
+   "RAMB36": 0,
+   "RAMB18": 0,
+   "DSP Blocks": 0
+  },
+  {
+   "instance": "u_mem",
+   "depth": 2,
+   "Module": "mem_stage",
+   "Total LUTs": 79,
+   "Logic LUTs": 79,
+   "LUTRAMs": 0,
+   "SRLs": 0,
+   "FFs": 72,
+   "RAMB36": 0,
+   "RAMB18": 0,
+   "DSP Blocks": 0
+  },
+  {
+   "instance": "stall_gen",
+   "depth": 1,
+   "Module": "bench_stall_gen",
+   "Total LUTs": 61,
+   "Logic LUTs": 61,
+   "LUTRAMs": 0,
+   "SRLs": 0,
+   "FFs": 34,
+   "RAMB36": 0,
+   "RAMB18": 0,
+   "DSP Blocks": 0
+  }
+ ],
+ "finished_at": "2026-10-04T19:41:22Z",
+ "wall_sec": 863.0,
+ "core_area": {
+  "instance": "cpu",
+  "depth": 1,
+  "Module": "core",
+  "Total LUTs": 1690,
+  "Logic LUTs": 1616,
+  "LUTRAMs": 74,
+  "SRLs": 0,
+  "FFs": 843,
+  "RAMB36": 1,
+  "RAMB18": 1,
+  "DSP Blocks": 4
+ },
+ "gowin_reference": {
+  "fmax_mhz": 109.53,
+  "lut4": 2600,
+  "ff": 702,
+  "source": "bench/v2/claude-opus-5_5_xhigh-v2/rep1/log.jsonl hyp-20260929-002-r11s1"
+ }
+}

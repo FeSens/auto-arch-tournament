@@ -1,0 +1,582 @@
+{
+ "design": "neorv32",
+ "group": "reference",
+ "system": null,
+ "rep": null,
+ "registry_entry": {
+  "name": "neorv32",
+  "group": "reference",
+  "kind": "files",
+  "top": "core_bench",
+  "files": [
+   {
+    "path": "/home/bench/refcores/neorv32/rtl/core/neorv32_package.vhd",
+    "lang": "vhdl",
+    "lib": "neorv32"
+   },
+   {
+    "path": "/home/bench/refcores/neorv32/rtl/core/neorv32_sys.vhd",
+    "lang": "vhdl",
+    "lib": "neorv32"
+   },
+   {
+    "path": "/home/bench/refcores/neorv32/rtl/core/neorv32_prim.vhd",
+    "lang": "vhdl",
+    "lib": "neorv32"
+   },
+   {
+    "path": "/home/bench/refcores/neorv32/rtl/core/neorv32_cpu_decompressor.vhd",
+    "lang": "vhdl",
+    "lib": "neorv32"
+   },
+   {
+    "path": "/home/bench/refcores/neorv32/rtl/core/neorv32_cpu_frontend.vhd",
+    "lang": "vhdl",
+    "lib": "neorv32"
+   },
+   {
+    "path": "/home/bench/refcores/neorv32/rtl/core/neorv32_cpu_control.vhd",
+    "lang": "vhdl",
+    "lib": "neorv32"
+   },
+   {
+    "path": "/home/bench/refcores/neorv32/rtl/core/neorv32_cpu_hwtrig.vhd",
+    "lang": "vhdl",
+    "lib": "neorv32"
+   },
+   {
+    "path": "/home/bench/refcores/neorv32/rtl/core/neorv32_cpu_counters.vhd",
+    "lang": "vhdl",
+    "lib": "neorv32"
+   },
+   {
+    "path": "/home/bench/refcores/neorv32/rtl/core/neorv32_cpu_regfile.vhd",
+    "lang": "vhdl",
+    "lib": "neorv32"
+   },
+   {
+    "path": "/home/bench/refcores/neorv32/rtl/core/neorv32_cpu_alu_shifter.vhd",
+    "lang": "vhdl",
+    "lib": "neorv32"
+   },
+   {
+    "path": "/home/bench/refcores/neorv32/rtl/core/neorv32_cpu_alu_muldiv.vhd",
+    "lang": "vhdl",
+    "lib": "neorv32"
+   },
+   {
+    "path": "/home/bench/refcores/neorv32/rtl/core/neorv32_cpu_alu_bitmanip.vhd",
+    "lang": "vhdl",
+    "lib": "neorv32"
+   },
+   {
+    "path": "/home/bench/refcores/neorv32/rtl/core/neorv32_cpu_alu_fpu.vhd",
+    "lang": "vhdl",
+    "lib": "neorv32"
+   },
+   {
+    "path": "/home/bench/refcores/neorv32/rtl/core/neorv32_cpu_alu_cond.vhd",
+    "lang": "vhdl",
+    "lib": "neorv32"
+   },
+   {
+    "path": "/home/bench/refcores/neorv32/rtl/core/neorv32_cpu_alu_crypto.vhd",
+    "lang": "vhdl",
+    "lib": "neorv32"
+   },
+   {
+    "path": "/home/bench/refcores/neorv32/rtl/core/neorv32_cpu_alu_cfu.vhd",
+    "lang": "vhdl",
+    "lib": "neorv32"
+   },
+   {
+    "path": "/home/bench/refcores/neorv32/rtl/core/neorv32_cpu_alu.vhd",
+    "lang": "vhdl",
+    "lib": "neorv32"
+   },
+   {
+    "path": "/home/bench/refcores/neorv32/rtl/core/neorv32_cpu_lsu.vhd",
+    "lang": "vhdl",
+    "lib": "neorv32"
+   },
+   {
+    "path": "/home/bench/refcores/neorv32/rtl/core/neorv32_cpu_pmp.vhd",
+    "lang": "vhdl",
+    "lib": "neorv32"
+   },
+   {
+    "path": "/home/bench/refcores/neorv32/rtl/core/neorv32_cpu_trace.vhd",
+    "lang": "vhdl",
+    "lib": "neorv32"
+   },
+   {
+    "path": "/home/bench/refcores/neorv32/rtl/core/neorv32_cpu.vhd",
+    "lang": "vhdl",
+    "lib": "neorv32"
+   },
+   {
+    "path": "research/v2/reference_cores/benches/neorv32_cpu_flat.vhd",
+    "lang": "vhdl",
+    "lib": null
+   },
+   {
+    "path": "fpga/bench_stall_gen.sv",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "research/v2/reference_cores/benches/neorv32_bench.sv",
+    "lang": "sv",
+    "lib": null
+   }
+  ],
+  "include_dirs": []
+ },
+ "sources": [
+  {
+   "origin": "/home/bench/refcores/neorv32/rtl/core/neorv32_package.vhd",
+   "lang": "vhdl",
+   "lib": "neorv32",
+   "sha256": "94a4575e47cfecb28ff0d7f017f39423f566dcfc96fe7bfebb0ad8ee43ac54e9"
+  },
+  {
+   "origin": "/home/bench/refcores/neorv32/rtl/core/neorv32_sys.vhd",
+   "lang": "vhdl",
+   "lib": "neorv32",
+   "sha256": "ab7004fbea1e9d0d2afe8f28d90c05d9a3cf0403b98e81062ef25696d445bd6a"
+  },
+  {
+   "origin": "/home/bench/refcores/neorv32/rtl/core/neorv32_prim.vhd",
+   "lang": "vhdl",
+   "lib": "neorv32",
+   "sha256": "2aa574538aaecbd9b502818fb73d2e78abfe16d040c7396662755725731ab1a5"
+  },
+  {
+   "origin": "/home/bench/refcores/neorv32/rtl/core/neorv32_cpu_decompressor.vhd",
+   "lang": "vhdl",
+   "lib": "neorv32",
+   "sha256": "f30761a981cab7bae0156d990bcb43f46094753f02644fb27494137023c1c206"
+  },
+  {
+   "origin": "/home/bench/refcores/neorv32/rtl/core/neorv32_cpu_frontend.vhd",
+   "lang": "vhdl",
+   "lib": "neorv32",
+   "sha256": "5a6e1681ad160980b820ab05498e59ce85a902c9e8c298fd0b295fbdfcdfb43d"
+  },
+  {
+   "origin": "/home/bench/refcores/neorv32/rtl/core/neorv32_cpu_control.vhd",
+   "lang": "vhdl",
+   "lib": "neorv32",
+   "sha256": "e5507cb410c1c5799aec92ef50155919313c6fe75de591a24ddcd3dda851fbf5"
+  },
+  {
+   "origin": "/home/bench/refcores/neorv32/rtl/core/neorv32_cpu_hwtrig.vhd",
+   "lang": "vhdl",
+   "lib": "neorv32",
+   "sha256": "78d91a5df0b58d4845486fec0b312a7f6e4c2fa0829e88bdac79b3d93f3e0ad6"
+  },
+  {
+   "origin": "/home/bench/refcores/neorv32/rtl/core/neorv32_cpu_counters.vhd",
+   "lang": "vhdl",
+   "lib": "neorv32",
+   "sha256": "fc15d9d198e83cb76786e12e61b97ad0f79cbb68e6145664163bd0a584b94426"
+  },
+  {
+   "origin": "/home/bench/refcores/neorv32/rtl/core/neorv32_cpu_regfile.vhd",
+   "lang": "vhdl",
+   "lib": "neorv32",
+   "sha256": "3ab615409ca5f0ed99c60daabda6dec0fac6ef06cb5140da183199c82ab07247"
+  },
+  {
+   "origin": "/home/bench/refcores/neorv32/rtl/core/neorv32_cpu_alu_shifter.vhd",
+   "lang": "vhdl",
+   "lib": "neorv32",
+   "sha256": "94213127a23b31e301b35e93f9a43d4b70adb6c553e31dadcfddfd6fabbcf050"
+  },
+  {
+   "origin": "/home/bench/refcores/neorv32/rtl/core/neorv32_cpu_alu_muldiv.vhd",
+   "lang": "vhdl",
+   "lib": "neorv32",
+   "sha256": "fedd9a1f750b1f7c18f732290a9e6a79ff638b992e4171ab64f9c93ab5eefcbe"
+  },
+  {
+   "origin": "/home/bench/refcores/neorv32/rtl/core/neorv32_cpu_alu_bitmanip.vhd",
+   "lang": "vhdl",
+   "lib": "neorv32",
+   "sha256": "02f59104a768a6317e7a12872d9e6ca76961679bb4f807dd38ccf8662174d4a7"
+  },
+  {
+   "origin": "/home/bench/refcores/neorv32/rtl/core/neorv32_cpu_alu_fpu.vhd",
+   "lang": "vhdl",
+   "lib": "neorv32",
+   "sha256": "632d93286e9714e6e2616e1ed5c0e2c29cf2588d137c1f25206559223b7943fd"
+  },
+  {
+   "origin": "/home/bench/refcores/neorv32/rtl/core/neorv32_cpu_alu_cond.vhd",
+   "lang": "vhdl",
+   "lib": "neorv32",
+   "sha256": "47874dce2f222a3d526e179f0bbadab0a5cc8a25879be6029813d580c39aaec6"
+  },
+  {
+   "origin": "/home/bench/refcores/neorv32/rtl/core/neorv32_cpu_alu_crypto.vhd",
+   "lang": "vhdl",
+   "lib": "neorv32",
+   "sha256": "4e3989e94ec1669ca37844e444c0dc9be868b4dcd6ba37fff9ea729667f2546d"
+  },
+  {
+   "origin": "/home/bench/refcores/neorv32/rtl/core/neorv32_cpu_alu_cfu.vhd",
+   "lang": "vhdl",
+   "lib": "neorv32",
+   "sha256": "83d442fce2e8f4ba5cc87f70dfbcfa7e501bd81c57ba3d19558b066a35e02b59"
+  },
+  {
+   "origin": "/home/bench/refcores/neorv32/rtl/core/neorv32_cpu_alu.vhd",
+   "lang": "vhdl",
+   "lib": "neorv32",
+   "sha256": "e1cbe0044f470c78dd3c83003d62c3487d8ddcaa72fe05b2f41b50712cfe8cb4"
+  },
+  {
+   "origin": "/home/bench/refcores/neorv32/rtl/core/neorv32_cpu_lsu.vhd",
+   "lang": "vhdl",
+   "lib": "neorv32",
+   "sha256": "5db91374038ab7c677ee24991f086203dfa7d5ae99583a10665faf9af5b84666"
+  },
+  {
+   "origin": "/home/bench/refcores/neorv32/rtl/core/neorv32_cpu_pmp.vhd",
+   "lang": "vhdl",
+   "lib": "neorv32",
+   "sha256": "aa812d40a8f0fc3598d36a6da9ecd1bf109c99dd693351aac0b6e7e190e61a9c"
+  },
+  {
+   "origin": "/home/bench/refcores/neorv32/rtl/core/neorv32_cpu_trace.vhd",
+   "lang": "vhdl",
+   "lib": "neorv32",
+   "sha256": "4bb86223d40efe7406b1f00eaae38c85797fdbcf09640b22914cecf971ed69a1"
+  },
+  {
+   "origin": "/home/bench/refcores/neorv32/rtl/core/neorv32_cpu.vhd",
+   "lang": "vhdl",
+   "lib": "neorv32",
+   "sha256": "77e44b422b07b6d827479bd44dc4240feaab38ed0adc1dab53f33a44a2504917"
+  },
+  {
+   "origin": "/home/bench/auto-arch-tournament/research/v2/reference_cores/benches/neorv32_cpu_flat.vhd",
+   "lang": "vhdl",
+   "lib": null,
+   "sha256": "c1047865cfac2de831385c0076c07cb6dae9f5b031f6eecba8dc0e6ceead4687"
+  },
+  {
+   "origin": "/home/bench/auto-arch-tournament/fpga/bench_stall_gen.sv",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "d8c73f04cc214f500eb467ddee496884ff2390c2a0a68f16d4a2a8a839e3753e"
+  },
+  {
+   "origin": "/home/bench/auto-arch-tournament/research/v2/reference_cores/benches/neorv32_bench.sv",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "c37e902c2e753989ddd9e68de0781022ce9fc8b073e772f2e8ba9e9fd87613be"
+  }
+ ],
+ "include_dirs": [],
+ "flow": {
+  "tool": "2026.1",
+  "part": "xc7a200tsbg484-1",
+  "spec": "research/runs/EXP-2026-09-28-v2-main/amendment_15.yaml part_c_cross_fpga"
+ },
+ "top": "core_bench",
+ "part": "xc7a200tsbg484-1",
+ "source_sha256": "368fa78d1e53c39bf25e6cc41d956de5fa5805d9640d42d525c08ca24871dd47",
+ "n_files": 24,
+ "started_at": "2026-10-04T19:21:02Z",
+ "status": "ok",
+ "complete": true,
+ "pass1_synth": {
+  "status": "ok",
+  "period": 5.0,
+  "sec_read": 3.168,
+  "sec_synth": 30.773,
+  "wall_sec": 40.7,
+  "warnings": 186,
+  "critical_warnings": 0,
+  "vivado_version": "2026.1"
+ },
+ "vivado_version": "2026.1",
+ "pass1": {
+  "status": "ok",
+  "directive": "Default",
+  "period": 5.0,
+  "wns": -1.009,
+  "fmax_mhz": 166.417,
+  "logic_levels": 11,
+  "startpoint": "cpu/cpu_inst/cpu_control_inst/exec_reg[ir][13]_replica/C",
+  "endpoint": "cpu/cpu_inst/cpu_regfile_inst/arch_sram_sync.regfile_reg_0_31_26_26/DP/I",
+  "requirement": 5.0,
+  "datapath_delay": 5.538,
+  "logic_delay": 2.637,
+  "net_delay": 2.901,
+  "skew": -0.029,
+  "uncertainty": 0.035,
+  "wns_all_groups": -1.009,
+  "worst_group_all": "clock",
+  "whs": 0.04,
+  "hd_clk_src": "BUFGCTRL_X0Y0",
+  "sec_open": 9.885,
+  "sec_opt": 3.011,
+  "sec_place": 15.416,
+  "sec_physopt": 3.998,
+  "sec_route": 39.928,
+  "wall_sec": 75.8,
+  "warnings": 6,
+  "critical_warnings": 0,
+  "vivado_version": "2026.1",
+  "route_nets_with_errors": 0,
+  "util": {
+   "slice_luts": 1486,
+   "lut_as_logic": 1430,
+   "lut_as_memory": 56,
+   "slice_registers": 931,
+   "f7_muxes": 0,
+   "f8_muxes": 0,
+   "block_ram_tile": 2,
+   "dsps": 4,
+   "slices": 476,
+   "lut_as_distributed_ram": 56,
+   "lut_as_shift_register": 0
+  },
+  "worst_path": {
+   "via_dmem": false,
+   "instances": [
+    "cpu/cpu_inst"
+   ]
+  }
+ },
+ "F1": 166.417,
+ "P2": 5.709,
+ "pass2_synth": {
+  "status": "ok",
+  "period": 5.709,
+  "sec_read": 3.462,
+  "sec_synth": 29.301,
+  "wall_sec": 39.2,
+  "warnings": 186,
+  "critical_warnings": 0
+ },
+ "pass2": {
+  "Default": {
+   "status": "ok",
+   "directive": "Default",
+   "period": 5.709,
+   "wns": -0.265,
+   "fmax_mhz": 167.392,
+   "logic_levels": 10,
+   "startpoint": "cpu/cpu_inst/cpu_alu_inst/cpu_alu_muldiv_enabled.cpu_alu_muldiv_inst/multiplier_core_parallel.multiplier_inst/one_reg.res_reg__0/CLK",
+   "endpoint": "cpu/cpu_inst/cpu_regfile_inst/arch_sram_sync.regfile_reg_0_31_0_0/SP/I",
+   "requirement": 5.709,
+   "datapath_delay": 5.602,
+   "logic_delay": 2.343,
+   "net_delay": 3.259,
+   "skew": -0.129,
+   "uncertainty": 0.035,
+   "wns_all_groups": -0.265,
+   "worst_group_all": "clock",
+   "whs": 0.094,
+   "hd_clk_src": "BUFGCTRL_X0Y0",
+   "sec_open": 9.204,
+   "sec_opt": 2.723,
+   "sec_place": 13.523,
+   "sec_physopt": 5.739,
+   "sec_route": 37.982,
+   "wall_sec": 72.8,
+   "warnings": 6,
+   "critical_warnings": 0,
+   "vivado_version": "2026.1",
+   "route_nets_with_errors": 0,
+   "worst_path": {
+    "via_dmem": false,
+    "instances": [
+     "cpu/cpu_inst"
+    ]
+   }
+  },
+  "Explore": {
+   "status": "ok",
+   "directive": "Explore",
+   "period": 5.709,
+   "wns": -0.221,
+   "fmax_mhz": 168.634,
+   "logic_levels": 12,
+   "startpoint": "cpu/cpu_inst/cpu_alu_inst/cpu_alu_muldiv_enabled.cpu_alu_muldiv_inst/divider_core_serial.div_quo_reg[2]/C",
+   "endpoint": "cpu/cpu_inst/cpu_regfile_inst/arch_sram_sync.regfile_reg_0_31_30_30/DP/I",
+   "requirement": 5.709,
+   "datapath_delay": 5.593,
+   "logic_delay": 2.699,
+   "net_delay": 2.894,
+   "skew": -0.044,
+   "uncertainty": 0.035,
+   "wns_all_groups": -0.221,
+   "worst_group_all": "clock",
+   "whs": 0.093,
+   "hd_clk_src": "BUFGCTRL_X0Y0",
+   "sec_open": 9.977,
+   "sec_opt": 2.7,
+   "sec_place": 26.888,
+   "sec_physopt": 4.419,
+   "sec_route": 37.377,
+   "wall_sec": 85.0,
+   "warnings": 6,
+   "critical_warnings": 0,
+   "vivado_version": "2026.1",
+   "route_nets_with_errors": 0,
+   "worst_path": {
+    "via_dmem": false,
+    "instances": [
+     "cpu/cpu_inst"
+    ]
+   }
+  },
+  "ExtraTimingOpt": {
+   "status": "ok",
+   "directive": "ExtraTimingOpt",
+   "period": 5.709,
+   "wns": -0.657,
+   "fmax_mhz": 157.085,
+   "logic_levels": 10,
+   "startpoint": "cpu/cpu_inst/cpu_alu_inst/cpu_alu_muldiv_enabled.cpu_alu_muldiv_inst/multiplier_core_parallel.multiplier_inst/one_reg.res_reg__0/CLK",
+   "endpoint": "cpu/cpu_inst/cpu_regfile_inst/arch_sram_sync.regfile_reg_0_31_7_7/DP/I",
+   "requirement": 5.709,
+   "datapath_delay": 5.715,
+   "logic_delay": 2.431,
+   "net_delay": 3.284,
+   "skew": -0.378,
+   "uncertainty": 0.035,
+   "wns_all_groups": -0.657,
+   "worst_group_all": "clock",
+   "whs": 0.082,
+   "hd_clk_src": "BUFGCTRL_X0Y0",
+   "sec_open": 9.393,
+   "sec_opt": 2.626,
+   "sec_place": 51.408,
+   "sec_physopt": 4.049,
+   "sec_route": 37.224,
+   "wall_sec": 108.5,
+   "warnings": 6,
+   "critical_warnings": 0,
+   "vivado_version": "2026.1",
+   "route_nets_with_errors": 0,
+   "worst_path": {
+    "via_dmem": false,
+    "instances": [
+     "cpu/cpu_inst"
+    ]
+   }
+  }
+ },
+ "fmax_p2": {
+  "Default": 167.392,
+  "Explore": 168.634,
+  "ExtraTimingOpt": 157.085
+ },
+ "fmax_mhz": 167.392,
+ "area": {
+  "slice_luts": 1451,
+  "lut_as_logic": 1395,
+  "lut_as_memory": 56,
+  "slice_registers": 856,
+  "f7_muxes": 0,
+  "f8_muxes": 0,
+  "block_ram_tile": 2,
+  "dsps": 4,
+  "slices": 429,
+  "lut_as_distributed_ram": 56,
+  "lut_as_shift_register": 0
+ },
+ "area_hier": [
+  {
+   "instance": "core_bench",
+   "depth": 0,
+   "Module": "(top)",
+   "Total LUTs": 1451,
+   "Logic LUTs": 1395,
+   "LUTRAMs": 56,
+   "SRLs": 0,
+   "FFs": 856,
+   "RAMB36": 2,
+   "RAMB18": 0,
+   "DSP Blocks": 4
+  },
+  {
+   "instance": "(core_bench)",
+   "depth": 1,
+   "Module": "(top)",
+   "Total LUTs": 3,
+   "Logic LUTs": 3,
+   "LUTRAMs": 0,
+   "SRLs": 0,
+   "FFs": 39,
+   "RAMB36": 2,
+   "RAMB18": 0,
+   "DSP Blocks": 0
+  },
+  {
+   "instance": "cpu",
+   "depth": 1,
+   "Module": "neorv32_cpu_flat",
+   "Total LUTs": 1390,
+   "Logic LUTs": 1334,
+   "LUTRAMs": 56,
+   "SRLs": 0,
+   "FFs": 783,
+   "RAMB36": 0,
+   "RAMB18": 0,
+   "DSP Blocks": 4
+  },
+  {
+   "instance": "cpu_inst",
+   "depth": 2,
+   "Module": "neorv32_cpu",
+   "Total LUTs": 1389,
+   "Logic LUTs": 1333,
+   "LUTRAMs": 56,
+   "SRLs": 0,
+   "FFs": 783,
+   "RAMB36": 0,
+   "RAMB18": 0,
+   "DSP Blocks": 4
+  },
+  {
+   "instance": "stall_gen",
+   "depth": 1,
+   "Module": "bench_stall_gen",
+   "Total LUTs": 58,
+   "Logic LUTs": 58,
+   "LUTRAMs": 0,
+   "SRLs": 0,
+   "FFs": 34,
+   "RAMB36": 0,
+   "RAMB18": 0,
+   "DSP Blocks": 0
+  }
+ ],
+ "finished_at": "2026-10-04T19:26:59Z",
+ "wall_sec": 356.9,
+ "core_area": {
+  "instance": "cpu",
+  "depth": 1,
+  "Module": "neorv32_cpu_flat",
+  "Total LUTs": 1390,
+  "Logic LUTs": 1334,
+  "LUTRAMs": 56,
+  "SRLs": 0,
+  "FFs": 783,
+  "RAMB36": 0,
+  "RAMB18": 0,
+  "DSP Blocks": 4
+ },
+ "gowin_reference": {
+  "fmax_mhz": 92.028,
+  "lut4": 2058,
+  "ff": 820,
+  "source": "research/v2/reference_cores/results/neorv32.json"
+ }
+}

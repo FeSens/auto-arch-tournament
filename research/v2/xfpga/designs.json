@@ -1,0 +1,896 @@
+{
+ "claude-opus-5_5_xhigh-v2_rep1": {
+  "name": "claude-opus-5_5_xhigh-v2_rep1",
+  "group": "agent",
+  "system": "claude-opus-5_5_xhigh-v2",
+  "rep": 1,
+  "kind": "core_si",
+  "rtl_dir": "bench/v2/claude-opus-5_5_xhigh-v2/rep1/final-rtl"
+ },
+ "claude-opus-5_5_xhigh-v2_rep2": {
+  "name": "claude-opus-5_5_xhigh-v2_rep2",
+  "group": "agent",
+  "system": "claude-opus-5_5_xhigh-v2",
+  "rep": 2,
+  "kind": "core_si",
+  "rtl_dir": "bench/v2/claude-opus-5_5_xhigh-v2/rep2/final-rtl"
+ },
+ "claude-opus-5_5_xhigh-v2_rep3": {
+  "name": "claude-opus-5_5_xhigh-v2_rep3",
+  "group": "agent",
+  "system": "claude-opus-5_5_xhigh-v2",
+  "rep": 3,
+  "kind": "core_si",
+  "rtl_dir": "bench/v2/claude-opus-5_5_xhigh-v2/rep3/final-rtl"
+ },
+ "claude-opus-5_5_xhigh-v2_rep4": {
+  "name": "claude-opus-5_5_xhigh-v2_rep4",
+  "group": "agent",
+  "system": "claude-opus-5_5_xhigh-v2",
+  "rep": 4,
+  "kind": "core_si",
+  "rtl_dir": "bench/v2/claude-opus-5_5_xhigh-v2/rep4/final-rtl"
+ },
+ "claude-opus-5_5_xhigh-v2_rep5": {
+  "name": "claude-opus-5_5_xhigh-v2_rep5",
+  "group": "agent",
+  "system": "claude-opus-5_5_xhigh-v2",
+  "rep": 5,
+  "kind": "core_si",
+  "rtl_dir": "bench/v2/claude-opus-5_5_xhigh-v2/rep5/final-rtl"
+ },
+ "claude-opus-5_5_xhigh-v2_rep6": {
+  "name": "claude-opus-5_5_xhigh-v2_rep6",
+  "group": "agent",
+  "system": "claude-opus-5_5_xhigh-v2",
+  "rep": 6,
+  "kind": "core_si",
+  "rtl_dir": "bench/v2/claude-opus-5_5_xhigh-v2/rep6/final-rtl"
+ },
+ "claude-sonnet-5-5_xhigh-v2_rep1": {
+  "name": "claude-sonnet-5-5_xhigh-v2_rep1",
+  "group": "agent",
+  "system": "claude-sonnet-5-5_xhigh-v2",
+  "rep": 1,
+  "kind": "core_si",
+  "rtl_dir": "bench/v2/claude-sonnet-5-5_xhigh-v2/rep1/final-rtl"
+ },
+ "claude-sonnet-5-5_xhigh-v2_rep2": {
+  "name": "claude-sonnet-5-5_xhigh-v2_rep2",
+  "group": "agent",
+  "system": "claude-sonnet-5-5_xhigh-v2",
+  "rep": 2,
+  "kind": "core_si",
+  "rtl_dir": "bench/v2/claude-sonnet-5-5_xhigh-v2/rep2/final-rtl"
+ },
+ "claude-sonnet-5-5_xhigh-v2_rep3": {
+  "name": "claude-sonnet-5-5_xhigh-v2_rep3",
+  "group": "agent",
+  "system": "claude-sonnet-5-5_xhigh-v2",
+  "rep": 3,
+  "kind": "core_si",
+  "rtl_dir": "bench/v2/claude-sonnet-5-5_xhigh-v2/rep3/final-rtl"
+ },
+ "claude-sonnet-5-5_xhigh-v2_rep4": {
+  "name": "claude-sonnet-5-5_xhigh-v2_rep4",
+  "group": "agent",
+  "system": "claude-sonnet-5-5_xhigh-v2",
+  "rep": 4,
+  "kind": "core_si",
+  "rtl_dir": "bench/v2/claude-sonnet-5-5_xhigh-v2/rep4/final-rtl"
+ },
+ "claude-sonnet-5-5_xhigh-v2_rep5": {
+  "name": "claude-sonnet-5-5_xhigh-v2_rep5",
+  "group": "agent",
+  "system": "claude-sonnet-5-5_xhigh-v2",
+  "rep": 5,
+  "kind": "core_si",
+  "rtl_dir": "bench/v2/claude-sonnet-5-5_xhigh-v2/rep5/final-rtl"
+ },
+ "claude-sonnet-5-5_xhigh-v2_rep6": {
+  "name": "claude-sonnet-5-5_xhigh-v2_rep6",
+  "group": "agent",
+  "system": "claude-sonnet-5-5_xhigh-v2",
+  "rep": 6,
+  "kind": "core_si",
+  "rtl_dir": "bench/v2/claude-sonnet-5-5_xhigh-v2/rep6/final-rtl"
+ },
+ "gpt-6_1-sol_xhigh-v2_rep1": {
+  "name": "gpt-6_1-sol_xhigh-v2_rep1",
+  "group": "agent",
+  "system": "gpt-6_1-sol_xhigh-v2",
+  "rep": 1,
+  "kind": "core_si",
+  "rtl_dir": "bench/v2/gpt-6_1-sol_xhigh-v2/rep1/final-rtl"
+ },
+ "gpt-6_1-sol_xhigh-v2_rep2": {
+  "name": "gpt-6_1-sol_xhigh-v2_rep2",
+  "group": "agent",
+  "system": "gpt-6_1-sol_xhigh-v2",
+  "rep": 2,
+  "kind": "core_si",
+  "rtl_dir": "bench/v2/gpt-6_1-sol_xhigh-v2/rep2/final-rtl"
+ },
+ "gpt-6_1-sol_xhigh-v2_rep3": {
+  "name": "gpt-6_1-sol_xhigh-v2_rep3",
+  "group": "agent",
+  "system": "gpt-6_1-sol_xhigh-v2",
+  "rep": 3,
+  "kind": "core_si",
+  "rtl_dir": "bench/v2/gpt-6_1-sol_xhigh-v2/rep3/final-rtl"
+ },
+ "gpt-6_1-sol_xhigh-v2_rep4": {
+  "name": "gpt-6_1-sol_xhigh-v2_rep4",
+  "group": "agent",
+  "system": "gpt-6_1-sol_xhigh-v2",
+  "rep": 4,
+  "kind": "core_si",
+  "rtl_dir": "bench/v2/gpt-6_1-sol_xhigh-v2/rep4/final-rtl"
+ },
+ "gpt-6_1-sol_xhigh-v2_rep5": {
+  "name": "gpt-6_1-sol_xhigh-v2_rep5",
+  "group": "agent",
+  "system": "gpt-6_1-sol_xhigh-v2",
+  "rep": 5,
+  "kind": "core_si",
+  "rtl_dir": "bench/v2/gpt-6_1-sol_xhigh-v2/rep5/final-rtl"
+ },
+ "gpt-6_1-sol_xhigh-v2_rep6": {
+  "name": "gpt-6_1-sol_xhigh-v2_rep6",
+  "group": "agent",
+  "system": "gpt-6_1-sol_xhigh-v2",
+  "rep": 6,
+  "kind": "core_si",
+  "rtl_dir": "bench/v2/gpt-6_1-sol_xhigh-v2/rep6/final-rtl"
+ },
+ "gpt-6-astra_xhigh-v2_rep1": {
+  "name": "gpt-6-astra_xhigh-v2_rep1",
+  "group": "agent",
+  "system": "gpt-6-astra_xhigh-v2",
+  "rep": 1,
+  "kind": "core_si",
+  "rtl_dir": "bench/v2/gpt-6-astra_xhigh-v2/rep1/final-rtl"
+ },
+ "gpt-6-astra_xhigh-v2_rep2": {
+  "name": "gpt-6-astra_xhigh-v2_rep2",
+  "group": "agent",
+  "system": "gpt-6-astra_xhigh-v2",
+  "rep": 2,
+  "kind": "core_si",
+  "rtl_dir": "bench/v2/gpt-6-astra_xhigh-v2/rep2/final-rtl"
+ },
+ "gpt-6-astra_xhigh-v2_rep3": {
+  "name": "gpt-6-astra_xhigh-v2_rep3",
+  "group": "agent",
+  "system": "gpt-6-astra_xhigh-v2",
+  "rep": 3,
+  "kind": "core_si",
+  "rtl_dir": "bench/v2/gpt-6-astra_xhigh-v2/rep3/final-rtl"
+ },
+ "gpt-6-astra_xhigh-v2_rep4": {
+  "name": "gpt-6-astra_xhigh-v2_rep4",
+  "group": "agent",
+  "system": "gpt-6-astra_xhigh-v2",
+  "rep": 4,
+  "kind": "core_si",
+  "rtl_dir": "bench/v2/gpt-6-astra_xhigh-v2/rep4/final-rtl"
+ },
+ "gpt-6-astra_xhigh-v2_rep5": {
+  "name": "gpt-6-astra_xhigh-v2_rep5",
+  "group": "agent",
+  "system": "gpt-6-astra_xhigh-v2",
+  "rep": 5,
+  "kind": "core_si",
+  "rtl_dir": "bench/v2/gpt-6-astra_xhigh-v2/rep5/final-rtl"
+ },
+ "gpt-6-astra_xhigh-v2_rep6": {
+  "name": "gpt-6-astra_xhigh-v2_rep6",
+  "group": "agent",
+  "system": "gpt-6-astra_xhigh-v2",
+  "rep": 6,
+  "kind": "core_si",
+  "rtl_dir": "bench/v2/gpt-6-astra_xhigh-v2/rep6/final-rtl"
+ },
+ "gpt-6-luna_xhigh-v2_rep1": {
+  "name": "gpt-6-luna_xhigh-v2_rep1",
+  "group": "agent",
+  "system": "gpt-6-luna_xhigh-v2",
+  "rep": 1,
+  "kind": "core_si",
+  "rtl_dir": "bench/v2/gpt-6-luna_xhigh-v2/rep1/final-rtl"
+ },
+ "gpt-6-luna_xhigh-v2_rep2": {
+  "name": "gpt-6-luna_xhigh-v2_rep2",
+  "group": "agent",
+  "system": "gpt-6-luna_xhigh-v2",
+  "rep": 2,
+  "kind": "core_si",
+  "rtl_dir": "bench/v2/gpt-6-luna_xhigh-v2/rep2/final-rtl"
+ },
+ "gpt-6-luna_xhigh-v2_rep3": {
+  "name": "gpt-6-luna_xhigh-v2_rep3",
+  "group": "agent",
+  "system": "gpt-6-luna_xhigh-v2",
+  "rep": 3,
+  "kind": "core_si",
+  "rtl_dir": "bench/v2/gpt-6-luna_xhigh-v2/rep3/final-rtl"
+ },
+ "gpt-6-luna_xhigh-v2_rep4": {
+  "name": "gpt-6-luna_xhigh-v2_rep4",
+  "group": "agent",
+  "system": "gpt-6-luna_xhigh-v2",
+  "rep": 4,
+  "kind": "core_si",
+  "rtl_dir": "bench/v2/gpt-6-luna_xhigh-v2/rep4/final-rtl"
+ },
+ "gpt-6-luna_xhigh-v2_rep5": {
+  "name": "gpt-6-luna_xhigh-v2_rep5",
+  "group": "agent",
+  "system": "gpt-6-luna_xhigh-v2",
+  "rep": 5,
+  "kind": "core_si",
+  "rtl_dir": "bench/v2/gpt-6-luna_xhigh-v2/rep5/final-rtl"
+ },
+ "gpt-6-luna_xhigh-v2_rep6": {
+  "name": "gpt-6-luna_xhigh-v2_rep6",
+  "group": "agent",
+  "system": "gpt-6-luna_xhigh-v2",
+  "rep": 6,
+  "kind": "core_si",
+  "rtl_dir": "bench/v2/gpt-6-luna_xhigh-v2/rep6/final-rtl"
+ },
+ "gpt-5_5_xhigh-v2_rep1": {
+  "name": "gpt-5_5_xhigh-v2_rep1",
+  "group": "agent",
+  "system": "gpt-5_5_xhigh-v2",
+  "rep": 1,
+  "kind": "core_si",
+  "rtl_dir": "bench/v2/gpt-5_5_xhigh-v2/rep1/final-rtl"
+ },
+ "gpt-5_5_xhigh-v2_rep2": {
+  "name": "gpt-5_5_xhigh-v2_rep2",
+  "group": "agent",
+  "system": "gpt-5_5_xhigh-v2",
+  "rep": 2,
+  "kind": "core_si",
+  "rtl_dir": "bench/v2/gpt-5_5_xhigh-v2/rep2/final-rtl"
+ },
+ "gpt-5_5_xhigh-v2_rep3": {
+  "name": "gpt-5_5_xhigh-v2_rep3",
+  "group": "agent",
+  "system": "gpt-5_5_xhigh-v2",
+  "rep": 3,
+  "kind": "core_si",
+  "rtl_dir": "bench/v2/gpt-5_5_xhigh-v2/rep3/final-rtl"
+ },
+ "gpt-5_5_xhigh-v2_rep4": {
+  "name": "gpt-5_5_xhigh-v2_rep4",
+  "group": "agent",
+  "system": "gpt-5_5_xhigh-v2",
+  "rep": 4,
+  "kind": "core_si",
+  "rtl_dir": "bench/v2/gpt-5_5_xhigh-v2/rep4/final-rtl"
+ },
+ "gpt-5_5_xhigh-v2_rep5": {
+  "name": "gpt-5_5_xhigh-v2_rep5",
+  "group": "agent",
+  "system": "gpt-5_5_xhigh-v2",
+  "rep": 5,
+  "kind": "core_si",
+  "rtl_dir": "bench/v2/gpt-5_5_xhigh-v2/rep5/final-rtl"
+ },
+ "gpt-5_5_xhigh-v2_rep6": {
+  "name": "gpt-5_5_xhigh-v2_rep6",
+  "group": "agent",
+  "system": "gpt-5_5_xhigh-v2",
+  "rep": 6,
+  "kind": "core_si",
+  "rtl_dir": "bench/v2/gpt-5_5_xhigh-v2/rep6/final-rtl"
+ },
+ "gpt-6-sol_xhigh-v2_rep1": {
+  "name": "gpt-6-sol_xhigh-v2_rep1",
+  "group": "pilot",
+  "system": "gpt-6-sol_xhigh-v2",
+  "rep": 1,
+  "kind": "core_si",
+  "rtl_dir": "bench/v2/gpt-6-sol_xhigh-v2/rep1/final-rtl"
+ },
+ "v0": {
+  "name": "v0",
+  "group": "v0",
+  "kind": "core_si",
+  "git_tag": "hwe-bench-v2.8.3",
+  "rtl_dir": "cores/bench/rtl"
+ },
+ "vexriscv_maxperf": {
+  "name": "vexriscv_maxperf",
+  "group": "reference",
+  "kind": "files",
+  "top": "core_bench",
+  "files": [
+   {
+    "path": "/home/bench/vexref/VexRiscv/VexRiscv.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "fpga/bench_stall_gen.sv",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "research/v2/reference_vexriscv/vex_bench.sv",
+    "lang": "sv",
+    "lib": null
+   }
+  ],
+  "include_dirs": []
+ },
+ "vexriscv_nocache": {
+  "name": "vexriscv_nocache",
+  "group": "reference",
+  "kind": "files",
+  "top": "core_bench",
+  "files": [
+   {
+    "path": "/home/bench/refcores/vexriscv_nocache/VexRiscv.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "fpga/bench_stall_gen.sv",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "research/v2/reference_cores/benches/vexriscv_nocache_bench.sv",
+    "lang": "sv",
+    "lib": null
+   }
+  ],
+  "include_dirs": []
+ },
+ "vexiiriscv": {
+  "name": "vexiiriscv",
+  "group": "reference",
+  "kind": "files",
+  "top": "core_bench",
+  "files": [
+   {
+    "path": "/home/bench/refcores/vexiiriscv_benchmap/VexiiRiscv.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "fpga/bench_stall_gen.sv",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "research/v2/reference_cores/benches/vexiiriscv_bench.sv",
+    "lang": "sv",
+    "lib": null
+   }
+  ],
+  "include_dirs": []
+ },
+ "hazard3": {
+  "name": "hazard3",
+  "group": "reference",
+  "kind": "files",
+  "top": "core_bench",
+  "files": [
+   {
+    "path": "/home/bench/refcores/Hazard3/hdl/hazard3_core.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/Hazard3/hdl/hazard3_cpu_1port.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/Hazard3/hdl/hazard3_cpu_2port.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/Hazard3/hdl/arith/hazard3_alu.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/Hazard3/hdl/arith/hazard3_branchcmp.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/Hazard3/hdl/arith/hazard3_mul_fast.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/Hazard3/hdl/arith/hazard3_muldiv_seq.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/Hazard3/hdl/arith/hazard3_onehot_encode.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/Hazard3/hdl/arith/hazard3_onehot_priority.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/Hazard3/hdl/arith/hazard3_onehot_priority_dynamic.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/Hazard3/hdl/arith/hazard3_priority_encode.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/Hazard3/hdl/arith/hazard3_shift_barrel.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/Hazard3/hdl/hazard3_csr.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/Hazard3/hdl/hazard3_decode.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/Hazard3/hdl/hazard3_frontend.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/Hazard3/hdl/hazard3_instr_decompress.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/Hazard3/hdl/hazard3_irq_ctrl.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/Hazard3/hdl/hazard3_pmp.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/Hazard3/hdl/hazard3_power_ctrl.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/Hazard3/hdl/hazard3_regfile_1w2r.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/Hazard3/hdl/hazard3_triggers.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "fpga/bench_stall_gen.sv",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "research/v2/reference_cores/benches/hazard3_bench.sv",
+    "lang": "sv",
+    "lib": null
+   }
+  ],
+  "include_dirs": [
+   "/home/bench/refcores/Hazard3/hdl"
+  ]
+ },
+ "ibex_maxperf": {
+  "name": "ibex_maxperf",
+  "group": "reference",
+  "kind": "files",
+  "top": "core_bench",
+  "files": [
+   {
+    "path": "fpga/bench_stall_gen.sv",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/gen/ibex_maxperf_bench.v",
+    "lang": "sv",
+    "lib": null
+   }
+  ],
+  "include_dirs": []
+ },
+ "ibex_small": {
+  "name": "ibex_small",
+  "group": "reference",
+  "kind": "files",
+  "top": "core_bench",
+  "files": [
+   {
+    "path": "fpga/bench_stall_gen.sv",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/gen/ibex_small_bench.v",
+    "lang": "sv",
+    "lib": null
+   }
+  ],
+  "include_dirs": []
+ },
+ "ueriscv": {
+  "name": "ueriscv",
+  "group": "reference",
+  "kind": "files",
+  "top": "core_bench",
+  "files": [
+   {
+    "path": "/home/bench/refcores/riscv/core/riscv/riscv_alu.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/riscv/core/riscv/riscv_core.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/riscv/core/riscv/riscv_csr.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/riscv/core/riscv/riscv_csr_regfile.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/riscv/core/riscv/riscv_decode.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/riscv/core/riscv/riscv_decoder.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/riscv/core/riscv/riscv_divider.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/riscv/core/riscv/riscv_exec.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/riscv/core/riscv/riscv_fetch.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/riscv/core/riscv/riscv_issue.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/riscv/core/riscv/riscv_lsu.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/riscv/core/riscv/riscv_mmu.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/riscv/core/riscv/riscv_multiplier.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/riscv/core/riscv/riscv_pipe_ctrl.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/riscv/core/riscv/riscv_regfile.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "fpga/bench_stall_gen.sv",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "research/v2/reference_cores/benches/ueriscv_bench.sv",
+    "lang": "sv",
+    "lib": null
+   }
+  ],
+  "include_dirs": [
+   "/home/bench/refcores/riscv/core/riscv"
+  ]
+ },
+ "neorv32": {
+  "name": "neorv32",
+  "group": "reference",
+  "kind": "files",
+  "top": "core_bench",
+  "files": [
+   {
+    "path": "/home/bench/refcores/neorv32/rtl/core/neorv32_package.vhd",
+    "lang": "vhdl",
+    "lib": "neorv32"
+   },
+   {
+    "path": "/home/bench/refcores/neorv32/rtl/core/neorv32_sys.vhd",
+    "lang": "vhdl",
+    "lib": "neorv32"
+   },
+   {
+    "path": "/home/bench/refcores/neorv32/rtl/core/neorv32_prim.vhd",
+    "lang": "vhdl",
+    "lib": "neorv32"
+   },
+   {
+    "path": "/home/bench/refcores/neorv32/rtl/core/neorv32_cpu_decompressor.vhd",
+    "lang": "vhdl",
+    "lib": "neorv32"
+   },
+   {
+    "path": "/home/bench/refcores/neorv32/rtl/core/neorv32_cpu_frontend.vhd",
+    "lang": "vhdl",
+    "lib": "neorv32"
+   },
+   {
+    "path": "/home/bench/refcores/neorv32/rtl/core/neorv32_cpu_control.vhd",
+    "lang": "vhdl",
+    "lib": "neorv32"
+   },
+   {
+    "path": "/home/bench/refcores/neorv32/rtl/core/neorv32_cpu_hwtrig.vhd",
+    "lang": "vhdl",
+    "lib": "neorv32"
+   },
+   {
+    "path": "/home/bench/refcores/neorv32/rtl/core/neorv32_cpu_counters.vhd",
+    "lang": "vhdl",
+    "lib": "neorv32"
+   },
+   {
+    "path": "/home/bench/refcores/neorv32/rtl/core/neorv32_cpu_regfile.vhd",
+    "lang": "vhdl",
+    "lib": "neorv32"
+   },
+   {
+    "path": "/home/bench/refcores/neorv32/rtl/core/neorv32_cpu_alu_shifter.vhd",
+    "lang": "vhdl",
+    "lib": "neorv32"
+   },
+   {
+    "path": "/home/bench/refcores/neorv32/rtl/core/neorv32_cpu_alu_muldiv.vhd",
+    "lang": "vhdl",
+    "lib": "neorv32"
+   },
+   {
+    "path": "/home/bench/refcores/neorv32/rtl/core/neorv32_cpu_alu_bitmanip.vhd",
+    "lang": "vhdl",
+    "lib": "neorv32"
+   },
+   {
+    "path": "/home/bench/refcores/neorv32/rtl/core/neorv32_cpu_alu_fpu.vhd",
+    "lang": "vhdl",
+    "lib": "neorv32"
+   },
+   {
+    "path": "/home/bench/refcores/neorv32/rtl/core/neorv32_cpu_alu_cond.vhd",
+    "lang": "vhdl",
+    "lib": "neorv32"
+   },
+   {
+    "path": "/home/bench/refcores/neorv32/rtl/core/neorv32_cpu_alu_crypto.vhd",
+    "lang": "vhdl",
+    "lib": "neorv32"
+   },
+   {
+    "path": "/home/bench/refcores/neorv32/rtl/core/neorv32_cpu_alu_cfu.vhd",
+    "lang": "vhdl",
+    "lib": "neorv32"
+   },
+   {
+    "path": "/home/bench/refcores/neorv32/rtl/core/neorv32_cpu_alu.vhd",
+    "lang": "vhdl",
+    "lib": "neorv32"
+   },
+   {
+    "path": "/home/bench/refcores/neorv32/rtl/core/neorv32_cpu_lsu.vhd",
+    "lang": "vhdl",
+    "lib": "neorv32"
+   },
+   {
+    "path": "/home/bench/refcores/neorv32/rtl/core/neorv32_cpu_pmp.vhd",
+    "lang": "vhdl",
+    "lib": "neorv32"
+   },
+   {
+    "path": "/home/bench/refcores/neorv32/rtl/core/neorv32_cpu_trace.vhd",
+    "lang": "vhdl",
+    "lib": "neorv32"
+   },
+   {
+    "path": "/home/bench/refcores/neorv32/rtl/core/neorv32_cpu.vhd",
+    "lang": "vhdl",
+    "lib": "neorv32"
+   },
+   {
+    "path": "research/v2/reference_cores/benches/neorv32_cpu_flat.vhd",
+    "lang": "vhdl",
+    "lib": null
+   },
+   {
+    "path": "fpga/bench_stall_gen.sv",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "research/v2/reference_cores/benches/neorv32_bench.sv",
+    "lang": "sv",
+    "lib": null
+   }
+  ],
+  "include_dirs": []
+ },
+ "biriscv": {
+  "name": "biriscv",
+  "group": "reference",
+  "kind": "files",
+  "top": "core_bench",
+  "files": [
+   {
+    "path": "/home/bench/refcores/biriscv/src/core/biriscv_alu.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/biriscv/src/core/biriscv_csr.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/biriscv/src/core/biriscv_csr_regfile.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/biriscv/src/core/biriscv_decode.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/biriscv/src/core/biriscv_decoder.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/biriscv/src/core/biriscv_divider.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/biriscv/src/core/biriscv_exec.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/biriscv/src/core/biriscv_fetch.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/biriscv/src/core/biriscv_frontend.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/biriscv/src/core/biriscv_issue.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/biriscv/src/core/biriscv_lsu.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/biriscv/src/core/biriscv_mmu.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/biriscv/src/core/biriscv_multiplier.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/biriscv/src/core/biriscv_npc.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/biriscv/src/core/biriscv_pipe_ctrl.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/biriscv/src/core/biriscv_regfile.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/biriscv/src/core/riscv_core.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "fpga/bench_stall_gen.sv",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "research/v2/reference_cores/benches/biriscv_bench.sv",
+    "lang": "sv",
+    "lib": null
+   }
+  ],
+  "include_dirs": [
+   "/home/bench/refcores/biriscv/src/core"
+  ]
+ },
+ "picorv32": {
+  "name": "picorv32",
+  "group": "reference",
+  "kind": "files",
+  "top": "core_bench",
+  "files": [
+   {
+    "path": "/home/bench/refcores/picorv32/picorv32.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "fpga/bench_stall_gen.sv",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "research/v2/reference_cores/benches/picorv32_bench.sv",
+    "lang": "sv",
+    "lib": null
+   }
+  ],
+  "include_dirs": []
+ }
+}

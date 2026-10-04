@@ -1,0 +1,637 @@
+{
+ "design": "biriscv",
+ "group": "reference",
+ "system": null,
+ "rep": null,
+ "registry_entry": {
+  "name": "biriscv",
+  "group": "reference",
+  "kind": "files",
+  "top": "core_bench",
+  "files": [
+   {
+    "path": "/home/bench/refcores/biriscv/src/core/biriscv_alu.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/biriscv/src/core/biriscv_csr.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/biriscv/src/core/biriscv_csr_regfile.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/biriscv/src/core/biriscv_decode.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/biriscv/src/core/biriscv_decoder.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/biriscv/src/core/biriscv_divider.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/biriscv/src/core/biriscv_exec.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/biriscv/src/core/biriscv_fetch.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/biriscv/src/core/biriscv_frontend.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/biriscv/src/core/biriscv_issue.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/biriscv/src/core/biriscv_lsu.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/biriscv/src/core/biriscv_mmu.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/biriscv/src/core/biriscv_multiplier.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/biriscv/src/core/biriscv_npc.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/biriscv/src/core/biriscv_pipe_ctrl.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/biriscv/src/core/biriscv_regfile.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/biriscv/src/core/riscv_core.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "fpga/bench_stall_gen.sv",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "research/v2/reference_cores/benches/biriscv_bench.sv",
+    "lang": "sv",
+    "lib": null
+   }
+  ],
+  "include_dirs": [
+   "/home/bench/refcores/biriscv/src/core"
+  ]
+ },
+ "sources": [
+  {
+   "origin": "/home/bench/refcores/biriscv/src/core/biriscv_alu.v",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "e8628af2c5c5bc70f21e02652fbf056ae59aa7fb125f2a3fe9b21ef9814694e3"
+  },
+  {
+   "origin": "/home/bench/refcores/biriscv/src/core/biriscv_csr.v",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "02a5eb4a1274493ba3aaf029717e09ca1f75a3af06c78941e5faad2d74427976"
+  },
+  {
+   "origin": "/home/bench/refcores/biriscv/src/core/biriscv_csr_regfile.v",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "9da3fe973e208a5bf9b636f9496ac854d1d796b7fac2982177bb1df21379dc03"
+  },
+  {
+   "origin": "/home/bench/refcores/biriscv/src/core/biriscv_decode.v",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "77ee30273be3456f4df3b7d60a863f65b0551f3b08d69811798d8a3b6b18e0a8"
+  },
+  {
+   "origin": "/home/bench/refcores/biriscv/src/core/biriscv_decoder.v",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "47805ee880fdba67b735eb77da1259a48cdfc10d21757ada1cdbf6b18e07e481"
+  },
+  {
+   "origin": "/home/bench/refcores/biriscv/src/core/biriscv_divider.v",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "5e73c61ce2aa6e82191f60590be460b7319c10e6714135bad6ecd0c00fb35e79"
+  },
+  {
+   "origin": "/home/bench/refcores/biriscv/src/core/biriscv_exec.v",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "93b11cc356986baa3861ace143f71fe2b5da44109afa2328a252778fc58055b6"
+  },
+  {
+   "origin": "/home/bench/refcores/biriscv/src/core/biriscv_fetch.v",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "bfe0afa48a744da203924e4776e227a0a9e07af839e0a24f45312aad6dfe47af"
+  },
+  {
+   "origin": "/home/bench/refcores/biriscv/src/core/biriscv_frontend.v",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "e3524075ae1feb3de8a6f726319e4e0e96a10810d8f42ffee03ff3b0be353bf5"
+  },
+  {
+   "origin": "/home/bench/refcores/biriscv/src/core/biriscv_issue.v",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "3ba90dc520a538e654b5a2b8793a2e9377eed7ed163d36cf898e8d8c60ba0875"
+  },
+  {
+   "origin": "/home/bench/refcores/biriscv/src/core/biriscv_lsu.v",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "3c579674a0851335406b2bc1089eeea4956263c7b2550760b59870c19de853dd"
+  },
+  {
+   "origin": "/home/bench/refcores/biriscv/src/core/biriscv_mmu.v",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "d6de4ba3ee65db0d80146d85175f121524c099e636ade59cf58bb67469282c26"
+  },
+  {
+   "origin": "/home/bench/refcores/biriscv/src/core/biriscv_multiplier.v",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "defc1feea8adf24047a1f3861156f61afeeec9388078368360428e88d48dde90"
+  },
+  {
+   "origin": "/home/bench/refcores/biriscv/src/core/biriscv_npc.v",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "f6c9e984d80d1ef4236d6e7dbbf7d651306f7a18e8c3a649212c78c5018dafb7"
+  },
+  {
+   "origin": "/home/bench/refcores/biriscv/src/core/biriscv_pipe_ctrl.v",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "6524fa1ff08abe2fa064a4b8e8c2846ddfee32395992475d10f09a44a1d9dd58"
+  },
+  {
+   "origin": "/home/bench/refcores/biriscv/src/core/biriscv_regfile.v",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "61cd309835ace8ed5a3d3be2d65293b4bbefd263d60b041e09ad96b43ef543b4"
+  },
+  {
+   "origin": "/home/bench/refcores/biriscv/src/core/riscv_core.v",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "139de10a842d757242638a9edff50a5a17c5e6bac9abfc0e55ea08ba73718709"
+  },
+  {
+   "origin": "/home/bench/auto-arch-tournament/fpga/bench_stall_gen.sv",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "d8c73f04cc214f500eb467ddee496884ff2390c2a0a68f16d4a2a8a839e3753e"
+  },
+  {
+   "origin": "/home/bench/auto-arch-tournament/research/v2/reference_cores/benches/biriscv_bench.sv",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "98fc9e4d21a76fbc791723218e8a8929e9300df83ddb576714f79807e165f6b7"
+  }
+ ],
+ "include_dirs": [
+  "root/home/bench/refcores/biriscv/src/core"
+ ],
+ "flow": {
+  "tool": "2026.1",
+  "part": "xc7a200tsbg484-1",
+  "spec": "research/runs/EXP-2026-09-28-v2-main/amendment_15.yaml part_c_cross_fpga"
+ },
+ "top": "core_bench",
+ "part": "xc7a200tsbg484-1",
+ "source_sha256": "e79f803039be50f061155dccdea49faeefac3055d44008aa41e31e81243838d4",
+ "n_files": 19,
+ "started_at": "2026-10-04T19:12:47Z",
+ "status": "ok",
+ "complete": true,
+ "pass1_synth": {
+  "status": "ok",
+  "period": 5.0,
+  "sec_read": 3.418,
+  "sec_synth": 254.671,
+  "wall_sec": 265.3,
+  "warnings": 110,
+  "critical_warnings": 0,
+  "vivado_version": "2026.1"
+ },
+ "vivado_version": "2026.1",
+ "pass1": {
+  "status": "ok",
+  "directive": "Default",
+  "period": 5.0,
+  "wns": -14.326,
+  "fmax_mhz": 51.744,
+  "logic_levels": 21,
+  "startpoint": "cpu/u_frontend/u_decode/u_fifo/rd_ptr_q_reg[0]_rep__1/C",
+  "endpoint": "cpu/u_lsu/mem_data_wr_q_reg[20]/D",
+  "requirement": 5.0,
+  "datapath_delay": 19.314,
+  "logic_delay": 3.611,
+  "net_delay": 15.703,
+  "skew": -0.005,
+  "uncertainty": 0.035,
+  "wns_all_groups": -14.326,
+  "worst_group_all": "clock",
+  "whs": 0.051,
+  "hd_clk_src": "BUFGCTRL_X0Y0",
+  "sec_open": 9.779,
+  "sec_opt": 5.848,
+  "sec_place": 58.422,
+  "sec_physopt": 18.996,
+  "sec_route": 115.876,
+  "wall_sec": 215.4,
+  "warnings": 6,
+  "critical_warnings": 0,
+  "vivado_version": "2026.1",
+  "route_nets_with_errors": 0,
+  "util": {
+   "slice_luts": 11975,
+   "lut_as_logic": 11975,
+   "lut_as_memory": 0,
+   "slice_registers": 6487,
+   "f7_muxes": 728,
+   "f8_muxes": 155,
+   "block_ram_tile": 2,
+   "dsps": 4,
+   "slices": 3760,
+   "lut_as_distributed_ram": 0,
+   "lut_as_shift_register": 0
+  },
+  "worst_path": {
+   "via_dmem": false,
+   "instances": [
+    "cpu/u_frontend",
+    "cpu/u_issue",
+    "cpu/u_frontend",
+    "cpu/u_lsu"
+   ]
+  }
+ },
+ "F1": 51.744,
+ "P2": 18.36,
+ "pass2_synth": {
+  "status": "ok",
+  "period": 18.36,
+  "sec_read": 2.828,
+  "sec_synth": 249.286,
+  "wall_sec": 260.6,
+  "warnings": 110,
+  "critical_warnings": 0
+ },
+ "pass2": {
+  "Default": {
+   "status": "ok",
+   "directive": "Default",
+   "period": 18.36,
+   "wns": -1.027,
+   "fmax_mhz": 51.581,
+   "logic_levels": 24,
+   "startpoint": "cpu/u_frontend/u_decode/u_fifo/rd_ptr_q_reg[0]_rep/C",
+   "endpoint": "cpu/u_lsu/mem_data_wr_q_reg[19]/D",
+   "requirement": 18.36,
+   "datapath_delay": 19.526,
+   "logic_delay": 5.056,
+   "net_delay": 14.47,
+   "skew": 0.098,
+   "uncertainty": 0.035,
+   "wns_all_groups": -1.027,
+   "worst_group_all": "clock",
+   "whs": 0.063,
+   "hd_clk_src": "BUFGCTRL_X0Y0",
+   "sec_open": 9.933,
+   "sec_opt": 5.802,
+   "sec_place": 51.107,
+   "sec_physopt": 9.483,
+   "sec_route": 119.254,
+   "wall_sec": 202.5,
+   "warnings": 6,
+   "critical_warnings": 0,
+   "vivado_version": "2026.1",
+   "route_nets_with_errors": 0,
+   "worst_path": {
+    "via_dmem": false,
+    "instances": [
+     "cpu/u_frontend",
+     "cpu/u_issue",
+     "cpu/u_frontend",
+     "cpu/u_lsu"
+    ]
+   }
+  },
+  "Explore": {
+   "status": "ok",
+   "directive": "Explore",
+   "period": 18.36,
+   "wns": -1.528,
+   "fmax_mhz": 50.282,
+   "logic_levels": 24,
+   "startpoint": "cpu/u_frontend/u_decode/u_fifo/rd_ptr_q_reg[0]_rep/C",
+   "endpoint": "cpu/u_lsu/mem_data_wr_q_reg[31]/D",
+   "requirement": 18.36,
+   "datapath_delay": 20.03,
+   "logic_delay": 4.764,
+   "net_delay": 15.266,
+   "skew": 0.098,
+   "uncertainty": 0.035,
+   "wns_all_groups": -1.528,
+   "worst_group_all": "clock",
+   "whs": 0.063,
+   "hd_clk_src": "BUFGCTRL_X0Y0",
+   "sec_open": 10.254,
+   "sec_opt": 5.76,
+   "sec_place": 74.86,
+   "sec_physopt": 14.956,
+   "sec_route": 106.308,
+   "wall_sec": 218.9,
+   "warnings": 6,
+   "critical_warnings": 0,
+   "vivado_version": "2026.1",
+   "route_nets_with_errors": 0,
+   "worst_path": {
+    "via_dmem": false,
+    "instances": [
+     "cpu/u_frontend",
+     "cpu/u_issue",
+     "cpu/u_frontend",
+     "cpu/u_issue",
+     "cpu/u_lsu"
+    ]
+   }
+  },
+  "ExtraTimingOpt": {
+   "status": "ok",
+   "directive": "ExtraTimingOpt",
+   "period": 18.36,
+   "wns": -0.806,
+   "fmax_mhz": 52.176,
+   "logic_levels": 23,
+   "startpoint": "cpu/u_frontend/u_decode/u_fifo/pc_q_reg[1][5]/C",
+   "endpoint": "cpu/u_lsu/mem_data_wr_q_reg[19]/D",
+   "requirement": 18.36,
+   "datapath_delay": 19.029,
+   "logic_delay": 4.64,
+   "net_delay": 14.389,
+   "skew": -0.133,
+   "uncertainty": 0.035,
+   "wns_all_groups": -0.806,
+   "worst_group_all": "clock",
+   "whs": 0.055,
+   "hd_clk_src": "BUFGCTRL_X0Y0",
+   "sec_open": 10.032,
+   "sec_opt": 5.736,
+   "sec_place": 58.562,
+   "sec_physopt": 1.42,
+   "sec_route": 170.627,
+   "wall_sec": 252.6,
+   "warnings": 5,
+   "critical_warnings": 0,
+   "vivado_version": "2026.1",
+   "route_nets_with_errors": 0,
+   "worst_path": {
+    "via_dmem": false,
+    "instances": [
+     "cpu/u_frontend",
+     "cpu/u_issue",
+     "cpu/u_frontend",
+     "cpu/u_issue",
+     "cpu/u_frontend",
+     "cpu/u_lsu"
+    ]
+   }
+  }
+ },
+ "fmax_p2": {
+  "Default": 51.581,
+  "Explore": 50.282,
+  "ExtraTimingOpt": 52.176
+ },
+ "fmax_mhz": 51.581,
+ "area": {
+  "slice_luts": 11443,
+  "lut_as_logic": 11443,
+  "lut_as_memory": 0,
+  "slice_registers": 6485,
+  "f7_muxes": 728,
+  "f8_muxes": 155,
+  "block_ram_tile": 2,
+  "dsps": 4,
+  "slices": 3690,
+  "lut_as_distributed_ram": 0,
+  "lut_as_shift_register": 0
+ },
+ "area_hier": [
+  {
+   "instance": "core_bench",
+   "depth": 0,
+   "Module": "(top)",
+   "Total LUTs": 11443,
+   "Logic LUTs": 11443,
+   "LUTRAMs": 0,
+   "SRLs": 0,
+   "FFs": 6485,
+   "RAMB36": 2,
+   "RAMB18": 0,
+   "DSP Blocks": 4
+  },
+  {
+   "instance": "(core_bench)",
+   "depth": 1,
+   "Module": "(top)",
+   "Total LUTs": 4,
+   "Logic LUTs": 4,
+   "LUTRAMs": 0,
+   "SRLs": 0,
+   "FFs": 77,
+   "RAMB36": 2,
+   "RAMB18": 0,
+   "DSP Blocks": 0
+  },
+  {
+   "instance": "cpu",
+   "depth": 1,
+   "Module": "riscv_core",
+   "Total LUTs": 11380,
+   "Logic LUTs": 11380,
+   "LUTRAMs": 0,
+   "SRLs": 0,
+   "FFs": 6374,
+   "RAMB36": 0,
+   "RAMB18": 0,
+   "DSP Blocks": 4
+  },
+  {
+   "instance": "u_mul",
+   "depth": 2,
+   "Module": "biriscv_multiplier",
+   "Total LUTs": 71,
+   "Logic LUTs": 71,
+   "LUTRAMs": 0,
+   "SRLs": 0,
+   "FFs": 99,
+   "RAMB36": 0,
+   "RAMB18": 0,
+   "DSP Blocks": 4
+  },
+  {
+   "instance": "u_csr",
+   "depth": 2,
+   "Module": "biriscv_csr",
+   "Total LUTs": 146,
+   "Logic LUTs": 146,
+   "LUTRAMs": 0,
+   "SRLs": 0,
+   "FFs": 384,
+   "RAMB36": 0,
+   "RAMB18": 0,
+   "DSP Blocks": 0
+  },
+  {
+   "instance": "u_div",
+   "depth": 2,
+   "Module": "biriscv_divider",
+   "Total LUTs": 256,
+   "Logic LUTs": 256,
+   "LUTRAMs": 0,
+   "SRLs": 0,
+   "FFs": 263,
+   "RAMB36": 0,
+   "RAMB18": 0,
+   "DSP Blocks": 0
+  },
+  {
+   "instance": "u_exec0",
+   "depth": 2,
+   "Module": "biriscv_exec",
+   "Total LUTs": 0,
+   "Logic LUTs": 0,
+   "LUTRAMs": 0,
+   "SRLs": 0,
+   "FFs": 98,
+   "RAMB36": 0,
+   "RAMB18": 0,
+   "DSP Blocks": 0
+  },
+  {
+   "instance": "u_exec1",
+   "depth": 2,
+   "Module": "biriscv_exec_0",
+   "Total LUTs": 1206,
+   "Logic LUTs": 1206,
+   "LUTRAMs": 0,
+   "SRLs": 0,
+   "FFs": 98,
+   "RAMB36": 0,
+   "RAMB18": 0,
+   "DSP Blocks": 0
+  },
+  {
+   "instance": "u_frontend",
+   "depth": 2,
+   "Module": "biriscv_frontend",
+   "Total LUTs": 6225,
+   "Logic LUTs": 6225,
+   "LUTRAMs": 0,
+   "SRLs": 0,
+   "FFs": 3743,
+   "RAMB36": 0,
+   "RAMB18": 0,
+   "DSP Blocks": 0
+  },
+  {
+   "instance": "u_issue",
+   "depth": 2,
+   "Module": "biriscv_issue",
+   "Total LUTs": 3369,
+   "Logic LUTs": 3369,
+   "LUTRAMs": 0,
+   "SRLs": 0,
+   "FFs": 1532,
+   "RAMB36": 0,
+   "RAMB18": 0,
+   "DSP Blocks": 0
+  },
+  {
+   "instance": "u_lsu",
+   "depth": 2,
+   "Module": "biriscv_lsu",
+   "Total LUTs": 123,
+   "Logic LUTs": 123,
+   "LUTRAMs": 0,
+   "SRLs": 0,
+   "FFs": 157,
+   "RAMB36": 0,
+   "RAMB18": 0,
+   "DSP Blocks": 0
+  },
+  {
+   "instance": "stall_gen",
+   "depth": 1,
+   "Module": "bench_stall_gen",
+   "Total LUTs": 60,
+   "Logic LUTs": 60,
+   "LUTRAMs": 0,
+   "SRLs": 0,
+   "FFs": 34,
+   "RAMB36": 0,
+   "RAMB18": 0,
+   "DSP Blocks": 0
+  }
+ ],
+ "finished_at": "2026-10-04T19:34:27Z",
+ "wall_sec": 1300.1,
+ "core_area": {
+  "instance": "cpu",
+  "depth": 1,
+  "Module": "riscv_core",
+  "Total LUTs": 11380,
+  "Logic LUTs": 11380,
+  "LUTRAMs": 0,
+  "SRLs": 0,
+  "FFs": 6374,
+  "RAMB36": 0,
+  "RAMB18": 0,
+  "DSP Blocks": 4
+ },
+ "gowin_reference": {
+  "fmax_mhz": 27.279,
+  "lut4": 17560,
+  "ff": 6402,
+  "source": "research/v2/reference_cores/results/biriscv.json"
+ }
+}

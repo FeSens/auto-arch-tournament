@@ -1,0 +1,469 @@
+{
+ "design": "v0",
+ "group": "v0",
+ "system": null,
+ "rep": null,
+ "registry_entry": {
+  "name": "v0",
+  "group": "v0",
+  "kind": "core_si",
+  "git_tag": "hwe-bench-v2.8.3",
+  "rtl_dir": "cores/bench/rtl"
+ },
+ "sources": [
+  {
+   "origin": "/home/bench/xfpga-stage/git/hwe-bench-v2.8.3/cores/bench/rtl/core_pkg.sv",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "840a5925ddba190193593ac15e806bc9ba05062095e0679603e92b6cbecc18f6"
+  },
+  {
+   "origin": "/home/bench/xfpga-stage/git/hwe-bench-v2.8.3/cores/bench/rtl/alu.sv",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "a573be32c790ea2409694c48f6b3ed024f25dbbafaeaee2e1563a09271d6c630"
+  },
+  {
+   "origin": "/home/bench/xfpga-stage/git/hwe-bench-v2.8.3/cores/bench/rtl/core.sv",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "c18294ced470d8b499ab35d61c44e6b91903450de04176e8c166c33a2edc08f5"
+  },
+  {
+   "origin": "/home/bench/xfpga-stage/git/hwe-bench-v2.8.3/cores/bench/rtl/decoder.sv",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "dcdf0402b952b0460973c7a843d014839c53b66eaf26fa1b7e4e75be082d7011"
+  },
+  {
+   "origin": "/home/bench/xfpga-stage/git/hwe-bench-v2.8.3/cores/bench/rtl/ex_stage.sv",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "00f2eb24e4620168bbd066bb46bc94d1917e1a07e234f024942f89e26c5a2d66"
+  },
+  {
+   "origin": "/home/bench/xfpga-stage/git/hwe-bench-v2.8.3/cores/bench/rtl/forward_unit.sv",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "e60a05fa56f561908a1ce4de9c64e3e0e04ccf7f782dc4e2caef2bf7e5d2acfc"
+  },
+  {
+   "origin": "/home/bench/xfpga-stage/git/hwe-bench-v2.8.3/cores/bench/rtl/hazard_unit.sv",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "274646e63386a3995fea65b39d6c5d29ce88f5009007c98010179eba6fc8d840"
+  },
+  {
+   "origin": "/home/bench/xfpga-stage/git/hwe-bench-v2.8.3/cores/bench/rtl/id_stage.sv",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "9b1e0e8b1ac875d2d25ea43543f4964ad021245ce0315e934cf47b85deed3786"
+  },
+  {
+   "origin": "/home/bench/xfpga-stage/git/hwe-bench-v2.8.3/cores/bench/rtl/if_stage.sv",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "2870162950c328b9c0f9d2b8ea637267dd3c6f66a5d7bc2739c2f76568b6e4f7"
+  },
+  {
+   "origin": "/home/bench/xfpga-stage/git/hwe-bench-v2.8.3/cores/bench/rtl/imm_gen.sv",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "b44d8c04b2e79720b983a55f11698e22808baa3c7589060c1fa53cc16048d6b2"
+  },
+  {
+   "origin": "/home/bench/xfpga-stage/git/hwe-bench-v2.8.3/cores/bench/rtl/mem_stage.sv",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "7c8ab041e5dc9ee654ce109f4bb8bc772699f57819411c4fc66797ca727f2e90"
+  },
+  {
+   "origin": "/home/bench/xfpga-stage/git/hwe-bench-v2.8.3/cores/bench/rtl/reg_file.sv",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "2b857a07b85a3e0b51c05abd3769c89120aefae2a10572e321d80669f19e848f"
+  },
+  {
+   "origin": "/home/bench/xfpga-stage/git/hwe-bench-v2.8.3/cores/bench/rtl/wb_stage.sv",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "c8f46c9b03487325e8c24580004eb1a2960be6d5a4452e84aa3e746c626c574b"
+  },
+  {
+   "origin": "/home/bench/auto-arch-tournament/fpga/bench_stall_gen.sv",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "d8c73f04cc214f500eb467ddee496884ff2390c2a0a68f16d4a2a8a839e3753e"
+  },
+  {
+   "origin": "/home/bench/auto-arch-tournament/fpga/core_bench_si.sv",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "cb242939810217c84701833a2e4bbb21157eb5e0e080c8bee200dd9cf4e76393"
+  }
+ ],
+ "include_dirs": [
+  "root/home/bench/xfpga-stage/git/hwe-bench-v2.8.3/cores/bench/rtl"
+ ],
+ "flow": {
+  "tool": "2026.1",
+  "part": "xc7a200tsbg484-1",
+  "spec": "research/runs/EXP-2026-09-28-v2-main/amendment_15.yaml part_c_cross_fpga"
+ },
+ "top": "core_bench",
+ "part": "xc7a200tsbg484-1",
+ "source_sha256": "7e9c92fff827e8e616dbe3c232750657730a56b8e388c8e1e29c8d2e83c80e86",
+ "n_files": 15,
+ "started_at": "2026-10-04T19:23:32Z",
+ "status": "ok",
+ "complete": true,
+ "pass1_synth": {
+  "status": "ok",
+  "period": 5.0,
+  "sec_read": 3.046,
+  "sec_synth": 41.824,
+  "wall_sec": 51.9,
+  "warnings": 101,
+  "critical_warnings": 0,
+  "vivado_version": "2026.1"
+ },
+ "vivado_version": "2026.1",
+ "pass1": {
+  "status": "ok",
+  "directive": "Default",
+  "period": 5.0,
+  "wns": -99.25,
+  "fmax_mhz": 9.592,
+  "logic_levels": 328,
+  "startpoint": "cpu/u_ex/reg_q_reg[rd][2]/C",
+  "endpoint": "cpu/u_ex/reg_q_reg[alu_result][4]_rep__4/D",
+  "requirement": 5.0,
+  "datapath_delay": 104.067,
+  "logic_delay": 62.01,
+  "net_delay": 42.057,
+  "skew": -0.103,
+  "uncertainty": 0.035,
+  "wns_all_groups": -99.25,
+  "worst_group_all": "clock",
+  "whs": 0.055,
+  "hd_clk_src": "BUFGCTRL_X0Y0",
+  "sec_open": 9.963,
+  "sec_opt": 2.604,
+  "sec_place": 46.935,
+  "sec_physopt": 135.863,
+  "sec_route": 64.772,
+  "wall_sec": 265.4,
+  "warnings": 6,
+  "critical_warnings": 0,
+  "vivado_version": "2026.1",
+  "route_nets_with_errors": 0,
+  "util": {
+   "slice_luts": 8061,
+   "lut_as_logic": 7037,
+   "lut_as_memory": 1024,
+   "slice_registers": 1492,
+   "f7_muxes": 804,
+   "f8_muxes": 385,
+   "block_ram_tile": 0,
+   "dsps": 12,
+   "slices": 2490,
+   "lut_as_distributed_ram": 1024,
+   "lut_as_shift_register": 0
+  },
+  "worst_path": {
+   "via_dmem": false,
+   "instances": [
+    "cpu/u_id",
+    "cpu/u_ex",
+    "cpu/u_id",
+    "cpu/u_ex",
+    "cpu/u_id",
+    "cpu/u_ex",
+    "cpu/u_id",
+    "cpu/u_ex",
+    "cpu/u_id",
+    "cpu/u_ex"
+   ]
+  }
+ },
+ "F1": 9.592,
+ "P2": 99.037,
+ "pass2_synth": {
+  "status": "ok",
+  "period": 99.037,
+  "sec_read": 2.969,
+  "sec_synth": 42.287,
+  "wall_sec": 52.1,
+  "warnings": 101,
+  "critical_warnings": 0
+ },
+ "pass2": {
+  "Default": {
+   "status": "ok",
+   "directive": "Default",
+   "period": 99.037,
+   "wns": -4.95,
+   "fmax_mhz": 9.617,
+   "logic_levels": 334,
+   "startpoint": "cpu/u_ex/reg_q_reg[rd][2]/C",
+   "endpoint": "cpu/u_ex/reg_q_reg[alu_result][31]/D",
+   "requirement": 99.037,
+   "datapath_delay": 103.969,
+   "logic_delay": 62.75,
+   "net_delay": 41.22,
+   "skew": -0.013,
+   "uncertainty": 0.035,
+   "wns_all_groups": -4.95,
+   "worst_group_all": "clock",
+   "whs": 0.101,
+   "hd_clk_src": "BUFGCTRL_X0Y0",
+   "sec_open": 10.064,
+   "sec_opt": 2.595,
+   "sec_place": 44.241,
+   "sec_physopt": 76.292,
+   "sec_route": 77.603,
+   "wall_sec": 216.2,
+   "warnings": 6,
+   "critical_warnings": 0,
+   "vivado_version": "2026.1",
+   "route_nets_with_errors": 0,
+   "worst_path": {
+    "via_dmem": false,
+    "instances": [
+     "cpu/u_ex",
+     "cpu/u_id",
+     "cpu/u_ex",
+     "cpu/u_id",
+     "cpu/u_ex",
+     "cpu/u_id",
+     "cpu/u_ex"
+    ]
+   }
+  },
+  "Explore": {
+   "status": "ok",
+   "directive": "Explore",
+   "period": 99.037,
+   "wns": -5.31,
+   "fmax_mhz": 9.583,
+   "logic_levels": 332,
+   "startpoint": "cpu/u_ex/reg_q_reg[ctrl][reg_write]_replica/C",
+   "endpoint": "cpu/u_ex/reg_q_reg[alu_result][8]/D",
+   "requirement": 99.037,
+   "datapath_delay": 104.206,
+   "logic_delay": 62.621,
+   "net_delay": 41.585,
+   "skew": -0.039,
+   "uncertainty": 0.035,
+   "wns_all_groups": -5.31,
+   "worst_group_all": "clock",
+   "whs": 0.088,
+   "hd_clk_src": "BUFGCTRL_X0Y0",
+   "sec_open": 11.117,
+   "sec_opt": 2.776,
+   "sec_place": 58.583,
+   "sec_physopt": 65.07,
+   "sec_route": 75.881,
+   "wall_sec": 219.9,
+   "warnings": 6,
+   "critical_warnings": 0,
+   "vivado_version": "2026.1",
+   "route_nets_with_errors": 0,
+   "worst_path": {
+    "via_dmem": false,
+    "instances": [
+     "cpu/u_ex",
+     "cpu/u_id",
+     "cpu/u_ex",
+     "cpu/u_id",
+     "cpu/u_ex",
+     "cpu/u_id",
+     "cpu/u_ex"
+    ]
+   }
+  },
+  "ExtraTimingOpt": {
+   "status": "ok",
+   "directive": "ExtraTimingOpt",
+   "period": 99.037,
+   "wns": -4.434,
+   "fmax_mhz": 9.665,
+   "logic_levels": 324,
+   "startpoint": "cpu/u_ex/reg_q_reg[rd][2]/C",
+   "endpoint": "cpu/u_ex/reg_q_reg[alu_result][31]/D",
+   "requirement": 99.037,
+   "datapath_delay": 103.431,
+   "logic_delay": 61.81,
+   "net_delay": 41.621,
+   "skew": -0.035,
+   "uncertainty": 0.035,
+   "wns_all_groups": -4.434,
+   "worst_group_all": "clock",
+   "whs": 0.093,
+   "hd_clk_src": "BUFGCTRL_X0Y0",
+   "sec_open": 9.848,
+   "sec_opt": 2.815,
+   "sec_place": 125.102,
+   "sec_physopt": 81.626,
+   "sec_route": 78.63,
+   "wall_sec": 304.0,
+   "warnings": 6,
+   "critical_warnings": 0,
+   "vivado_version": "2026.1",
+   "route_nets_with_errors": 0,
+   "worst_path": {
+    "via_dmem": false,
+    "instances": [
+     "cpu/u_ex",
+     "cpu/u_id",
+     "cpu/u_ex",
+     "cpu/u_id",
+     "cpu/u_ex",
+     "cpu/u_id",
+     "cpu/u_ex"
+    ]
+   }
+  }
+ },
+ "fmax_p2": {
+  "Default": 9.617,
+  "Explore": 9.583,
+  "ExtraTimingOpt": 9.665
+ },
+ "fmax_mhz": 9.617,
+ "area": {
+  "slice_luts": 7796,
+  "lut_as_logic": 6772,
+  "lut_as_memory": 1024,
+  "slice_registers": 1488,
+  "f7_muxes": 804,
+  "f8_muxes": 385,
+  "block_ram_tile": 0,
+  "dsps": 12,
+  "slices": 2586,
+  "lut_as_distributed_ram": 1024,
+  "lut_as_shift_register": 0
+ },
+ "area_hier": [
+  {
+   "instance": "core_bench",
+   "depth": 0,
+   "Module": "(top)",
+   "Total LUTs": 7796,
+   "Logic LUTs": 6772,
+   "LUTRAMs": 1024,
+   "SRLs": 0,
+   "FFs": 1488,
+   "RAMB36": 0,
+   "RAMB18": 0,
+   "DSP Blocks": 12
+  },
+  {
+   "instance": "(core_bench)",
+   "depth": 1,
+   "Module": "(top)",
+   "Total LUTs": 1025,
+   "Logic LUTs": 1,
+   "LUTRAMs": 1024,
+   "SRLs": 0,
+   "FFs": 32,
+   "RAMB36": 0,
+   "RAMB18": 0,
+   "DSP Blocks": 0
+  },
+  {
+   "instance": "cpu",
+   "depth": 1,
+   "Module": "core",
+   "Total LUTs": 6605,
+   "Logic LUTs": 6605,
+   "LUTRAMs": 0,
+   "SRLs": 0,
+   "FFs": 1422,
+   "RAMB36": 0,
+   "RAMB18": 0,
+   "DSP Blocks": 12
+  },
+  {
+   "instance": "u_ex",
+   "depth": 2,
+   "Module": "ex_stage",
+   "Total LUTs": 4702,
+   "Logic LUTs": 4702,
+   "LUTRAMs": 0,
+   "SRLs": 0,
+   "FFs": 125,
+   "RAMB36": 0,
+   "RAMB18": 0,
+   "DSP Blocks": 12
+  },
+  {
+   "instance": "u_id",
+   "depth": 2,
+   "Module": "id_stage",
+   "Total LUTs": 1203,
+   "Logic LUTs": 1203,
+   "LUTRAMs": 0,
+   "SRLs": 0,
+   "FFs": 167,
+   "RAMB36": 0,
+   "RAMB18": 0,
+   "DSP Blocks": 0
+  },
+  {
+   "instance": "u_mem",
+   "depth": 2,
+   "Module": "mem_stage",
+   "Total LUTs": 168,
+   "Logic LUTs": 168,
+   "LUTRAMs": 0,
+   "SRLs": 0,
+   "FFs": 74,
+   "RAMB36": 0,
+   "RAMB18": 0,
+   "DSP Blocks": 0
+  },
+  {
+   "instance": "u_rf",
+   "depth": 2,
+   "Module": "reg_file",
+   "Total LUTs": 576,
+   "Logic LUTs": 576,
+   "LUTRAMs": 0,
+   "SRLs": 0,
+   "FFs": 1024,
+   "RAMB36": 0,
+   "RAMB18": 0,
+   "DSP Blocks": 0
+  },
+  {
+   "instance": "stall_gen",
+   "depth": 1,
+   "Module": "bench_stall_gen",
+   "Total LUTs": 166,
+   "Logic LUTs": 166,
+   "LUTRAMs": 0,
+   "SRLs": 0,
+   "FFs": 34,
+   "RAMB36": 0,
+   "RAMB18": 0,
+   "DSP Blocks": 0
+  }
+ ],
+ "finished_at": "2026-10-04T19:37:52Z",
+ "wall_sec": 859.9,
+ "core_area": {
+  "instance": "cpu",
+  "depth": 1,
+  "Module": "core",
+  "Total LUTs": 6605,
+  "Logic LUTs": 6605,
+  "LUTRAMs": 0,
+  "SRLs": 0,
+  "FFs": 1422,
+  "RAMB36": 0,
+  "RAMB18": 0,
+  "DSP Blocks": 12
+ },
+ "gowin_reference": null
+}

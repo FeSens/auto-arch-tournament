@@ -1,0 +1,1248 @@
+{
+ "runs": [
+  {
+   "system": "Opus",
+   "model": "claude-opus-5_5_xhigh-v2",
+   "rep": 1,
+   "gowin_fmax": 109.53,
+   "artix_fmax": 132.433,
+   "gowin_heldout": 7769.575770421307,
+   "artix_heldout": 9394.213713176348,
+   "gowin_coremark": 311.27,
+   "artix_coremark": 373.3632776510363,
+   "artix_luts": 2774,
+   "artix_ffs": 909
+  },
+  {
+   "system": "Opus",
+   "model": "claude-opus-5_5_xhigh-v2",
+   "rep": 2,
+   "gowin_fmax": 104.045,
+   "artix_fmax": 89.767,
+   "gowin_heldout": 7318.190912150755,
+   "artix_heldout": 6313.922279888868,
+   "gowin_coremark": 287.76,
+   "artix_coremark": 247.8499807279639,
+   "artix_luts": 2982,
+   "artix_ffs": 803
+  },
+  {
+   "system": "Opus",
+   "model": "claude-opus-5_5_xhigh-v2",
+   "rep": 3,
+   "gowin_fmax": 106.129,
+   "artix_fmax": 86.222,
+   "gowin_heldout": 6377.75978258979,
+   "artix_heldout": 5181.460335765504,
+   "gowin_coremark": 251.74,
+   "artix_coremark": 204.5166242398999,
+   "artix_luts": 3409,
+   "artix_ffs": 1850
+  },
+  {
+   "system": "Opus",
+   "model": "claude-opus-5_5_xhigh-v2",
+   "rep": 4,
+   "gowin_fmax": 109.868,
+   "artix_fmax": 143.021,
+   "gowin_heldout": 5990.750086522253,
+   "artix_heldout": 7798.476973500011,
+   "gowin_coremark": 247.3,
+   "artix_coremark": 321.9190400208159,
+   "artix_luts": 3267,
+   "artix_ffs": 1087
+  },
+  {
+   "system": "Opus",
+   "model": "claude-opus-5_5_xhigh-v2",
+   "rep": 5,
+   "gowin_fmax": 100.874,
+   "artix_fmax": 87.665,
+   "gowin_heldout": 7483.878157252847,
+   "artix_heldout": 6503.897720478716,
+   "gowin_coremark": 292.99,
+   "artix_coremark": 254.62279868112563,
+   "artix_luts": 3300,
+   "artix_ffs": 2048
+  },
+  {
+   "system": "Opus",
+   "model": "claude-opus-5_5_xhigh-v2",
+   "rep": 6,
+   "gowin_fmax": 126.206,
+   "artix_fmax": 101.256,
+   "gowin_heldout": 7387.38198348134,
+   "artix_heldout": 5926.950779831279,
+   "gowin_coremark": 296.83,
+   "artix_coremark": 238.14770868440888,
+   "artix_luts": 3306,
+   "artix_ffs": 1896
+  },
+  {
+   "system": "Sonnet 5.5",
+   "model": "claude-sonnet-5-5_xhigh-v2",
+   "rep": 1,
+   "gowin_fmax": 102.536,
+   "artix_fmax": 146.092,
+   "gowin_heldout": 5641.522990742426,
+   "artix_heldout": 8037.970827451268,
+   "gowin_coremark": 234.84,
+   "artix_coremark": 321.8663897127543,
+   "artix_luts": 4375,
+   "artix_ffs": 3431
+  },
+  {
+   "system": "Sonnet 5.5",
+   "model": "claude-sonnet-5-5_xhigh-v2",
+   "rep": 2,
+   "gowin_fmax": 105.482,
+   "artix_fmax": 128.866,
+   "gowin_heldout": 6030.798981070154,
+   "artix_heldout": 7367.749393210102,
+   "gowin_coremark": 259.8,
+   "artix_coremark": 304.9452740297686,
+   "artix_luts": 4015,
+   "artix_ffs": 2307
+  },
+  {
+   "system": "Sonnet 5.5",
+   "model": "claude-sonnet-5-5_xhigh-v2",
+   "rep": 3,
+   "gowin_fmax": 112.419,
+   "artix_fmax": 100.331,
+   "gowin_heldout": 6920.512415519285,
+   "artix_heldout": 6176.375267183163,
+   "gowin_coremark": 276.51,
+   "artix_coremark": 246.7816384287794,
+   "artix_luts": 3526,
+   "artix_ffs": 2067
+  },
+  {
+   "system": "Sonnet 5.5",
+   "model": "claude-sonnet-5-5_xhigh-v2",
+   "rep": 4,
+   "gowin_fmax": 102.102,
+   "artix_fmax": 97.267,
+   "gowin_heldout": 7144.133819341421,
+   "artix_heldout": 6805.826175842611,
+   "gowin_coremark": 288.25,
+   "artix_coremark": 272.2805536364726,
+   "artix_luts": 3966,
+   "artix_ffs": 2038
+  },
+  {
+   "system": "Sonnet 5.5",
+   "model": "claude-sonnet-5-5_xhigh-v2",
+   "rep": 5,
+   "gowin_fmax": 105.043,
+   "artix_fmax": 133.583,
+   "gowin_heldout": 6327.416234721357,
+   "artix_heldout": 8046.564196403213,
+   "gowin_coremark": 263.77,
+   "artix_coremark": 326.68188604541115,
+   "artix_luts": 3315,
+   "artix_ffs": 1111
+  },
+  {
+   "system": "Sonnet 5.5",
+   "model": "claude-sonnet-5-5_xhigh-v2",
+   "rep": 6,
+   "gowin_fmax": 100.388,
+   "artix_fmax": 137.08,
+   "gowin_heldout": 6563.350548490076,
+   "artix_heldout": 8962.267334611899,
+   "gowin_coremark": 267.36,
+   "artix_coremark": 365.0814069216857,
+   "artix_luts": 4058,
+   "artix_ffs": 1985
+  },
+  {
+   "system": "GPT-5.5",
+   "model": "gpt-5_5_xhigh-v2",
+   "rep": 1,
+   "gowin_fmax": 54.067,
+   "artix_fmax": 69.382,
+   "gowin_heldout": 3280.9188937855015,
+   "artix_heldout": 4210.270861868163,
+   "gowin_coremark": 133.98,
+   "artix_coremark": 167.0494471853172,
+   "artix_luts": 3627,
+   "artix_ffs": 1728
+  },
+  {
+   "system": "GPT-5.5",
+   "model": "gpt-5_5_xhigh-v2",
+   "rep": 2,
+   "gowin_fmax": 67.985,
+   "artix_fmax": 70.977,
+   "gowin_heldout": 3781.9463026236303,
+   "artix_heldout": 3948.388655163893,
+   "gowin_coremark": 154.29,
+   "artix_coremark": 161.08401551446707,
+   "artix_luts": 3700,
+   "artix_ffs": 1831
+  },
+  {
+   "system": "GPT-5.5",
+   "model": "gpt-5_5_xhigh-v2",
+   "rep": 3,
+   "gowin_fmax": 56.643,
+   "artix_fmax": 72.95,
+   "gowin_heldout": 3215.9969820835395,
+   "artix_heldout": 4141.853006426111,
+   "gowin_coremark": 126.1,
+   "artix_coremark": 162.40643819639135,
+   "artix_luts": 3775,
+   "artix_ffs": 1714
+  },
+  {
+   "system": "GPT-5.5",
+   "model": "gpt-5_5_xhigh-v2",
+   "rep": 4,
+   "gowin_fmax": 64.153,
+   "artix_fmax": 96.684,
+   "gowin_heldout": 3429.113303014063,
+   "artix_heldout": 5167.963939155023,
+   "gowin_coremark": 143.4,
+   "artix_coremark": 210.8554208406738,
+   "artix_luts": 3607,
+   "artix_ffs": 2010
+  },
+  {
+   "system": "GPT-5.5",
+   "model": "gpt-5_5_xhigh-v2",
+   "rep": 5,
+   "gowin_fmax": 91.55,
+   "artix_fmax": 108.26,
+   "gowin_heldout": 4368.978382836063,
+   "artix_heldout": 5166.418347633336,
+   "gowin_coremark": 171.26,
+   "artix_coremark": 198.709471371501,
+   "artix_luts": 3414,
+   "artix_ffs": 1965
+  },
+  {
+   "system": "GPT-5.5",
+   "model": "gpt-5_5_xhigh-v2",
+   "rep": 6,
+   "gowin_fmax": 63.581,
+   "artix_fmax": 68.097,
+   "gowin_heldout": 3609.913036347889,
+   "artix_heldout": 3866.316164202859,
+   "gowin_coremark": 147.56,
+   "artix_coremark": 153.03446326134627,
+   "artix_luts": 3578,
+   "artix_ffs": 1889
+  },
+  {
+   "system": "Astra",
+   "model": "gpt-6-astra_xhigh-v2",
+   "rep": 1,
+   "gowin_fmax": 73.79,
+   "artix_fmax": 91.333,
+   "gowin_heldout": 4352.644962553116,
+   "artix_heldout": 5387.452532387366,
+   "gowin_coremark": 181.72,
+   "artix_coremark": 227.03651879160782,
+   "artix_luts": 5213,
+   "artix_ffs": 2251
+  },
+  {
+   "system": "Astra",
+   "model": "gpt-6-astra_xhigh-v2",
+   "rep": 2,
+   "gowin_fmax": 84.388,
+   "artix_fmax": 109.242,
+   "gowin_heldout": 5288.737813944968,
+   "artix_heldout": 6846.379772846571,
+   "gowin_coremark": 218.37,
+   "artix_coremark": 273.8211106596527,
+   "artix_luts": 5353,
+   "artix_ffs": 1129
+  },
+  {
+   "system": "Astra",
+   "model": "gpt-6-astra_xhigh-v2",
+   "rep": 3,
+   "gowin_fmax": 89.575,
+   "artix_fmax": 104.877,
+   "gowin_heldout": 5641.059547768336,
+   "artix_heldout": 6604.715625914604,
+   "gowin_coremark": 230.38,
+   "artix_coremark": 263.24052634551305,
+   "artix_luts": 6340,
+   "artix_ffs": 2992
+  },
+  {
+   "system": "Astra",
+   "model": "gpt-6-astra_xhigh-v2",
+   "rep": 4,
+   "gowin_fmax": 82.887,
+   "artix_fmax": 95.997,
+   "gowin_heldout": 4889.226403199729,
+   "artix_heldout": 5662.541375945138,
+   "gowin_coremark": 195.55,
+   "artix_coremark": 226.48258719144323,
+   "artix_luts": 4621,
+   "artix_ffs": 1832
+  },
+  {
+   "system": "Astra",
+   "model": "gpt-6-astra_xhigh-v2",
+   "rep": 5,
+   "gowin_fmax": 73.869,
+   "artix_fmax": 92.149,
+   "gowin_heldout": 4546.374030755098,
+   "artix_heldout": 5671.4429674159865,
+   "gowin_coremark": 186.8,
+   "artix_coremark": 228.23066928410333,
+   "artix_luts": 4839,
+   "artix_ffs": 1937
+  },
+  {
+   "system": "Astra",
+   "model": "gpt-6-astra_xhigh-v2",
+   "rep": 6,
+   "gowin_fmax": 87.843,
+   "artix_fmax": 119.99,
+   "gowin_heldout": 5502.171558982116,
+   "artix_heldout": 7515.744741894785,
+   "gowin_coremark": 219.91,
+   "artix_coremark": 300.3931472609873,
+   "artix_luts": 4822,
+   "artix_ffs": 2325
+  },
+  {
+   "system": "Luna",
+   "model": "gpt-6-luna_xhigh-v2",
+   "rep": 1,
+   "gowin_fmax": 50.987,
+   "artix_fmax": 64.537,
+   "gowin_heldout": 3042.6818081889287,
+   "artix_heldout": 3851.286717302234,
+   "gowin_coremark": 119.44,
+   "artix_coremark": 151.18123147920403,
+   "artix_luts": 3691,
+   "artix_ffs": 1923
+  },
+  {
+   "system": "Luna",
+   "model": "gpt-6-luna_xhigh-v2",
+   "rep": 2,
+   "gowin_fmax": 74.129,
+   "artix_fmax": 78.107,
+   "gowin_heldout": 3849.526936811284,
+   "artix_heldout": 4056.1049043359385,
+   "gowin_coremark": 152.3,
+   "artix_coremark": 161.40164247098855,
+   "artix_luts": 3705,
+   "artix_ffs": 1822
+  },
+  {
+   "system": "Luna",
+   "model": "gpt-6-luna_xhigh-v2",
+   "rep": 3,
+   "gowin_fmax": 70.9,
+   "artix_fmax": 73.233,
+   "gowin_heldout": 4038.8921344263554,
+   "artix_heldout": 4171.793902404025,
+   "gowin_coremark": 160.91,
+   "artix_coremark": 163.27361445506457,
+   "artix_luts": 3505,
+   "artix_ffs": 1644
+  },
+  {
+   "system": "Luna",
+   "model": "gpt-6-luna_xhigh-v2",
+   "rep": 4,
+   "gowin_fmax": 58.206,
+   "artix_fmax": 71.669,
+   "gowin_heldout": 3488.4497558251987,
+   "artix_heldout": 4295.325319558747,
+   "gowin_coremark": 130.81,
+   "artix_coremark": 161.06591299262934,
+   "artix_luts": 3670,
+   "artix_ffs": 1659
+  },
+  {
+   "system": "Luna",
+   "model": "gpt-6-luna_xhigh-v2",
+   "rep": 5,
+   "gowin_fmax": 72.354,
+   "artix_fmax": 98.971,
+   "gowin_heldout": 4125.87892886543,
+   "artix_heldout": 5643.673652717752,
+   "gowin_coremark": 165.41,
+   "artix_coremark": 226.26390559058467,
+   "artix_luts": 4089,
+   "artix_ffs": 1757
+  },
+  {
+   "system": "Luna",
+   "model": "gpt-6-luna_xhigh-v2",
+   "rep": 6,
+   "gowin_fmax": 50.738,
+   "artix_fmax": 65.232,
+   "gowin_heldout": 2880.7311561349934,
+   "artix_heldout": 3703.6512037722787,
+   "gowin_coremark": 112.96,
+   "artix_coremark": 145.22408192497602,
+   "artix_luts": 3415,
+   "artix_ffs": 1638
+  },
+  {
+   "system": "Sol 6.1",
+   "model": "gpt-6_1-sol_xhigh-v2",
+   "rep": 1,
+   "gowin_fmax": 93.708,
+   "artix_fmax": 141.643,
+   "gowin_heldout": 5472.026915476733,
+   "artix_heldout": 8271.164771298834,
+   "gowin_coremark": 226.61,
+   "artix_coremark": 332.9155133134005,
+   "artix_luts": 3657,
+   "artix_ffs": 1143
+  },
+  {
+   "system": "Sol 6.1",
+   "model": "gpt-6_1-sol_xhigh-v2",
+   "rep": 2,
+   "gowin_fmax": 81.557,
+   "artix_fmax": 113.598,
+   "gowin_heldout": 4940.404677485528,
+   "artix_heldout": 6881.323375712693,
+   "gowin_coremark": 203.11,
+   "artix_coremark": 279.8141567765236,
+   "artix_luts": 4542,
+   "artix_ffs": 1956
+  },
+  {
+   "system": "Sol 6.1",
+   "model": "gpt-6_1-sol_xhigh-v2",
+   "rep": 3,
+   "gowin_fmax": 85.63,
+   "artix_fmax": 103.125,
+   "gowin_heldout": 5079.146141809609,
+   "artix_heldout": 6116.862616771172,
+   "gowin_coremark": 210.29,
+   "artix_coremark": 257.6234044211549,
+   "artix_luts": 5297,
+   "artix_ffs": 2324
+  },
+  {
+   "system": "Sol 6.1",
+   "model": "gpt-6_1-sol_xhigh-v2",
+   "rep": 4,
+   "gowin_fmax": 87.715,
+   "artix_fmax": 99.108,
+   "gowin_heldout": 5511.6668584516,
+   "artix_heldout": 6227.558331042816,
+   "gowin_coremark": 221.85,
+   "artix_coremark": 244.58809235947254,
+   "artix_luts": 5502,
+   "artix_ffs": 2155
+  },
+  {
+   "system": "Sol 6.1",
+   "model": "gpt-6_1-sol_xhigh-v2",
+   "rep": 5,
+   "gowin_fmax": 95.961,
+   "artix_fmax": 114.077,
+   "gowin_heldout": 5527.542826880218,
+   "artix_heldout": 6571.060150081955,
+   "gowin_coremark": 223.34,
+   "artix_coremark": 265.50750785976885,
+   "artix_luts": 4872,
+   "artix_ffs": 2806
+  },
+  {
+   "system": "Sol 6.1",
+   "model": "gpt-6_1-sol_xhigh-v2",
+   "rep": 6,
+   "gowin_fmax": 93.817,
+   "artix_fmax": 95.374,
+   "gowin_heldout": 5419.822078879647,
+   "artix_heldout": 5509.770201041031,
+   "gowin_coremark": 225.27,
+   "artix_coremark": 232.0531892167554,
+   "artix_luts": 3777,
+   "artix_ffs": 2163
+  }
+ ],
+ "refs": [
+  {
+   "design": "vexriscv_maxperf",
+   "gowin_fmax": 87.764,
+   "artix_fmax": 144.676,
+   "gowin_heldout": 6215.50256354366,
+   "artix_heldout": 10246.046771834035
+  },
+  {
+   "design": "vexriscv_nocache",
+   "gowin_fmax": 88.486,
+   "artix_fmax": 171.585,
+   "gowin_heldout": 4523.663360095456,
+   "artix_heldout": 8771.927509910924
+  },
+  {
+   "design": "vexiiriscv",
+   "gowin_fmax": 82.898,
+   "artix_fmax": 127.307,
+   "gowin_heldout": 4361.898374446883,
+   "artix_heldout": 6698.595820836569
+  },
+  {
+   "design": "hazard3",
+   "gowin_fmax": 50.449,
+   "artix_fmax": 66.988,
+   "gowin_heldout": 3028.3031849264657,
+   "artix_heldout": 4021.090086064221
+  },
+  {
+   "design": "ibex_maxperf",
+   "gowin_fmax": 45.451,
+   "artix_fmax": 70.791,
+   "gowin_heldout": 2595.482224920409,
+   "artix_heldout": 4042.5245249684394
+  },
+  {
+   "design": "ibex_small",
+   "gowin_fmax": 47.107,
+   "artix_fmax": 77.453,
+   "gowin_heldout": 2187.6569294027945,
+   "artix_heldout": 3596.9302259331885
+  },
+  {
+   "design": "ueriscv",
+   "gowin_fmax": 44.49,
+   "artix_fmax": 81.887,
+   "gowin_heldout": 2206.0138002740823,
+   "artix_heldout": 4060.324838459066
+  },
+  {
+   "design": "neorv32",
+   "gowin_fmax": 92.028,
+   "artix_fmax": 167.392,
+   "gowin_heldout": 2101.6757505679766,
+   "artix_heldout": 3822.7898817650553
+  },
+  {
+   "design": "biriscv",
+   "gowin_fmax": 27.279,
+   "artix_fmax": 51.581,
+   "gowin_heldout": 2011.4536671181854,
+   "artix_heldout": 3803.394244789883
+  },
+  {
+   "design": "picorv32",
+   "gowin_fmax": 114.828,
+   "artix_fmax": 182.949,
+   "gowin_heldout": 1741.037209742171,
+   "artix_heldout": 2773.896754146383
+  }
+ ],
+ "systems": [
+  {
+   "system": "Opus",
+   "gowin_heldout_gm": 7024.163483059381,
+   "artix_heldout_gm": 6723.63987135964,
+   "gowin_fmax_gm": 109.15738917034017,
+   "artix_fmax_gm": 104.4871714403143
+  },
+  {
+   "system": "Sol 6.1",
+   "gowin_heldout_gm": 5320.064862581648,
+   "artix_heldout_gm": 6543.483572961343,
+   "gowin_fmax_gm": 89.5816391602355,
+   "artix_fmax_gm": 110.18211232851401
+  },
+  {
+   "system": "Luna",
+   "gowin_heldout_gm": 3538.041908502498,
+   "artix_heldout_gm": 4244.934417682509,
+   "gowin_fmax_gm": 62.08350774986239,
+   "artix_fmax_gm": 74.48764758396969
+  },
+  {
+   "system": "Astra",
+   "gowin_heldout_gm": 5013.614072646321,
+   "artix_heldout_gm": 6235.853794781166,
+   "gowin_fmax_gm": 81.81886870168714,
+   "artix_fmax_gm": 101.76501331878838
+  },
+  {
+   "system": "Sonnet 5.5",
+   "gowin_heldout_gm": 6417.538885587289,
+   "artix_heldout_gm": 7510.820142587813,
+   "gowin_fmax_gm": 104.59147044725853,
+   "artix_fmax_gm": 122.40949949557768
+  },
+  {
+   "system": "GPT-5.5",
+   "gowin_heldout_gm": 3594.8504340903537,
+   "artix_heldout_gm": 4384.85433398473,
+   "gowin_fmax_gm": 65.33045994503006,
+   "artix_fmax_gm": 79.68747398072726
+  }
+ ],
+ "kendall_tau_b_systems_heldout": 0.8666666666666667,
+ "kendall_tau_b_systems_fmax": 0.7333333333333333,
+ "spearman_runs_heldout": 0.7693693693693694,
+ "spearman_runs_fmax": 0.6767052767052767,
+ "spearman_all_designs_heldout": 0.81313598519889,
+ "tests_gowin": {
+  "primary": {
+   "Opus vs Sol 6.1": {
+    "diff_ln": 0.2778706354911673,
+    "t": 5.990699821382348,
+    "df": 7.067338768881436,
+    "p": 0.0005277222565776966,
+    "ratio": 1.3203153842095812,
+    "ci95": [
+     1.183412462996172,
+     1.4730559025607735
+    ],
+    "boot95": [
+     1.2077742004244831,
+     1.427435527560619
+    ],
+    "verdict": "Opus ranks higher than Sol 6.1 on this contract"
+   }
+  },
+  "secondary": {
+   "Luna vs Sol 6.1": {
+    "diff_ln": -0.4079120545741244,
+    "t": -6.320624890283926,
+    "df": 6.001767799773505,
+    "p": 0.0007318904421386676,
+    "ratio": 0.6650373632447792,
+    "ci95": [
+     0.5678963768505139,
+     0.7787947106906573
+    ],
+    "p_holm": 0.0007318904421386676,
+    "boot95": [
+     0.5911166481551035,
+     0.7440848392307126
+    ],
+    "verdict": "Sol 6.1 ranks higher than Luna on this contract"
+   },
+   "Luna vs Opus": {
+    "diff_ln": -0.6857826900652917,
+    "t": -9.204609984444566,
+    "df": 8.837190164920044,
+    "p": 8.051085840634491e-06,
+    "ratio": 0.5036958375236307,
+    "ci95": [
+     0.42536929608006924,
+     0.5964452514007378
+    ],
+    "p_holm": 1.6102171681268983e-05,
+    "boot95": [
+     0.4411392691208341,
+     0.5744178874577227
+    ],
+    "verdict": "Opus ranks higher than Luna on this contract"
+   }
+  },
+  "extension": {
+   "Opus vs Astra": {
+    "diff_ln": 0.3371991041660909,
+    "t": 5.603092429693286,
+    "df": 9.99457347127444,
+    "p": 0.00022716493460382502,
+    "ratio": 1.401017984487952,
+    "ci95": [
+     1.2251923472585822,
+     1.602076112579909
+    ],
+    "p_holm": 0.0018173194768306001,
+    "boot95": [
+     1.256274237909294,
+     1.5530722804286985
+    ],
+    "verdict": "Opus ranks higher than Astra on this contract"
+   },
+   "Opus vs Sonnet 5.5": {
+    "diff_ln": 0.09032143793558767,
+    "t": 1.6360360828562517,
+    "df": 9.74856653935426,
+    "p": 0.13366272968031417,
+    "ratio": 1.094526049360522,
+    "ci95": [
+     0.9674225465857059,
+     1.2383288739308078
+    ],
+    "p_holm": 0.4009881890409425,
+    "boot95": [
+     0.9879439954634509,
+     1.2045109781921333
+    ],
+    "verdict": "not distinguishable at this n; no ranking claimed"
+   },
+   "Opus vs GPT-5.5": {
+    "diff_ln": 0.6698537445466108,
+    "t": 10.741517759762685,
+    "df": 9.918936212320453,
+    "p": 8.807071412589461e-07,
+    "ratio": 1.9539515236707716,
+    "ci95": [
+     1.7002074816579549,
+     2.24556508428741
+    ],
+    "p_holm": 1.0568485695107354e-05,
+    "boot95": [
+     1.735014561865272,
+     2.1691456206093878
+    ],
+    "verdict": "Opus ranks higher than GPT-5.5 on this contract"
+   },
+   "Sol 6.1 vs Astra": {
+    "diff_ln": 0.059328468674923585,
+    "t": 1.2547095204863583,
+    "df": 6.981078723421921,
+    "p": 0.24995727898405984,
+    "ratio": 1.061123729408549,
+    "ci95": [
+     0.9488131759882358,
+     1.186728428324301
+    ],
+    "p_holm": 0.4999145579681197,
+    "boot95": [
+     0.9776008637066144,
+     1.155490272814435
+    ],
+    "verdict": "not distinguishable at this n; no ranking claimed"
+   },
+   "Sol 6.1 vs Sonnet 5.5": {
+    "diff_ln": -0.18754919755557964,
+    "t": -4.600495655649504,
+    "df": 7.746377984343112,
+    "p": 0.0019080653319091712,
+    "ratio": 0.8289883329775559,
+    "ci95": [
+     0.7542005804662367,
+     0.9111921602978293
+    ],
+    "p_holm": 0.007632261327636685,
+    "boot95": [
+     0.7703982803250818,
+     0.8925019485110388
+    ],
+    "verdict": "Sonnet 5.5 ranks higher than Sol 6.1 on this contract"
+   },
+   "Sol 6.1 vs GPT-5.5": {
+    "diff_ln": 0.39198310905544353,
+    "t": 7.834942409603165,
+    "df": 6.748332764976228,
+    "p": 0.00012600482864307683,
+    "ratio": 1.479912714067573,
+    "ci95": [
+     1.3136117477422649,
+     1.6672670939667658
+    ],
+    "p_holm": 0.0011340434577876914,
+    "boot95": [
+     1.3452174840063709,
+     1.607486143429225
+    ],
+    "verdict": "Sol 6.1 ranks higher than GPT-5.5 on this contract"
+   },
+   "Luna vs Astra": {
+    "diff_ln": -0.3485835858992008,
+    "t": -4.643541432533842,
+    "df": 8.95100952804688,
+    "p": 0.0012308855595064537,
+    "ratio": 0.705686927082328,
+    "ci95": [
+     0.5953879524329706,
+     0.8364194085888287
+    ],
+    "p_holm": 0.0073853133570387225,
+    "boot95": [
+     0.6178201655475228,
+     0.8052086453157546
+    ],
+    "verdict": "Astra ranks higher than Luna on this contract"
+   },
+   "Luna vs Sonnet 5.5": {
+    "diff_ln": -0.595461252129704,
+    "t": -8.36985724962629,
+    "df": 8.034964519974007,
+    "p": 3.068977143736815e-05,
+    "ratio": 0.5513082151240788,
+    "ci95": [
+     0.4679497492710859,
+     0.6495157835573986
+    ],
+    "p_holm": 0.0003068977143736815,
+    "boot95": [
+     0.48469335820759496,
+     0.6249644217210794
+    ],
+    "verdict": "Sonnet 5.5 ranks higher than Luna on this contract"
+   },
+   "Luna vs GPT-5.5": {
+    "diff_ln": -0.015928945518680848,
+    "t": -0.20733410165282987,
+    "df": 9.26541008328487,
+    "p": 0.84023435623631,
+    "ratio": 0.9841972491959237,
+    "ci95": [
+     0.827812397917753,
+     1.170125293800036
+    ],
+    "p_holm": 0.84023435623631,
+    "boot95": [
+     0.8581253380124437,
+     1.1264088864167445
+    ],
+    "verdict": "not distinguishable at this n; no ranking claimed"
+   },
+   "Astra vs Sonnet 5.5": {
+    "diff_ln": -0.24687766623050322,
+    "t": -4.411162723579826,
+    "df": 9.675228042290822,
+    "p": 0.0014208523574677104,
+    "ratio": 0.7812362592622624,
+    "ci95": [
+     0.689251748539219,
+     0.8854966187312683
+    ],
+    "p_holm": 0.0073853133570387225,
+    "boot95": [
+     0.706523246535493,
+     0.8617311637512489
+    ],
+    "verdict": "Sonnet 5.5 ranks higher than Astra on this contract"
+   },
+   "Astra vs GPT-5.5": {
+    "diff_ln": 0.33265464038051995,
+    "t": 5.277369081057753,
+    "df": 9.954987309182801,
+    "p": 0.00036441829755071246,
+    "ratio": 1.394665554121996,
+    "ci95": [
+     1.211815445079487,
+     1.6051058069546467
+    ],
+    "p_holm": 0.0025509280828549872,
+    "boot95": [
+     1.243088391466582,
+     1.5545489310339842
+    ],
+    "verdict": "Astra ranks higher than GPT-5.5 on this contract"
+   },
+   "Sonnet 5.5 vs GPT-5.5": {
+    "diff_ln": 0.5795323066110232,
+    "t": 9.939723526075712,
+    "df": 9.423194970329114,
+    "p": 2.659031937569522e-06,
+    "ratio": 1.7852033076895428,
+    "ci95": [
+     1.566016934776887,
+     2.035067935098502
+    ],
+    "p_holm": 2.924935131326474e-05,
+    "boot95": [
+     1.6061990697784716,
+     1.9725510256510856
+    ],
+    "verdict": "Sonnet 5.5 ranks higher than GPT-5.5 on this contract"
+   }
+  },
+  "ranking": [
+   {
+    "system": "Opus",
+    "geomean": 7024.163483059381,
+    "rank95": [
+     1,
+     2
+    ]
+   },
+   {
+    "system": "Sonnet 5.5",
+    "geomean": 6417.538885587289,
+    "rank95": [
+     1,
+     2
+    ]
+   },
+   {
+    "system": "Sol 6.1",
+    "geomean": 5320.064862581648,
+    "rank95": [
+     3,
+     4
+    ]
+   },
+   {
+    "system": "Astra",
+    "geomean": 5013.614072646321,
+    "rank95": [
+     3,
+     4
+    ]
+   },
+   {
+    "system": "GPT-5.5",
+    "geomean": 3594.8504340903537,
+    "rank95": [
+     5,
+     6
+    ]
+   },
+   {
+    "system": "Luna",
+    "geomean": 3538.041908502498,
+    "rank95": [
+     5,
+     6
+    ]
+   }
+  ]
+ },
+ "tests_artix": {
+  "primary": {
+   "Opus vs Sol 6.1": {
+    "diff_ln": 0.027159975346600973,
+    "t": 0.2643353116259718,
+    "df": 8.582877282634536,
+    "p": 0.7977589230509058,
+    "ratio": 1.02753216943078,
+    "ci95": [
+     0.8130148059496495,
+     1.298650838199511
+    ],
+    "boot95": [
+     0.8624046940514931,
+     1.2345102363700953
+    ],
+    "verdict": "not distinguishable at this n; no ranking claimed"
+   }
+  },
+  "secondary": {
+   "Luna vs Sol 6.1": {
+    "diff_ln": -0.43274330973935804,
+    "t": -5.225838023165049,
+    "df": 9.926556973221606,
+    "p": 0.00039603288440727885,
+    "ratio": 0.6487269923352776,
+    "ci95": [
+     0.5393248820905756,
+     0.7803213323907003
+    ],
+    "p_holm": 0.0007920657688145577,
+    "boot95": [
+     0.5608901507777141,
+     0.7605133996107553
+    ],
+    "verdict": "Sol 6.1 ranks higher than Luna on this contract"
+   },
+   "Luna vs Opus": {
+    "diff_ln": -0.459903285085959,
+    "t": -4.355992841932039,
+    "df": 9.007602553344093,
+    "p": 0.0018304851665425796,
+    "ratio": 0.6313447030029743,
+    "ci95": [
+     0.4972263883418038,
+     0.8016391393449346
+    ],
+    "p_holm": 0.0018304851665425796,
+    "boot95": [
+     0.5209575944029947,
+     0.7674866635670414
+    ],
+    "verdict": "Opus ranks higher than Luna on this contract"
+   }
+  },
+  "extension": {
+   "Opus vs Astra": {
+    "diff_ln": 0.07531414985266238,
+    "t": 0.7417663603757998,
+    "df": 8.376855451083777,
+    "p": 0.47850803852471524,
+    "ratio": 1.0782228212256526,
+    "ci95": [
+     0.8547025892086787,
+     1.36019764873786
+    ],
+    "p_holm": 1.0,
+    "boot95": [
+     0.9052576692878013,
+     1.297980884837404
+    ],
+    "verdict": "not distinguishable at this n; no ranking claimed"
+   },
+   "Opus vs Sonnet 5.5": {
+    "diff_ln": -0.1107150111287396,
+    "t": -1.0863152419152233,
+    "df": 8.443547680560615,
+    "p": 0.3073767843684546,
+    "ratio": 0.8951938328592497,
+    "ci95": [
+     0.7092079765527473,
+     1.129953447907438
+    ],
+    "p_holm": 1.0,
+    "boot95": [
+     0.7520021772740666,
+     1.0783291502497097
+    ],
+    "verdict": "not distinguishable at this n; no ranking claimed"
+   },
+   "Opus vs GPT-5.5": {
+    "diff_ln": 0.4274732493080613,
+    "t": 4.216497529864372,
+    "df": 8.350040966187054,
+    "p": 0.002661654372214174,
+    "ratio": 1.5333781601929617,
+    "ci95": [
+     1.2157764585447377,
+     1.9339481083316532
+    ],
+    "p_holm": 0.018631580605499215,
+    "boot95": [
+     1.2844081152466968,
+     1.8426427239623837
+    ],
+    "verdict": "Opus ranks higher than GPT-5.5 on this contract"
+   },
+   "Sol 6.1 vs Astra": {
+    "diff_ln": 0.04815417450606141,
+    "t": 0.6206718500084809,
+    "df": 9.983035081633718,
+    "p": 0.5487225960750421,
+    "ratio": 1.049332423161947,
+    "ci95": [
+     0.8827144919210153,
+     1.2474005404654094
+    ],
+    "p_holm": 1.0,
+    "boot95": [
+     0.9170192139683943,
+     1.208291758468977
+    ],
+    "verdict": "not distinguishable at this n; no ranking claimed"
+   },
+   "Sol 6.1 vs Sonnet 5.5": {
+    "diff_ln": -0.13787498647534058,
+    "t": -1.7656730420084241,
+    "df": 9.9922397741069,
+    "p": 0.10793050230079608,
+    "ratio": 0.8712075976707946,
+    "ci95": [
+     0.7320689586829822,
+     1.036791232898045
+    ],
+    "p_holm": 0.5396525115039804,
+    "boot95": [
+     0.7628315720138795,
+     1.0068089452311746
+    ],
+    "verdict": "not distinguishable at this n; no ranking claimed"
+   },
+   "Sol 6.1 vs GPT-5.5": {
+    "diff_ln": 0.4003132739614603,
+    "t": 5.173048666614305,
+    "df": 9.978331111917646,
+    "p": 0.00042017581049936663,
+    "ratio": 1.4922921206860165,
+    "ci95": [
+     1.2558835082671385,
+     1.7732024975264487
+    ],
+    "p_holm": 0.004201758104993666,
+    "boot95": [
+     1.2997451059329104,
+     1.7168746731337337
+    ],
+    "verdict": "Sol 6.1 ranks higher than GPT-5.5 on this contract"
+   },
+   "Luna vs Astra": {
+    "diff_ln": -0.38458913523329663,
+    "t": -4.730705997931419,
+    "df": 9.841788199948846,
+    "p": 0.0008392675748819697,
+    "ratio": 0.6807302668377387,
+    "ci95": [
+     0.5677215691975414,
+     0.8162340860925419
+    ],
+    "p_holm": 0.007553408173937727,
+    "boot95": [
+     0.5950074702578595,
+     0.7942054461581234
+    ],
+    "verdict": "Astra ranks higher than Luna on this contract"
+   },
+   "Luna vs Sonnet 5.5": {
+    "diff_ln": -0.5706182962146986,
+    "t": -6.977824649475999,
+    "df": 9.872570171635884,
+    "p": 4.073607071257492e-05,
+    "ratio": 0.5651758845366172,
+    "ci95": [
+     0.47088292704113704,
+     0.6783507367083673
+    ],
+    "p_holm": 0.0004480967778383241,
+    "boot95": [
+     0.4937514242749698,
+     0.6613056505685206
+    ],
+    "verdict": "Sonnet 5.5 ranks higher than Luna on this contract"
+   },
+   "Luna vs GPT-5.5": {
+    "diff_ln": -0.032430035777897714,
+    "t": -0.3998478728942914,
+    "df": 9.828523873863086,
+    "p": 0.697820034030205,
+    "ratio": 0.9680901791382726,
+    "ci95": [
+     0.8076927071597928,
+     1.160340543669857
+    ],
+    "p_holm": 1.0,
+    "boot95": [
+     0.8442340279020099,
+     1.12914688665616
+    ],
+    "verdict": "not distinguishable at this n; no ranking claimed"
+   },
+   "Astra vs Sonnet 5.5": {
+    "diff_ln": -0.186029160981402,
+    "t": -2.4323575290265467,
+    "df": 9.998212526617362,
+    "p": 0.035311577733715155,
+    "ratio": 0.8302493837420843,
+    "ci95": [
+     0.7001619588396484,
+     0.9845065566636677
+    ],
+    "p_holm": 0.21186946640229093,
+    "boot95": [
+     0.7267922065785424,
+     0.9554250402902137
+    ],
+    "verdict": "not distinguishable at this n; no ranking claimed"
+   },
+   "Astra vs GPT-5.5": {
+    "diff_ln": 0.3521590994553989,
+    "t": 4.648095155709143,
+    "df": 9.999709784418265,
+    "p": 0.0009107535520193576,
+    "ratio": 1.4221347665874096,
+    "ci95": [
+     1.2012291583837993,
+     1.6836648363229594
+    ],
+    "p_holm": 0.007553408173937727,
+    "boot95": [
+     1.2388684109587718,
+     1.624205128170272
+    ],
+    "verdict": "Astra ranks higher than GPT-5.5 on this contract"
+   },
+   "Sonnet 5.5 vs GPT-5.5": {
+    "diff_ln": 0.5381882604368009,
+    "t": 7.055562592286614,
+    "df": 9.996483087867254,
+    "p": 3.481719123508627e-05,
+    "ratio": 1.7129007192725523,
+    "ci95": [
+     1.4451612376944758,
+     2.0302432680558202
+    ],
+    "p_holm": 0.0004178062948210352,
+    "boot95": [
+     1.4854226218750057,
+     1.9540174658421017
+    ],
+    "verdict": "Sonnet 5.5 ranks higher than GPT-5.5 on this contract"
+   }
+  },
+  "ranking": [
+   {
+    "system": "Sonnet 5.5",
+    "geomean": 7510.820142587813,
+    "rank95": [
+     1,
+     2
+    ]
+   },
+   {
+    "system": "Opus",
+    "geomean": 6723.63987135964,
+    "rank95": [
+     1,
+     4
+    ]
+   },
+   {
+    "system": "Sol 6.1",
+    "geomean": 6543.483572961343,
+    "rank95": [
+     1,
+     4
+    ]
+   },
+   {
+    "system": "Astra",
+    "geomean": 6235.853794781166,
+    "rank95": [
+     2,
+     4
+    ]
+   },
+   {
+    "system": "GPT-5.5",
+    "geomean": 4384.85433398473,
+    "rank95": [
+     5,
+     6
+    ]
+   },
+   {
+    "system": "Luna",
+    "geomean": 4244.934417682509,
+    "rank95": [
+     5,
+     6
+    ]
+   }
+  ]
+ },
+ "fmax_ratio": {
+  "agents_gm": 1.165622778953111,
+  "agents_range": [
+   0.8023073387953029,
+   1.5115358347206216
+  ],
+  "refs_gm": 1.6696428201315625,
+  "refs_range": [
+   1.3278360324287894,
+   1.939120312817847
+  ],
+  "welch_agents_vs_refs": {
+   "diff_ln": -0.3593542049998474,
+   "t": -7.779065900473886,
+   "df": 20.670395435211972,
+   "p": 1.4325519855258455e-07,
+   "ratio": 0.6981270274688234,
+   "ci95": [
+    0.6341210603304838,
+    0.7685935335887562
+   ]
+  },
+  "per_system_gm": {
+   "Opus": 0.9572157435651193,
+   "Sol 6.1": 1.2299631192440033,
+   "Luna": 1.1997976642055106,
+   "Astra": 1.2437841653595243,
+   "Sonnet 5.5": 1.1703583377509172,
+   "GPT-5.5": 1.219759879966823
+  }
+ }
+}

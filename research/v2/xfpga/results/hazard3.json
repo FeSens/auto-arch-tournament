@@ -1,0 +1,575 @@
+{
+ "design": "hazard3",
+ "group": "reference",
+ "system": null,
+ "rep": null,
+ "registry_entry": {
+  "name": "hazard3",
+  "group": "reference",
+  "kind": "files",
+  "top": "core_bench",
+  "files": [
+   {
+    "path": "/home/bench/refcores/Hazard3/hdl/hazard3_core.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/Hazard3/hdl/hazard3_cpu_1port.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/Hazard3/hdl/hazard3_cpu_2port.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/Hazard3/hdl/arith/hazard3_alu.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/Hazard3/hdl/arith/hazard3_branchcmp.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/Hazard3/hdl/arith/hazard3_mul_fast.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/Hazard3/hdl/arith/hazard3_muldiv_seq.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/Hazard3/hdl/arith/hazard3_onehot_encode.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/Hazard3/hdl/arith/hazard3_onehot_priority.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/Hazard3/hdl/arith/hazard3_onehot_priority_dynamic.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/Hazard3/hdl/arith/hazard3_priority_encode.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/Hazard3/hdl/arith/hazard3_shift_barrel.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/Hazard3/hdl/hazard3_csr.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/Hazard3/hdl/hazard3_decode.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/Hazard3/hdl/hazard3_frontend.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/Hazard3/hdl/hazard3_instr_decompress.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/Hazard3/hdl/hazard3_irq_ctrl.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/Hazard3/hdl/hazard3_pmp.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/Hazard3/hdl/hazard3_power_ctrl.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/Hazard3/hdl/hazard3_regfile_1w2r.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "/home/bench/refcores/Hazard3/hdl/hazard3_triggers.v",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "fpga/bench_stall_gen.sv",
+    "lang": "sv",
+    "lib": null
+   },
+   {
+    "path": "research/v2/reference_cores/benches/hazard3_bench.sv",
+    "lang": "sv",
+    "lib": null
+   }
+  ],
+  "include_dirs": [
+   "/home/bench/refcores/Hazard3/hdl"
+  ]
+ },
+ "sources": [
+  {
+   "origin": "/home/bench/refcores/Hazard3/hdl/hazard3_core.v",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "6bd75985884c9cca0153c94a19e5c5540dc36900c9d4b8200a761641cb544864"
+  },
+  {
+   "origin": "/home/bench/refcores/Hazard3/hdl/hazard3_cpu_1port.v",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "31697f3730326f4e679fc64887ae0034a10fb620129463d584bfbf23252c34f5"
+  },
+  {
+   "origin": "/home/bench/refcores/Hazard3/hdl/hazard3_cpu_2port.v",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "a3074ca551a99b60291f351c019f7eb4f75880b7d3eaebede2d4a6b873c140d1"
+  },
+  {
+   "origin": "/home/bench/refcores/Hazard3/hdl/arith/hazard3_alu.v",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "41ce9cc63b0e70841656b62b4179103d29cc4e91d5507e80e7d69b4d43e6177f"
+  },
+  {
+   "origin": "/home/bench/refcores/Hazard3/hdl/arith/hazard3_branchcmp.v",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "8bd4a431d0d1d4fabb4ab7c7b7a85c05698477e083412abb0d45e2f36bf2411b"
+  },
+  {
+   "origin": "/home/bench/refcores/Hazard3/hdl/arith/hazard3_mul_fast.v",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "3ee0eca1db78071d08d4bedaf5b25d6bd193bc761d3a5a0afd70515ccea5a9bb"
+  },
+  {
+   "origin": "/home/bench/refcores/Hazard3/hdl/arith/hazard3_muldiv_seq.v",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "5e9cd9f939aede0fc1e767436df603b18fddebd57cbcee2831b0d5bf74e380d6"
+  },
+  {
+   "origin": "/home/bench/refcores/Hazard3/hdl/arith/hazard3_onehot_encode.v",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "be599236007909aa47da934129af2ce0cc27fd195f2f4dbbb0eb3a2e31c752d6"
+  },
+  {
+   "origin": "/home/bench/refcores/Hazard3/hdl/arith/hazard3_onehot_priority.v",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "355d6516cb8da6b4da69d227a0d609121fb0dfc6d04582c00d7b4286108f1084"
+  },
+  {
+   "origin": "/home/bench/refcores/Hazard3/hdl/arith/hazard3_onehot_priority_dynamic.v",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "52bb7595980d83540a9d3f72bc24ed7a564ba3fa7b01715b2add94636afd80b5"
+  },
+  {
+   "origin": "/home/bench/refcores/Hazard3/hdl/arith/hazard3_priority_encode.v",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "40e97539f9b74111d5169d80417e1f286d3f088fb668513fdc7e03ae09a30fc7"
+  },
+  {
+   "origin": "/home/bench/refcores/Hazard3/hdl/arith/hazard3_shift_barrel.v",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "60e9275389fe4f9e5df333bd7d3744a7161a9023ccacef106122e0e2e8f65a14"
+  },
+  {
+   "origin": "/home/bench/refcores/Hazard3/hdl/hazard3_csr.v",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "7d415cbe92c6c034f162cf78e370cf4449f00eb36fde6e7220e5e0db010284a2"
+  },
+  {
+   "origin": "/home/bench/refcores/Hazard3/hdl/hazard3_decode.v",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "76c7c6f842824aabe6c1ddac2a046092c3cda2505e19c261953b438ba0491ca8"
+  },
+  {
+   "origin": "/home/bench/refcores/Hazard3/hdl/hazard3_frontend.v",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "a1c63b595743c20ab6165bdfcc2eee985ad2e3f069d7aee8a244a47d4e55c524"
+  },
+  {
+   "origin": "/home/bench/refcores/Hazard3/hdl/hazard3_instr_decompress.v",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "6b9e35d93e72f7caf9c4d73eceb331f0c7a4ec672f0e1325c629e440eca21319"
+  },
+  {
+   "origin": "/home/bench/refcores/Hazard3/hdl/hazard3_irq_ctrl.v",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "bab40d33b371faafa518e2c43d2b92dd07f813d353234cd999d4d80324db6bc4"
+  },
+  {
+   "origin": "/home/bench/refcores/Hazard3/hdl/hazard3_pmp.v",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "5ecd50932873f25c8d5c192bbb04da475508701188649e50a1511a9d3c191ec3"
+  },
+  {
+   "origin": "/home/bench/refcores/Hazard3/hdl/hazard3_power_ctrl.v",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "4bacfc8cb45d0e82058b7c035a65dc7d0b833e4bae1e2f0764db89501f66b744"
+  },
+  {
+   "origin": "/home/bench/refcores/Hazard3/hdl/hazard3_regfile_1w2r.v",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "b34eb529ce5d486a9b8e8b91a6da448200d2838375dc0f07ae33ace38809c038"
+  },
+  {
+   "origin": "/home/bench/refcores/Hazard3/hdl/hazard3_triggers.v",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "cc034af5a55e12f0015be33a64337f8723c8b899af9afeda65e85411194d3174"
+  },
+  {
+   "origin": "/home/bench/auto-arch-tournament/fpga/bench_stall_gen.sv",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "d8c73f04cc214f500eb467ddee496884ff2390c2a0a68f16d4a2a8a839e3753e"
+  },
+  {
+   "origin": "/home/bench/auto-arch-tournament/research/v2/reference_cores/benches/hazard3_bench.sv",
+   "lang": "sv",
+   "lib": null,
+   "sha256": "5eb3136e4e637976ab6635d73f3d9443c919bd75d42b9e715bf2c9d8f43e78fd"
+  }
+ ],
+ "include_dirs": [
+  "root/home/bench/refcores/Hazard3/hdl"
+ ],
+ "flow": {
+  "tool": "2026.1",
+  "part": "xc7a200tsbg484-1",
+  "spec": "research/runs/EXP-2026-09-28-v2-main/amendment_15.yaml part_c_cross_fpga"
+ },
+ "top": "core_bench",
+ "part": "xc7a200tsbg484-1",
+ "source_sha256": "65dcf89931bf2f4036c0fb80558b3a752b1e38a71d1581e74e7f04f4ff2b1818",
+ "n_files": 23,
+ "started_at": "2026-10-04T19:19:44Z",
+ "status": "ok",
+ "complete": true,
+ "pass1_synth": {
+  "status": "ok",
+  "period": 5.0,
+  "sec_read": 2.786,
+  "sec_synth": 44.129,
+  "wall_sec": 53.3,
+  "warnings": 118,
+  "critical_warnings": 0,
+  "vivado_version": "2026.1"
+ },
+ "vivado_version": "2026.1",
+ "pass1": {
+  "status": "ok",
+  "directive": "Default",
+  "period": 5.0,
+  "wns": -9.801,
+  "fmax_mhz": 67.563,
+  "logic_levels": 13,
+  "startpoint": "cpu/core/frontend/buf_contents_reg[32]/C",
+  "endpoint": "cpu/core/xm_result_reg[29]/D",
+  "requirement": 5.0,
+  "datapath_delay": 14.555,
+  "logic_delay": 9.164,
+  "net_delay": 5.391,
+  "skew": -0.29,
+  "uncertainty": 0.035,
+  "wns_all_groups": -9.801,
+  "worst_group_all": "clock",
+  "whs": 0.07,
+  "hd_clk_src": "BUFGCTRL_X0Y0",
+  "sec_open": 9.709,
+  "sec_opt": 2.775,
+  "sec_place": 21.489,
+  "sec_physopt": 21.644,
+  "sec_route": 37.441,
+  "wall_sec": 96.7,
+  "warnings": 6,
+  "critical_warnings": 0,
+  "vivado_version": "2026.1",
+  "route_nets_with_errors": 0,
+  "util": {
+   "slice_luts": 2117,
+   "lut_as_logic": 2073,
+   "lut_as_memory": 44,
+   "slice_registers": 731,
+   "f7_muxes": 8,
+   "f8_muxes": 0,
+   "block_ram_tile": 2,
+   "dsps": 8,
+   "slices": 636,
+   "lut_as_distributed_ram": 44,
+   "lut_as_shift_register": 0
+  },
+  "worst_path": {
+   "via_dmem": false,
+   "instances": [
+    "cpu/core"
+   ]
+  }
+ },
+ "F1": 67.563,
+ "P2": 14.061,
+ "pass2_synth": {
+  "status": "ok",
+  "period": 14.061,
+  "sec_read": 2.807,
+  "sec_synth": 44.285,
+  "wall_sec": 53.9,
+  "warnings": 118,
+  "critical_warnings": 0
+ },
+ "pass2": {
+  "Default": {
+   "status": "ok",
+   "directive": "Default",
+   "period": 14.061,
+   "wns": -0.996,
+   "fmax_mhz": 66.414,
+   "logic_levels": 10,
+   "startpoint": "cpu/core/regs/real_dualport_noreset.rdata1_reg[4]/C",
+   "endpoint": "cpu/core/xm_result_reg[30]/D",
+   "requirement": 14.061,
+   "datapath_delay": 14.759,
+   "logic_delay": 11.014,
+   "net_delay": 3.745,
+   "skew": -0.295,
+   "uncertainty": 0.035,
+   "wns_all_groups": -0.996,
+   "worst_group_all": "clock",
+   "whs": 0.13,
+   "hd_clk_src": "BUFGCTRL_X0Y0",
+   "sec_open": 9.252,
+   "sec_opt": 2.822,
+   "sec_place": 19.819,
+   "sec_physopt": 12.269,
+   "sec_route": 43.222,
+   "wall_sec": 91.3,
+   "warnings": 6,
+   "critical_warnings": 0,
+   "vivado_version": "2026.1",
+   "route_nets_with_errors": 0,
+   "worst_path": {
+    "via_dmem": false,
+    "instances": [
+     "cpu/core"
+    ]
+   }
+  },
+  "Explore": {
+   "status": "ok",
+   "directive": "Explore",
+   "period": 14.061,
+   "wns": -0.867,
+   "fmax_mhz": 66.988,
+   "logic_levels": 15,
+   "startpoint": "cpu/core/x_rs1_select_regs_xm_mw_reg[2]_replica_3/C",
+   "endpoint": "cpu/core/xm_result_reg[30]/D",
+   "requirement": 14.061,
+   "datapath_delay": 14.631,
+   "logic_delay": 11.555,
+   "net_delay": 3.076,
+   "skew": -0.293,
+   "uncertainty": 0.035,
+   "wns_all_groups": -0.867,
+   "worst_group_all": "clock",
+   "whs": 0.149,
+   "hd_clk_src": "BUFGCTRL_X0Y0",
+   "sec_open": 9.615,
+   "sec_opt": 2.772,
+   "sec_place": 34.998,
+   "sec_physopt": 14.225,
+   "sec_route": 45.83,
+   "wall_sec": 111.2,
+   "warnings": 6,
+   "critical_warnings": 0,
+   "vivado_version": "2026.1",
+   "route_nets_with_errors": 0,
+   "worst_path": {
+    "via_dmem": false,
+    "instances": [
+     "cpu/core"
+    ]
+   }
+  },
+  "ExtraTimingOpt": {
+   "status": "ok",
+   "directive": "ExtraTimingOpt",
+   "period": 14.061,
+   "wns": -0.511,
+   "fmax_mhz": 68.625,
+   "logic_levels": 13,
+   "startpoint": "cpu/core/x_rs2_select_regs_xm_mw_reg[0]/C",
+   "endpoint": "cpu/core/xm_result_reg[22]/D",
+   "requirement": 14.061,
+   "datapath_delay": 14.593,
+   "logic_delay": 11.142,
+   "net_delay": 3.451,
+   "skew": -0.025,
+   "uncertainty": 0.035,
+   "wns_all_groups": -0.511,
+   "worst_group_all": "clock",
+   "whs": 0.131,
+   "hd_clk_src": "BUFGCTRL_X0Y0",
+   "sec_open": 9.408,
+   "sec_opt": 2.871,
+   "sec_place": 42.594,
+   "sec_physopt": 8.286,
+   "sec_route": 44.616,
+   "wall_sec": 111.3,
+   "warnings": 6,
+   "critical_warnings": 0,
+   "vivado_version": "2026.1",
+   "route_nets_with_errors": 0,
+   "worst_path": {
+    "via_dmem": false,
+    "instances": [
+     "cpu/core"
+    ]
+   }
+  }
+ },
+ "fmax_p2": {
+  "Default": 66.414,
+  "Explore": 66.988,
+  "ExtraTimingOpt": 68.625
+ },
+ "fmax_mhz": 66.988,
+ "area": {
+  "slice_luts": 1907,
+  "lut_as_logic": 1863,
+  "lut_as_memory": 44,
+  "slice_registers": 730,
+  "f7_muxes": 8,
+  "f8_muxes": 0,
+  "block_ram_tile": 2,
+  "dsps": 8,
+  "slices": 617,
+  "lut_as_distributed_ram": 44,
+  "lut_as_shift_register": 0
+ },
+ "area_hier": [
+  {
+   "instance": "core_bench",
+   "depth": 0,
+   "Module": "(top)",
+   "Total LUTs": 1907,
+   "Logic LUTs": 1863,
+   "LUTRAMs": 44,
+   "SRLs": 0,
+   "FFs": 730,
+   "RAMB36": 2,
+   "RAMB18": 0,
+   "DSP Blocks": 8
+  },
+  {
+   "instance": "(core_bench)",
+   "depth": 1,
+   "Module": "(top)",
+   "Total LUTs": 4,
+   "Logic LUTs": 4,
+   "LUTRAMs": 0,
+   "SRLs": 0,
+   "FFs": 49,
+   "RAMB36": 2,
+   "RAMB18": 0,
+   "DSP Blocks": 0
+  },
+  {
+   "instance": "cpu",
+   "depth": 1,
+   "Module": "hazard3_cpu_2port",
+   "Total LUTs": 1843,
+   "Logic LUTs": 1799,
+   "LUTRAMs": 44,
+   "SRLs": 0,
+   "FFs": 647,
+   "RAMB36": 0,
+   "RAMB18": 0,
+   "DSP Blocks": 8
+  },
+  {
+   "instance": "core",
+   "depth": 2,
+   "Module": "hazard3_core",
+   "Total LUTs": 1842,
+   "Logic LUTs": 1798,
+   "LUTRAMs": 44,
+   "SRLs": 0,
+   "FFs": 644,
+   "RAMB36": 0,
+   "RAMB18": 0,
+   "DSP Blocks": 8
+  },
+  {
+   "instance": "stall_gen",
+   "depth": 1,
+   "Module": "bench_stall_gen",
+   "Total LUTs": 61,
+   "Logic LUTs": 61,
+   "LUTRAMs": 0,
+   "SRLs": 0,
+   "FFs": 34,
+   "RAMB36": 0,
+   "RAMB18": 0,
+   "DSP Blocks": 0
+  }
+ ],
+ "finished_at": "2026-10-04T19:28:36Z",
+ "wall_sec": 532.4,
+ "core_area": {
+  "instance": "cpu",
+  "depth": 1,
+  "Module": "hazard3_cpu_2port",
+  "Total LUTs": 1843,
+  "Logic LUTs": 1799,
+  "LUTRAMs": 44,
+  "SRLs": 0,
+  "FFs": 647,
+  "RAMB36": 0,
+  "RAMB18": 0,
+  "DSP Blocks": 8
+ },
+ "gowin_reference": {
+  "fmax_mhz": 50.449,
+  "lut4": 2801,
+  "ff": 650,
+  "source": "research/v2/reference_cores/results/hazard3.json"
+ }
+}

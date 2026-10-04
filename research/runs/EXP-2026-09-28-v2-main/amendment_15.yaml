@@ -123,3 +123,15 @@ unchanged: >
 launched: >
   To be filled in afterwards: smoke20 verdict and runner start times (part A), the date the
   baseline's evals ran (part B), and the Vivado flow's first build (part C).
+  Part C: first Vivado build (smoke, PicoRV32 and V0, pass 1) 2026-10-04T18:54Z; full run of
+  48 designs 19:12:45Z to 20:39:17Z, all status ok, no transfer failure. Two flow points the
+  text left open, settled during the run and recorded in research/v2/xfpga/README.md: every
+  Verilog file is read as SystemVerilog, as the Gowin projects do (a first run in Vivado's
+  by-extension mode failed both Ibex configurations and was stopped before any design
+  finished; none of its numbers are used), and WNS is taken from the clock's own path group
+  (equal to the all-groups WNS in every build). The GPT-6 Sol pilot was built and reported
+  with no test. Analysis: research/v2/xfpga/results/analysis.md.
+  Part B: one deviation from the text, recorded in research/v2/textbook_baseline/README.md
+  before any harness eval: under RISCV_FORMAL_ALTOPS the divider answers one cycle after the
+  request instead of keeping its 34-cycle latency, because the liveness check (trigger at
+  step 10, check at 20) needs the next retirement within 10 cycles.
