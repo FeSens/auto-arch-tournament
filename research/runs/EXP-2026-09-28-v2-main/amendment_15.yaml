@@ -1,0 +1,125 @@
+# WRITE-ONCE. Amendment 15 to prereg.yaml, written 2026-10-04 (about 18:50Z) while the
+# amendment 14 ablation runs and before any measurement below; its commit time is the
+# authoritative timestamp.
+reason: >
+  Reviewers of the V1 paper (MLCAD 2026, paper 48) asked for (1) a control that separates
+  the agents' reasoning from the gates plus blind sampling, (2) ablations or baselines, and
+  (3) evidence beyond one FPGA. The operator approved, 2026-10-04: a rerun of the V1
+  random-mutation control on the V2 harness, paired with the textbook-edit baseline
+  research/v2/PLAN.md planned ("ok, do it and lets pair with the textbook-edid baseline"),
+  and a synthesis of the designs for an AMD Artix-7 200T ("Lets compare if our desing
+  transfer to other FPGAs"). PLAN.md had demoted the static and random controls to harness
+  tests; part A reverses that for the random control only. Added after all main and
+  extension data, so none of the earlier analyses change.
+
+part_a_random_control:
+  agent: >
+    tools/agents/random_agent.py, unchanged since V1 (EXP-2026-07-e1b-random-control): no
+    LLM. The hypothesis step writes a placeholder YAML. The implementation step applies
+    k ~ U{1,2,3} single-line mutations to the champion RTL, drawn from op_swap (+/-, &/|,
+    ==/!=), ternary_swap and lit_perturb (flip the low bit of a sized constant), lints with
+    Verilator and redraws on a lint failure (at most 20 draws). Seed = 100 + rep.
+  system: >
+    name random-mutation-v2, provider random, prompt_profile nolessons (no scribe; the agent
+    ignores prompt text), in a research-side models file
+    (research/runs/EXP-2026-09-28-v2-main/amendment_15_models.yaml) so no harness file
+    changes while amendment 14 runs.
+  harness: >
+    HARNESS_VERSION 2.8.3, fixture bench-v2.8.3 (V0 start), N=15, K=3, 3 runs (reps 1-3,
+    seeds 101-103), the same gates, acceptance margin and held-out scoring as every V2 run.
+  smoke20: >
+    One round (N=1, K=3), unscored, results bench/v2/smoke-rand/. The reps start only if
+    the smoke row is done, harness 2.8.3, the slots' implementation_notes.md list the
+    applied mutations, and every slot reached the gates.
+  schedule: >
+    After the amendment 14 runners finish, so the ablation's agents never share the host
+    with it. Three runners at once, one rep each.
+  expected: >
+    V1 measured 0 of 135 accepted (all 135 failed formal). Prediction: 0 accepted; the
+    final champion is V0 in all three runs.
+  report: >
+    Accepted, rejected and broken counts by first failing gate; mutation kinds and draws
+    used; final CoreMark and held-out score per run. Descriptive, no test (the agents'
+    scores are all far above V0).
+
+part_b_textbook_baseline:
+  edit: >
+    One textbook edit to V0: the single-cycle combinational divider is replaced by a
+    radix-2 restoring divider that produces one quotient bit per cycle (32 iterations, plus
+    a cycle for operand setup and sign handling), and the pipeline stalls in EX until the
+    result is ready (through hazard_unit, as V0 already stalls for memory). RV32M
+    divide-by-zero and overflow results are preserved. The multiplier and everything else
+    stay as in V0. Under RISCV_FORMAL_ALTOPS the divider keeps the same latency and returns
+    the ALTOPS formula of its latched operands, so formal still exercises the stall.
+  author: >
+    Written by the operator's coding assistant (Claude Opus 5.5 in Claude Code). Opus 5.5 is
+    also one of the scored systems; the edit is fixed by this text, so the author decides
+    only its implementation. Correctness bugs are fixed until every gate passes; nothing is
+    tuned for Fmax or cycles. Any change after the first FPGA measurement is recorded.
+  scoring: >
+    In a scratch copy of the bench-v2.8.3 fixture, with the harness's own evals: formal
+    (tools.eval.formal.run_formal), cosim (run_cosim), the FPGA fitness (run_fpga_eval:
+    CoreMark, Gowin Fmax as the median of three placement options) and the held-out suite
+    (run_holdout at that Fmax), plus the cocotb unit tests. V0 is scored the same way in
+    the same tree as the reference point.
+  schedule: Written and unit-tested now; the harness evals run after the amendment 14 runners finish.
+  report: >
+    CoreMark score, held-out score, Fmax, LUT4, critical path, next to V0, the agents'
+    per-round geomean champion score (the round at which each system's runs pass the
+    textbook score) and the reference cores. Descriptive, no test.
+
+part_c_cross_fpga:
+  question: >
+    Do the V2 designs, and the ranking of the systems, hold on a different FPGA family and
+    vendor flow? Exploratory.
+  designs: >
+    The 36 scored final designs (six systems x six runs), the six amendment 14 finals when
+    they finish, V0, the part B baseline and the ten reference configurations of
+    research/v2/reference_cores. The GPT-6 Sol pilot final is listed but not tested.
+  tool: >
+    AMD Vivado 2026.1 on the operator's workstation omarchy (16 cores, 31 GB), part
+    xc7a200tsbg484-1 (Artix-7 200T, the slowest speed grade, the part on the Nexys Video
+    board). The bench host's Gowin flow is untouched.
+  wrapper: >
+    The same files the Gowin fitness times: fpga/core_bench_si.sv (every V2 design is
+    nret 1) and fpga/bench_stall_gen.sv for the agents, V0 and part B; the
+    research/v2/reference_cores bench wrappers for the reference cores. RTL is used as
+    written: no source edits, no defines (the Gowin flow sets none either). Gowin-only
+    attributes such as syn_ramstyle are ignored by Vivado.
+  flow: >
+    synth_design -mode out_of_context -top core_bench with default options;
+    create_clock on the clock port; opt_design, place_design -directive D,
+    phys_opt_design, route_design. Fmax for a build = 1000 / (period - WNS) in MHz.
+    Two passes per design. Pass 1: period 5.000 ns (the Gowin SDC's value), directive
+    Default, gives F1. Pass 2: period = 0.95 x 1000/F1 ns rounded to 0.001, one build each
+    with D in {Default, Explore, ExtraTimingOpt}; the design's Fmax is the median of those
+    three (the Gowin score is likewise a median over three placements). Area from
+    report_utilization of the pass 2 Default build: slice LUTs, FFs, LUTRAM, BRAM tiles,
+    DSPs. A design Vivado cannot synthesize or place is reported as a transfer failure with
+    the tool's error; it is not edited.
+  score: >
+    The held-out cycle counts come from RTL simulation and do not depend on the FPGA, so
+    each design's Artix-7 held-out score = geomean over the five kernels of
+    Fmax_A x 1e6 x reps / cycles, with the reps and cycles of its scored held-out run
+    (references: research/v2/reference_cores/results_sim). Same for CoreMark.
+  analysis: >
+    (1) Kendall tau-b between the six systems' geometric-mean held-out scores on Gowin and on
+    Artix-7, and Spearman rho over the 36 runs (and over all designs including references).
+    (2) The prereg main test and the amendment 13 extension family recomputed on Artix-7
+    held-out scores with the same procedure, reported side by side with the Gowin results:
+    which pairs separate and whether the three tiers hold. (3) The Artix-7 / Gowin Fmax
+    ratio per design: agents' finals vs reference cores, Welch on ln(ratio), as a check on
+    whether the agents' designs are specialized to the Gowin part they were tuned on. All
+    of part C is exploratory and does not change any V2 verdict.
+  not_matched: >
+    Different vendor, LUT6 fabric vs LUT4, different RAM and DSP primitives. The agents
+    tuned their designs against Gowin timing; the reference cores were written for other
+    targets (several for Xilinx). Out-of-context timing has no I/O paths, like the Gowin
+    wrapper's memory-side-only observation.
+
+unchanged: >
+  The question, metrics, tests and verdicts of the main campaign, amendment 13 and
+  amendment 14; the harness; every scored run.
+launched: >
+  To be filled in afterwards: smoke20 verdict and runner start times (part A), the date the
+  baseline's evals ran (part B), and the Vivado flow's first build (part C).

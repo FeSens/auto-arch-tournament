@@ -1,0 +1,8 @@
+# Amendment 15 part A: the V1 random-mutation control on harness 2.8.3.
+# No LLM (tools/agents/random_agent.py; the runner sets RANDOM_AGENT_SEED = 100 + rep).
+# Research-side so no harness file changes while amendment 14 runs.
+models:
+  - name: random-mutation-v2
+    provider: random
+    model: random-mutation
+    prompt_profile: nolessons
