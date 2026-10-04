@@ -156,3 +156,10 @@ bench/*.prev-*
 bench/*.stale-*
 bench/*.partial-*
 bench/results.jsonl.*
+
+# V2 campaign (EXP-2026-09-28-v2-main): every rep's repo.bundle and verbatim
+# transcript ARE tracked, for the paper write-up (operator, 2026-10-04: commit
+# every log and lesson). Scanned for credentials before each commit
+# (research/v2/scripts/export_lessons.py scans the bundles' full history).
+!bench/v2/**/repo.bundle
+!bench/v2/**/agent.full.log.gz

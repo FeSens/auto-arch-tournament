@@ -1,0 +1,238 @@
+{
+ "claude-opus-5_5_xhigh-v2-rep1": {
+  "cmd": 3357,
+  "say": 1144,
+  "edit": 1616,
+  "read": 118,
+  "nosandbox": 2
+ },
+ "gpt-6-luna_xhigh-v2-rep1": {
+  "say": 967,
+  "cmd": 2577,
+  "edit": 1400
+ },
+ "gpt-6-sol_xhigh-v2-rep1": {
+  "say": 1221,
+  "cmd": 5566,
+  "edit": 2990,
+  "denied": 25
+ },
+ "gpt-6-luna_xhigh-v2-rep2": {
+  "say": 944,
+  "cmd": 2161,
+  "edit": 1395
+ },
+ "gpt-6-sol_xhigh-v2-rep2": {
+  "say": 120,
+  "cmd": 568,
+  "edit": 316
+ },
+ "claude-opus-5_5_xhigh-v2-rep2": {
+  "cmd": 3379,
+  "say": 1188,
+  "edit": 1800,
+  "read": 137,
+  "nosandbox": 8
+ },
+ "gpt-6_1-sol_xhigh-v2-rep1": {
+  "say": 1175,
+  "cmd": 6406,
+  "edit": 3070,
+  "denied": 19
+ },
+ "claude-opus-5_5_xhigh-v2-rep3": {
+  "cmd": 3471,
+  "say": 1104,
+  "edit": 1710,
+  "read": 134,
+  "nosandbox": 5
+ },
+ "gpt-6-luna_xhigh-v2-rep3": {
+  "say": 920,
+  "cmd": 2511,
+  "edit": 1524,
+  "denied": 7
+ },
+ "gpt-6_1-sol_xhigh-v2-rep2": {
+  "say": 1038,
+  "cmd": 5967,
+  "edit": 2030,
+  "denied": 26
+ },
+ "claude-opus-5_5_xhigh-v2-rep4": {
+  "say": 1142,
+  "cmd": 3351,
+  "edit": 1756,
+  "read": 162,
+  "nosandbox": 1
+ },
+ "gpt-6-luna_xhigh-v2-rep4": {
+  "say": 899,
+  "cmd": 2314,
+  "edit": 1436
+ },
+ "claude-opus-5_5_xhigh-v2-rep5": {
+  "cmd": 3571,
+  "say": 1218,
+  "edit": 1780,
+  "read": 162,
+  "nosandbox": 2
+ },
+ "gpt-6-luna_xhigh-v2-rep5": {
+  "say": 966,
+  "cmd": 2571,
+  "edit": 1572,
+  "denied": 1
+ },
+ "gpt-6_1-sol_xhigh-v2-rep3": {
+  "say": 1017,
+  "cmd": 6131,
+  "edit": 2368,
+  "denied": 30
+ },
+ "claude-opus-5_5_xhigh-v2-rep6": {
+  "cmd": 3216,
+  "say": 1100,
+  "edit": 1983,
+  "read": 193,
+  "denied": 2
+ },
+ "gpt-6-luna_xhigh-v2-rep6": {
+  "say": 929,
+  "cmd": 2504,
+  "edit": 1694
+ },
+ "claude-sonnet-5-5_xhigh-v2-rep1": {
+  "cmd": 3320,
+  "say": 507,
+  "edit": 1349,
+  "read": 80,
+  "nosandbox": 7
+ },
+ "gpt-6-astra_xhigh-v2-rep1": {
+  "say": 1097,
+  "cmd": 6045,
+  "edit": 2188,
+  "denied": 18
+ },
+ "gpt-6_1-sol_xhigh-v2-rep4": {
+  "say": 1098,
+  "cmd": 6505,
+  "edit": 2656,
+  "denied": 22
+ },
+ "claude-sonnet-5-5_xhigh-v2-rep2": {
+  "cmd": 3617,
+  "say": 404,
+  "edit": 1220,
+  "read": 68,
+  "nosandbox": 6
+ },
+ "gpt-6-astra_xhigh-v2-rep2": {
+  "say": 1168,
+  "cmd": 5775,
+  "edit": 2094,
+  "denied": 24
+ },
+ "claude-sonnet-5-5_xhigh-v2-rep3": {
+  "cmd": 3234,
+  "say": 430,
+  "edit": 1024,
+  "read": 32,
+  "nosandbox": 4
+ },
+ "gpt-6_1-sol_xhigh-v2-rep5": {
+  "say": 1150,
+  "cmd": 6859,
+  "edit": 2922,
+  "denied": 13
+ },
+ "gpt-6-astra_xhigh-v2-rep3": {
+  "say": 1065,
+  "cmd": 5579,
+  "edit": 1998,
+  "denied": 30
+ },
+ "claude-sonnet-5-5_xhigh-v2-rep4": {
+  "say": 446,
+  "cmd": 3462,
+  "edit": 1206,
+  "read": 89,
+  "nosandbox": 8
+ },
+ "gpt-6_1-sol_xhigh-v2-rep6": {
+  "say": 1063,
+  "cmd": 5917,
+  "edit": 2540,
+  "denied": 22
+ },
+ "gpt-6-astra_xhigh-v2-rep4": {
+  "say": 1144,
+  "cmd": 6065,
+  "edit": 2238,
+  "denied": 21
+ },
+ "claude-sonnet-5-5_xhigh-v2-rep5": {
+  "cmd": 3564,
+  "say": 447,
+  "read": 79,
+  "edit": 1187,
+  "nosandbox": 8
+ },
+ "claude-sonnet-5-5_xhigh-v2-rep6": {
+  "cmd": 3132,
+  "say": 452,
+  "edit": 981,
+  "read": 66,
+  "nosandbox": 3
+ },
+ "gpt-6-astra_xhigh-v2-rep5": {
+  "say": 1110,
+  "cmd": 5724,
+  "edit": 2452,
+  "denied": 34
+ },
+ "gpt-5_5_xhigh-v2-rep1": {
+  "say": 3077,
+  "cmd": 3707,
+  "edit": 1838,
+  "nosandbox": 2,
+  "denied": 15
+ },
+ "gpt-5_5_xhigh-v2-rep2": {
+  "say": 2589,
+  "cmd": 3124,
+  "edit": 1283,
+  "denied": 6
+ },
+ "gpt-6-astra_xhigh-v2-rep6": {
+  "say": 1015,
+  "cmd": 5495,
+  "edit": 2344,
+  "denied": 25
+ },
+ "gpt-5_5_xhigh-v2-rep3": {
+  "say": 2653,
+  "cmd": 3514,
+  "edit": 1578,
+  "denied": 5
+ },
+ "gpt-5_5_xhigh-v2-rep4": {
+  "say": 2741,
+  "cmd": 3570,
+  "edit": 1873,
+  "denied": 7
+ },
+ "gpt-5_5_xhigh-v2-rep5": {
+  "say": 2471,
+  "cmd": 3332,
+  "edit": 1678,
+  "denied": 7
+ },
+ "gpt-5_5_xhigh-v2-rep6": {
+  "say": 2533,
+  "cmd": 3338,
+  "edit": 1584,
+  "denied": 15
+ }
+}
