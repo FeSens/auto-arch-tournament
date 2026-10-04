@@ -132,3 +132,44 @@ def test_append_log_no_scribe_call_when_target_none(patched_log_env, monkeypatch
     assert "_diff" not in written
     assert "lesson" not in written
     assert "scribe_skipped" not in written
+
+
+def test_append_log_skips_scribe_under_nolessons_profile(patched_log_env, monkeypatch):
+    """V2 amendment 14: BENCH_PROMPT_PROFILE=nolessons never calls the
+    scribe, so no lesson lands in the JSONL (and LESSONS.md is never
+    written)."""
+    from tools import orchestrator
+    from tools.agents import scribe
+
+    calls = []
+
+    def _scribe(entry, diff, target):
+        calls.append(entry["id"])
+        return "- a lesson"
+
+    monkeypatch.setattr(scribe, "run_scribe_agent", _scribe)
+    import sys
+    sys.modules["tools.agents.scribe"] = scribe
+    monkeypatch.setenv("BENCH_PROMPT_PROFILE", "nolessons")
+
+    orchestrator.append_log(_entry())
+    written = _read_last(patched_log_env)
+    assert calls == []
+    assert "lesson" not in written
+    assert "scribe_skipped" not in written
+    assert "_diff" not in written
+
+
+def test_append_log_runs_scribe_under_full_profile(patched_log_env, monkeypatch):
+    """The default profile still runs the scribe (2.8.2 behavior)."""
+    from tools import orchestrator
+    from tools.agents import scribe
+
+    monkeypatch.setattr(scribe, "run_scribe_agent",
+                        lambda entry, diff, target: "- a lesson")
+    import sys
+    sys.modules["tools.agents.scribe"] = scribe
+    monkeypatch.delenv("BENCH_PROMPT_PROFILE", raising=False)
+
+    orchestrator.append_log(_entry())
+    assert _read_last(patched_log_env).get("lesson") == "- a lesson"
