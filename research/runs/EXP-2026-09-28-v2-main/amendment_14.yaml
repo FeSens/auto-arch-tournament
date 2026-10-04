@@ -66,3 +66,14 @@ unchanged: question, metrics, tests and verdict rules of the main campaign and a
 launched: >
   To be filled in afterwards with the smoke verdict and each runner's start time, account and
   first probe verdict.
+  smoke19: started 2026-10-04T13:15:21Z on hwebench (tmux abl-smoke), probe confined, ended
+  done 13:47Z. Row: harness 2.8.3, fixture_commit fad7d02 (= hwe-bench-v2.8.3), codex_cli
+  0.159.0, runner clean, orchestrator exit 0, CoreMark 79.97, held-out 2039 iter/s with all
+  five kernels validated. The clone had no cores/bench/LESSONS.md and no scribe files, its
+  log.jsonl (baseline plus three slots) has no `lesson` or `scribe_skipped` field, the
+  bundle's history never touches LESSONS.md, and the orchestrator log never mentions the
+  scribe. Every smoke19 check passed.
+  Runners: F (tmux abl-a, hwebench, reps 1-2), G (abl-b, hwebench2, reps 3-4) and H (abl-c,
+  hwebench3, reps 5-6) started 2026-10-04T13:47:32Z; reps 1, 3 and 5 probes confined. Rep1
+  runs in a fresh clone created 13:47:32Z (fixture commit only, empty log); the smoke's
+  artifacts stay in bench/v2/smoke-abl.
