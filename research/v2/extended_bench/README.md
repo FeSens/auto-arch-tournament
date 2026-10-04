@@ -18,6 +18,8 @@ analysis.
 Results: `results/analysis.md` (tables), `results/analysis.json`,
 `results/champions.json` and `results/references.json` (per run and kernel:
 cycles, reps, iter/s, checks).
+`results/per_benchmark_table.md` (`per_benchmark.py`): CoreMark and every
+kernel per system and per reference core, with an overall ranking.
 
 ## Method
 
