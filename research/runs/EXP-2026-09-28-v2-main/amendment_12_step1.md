@@ -48,6 +48,7 @@ whose champion fails step 2 or has a score-relevant (c) branch removed, n report
 | GPT-6 Astra rep3 | none | | |
 | GPT-6 Astra rep4 | none | | |
 | GPT-6 Astra rep5 | none (final champion from round 8, row 2026-10-03 15:43Z) | | |
+| GPT-6 Astra rep6 | none (final champion from round 15, row 2026-10-04 00:20Z; `ifndef CORE_PKG_DEFINED package guard only) | | |
 | Sonnet 5.5 reps 1-4 | none | | |
 | Sonnet 5.5 rep5 | reg_file.sv:61 `ifdef RISCV_FORMAL (final champion r9s1, row 2026-10-03 00:02Z) | the register file is 32 flop words under formal and two copies of 16x4 RAM16SDP4 slices (one per read port) in simulation and synthesis; same async read, sync write, no reset, half split and x0 mask, so formal proves a different structure of the same function. The header gives the reason (the slices' SMT arrays made the `reg` check take over 6 min per check). Operator's bounded equivalence of the two arms at 20:53Z (yosys miter, zero initial contents, 8 steps): equal; the final file is byte-identical to the checked one | (b) |
 | Sonnet 5.5 rep6 | none (final champion r14s1, row 2026-10-03 08:54Z; `ifndef CORE_PKG_DEFINED package guard only) | | |
@@ -57,4 +58,5 @@ whose champion fails step 2 or has a score-relevant (c) branch removed, n report
 
 Extension runs needing step 2 so far: Sonnet 5.5 rep5 (formal on the RAM16SDP4 register
 file, ceiling 6 h, after the campaign, with Opus rep2's). Sonnet 5.5 is final (6 of 6): rep5
-is its only step 2 run and none of its champions has a class (c) branch.
+is its only step 2 run and none of its champions has a class (c) branch. GPT-6 Astra is
+final (6 of 6): no step 2 run (rep2's `ifdef YOSYS is class (d), bit-identical arms).
