@@ -340,3 +340,35 @@ run's round 12. Harness evals stay out of reach (`.tmp/riscv-formal-eval` is
 bench-only), so this costs sibling agents time, not scores. The V3 fix above
 (per-slot formal work dir, or a sticky `cores/` plus a prompt note) now covers
 two systems.
+
+## 2026-10-04: open-source reference cores, measured
+
+`research/v2/reference_cores/` scores 10 configurations of 8 open-source
+RV32IM cores the way the bench scores an agent's core. Stage 1 runs the
+harness's own Gowin flow (read-only import). Stage 2 runs the bench's own
+CoreMark and held-out ELFs in a Verilator testbench that copies
+`test/cosim/main.cpp` (same stall model, seed, markers and scoring). The
+cores are VexRiscv (MaxPerf, NoCache), VexiiRiscv, Ibex (small, maxperf),
+Hazard3, ultraembedded riscv, biRISC-V, NEORV32 and PicoRV32. Best is VexRiscv
+MaxPerf, at 228.0 CoreMark and 6,216 held-out. It scores above 21 of the 32
+finished agent runs on CoreMark; every Opus 5.5 final and five of six Sonnet
+5.5 finals beat it. Seven of the ten score below every agent final, except
+Hazard3, which beats two.
+
+- The method agrees with two published figures: VexRiscv MaxPerf measures
+  2.598 CoreMark/MHz (published 2.57) and NEORV32 0.940 (published 0.95).
+  The other published figures run 20 to 70% above the measured ones (no
+  stalls, other flags, or extra extensions).
+- V3: the V1 `cores/{picorv32,ibex,neorv32,vexriscv}/core.yaml` citations are
+  wrong for this bench. PicoRV32's 0.516 is DMIPS/MHz; Ibex's 0.904 is the
+  RV32EC "micro" config, which cannot run the bench ELF; NEORV32's 0.95 needs
+  C plus caches; VexRiscv's 2.30 is the no-cache config. Replace them with the
+  measured stage 2 figures.
+- V3: references read memory one cycle after the request, as their native
+  buses require. Agent cores read combinationally (`test/cosim/main.cpp`), and
+  in the FPGA bench their instruction data is a register (the LFSR), so
+  instruction memory costs them no cycle and no logic delay. A V3 contract
+  with a synchronous memory port would make agent and reference numbers
+  directly comparable.
+- Ibex mainline merged CHERIoT in 2026-08. The rows pin e4bcf749, the newest
+  mainline commit with no CHERIoT RTL, to match the published configs.
