@@ -1,0 +1,446 @@
+diff -ruN v0/rtl/alu.sv textbook/rtl/alu.sv
+--- v0/rtl/alu.sv	2026-10-04 15:14:54.000000000 +0200
++++ textbook/rtl/alu.sv	2026-10-04 20:51:54.571347360 +0200
+@@ -1,16 +1,9 @@
+ // rtl/alu.sv
+ //
+-// RV32IM combinational ALU. Hardware multiplier and divider are SystemVerilog
+-// `*` and `/` on signed/unsigned types — Verilator and Yosys both support
+-// these and emit reasonable structural hardware.
+-//
+-// RV32IM division semantics (overridden from straight `signed /`):
+-//   DIV  by 0       -> -1   (all ones)
+-//   DIVU by 0       -> 0xFFFFFFFF
+-//   DIV  INT_MIN/-1 -> INT_MIN  (no trap, defined overflow)
+-//   REM  by 0       -> dividend
+-//   REMU by 0       -> dividend
+-//   REM  INT_MIN/-1 -> 0
++// RV32IM combinational ALU without division. The hardware multiplier is
++// SystemVerilog `*` on signed/unsigned types. DIV/DIVU/REM/REMU run in the
++// iterative divider (divider.sv), which ex_stage selects for those ops; the
++// ALU returns 0 for them.
+ //
+ // Latency:        combinational (0 cycles).
+ // RVFI fields:    feeds rd_wdata (via EX/MEM/WB), branch resolution, mem_addr.
+@@ -53,7 +46,7 @@
+       ALU_SRA:    out = $unsigned($signed(a) >>> shamt);
+       ALU_LUI:    out = b;
+ 
+-      // M-extension. Under RISCV_FORMAL_ALTOPS the hardware operations
++      // M-extension multiply. Under RISCV_FORMAL_ALTOPS the hardware operations
+       // are substituted for tractable algebraic stand-ins so bitwuzla
+       // can solve the BMC inside the 20-step depth budget. The same
+       // substitution must appear in the riscv-formal spec (insn_*.v).
+@@ -64,33 +57,11 @@
+       ALU_MULH:   out = (a + b) ^ 32'hf6583fb7;
+       ALU_MULHU:  out = (a + b) ^ 32'h949ce5e8;
+       ALU_MULHSU: out = (a - b) ^ 32'hecfbe137;
+-      ALU_DIV:    out = (a - b) ^ 32'h7f8529ec;
+-      ALU_DIVU:   out = (a - b) ^ 32'h10e8fd70;
+-      ALU_REM:    out = (a - b) ^ 32'h8da68fa5;
+-      ALU_REMU:   out = (a - b) ^ 32'h3138d0e1;
+ `else
+       ALU_MUL:    out = mul_uu[31:0];
+       ALU_MULH:   out = $unsigned(mul_ss[63:32]);
+       ALU_MULHU:  out = mul_uu[63:32];
+       ALU_MULHSU: out = $unsigned(mul_su[63:32]);
+-      ALU_DIV: begin
+-        if (b == 32'b0)
+-          out = 32'hFFFFFFFF;
+-        else if (a == 32'h80000000 && b == 32'hFFFFFFFF)
+-          out = 32'h80000000;
+-        else
+-          out = $unsigned($signed(a) / $signed(b));
+-      end
+-      ALU_DIVU: out = (b == 32'b0) ? 32'hFFFFFFFF : (a / b);
+-      ALU_REM: begin
+-        if (b == 32'b0)
+-          out = a;
+-        else if (a == 32'h80000000 && b == 32'hFFFFFFFF)
+-          out = 32'b0;
+-        else
+-          out = $unsigned($signed(a) % $signed(b));
+-      end
+-      ALU_REMU: out = (b == 32'b0) ? a : (a % b);
+ `endif
+       default:  out = 32'b0;
+     endcase
+diff -ruN v0/rtl/core.sv textbook/rtl/core.sv
+--- v0/rtl/core.sv	2026-10-04 15:14:54.000000000 +0200
++++ textbook/rtl/core.sv	2026-10-04 20:51:54.571420260 +0200
+@@ -6,7 +6,7 @@
+ //   |    |     ^
+ //   |    +-----+    forward_unit drives EX-stage rs1/rs2 muxes
+ //   |               from EX/MEM and MEM/WB
+-//   +- stall <- hazard_unit (load-use)
++//   +- stall <- hazard_unit (load-use, memory stalls, divide in EX)
+ //
+ // IO port names use the `io_*` Chisel-emit prefix so the existing
+ // formal/wrapper_si.sv and test/cosim/main.cpp bindings carry through
+@@ -79,6 +79,7 @@
+   // hazard / forward
+   logic       stall_if, stall_id, flush_if, flush_id;
+   logic       stall_ex_mem, hold_mem_wb;
++  logic       bubble_ex_mem, div_wait;
+   logic [1:0] fwd_rs1_sel, fwd_rs2_sel;
+ 
+   // EX redirect
+@@ -138,12 +139,14 @@
+     .clock           (clock),
+     .reset           (reset),
+     .stall           (stall_ex_mem),
++    .bubble          (bubble_ex_mem),
+     .in              (id_ex_w),
+     .fwd_rs1_sel     (fwd_rs1_sel),
+     .fwd_rs2_sel     (fwd_rs2_sel),
+     .fwd_ex_mem      (ex_mem_w.alu_result),  // EX/MEM-registered ALU result
+     .fwd_mem_wb      (wb_w_data),            // WB-stage's write-mux output
+     .out             (ex_mem_w),
++    .div_wait        (div_wait),
+     .redirect        (redirect),
+     .redirect_target (redirect_target)
+   );
+@@ -180,11 +183,13 @@
+     .imem_ready     (io_imemReady),
+     .dmem_ready     (io_dmemReady),
+     .ex_mem_mem_op  (ex_mem_w.ctrl.mem_read | ex_mem_w.ctrl.mem_write),
++    .ex_busy        (div_wait),
+     .stall_if       (stall_if),
+     .stall_id       (stall_id),
+     .flush_if       (flush_if),
+     .flush_id       (flush_id),
+     .stall_ex_mem   (stall_ex_mem),
++    .bubble_ex_mem  (bubble_ex_mem),
+     .hold_mem_wb    (hold_mem_wb)
+   );
+ 
+diff -ruN v0/rtl/divider.sv textbook/rtl/divider.sv
+--- v0/rtl/divider.sv	1970-01-01 01:00:00.000000000 +0100
++++ textbook/rtl/divider.sv	2026-10-04 20:51:54.571482855 +0200
+@@ -0,0 +1,140 @@
++// rtl/divider.sv
++//
++// Iterative RV32M divider: radix-2 restoring division, one quotient bit
++// per cycle. Replaces the single-cycle `/` and `%` V0 had in alu.sv.
++//
++//   cycle 0       start: latch |a|, |b| and the result signs
++//   cycles 1..32  one shift-and-subtract step each
++//   cycle 33      done: sign-corrected quotient or remainder on `result`,
++//                 held until `ack`
++//
++// RV32M special cases come out of the datapath unchanged except divide by
++// zero, which is caught at start:
++//   DIV/DIVU by 0   -> all ones       REM/REMU by 0 -> dividend
++//   DIV INT_MIN/-1  -> INT_MIN        REM INT_MIN/-1 -> 0
++//
++// Under RISCV_FORMAL_ALTOPS the result is the riscv-formal stand-in formula
++// of the latched operands and `done` follows start by one cycle, so formal
++// still exercises the EX stall and bubble path; a 34-cycle stall would not
++// fit the liveness check's 10-cycle window.
++//
++// Latency:        34 cycles in EX (2 under ALTOPS).
++// RVFI fields:    feeds rd_wdata for DIV/DIVU/REM/REMU via ex_stage.
++module divider (
++  input  logic        clock,
++  input  logic        reset,
++  input  logic        req,      // a DIV/DIVU/REM/REMU sits in EX
++  input  logic        ack,      // EX/MEM captures the result this cycle
++  input  logic [4:0]  op,
++  input  logic [31:0] a,
++  input  logic [31:0] b,
++  output logic        done,
++  output logic [31:0] result
++);
++
++  typedef enum logic [1:0] { S_IDLE, S_RUN, S_DONE } state_t;
++  state_t state;
++
++  logic [4:0]  cnt;
++  logic [31:0] quo_q;    // dividend shifting out, quotient shifting in
++  logic [31:0] rem_q;    // partial remainder
++  logic [31:0] div_q;    // |divisor|
++  logic        neg_q;    // quotient negative
++  logic        neg_r;    // remainder negative (sign of the dividend)
++  logic        is_rem_q;
++  logic        by_zero_q;
++  logic [31:0] a_q;      // dividend, for REM by zero
++
++  logic        is_signed;
++  logic        start;
++  logic [32:0] shifted;
++  logic [32:0] diff;
++
++  always_comb begin
++    start     = req && (state == S_IDLE);
++    is_signed = (op == ALU_DIV) || (op == ALU_REM);
++    shifted   = {rem_q, quo_q[31]};
++    diff      = shifted - {1'b0, div_q};
++  end
++
++`ifdef RISCV_FORMAL_ALTOPS
++  logic [31:0] alt_val;
++  always_comb begin
++    case (op)
++      ALU_DIV:  alt_val = (a - b) ^ 32'h7f8529ec;
++      ALU_DIVU: alt_val = (a - b) ^ 32'h10e8fd70;
++      ALU_REM:  alt_val = (a - b) ^ 32'h8da68fa5;
++      default:  alt_val = (a - b) ^ 32'h3138d0e1;  // ALU_REMU
++    endcase
++  end
++`endif
++
++  always_ff @(posedge clock) begin
++    if (reset) begin
++      state     <= S_IDLE;
++      cnt       <= 5'd0;
++      quo_q     <= 32'b0;
++      rem_q     <= 32'b0;
++      div_q     <= 32'b0;
++      neg_q     <= 1'b0;
++      neg_r     <= 1'b0;
++      is_rem_q  <= 1'b0;
++      by_zero_q <= 1'b0;
++      a_q       <= 32'b0;
++    end else begin
++      case (state)
++        S_IDLE: if (start) begin
++`ifdef RISCV_FORMAL_ALTOPS
++          quo_q     <= alt_val;
++          neg_q     <= 1'b0;
++          neg_r     <= 1'b0;
++          is_rem_q  <= 1'b0;
++          by_zero_q <= 1'b0;
++          state     <= S_DONE;
++`else
++          quo_q     <= (is_signed && a[31]) ? (32'b0 - a) : a;
++          div_q     <= (is_signed && b[31]) ? (32'b0 - b) : b;
++          neg_q     <= is_signed && (a[31] ^ b[31]);
++          neg_r     <= is_signed && a[31];
++          is_rem_q  <= (op == ALU_REM) || (op == ALU_REMU);
++          by_zero_q <= (b == 32'b0);
++          state     <= S_RUN;
++`endif
++          rem_q     <= 32'b0;
++          a_q       <= a;
++          cnt       <= 5'd0;
++        end
++        S_RUN: begin
++          if (diff[32]) begin
++            rem_q <= shifted[31:0];
++            quo_q <= {quo_q[30:0], 1'b0};
++          end else begin
++            rem_q <= diff[31:0];
++            quo_q <= {quo_q[30:0], 1'b1};
++          end
++          cnt <= cnt + 5'd1;
++          if (cnt == 5'd31) state <= S_DONE;
++        end
++        default: if (ack) state <= S_IDLE;  // S_DONE
++      endcase
++      // The instruction left EX without taking the result (cannot happen
++      // in this pipeline); return to idle rather than hang.
++      if (!req) state <= S_IDLE;
++    end
++  end
++
++  always_comb begin
++    done = (state == S_DONE);
++`ifdef RISCV_FORMAL_ALTOPS
++    result = quo_q;
++`else
++    if (by_zero_q)
++      result = is_rem_q ? a_q : 32'hFFFFFFFF;
++    else if (is_rem_q)
++      result = neg_r ? (32'b0 - rem_q) : rem_q;
++    else
++      result = neg_q ? (32'b0 - quo_q) : quo_q;
++`endif
++  end
++
++endmodule
+diff -ruN v0/rtl/ex_stage.sv textbook/rtl/ex_stage.sv
+--- v0/rtl/ex_stage.sv	2026-10-04 15:14:54.000000000 +0200
++++ textbook/rtl/ex_stage.sv	2026-10-04 20:51:54.571509843 +0200
+@@ -2,26 +2,32 @@
+ //
+ // Execute stage. Resolves the operand muxes (forwarding from EX/MEM and
+ // MEM/WB), runs the ALU, resolves branches, computes the redirect
+-// target. Owns the EX/MEM pipeline register.
++// target. Owns the EX/MEM pipeline register. DIV/DIVU/REM/REMU run in the
++// iterative divider: the instruction stays in EX (div_wait holds the
++// front of the pipeline through hazard_unit) and EX/MEM takes bubbles
++// until the result is ready.
+ //
+ // Forwarding select encoding (driven by forward_unit):
+ //   00 = ID/EX register value (no forward)
+ //   01 = EX/MEM aluResult (instruction immediately ahead in MEM)
+ //   10 = MEM/WB result (instruction two ahead, post regfile-write mux)
+ //
+-// Latency:        1 cycle (EX/MEM register clocked here).
++// Latency:        1 cycle (EX/MEM register clocked here); 34 cycles for
++//                 a divide (2 under RISCV_FORMAL_ALTOPS).
+ // RVFI fields:    feeds pc_wdata (= pc_next), the rd_wdata path for
+ //                 ALU and JAL/JALR (PC+4), and the branch resolve.
+ module ex_stage (
+   input  logic               clock,
+   input  logic               reset,
+   input  logic               stall,         // freeze EX/MEM register (dmem stall)
++  input  logic               bubble,        // EX/MEM captures a bubble (divide in progress)
+   input  id_ex_t   in,
+   input  logic [1:0]         fwd_rs1_sel,
+   input  logic [1:0]         fwd_rs2_sel,
+   input  logic [31:0]        fwd_ex_mem,    // EX/MEM.alu_result (registered)
+   input  logic [31:0]        fwd_mem_wb,    // WB-stage write-data mux output
+   output ex_mem_t  out,
++  output logic               div_wait,      // a divide in EX is not done yet
+   output logic               redirect,
+   output logic [31:0]        redirect_target
+ );
+@@ -59,6 +65,60 @@
+     .out (alu_result)
+   );
+ 
++  // ── Iterative divider ─────────────────────────────────────────────────
++  // The operands are latched when the divide starts: while it waits in EX
++  // the instructions ahead of it drain, so the forwarding paths that fed
++  // it on its first cycle are gone by the time it completes. The latched
++  // values also feed EX/MEM's rs1_val/rs2_val (RVFI rs1/rs2_rdata).
++  logic        div_req;
++  logic        div_done;
++  logic [31:0] div_result;
++  logic [31:0] div_rs1_q;
++  logic [31:0] div_rs2_q;
++  logic [31:0] ex_result;
++  logic [31:0] ex_rs1;
++  logic [31:0] ex_rs2;
++
++  always_comb begin
++    div_req = in.valid && !in.ctrl.is_illegal
++              && (in.ctrl.alu_op == ALU_DIV || in.ctrl.alu_op == ALU_DIVU
++               || in.ctrl.alu_op == ALU_REM || in.ctrl.alu_op == ALU_REMU);
++    div_wait  = div_req && !div_done;
++    ex_result = div_req ? div_result : alu_result;
++    ex_rs1    = div_req ? div_rs1_q  : rs1;
++    ex_rs2    = div_req ? div_rs2_q  : rs2;
++  end
++
++  divider u_div (
++    .clock  (clock),
++    .reset  (reset),
++    .req    (div_req),
++    .ack    (div_req && div_done && !stall),
++    .op     (in.ctrl.alu_op),
++    .a      (rs1),
++    .b      (rs2),
++    .done   (div_done),
++    .result (div_result)
++  );
++
++  // Latch on the divide's first cycle in EX.
++  logic div_lat_q;  // high once the operands for the current divide are latched
++  always_ff @(posedge clock) begin
++    if (reset) begin
++      div_lat_q <= 1'b0;
++      div_rs1_q   <= 32'b0;
++      div_rs2_q   <= 32'b0;
++    end else if (!div_req) begin
++      div_lat_q <= 1'b0;
++    end else if (!div_lat_q) begin
++      div_lat_q <= 1'b1;
++      div_rs1_q   <= rs1;
++      div_rs2_q   <= rs2;
++    end else if (div_done && !stall) begin
++      div_lat_q <= 1'b0;  // EX/MEM takes the result; next divide relatches
++    end
++  end
++
+   // ── Branch resolve ────────────────────────────────────────────────────
+   logic        branch_cond;
+   logic        branch_taken;
+@@ -122,18 +182,21 @@
+       // dmem stall: hold the EX/MEM register so the in-flight LOAD/STORE
+       // stays in MEM stage waiting on the bus.
+       reg_q <= reg_q;
++    end else if (bubble) begin
++      // Divide in progress: nothing leaves EX this cycle.
++      reg_q <= '0;
+     end else begin
+       reg_q.pc            <= in.pc;
+       // For JAL/JALR, the rd_wdata is PC+4 (return address), not the ALU's
+       // sum (which is the jump target). The MEM/WB register's read-data
+       // mux only kicks in for LOADs, so we route PC+4 here.
+-      reg_q.alu_result    <= in.ctrl.is_jump ? (in.pc + 32'd4) : alu_result;
++      reg_q.alu_result    <= in.ctrl.is_jump ? (in.pc + 32'd4) : ex_result;
+       reg_q.write_data    <= rs2;
+       reg_q.rd            <= in.rd;
+       reg_q.rs1_addr      <= in.rs1_addr;
+       reg_q.rs2_addr      <= in.rs2_addr;
+-      reg_q.rs1_val       <= rs1;
+-      reg_q.rs2_val       <= rs2;
++      reg_q.rs1_val       <= ex_rs1;
++      reg_q.rs2_val       <= ex_rs2;
+       // pc_next reverts to pc+4 on misalign trap so the pc_fwd checker
+       // (asserting next retirement's pc_rdata == this pc_wdata) stays
+       // consistent with the suppressed redirect.
+diff -ruN v0/rtl/hazard_unit.sv textbook/rtl/hazard_unit.sv
+--- v0/rtl/hazard_unit.sv	2026-10-04 15:14:54.000000000 +0200
++++ textbook/rtl/hazard_unit.sv	2026-10-04 20:51:54.571563264 +0200
+@@ -3,7 +3,8 @@
+ // Detects the only data hazard the textbook 5-stage doesn't cover via
+ // forwarding: load-use. A LOAD in EX produces its data only after MEM,
+ // so an instruction immediately behind that consumes the LOAD's rd
+-// must be stalled by exactly one cycle.
++// must be stalled by exactly one cycle. Also holds the front of the
++// pipeline while a divide is in progress in EX (ex_busy).
+ //
+ // Outputs:
+ //   stall_if / stall_id : freeze the PC reg and the IF/ID combinational
+@@ -13,6 +14,8 @@
+ //   flush_id            : also kills ID's own register on load-use to
+ //                          inject a single-cycle bubble between LOAD
+ //                          and the dependent instruction.
++//   bubble_ex_mem       : divide in progress; EX/MEM captures a bubble
++//                          while the stages ahead keep draining.
+ //
+ // Latency:        combinational.
+ // RVFI fields:    n/a (governs validity of subsequent retirements).
+@@ -31,11 +34,13 @@
+   // would actually be holding up). Computed at top level from the
+   // EX/MEM register's ctrl.mem_read | ctrl.mem_write.
+   input  logic       ex_mem_mem_op,
++  input  logic       ex_busy,           // divide in EX not done yet
+   output logic       stall_if,          // PC reg holds
+   output logic       stall_id,          // ID/EX register holds (vs. bubble)
+   output logic       flush_if,          // IF/ID comb output -> NOP
+   output logic       flush_id,          // ID/EX register captures '0
+   output logic       stall_ex_mem,      // EX/MEM register holds
++  output logic       bubble_ex_mem,     // EX/MEM register captures a bubble
+   output logic       hold_mem_wb        // MEM/WB clears valid only;
+                                         // data fields stay (for fwd)
+ );
+@@ -54,7 +59,7 @@
+     dmem_stall = !dmem_ready && ex_mem_mem_op;
+ 
+     // PC reg holds on any stall reason.
+-    stall_if      = load_use_hazard || imem_stall || dmem_stall;
++    stall_if      = load_use_hazard || imem_stall || dmem_stall || ex_busy;
+     // IF/ID combinational payload: NOP whenever we wouldn't have a valid
+     // instruction this cycle (redirect target unknown to IF, or imem
+     // didn't deliver).
+@@ -67,11 +72,14 @@
+     // dmem_stall takes precedence over load_use's bubble: re-evaluate
+     // load_use next cycle when the bus unblocks. flush_id is 1 only when
+     // we want bubble (not hold).
+-    stall_id      = dmem_stall || load_use_hazard;
+-    flush_id      = (load_use_hazard || redirect) && !dmem_stall;
++    //   - ex_busy     -> hold        (divide stays in EX until done)
++    stall_id      = dmem_stall || load_use_hazard || ex_busy;
++    flush_id      = (load_use_hazard || redirect) && !dmem_stall && !ex_busy;
+     // EX/MEM register: holds on dmem_stall (LOAD waits in MEM until the
+     // bus delivers).
+     stall_ex_mem  = dmem_stall;
++    // A divide in progress sends bubbles to MEM; a dmem stall holds instead.
++    bubble_ex_mem = ex_busy && !dmem_stall;
+     // MEM/WB register: on dmem_stall the previously-retired instruction's
+     // data fields stay alive for forwarding (e.g. a held BNE needs the
+     // LOAD's load_data via fwd_mem_wb), but valid is cleared so we don't
