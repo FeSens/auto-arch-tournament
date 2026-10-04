@@ -57,8 +57,11 @@ whose champion fails step 2 or has a score-relevant (c) branch removed, n report
 | GPT-5.5 rep3 | none (final champion from round 15, row 2026-10-03 20:29Z; `ifndef CORE_PKG_DEFINED package guards only) | | |
 | GPT-5.5 rep4 | none (final champion from round 9, row 2026-10-04 01:54Z; `ifndef CORE_PKG_DEFINED package guard only) | | |
 | GPT-5.5 rep5 | none (final champion from round 11, row 2026-10-04 05:56Z; `ifndef CORE_PKG_DEFINED package guards only; the RISCV_FORMAL_ALTOPS arm in ex_stage.sv, which leaves DIV/REM to alu.sv's stand-ins instead of the iterative divider, is outside the scan by definition) | | |
+| GPT-5.5 rep6 | none (final champion from round 5, row 2026-10-04 10:03Z; `ifndef CORE_PKG_DEFINED package guard only; RISCV_FORMAL_ALTOPS arms in alu.sv and divider.sv are outside the scan by definition) | | |
 
 Extension runs needing step 2 so far: Sonnet 5.5 rep5 (formal on the RAM16SDP4 register
 file, ceiling 6 h, after the campaign, with Opus rep2's). Sonnet 5.5 is final (6 of 6): rep5
 is its only step 2 run and none of its champions has a class (c) branch. GPT-6 Astra is
-final (6 of 6): no step 2 run (rep2's `ifdef YOSYS is class (d), bit-identical arms).
+final (6 of 6): no step 2 run (rep2's `ifdef YOSYS is class (d), bit-identical arms). GPT-5.5 is final (6 of 6):
+no step 2 run and no class (c) branch (all six champions: package guards only). Step 2 thus
+has two runs in all: Opus rep2 (main) and Sonnet 5.5 rep5 (extension).
