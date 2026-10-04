@@ -1,0 +1,68 @@
+# WRITE-ONCE. Amendment 14 to prereg.yaml, written 2026-10-04 (about 11:15Z) after the
+# campaign ended (10:03Z) and before any run of this amendment started; its commit time is
+# the authoritative timestamp.
+reason: >
+  research/v2/PLAN.md (Phase 3) planned a no-lessons ablation on one system to measure what
+  the scribe's distilled lessons contribute; it was not run during the campaign. After the
+  campaign the operator approved it (2026-10-04: "yes, run 6 runs of gpt-sol-6.1 with
+  ablations"). Added after all main and extension data, so none of the earlier analyses
+  change.
+treatment: >
+  Prompt profile "nolessons". The scribe agent is not run, so cores/bench/LESSONS.md is
+  never written and log.jsonl entries carry no `lesson` field. Every hypothesis prompt's
+  lessons block therefore reads "(no lessons recorded yet — file does not exist)", which
+  is what the full profile shows in round 1. Everything else is the full profile: the last
+  five outcomes inlined in the hypothesis prompt, log.jsonl, the hypothesis YAMLs and the
+  git history stay readable, and the implementation prompt is unchanged. The ablation
+  removes the distilled lessons, not the raw outcome history.
+harness: >
+  HARNESS_VERSION 2.8.3, fixture branch bench-v2.8.3 = tag hwe-bench-v2.8.3 =
+  bench-v2.8.2 plus one commit: tools/orchestrator.py skips the scribe step when
+  BENCH_PROMPT_PROFILE is "nolessons" (no effect under the default "full" profile), its
+  test, and the version file. The runner already passes a model's prompt_profile as
+  BENCH_PROMPT_PROFILE. N=15, K=3, budgets, prompts, evals, held-out scoring, acceptance
+  margin and incident policy are 2.8.2's.
+system:
+  name: gpt-6_1-sol_xhigh-v2-nolessons
+  cli: Codex CLI 0.159.0 (cli/codex-0.159.0, the copy GPT-6.1 Sol ran with)
+  model: gpt-6.1-sol
+  effort: xhigh
+  prompt_profile: nolessons
+  control: the six scored GPT-6.1 Sol runs of the campaign (full profile, harness 2.8.2)
+smoke19: >
+  One round (N=1, K=3) on hwebench, unscored, results
+  bench/v2/smoke-abl/results-smoke-sol61nl.jsonl. Its reps start only if the smoke row is
+  done, harness 2.8.3, sandbox probe confined, codex_cli 0.159.0, held-out scored, the
+  clone history has no LESSONS.md, its log.jsonl has no `lesson` field, and no scribe
+  agent ran.
+schedule: >
+  Three runners from the same checkout and fixture, one per agent account, started together
+  after smoke19: reps 1-2 on hwebench (runner F, tmux abl-a), reps 3-4 on hwebench2
+  (runner G, tmux abl-b), reps 5-6 on hwebench3 (runner H, tmux abl-c). Results
+  bench/v2/results-sol61nl-{a,b,c}.jsonl, logs bench/v2/runner-sol61nl-{a,b,c}.log, rep
+  dirs bench/v2/gpt-6_1-sol_xhigh-v2-nolessons/rep<N>. Three runs in progress at once, as
+  in the campaign.
+not_matched: >
+  The control runs ran 2026-09-30 to 10-03, one after another on hwebench3, next to two
+  other systems' runs. These runs start 2026-10-04, three at once on the same Codex
+  subscription quota, so with different partners, times of day and possibly a different
+  provider model state. No full-profile Sol run is repeated alongside them as a drift
+  anchor. Without the scribe a round has no scribe step (up to 4 min per slot), so
+  wall-clock differs. Agent budgets are per agent, not per round, so the work each
+  agent may do is unchanged. Quota pauses rerun the interrupted attempt (amendment 01 policy).
+analysis:
+  ablation_test: >
+    GPT-6.1 Sol (full) vs GPT-6.1 Sol (nolessons), 6 scored runs each: Welch two-sided on
+    ln(held-out score), ratio of geometric means with its 95% CI and the 10,000-sample
+    bootstrap CI, alpha 0.05, a family of its own (the main and extension families are
+    unchanged). Verdict wording as prereg.yaml: "scores higher" only when the CI excludes 1
+    and p < 0.05, otherwise "not distinguishable at n=6".
+  descriptive: >
+    CoreMark score, accepted / rejected / broken counts by stage, Fmax, LUT4, wall time and
+    tokens for both arms. The extended suite (exploratory) is run on the ablation champions
+    too.
+  verdict_rules: unchanged
+unchanged: question, metrics, tests and verdict rules of the main campaign and amendment 13, budget (N=15, K=3), runs per system (6), incident policy
+launched: >
+  To be filled in afterwards with the smoke verdict and each runner's start time, account and
+  first probe verdict.
