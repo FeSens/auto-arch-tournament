@@ -472,3 +472,31 @@ before any measurement) adds three things:
   two-pass clock target, median Fmax over three placement directives; held-out
   scores recomputed from the FPGA-independent cycle counts. Flow in
   `research/v2/xfpga/`. It runs off the bench host, so it starts now.
+
+## 2026-10-04: Artix-7 transfer (amendment 15 part C)
+
+All 48 designs (36 finals, the Sol pilot, V0, 10 reference configurations)
+built in Vivado 2026.1 for xc7a200tsbg484-1, no failures, 19:12Z to 20:39Z.
+Analysis: `research/v2/xfpga/results/analysis.md` (exploratory).
+
+- The bottom of the ranking transfers, the top does not. Every pair between
+  {GPT-5.5, Luna} and the other four separates on both FPGAs (8 of 8). Among
+  the top four, the four pairs that separated on Gowin (Opus vs Sol, the
+  primary; Opus vs Astra; Sol vs Sonnet; Astra vs Sonnet) do not separate on
+  Artix-7. Opus vs Sol: 1.320 [1.183, 1.473] on Gowin, 1.028 [0.813, 1.299]
+  on Artix-7. Artix-7 order: Sonnet 7,511 > Opus 6,724 > Sol 6,543 > Astra
+  6,236 > GPT-5.5 4,385 > Luna 4,245. Kendall tau-b over the six systems
+  0.867; Spearman over the 36 runs 0.769.
+- The agents' designs gain less from the faster fabric than the reference
+  cores: Artix-7/Gowin Fmax 1.17 (0.80 to 1.51) vs 1.67 (1.33 to 1.94),
+  Welch p = 1.4e-7. Opus transfers worst (0.96; four of six runs are slower
+  on Artix-7, each limited by an EX-stage arithmetic or forwarding path with
+  7.8 to 8.7 ns of logic delay). The dmem read does not explain it: the seven
+  designs whose worst path runs through the bench's distributed-RAM dmem have
+  a higher ratio (1.27) than the other 29 (1.14). On Artix-7, VexRiscv
+  MaxPerf (10,246) and VexRiscv NoCache (8,772) score above every system's
+  geometric mean; on Gowin, MaxPerf (6,216) sat between tiers 1 and 2.
+- Reading: fifteen rounds of tuning against one vendor's timing report
+  produce designs specialized to that part. The V2 ranking is a ranking on
+  the Gowin contract; across FPGAs only the split between the top four and
+  {GPT-5.5, Luna} holds.
