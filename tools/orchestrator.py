@@ -381,7 +381,12 @@ def append_log(entry: dict):
         # never race on the file. A scribe failure MUST NOT fail the
         # iteration — the JSONL line is the authoritative outcome; the
         # lesson is decoration the next round's hypothesis agent reads.
-        if target:
+        # BENCH_PROMPT_PROFILE=nolessons (V2 amendment 14 ablation) skips
+        # the scribe: LESSONS.md is never written, so every hypothesis
+        # prompt shows the no-lessons-yet line the full profile shows in
+        # round 1.
+        no_lessons = os.environ.get("BENCH_PROMPT_PROFILE", "full") == "nolessons"
+        if target and not no_lessons:
             try:
                 from tools.agents.scribe import run_scribe_agent
                 lesson = run_scribe_agent(entry, slot_diff, target)
