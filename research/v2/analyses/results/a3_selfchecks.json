@@ -1,0 +1,525 @@
+{
+ "per_system": {
+  "Opus 5.5": {
+   "n_slots": 270,
+   "share_formal": 0.9888888888888889,
+   "share_cosim": 1.0,
+   "share_lint": 1.0,
+   "share_timing": 0.8333333333333334,
+   "share_cocotb": 0.8222222222222222,
+   "share_own_sim": 0.018518518518518517,
+   "share_formal_after_last_edit": 0.6851851851851852,
+   "share_cosim_after_last_edit": 0.7148148148148148,
+   "share_all_three": 0.8333333333333334,
+   "median_formal_runs_if_any": 3,
+   "share_killed_at_watchdog": 0.0,
+   "median_shell_cmds": 28.0,
+   "n_with_formal": 267,
+   "gate_fail_rate_with_formal": 0.018726591760299626,
+   "formal_fail_rate_with_formal": 0.0149812734082397,
+   "n_without_formal": 3,
+   "gate_fail_rate_without_formal": 0.0,
+   "formal_fail_rate_without_formal": 0.0,
+   "n_formal_after_last_edit": 185,
+   "formal_fail_rate_formal_after_last_edit": 0.010810810810810811,
+   "formal_fail_rate_not_after_last_edit": 0.023529411764705882,
+   "gate_fail_count": 5,
+   "formal_fail_count": 4
+  },
+  "Sonnet 5.5": {
+   "n_slots": 268,
+   "share_formal": 1.0,
+   "share_cosim": 1.0,
+   "share_lint": 1.0,
+   "share_timing": 0.8507462686567164,
+   "share_cocotb": 0.6977611940298507,
+   "share_own_sim": 0.0,
+   "share_formal_after_last_edit": 0.8395522388059702,
+   "share_cosim_after_last_edit": 0.8208955223880597,
+   "share_all_three": 0.8507462686567164,
+   "median_formal_runs_if_any": 3.0,
+   "share_killed_at_watchdog": 0.007462686567164179,
+   "median_shell_cmds": 29.0,
+   "n_with_formal": 268,
+   "gate_fail_rate_with_formal": 0.04477611940298507,
+   "formal_fail_rate_with_formal": 0.03731343283582089,
+   "n_without_formal": 0,
+   "gate_fail_rate_without_formal": null,
+   "formal_fail_rate_without_formal": null,
+   "n_formal_after_last_edit": 225,
+   "formal_fail_rate_formal_after_last_edit": 0.04,
+   "formal_fail_rate_not_after_last_edit": 0.023255813953488372,
+   "gate_fail_count": 12,
+   "formal_fail_count": 10
+  },
+  "GPT-6.1 Sol": {
+   "n_slots": 270,
+   "share_formal": 1.0,
+   "share_cosim": 1.0,
+   "share_lint": 1.0,
+   "share_timing": 1.0,
+   "share_cocotb": 1.0,
+   "share_own_sim": 0.003703703703703704,
+   "share_formal_after_last_edit": 0.7296296296296296,
+   "share_cosim_after_last_edit": 0.8185185185185185,
+   "share_all_three": 1.0,
+   "median_formal_runs_if_any": 1.0,
+   "share_killed_at_watchdog": 0.03333333333333333,
+   "median_shell_cmds": 35.5,
+   "n_with_formal": 270,
+   "gate_fail_rate_with_formal": 0.02962962962962963,
+   "formal_fail_rate_with_formal": 0.018518518518518517,
+   "n_without_formal": 0,
+   "gate_fail_rate_without_formal": null,
+   "formal_fail_rate_without_formal": null,
+   "n_formal_after_last_edit": 197,
+   "formal_fail_rate_formal_after_last_edit": 0.02030456852791878,
+   "formal_fail_rate_not_after_last_edit": 0.0136986301369863,
+   "gate_fail_count": 8,
+   "formal_fail_count": 5
+  },
+  "GPT-6 Astra": {
+   "n_slots": 270,
+   "share_formal": 1.0,
+   "share_cosim": 1.0,
+   "share_lint": 1.0,
+   "share_timing": 1.0,
+   "share_cocotb": 1.0,
+   "share_own_sim": 0.003703703703703704,
+   "share_formal_after_last_edit": 0.725925925925926,
+   "share_cosim_after_last_edit": 0.8037037037037037,
+   "share_all_three": 1.0,
+   "median_formal_runs_if_any": 1.0,
+   "share_killed_at_watchdog": 0.003703703703703704,
+   "median_shell_cmds": 33.0,
+   "n_with_formal": 270,
+   "gate_fail_rate_with_formal": 0.011111111111111112,
+   "formal_fail_rate_with_formal": 0.011111111111111112,
+   "n_without_formal": 0,
+   "gate_fail_rate_without_formal": null,
+   "formal_fail_rate_without_formal": null,
+   "n_formal_after_last_edit": 196,
+   "formal_fail_rate_formal_after_last_edit": 0.0,
+   "formal_fail_rate_not_after_last_edit": 0.04054054054054054,
+   "gate_fail_count": 3,
+   "formal_fail_count": 3
+  },
+  "GPT-5.5": {
+   "n_slots": 270,
+   "share_formal": 1.0,
+   "share_cosim": 0.9925925925925926,
+   "share_lint": 1.0,
+   "share_timing": 0.014814814814814815,
+   "share_cocotb": 0.674074074074074,
+   "share_own_sim": 0.0,
+   "share_formal_after_last_edit": 0.9555555555555556,
+   "share_cosim_after_last_edit": 0.9518518518518518,
+   "share_all_three": 0.014814814814814815,
+   "median_formal_runs_if_any": 2.0,
+   "share_killed_at_watchdog": 0.0,
+   "median_shell_cmds": 30.0,
+   "n_with_formal": 270,
+   "gate_fail_rate_with_formal": 0.06296296296296296,
+   "formal_fail_rate_with_formal": 0.011111111111111112,
+   "n_without_formal": 0,
+   "gate_fail_rate_without_formal": null,
+   "formal_fail_rate_without_formal": null,
+   "n_formal_after_last_edit": 258,
+   "formal_fail_rate_formal_after_last_edit": 0.011627906976744186,
+   "formal_fail_rate_not_after_last_edit": 0.0,
+   "gate_fail_count": 17,
+   "formal_fail_count": 3
+  },
+  "GPT-6 Luna": {
+   "n_slots": 269,
+   "share_formal": 1.0,
+   "share_cosim": 0.966542750929368,
+   "share_lint": 1.0,
+   "share_timing": 0.8847583643122676,
+   "share_cocotb": 0.11895910780669144,
+   "share_own_sim": 0.0,
+   "share_formal_after_last_edit": 0.828996282527881,
+   "share_cosim_after_last_edit": 0.7955390334572491,
+   "share_all_three": 0.8847583643122676,
+   "median_formal_runs_if_any": 2,
+   "share_killed_at_watchdog": 0.03717472118959108,
+   "median_shell_cmds": 19,
+   "n_with_formal": 269,
+   "gate_fail_rate_with_formal": 0.06319702602230483,
+   "formal_fail_rate_with_formal": 0.03345724907063197,
+   "n_without_formal": 0,
+   "gate_fail_rate_without_formal": null,
+   "formal_fail_rate_without_formal": null,
+   "n_formal_after_last_edit": 223,
+   "formal_fail_rate_formal_after_last_edit": 0.04035874439461883,
+   "formal_fail_rate_not_after_last_edit": 0.0,
+   "gate_fail_count": 17,
+   "formal_fail_count": 9
+  }
+ },
+ "overall": {
+  "n_slots": 1617,
+  "share_formal": 0.9981447124304267,
+  "share_cosim": 0.9931972789115646,
+  "share_lint": 1.0,
+  "share_timing": 0.7637600494743352,
+  "share_cocotb": 0.7192331478045764,
+  "share_own_sim": 0.004329004329004329,
+  "share_formal_after_last_edit": 0.7940630797773655,
+  "share_cosim_after_last_edit": 0.8175633889919605,
+  "share_all_three": 0.7637600494743352,
+  "median_formal_runs_if_any": 2.0,
+  "share_killed_at_watchdog": 0.013605442176870748,
+  "median_shell_cmds": 29,
+  "n_with_formal": 1614,
+  "gate_fail_rate_with_formal": 0.03841387856257745,
+  "formal_fail_rate_with_formal": 0.021065675340768277,
+  "n_without_formal": 3,
+  "gate_fail_rate_without_formal": 0.0,
+  "formal_fail_rate_without_formal": 0.0,
+  "n_formal_after_last_edit": 1284,
+  "formal_fail_rate_formal_after_last_edit": 0.02102803738317757,
+  "formal_fail_rate_not_after_last_edit": 0.021021021021021023,
+  "gate_fail_count": 62,
+  "formal_fail_count": 34
+ },
+ "hypothesis_agents": {
+  "Opus 5.5": {
+   "n_sessions": 270,
+   "share_formal": 0.0,
+   "share_cosim": 0.011111111111111112,
+   "share_lint": 0.0,
+   "share_timing": 0.35185185185185186,
+   "share_cocotb": 0.0,
+   "share_own_sim": 0.0,
+   "share_killed_at_watchdog": 0.0
+  },
+  "Sonnet 5.5": {
+   "n_sessions": 270,
+   "share_formal": 0.0,
+   "share_cosim": 0.04814814814814815,
+   "share_lint": 0.007407407407407408,
+   "share_timing": 0.4,
+   "share_cocotb": 0.003703703703703704,
+   "share_own_sim": 0.0,
+   "share_killed_at_watchdog": 0.0
+  },
+  "GPT-6.1 Sol": {
+   "n_sessions": 270,
+   "share_formal": 0.12222222222222222,
+   "share_cosim": 0.6962962962962963,
+   "share_lint": 0.17407407407407408,
+   "share_timing": 0.762962962962963,
+   "share_cocotb": 0.45555555555555555,
+   "share_own_sim": 0.025925925925925925,
+   "share_killed_at_watchdog": 0.5592592592592592
+  },
+  "GPT-6 Astra": {
+   "n_sessions": 270,
+   "share_formal": 0.2222222222222222,
+   "share_cosim": 0.6592592592592592,
+   "share_lint": 0.3333333333333333,
+   "share_timing": 0.6925925925925925,
+   "share_cocotb": 0.5740740740740741,
+   "share_own_sim": 0.003703703703703704,
+   "share_killed_at_watchdog": 0.22962962962962963
+  },
+  "GPT-5.5": {
+   "n_sessions": 270,
+   "share_formal": 0.0,
+   "share_cosim": 0.0,
+   "share_lint": 0.0,
+   "share_timing": 0.0,
+   "share_cocotb": 0.0,
+   "share_own_sim": 0.0,
+   "share_killed_at_watchdog": 0.0
+  },
+  "GPT-6 Luna": {
+   "n_sessions": 270,
+   "share_formal": 0.0,
+   "share_cosim": 0.0,
+   "share_lint": 0.0,
+   "share_timing": 0.0,
+   "share_cocotb": 0.0,
+   "share_own_sim": 0.0,
+   "share_killed_at_watchdog": 0.0
+  }
+ },
+ "local_formal_verdict_vs_gate": {
+  "Opus 5.5": {
+   "pass_final": {
+    "passed all gates": 156
+   },
+   "pass_stale": {
+    "passed all gates": 74
+   },
+   "fail": {
+    "passed all gates": 3,
+    "formal gate failed": 1
+   },
+   "none": {
+    "passed all gates": 32,
+    "other gate failed": 1,
+    "formal gate failed": 3
+   }
+  },
+  "Sonnet 5.5": {
+   "pass_final": {
+    "passed all gates": 197,
+    "other gate failed": 2
+   },
+   "pass_stale": {
+    "passed all gates": 43
+   },
+   "fail": {
+    "passed all gates": 1,
+    "formal gate failed": 1
+   },
+   "none": {
+    "passed all gates": 15,
+    "formal gate failed": 9
+   }
+  },
+  "GPT-6.1 Sol": {
+   "pass_final": {
+    "passed all gates": 191,
+    "other gate failed": 1
+   },
+   "pass_stale": {
+    "passed all gates": 68,
+    "other gate failed": 1
+   },
+   "fail": {
+    "passed all gates": 1,
+    "formal gate failed": 3
+   },
+   "none": {
+    "formal gate failed": 2,
+    "other gate failed": 1,
+    "passed all gates": 2
+   }
+  },
+  "GPT-6 Astra": {
+   "pass_final": {
+    "passed all gates": 189
+   },
+   "pass_stale": {
+    "passed all gates": 72
+   },
+   "fail": {
+    "formal gate failed": 2
+   },
+   "none": {
+    "passed all gates": 6,
+    "formal gate failed": 1
+   }
+  },
+  "GPT-5.5": {
+   "pass_final": {
+    "passed all gates": 243,
+    "other gate failed": 11
+   },
+   "pass_stale": {
+    "passed all gates": 9,
+    "other gate failed": 3
+   },
+   "fail": {
+    "formal gate failed": 2,
+    "passed all gates": 1
+   },
+   "none": {
+    "formal gate failed": 1
+   }
+  },
+  "GPT-6 Luna": {
+   "pass_final": {
+    "passed all gates": 203,
+    "other gate failed": 5
+   },
+   "pass_stale": {
+    "passed all gates": 46,
+    "other gate failed": 3
+   },
+   "fail": {
+    "formal gate failed": 9,
+    "passed all gates": 2
+   },
+   "none": {
+    "passed all gates": 1
+   }
+  },
+  "all": {
+   "pass_final": {
+    "passed all gates": 1179,
+    "other gate failed": 19
+   },
+   "pass_stale": {
+    "passed all gates": 312,
+    "other gate failed": 7
+   },
+   "fail": {
+    "passed all gates": 8,
+    "formal gate failed": 18
+   },
+   "none": {
+    "passed all gates": 56,
+    "other gate failed": 2,
+    "formal gate failed": 16
+   }
+  }
+ },
+ "formal_gate_failures_by_local_verdict": [
+  {
+   "local_verdict": "fail",
+   "class": "formal_check_failed",
+   "n": 15
+  },
+  {
+   "local_verdict": "fail",
+   "class": "formal_timeout",
+   "n": 3
+  },
+  {
+   "local_verdict": "none",
+   "class": "formal_timeout",
+   "n": 16
+  }
+ ],
+ "slots_without_impl_session": [
+  [
+   "Sonnet 5.5",
+   3,
+   "hyp-20261002-003-r3s2",
+   "hypothesis_gen_failed"
+  ],
+  [
+   "Sonnet 5.5",
+   3,
+   "hyp-20261002-001-r12s0",
+   "hypothesis_gen_failed"
+  ],
+  [
+   "GPT-6 Luna",
+   1,
+   "hyp-20260929-002-r6s1",
+   "hypothesis_gen_failed"
+  ]
+ ],
+ "failing_slots_by_class_and_formal_selfcheck": [
+  {
+   "system": "GPT-5.5",
+   "class": "cosim_failed",
+   "ran_formal": true,
+   "n": 5
+  },
+  {
+   "system": "GPT-5.5",
+   "class": "formal_check_failed",
+   "ran_formal": true,
+   "n": 2
+  },
+  {
+   "system": "GPT-5.5",
+   "class": "formal_timeout",
+   "ran_formal": true,
+   "n": 1
+  },
+  {
+   "system": "GPT-5.5",
+   "class": "placement_failed",
+   "ran_formal": true,
+   "n": 9
+  },
+  {
+   "system": "GPT-6 Astra",
+   "class": "formal_check_failed",
+   "ran_formal": true,
+   "n": 2
+  },
+  {
+   "system": "GPT-6 Astra",
+   "class": "formal_timeout",
+   "ran_formal": true,
+   "n": 1
+  },
+  {
+   "system": "GPT-6 Luna",
+   "class": "cosim_failed",
+   "ran_formal": true,
+   "n": 1
+  },
+  {
+   "system": "GPT-6 Luna",
+   "class": "formal_check_failed",
+   "ran_formal": true,
+   "n": 9
+  },
+  {
+   "system": "GPT-6 Luna",
+   "class": "placement_failed",
+   "ran_formal": true,
+   "n": 7
+  },
+  {
+   "system": "GPT-6.1 Sol",
+   "class": "cosim_failed",
+   "ran_formal": true,
+   "n": 1
+  },
+  {
+   "system": "GPT-6.1 Sol",
+   "class": "formal_check_failed",
+   "ran_formal": true,
+   "n": 2
+  },
+  {
+   "system": "GPT-6.1 Sol",
+   "class": "formal_timeout",
+   "ran_formal": true,
+   "n": 3
+  },
+  {
+   "system": "GPT-6.1 Sol",
+   "class": "placement_failed",
+   "ran_formal": true,
+   "n": 1
+  },
+  {
+   "system": "GPT-6.1 Sol",
+   "class": "sandbox_violation",
+   "ran_formal": true,
+   "n": 1
+  },
+  {
+   "system": "Opus 5.5",
+   "class": "formal_timeout",
+   "ran_formal": true,
+   "n": 4
+  },
+  {
+   "system": "Opus 5.5",
+   "class": "placement_failed",
+   "ran_formal": true,
+   "n": 1
+  },
+  {
+   "system": "Sonnet 5.5",
+   "class": "cosim_failed",
+   "ran_formal": true,
+   "n": 1
+  },
+  {
+   "system": "Sonnet 5.5",
+   "class": "formal_timeout",
+   "ran_formal": true,
+   "n": 10
+  },
+  {
+   "system": "Sonnet 5.5",
+   "class": "sandbox_violation",
+   "ran_formal": true,
+   "n": 1
+  }
+ ],
+ "rules": "Analysis 3: did implementation agents run the harness's checks themselves?\n\nSource: each run's agent.full.log.gz (parsed by transcripts.py into\nresults/transcript_sessions.jsonl), joined to log.jsonl outcomes by\nhypothesis id.\n\nDetection: every shell command an implementation session ran (Claude Code\nBash tool_use; Codex command_execution items) is unwrapped (Codex's\n`/bin/bash -c '...'`, nested `bash -c`), heredoc bodies are set aside, the\nscript is split into simple commands (on ; && || | & ( ) and newlines), and\nleading VAR=value, timeout/nice/env/nohup/setsid wrappers are dropped. A\nsimple command counts as a check only when the check is the program being\nrun, never when it is read or searched (cat/sed/rg formal/run_all.sh, ps |\ngrep sby and `command -v sby` do not count):\n  formal  bash|sh formal/run_all.sh, ./formal/run_all.sh, make formal|formal-deep,\n          sby <file>.sby | sby -f, python -m tools.eval.formal\n  cosim   make cosim, python -m tools.eval.cosim, test/cosim/run_cosim.py,\n          the built Verilator harness cores/bench/obj_dir/cosim_sim, or Python\n          calling tools.eval.cosim / run_coremark_ipc (CoreMark on the harness)\n  lint    verilator --lint-only, make lint\n  timing  make timing|fpga, python -m tools.eval.gowin|tools.eval.fpga, gw_sh,\n          or Python calling tools.eval.gowin / gw_sh\n  cocotb  pytest, python -m pytest, make test\n  own_sim iverilog, vvp, verilator --binary|--cc|--exe|--build (an agent's own\n          testbench rather than a harness check)\nA check \"covers the shipped RTL\" when its last invocation comes after the\nsession's last RTL edit (Edit/Write or Codex file_change on cores/bench/rtl,\nor a shell command that writes an rtl/*.sv path: sed -i, perl -i, redirect,\nPython write_text/open(...,'w'), cp/mv into rtl, git checkout/restore/apply).\n"
+}

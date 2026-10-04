@@ -1,0 +1,836 @@
+{
+ "per_system": {
+  "Opus 5.5": {
+   "n_lessons": 261,
+   "per_run": [
+    45,
+    45,
+    43,
+    42,
+    42,
+    44
+   ],
+   "by_source": {
+    "accepted": 41,
+    "rejected": 215,
+    "gate failure": 5
+   },
+   "lesson_rate_by_candidate_outcome": {
+    "accepted": 0.9761904761904762,
+    "rejected": 0.9641255605381166,
+    "gate failure": 1.0
+   },
+   "topic_share_multilabel": {
+    "divider": 0.22988505747126436,
+    "multiplier": 0.3333333333333333,
+    "branch prediction": 0.6206896551724138,
+    "fetch / caches": 0.4827586206896552,
+    "forwarding / hazards": 0.8160919540229885,
+    "formal / RVFI": 0.07662835249042145,
+    "cosim": 0.15708812260536398,
+    "process / tooling": 0.42911877394636017,
+    "area / resources": 0.7164750957854407,
+    "Fmax / critical path": 0.9885057471264368
+   },
+   "primary_topic_share": {
+    "divider": 0.04980842911877394,
+    "multiplier": 0.13409961685823754,
+    "branch prediction": 0.3103448275862069,
+    "fetch / caches": 0.1532567049808429,
+    "forwarding / hazards": 0.29118773946360155,
+    "formal / RVFI": 0.01532567049808429,
+    "cosim": 0.0038314176245210726,
+    "process / tooling": 0.038314176245210725,
+    "area / resources": 0.0038314176245210726,
+    "Fmax / critical path": 0.0,
+    "other": 0.0
+   },
+   "median_chars": 1154
+  },
+  "Sonnet 5.5": {
+   "n_lessons": 218,
+   "per_run": [
+    40,
+    32,
+    37,
+    37,
+    36,
+    36
+   ],
+   "by_source": {
+    "accepted": 45,
+    "rejected": 167,
+    "gate failure": 6
+   },
+   "lesson_rate_by_candidate_outcome": {
+    "accepted": 0.9574468085106383,
+    "rejected": 0.7990430622009569,
+    "gate failure": 0.42857142857142855
+   },
+   "topic_share_multilabel": {
+    "divider": 0.14678899082568808,
+    "multiplier": 0.22935779816513763,
+    "branch prediction": 0.5642201834862385,
+    "fetch / caches": 0.5229357798165137,
+    "forwarding / hazards": 0.7614678899082569,
+    "formal / RVFI": 0.0871559633027523,
+    "cosim": 0.027522935779816515,
+    "process / tooling": 0.4908256880733945,
+    "area / resources": 0.573394495412844,
+    "Fmax / critical path": 0.981651376146789
+   },
+   "primary_topic_share": {
+    "divider": 0.04128440366972477,
+    "multiplier": 0.08256880733944955,
+    "branch prediction": 0.24311926605504589,
+    "fetch / caches": 0.22018348623853212,
+    "forwarding / hazards": 0.3073394495412844,
+    "formal / RVFI": 0.03211009174311927,
+    "cosim": 0.0,
+    "process / tooling": 0.05504587155963303,
+    "area / resources": 0.013761467889908258,
+    "Fmax / critical path": 0.0045871559633027525,
+    "other": 0.0
+   },
+   "median_chars": 958
+  },
+  "GPT-6.1 Sol": {
+   "n_lessons": 144,
+   "per_run": [
+    25,
+    18,
+    21,
+    30,
+    25,
+    25
+   ],
+   "by_source": {
+    "accepted": 52,
+    "rejected": 91,
+    "gate failure": 1
+   },
+   "lesson_rate_by_candidate_outcome": {
+    "rejected": 0.4375,
+    "accepted": 0.9629629629629629,
+    "gate failure": 0.125
+   },
+   "topic_share_multilabel": {
+    "divider": 0.3402777777777778,
+    "multiplier": 0.16666666666666666,
+    "branch prediction": 0.3263888888888889,
+    "fetch / caches": 0.2708333333333333,
+    "forwarding / hazards": 0.6666666666666666,
+    "formal / RVFI": 0.013888888888888888,
+    "cosim": 0.0,
+    "process / tooling": 0.1111111111111111,
+    "area / resources": 0.1527777777777778,
+    "Fmax / critical path": 0.8958333333333334
+   },
+   "primary_topic_share": {
+    "divider": 0.14583333333333334,
+    "multiplier": 0.04861111111111111,
+    "branch prediction": 0.2013888888888889,
+    "fetch / caches": 0.14583333333333334,
+    "forwarding / hazards": 0.3680555555555556,
+    "formal / RVFI": 0.0,
+    "cosim": 0.0,
+    "process / tooling": 0.04861111111111111,
+    "area / resources": 0.013888888888888888,
+    "Fmax / critical path": 0.020833333333333332,
+    "other": 0.006944444444444444
+   },
+   "median_chars": 251
+  },
+  "GPT-6 Astra": {
+   "n_lessons": 168,
+   "per_run": [
+    31,
+    30,
+    26,
+    23,
+    21,
+    37
+   ],
+   "by_source": {
+    "accepted": 54,
+    "rejected": 113,
+    "gate failure": 1
+   },
+   "lesson_rate_by_candidate_outcome": {
+    "rejected": 0.5355450236966824,
+    "accepted": 0.9642857142857143,
+    "gate failure": 0.3333333333333333
+   },
+   "topic_share_multilabel": {
+    "divider": 0.5595238095238095,
+    "multiplier": 0.19642857142857142,
+    "branch prediction": 0.23809523809523808,
+    "fetch / caches": 0.19642857142857142,
+    "forwarding / hazards": 0.5059523809523809,
+    "formal / RVFI": 0.011904761904761904,
+    "cosim": 0.0,
+    "process / tooling": 0.11904761904761904,
+    "area / resources": 0.09523809523809523,
+    "Fmax / critical path": 0.8452380952380952
+   },
+   "primary_topic_share": {
+    "divider": 0.27976190476190477,
+    "multiplier": 0.1130952380952381,
+    "branch prediction": 0.19642857142857142,
+    "fetch / caches": 0.1130952380952381,
+    "forwarding / hazards": 0.20833333333333334,
+    "formal / RVFI": 0.005952380952380952,
+    "cosim": 0.0,
+    "process / tooling": 0.017857142857142856,
+    "area / resources": 0.0,
+    "Fmax / critical path": 0.06547619047619048,
+    "other": 0.0
+   },
+   "median_chars": 256
+  },
+  "GPT-5.5": {
+   "n_lessons": 260,
+   "per_run": [
+    44,
+    45,
+    43,
+    44,
+    40,
+    44
+   ],
+   "by_source": {
+    "accepted": 28,
+    "rejected": 217,
+    "gate failure": 15
+   },
+   "lesson_rate_by_candidate_outcome": {
+    "accepted": 1.0,
+    "rejected": 0.9644444444444444,
+    "gate failure": 0.8823529411764706
+   },
+   "topic_share_multilabel": {
+    "divider": 0.09615384615384616,
+    "multiplier": 0.11923076923076924,
+    "branch prediction": 0.36538461538461536,
+    "fetch / caches": 0.2846153846153846,
+    "forwarding / hazards": 0.6538461538461539,
+    "formal / RVFI": 0.09615384615384616,
+    "cosim": 0.007692307692307693,
+    "process / tooling": 0.046153846153846156,
+    "area / resources": 0.038461538461538464,
+    "Fmax / critical path": 0.7769230769230769
+   },
+   "primary_topic_share": {
+    "divider": 0.06538461538461539,
+    "multiplier": 0.08076923076923077,
+    "branch prediction": 0.3230769230769231,
+    "fetch / caches": 0.13076923076923078,
+    "forwarding / hazards": 0.25,
+    "formal / RVFI": 0.03461538461538462,
+    "cosim": 0.0,
+    "process / tooling": 0.03076923076923077,
+    "area / resources": 0.015384615384615385,
+    "Fmax / critical path": 0.06153846153846154,
+    "other": 0.007692307692307693
+   },
+   "median_chars": 237
+  },
+  "GPT-6 Luna": {
+   "n_lessons": 177,
+   "per_run": [
+    28,
+    34,
+    29,
+    30,
+    29,
+    27
+   ],
+   "by_source": {
+    "rejected": 148,
+    "accepted": 24,
+    "gate failure": 5
+   },
+   "lesson_rate_by_candidate_outcome": {
+    "rejected": 0.6491228070175439,
+    "accepted": 1.0,
+    "gate failure": 0.2777777777777778
+   },
+   "topic_share_multilabel": {
+    "divider": 0.0847457627118644,
+    "multiplier": 0.06779661016949153,
+    "branch prediction": 0.3446327683615819,
+    "fetch / caches": 0.3163841807909605,
+    "forwarding / hazards": 0.4463276836158192,
+    "formal / RVFI": 0.02824858757062147,
+    "cosim": 0.0,
+    "process / tooling": 0.04519774011299435,
+    "area / resources": 0.05649717514124294,
+    "Fmax / critical path": 0.7457627118644068
+   },
+   "primary_topic_share": {
+    "divider": 0.06779661016949153,
+    "multiplier": 0.062146892655367235,
+    "branch prediction": 0.2598870056497175,
+    "fetch / caches": 0.11864406779661017,
+    "forwarding / hazards": 0.2937853107344633,
+    "formal / RVFI": 0.0,
+    "cosim": 0.0,
+    "process / tooling": 0.022598870056497175,
+    "area / resources": 0.0,
+    "Fmax / critical path": 0.15819209039548024,
+    "other": 0.01694915254237288
+   },
+   "median_chars": 225
+  }
+ },
+ "overall": {
+  "n_lessons": 1228,
+  "by_source": {
+   "accepted": 244,
+   "rejected": 951,
+   "gate failure": 33
+  },
+  "topic_share_multilabel": {
+   "divider": 0.22394136807817588,
+   "multiplier": 0.19299674267100977,
+   "branch prediction": 0.42996742671009774,
+   "fetch / caches": 0.35993485342019543,
+   "forwarding / hazards": 0.6587947882736156,
+   "formal / RVFI": 0.059446254071661236,
+   "cosim": 0.039902280130293157,
+   "process / tooling": 0.22394136807817588,
+   "area / resources": 0.30130293159609123,
+   "Fmax / critical path": 0.8770358306188925
+  },
+  "primary_topic_share": {
+   "divider": 0.09690553745928339,
+   "multiplier": 0.09039087947882736,
+   "branch prediction": 0.26547231270358307,
+   "fetch / caches": 0.1490228013029316,
+   "forwarding / hazards": 0.28338762214983715,
+   "formal / RVFI": 0.01710097719869707,
+   "cosim": 0.0008143322475570033,
+   "process / tooling": 0.035830618892508145,
+   "area / resources": 0.008143322475570033,
+   "Fmax / critical path": 0.04804560260586319,
+   "other": 0.004885993485342019
+  }
+ },
+ "repetition": {
+  "0.4": {
+   "Opus 5.5": {
+    "n": 4,
+    "of_later_candidates": 252,
+    "median_title_content_words": 14,
+    "share": 0.015873015873015872,
+    "outcomes": {
+     "accepted": 1,
+     "rejected": 3
+    }
+   },
+   "Sonnet 5.5": {
+    "n": 6,
+    "of_later_candidates": 252,
+    "median_title_content_words": 12,
+    "share": 0.023809523809523808,
+    "outcomes": {
+     "rejected": 6
+    }
+   },
+   "GPT-6.1 Sol": {
+    "n": 1,
+    "of_later_candidates": 252,
+    "median_title_content_words": 7,
+    "share": 0.003968253968253968,
+    "outcomes": {
+     "accepted": 1
+    }
+   },
+   "GPT-6 Astra": {
+    "n": 2,
+    "of_later_candidates": 252,
+    "median_title_content_words": 7,
+    "share": 0.007936507936507936,
+    "outcomes": {
+     "rejected": 1,
+     "accepted": 1
+    }
+   },
+   "GPT-5.5": {
+    "n": 21,
+    "of_later_candidates": 252,
+    "median_title_content_words": 4,
+    "share": 0.08333333333333333,
+    "outcomes": {
+     "rejected": 20,
+     "accepted": 1
+    }
+   },
+   "GPT-6 Luna": {
+    "n": 21,
+    "of_later_candidates": 252,
+    "median_title_content_words": 4,
+    "share": 0.08333333333333333,
+    "outcomes": {
+     "rejected": 20,
+     "gate failure": 1
+    }
+   }
+  },
+  "0.5": {
+   "Opus 5.5": {
+    "n": 2,
+    "of_later_candidates": 252,
+    "median_title_content_words": 14,
+    "share": 0.007936507936507936,
+    "outcomes": {
+     "rejected": 2
+    }
+   },
+   "Sonnet 5.5": {
+    "n": 1,
+    "of_later_candidates": 252,
+    "median_title_content_words": 12,
+    "share": 0.003968253968253968,
+    "outcomes": {
+     "rejected": 1
+    }
+   },
+   "GPT-6.1 Sol": {
+    "n": 1,
+    "of_later_candidates": 252,
+    "median_title_content_words": 7,
+    "share": 0.003968253968253968,
+    "outcomes": {
+     "accepted": 1
+    }
+   },
+   "GPT-6 Astra": {
+    "n": 0,
+    "of_later_candidates": 252,
+    "median_title_content_words": 7,
+    "share": 0.0,
+    "outcomes": {}
+   },
+   "GPT-5.5": {
+    "n": 8,
+    "of_later_candidates": 252,
+    "median_title_content_words": 4,
+    "share": 0.031746031746031744,
+    "outcomes": {
+     "rejected": 7,
+     "accepted": 1
+    }
+   },
+   "GPT-6 Luna": {
+    "n": 12,
+    "of_later_candidates": 252,
+    "median_title_content_words": 4,
+    "share": 0.047619047619047616,
+    "outcomes": {
+     "rejected": 11,
+     "gate failure": 1
+    }
+   }
+  },
+  "0.6": {
+   "Opus 5.5": {
+    "n": 0,
+    "of_later_candidates": 252,
+    "median_title_content_words": 14,
+    "share": 0.0,
+    "outcomes": {}
+   },
+   "Sonnet 5.5": {
+    "n": 0,
+    "of_later_candidates": 252,
+    "median_title_content_words": 12,
+    "share": 0.0,
+    "outcomes": {}
+   },
+   "GPT-6.1 Sol": {
+    "n": 0,
+    "of_later_candidates": 252,
+    "median_title_content_words": 7,
+    "share": 0.0,
+    "outcomes": {}
+   },
+   "GPT-6 Astra": {
+    "n": 0,
+    "of_later_candidates": 252,
+    "median_title_content_words": 7,
+    "share": 0.0,
+    "outcomes": {}
+   },
+   "GPT-5.5": {
+    "n": 4,
+    "of_later_candidates": 252,
+    "median_title_content_words": 4,
+    "share": 0.015873015873015872,
+    "outcomes": {
+     "rejected": 4
+    }
+   },
+   "GPT-6 Luna": {
+    "n": 2,
+    "of_later_candidates": 252,
+    "median_title_content_words": 4,
+    "share": 0.007936507936507936,
+    "outcomes": {
+     "rejected": 2
+    }
+   }
+  }
+ },
+ "repeat_pairs_0.5": [
+  {
+   "system": "Opus 5.5",
+   "rep": 6,
+   "later_id": "hyp-20261001-002-r4s1",
+   "later_title": "Take the regfile BSRAM DO out of EX: IF/ID register + ID-cycle sync regfile read on r3s0's flat EX, with ID-stage JAL/BTFN redirects",
+   "later_class": "rejected_below_margin",
+   "earlier_id": "hyp-20261001-002-r3s1",
+   "earlier_title": "Classic 5-stage: IF/ID register + explicit sync-read regfile so the BSRAM read leaves EX; ID-stage JAL/BTFN redirect",
+   "earlier_class": "rejected_lost_to_sibling",
+   "rounds_apart": 1,
+   "jaccard": 0.53
+  },
+  {
+   "system": "Opus 5.5",
+   "rep": 6,
+   "later_id": "hyp-20261001-003-r15s2",
+   "later_title": "Two-ahead pipelined fetch-word predictor: BSRAM word table read on a flop-predicted PC, used only on imem-stall cycles",
+   "later_class": "rejected_no_gain",
+   "earlier_id": "hyp-20261001-003-r14s2",
+   "earlier_title": "Next-fetch word predictor: 64-entry ahead-read L0 word table supplies the ID instruction on imem-stall cycles",
+   "earlier_class": "rejected_no_gain",
+   "rounds_apart": 1,
+   "jaccard": 0.5
+  },
+  {
+   "system": "Sonnet 5.5",
+   "rep": 6,
+   "later_id": "hyp-20261003-003-r7s2",
+   "later_title": "Retry 1-cycle mispredict recovery plus local-history direction predictor on the r6s1 99.9 MHz base",
+   "later_class": "rejected_no_gain",
+   "earlier_id": "hyp-20261003-003-r6s2",
+   "earlier_title": "1-cycle mispredict recovery (refetch target in the kill cycle) plus local-history two-level direction predictor",
+   "earlier_class": "rejected_lost_to_sibling",
+   "rounds_apart": 1,
+   "jaccard": 0.5
+  },
+  {
+   "system": "GPT-6.1 Sol",
+   "rep": 2,
+   "later_id": "hyp-20260930-001-r6s0",
+   "later_title": "LUT-factored divider launch seed on the queued-fetch champion",
+   "later_class": "accepted",
+   "earlier_id": "hyp-20260930-001-r5s0",
+   "earlier_title": "LUT-factored four-bit divider launch seed",
+   "earlier_class": "rejected_lost_to_sibling",
+   "rounds_apart": 1,
+   "jaccard": 0.5
+  },
+  {
+   "system": "GPT-5.5",
+   "rep": 1,
+   "later_id": "hyp-20261003-002-r12s1",
+   "later_title": "Unified-PC split execute",
+   "later_class": "rejected_no_gain",
+   "earlier_id": "hyp-20261003-002-r10s1",
+   "earlier_title": "Bypassed split execute stage",
+   "earlier_class": "formal_check_failed",
+   "rounds_apart": 2,
+   "jaccard": 0.5
+  },
+  {
+   "system": "GPT-5.5",
+   "rep": 2,
+   "later_id": "hyp-20261003-003-r8s2",
+   "later_title": "Target-carry direct-JAL predictor",
+   "later_class": "rejected_no_gain",
+   "earlier_id": "hyp-20261003-003-r7s2",
+   "earlier_title": "ID-stage direct-JAL predictor",
+   "earlier_class": "rejected_below_margin",
+   "rounds_apart": 1,
+   "jaccard": 0.6
+  },
+  {
+   "system": "GPT-5.5",
+   "rep": 2,
+   "later_id": "hyp-20261003-003-r9s2",
+   "later_title": "Word-aligned direct-JAL decode predictor",
+   "later_class": "rejected_no_gain",
+   "earlier_id": "hyp-20261003-003-r7s2",
+   "earlier_title": "ID-stage direct-JAL predictor",
+   "earlier_class": "rejected_below_margin",
+   "rounds_apart": 2,
+   "jaccard": 0.5
+  },
+  {
+   "system": "GPT-5.5",
+   "rep": 2,
+   "later_id": "hyp-20261003-003-r11s2",
+   "later_title": "Metadata-free direct-JAL decode predictor",
+   "later_class": "accepted",
+   "earlier_id": "hyp-20261003-003-r7s2",
+   "earlier_title": "ID-stage direct-JAL predictor",
+   "earlier_class": "rejected_below_margin",
+   "rounds_apart": 4,
+   "jaccard": 0.5
+  },
+  {
+   "system": "GPT-5.5",
+   "rep": 2,
+   "later_id": "hyp-20261003-003-r15s2",
+   "later_title": "Opcode-fast direct-JAL predictor",
+   "later_class": "rejected_no_gain",
+   "earlier_id": "hyp-20261003-003-r7s2",
+   "earlier_title": "ID-stage direct-JAL predictor",
+   "earlier_class": "rejected_below_margin",
+   "rounds_apart": 8,
+   "jaccard": 0.6
+  },
+  {
+   "system": "GPT-5.5",
+   "rep": 3,
+   "later_id": "hyp-20261003-003-r6s2",
+   "later_title": "Countdown loop backedge predictor",
+   "later_class": "rejected_no_gain",
+   "earlier_id": "hyp-20261003-003-r3s2",
+   "earlier_title": "One-entry loop backedge predictor",
+   "earlier_class": "rejected_no_gain",
+   "rounds_apart": 3,
+   "jaccard": 0.6
+  },
+  {
+   "system": "GPT-5.5",
+   "rep": 4,
+   "later_id": "hyp-20261004-003-r15s2",
+   "later_title": "Tagless loop target predictor",
+   "later_class": "rejected_no_gain",
+   "earlier_id": "hyp-20261003-003-r5s2",
+   "earlier_title": "Outstanding loop target predictor",
+   "earlier_class": "rejected_no_gain",
+   "rounds_apart": 10,
+   "jaccard": 0.6
+  },
+  {
+   "system": "GPT-5.5",
+   "rep": 6,
+   "later_id": "hyp-20261004-003-r7s2",
+   "later_title": "Decode-stage backward branch predictor",
+   "later_class": "rejected_no_gain",
+   "earlier_id": "hyp-20261004-003-r2s2",
+   "earlier_title": "Table-free backward branch predictor",
+   "earlier_class": "rejected_no_gain",
+   "rounds_apart": 5,
+   "jaccard": 0.5
+  },
+  {
+   "system": "GPT-6 Luna",
+   "rep": 1,
+   "later_id": "hyp-20260929-003-r7s2",
+   "later_title": "Expand tagged loop predictor capacity",
+   "later_class": "rejected_no_gain",
+   "earlier_id": "hyp-20260929-003-r5s2",
+   "earlier_title": "Tagged loop direction predictor",
+   "earlier_class": "rejected_below_margin",
+   "rounds_apart": 2,
+   "jaccard": 0.5
+  },
+  {
+   "system": "GPT-6 Luna",
+   "rep": 1,
+   "later_id": "hyp-20260929-002-r14s1",
+   "later_title": "Retiming conditional branch recovery",
+   "later_class": "rejected_no_gain",
+   "earlier_id": "hyp-20260929-001-r10s0",
+   "earlier_title": "Retiming conditional branch target calculation",
+   "earlier_class": "rejected_no_gain",
+   "rounds_apart": 4,
+   "jaccard": 0.5
+  },
+  {
+   "system": "GPT-6 Luna",
+   "rep": 2,
+   "later_id": "hyp-20260930-002-r14s1",
+   "later_title": "Register the execute redirect boundary",
+   "later_class": "rejected_no_gain",
+   "earlier_id": "hyp-20260929-002-r3s1",
+   "earlier_title": "Register EX redirects at the pipeline boundary",
+   "earlier_class": "rejected_no_gain",
+   "rounds_apart": 11,
+   "jaccard": 0.6
+  },
+  {
+   "system": "GPT-6 Luna",
+   "rep": 2,
+   "later_id": "hyp-20260930-003-r15s2",
+   "later_title": "Learn only forward branch directions",
+   "later_class": "rejected_below_margin",
+   "earlier_id": "hyp-20260930-003-r13s2",
+   "earlier_title": "Learn direction by branch direction class",
+   "earlier_class": "rejected_no_gain",
+   "rounds_apart": 2,
+   "jaccard": 0.6
+  },
+  {
+   "system": "GPT-6 Luna",
+   "rep": 3,
+   "later_id": "hyp-20260930-001-r10s0",
+   "later_title": "Bypass ALU result selection for memory addresses",
+   "later_class": "rejected_no_gain",
+   "earlier_id": "hyp-20260930-001-r4s0",
+   "earlier_title": "Bypass the general ALU for memory addresses",
+   "earlier_class": "rejected_no_gain",
+   "rounds_apart": 6,
+   "jaccard": 0.57
+  },
+  {
+   "system": "GPT-6 Luna",
+   "rep": 4,
+   "later_id": "hyp-20260930-002-r4s1",
+   "later_title": "Synchronous register-file read stage",
+   "later_class": "rejected_no_gain",
+   "earlier_id": "hyp-20260930-001-r3s0",
+   "earlier_title": "Shared one-hot register file reads",
+   "earlier_class": "rejected_no_gain",
+   "rounds_apart": 1,
+   "jaccard": 0.5
+  },
+  {
+   "system": "GPT-6 Luna",
+   "rep": 4,
+   "later_id": "hyp-20260930-003-r10s2",
+   "later_title": "Compact return-target prediction",
+   "later_class": "rejected_no_gain",
+   "earlier_id": "hyp-20260930-003-r9s2",
+   "earlier_title": "Single-entry return target prediction",
+   "earlier_class": "rejected_below_margin",
+   "rounds_apart": 1,
+   "jaccard": 0.5
+  },
+  {
+   "system": "GPT-6 Luna",
+   "rep": 5,
+   "later_id": "hyp-20261001-003-r8s2",
+   "later_title": "Single-entry return target predictor",
+   "later_class": "rejected_no_gain",
+   "earlier_id": "hyp-20260930-003-r4s2",
+   "earlier_title": "Single-entry registered branch target predictor",
+   "earlier_class": "rejected_no_gain",
+   "rounds_apart": 4,
+   "jaccard": 0.57
+  },
+  {
+   "system": "GPT-6 Luna",
+   "rep": 6,
+   "later_id": "hyp-20261001-002-r12s1",
+   "later_title": "Synchronous register-file read stage",
+   "later_class": "rejected_no_gain",
+   "earlier_id": "hyp-20261001-001-r5s0",
+   "earlier_title": "Rebalance the register-file read mux",
+   "earlier_class": "rejected_no_gain",
+   "rounds_apart": 7,
+   "jaccard": 0.5
+  },
+  {
+   "system": "GPT-6 Luna",
+   "rep": 6,
+   "later_id": "hyp-20261001-002-r13s1",
+   "later_title": "Split operand forwarding from execute",
+   "later_class": "formal_check_failed",
+   "earlier_id": "hyp-20261001-002-r11s1",
+   "earlier_title": "Split the execute stage",
+   "earlier_class": "formal_check_failed",
+   "rounds_apart": 2,
+   "jaccard": 0.5
+  },
+  {
+   "system": "GPT-6 Luna",
+   "rep": 6,
+   "later_id": "hyp-20261001-003-r14s2",
+   "later_title": "Single-entry learned loop predictor",
+   "later_class": "rejected_no_gain",
+   "earlier_id": "hyp-20261001-003-r11s2",
+   "earlier_title": "Lookahead single-entry loop target predictor",
+   "earlier_class": "rejected_no_gain",
+   "rounds_apart": 3,
+   "jaccard": 0.57
+  },
+  {
+   "system": "GPT-6 Luna",
+   "rep": 6,
+   "later_id": "hyp-20261001-003-r15s2",
+   "later_title": "Single-entry direct-call target predictor",
+   "later_class": "rejected_no_gain",
+   "earlier_id": "hyp-20261001-003-r11s2",
+   "earlier_title": "Lookahead single-entry loop target predictor",
+   "earlier_class": "rejected_no_gain",
+   "rounds_apart": 4,
+   "jaccard": 0.5
+  }
+ ],
+ "quotes": [
+  {
+   "system": "GPT-6.1 Sol",
+   "rep": 6,
+   "id": "hyp-20261002-002-r1s1",
+   "outcome": "accepted",
+   "delta_pct": 735.07,
+   "lesson": "Moving combinational DIV/REM (`/` and `%`) out of the shared ALU into a registered iterative divider removes their timing cost from ordinary instructions, letting Fmax gains outweigh CoreMark's added divide stalls.",
+   "short": "Moving combinational DIV/REM (`/` and `%`) out of the shared ALU into a registered iterative divider removes their timing cost from ordinary instructions, letting Fmax gains outweigh CoreMark's added divide stalls."
+  },
+  {
+   "system": "Opus 5.5",
+   "rep": 1,
+   "id": "hyp-20260929-002-r1s1",
+   "outcome": "rejected",
+   "delta_pct": 702.23,
+   "lesson": "Moving MUL into the multi-cycle M-unit along with DIV/REM scored 97.23 iter/s, below the 103.21 of the divider-only sibling hyp-001; once the combinational `/`/`%` is gone, the single-cycle 33x33 DSP multiply is not on the critical path (hyp-001 reached 46.4 MHz with it in place), so multi-cycling it most likely bought no Fmax and only added 2-3 stall cycles per MUL in core_matrix, which means a unit should only come off the EX path when the timing report shows it is critical.",
+   "short": "Moving MUL into the multi-cycle M-unit along with DIV/REM scored 97.23 iter/s, below the 103.21 of the divider-only sibling hyp-001; once the combinational `/`/`%` is gone, the single-cycle 33x33 DSP multiply is not on the ..."
+  },
+  {
+   "system": "GPT-6 Luna",
+   "rep": 5,
+   "id": "hyp-20260930-003-r2s2",
+   "outcome": "rejected",
+   "delta_pct": 5.74,
+   "lesson": "Even a tiny direct-mapped BTB puts indexed tag/counter reads and target selection on the IF next-PC path, and their timing cost outweighed saved CoreMark loop-redirect bubbles.",
+   "short": "Even a tiny direct-mapped BTB puts indexed tag/counter reads and target selection on the IF next-PC path, and their timing cost outweighed saved CoreMark loop-redirect bubbles."
+  },
+  {
+   "system": "Sonnet 5.5",
+   "rep": 3,
+   "id": "hyp-20261002-003-r9s2",
+   "outcome": "accepted",
+   "delta_pct": 13.83,
+   "lesson": "A depth-4 fetch queue (FD flop head feeding decode/regfile-read/load-use compare, 3-entry shifting flop FIFO, `accept = imem_ready && cnt != 3` so the pc CE no longer contains load_use/dmem_stall/ex_busy, redirect-cycle fetch from `redir_tgt_q`) took fitness 230.30 -> 262.14, about 2x the predicted +6% net and close to the ~13% cycle bound, where the same FD+skid structure at depth 2 (r8s2) netted only +2.79% \u2014 so the earlier \"fetch buffering is capped near +3%\" conclusion was a depth limit, not a structural one (dmem/load-use/divide stall runs of 2-4 cycles overflow a 2-entry skid before the next imem stall), and with every queue read/CE on flops and the pc CE made lighter, going from 2 to 4 entries cost little Fmax; when a buffer is flop-only on its consumer and producer cones, size it to the stall-run length (post-change cycles and `make timing` were not captured, so the split between cycles saved and Fmax kept is inferred).",
+   "short": "A depth-4 fetch queue (FD flop head feeding decode/regfile-read/load-use compare, 3-entry shifting flop FIFO, `accept = imem_ready && cnt != 3` so the pc CE no longer contains load_use/dmem_stall/ex_busy, redirect-cycle fetch ..."
+  },
+  {
+   "system": "GPT-6 Astra",
+   "rep": 1,
+   "id": "hyp-20261001-002-r15s1",
+   "outcome": "rejected",
+   "delta_pct": 4.17,
+   "lesson": "Capturing completed MEM results and PC/immediate operands in ID reduces EX forwarding to two-input muxes but recovers too little Fmax for the one-entry fetch buffer's CoreMark cycle savings to clear the 4.6% acceptance margin.",
+   "short": "Capturing completed MEM results and PC/immediate operands in ID reduces EX forwarding to two-input muxes but recovers too little Fmax for the one-entry fetch buffer's CoreMark cycle savings to clear the 4.6% acceptance margin."
+  }
+ ],
+ "consistency_problems": [],
+ "topics_regex": {
+  "divider": "\\bdiv\\w*|\\brem[u]?\\b|quotient|radix|\\bsrt\\b|non-?restoring|division",
+  "multiplier": "\\bmul\\w*|multipl\\w*|\\bdsps?\\b|partial.product|booth",
+  "branch prediction": "predict\\w*|\\bbtb\\b|\\bbht\\b|\\bpht\\b|\\bras\\b|return.address|gshare|backedge|\\bbtfn\\b|branch.target|\\btaken\\b|\\bjal\\b|\\bjalr\\b",
+  "fetch / caches": "\\bfetch\\w*|i-?cache|\\bcache\\w*|prefetch\\w*|instruction.queue|loop.buffer|replay|\\bimem\\w*|\\bfifo\\b",
+  "forwarding / hazards": "forward\\w*|bypass\\w*|hazard\\w*|load-use|interlock\\w*|\\bstall\\w*|bubbles?\\b|scoreboard",
+  "formal / RVFI": "formal|\\brvfi\\w*|liveness|\\bsby\\b|counterexample|pc_fwd|reg_ch0|_ch0\\b|\\bbmc\\b|altops",
+  "cosim": "cosim|co-sim|\\biss\\b|reference.model|random\\d?\\.elf|selftest|istall|dstall",
+  "process / tooling": "placement.option|place.and.route|\\bseeds?\\b|noise|\\bmargin\\b|\\bbar\\b|qualif\\w*|sandbox|time.?out|budget|\\blint\\b|verilator|yosys|harness|watchdog|run-to-run|spread",
+  "area / resources": "\\blut4?s?\\b|\\bbsram\\b|lut-?ram|\\bdffs?\\b|resource|\\barea\\b|does not fit|utiliz",
+  "Fmax / critical path": "fmax|critical|\\bmhz\\b|timing|slack|logic.levels?|\\bcones?\\b|fanout|\\bpaths?\\b"
+ },
+ "notes": "Analysis 4: the scribe's lessons.\n\nSource: research/v2/lessons/all_lessons.jsonl (one row per lesson bullet,\nrestricted to the 36 scored runs), cross-checked against the `lesson` field\nof each run's log.jsonl. The scribe (same model as the system) may write no\nlesson for a candidate (\"write nothing at all if no useful lesson can be\ndistilled\"), so counts differ by system.\n\nTopics: keyword regexes over the lesson text (case-insensitive), multi-label.\n\"primary topic\" assigns each lesson to the topic whose keyword appears first\nin the text (a lesson usually opens with its subject), among the specific\ntopics; the generic ones (area / resources, Fmax / critical path: nearly\nevery lesson mentions Fmax, since fitness = Fmax x CoreMark iterations per\ncycle) count only when no specific topic matches. The leading\n\"- <date> <id> (<outcome>, <delta>):\" prefix is removed before matching.\n\nRepetition: within a run, a hypothesis title \"repeats\" an earlier one when\nthe Jaccard similarity of their content-word sets (lowercased, stopwords and\n1-2 letter words removed, light suffix stripping) is at least 0.5, the\nearlier candidate was rejected or failed a gate in an earlier round, and the\nscribe wrote a lesson for it. Sensitivity at 0.4 and 0.6 is reported.\n"
+}

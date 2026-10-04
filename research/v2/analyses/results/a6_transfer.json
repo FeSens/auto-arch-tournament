@@ -1,0 +1,1364 @@
+{
+ "runs": [
+  {
+   "system": "Opus 5.5",
+   "model": "claude-opus-5_5_xhigh-v2",
+   "rep": 1,
+   "coremark": 308.79,
+   "coremark_best_any_candidate": 311.27,
+   "holdout": 7769.575770421307,
+   "fmax_champion": 109.53,
+   "fmax_holdout": 109.53,
+   "coremark_ipc_per_Mcycle": 2.819261646651788,
+   "holdout_ipc_per_Mcycle": 70.93559545714689,
+   "kernel_ipc_per_Mcycle": {
+    "dhrystone": 2231.153446834588,
+    "aha-mont64": 88.10095312016132,
+    "crc32": 37.12056594839746,
+    "matmult-int": 11.456022239957843,
+    "edn": 21.486348218932136
+   },
+   "ratio": 25.161358108816046,
+   "lut4": 2600,
+   "champion_id": "hyp-20260929-002-r11s1",
+   "transfer_index": 1.0063350862422824,
+   "kernel_index": {
+    "dhrystone": 0.9866918920429881,
+    "aha-mont64": 1.024354963261347,
+    "crc32": 1.0061146235197036,
+    "matmult-int": 0.9482784369354468,
+    "edn": 1.0045802489009175
+   }
+  },
+  {
+   "system": "Opus 5.5",
+   "model": "claude-opus-5_5_xhigh-v2",
+   "rep": 2,
+   "coremark": 287.27,
+   "coremark_best_any_candidate": 287.76,
+   "holdout": 7318.190912150755,
+   "fmax_champion": 104.045,
+   "fmax_holdout": 104.045,
+   "coremark_ipc_per_Mcycle": 2.7610001005004037,
+   "holdout_ipc_per_Mcycle": 70.3367861228387,
+   "kernel_ipc_per_Mcycle": {
+    "dhrystone": 2237.579476026014,
+    "aha-mont64": 86.24775270699352,
+    "crc32": 36.49475205465454,
+    "matmult-int": 11.525650334820142,
+    "edn": 21.207549378597594
+   },
+   "ratio": 25.474957051382866,
+   "lut4": 2862,
+   "champion_id": "hyp-20260930-003-r13s2",
+   "transfer_index": 1.0188775578190807,
+   "kernel_index": {
+    "dhrystone": 1.0104144543836147,
+    "aha-mont64": 1.0239685494840713,
+    "crc32": 1.0100252955396587,
+    "matmult-int": 0.9741737606833301,
+    "edn": 1.0124683897670554
+   }
+  },
+  {
+   "system": "Opus 5.5",
+   "model": "claude-opus-5_5_xhigh-v2",
+   "rep": 3,
+   "coremark": 251.74,
+   "coremark_best_any_candidate": 251.74,
+   "holdout": 6377.75978258979,
+   "fmax_champion": 106.129,
+   "fmax_holdout": 106.129,
+   "coremark_ipc_per_Mcycle": 2.3719772707650004,
+   "holdout_ipc_per_Mcycle": 60.094411354010624,
+   "kernel_ipc_per_Mcycle": {
+    "dhrystone": 1838.8076680731501,
+    "aha-mont64": 71.7519935394505,
+    "crc32": 31.15712364358328,
+    "matmult-int": 10.387754084464905,
+    "edn": 18.353594478064153
+   },
+   "ratio": 25.33470955187809,
+   "lut4": 2681,
+   "champion_id": "hyp-20260930-003-r9s2",
+   "transfer_index": 1.0132683224630625,
+   "kernel_index": {
+    "dhrystone": 0.9665254318508365,
+    "aha-mont64": 0.9915821522666437,
+    "crc32": 1.0037258063785879,
+    "matmult-int": 1.0219944726293388,
+    "edn": 1.0199244834510872
+   }
+  },
+  {
+   "system": "Opus 5.5",
+   "model": "claude-opus-5_5_xhigh-v2",
+   "rep": 4,
+   "coremark": 247.3,
+   "coremark_best_any_candidate": 247.3,
+   "holdout": 5990.750086522253,
+   "fmax_champion": 109.868,
+   "fmax_holdout": 109.868,
+   "coremark_ipc_per_Mcycle": 2.2508515534139453,
+   "holdout_ipc_per_Mcycle": 54.52679657882418,
+   "kernel_ipc_per_Mcycle": {
+    "dhrystone": 1838.4369364041768,
+    "aha-mont64": 70.25898515814069,
+    "crc32": 28.422027955906696,
+    "matmult-int": 8.876874204040279,
+    "edn": 14.79054517357888
+   },
+   "ratio": 24.224626310239596,
+   "lut4": 3393,
+   "champion_id": "hyp-20260930-002-r6s1",
+   "transfer_index": 0.9688702534129278,
+   "kernel_index": {
+    "dhrystone": 1.01833198823496,
+    "aha-mont64": 1.0231993867539566,
+    "crc32": 0.9648870202296586,
+    "matmult-int": 0.9203449255465574,
+    "edn": 0.8661532457157228
+   }
+  },
+  {
+   "system": "Opus 5.5",
+   "model": "claude-opus-5_5_xhigh-v2",
+   "rep": 5,
+   "coremark": 292.99,
+   "coremark_best_any_candidate": 292.99,
+   "holdout": 7483.878157252847,
+   "fmax_champion": 100.874,
+   "fmax_holdout": 100.874,
+   "coremark_ipc_per_Mcycle": 2.904497789096283,
+   "holdout_ipc_per_Mcycle": 74.19035784496343,
+   "kernel_ipc_per_Mcycle": {
+    "dhrystone": 2259.1271561015446,
+    "aha-mont64": 89.86558803996861,
+    "crc32": 37.29787659044362,
+    "matmult-int": 12.914234844499697,
+    "edn": 22.985314223036617
+   },
+   "ratio": 25.543118049260542,
+   "lut4": 3678,
+   "champion_id": "hyp-20261001-002-r13s1",
+   "transfer_index": 1.0216036747234603,
+   "kernel_index": {
+    "dhrystone": 0.9697440615976884,
+    "aha-mont64": 1.0142093796126042,
+    "crc32": 0.9812537129035682,
+    "matmult-int": 1.0376121293176357,
+    "edn": 1.0431260797293735
+   }
+  },
+  {
+   "system": "Opus 5.5",
+   "model": "claude-opus-5_5_xhigh-v2",
+   "rep": 6,
+   "coremark": 296.83,
+   "coremark_best_any_candidate": 296.83,
+   "holdout": 7387.38198348134,
+   "fmax_champion": 126.206,
+   "fmax_holdout": 126.206,
+   "coremark_ipc_per_Mcycle": 2.351936761124367,
+   "holdout_ipc_per_Mcycle": 58.53431677956156,
+   "kernel_ipc_per_Mcycle": {
+    "dhrystone": 1861.0508423581375,
+    "aha-mont64": 70.82679661022951,
+    "crc32": 31.15681084423187,
+    "matmult-int": 9.583213276967003,
+    "edn": 17.45953926371028
+   },
+   "ratio": 24.88758543099195,
+   "lut4": 3506,
+   "champion_id": "hyp-20261001-002-r11s1",
+   "transfer_index": 0.9953854765210027,
+   "kernel_index": {
+    "dhrystone": 0.9865522707706403,
+    "aha-mont64": 0.9871365031858014,
+    "crc32": 1.0122682446954767,
+    "matmult-int": 0.9508738930149366,
+    "edn": 0.9785083755373077
+   }
+  },
+  {
+   "system": "Sonnet 5.5",
+   "model": "claude-sonnet-5-5_xhigh-v2",
+   "rep": 1,
+   "coremark": 225.9,
+   "coremark_best_any_candidate": 234.84,
+   "holdout": 5641.522990742426,
+   "fmax_champion": 102.536,
+   "fmax_holdout": 102.536,
+   "coremark_ipc_per_Mcycle": 2.203176010409566,
+   "holdout_ipc_per_Mcycle": 55.01992461908429,
+   "kernel_ipc_per_Mcycle": {
+    "dhrystone": 1819.4432988690342,
+    "aha-mont64": 70.21157908298763,
+    "crc32": 30.179578552245378,
+    "matmult-int": 8.877089592914425,
+    "edn": 14.73224440439893
+   },
+   "ratio": 24.973541349014724,
+   "lut4": 5161,
+   "champion_id": "hyp-20261001-001-r10s0",
+   "transfer_index": 0.998823305902167,
+   "kernel_index": {
+    "dhrystone": 1.0296196791406684,
+    "aha-mont64": 1.0446355444763973,
+    "crc32": 1.046724120987442,
+    "matmult-int": 0.9402835088868392,
+    "edn": 0.881408287373154
+   }
+  },
+  {
+   "system": "Sonnet 5.5",
+   "model": "claude-sonnet-5-5_xhigh-v2",
+   "rep": 2,
+   "coremark": 249.61,
+   "coremark_best_any_candidate": 259.8,
+   "holdout": 6030.798981070154,
+   "fmax_champion": 105.482,
+   "fmax_holdout": 105.482,
+   "coremark_ipc_per_Mcycle": 2.366374947851012,
+   "holdout_ipc_per_Mcycle": 57.17372614351418,
+   "kernel_ipc_per_Mcycle": {
+    "dhrystone": 1816.6404263049533,
+    "aha-mont64": 69.09947491309013,
+    "crc32": 32.79450743014223,
+    "matmult-int": 9.61386242050137,
+    "edn": 15.436176965272306
+   },
+   "ratio": 24.16088690785687,
+   "lut4": 3285,
+   "champion_id": "hyp-20261001-001-r8s0",
+   "transfer_index": 0.9663209793746803,
+   "kernel_index": {
+    "dhrystone": 0.957134384908177,
+    "aha-mont64": 0.9571862265063167,
+    "crc32": 1.0589752473181289,
+    "matmult-int": 0.948094777377102,
+    "edn": 0.8598319890191856
+   }
+  },
+  {
+   "system": "Sonnet 5.5",
+   "model": "claude-sonnet-5-5_xhigh-v2",
+   "rep": 3,
+   "coremark": 276.51,
+   "coremark_best_any_candidate": 276.51,
+   "holdout": 6920.512415519285,
+   "fmax_champion": 112.419,
+   "fmax_holdout": 112.419,
+   "coremark_ipc_per_Mcycle": 2.4596748604995406,
+   "holdout_ipc_per_Mcycle": 61.559989107884626,
+   "kernel_ipc_per_Mcycle": {
+    "dhrystone": 1963.2788327129374,
+    "aha-mont64": 70.63960275112997,
+    "crc32": 30.72248008244548,
+    "matmult-int": 10.834377044988667,
+    "edn": 19.151474759313842
+   },
+   "ratio": 25.028072820220917,
+   "lut4": 3986,
+   "champion_id": "hyp-20261002-001-r14s0",
+   "transfer_index": 1.001004306329166,
+   "kernel_index": {
+    "dhrystone": 0.9951574183481854,
+    "aha-mont64": 0.9414034776741085,
+    "crc32": 0.9544360277901971,
+    "matmult-int": 1.0279302655277454,
+    "edn": 1.0263179594479852
+   }
+  },
+  {
+   "system": "Sonnet 5.5",
+   "model": "claude-sonnet-5-5_xhigh-v2",
+   "rep": 4,
+   "coremark": 285.82,
+   "coremark_best_any_candidate": 288.25,
+   "holdout": 7144.133819341421,
+   "fmax_champion": 102.102,
+   "fmax_holdout": 102.102,
+   "coremark_ipc_per_Mcycle": 2.79931069773379,
+   "holdout_ipc_per_Mcycle": 69.97055708351864,
+   "kernel_ipc_per_Mcycle": {
+    "dhrystone": 2190.370983133413,
+    "aha-mont64": 86.6219726161958,
+    "crc32": 35.452122892814444,
+    "matmult-int": 11.619485101883518,
+    "edn": 21.458619627083525
+   },
+   "ratio": 24.995220136244566,
+   "lut4": 4310,
+   "champion_id": "hyp-20261002-003-r11s2",
+   "transfer_index": 0.9996903546569369,
+   "kernel_index": {
+    "dhrystone": 0.9755602057732053,
+    "aha-mont64": 1.0143368846261283,
+    "crc32": 0.9677415722962004,
+    "matmult-int": 0.9686640675247681,
+    "edn": 1.0104343141179377
+   }
+  },
+  {
+   "system": "Sonnet 5.5",
+   "model": "claude-sonnet-5-5_xhigh-v2",
+   "rep": 5,
+   "coremark": 254.45,
+   "coremark_best_any_candidate": 263.77,
+   "holdout": 6327.416234721357,
+   "fmax_champion": 105.043,
+   "fmax_holdout": 105.043,
+   "coremark_ipc_per_Mcycle": 2.422305167334052,
+   "holdout_ipc_per_Mcycle": 60.23643874148062,
+   "kernel_ipc_per_Mcycle": {
+    "dhrystone": 1950.9435250623083,
+    "aha-mont64": 70.65592366899254,
+    "crc32": 29.900878587482495,
+    "matmult-int": 10.587732065440653,
+    "edn": 18.172566693319762
+   },
+   "ratio": 24.867031773320328,
+   "lut4": 3205,
+   "champion_id": "hyp-20261002-002-r9s1",
+   "transfer_index": 0.9945634276166425,
+   "kernel_index": {
+    "dhrystone": 1.0041609886237444,
+    "aha-mont64": 0.9561476786611475,
+    "crc32": 0.9432424758018471,
+    "matmult-int": 1.0200265995698243,
+    "edn": 0.9888828028283221
+   }
+  },
+  {
+   "system": "Sonnet 5.5",
+   "model": "claude-sonnet-5-5_xhigh-v2",
+   "rep": 6,
+   "coremark": 267.36,
+   "coremark_best_any_candidate": 267.36,
+   "holdout": 6563.350548490076,
+   "fmax_champion": 100.388,
+   "fmax_holdout": 100.388,
+   "coremark_ipc_per_Mcycle": 2.6632725920753257,
+   "holdout_ipc_per_Mcycle": 65.37983173775822,
+   "kernel_ipc_per_Mcycle": {
+    "dhrystone": 1972.9222990858136,
+    "aha-mont64": 85.46917233790238,
+    "crc32": 37.676293657405274,
+    "matmult-int": 10.670756649126314,
+    "edn": 17.621226106057932
+   },
+   "ratio": 24.548737838457793,
+   "lut4": 6340,
+   "champion_id": "hyp-20261003-002-r14s1",
+   "transfer_index": 0.9818331785972919,
+   "kernel_index": {
+    "dhrystone": 0.9235956199652617,
+    "aha-mont64": 1.0519597690148559,
+    "crc32": 1.0809878412350706,
+    "matmult-int": 0.9350116160438725,
+    "edn": 0.8721233467186591
+   }
+  },
+  {
+   "system": "GPT-6.1 Sol",
+   "model": "gpt-6_1-sol_xhigh-v2",
+   "rep": 1,
+   "coremark": 223.44,
+   "coremark_best_any_candidate": 226.61,
+   "holdout": 5472.026915476733,
+   "fmax_champion": 93.708,
+   "fmax_holdout": 93.708,
+   "coremark_ipc_per_Mcycle": 2.384429105676944,
+   "holdout_ipc_per_Mcycle": 58.39444781103785,
+   "kernel_ipc_per_Mcycle": {
+    "dhrystone": 1901.4865187774963,
+    "aha-mont64": 70.31597185111015,
+    "crc32": 31.852645415289484,
+    "matmult-int": 9.794306504333655,
+    "edn": 16.277636578323595
+   },
+   "ratio": 24.48991637789444,
+   "lut4": 3584,
+   "champion_id": "hyp-20260930-001-r9s0",
+   "transfer_index": 0.979480598925999,
+   "kernel_index": {
+    "dhrystone": 0.9942516930418166,
+    "aha-mont64": 0.9666623895565608,
+    "crc32": 1.020773409095297,
+    "matmult-int": 0.9585762987575056,
+    "edn": 0.8998380264546253
+   }
+  },
+  {
+   "system": "GPT-6.1 Sol",
+   "model": "gpt-6_1-sol_xhigh-v2",
+   "rep": 2,
+   "coremark": 200.89,
+   "coremark_best_any_candidate": 203.11,
+   "holdout": 4940.404677485528,
+   "fmax_champion": 81.557,
+   "fmax_holdout": 81.557,
+   "coremark_ipc_per_Mcycle": 2.4631961546552192,
+   "holdout_ipc_per_Mcycle": 60.57609619634763,
+   "kernel_ipc_per_Mcycle": {
+    "dhrystone": 2000.868376875564,
+    "aha-mont64": 71.74005135870277,
+    "crc32": 32.810480104818545,
+    "matmult-int": 10.232091111996377,
+    "edn": 16.925800675000932
+   },
+   "ratio": 24.59258637804534,
+   "lut4": 4859,
+   "champion_id": "hyp-20260930-001-r11s0",
+   "transfer_index": 0.9835869123852933,
+   "kernel_index": {
+    "dhrystone": 1.0127611317156098,
+    "aha-mont64": 0.9547022316820711,
+    "crc32": 1.0178454581151843,
+    "matmult-int": 0.9693995439869838,
+    "edn": 0.9057485194970741
+   }
+  },
+  {
+   "system": "GPT-6.1 Sol",
+   "model": "gpt-6_1-sol_xhigh-v2",
+   "rep": 3,
+   "coremark": 209.1,
+   "coremark_best_any_candidate": 210.29,
+   "holdout": 5079.146141809609,
+   "fmax_champion": 85.63,
+   "fmax_holdout": 85.63,
+   "coremark_ipc_per_Mcycle": 2.4419046465538377,
+   "holdout_ipc_per_Mcycle": 59.31503143535688,
+   "kernel_ipc_per_Mcycle": {
+    "dhrystone": 2012.416610486703,
+    "aha-mont64": 71.71299027034004,
+    "crc32": 30.728070912193512,
+    "matmult-int": 9.971879300372947,
+    "edn": 16.603352548946685
+   },
+   "ratio": 24.290512395072255,
+   "lut4": 6882,
+   "champion_id": "hyp-20261001-001-r13s0",
+   "transfer_index": 0.9715053845761781,
+   "kernel_index": {
+    "dhrystone": 1.027487849871411,
+    "aha-mont64": 0.962663228603889,
+    "crc32": 0.9615565947206369,
+    "matmult-int": 0.9529842480818064,
+    "edn": 0.8962403590835215
+   }
+  },
+  {
+   "system": "GPT-6.1 Sol",
+   "model": "gpt-6_1-sol_xhigh-v2",
+   "rep": 4,
+   "coremark": 216.47,
+   "coremark_best_any_candidate": 221.85,
+   "holdout": 5511.6668584516,
+   "fmax_champion": 87.715,
+   "fmax_holdout": 87.715,
+   "coremark_ipc_per_Mcycle": 2.46789454291755,
+   "holdout_ipc_per_Mcycle": 62.836081154324724,
+   "kernel_ipc_per_Mcycle": {
+    "dhrystone": 2037.1411575850914,
+    "aha-mont64": 71.19183315766747,
+    "crc32": 31.7312462164896,
+    "matmult-int": 10.998583382460339,
+    "edn": 19.35397964271005
+   },
+   "ratio": 25.461573698210376,
+   "lut4": 5887,
+   "champion_id": "hyp-20261002-003-r11s2",
+   "transfer_index": 1.0183422871150591,
+   "kernel_index": {
+    "dhrystone": 1.0291579387125536,
+    "aha-mont64": 0.945602976819469,
+    "crc32": 0.9824914664446226,
+    "matmult-int": 1.0400340649928403,
+    "edn": 1.0337156487802084
+   }
+  },
+  {
+   "system": "GPT-6.1 Sol",
+   "model": "gpt-6_1-sol_xhigh-v2",
+   "rep": 5,
+   "coremark": 223.34,
+   "coremark_best_any_candidate": 223.34,
+   "holdout": 5527.542826880218,
+   "fmax_champion": 95.961,
+   "fmax_holdout": 95.961,
+   "coremark_ipc_per_Mcycle": 2.3274411832338586,
+   "holdout_ipc_per_Mcycle": 57.60197191442578,
+   "kernel_ipc_per_Mcycle": {
+    "dhrystone": 1660.8431048576062,
+    "aha-mont64": 68.28896201119188,
+    "crc32": 32.62842639262656,
+    "matmult-int": 10.14738741981027,
+    "edn": 16.887185159541684
+   },
+   "ratio": 24.74945297250926,
+   "lut4": 6204,
+   "champion_id": "hyp-20261002-002-r11s1",
+   "transfer_index": 0.9898608327828203,
+   "kernel_index": {
+    "dhrystone": 0.8896873098783391,
+    "aha-mont64": 0.9617828953921916,
+    "crc32": 1.0712372600085318,
+    "matmult-int": 1.017449674830562,
+    "edn": 0.9563920537293724
+   }
+  },
+  {
+   "system": "GPT-6.1 Sol",
+   "model": "gpt-6_1-sol_xhigh-v2",
+   "rep": 6,
+   "coremark": 218.36,
+   "coremark_best_any_candidate": 225.27,
+   "holdout": 5419.822078879647,
+   "fmax_champion": 93.817,
+   "fmax_holdout": 93.817,
+   "coremark_ipc_per_Mcycle": 2.327506188838956,
+   "holdout_ipc_per_Mcycle": 57.77014910815356,
+   "kernel_ipc_per_Mcycle": {
+    "dhrystone": 1890.6564075448534,
+    "aha-mont64": 71.78150571039824,
+    "crc32": 30.18735277376491,
+    "matmult-int": 9.595670433500405,
+    "edn": 16.367860462025416
+   },
+   "ratio": 24.820581053671216,
+   "lut4": 3675,
+   "champion_id": "hyp-20261002-003-r5s2",
+   "transfer_index": 0.992705618957748,
+   "kernel_index": {
+    "dhrystone": 1.0127663645907141,
+    "aha-mont64": 1.0109437041606142,
+    "crc32": 0.9910656894927574,
+    "matmult-int": 0.9621037102087956,
+    "edn": 0.9269546302010884
+   }
+  },
+  {
+   "system": "GPT-6 Astra",
+   "model": "gpt-6-astra_xhigh-v2",
+   "rep": 1,
+   "coremark": 174.44,
+   "coremark_best_any_candidate": 181.72,
+   "holdout": 4352.644962553116,
+   "fmax_champion": 73.79,
+   "fmax_holdout": 73.79,
+   "coremark_ipc_per_Mcycle": 2.364064517211926,
+   "holdout_ipc_per_Mcycle": 58.98692183972243,
+   "kernel_ipc_per_Mcycle": {
+    "dhrystone": 1894.2204178018835,
+    "aha-mont64": 72.22531988594177,
+    "crc32": 31.158137588103965,
+    "matmult-int": 9.59522848477909,
+    "edn": 17.459502683525564
+   },
+   "ratio": 24.952103660588833,
+   "lut4": 5422,
+   "champion_id": "hyp-20261001-002-r7s1",
+   "transfer_index": 0.9979658999570027,
+   "kernel_index": {
+    "dhrystone": 0.9989843666142495,
+    "aha-mont64": 1.0014641375484385,
+    "crc32": 1.007118147663824,
+    "matmult-int": 0.9471819350735151,
+    "edn": 0.9734865444678414
+   }
+  },
+  {
+   "system": "GPT-6 Astra",
+   "model": "gpt-6-astra_xhigh-v2",
+   "rep": 2,
+   "coremark": 211.52,
+   "coremark_best_any_candidate": 218.37,
+   "holdout": 5288.737813944968,
+   "fmax_champion": 84.388,
+   "fmax_holdout": 84.388,
+   "coremark_ipc_per_Mcycle": 2.5065552686663795,
+   "holdout_ipc_per_Mcycle": 62.671680972946135,
+   "kernel_ipc_per_Mcycle": {
+    "dhrystone": 2039.247354586369,
+    "aha-mont64": 72.23327591991786,
+    "crc32": 31.527010766474177,
+    "matmult-int": 10.998680158380994,
+    "edn": 18.928932835981932
+   },
+   "ratio": 25.0034881521604,
+   "lut4": 5850,
+   "champion_id": "hyp-20261002-001-r13s0",
+   "transfer_index": 1.0000210361119575,
+   "kernel_index": {
+    "dhrystone": 1.0143319968948978,
+    "aha-mont64": 0.9446377101718807,
+    "crc32": 0.9611114819839697,
+    "matmult-int": 1.0240017484275838,
+    "edn": 0.9954197510990824
+   }
+  },
+  {
+   "system": "GPT-6 Astra",
+   "model": "gpt-6-astra_xhigh-v2",
+   "rep": 3,
+   "coremark": 224.83,
+   "coremark_best_any_candidate": 230.38,
+   "holdout": 5641.059547768336,
+   "fmax_champion": 89.575,
+   "fmax_holdout": 89.575,
+   "coremark_ipc_per_Mcycle": 2.5099929092700313,
+   "holdout_ipc_per_Mcycle": 62.975825261159294,
+   "kernel_ipc_per_Mcycle": {
+    "dhrystone": 2041.8782421197964,
+    "aha-mont64": 72.30644919296964,
+    "crc32": 31.73192866662436,
+    "matmult-int": 10.954646303683244,
+    "edn": 19.300458733303174
+   },
+   "ratio": 25.09033290827886,
+   "lut4": 6599,
+   "champion_id": "hyp-20261002-002-r12s1",
+   "transfer_index": 1.0034944148048006,
+   "kernel_index": {
+    "dhrystone": 1.0142496108245747,
+    "aha-mont64": 0.9442995715771518,
+    "crc32": 0.9660335962422106,
+    "matmult-int": 1.0185052586149443,
+    "edn": 1.0135671941956172
+   }
+  },
+  {
+   "system": "GPT-6 Astra",
+   "model": "gpt-6-astra_xhigh-v2",
+   "rep": 4,
+   "coremark": 195.55,
+   "coremark_best_any_candidate": 195.55,
+   "holdout": 4889.226403199729,
+   "fmax_champion": 82.887,
+   "fmax_holdout": 82.887,
+   "coremark_ipc_per_Mcycle": 2.3592673436820237,
+   "holdout_ipc_per_Mcycle": 58.986649332220075,
+   "kernel_ipc_per_Mcycle": {
+    "dhrystone": 1894.2204178018835,
+    "aha-mont64": 72.22495473300961,
+    "crc32": 31.158137588103965,
+    "matmult-int": 9.595253036417823,
+    "edn": 17.459142986540048
+   },
+   "ratio": 25.002436221936737,
+   "lut4": 5048,
+   "champion_id": "hyp-20261003-003-r10s2",
+   "transfer_index": 0.9999789638880427,
+   "kernel_index": {
+    "dhrystone": 1.0010156333857503,
+    "aha-mont64": 1.0034953730730598,
+    "crc32": 1.0091659531117294,
+    "matmult-int": 0.9491102988236327,
+    "edn": 0.9754458693606812
+   }
+  },
+  {
+   "system": "GPT-6 Astra",
+   "model": "gpt-6-astra_xhigh-v2",
+   "rep": 5,
+   "coremark": 182.96,
+   "coremark_best_any_candidate": 186.8,
+   "holdout": 4546.374030755098,
+   "fmax_champion": 73.869,
+   "fmax_holdout": 73.869,
+   "coremark_ipc_per_Mcycle": 2.476756875105572,
+   "holdout_ipc_per_Mcycle": 61.546440736372446,
+   "kernel_ipc_per_Mcycle": {
+    "dhrystone": 2008.118824407078,
+    "aha-mont64": 72.09956084157491,
+    "crc32": 31.433064860033802,
+    "matmult-int": 10.635544699421782,
+    "edn": 18.245098819104225
+   },
+   "ratio": 24.84900541514592,
+   "lut4": 5310,
+   "champion_id": "hyp-20261003-003-r8s2",
+   "transfer_index": 0.993842458715456,
+   "kernel_index": {
+    "dhrystone": 1.010865868583953,
+    "aha-mont64": 0.9542331385893308,
+    "crc32": 0.9697763910226533,
+    "matmult-int": 1.00210624895287,
+    "edn": 0.9710022836904374
+   }
+  },
+  {
+   "system": "GPT-6 Astra",
+   "model": "gpt-6-astra_xhigh-v2",
+   "rep": 6,
+   "coremark": 219.91,
+   "coremark_best_any_candidate": 219.91,
+   "holdout": 5502.171558982116,
+   "fmax_champion": 87.843,
+   "fmax_holdout": 87.843,
+   "coremark_ipc_per_Mcycle": 2.50348485091247,
+   "holdout_ipc_per_Mcycle": 62.636425884613644,
+   "kernel_ipc_per_Mcycle": {
+    "dhrystone": 2029.605174140124,
+    "aha-mont64": 72.29790205947803,
+    "crc32": 31.72367410904061,
+    "matmult-int": 10.82225314981678,
+    "edn": 19.137994123870282
+   },
+   "ratio": 25.02010622064534,
+   "lut4": 4503,
+   "champion_id": "hyp-20261004-002-r15s1",
+   "transfer_index": 1.0006856800993624,
+   "kernel_index": {
+    "dhrystone": 1.0107740802453333,
+    "aha-mont64": 0.9466424593584608,
+    "crc32": 0.9682929452649389,
+    "matmult-int": 1.0088117480495946,
+    "edn": 1.0076480244065602
+   }
+  },
+  {
+   "system": "GPT-5.5",
+   "model": "gpt-5_5_xhigh-v2",
+   "rep": 1,
+   "coremark": 130.18,
+   "coremark_best_any_candidate": 133.98,
+   "holdout": 3280.9188937855015,
+   "fmax_champion": 54.067,
+   "fmax_holdout": 54.067,
+   "coremark_ipc_per_Mcycle": 2.4076770226473325,
+   "holdout_ipc_per_Mcycle": 60.68246608440465,
+   "kernel_ipc_per_Mcycle": {
+    "dhrystone": 1901.826450729065,
+    "aha-mont64": 73.34265762987334,
+    "crc32": 31.15943208126657,
+    "matmult-int": 10.29544495197175,
+    "edn": 18.38882283215087
+   },
+   "ratio": 25.20294126429176,
+   "lut4": 2903,
+   "champion_id": "hyp-20261003-003-r14s2",
+   "transfer_index": 1.0079982154013247,
+   "kernel_index": {
+    "dhrystone": 0.9848274793688433,
+    "aha-mont64": 0.9985358624515617,
+    "crc32": 0.9889163585775346,
+    "matmult-int": 0.9978937510471299,
+    "edn": 1.006730228324971
+   }
+  },
+  {
+   "system": "GPT-5.5",
+   "model": "gpt-5_5_xhigh-v2",
+   "rep": 2,
+   "coremark": 154.29,
+   "coremark_best_any_candidate": 154.29,
+   "holdout": 3781.9463026236303,
+   "fmax_champion": 67.985,
+   "fmax_holdout": 67.985,
+   "coremark_ipc_per_Mcycle": 2.269524148871706,
+   "holdout_ipc_per_Mcycle": 55.62912852281582,
+   "kernel_ipc_per_Mcycle": {
+    "dhrystone": 1903.644495659532,
+    "aha-mont64": 68.6347686579329,
+    "crc32": 29.995160780727375,
+    "matmult-int": 8.953850065989874,
+    "edn": 15.181694520015547
+   },
+   "ratio": 24.511934037355825,
+   "lut4": 2996,
+   "champion_id": "hyp-20261003-003-r11s2",
+   "transfer_index": 0.9803612009641365,
+   "kernel_index": {
+    "dhrystone": 1.0457756902284991,
+    "aha-mont64": 0.9913217123395548,
+    "crc32": 1.0099145788902777,
+    "matmult-int": 0.920687866780202,
+    "edn": 0.8817446816664926
+   }
+  },
+  {
+   "system": "GPT-5.5",
+   "model": "gpt-5_5_xhigh-v2",
+   "rep": 3,
+   "coremark": 126.1,
+   "coremark_best_any_candidate": 126.1,
+   "holdout": 3215.9969820835395,
+   "fmax_champion": 56.643,
+   "fmax_holdout": 56.643,
+   "coremark_ipc_per_Mcycle": 2.2262705715749327,
+   "holdout_ipc_per_Mcycle": 56.7766004993298,
+   "kernel_ipc_per_Mcycle": {
+    "dhrystone": 1769.9517068676782,
+    "aha-mont64": 69.03757818937216,
+    "crc32": 29.28561643456731,
+    "matmult-int": 9.61509492983224,
+    "edn": 17.147152749580236
+   },
+   "ratio": 25.503544663628386,
+   "lut4": 2915,
+   "champion_id": "hyp-20261003-001-r15s0",
+   "transfer_index": 1.020020926833986,
+   "kernel_index": {
+    "dhrystone": 0.9912220950291809,
+    "aha-mont64": 1.0165128077398127,
+    "crc32": 1.0051819469126213,
+    "matmult-int": 1.0078897792934627,
+    "edn": 1.0152464502823473
+   }
+  },
+  {
+   "system": "GPT-5.5",
+   "model": "gpt-5_5_xhigh-v2",
+   "rep": 4,
+   "coremark": 139.91,
+   "coremark_best_any_candidate": 143.4,
+   "holdout": 3429.113303014063,
+   "fmax_champion": 64.153,
+   "fmax_holdout": 64.153,
+   "coremark_ipc_per_Mcycle": 2.1808719213176304,
+   "holdout_ipc_per_Mcycle": 53.45211140576538,
+   "kernel_ipc_per_Mcycle": {
+    "dhrystone": 1770.1783366165225,
+    "aha-mont64": 62.8209561914921,
+    "crc32": 28.434303016784767,
+    "matmult-int": 8.929182652383943,
+    "edn": 15.45426896362436
+   },
+   "ratio": 24.509422507426656,
+   "lut4": 3006,
+   "champion_id": "hyp-20261004-002-r9s1",
+   "transfer_index": 0.9802607516689538,
+   "kernel_index": {
+    "dhrystone": 1.0119856716074804,
+    "aha-mont64": 0.9442339987525772,
+    "crc32": 0.9962783249727724,
+    "matmult-int": 0.9554741814491361,
+    "edn": 0.9340620209067619
+   }
+  },
+  {
+   "system": "GPT-5.5",
+   "model": "gpt-5_5_xhigh-v2",
+   "rep": 5,
+   "coremark": 168.04,
+   "coremark_best_any_candidate": 171.26,
+   "holdout": 4368.978382836063,
+   "fmax_champion": 91.55,
+   "fmax_holdout": 91.55,
+   "coremark_ipc_per_Mcycle": 1.8354837555098928,
+   "holdout_ipc_per_Mcycle": 47.72231985621042,
+   "kernel_ipc_per_Mcycle": {
+    "dhrystone": 1532.1502579757996,
+    "aha-mont64": 62.44551628703956,
+    "crc32": 21.3545626158485,
+    "matmult-int": 8.007345404851385,
+    "edn": 15.129545217974384
+   },
+   "ratio": 25.99963331847217,
+   "lut4": 2662,
+   "champion_id": "hyp-20261004-002-r11s1",
+   "transfer_index": 1.0398621220944724,
+   "kernel_index": {
+    "dhrystone": 1.0407305815015149,
+    "aha-mont64": 1.1152082352019097,
+    "crc32": 0.8890135718239904,
+    "matmult-int": 1.0180648138781623,
+    "edn": 1.0865075212325093
+   }
+  },
+  {
+   "system": "GPT-5.5",
+   "model": "gpt-5_5_xhigh-v2",
+   "rep": 6,
+   "coremark": 141.55,
+   "coremark_best_any_candidate": 147.56,
+   "holdout": 3609.913036347889,
+   "fmax_champion": 63.581,
+   "fmax_holdout": 63.581,
+   "coremark_ipc_per_Mcycle": 2.2262705715749327,
+   "holdout_ipc_per_Mcycle": 56.7766004993298,
+   "kernel_ipc_per_Mcycle": {
+    "dhrystone": 1769.9517068676782,
+    "aha-mont64": 69.03757818937216,
+    "crc32": 29.28561643456731,
+    "matmult-int": 9.61509492983224,
+    "edn": 17.147152749580236
+   },
+   "ratio": 25.502741337674948,
+   "lut4": 2912,
+   "champion_id": "hyp-20261004-002-r5s1",
+   "transfer_index": 1.0199887976027602,
+   "kernel_index": {
+    "dhrystone": 0.9912220950291809,
+    "aha-mont64": 1.0165128077398127,
+    "crc32": 1.0051819469126213,
+    "matmult-int": 1.0078897792934627,
+    "edn": 1.0152464502823473
+   }
+  },
+  {
+   "system": "GPT-6 Luna",
+   "model": "gpt-6-luna_xhigh-v2",
+   "rep": 1,
+   "coremark": 119.44,
+   "coremark_best_any_candidate": 119.44,
+   "holdout": 3042.6818081889287,
+   "fmax_champion": 50.987,
+   "fmax_holdout": 50.987,
+   "coremark_ipc_per_Mcycle": 2.342551272590979,
+   "holdout_ipc_per_Mcycle": 59.675639048952334,
+   "kernel_ipc_per_Mcycle": {
+    "dhrystone": 1841.568058370341,
+    "aha-mont64": 71.03581945678198,
+    "crc32": 30.183697985942445,
+    "matmult-int": 10.434289021458463,
+    "edn": 18.36897465485615
+   },
+   "ratio": 25.474563029043274,
+   "lut4": 3236,
+   "champion_id": "hyp-20260929-003-r6s2",
+   "transfer_index": 1.0188617987927444,
+   "kernel_index": {
+    "dhrystone": 0.9801356170209005,
+    "aha-mont64": 0.9940163820198227,
+    "crc32": 0.9845813318489798,
+    "matmult-int": 1.0394681030985384,
+    "edn": 1.033601707810739
+   }
+  },
+  {
+   "system": "GPT-6 Luna",
+   "model": "gpt-6-luna_xhigh-v2",
+   "rep": 2,
+   "coremark": 145.89,
+   "coremark_best_any_candidate": 152.3,
+   "holdout": 3849.526936811284,
+   "fmax_champion": 74.129,
+   "fmax_holdout": 74.129,
+   "coremark_ipc_per_Mcycle": 1.96803362346085,
+   "holdout_ipc_per_Mcycle": 51.930107472261774,
+   "kernel_ipc_per_Mcycle": {
+    "dhrystone": 1643.0406548502835,
+    "aha-mont64": 65.78605454058638,
+    "crc32": 22.326617073461765,
+    "matmult-int": 9.14378231946059,
+    "edn": 17.11453698502786
+   },
+   "ratio": 26.386503096931143,
+   "lut4": 2743,
+   "champion_id": "hyp-20260930-003-r7s2",
+   "transfer_index": 1.0553350798810248,
+   "kernel_index": {
+    "dhrystone": 1.0408863146179252,
+    "aha-mont64": 1.0957376367244371,
+    "crc32": 0.866879365444258,
+    "matmult-int": 1.0842533554856293,
+    "edn": 1.1462782417782378
+   }
+  },
+  {
+   "system": "GPT-6 Luna",
+   "model": "gpt-6-luna_xhigh-v2",
+   "rep": 3,
+   "coremark": 158.07,
+   "coremark_best_any_candidate": 160.91,
+   "holdout": 4038.8921344263554,
+   "fmax_champion": 70.9,
+   "fmax_holdout": 70.9,
+   "coremark_ipc_per_Mcycle": 2.229508752271033,
+   "holdout_ipc_per_Mcycle": 56.96603856736754,
+   "kernel_ipc_per_Mcycle": {
+    "dhrystone": 1776.0501414475934,
+    "aha-mont64": 69.03753052753304,
+    "crc32": 29.285606905155632,
+    "matmult-int": 9.74010162172692,
+    "edn": 17.15228207682576
+   },
+   "ratio": 25.551288254737493,
+   "lut4": 2743,
+   "champion_id": "hyp-20260930-002-r11s1",
+   "transfer_index": 1.021930444224443,
+   "kernel_index": {
+    "dhrystone": 0.9931927575434885,
+    "aha-mont64": 1.0150357045484506,
+    "crc32": 1.0037216750272275,
+    "matmult-int": 1.01951053245602,
+    "edn": 1.014075142592471
+   }
+  },
+  {
+   "system": "GPT-6 Luna",
+   "model": "gpt-6-luna_xhigh-v2",
+   "rep": 4,
+   "coremark": 130.81,
+   "coremark_best_any_candidate": 130.81,
+   "holdout": 3488.4497558251987,
+   "fmax_champion": 58.206,
+   "fmax_holdout": 58.206,
+   "coremark_ipc_per_Mcycle": 2.2473581742821773,
+   "holdout_ipc_per_Mcycle": 59.93282059968382,
+   "kernel_ipc_per_Mcycle": {
+    "dhrystone": 1821.6750180345828,
+    "aha-mont64": 73.25819484482084,
+    "crc32": 30.182746468954026,
+    "matmult-int": 10.435363359352174,
+    "edn": 18.39628542204758
+   },
+   "ratio": 26.668066323868196,
+   "lut4": 3050,
+   "champion_id": "hyp-20260930-002-r15s1",
+   "transfer_index": 1.0665962746478954,
+   "kernel_index": {
+    "dhrystone": 1.0106158648187271,
+    "aha-mont64": 1.0685360318920243,
+    "crc32": 1.0262536563371407,
+    "matmult-int": 1.0836092214569644,
+    "edn": 1.0789846189007484
+   }
+  },
+  {
+   "system": "GPT-6 Luna",
+   "model": "gpt-6-luna_xhigh-v2",
+   "rep": 5,
+   "coremark": 165.41,
+   "coremark_best_any_candidate": 165.41,
+   "holdout": 4125.87892886543,
+   "fmax_champion": 72.354,
+   "fmax_holdout": 72.354,
+   "coremark_ipc_per_Mcycle": 2.2861636801748455,
+   "holdout_ipc_per_Mcycle": 57.0235084289109,
+   "kernel_ipc_per_Mcycle": {
+    "dhrystone": 1824.937959713278,
+    "aha-mont64": 71.67433761264967,
+    "crc32": 29.278785437903274,
+    "matmult-int": 9.592608319733145,
+    "edn": 16.412249446496887
+   },
+   "ratio": 24.943346405086935,
+   "lut4": 4104,
+   "champion_id": "hyp-20261001-001-r15s0",
+   "transfer_index": 0.9976156512370157,
+   "kernel_index": {
+    "dhrystone": 0.9952410639913514,
+    "aha-mont64": 1.0276887906297352,
+    "crc32": 0.9786197850727704,
+    "matmult-int": 0.9791896207038826,
+    "edn": 0.9462768091693199
+   }
+  },
+  {
+   "system": "GPT-6 Luna",
+   "model": "gpt-6-luna_xhigh-v2",
+   "rep": 6,
+   "coremark": 112.96,
+   "coremark_best_any_candidate": 112.96,
+   "holdout": 2880.7311561349934,
+   "fmax_champion": 50.738,
+   "fmax_holdout": 50.738,
+   "coremark_ipc_per_Mcycle": 2.2262705715749327,
+   "holdout_ipc_per_Mcycle": 56.7766004993298,
+   "kernel_ipc_per_Mcycle": {
+    "dhrystone": 1769.9517068676782,
+    "aha-mont64": 69.03757818937216,
+    "crc32": 29.28561643456731,
+    "matmult-int": 9.61509492983224,
+    "edn": 17.147152749580236
+   },
+   "ratio": 25.502223407710638,
+   "lut4": 2533,
+   "champion_id": "hyp-20261001-002-r10s1",
+   "transfer_index": 1.0199680828586257,
+   "kernel_index": {
+    "dhrystone": 0.9912220950291809,
+    "aha-mont64": 1.0165128077398127,
+    "crc32": 1.0051819469126213,
+    "matmult-int": 1.0078897792934627,
+    "edn": 1.0152464502823473
+   }
+  }
+ ],
+ "per_system": {
+  "Opus 5.5": {
+   "coremark_median": 290.13,
+   "holdout_median": 7352.786447816048,
+   "ratio_median": 25.24803383034707,
+   "ratio_min": 24.224626310239596,
+   "ratio_max": 25.543118049260542,
+   "coremark_ipc_median": 2.5664886856327023,
+   "holdout_ipc_median": 65.21559873842466,
+   "fmax_median": 107.8295,
+   "kernel_index_median": {
+    "dhrystone": 0.9866220814068143,
+    "aha-mont64": 1.0187043831832803,
+    "crc32": 1.0049202149491459,
+    "matmult-int": 0.9625238268491334,
+    "edn": 1.0085243193339863
+   }
+  },
+  "Sonnet 5.5": {
+   "coremark_median": 260.905,
+   "holdout_median": 6445.3833916057165,
+   "ratio_median": 24.920286561167526,
+   "ratio_min": 24.16088690785687,
+   "ratio_max": 25.028072820220917,
+   "coremark_ipc_median": 2.4409900139167964,
+   "holdout_ipc_median": 60.89821392468262,
+   "fmax_median": 103.7895,
+   "kernel_index_median": {
+    "dhrystone": 0.9853588120606953,
+    "aha-mont64": 0.9857615555662225,
+    "crc32": 1.0072328466418212,
+    "matmult-int": 0.958379422450935,
+    "edn": 0.935145545100738
+   }
+  },
+  "GPT-6.1 Sol": {
+   "coremark_median": 217.41500000000002,
+   "holdout_median": 5445.92449717819,
+   "ratio_median": 24.6710196752773,
+   "ratio_min": 24.290512395072255,
+   "ratio_max": 25.461573698210376,
+   "coremark_ipc_median": 2.413166876115391,
+   "holdout_ipc_median": 58.85473962319736,
+   "fmax_median": 90.7115,
+   "kernel_index_median": {
+    "dhrystone": 1.012763748153162,
+    "aha-mont64": 0.9622230619980403,
+    "crc32": 1.0044555738039709,
+    "matmult-int": 0.9657516270978896,
+    "edn": 0.9163515748490813
+   }
+  },
+  "GPT-6 Astra": {
+   "coremark_median": 203.53500000000003,
+   "holdout_median": 5088.982108572349,
+   "ratio_median": 25.002962187048567,
+   "ratio_min": 24.84900541514592,
+   "ratio_max": 25.09033290827886,
+   "coremark_ipc_median": 2.490120863009021,
+   "holdout_ipc_median": 62.091433310493045,
+   "fmax_median": 83.6375,
+   "kernel_index_median": {
+    "dhrystone": 1.0108199744146433,
+    "aha-mont64": 0.9504377989738958,
+    "crc32": 0.9690346681437961,
+    "matmult-int": 1.0054589985012323,
+    "edn": 0.9854328102298818
+   }
+  },
+  "GPT-5.5": {
+   "coremark_median": 140.73000000000002,
+   "holdout_median": 3519.513169680976,
+   "ratio_median": 25.352841300983354,
+   "ratio_min": 24.509422507426656,
+   "ratio_max": 25.99963331847217,
+   "coremark_ipc_median": 2.2262705715749327,
+   "holdout_ipc_median": 56.20286451107281,
+   "fmax_median": 63.867000000000004,
+   "kernel_index_median": {
+    "dhrystone": 1.0016038833183307,
+    "aha-mont64": 1.0075243350956873,
+    "crc32": 1.0007301359426968,
+    "matmult-int": 1.0028917651702962,
+    "edn": 1.0109883393036592
+   }
+  },
+  "GPT-6 Luna": {
+   "coremark_median": 138.35,
+   "holdout_median": 3668.9883463182414,
+   "ratio_median": 25.526755831224065,
+   "ratio_min": 24.943346405086935,
+   "ratio_max": 26.668066323868196,
+   "coremark_ipc_median": 2.238433463276605,
+   "holdout_ipc_median": 56.994773498139224,
+   "fmax_median": 64.553,
+   "kernel_index_median": {
+    "dhrystone": 0.9942169107674199,
+    "aha-mont64": 1.022100799184774,
+    "crc32": 0.9941515034381037,
+    "matmult-int": 1.0294893177772793,
+    "edn": 1.024424079046543
+   }
+  }
+ },
+ "median_ratio_36": 25.002962187048567,
+ "spearman": {
+  "coremark_vs_holdout": {
+   "pooled_36": {
+    "rho": 0.9961389961389961,
+    "p": 0.0,
+    "n": 36
+   },
+   "pearson_log_pooled_36": 0.99747303021729,
+   "stratified_within_system": {
+    "rho": 0.9428571428571428,
+    "p": 0.0,
+    "n": 36
+   },
+   "per_system": {
+    "Opus 5.5": {
+     "rho": 0.9428571428571428,
+     "p": 0.016666666666666666,
+     "n": 6
+    },
+    "Sonnet 5.5": {
+     "rho": 1.0,
+     "p": 0.002777777777777778,
+     "n": 6
+    },
+    "GPT-6.1 Sol": {
+     "rho": 0.7142857142857143,
+     "p": 0.1361111111111111,
+     "n": 6
+    },
+    "GPT-6 Astra": {
+     "rho": 1.0,
+     "p": 0.002777777777777778,
+     "n": 6
+    },
+    "GPT-5.5": {
+     "rho": 1.0,
+     "p": 0.002777777777777778,
+     "n": 6
+    },
+    "GPT-6 Luna": {
+     "rho": 1.0,
+     "p": 0.002777777777777778,
+     "n": 6
+    }
+   }
+  },
+  "coremark_ipc_vs_holdout_ipc": {
+   "pooled_36": {
+    "rho": 0.9490084985835694,
+    "p": 0.0,
+    "n": 36
+   },
+   "stratified_within_system": {
+    "rho": 0.9437343523520886,
+    "p": 0.0,
+    "n": 36
+   },
+   "per_system": {
+    "Opus 5.5": {
+     "rho": 1.0,
+     "p": 0.002777777777777778,
+     "n": 6
+    },
+    "Sonnet 5.5": {
+     "rho": 1.0,
+     "p": 0.002777777777777778,
+     "n": 6
+    },
+    "GPT-6.1 Sol": {
+     "rho": 1.0,
+     "p": 0.002777777777777778,
+     "n": 6
+    },
+    "GPT-6 Astra": {
+     "rho": 1.0,
+     "p": 0.002777777777777778,
+     "n": 6
+    },
+    "GPT-5.5": {
+     "rho": 0.8235294117647058,
+     "p": 0.05,
+     "n": 6
+    },
+    "GPT-6 Luna": {
+     "rho": 0.8285714285714286,
+     "p": 0.058333333333333334,
+     "n": 6
+    }
+   }
+  },
+  "fmax_vs_holdout": {
+   "rho": 0.9436293436293436,
+   "p": 0.0,
+   "n": 36
+  },
+  "coremark_ipc_vs_holdout": {
+   "rho": 0.6423790120225409,
+   "p": 0.00015,
+   "n": 36
+  }
+ },
+ "reference_cores": [
+  {
+   "core": "biriscv",
+   "coremark": 78.8497230475379,
+   "holdout": 2011.4536671181854,
+   "ratio": 25.509964897473324,
+   "transfer_index": 1.0202777057626948
+  },
+  {
+   "core": "hazard3",
+   "coremark": 119.72533585461615,
+   "holdout": 3028.3031849264657,
+   "ratio": 25.29375393528876,
+   "transfer_index": 1.011630291885608
+  },
+  {
+   "core": "ibex_maxperf",
+   "coremark": 102.48370387122829,
+   "holdout": 2595.482224920409,
+   "ratio": 25.325804268175713,
+   "transfer_index": 1.0129121533165528
+  },
+  {
+   "core": "ibex_small",
+   "coremark": 91.33830481132038,
+   "holdout": 2187.6569294027945,
+   "ratio": 23.95114441768858,
+   "transfer_index": 0.957932273724558
+  },
+  {
+   "core": "neorv32",
+   "coremark": 86.49413954929211,
+   "holdout": 2101.6757505679766,
+   "ratio": 24.298475729332544,
+   "transfer_index": 0.971823880208844
+  },
+  {
+   "core": "picorv32",
+   "coremark": 72.12564439509663,
+   "holdout": 1741.037209742171,
+   "ratio": 24.138948419024914,
+   "transfer_index": 0.9654435437865354
+  },
+  {
+   "core": "ueriscv",
+   "coremark": 88.82271274027951,
+   "holdout": 2206.0138002740823,
+   "ratio": 24.83614530806482,
+   "transfer_index": 0.9933281153754591
+  },
+  {
+   "core": "vexiiriscv",
+   "coremark": 170.1280033755524,
+   "holdout": 4361.898374446883,
+   "ratio": 25.638920623891206,
+   "transfer_index": 1.0254353237062472
+  },
+  {
+   "core": "vexriscv_maxperf",
+   "coremark": 227.98568140609007,
+   "holdout": 6215.50256354366,
+   "ratio": 27.2626882759034,
+   "transfer_index": 1.0903783348528744
+  },
+  {
+   "core": "vexriscv_nocache",
+   "coremark": 171.14446259099168,
+   "holdout": 4523.663360095456,
+   "ratio": 26.43184179967481,
+   "transfer_index": 1.0571484131334805
+  }
+ ],
+ "consistency_problems": [],
+ "notes": "Analysis 6: does CoreMark progress transfer to the held-out kernels?\n\nPer run (the final champion, which is what the held-out score measures):\n  CoreMark score   final_fitness from the results row (the champion's\n                   fitness; best_fitness can be a rejected candidate that\n                   scored higher by less than the 4.6% margin)\n  CoreMark IPC     iterations / cycles of the champion's log.jsonl row (the\n                   last accepted candidate), reported per million cycles\n  held-out score   holdout_geomean_iter_s = holdout Fmax x geomean over the\n                   five kernels (dhrystone, aha-mont64, crc32, matmult-int,\n                   edn) of reps / cycles\n  held-out IPC     geomean of reps / cycles (= held-out score / Fmax), per\n                   million cycles\n  ratio            held-out score / CoreMark score. Fmax cancels when the\n                   held-out Fmax equals the champion's loop Fmax, which holds\n                   for every run checked below, so the ratio is the held-out\n                   IPC / CoreMark IPC ratio.\n\"Transfer index\" = a run's ratio divided by the median ratio of the 36 runs\n(1.00 = typical; below 1 = the held-out kernels gained less than CoreMark).\nPer-kernel index: the run's kernel IPC / CoreMark IPC, divided by the median\nof that quantity over the 36 runs, which shows which kernel drags a run down.\nContext: the same ratio for the ten open-source reference cores in\nresearch/v2/reference_cores/results_sim (simulated with the harness's ELFs,\nstall model and scoring).\n"
+}

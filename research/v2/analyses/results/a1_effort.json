@@ -1,0 +1,1857 @@
+{
+ "runs": [
+  {
+   "system": "Opus 5.5",
+   "model": "claude-opus-5_5_xhigh-v2",
+   "rep": 1,
+   "cli": "Claude Code",
+   "tokens_in": 216225027,
+   "tokens_out": 3289009,
+   "tokens_in_from_transcripts": 216225027,
+   "tokens_out_from_transcripts": 3289009,
+   "sessions_killed_without_usage": 0,
+   "killed_by_role": {
+    "hypothesis": 0,
+    "implementation": 0,
+    "scribe": 0
+   },
+   "tokens_in_adjusted": 216225027,
+   "tokens_out_adjusted": 3289009,
+   "tokens_by_role": {
+    "hypothesis": {
+     "tokens_in": 42925656,
+     "tokens_out": 1216051
+    },
+    "implementation": {
+     "tokens_in": 163110244,
+     "tokens_out": 1829701
+    },
+    "scribe": {
+     "tokens_in": 10189127,
+     "tokens_out": 243257
+    }
+   },
+   "wall_clock_h": 6.635555555555555,
+   "api_equivalent_cost_usd": 201.2342384,
+   "total_cost_usd": 0.0,
+   "holdout": 7769.575770421307,
+   "coremark_final": 308.79
+  },
+  {
+   "system": "Opus 5.5",
+   "model": "claude-opus-5_5_xhigh-v2",
+   "rep": 2,
+   "cli": "Claude Code",
+   "tokens_in": 202690960,
+   "tokens_out": 3184050,
+   "tokens_in_from_transcripts": 202690960,
+   "tokens_out_from_transcripts": 3184050,
+   "sessions_killed_without_usage": 0,
+   "killed_by_role": {
+    "hypothesis": 0,
+    "implementation": 0,
+    "scribe": 0
+   },
+   "tokens_in_adjusted": 202690960,
+   "tokens_out_adjusted": 3184050,
+   "tokens_by_role": {
+    "hypothesis": {
+     "tokens_in": 40742127,
+     "tokens_out": 1260183
+    },
+    "implementation": {
+     "tokens_in": 150165003,
+     "tokens_out": 1677224
+    },
+    "scribe": {
+     "tokens_in": 11783830,
+     "tokens_out": 246643
+    }
+   },
+   "wall_clock_h": 9.1975,
+   "api_equivalent_cost_usd": 192.92438579999998,
+   "total_cost_usd": 0.0,
+   "holdout": 7318.190912150755,
+   "coremark_final": 287.27
+  },
+  {
+   "system": "Opus 5.5",
+   "model": "claude-opus-5_5_xhigh-v2",
+   "rep": 3,
+   "cli": "Claude Code",
+   "tokens_in": 208781673,
+   "tokens_out": 3151016,
+   "tokens_in_from_transcripts": 208781673,
+   "tokens_out_from_transcripts": 3151016,
+   "sessions_killed_without_usage": 0,
+   "killed_by_role": {
+    "hypothesis": 0,
+    "implementation": 0,
+    "scribe": 0
+   },
+   "tokens_in_adjusted": 208781673,
+   "tokens_out_adjusted": 3151016,
+   "tokens_by_role": {
+    "hypothesis": {
+     "tokens_in": 37836922,
+     "tokens_out": 1188349
+    },
+    "implementation": {
+     "tokens_in": 157134081,
+     "tokens_out": 1685438
+    },
+    "scribe": {
+     "tokens_in": 13810670,
+     "tokens_out": 277229
+    }
+   },
+   "wall_clock_h": 8.301111111111112,
+   "api_equivalent_cost_usd": 193.05769120000005,
+   "total_cost_usd": 0.0,
+   "holdout": 6377.75978258979,
+   "coremark_final": 251.74
+  },
+  {
+   "system": "Opus 5.5",
+   "model": "claude-opus-5_5_xhigh-v2",
+   "rep": 4,
+   "cli": "Claude Code",
+   "tokens_in": 209311773,
+   "tokens_out": 3144378,
+   "tokens_in_from_transcripts": 209311773,
+   "tokens_out_from_transcripts": 3144378,
+   "sessions_killed_without_usage": 0,
+   "killed_by_role": {
+    "hypothesis": 0,
+    "implementation": 0,
+    "scribe": 0
+   },
+   "tokens_in_adjusted": 209311773,
+   "tokens_out_adjusted": 3144378,
+   "tokens_by_role": {
+    "hypothesis": {
+     "tokens_in": 40403219,
+     "tokens_out": 1293498
+    },
+    "implementation": {
+     "tokens_in": 155967588,
+     "tokens_out": 1569793
+    },
+    "scribe": {
+     "tokens_in": 12940966,
+     "tokens_out": 281087
+    }
+   },
+   "wall_clock_h": 5.545,
+   "api_equivalent_cost_usd": 195.84781260000008,
+   "total_cost_usd": 0.0,
+   "holdout": 5990.750086522253,
+   "coremark_final": 247.3
+  },
+  {
+   "system": "Opus 5.5",
+   "model": "claude-opus-5_5_xhigh-v2",
+   "rep": 5,
+   "cli": "Claude Code",
+   "tokens_in": 232155099,
+   "tokens_out": 3216816,
+   "tokens_in_from_transcripts": 232155099,
+   "tokens_out_from_transcripts": 3216816,
+   "sessions_killed_without_usage": 0,
+   "killed_by_role": {
+    "hypothesis": 0,
+    "implementation": 0,
+    "scribe": 0
+   },
+   "tokens_in_adjusted": 232155099,
+   "tokens_out_adjusted": 3216816,
+   "tokens_by_role": {
+    "hypothesis": {
+     "tokens_in": 43317442,
+     "tokens_out": 1196042
+    },
+    "implementation": {
+     "tokens_in": 174974069,
+     "tokens_out": 1771252
+    },
+    "scribe": {
+     "tokens_in": 13863588,
+     "tokens_out": 249522
+    }
+   },
+   "wall_clock_h": 7.0119444444444445,
+   "api_equivalent_cost_usd": 202.65702240000002,
+   "total_cost_usd": 0.0,
+   "holdout": 7483.878157252847,
+   "coremark_final": 292.99
+  },
+  {
+   "system": "Opus 5.5",
+   "model": "claude-opus-5_5_xhigh-v2",
+   "rep": 6,
+   "cli": "Claude Code",
+   "tokens_in": 218596101,
+   "tokens_out": 3319052,
+   "tokens_in_from_transcripts": 218596101,
+   "tokens_out_from_transcripts": 3319052,
+   "sessions_killed_without_usage": 0,
+   "killed_by_role": {
+    "hypothesis": 0,
+    "implementation": 0,
+    "scribe": 0
+   },
+   "tokens_in_adjusted": 218596101,
+   "tokens_out_adjusted": 3319052,
+   "tokens_by_role": {
+    "hypothesis": {
+     "tokens_in": 40492475,
+     "tokens_out": 1174226
+    },
+    "implementation": {
+     "tokens_in": 163917207,
+     "tokens_out": 1860956
+    },
+    "scribe": {
+     "tokens_in": 14186419,
+     "tokens_out": 283870
+    }
+   },
+   "wall_clock_h": 5.821666666666666,
+   "api_equivalent_cost_usd": 202.17224220000014,
+   "total_cost_usd": 0.0,
+   "holdout": 7387.38198348134,
+   "coremark_final": 296.83
+  },
+  {
+   "system": "Sonnet 5.5",
+   "model": "claude-sonnet-5-5_xhigh-v2",
+   "rep": 1,
+   "cli": "Claude Code",
+   "tokens_in": 194144565,
+   "tokens_out": 2922459,
+   "tokens_in_from_transcripts": 194144565,
+   "tokens_out_from_transcripts": 2922459,
+   "sessions_killed_without_usage": 0,
+   "killed_by_role": {
+    "hypothesis": 0,
+    "implementation": 0,
+    "scribe": 0
+   },
+   "tokens_in_adjusted": 194144565,
+   "tokens_out_adjusted": 2922459,
+   "tokens_by_role": {
+    "hypothesis": {
+     "tokens_in": 40549003,
+     "tokens_out": 1323340
+    },
+    "implementation": {
+     "tokens_in": 146606949,
+     "tokens_out": 1471899
+    },
+    "scribe": {
+     "tokens_in": 6988613,
+     "tokens_out": 127220
+    }
+   },
+   "wall_clock_h": 6.743333333333333,
+   "api_equivalent_cost_usd": 109.19100119999999,
+   "total_cost_usd": 0.0,
+   "holdout": 5641.522990742426,
+   "coremark_final": 225.9
+  },
+  {
+   "system": "Sonnet 5.5",
+   "model": "claude-sonnet-5-5_xhigh-v2",
+   "rep": 2,
+   "cli": "Claude Code",
+   "tokens_in": 249937741,
+   "tokens_out": 3183335,
+   "tokens_in_from_transcripts": 249937741,
+   "tokens_out_from_transcripts": 3183335,
+   "sessions_killed_without_usage": 0,
+   "killed_by_role": {
+    "hypothesis": 0,
+    "implementation": 0,
+    "scribe": 0
+   },
+   "tokens_in_adjusted": 249937741,
+   "tokens_out_adjusted": 3183335,
+   "tokens_by_role": {
+    "hypothesis": {
+     "tokens_in": 45015983,
+     "tokens_out": 1284864
+    },
+    "implementation": {
+     "tokens_in": 198347462,
+     "tokens_out": 1769385
+    },
+    "scribe": {
+     "tokens_in": 6574296,
+     "tokens_out": 129086
+    }
+   },
+   "wall_clock_h": 9.346944444444444,
+   "api_equivalent_cost_usd": 125.81644560000004,
+   "total_cost_usd": 0.0,
+   "holdout": 6030.798981070154,
+   "coremark_final": 249.61
+  },
+  {
+   "system": "Sonnet 5.5",
+   "model": "claude-sonnet-5-5_xhigh-v2",
+   "rep": 3,
+   "cli": "Claude Code",
+   "tokens_in": 209957327,
+   "tokens_out": 3088262,
+   "tokens_in_from_transcripts": 209957327,
+   "tokens_out_from_transcripts": 3088262,
+   "sessions_killed_without_usage": 0,
+   "killed_by_role": {
+    "hypothesis": 0,
+    "implementation": 0,
+    "scribe": 0
+   },
+   "tokens_in_adjusted": 209957327,
+   "tokens_out_adjusted": 3088262,
+   "tokens_by_role": {
+    "hypothesis": {
+     "tokens_in": 49682144,
+     "tokens_out": 1363303
+    },
+    "implementation": {
+     "tokens_in": 153926707,
+     "tokens_out": 1604057
+    },
+    "scribe": {
+     "tokens_in": 6348476,
+     "tokens_out": 120902
+    }
+   },
+   "wall_clock_h": 7.144444444444445,
+   "api_equivalent_cost_usd": 114.91538399999999,
+   "total_cost_usd": 0.0,
+   "holdout": 6920.512415519285,
+   "coremark_final": 276.51
+  },
+  {
+   "system": "Sonnet 5.5",
+   "model": "claude-sonnet-5-5_xhigh-v2",
+   "rep": 4,
+   "cli": "Claude Code",
+   "tokens_in": 217948598,
+   "tokens_out": 2894644,
+   "tokens_in_from_transcripts": 217948598,
+   "tokens_out_from_transcripts": 2894644,
+   "sessions_killed_without_usage": 0,
+   "killed_by_role": {
+    "hypothesis": 0,
+    "implementation": 0,
+    "scribe": 0
+   },
+   "tokens_in_adjusted": 217948598,
+   "tokens_out_adjusted": 2894644,
+   "tokens_by_role": {
+    "hypothesis": {
+     "tokens_in": 38452183,
+     "tokens_out": 1158567
+    },
+    "implementation": {
+     "tokens_in": 173447157,
+     "tokens_out": 1618945
+    },
+    "scribe": {
+     "tokens_in": 6049258,
+     "tokens_out": 117132
+    }
+   },
+   "wall_clock_h": 8.348888888888888,
+   "api_equivalent_cost_usd": 114.4621896,
+   "total_cost_usd": 0.0,
+   "holdout": 7144.133819341421,
+   "coremark_final": 285.82
+  },
+  {
+   "system": "Sonnet 5.5",
+   "model": "claude-sonnet-5-5_xhigh-v2",
+   "rep": 5,
+   "cli": "Claude Code",
+   "tokens_in": 235480787,
+   "tokens_out": 3251535,
+   "tokens_in_from_transcripts": 235480787,
+   "tokens_out_from_transcripts": 3251535,
+   "sessions_killed_without_usage": 0,
+   "killed_by_role": {
+    "hypothesis": 0,
+    "implementation": 0,
+    "scribe": 0
+   },
+   "tokens_in_adjusted": 235480787,
+   "tokens_out_adjusted": 3251535,
+   "tokens_by_role": {
+    "hypothesis": {
+     "tokens_in": 42927626,
+     "tokens_out": 1278552
+    },
+    "implementation": {
+     "tokens_in": 186010586,
+     "tokens_out": 1845481
+    },
+    "scribe": {
+     "tokens_in": 6542575,
+     "tokens_out": 127502
+    }
+   },
+   "wall_clock_h": 7.3469444444444445,
+   "api_equivalent_cost_usd": 124.89204179999999,
+   "total_cost_usd": 0.0,
+   "holdout": 6327.416234721357,
+   "coremark_final": 254.45
+  },
+  {
+   "system": "Sonnet 5.5",
+   "model": "claude-sonnet-5-5_xhigh-v2",
+   "rep": 6,
+   "cli": "Claude Code",
+   "tokens_in": 196017495,
+   "tokens_out": 2793139,
+   "tokens_in_from_transcripts": 196017495,
+   "tokens_out_from_transcripts": 2793139,
+   "sessions_killed_without_usage": 0,
+   "killed_by_role": {
+    "hypothesis": 0,
+    "implementation": 0,
+    "scribe": 0
+   },
+   "tokens_in_adjusted": 196017495,
+   "tokens_out_adjusted": 2793139,
+   "tokens_by_role": {
+    "hypothesis": {
+     "tokens_in": 40105208,
+     "tokens_out": 1224391
+    },
+    "implementation": {
+     "tokens_in": 149913450,
+     "tokens_out": 1460520
+    },
+    "scribe": {
+     "tokens_in": 5998837,
+     "tokens_out": 108228
+    }
+   },
+   "wall_clock_h": 8.866111111111111,
+   "api_equivalent_cost_usd": 106.43083659999996,
+   "total_cost_usd": 0.0,
+   "holdout": 6563.350548490076,
+   "coremark_final": 267.36
+  },
+  {
+   "system": "GPT-6.1 Sol",
+   "model": "gpt-6_1-sol_xhigh-v2",
+   "rep": 1,
+   "cli": "Codex CLI",
+   "tokens_in": 146358058,
+   "tokens_out": 1936791,
+   "tokens_in_from_transcripts": 146358058,
+   "tokens_out_from_transcripts": 1936791,
+   "sessions_killed_without_usage": 25,
+   "killed_by_role": {
+    "hypothesis": 20,
+    "implementation": 5,
+    "scribe": 0
+   },
+   "tokens_in_adjusted": 183745923,
+   "tokens_out_adjusted": 2494821,
+   "tokens_by_role": {
+    "hypothesis": {
+     "tokens_in": 40950647,
+     "tokens_out": 625444
+    },
+    "implementation": {
+     "tokens_in": 99596121,
+     "tokens_out": 1206995
+    },
+    "scribe": {
+     "tokens_in": 5811290,
+     "tokens_out": 104352
+    }
+   },
+   "wall_clock_h": 17.447777777777777,
+   "api_equivalent_cost_usd": null,
+   "total_cost_usd": 0.0,
+   "holdout": 5472.026915476733,
+   "coremark_final": 223.44
+  },
+  {
+   "system": "GPT-6.1 Sol",
+   "model": "gpt-6_1-sol_xhigh-v2",
+   "rep": 2,
+   "cli": "Codex CLI",
+   "tokens_in": 116919358,
+   "tokens_out": 1465800,
+   "tokens_in_from_transcripts": 116919358,
+   "tokens_out_from_transcripts": 1465800,
+   "sessions_killed_without_usage": 32,
+   "killed_by_role": {
+    "hypothesis": 31,
+    "implementation": 0,
+    "scribe": 1
+   },
+   "tokens_in_adjusted": 159499880,
+   "tokens_out_adjusted": 2132426,
+   "tokens_by_role": {
+    "hypothesis": {
+     "tokens_in": 15154350,
+     "tokens_out": 246033
+    },
+    "implementation": {
+     "tokens_in": 96514374,
+     "tokens_out": 1124215
+    },
+    "scribe": {
+     "tokens_in": 5250634,
+     "tokens_out": 95552
+    }
+   },
+   "wall_clock_h": 12.171111111111111,
+   "api_equivalent_cost_usd": null,
+   "total_cost_usd": 0.0,
+   "holdout": 4940.404677485528,
+   "coremark_final": 200.89
+  },
+  {
+   "system": "GPT-6.1 Sol",
+   "model": "gpt-6_1-sol_xhigh-v2",
+   "rep": 3,
+   "cli": "Codex CLI",
+   "tokens_in": 131568327,
+   "tokens_out": 1708839,
+   "tokens_in_from_transcripts": 131568327,
+   "tokens_out_from_transcripts": 1708839,
+   "sessions_killed_without_usage": 28,
+   "killed_by_role": {
+    "hypothesis": 25,
+    "implementation": 2,
+    "scribe": 1
+   },
+   "tokens_in_adjusted": 169915721,
+   "tokens_out_adjusted": 2298489,
+   "tokens_by_role": {
+    "hypothesis": {
+     "tokens_in": 35023089,
+     "tokens_out": 482823
+    },
+    "implementation": {
+     "tokens_in": 91289959,
+     "tokens_out": 1130434
+    },
+    "scribe": {
+     "tokens_in": 5255279,
+     "tokens_out": 95582
+    }
+   },
+   "wall_clock_h": 11.606111111111112,
+   "api_equivalent_cost_usd": null,
+   "total_cost_usd": 0.0,
+   "holdout": 5079.146141809609,
+   "coremark_final": 209.1
+  },
+  {
+   "system": "GPT-6.1 Sol",
+   "model": "gpt-6_1-sol_xhigh-v2",
+   "rep": 4,
+   "cli": "Codex CLI",
+   "tokens_in": 158934309,
+   "tokens_out": 2037897,
+   "tokens_in_from_transcripts": 158934309,
+   "tokens_out_from_transcripts": 2037897,
+   "sessions_killed_without_usage": 22,
+   "killed_by_role": {
+    "hypothesis": 21,
+    "implementation": 0,
+    "scribe": 1
+   },
+   "tokens_in_adjusted": 187808921,
+   "tokens_out_adjusted": 2490103,
+   "tokens_by_role": {
+    "hypothesis": {
+     "tokens_in": 42863582,
+     "tokens_out": 596599
+    },
+    "implementation": {
+     "tokens_in": 110278562,
+     "tokens_out": 1341093
+    },
+    "scribe": {
+     "tokens_in": 5792165,
+     "tokens_out": 100205
+    }
+   },
+   "wall_clock_h": 13.346944444444444,
+   "api_equivalent_cost_usd": null,
+   "total_cost_usd": 0.0,
+   "holdout": 5511.6668584516,
+   "coremark_final": 216.47
+  },
+  {
+   "system": "GPT-6.1 Sol",
+   "model": "gpt-6_1-sol_xhigh-v2",
+   "rep": 5,
+   "cli": "Codex CLI",
+   "tokens_in": 146640685,
+   "tokens_out": 1821952,
+   "tokens_in_from_transcripts": 146640685,
+   "tokens_out_from_transcripts": 1821952,
+   "sessions_killed_without_usage": 29,
+   "killed_by_role": {
+    "hypothesis": 27,
+    "implementation": 2,
+    "scribe": 0
+   },
+   "tokens_in_adjusted": 187637060,
+   "tokens_out_adjusted": 2452562,
+   "tokens_by_role": {
+    "hypothesis": {
+     "tokens_in": 26650128,
+     "tokens_out": 351382
+    },
+    "implementation": {
+     "tokens_in": 113949763,
+     "tokens_out": 1357919
+    },
+    "scribe": {
+     "tokens_in": 6040794,
+     "tokens_out": 112651
+    }
+   },
+   "wall_clock_h": 14.313611111111111,
+   "api_equivalent_cost_usd": null,
+   "total_cost_usd": 0.0,
+   "holdout": 5527.542826880218,
+   "coremark_final": 223.34
+  },
+  {
+   "system": "GPT-6.1 Sol",
+   "model": "gpt-6_1-sol_xhigh-v2",
+   "rep": 6,
+   "cli": "Codex CLI",
+   "tokens_in": 126230743,
+   "tokens_out": 1639016,
+   "tokens_in_from_transcripts": 126230743,
+   "tokens_out_from_transcripts": 1639016,
+   "sessions_killed_without_usage": 27,
+   "killed_by_role": {
+    "hypothesis": 27,
+    "implementation": 0,
+    "scribe": 0
+   },
+   "tokens_in_adjusted": 163236700,
+   "tokens_out_adjusted": 2217950,
+   "tokens_by_role": {
+    "hypothesis": {
+     "tokens_in": 19761260,
+     "tokens_out": 314966
+    },
+    "implementation": {
+     "tokens_in": 100027448,
+     "tokens_out": 1217153
+    },
+    "scribe": {
+     "tokens_in": 6442035,
+     "tokens_out": 106897
+    }
+   },
+   "wall_clock_h": 10.922222222222222,
+   "api_equivalent_cost_usd": null,
+   "total_cost_usd": 0.0,
+   "holdout": 5419.822078879647,
+   "coremark_final": 218.36
+  },
+  {
+   "system": "GPT-6 Astra",
+   "model": "gpt-6-astra_xhigh-v2",
+   "rep": 1,
+   "cli": "Codex CLI",
+   "tokens_in": 190947941,
+   "tokens_out": 2170546,
+   "tokens_in_from_transcripts": 190947941,
+   "tokens_out_from_transcripts": 2170546,
+   "sessions_killed_without_usage": 5,
+   "killed_by_role": {
+    "hypothesis": 5,
+    "implementation": 0,
+    "scribe": 0
+   },
+   "tokens_in_adjusted": 201593856.0,
+   "tokens_out_adjusted": 2295668.5,
+   "tokens_by_role": {
+    "hypothesis": {
+     "tokens_in": 90527654,
+     "tokens_out": 1099502
+    },
+    "implementation": {
+     "tokens_in": 97026376,
+     "tokens_out": 1012606
+    },
+    "scribe": {
+     "tokens_in": 3393911,
+     "tokens_out": 58438
+    }
+   },
+   "wall_clock_h": 9.485555555555555,
+   "api_equivalent_cost_usd": null,
+   "total_cost_usd": 0.0,
+   "holdout": 4352.644962553116,
+   "coremark_final": 174.44
+  },
+  {
+   "system": "GPT-6 Astra",
+   "model": "gpt-6-astra_xhigh-v2",
+   "rep": 2,
+   "cli": "Codex CLI",
+   "tokens_in": 189732724,
+   "tokens_out": 2075458,
+   "tokens_in_from_transcripts": 189732724,
+   "tokens_out_from_transcripts": 2075458,
+   "sessions_killed_without_usage": 8,
+   "killed_by_role": {
+    "hypothesis": 7,
+    "implementation": 0,
+    "scribe": 1
+   },
+   "tokens_in_adjusted": 204708300.5,
+   "tokens_out_adjusted": 2251926.5,
+   "tokens_by_role": {
+    "hypothesis": {
+     "tokens_in": 93392633,
+     "tokens_out": 1047901
+    },
+    "implementation": {
+     "tokens_in": 91930728,
+     "tokens_out": 962961
+    },
+    "scribe": {
+     "tokens_in": 4409363,
+     "tokens_out": 64596
+    }
+   },
+   "wall_clock_h": 11.195555555555556,
+   "api_equivalent_cost_usd": null,
+   "total_cost_usd": 0.0,
+   "holdout": 5288.737813944968,
+   "coremark_final": 211.52
+  },
+  {
+   "system": "GPT-6 Astra",
+   "model": "gpt-6-astra_xhigh-v2",
+   "rep": 3,
+   "cli": "Codex CLI",
+   "tokens_in": 133205621,
+   "tokens_out": 1459821,
+   "tokens_in_from_transcripts": 133205621,
+   "tokens_out_from_transcripts": 1459821,
+   "sessions_killed_without_usage": 19,
+   "killed_by_role": {
+    "hypothesis": 18,
+    "implementation": 0,
+    "scribe": 1
+   },
+   "tokens_in_adjusted": 171602210.5,
+   "tokens_out_adjusted": 1911559.0,
+   "tokens_by_role": {
+    "hypothesis": {
+     "tokens_in": 39098618,
+     "tokens_out": 460259
+    },
+    "implementation": {
+     "tokens_in": 88964802,
+     "tokens_out": 928641
+    },
+    "scribe": {
+     "tokens_in": 5142201,
+     "tokens_out": 70921
+    }
+   },
+   "wall_clock_h": 11.003333333333334,
+   "api_equivalent_cost_usd": null,
+   "total_cost_usd": 0.0,
+   "holdout": 5641.059547768336,
+   "coremark_final": 224.83
+  },
+  {
+   "system": "GPT-6 Astra",
+   "model": "gpt-6-astra_xhigh-v2",
+   "rep": 4,
+   "cli": "Codex CLI",
+   "tokens_in": 172923849,
+   "tokens_out": 1877783,
+   "tokens_in_from_transcripts": 172923849,
+   "tokens_out_from_transcripts": 1877783,
+   "sessions_killed_without_usage": 11,
+   "killed_by_role": {
+    "hypothesis": 10,
+    "implementation": 1,
+    "scribe": 0
+   },
+   "tokens_in_adjusted": 195953959.0,
+   "tokens_out_adjusted": 2147266.0,
+   "tokens_by_role": {
+    "hypothesis": {
+     "tokens_in": 72830147,
+     "tokens_out": 901646
+    },
+    "implementation": {
+     "tokens_in": 95382126,
+     "tokens_out": 906832
+    },
+    "scribe": {
+     "tokens_in": 4711576,
+     "tokens_out": 69305
+    }
+   },
+   "wall_clock_h": 10.686666666666667,
+   "api_equivalent_cost_usd": null,
+   "total_cost_usd": 0.0,
+   "holdout": 4889.226403199729,
+   "coremark_final": 195.55
+  },
+  {
+   "system": "GPT-6 Astra",
+   "model": "gpt-6-astra_xhigh-v2",
+   "rep": 5,
+   "cli": "Codex CLI",
+   "tokens_in": 151017593,
+   "tokens_out": 1772026,
+   "tokens_in_from_transcripts": 151017593,
+   "tokens_out_from_transcripts": 1772026,
+   "sessions_killed_without_usage": 16,
+   "killed_by_role": {
+    "hypothesis": 16,
+    "implementation": 0,
+    "scribe": 0
+   },
+   "tokens_in_adjusted": 185084521.0,
+   "tokens_out_adjusted": 2172418.0,
+   "tokens_by_role": {
+    "hypothesis": {
+     "tokens_in": 43002366,
+     "tokens_out": 607015
+    },
+    "implementation": {
+     "tokens_in": 102933719,
+     "tokens_out": 1094833
+    },
+    "scribe": {
+     "tokens_in": 5081508,
+     "tokens_out": 70178
+    }
+   },
+   "wall_clock_h": 12.41,
+   "api_equivalent_cost_usd": null,
+   "total_cost_usd": 0.0,
+   "holdout": 4546.374030755098,
+   "coremark_final": 182.96
+  },
+  {
+   "system": "GPT-6 Astra",
+   "model": "gpt-6-astra_xhigh-v2",
+   "rep": 6,
+   "cli": "Codex CLI",
+   "tokens_in": 158218983,
+   "tokens_out": 1892568,
+   "tokens_in_from_transcripts": 158218983,
+   "tokens_out_from_transcripts": 1892568,
+   "sessions_killed_without_usage": 6,
+   "killed_by_role": {
+    "hypothesis": 6,
+    "implementation": 0,
+    "scribe": 0
+   },
+   "tokens_in_adjusted": 170994081.0,
+   "tokens_out_adjusted": 2042715.0,
+   "tokens_by_role": {
+    "hypothesis": {
+     "tokens_in": 71973816,
+     "tokens_out": 902498
+    },
+    "implementation": {
+     "tokens_in": 81235074,
+     "tokens_out": 910662
+    },
+    "scribe": {
+     "tokens_in": 5010093,
+     "tokens_out": 79408
+    }
+   },
+   "wall_clock_h": 8.617222222222223,
+   "api_equivalent_cost_usd": null,
+   "total_cost_usd": 0.0,
+   "holdout": 5502.171558982116,
+   "coremark_final": 219.91
+  },
+  {
+   "system": "GPT-5.5",
+   "model": "gpt-5_5_xhigh-v2",
+   "rep": 1,
+   "cli": "Codex CLI",
+   "tokens_in": 137822793,
+   "tokens_out": 2338184,
+   "tokens_in_from_transcripts": 137822793,
+   "tokens_out_from_transcripts": 2338184,
+   "sessions_killed_without_usage": 0,
+   "killed_by_role": {
+    "hypothesis": 0,
+    "implementation": 0,
+    "scribe": 0
+   },
+   "tokens_in_adjusted": 137822793,
+   "tokens_out_adjusted": 2338184,
+   "tokens_by_role": {
+    "hypothesis": {
+     "tokens_in": 17137859,
+     "tokens_out": 599473
+    },
+    "implementation": {
+     "tokens_in": 116456858,
+     "tokens_out": 1587436
+    },
+    "scribe": {
+     "tokens_in": 4228076,
+     "tokens_out": 151275
+    }
+   },
+   "wall_clock_h": 7.186944444444444,
+   "api_equivalent_cost_usd": null,
+   "total_cost_usd": 0.0,
+   "holdout": 3280.9188937855015,
+   "coremark_final": 130.18
+  },
+  {
+   "system": "GPT-5.5",
+   "model": "gpt-5_5_xhigh-v2",
+   "rep": 2,
+   "cli": "Codex CLI",
+   "tokens_in": 105710330,
+   "tokens_out": 1824238,
+   "tokens_in_from_transcripts": 105710330,
+   "tokens_out_from_transcripts": 1824238,
+   "sessions_killed_without_usage": 0,
+   "killed_by_role": {
+    "hypothesis": 0,
+    "implementation": 0,
+    "scribe": 0
+   },
+   "tokens_in_adjusted": 105710330,
+   "tokens_out_adjusted": 1824238,
+   "tokens_by_role": {
+    "hypothesis": {
+     "tokens_in": 15980656,
+     "tokens_out": 598195
+    },
+    "implementation": {
+     "tokens_in": 87772148,
+     "tokens_out": 1121006
+    },
+    "scribe": {
+     "tokens_in": 1957526,
+     "tokens_out": 105037
+    }
+   },
+   "wall_clock_h": 5.4375,
+   "api_equivalent_cost_usd": null,
+   "total_cost_usd": 0.0,
+   "holdout": 3781.9463026236303,
+   "coremark_final": 154.29
+  },
+  {
+   "system": "GPT-5.5",
+   "model": "gpt-5_5_xhigh-v2",
+   "rep": 3,
+   "cli": "Codex CLI",
+   "tokens_in": 112508347,
+   "tokens_out": 1996072,
+   "tokens_in_from_transcripts": 112508347,
+   "tokens_out_from_transcripts": 1996072,
+   "sessions_killed_without_usage": 0,
+   "killed_by_role": {
+    "hypothesis": 0,
+    "implementation": 0,
+    "scribe": 0
+   },
+   "tokens_in_adjusted": 112508347,
+   "tokens_out_adjusted": 1996072,
+   "tokens_by_role": {
+    "hypothesis": {
+     "tokens_in": 16922316,
+     "tokens_out": 625985
+    },
+    "implementation": {
+     "tokens_in": 91996380,
+     "tokens_out": 1230256
+    },
+    "scribe": {
+     "tokens_in": 3589651,
+     "tokens_out": 139831
+    }
+   },
+   "wall_clock_h": 4.383055555555556,
+   "api_equivalent_cost_usd": null,
+   "total_cost_usd": 0.0,
+   "holdout": 3215.9969820835395,
+   "coremark_final": 126.1
+  },
+  {
+   "system": "GPT-5.5",
+   "model": "gpt-5_5_xhigh-v2",
+   "rep": 4,
+   "cli": "Codex CLI",
+   "tokens_in": 123904953,
+   "tokens_out": 2138770,
+   "tokens_in_from_transcripts": 123904953,
+   "tokens_out_from_transcripts": 2138770,
+   "sessions_killed_without_usage": 0,
+   "killed_by_role": {
+    "hypothesis": 0,
+    "implementation": 0,
+    "scribe": 0
+   },
+   "tokens_in_adjusted": 123904953,
+   "tokens_out_adjusted": 2138770,
+   "tokens_by_role": {
+    "hypothesis": {
+     "tokens_in": 16132695,
+     "tokens_out": 609424
+    },
+    "implementation": {
+     "tokens_in": 104214442,
+     "tokens_out": 1392163
+    },
+    "scribe": {
+     "tokens_in": 3557816,
+     "tokens_out": 137183
+    }
+   },
+   "wall_clock_h": 5.4175,
+   "api_equivalent_cost_usd": null,
+   "total_cost_usd": 0.0,
+   "holdout": 3429.113303014063,
+   "coremark_final": 139.91
+  },
+  {
+   "system": "GPT-5.5",
+   "model": "gpt-5_5_xhigh-v2",
+   "rep": 5,
+   "cli": "Codex CLI",
+   "tokens_in": 104663511,
+   "tokens_out": 1962366,
+   "tokens_in_from_transcripts": 104663511,
+   "tokens_out_from_transcripts": 1962366,
+   "sessions_killed_without_usage": 0,
+   "killed_by_role": {
+    "hypothesis": 0,
+    "implementation": 0,
+    "scribe": 0
+   },
+   "tokens_in_adjusted": 104663511,
+   "tokens_out_adjusted": 1962366,
+   "tokens_by_role": {
+    "hypothesis": {
+     "tokens_in": 15734457,
+     "tokens_out": 544524
+    },
+    "implementation": {
+     "tokens_in": 85963703,
+     "tokens_out": 1291572
+    },
+    "scribe": {
+     "tokens_in": 2965351,
+     "tokens_out": 126270
+    }
+   },
+   "wall_clock_h": 4.0280555555555555,
+   "api_equivalent_cost_usd": null,
+   "total_cost_usd": 0.0,
+   "holdout": 4368.978382836063,
+   "coremark_final": 168.04
+  },
+  {
+   "system": "GPT-5.5",
+   "model": "gpt-5_5_xhigh-v2",
+   "rep": 6,
+   "cli": "Codex CLI",
+   "tokens_in": 107313877,
+   "tokens_out": 2153941,
+   "tokens_in_from_transcripts": 107313877,
+   "tokens_out_from_transcripts": 2153941,
+   "sessions_killed_without_usage": 0,
+   "killed_by_role": {
+    "hypothesis": 0,
+    "implementation": 0,
+    "scribe": 0
+   },
+   "tokens_in_adjusted": 107313877,
+   "tokens_out_adjusted": 2153941,
+   "tokens_by_role": {
+    "hypothesis": {
+     "tokens_in": 16778853,
+     "tokens_out": 645441
+    },
+    "implementation": {
+     "tokens_in": 87425923,
+     "tokens_out": 1377107
+    },
+    "scribe": {
+     "tokens_in": 3109101,
+     "tokens_out": 131393
+    }
+   },
+   "wall_clock_h": 4.118333333333333,
+   "api_equivalent_cost_usd": null,
+   "total_cost_usd": 0.0,
+   "holdout": 3609.913036347889,
+   "coremark_final": 141.55
+  },
+  {
+   "system": "GPT-6 Luna",
+   "model": "gpt-6-luna_xhigh-v2",
+   "rep": 1,
+   "cli": "Codex CLI",
+   "tokens_in": 100934117,
+   "tokens_out": 1776990,
+   "tokens_in_from_transcripts": 100934117,
+   "tokens_out_from_transcripts": 1776990,
+   "sessions_killed_without_usage": 4,
+   "killed_by_role": {
+    "hypothesis": 0,
+    "implementation": 4,
+    "scribe": 0
+   },
+   "tokens_in_adjusted": 108096877,
+   "tokens_out_adjusted": 1874810,
+   "tokens_by_role": {
+    "hypothesis": {
+     "tokens_in": 13841900,
+     "tokens_out": 598151
+    },
+    "implementation": {
+     "tokens_in": 84328966,
+     "tokens_out": 1055849
+    },
+    "scribe": {
+     "tokens_in": 2763251,
+     "tokens_out": 122990
+    }
+   },
+   "wall_clock_h": 7.765833333333333,
+   "api_equivalent_cost_usd": null,
+   "total_cost_usd": 0.0,
+   "holdout": 3042.6818081889287,
+   "coremark_final": 119.44
+  },
+  {
+   "system": "GPT-6 Luna",
+   "model": "gpt-6-luna_xhigh-v2",
+   "rep": 2,
+   "cli": "Codex CLI",
+   "tokens_in": 94525916,
+   "tokens_out": 1672643,
+   "tokens_in_from_transcripts": 94525916,
+   "tokens_out_from_transcripts": 1672643,
+   "sessions_killed_without_usage": 1,
+   "killed_by_role": {
+    "hypothesis": 0,
+    "implementation": 1,
+    "scribe": 0
+   },
+   "tokens_in_adjusted": 96316606,
+   "tokens_out_adjusted": 1697098,
+   "tokens_by_role": {
+    "hypothesis": {
+     "tokens_in": 13873971,
+     "tokens_out": 613334
+    },
+    "implementation": {
+     "tokens_in": 78141871,
+     "tokens_out": 944675
+    },
+    "scribe": {
+     "tokens_in": 2510074,
+     "tokens_out": 114634
+    }
+   },
+   "wall_clock_h": 7.351944444444444,
+   "api_equivalent_cost_usd": null,
+   "total_cost_usd": 0.0,
+   "holdout": 3849.526936811284,
+   "coremark_final": 145.89
+  },
+  {
+   "system": "GPT-6 Luna",
+   "model": "gpt-6-luna_xhigh-v2",
+   "rep": 3,
+   "cli": "Codex CLI",
+   "tokens_in": 130246241,
+   "tokens_out": 2194463,
+   "tokens_in_from_transcripts": 130246241,
+   "tokens_out_from_transcripts": 2194463,
+   "sessions_killed_without_usage": 1,
+   "killed_by_role": {
+    "hypothesis": 0,
+    "implementation": 0,
+    "scribe": 1
+   },
+   "tokens_in_adjusted": 130290293,
+   "tokens_out_adjusted": 2196547,
+   "tokens_by_role": {
+    "hypothesis": {
+     "tokens_in": 13843446,
+     "tokens_out": 565579
+    },
+    "implementation": {
+     "tokens_in": 112909375,
+     "tokens_out": 1467821
+    },
+    "scribe": {
+     "tokens_in": 3493420,
+     "tokens_out": 161063
+    }
+   },
+   "wall_clock_h": 7.802777777777778,
+   "api_equivalent_cost_usd": null,
+   "total_cost_usd": 0.0,
+   "holdout": 4038.8921344263554,
+   "coremark_final": 158.07
+  },
+  {
+   "system": "GPT-6 Luna",
+   "model": "gpt-6-luna_xhigh-v2",
+   "rep": 4,
+   "cli": "Codex CLI",
+   "tokens_in": 112654659,
+   "tokens_out": 1990660,
+   "tokens_in_from_transcripts": 112654659,
+   "tokens_out_from_transcripts": 1990660,
+   "sessions_killed_without_usage": 1,
+   "killed_by_role": {
+    "hypothesis": 0,
+    "implementation": 1,
+    "scribe": 0
+   },
+   "tokens_in_adjusted": 114445349,
+   "tokens_out_adjusted": 2015115,
+   "tokens_by_role": {
+    "hypothesis": {
+     "tokens_in": 13833959,
+     "tokens_out": 585479
+    },
+    "implementation": {
+     "tokens_in": 95749327,
+     "tokens_out": 1271713
+    },
+    "scribe": {
+     "tokens_in": 3071373,
+     "tokens_out": 133468
+    }
+   },
+   "wall_clock_h": 6.158055555555555,
+   "api_equivalent_cost_usd": null,
+   "total_cost_usd": 0.0,
+   "holdout": 3488.4497558251987,
+   "coremark_final": 130.81
+  },
+  {
+   "system": "GPT-6 Luna",
+   "model": "gpt-6-luna_xhigh-v2",
+   "rep": 5,
+   "cli": "Codex CLI",
+   "tokens_in": 117716551,
+   "tokens_out": 1772877,
+   "tokens_in_from_transcripts": 117716551,
+   "tokens_out_from_transcripts": 1772877,
+   "sessions_killed_without_usage": 4,
+   "killed_by_role": {
+    "hypothesis": 0,
+    "implementation": 4,
+    "scribe": 0
+   },
+   "tokens_in_adjusted": 124879311,
+   "tokens_out_adjusted": 1870697,
+   "tokens_by_role": {
+    "hypothesis": {
+     "tokens_in": 13973882,
+     "tokens_out": 523806
+    },
+    "implementation": {
+     "tokens_in": 100950692,
+     "tokens_out": 1126551
+    },
+    "scribe": {
+     "tokens_in": 2791977,
+     "tokens_out": 122520
+    }
+   },
+   "wall_clock_h": 7.6075,
+   "api_equivalent_cost_usd": null,
+   "total_cost_usd": 0.0,
+   "holdout": 4125.87892886543,
+   "coremark_final": 165.41
+  },
+  {
+   "system": "GPT-6 Luna",
+   "model": "gpt-6-luna_xhigh-v2",
+   "rep": 6,
+   "cli": "Codex CLI",
+   "tokens_in": 143672770,
+   "tokens_out": 2179820,
+   "tokens_in_from_transcripts": 143672770,
+   "tokens_out_from_transcripts": 2179820,
+   "sessions_killed_without_usage": 0,
+   "killed_by_role": {
+    "hypothesis": 0,
+    "implementation": 0,
+    "scribe": 0
+   },
+   "tokens_in_adjusted": 143672770,
+   "tokens_out_adjusted": 2179820,
+   "tokens_by_role": {
+    "hypothesis": {
+     "tokens_in": 13244269,
+     "tokens_out": 562669
+    },
+    "implementation": {
+     "tokens_in": 127286571,
+     "tokens_out": 1496268
+    },
+    "scribe": {
+     "tokens_in": 3141930,
+     "tokens_out": 120883
+    }
+   },
+   "wall_clock_h": 6.01,
+   "api_equivalent_cost_usd": null,
+   "total_cost_usd": 0.0,
+   "holdout": 2880.7311561349934,
+   "coremark_final": 112.96
+  }
+ ],
+ "per_system": {
+  "Opus 5.5": {
+   "tokens_in": {
+    "median": 212768400.0,
+    "min": 202690960,
+    "max": 232155099
+   },
+   "tokens_out": {
+    "median": 3200433.0,
+    "min": 3144378,
+    "max": 3319052
+   },
+   "tokens_in_adjusted": {
+    "median": 212768400.0,
+    "min": 202690960,
+    "max": 232155099
+   },
+   "tokens_out_adjusted": {
+    "median": 3200433.0,
+    "min": 3144378,
+    "max": 3319052
+   },
+   "wall_clock_h": {
+    "median": 6.82375,
+    "min": 5.545,
+    "max": 9.1975
+   },
+   "api_equivalent_cost_usd": {
+    "median": 198.54102550000005,
+    "min": 192.92438579999998,
+    "max": 202.65702240000002
+   },
+   "holdout": {
+    "median": 7352.786447816048,
+    "min": 5990.750086522253,
+    "max": 7769.575770421307
+   },
+   "sessions_killed_without_usage": {
+    "median": 0.0,
+    "min": 0,
+    "max": 0
+   },
+   "share_tokens_in_by_role": {
+    "hypothesis": 0.19081018219012447,
+    "implementation": 0.7495711293420164,
+    "scribe": 0.059618688467859074
+   },
+   "holdout_per_M_output_tokens": 2262.070651058688
+  },
+  "Sonnet 5.5": {
+   "tokens_in": {
+    "median": 213952962.5,
+    "min": 194144565,
+    "max": 249937741
+   },
+   "tokens_out": {
+    "median": 3005360.5,
+    "min": 2793139,
+    "max": 3251535
+   },
+   "tokens_in_adjusted": {
+    "median": 213952962.5,
+    "min": 194144565,
+    "max": 249937741
+   },
+   "tokens_out_adjusted": {
+    "median": 3005360.5,
+    "min": 2793139,
+    "max": 3251535
+   },
+   "wall_clock_h": {
+    "median": 7.847916666666666,
+    "min": 6.743333333333333,
+    "max": 9.346944444444444
+   },
+   "api_equivalent_cost_usd": {
+    "median": 114.6887868,
+    "min": 106.43083659999996,
+    "max": 125.81644560000004
+   },
+   "holdout": {
+    "median": 6445.3833916057165,
+    "min": 5641.522990742426,
+    "max": 7144.133819341421
+   },
+   "sessions_killed_without_usage": {
+    "median": 0.0,
+    "min": 0,
+    "max": 0
+   },
+   "share_tokens_in_by_role": {
+    "hypothesis": 0.19695803864447042,
+    "implementation": 0.7735042142319427,
+    "scribe": 0.02953774712358685
+   },
+   "holdout_per_M_output_tokens": 2093.4433268908324
+  },
+  "GPT-6.1 Sol": {
+   "tokens_in": {
+    "median": 138963192.5,
+    "min": 116919358,
+    "max": 158934309
+   },
+   "tokens_out": {
+    "median": 1765395.5,
+    "min": 1465800,
+    "max": 2037897
+   },
+   "tokens_in_adjusted": {
+    "median": 176830822.0,
+    "min": 159499880,
+    "max": 187808921
+   },
+   "tokens_out_adjusted": {
+    "median": 2375525.5,
+    "min": 2132426,
+    "max": 2494821
+   },
+   "wall_clock_h": {
+    "median": 12.759027777777778,
+    "min": 10.922222222222222,
+    "max": 17.447777777777777
+   },
+   "api_equivalent_cost_usd": null,
+   "holdout": {
+    "median": 5445.92449717819,
+    "min": 4940.404677485528,
+    "max": 5527.542826880218
+   },
+   "sessions_killed_without_usage": {
+    "median": 27.5,
+    "min": 22,
+    "max": 32
+   },
+   "share_tokens_in_by_role": {
+    "hypothesis": 0.21823351238662272,
+    "implementation": 0.7399203192619942,
+    "scribe": 0.0418461683513831
+   },
+   "holdout_per_M_output_tokens": 3003.068235184407
+  },
+  "GPT-6 Astra": {
+   "tokens_in": {
+    "median": 165571416.0,
+    "min": 133205621,
+    "max": 190947941
+   },
+   "tokens_out": {
+    "median": 1885175.5,
+    "min": 1459821,
+    "max": 2170546
+   },
+   "tokens_in_adjusted": {
+    "median": 190519240.0,
+    "min": 170994081.0,
+    "max": 204708300.5
+   },
+   "tokens_out_adjusted": {
+    "median": 2159842.0,
+    "min": 1911559.0,
+    "max": 2295668.5
+   },
+   "wall_clock_h": {
+    "median": 10.845,
+    "min": 8.617222222222223,
+    "max": 12.41
+   },
+   "api_equivalent_cost_usd": null,
+   "holdout": {
+    "median": 5088.982108572349,
+    "min": 4352.644962553116,
+    "max": 5641.059547768336
+   },
+   "sessions_killed_without_usage": {
+    "median": 9.5,
+    "min": 5,
+    "max": 19
+   },
+   "share_tokens_in_by_role": {
+    "hypothesis": 0.4124557909413146,
+    "implementation": 0.559685423227104,
+    "scribe": 0.027858785831581346
+   },
+   "holdout_per_M_output_tokens": 2584.679491782099
+  },
+  "GPT-5.5": {
+   "tokens_in": {
+    "median": 109911112.0,
+    "min": 104663511,
+    "max": 137822793
+   },
+   "tokens_out": {
+    "median": 2067421.0,
+    "min": 1824238,
+    "max": 2338184
+   },
+   "tokens_in_adjusted": {
+    "median": 109911112.0,
+    "min": 104663511,
+    "max": 137822793
+   },
+   "tokens_out_adjusted": {
+    "median": 2067421.0,
+    "min": 1824238,
+    "max": 2338184
+   },
+   "wall_clock_h": {
+    "median": 4.900277777777778,
+    "min": 4.0280555555555555,
+    "max": 7.186944444444444
+   },
+   "api_equivalent_cost_usd": null,
+   "holdout": {
+    "median": 3519.513169680976,
+    "min": 3215.9969820835395,
+    "max": 4368.978382836063
+   },
+   "sessions_killed_without_usage": {
+    "median": 0.0,
+    "min": 0,
+    "max": 0
+   },
+   "share_tokens_in_by_role": {
+    "hypothesis": 0.14262673784469604,
+    "implementation": 0.8293246234302523,
+    "scribe": 0.028048638725051766
+   },
+   "holdout_per_M_output_tokens": 1643.5600327127522
+  },
+  "GPT-6 Luna": {
+   "tokens_in": {
+    "median": 115185605.0,
+    "min": 94525916,
+    "max": 143672770
+   },
+   "tokens_out": {
+    "median": 1883825.0,
+    "min": 1672643,
+    "max": 2194463
+   },
+   "tokens_in_adjusted": {
+    "median": 119662330.0,
+    "min": 96316606,
+    "max": 143672770
+   },
+   "tokens_out_adjusted": {
+    "median": 1944962.5,
+    "min": 1697098,
+    "max": 2196547
+   },
+   "wall_clock_h": {
+    "median": 7.479722222222222,
+    "min": 6.01,
+    "max": 7.802777777777778
+   },
+   "api_equivalent_cost_usd": null,
+   "holdout": {
+    "median": 3668.9883463182414,
+    "min": 2880.7311561349934,
+    "max": 4125.87892886543
+   },
+   "sessions_killed_without_usage": {
+    "median": 1.0,
+    "min": 0,
+    "max": 4
+   },
+   "share_tokens_in_by_role": {
+    "hypothesis": 0.11805844517778481,
+    "implementation": 0.8565438862991824,
+    "scribe": 0.02539766852303279
+   },
+   "holdout_per_M_output_tokens": 1796.4504358233357
+  }
+ },
+ "spearman_vs_holdout": {
+  "tokens_in": {
+   "pooled_36": {
+    "rho": 0.8306306306306306,
+    "p": 0.0,
+    "n": 36
+   },
+   "stratified_within_system": {
+    "rho": 0.009523809523809525,
+    "p": 0.97775,
+    "n": 36
+   },
+   "per_system": {
+    "Opus 5.5": {
+     "rho": 0.6,
+     "p": 0.24166666666666667,
+     "n": 6
+    },
+    "Sonnet 5.5": {
+     "rho": 0.08571428571428572,
+     "p": 0.9194444444444444,
+     "n": 6
+    },
+    "GPT-6.1 Sol": {
+     "rho": 0.8857142857142857,
+     "p": 0.03333333333333333,
+     "n": 6
+    },
+    "GPT-6 Astra": {
+     "rho": -0.6,
+     "p": 0.24166666666666667,
+     "n": 6
+    },
+    "GPT-5.5": {
+     "rho": -0.8285714285714286,
+     "p": 0.058333333333333334,
+     "n": 6
+    },
+    "GPT-6 Luna": {
+     "rho": -0.08571428571428572,
+     "p": 0.9194444444444444,
+     "n": 6
+    }
+   }
+  },
+  "tokens_out": {
+   "pooled_36": {
+    "rho": 0.5508365508365508,
+    "p": 0.0005,
+    "n": 36
+   },
+   "stratified_within_system": {
+    "rho": -0.009523809523809525,
+    "p": 0.97775,
+    "n": 36
+   },
+   "per_system": {
+    "Opus 5.5": {
+     "rho": 0.8285714285714286,
+     "p": 0.058333333333333334,
+     "n": 6
+    },
+    "Sonnet 5.5": {
+     "rho": -0.37142857142857144,
+     "p": 0.49722222222222223,
+     "n": 6
+    },
+    "GPT-6.1 Sol": {
+     "rho": 0.7714285714285715,
+     "p": 0.10277777777777777,
+     "n": 6
+    },
+    "GPT-6 Astra": {
+     "rho": -0.4857142857142857,
+     "p": 0.35555555555555557,
+     "n": 6
+    },
+    "GPT-5.5": {
+     "rho": -0.5428571428571428,
+     "p": 0.2972222222222222,
+     "n": 6
+    },
+    "GPT-6 Luna": {
+     "rho": -0.2571428571428571,
+     "p": 0.6583333333333333,
+     "n": 6
+    }
+   }
+  },
+  "tokens_in_adjusted": {
+   "pooled_36": {
+    "rho": 0.8522522522522522,
+    "p": 0.0,
+    "n": 36
+   },
+   "stratified_within_system": {
+    "rho": 0.01904761904761905,
+    "p": 0.93185,
+    "n": 36
+   },
+   "per_system": {
+    "Opus 5.5": {
+     "rho": 0.6,
+     "p": 0.24166666666666667,
+     "n": 6
+    },
+    "Sonnet 5.5": {
+     "rho": 0.08571428571428572,
+     "p": 0.9194444444444444,
+     "n": 6
+    },
+    "GPT-6.1 Sol": {
+     "rho": 0.8857142857142857,
+     "p": 0.03333333333333333,
+     "n": 6
+    },
+    "GPT-6 Astra": {
+     "rho": -0.5428571428571428,
+     "p": 0.2972222222222222,
+     "n": 6
+    },
+    "GPT-5.5": {
+     "rho": -0.8285714285714286,
+     "p": 0.058333333333333334,
+     "n": 6
+    },
+    "GPT-6 Luna": {
+     "rho": -0.08571428571428572,
+     "p": 0.9194444444444444,
+     "n": 6
+    }
+   }
+  },
+  "tokens_out_adjusted": {
+   "pooled_36": {
+    "rho": 0.7933075933075933,
+    "p": 0.0,
+    "n": 36
+   },
+   "stratified_within_system": {
+    "rho": -0.0761904761904762,
+    "p": 0.6745,
+    "n": 36
+   },
+   "per_system": {
+    "Opus 5.5": {
+     "rho": 0.8285714285714286,
+     "p": 0.058333333333333334,
+     "n": 6
+    },
+    "Sonnet 5.5": {
+     "rho": -0.37142857142857144,
+     "p": 0.49722222222222223,
+     "n": 6
+    },
+    "GPT-6.1 Sol": {
+     "rho": 0.7142857142857143,
+     "p": 0.1361111111111111,
+     "n": 6
+    },
+    "GPT-6 Astra": {
+     "rho": -0.8285714285714286,
+     "p": 0.058333333333333334,
+     "n": 6
+    },
+    "GPT-5.5": {
+     "rho": -0.5428571428571428,
+     "p": 0.2972222222222222,
+     "n": 6
+    },
+    "GPT-6 Luna": {
+     "rho": -0.2571428571428571,
+     "p": 0.6583333333333333,
+     "n": 6
+    }
+   }
+  },
+  "wall_clock_h": {
+   "pooled_36": {
+    "rho": 0.2193050193050193,
+    "p": 0.1964,
+    "n": 36
+   },
+   "stratified_within_system": {
+    "rho": 0.14285714285714285,
+    "p": 0.42495,
+    "n": 36
+   },
+   "per_system": {
+    "Opus 5.5": {
+     "rho": 0.08571428571428572,
+     "p": 0.9194444444444444,
+     "n": 6
+    },
+    "Sonnet 5.5": {
+     "rho": 0.14285714285714285,
+     "p": 0.8027777777777778,
+     "n": 6
+    },
+    "GPT-6.1 Sol": {
+     "rho": 0.6,
+     "p": 0.24166666666666667,
+     "n": 6
+    },
+    "GPT-6 Astra": {
+     "rho": -0.08571428571428572,
+     "p": 0.9194444444444444,
+     "n": 6
+    },
+    "GPT-5.5": {
+     "rho": -0.42857142857142855,
+     "p": 0.41944444444444445,
+     "n": 6
+    },
+    "GPT-6 Luna": {
+     "rho": 0.5428571428571428,
+     "p": 0.2972222222222222,
+     "n": 6
+    }
+   }
+  },
+  "api_equivalent_cost_usd": {
+   "pooled_12_claude": {
+    "rho": 0.5174825174825175,
+    "p": 0.08955,
+    "n": 12
+   },
+   "stratified_within_system": {
+    "rho": 0.22857142857142856,
+    "p": 0.497,
+    "n": 12
+   },
+   "per_system": {
+    "Opus 5.5": {
+     "rho": 0.6,
+     "p": 0.24166666666666667,
+     "n": 6
+    },
+    "Sonnet 5.5": {
+     "rho": -0.14285714285714285,
+     "p": 0.8027777777777778,
+     "n": 6
+    }
+   }
+  }
+ },
+ "notes": "Analysis 1: effort (tokens, cost, wall time) vs held-out score.\n\nPer run: total_tokens_in / total_tokens_out / wall_clock_sec from the scored\nresults row; api_equivalent_cost_usd from the row or the run's summary.json\n(Claude Code runs only: Claude Code reports a list-price estimate, the Codex\nCLI reports no cost; total_cost_usd is 0.0 for all 36 runs because every run\nused a subscription). Held-out score: holdout_geomean_iter_s.\n\nToken caveat (from the transcripts, see transcripts.py): the Codex CLI reports\nusage only in its final `turn.completed` event, so a Codex session killed by\nthe harness watchdog (20 min hypothesis, 30 min implementation) adds 0 tokens\nto the run's total. The table reports the number of killed sessions per run\nand an adjusted total that imputes each killed session as the median finished\nsession of the same system and role (a rough correction, likely still low:\nkilled sessions ran to the time limit). Claude Code sessions killed early are\nrecovered from per-message usage by the runner (telemetry.py), so Claude\ntotals need no adjustment.\n\nSpearman rho with a permutation p-value: pooled over the 36 runs, stratified\n(ranks taken within each system, which removes system-level differences),\nand within each system (n = 6, exact permutation p).\n"
+}
