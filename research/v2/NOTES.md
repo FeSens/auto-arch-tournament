@@ -448,3 +448,27 @@ analysis: `research/runs/EXP-2026-09-28-v2-main/analysis_final.md`.
 Operations over the campaign's last day: one harness cosim runaway ended by
 the operator ahead of the OOM killer (02:27Z, GPT-5.5 rep5 r2s1). The guard
 started after it never had to fire.
+
+## 2026-10-04: amendment 15 (random control, textbook baseline, Artix-7)
+
+The V1 paper's reviews (MLCAD 2026) asked for a control that separates the
+agents' reasoning from the gates plus blind sampling, for baselines or
+ablations, and for evidence beyond one FPGA. Amendment 15 (committed 18:45Z,
+before any measurement) adds three things:
+
+- Part A: the V1 random-mutation control (no LLM; 1 to 3 seeded single-line
+  operator, ternary or constant edits per slot, lint-clean) rerun on harness
+  2.8.3, 3 runs of N=15, K=3, after the ablation. V1 measured 0 of 135
+  accepted (all failed formal).
+- Part B: the textbook-edit baseline, V0 with its single-cycle divider replaced
+  by a radix-2 iterative one (34 cycles in EX, pipeline stalls until done).
+  RTL and unit tests in `research/v2/textbook_baseline/` (79 cocotb cases
+  pass). One deviation from the amendment text: under ALTOPS the divider
+  answers after one cycle, because riscv-formal's liveness check needs the next
+  retirement within 10 cycles; the agents' dividers do the same. Harness evals
+  (`research/v2/scripts/score_textbook.py`) run after the ablation.
+- Part C: every final design synthesized for an AMD Artix-7 200T
+  (xc7a200tsbg484-1) with Vivado 2026.1 on the operator's workstation,
+  two-pass clock target, median Fmax over three placement directives; held-out
+  scores recomputed from the FPGA-independent cycle counts. Flow in
+  `research/v2/xfpga/`. It runs off the bench host, so it starts now.
