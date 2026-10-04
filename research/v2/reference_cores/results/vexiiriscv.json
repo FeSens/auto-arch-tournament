@@ -4,30 +4,54 @@
   {
    "place_option": 0,
    "placement_failed": false,
-   "fmax_mhz": 71.649,
-   "levels": 14,
-   "logic": 3499,
-   "regs": 1614,
+   "fmax_mhz": 83.928,
+   "levels": 13,
+   "logic": 3443,
+   "regs": 1613,
    "lutram": 27,
    "bsram": 10,
    "dsp": 2,
    "critical_paths": [
     {
      "from": "cpu/execute_ctrl1_up_SrcStageables_ZERO_lane0_s0",
-     "to": "cpu/TrapPlugin_logic_harts_0_trap_pending_state_tval_31_s0",
-     "slack_ns": -8.957,
-     "arrival_ns": 19.251,
+     "to": "cpu/integer_RegFilePlugin_logic_regfile_fpga/asMem_ram_asMem_ram_0_0_s",
+     "slack_ns": -6.915,
+     "arrival_ns": 17.21,
      "logic_cells": 37,
      "modules": [
       "clock_ibuf",
       "cpu"
+     ]
+    },
+    {
+     "from": "cpu/execute_ctrl1_up_RsUnsignedPlugin_RS1_SIGNED_lane0_s0",
+     "to": "cpu/early0_DivPlugin_logic_processing_div/numerator_24_s1",
+     "slack_ns": -6.912,
+     "arrival_ns": 17.207,
+     "logic_cells": 17,
+     "modules": [
+      "clock_ibuf",
+      "cpu",
+      "cpu/early0_DivPlugin_logic_processing_div"
+     ]
+    },
+    {
+     "from": "cpu/execute_ctrl1_up_RsUnsignedPlugin_RS1_SIGNED_lane0_s0",
+     "to": "cpu/early0_DivPlugin_logic_processing_div/numerator_19_s1",
+     "slack_ns": -6.911,
+     "arrival_ns": 17.205,
+     "logic_cells": 16,
+     "modules": [
+      "clock_ibuf",
+      "cpu",
+      "cpu/early0_DivPlugin_logic_processing_div"
      ]
     },
     {
      "from": "cpu/execute_ctrl1_up_SrcStageables_ZERO_lane0_s0",
-     "to": "cpu/TrapPlugin_logic_harts_0_trap_pending_state_tval_8_s0",
-     "slack_ns": -8.955,
-     "arrival_ns": 19.249,
+     "to": "cpu/TrapPlugin_logic_harts_0_trap_pending_state_tval_20_s0",
+     "slack_ns": -6.904,
+     "arrival_ns": 17.198,
      "logic_cells": 37,
      "modules": [
       "clock_ibuf",
@@ -35,36 +59,15 @@
      ]
     },
     {
-     "from": "cpu/execute_ctrl1_up_SrcStageables_ZERO_lane0_s0",
-     "to": "cpu/TrapPlugin_logic_harts_0_trap_pending_state_tval_16_s0",
-     "slack_ns": -8.951,
-     "arrival_ns": 19.245,
-     "logic_cells": 37,
+     "from": "cpu/execute_ctrl1_up_RsUnsignedPlugin_RS1_SIGNED_lane0_s0",
+     "to": "cpu/early0_DivPlugin_logic_processing_div/shifter_0_s1",
+     "slack_ns": -6.901,
+     "arrival_ns": 17.196,
+     "logic_cells": 16,
      "modules": [
       "clock_ibuf",
-      "cpu"
-     ]
-    },
-    {
-     "from": "cpu/execute_ctrl2_up_early0_BranchPlugin_logic_alu_EQ_lane0_s0",
-     "to": "cpu/GSharePlugin_logic_mem_banks_0_GSharePlugin_logic_mem_banks_0_0_0_s",
-     "slack_ns": -8.902,
-     "arrival_ns": 19.197,
-     "logic_cells": 7,
-     "modules": [
-      "clock_ibuf",
-      "cpu"
-     ]
-    },
-    {
-     "from": "cpu/execute_ctrl2_up_early0_BranchPlugin_logic_alu_EQ_lane0_s0",
-     "to": "cpu/GSharePlugin_logic_mem_banks_0_GSharePlugin_logic_mem_banks_0_0_0_s",
-     "slack_ns": -8.886,
-     "arrival_ns": 19.181,
-     "logic_cells": 7,
-     "modules": [
-      "clock_ibuf",
-      "cpu"
+      "cpu",
+      "cpu/early0_DivPlugin_logic_processing_div"
      ]
     }
    ]
@@ -72,52 +75,31 @@
   {
    "place_option": 1,
    "placement_failed": false,
-   "fmax_mhz": 85.95,
-   "levels": 14,
-   "logic": 3499,
-   "regs": 1614,
+   "fmax_mhz": 82.898,
+   "levels": 15,
+   "logic": 3443,
+   "regs": 1613,
    "lutram": 27,
    "bsram": 10,
    "dsp": 2,
    "critical_paths": [
     {
-     "from": "cpu/execute_ctrl1_up_SrcStageables_ZERO_lane0_s0",
-     "to": "cpu/TrapPlugin_logic_harts_0_trap_pending_state_tval_24_s0",
-     "slack_ns": -6.635,
-     "arrival_ns": 16.929,
-     "logic_cells": 37,
+     "from": "cpu/execute_ctrl1_up_integer_RS1_lane0_31_s0",
+     "to": "cpu/early0_DivPlugin_logic_processing_div/numerator_24_s1",
+     "slack_ns": -7.063,
+     "arrival_ns": 17.357,
+     "logic_cells": 15,
      "modules": [
       "clock_ibuf",
-      "cpu"
+      "cpu",
+      "cpu/early0_DivPlugin_logic_processing_div"
      ]
     },
     {
-     "from": "cpu/execute_ctrl1_up_early0_SrcPlugin_SRC1_lane0_2_s0",
-     "to": "cpu/execute_ctrl1_up_integer_RS2_lane0_8_s0",
-     "slack_ns": -6.631,
-     "arrival_ns": 16.925,
-     "logic_cells": 9,
-     "modules": [
-      "clock_ibuf",
-      "cpu"
-     ]
-    },
-    {
-     "from": "cpu/execute_ctrl1_up_SrcStageables_ZERO_lane0_s0",
-     "to": "cpu/TrapPlugin_logic_harts_0_trap_pending_state_tval_27_s0",
-     "slack_ns": -6.622,
-     "arrival_ns": 16.917,
-     "logic_cells": 37,
-     "modules": [
-      "clock_ibuf",
-      "cpu"
-     ]
-    },
-    {
-     "from": "cpu/execute_ctrl1_up_SrcStageables_ZERO_lane0_s0",
-     "to": "cpu/TrapPlugin_logic_harts_0_trap_pending_state_tval_19_s0",
-     "slack_ns": -6.62,
-     "arrival_ns": 16.914,
+     "from": "cpu/execute_ctrl1_up_SrcStageables_REVERT_lane0_s0",
+     "to": "cpu/TrapPlugin_logic_harts_0_trap_pending_state_tval_15_s0",
+     "slack_ns": -7.057,
+     "arrival_ns": 17.351,
      "logic_cells": 36,
      "modules": [
       "clock_ibuf",
@@ -125,10 +107,33 @@
      ]
     },
     {
-     "from": "cpu/execute_ctrl1_up_SrcStageables_ZERO_lane0_s0",
-     "to": "cpu/TrapPlugin_logic_harts_0_trap_pending_state_tval_9_s0",
-     "slack_ns": -6.619,
-     "arrival_ns": 16.913,
+     "from": "cpu/execute_ctrl1_up_integer_RS1_lane0_31_s0",
+     "to": "cpu/early0_DivPlugin_logic_processing_div/shifter_1_s1",
+     "slack_ns": -7.054,
+     "arrival_ns": 17.348,
+     "logic_cells": 14,
+     "modules": [
+      "clock_ibuf",
+      "cpu",
+      "cpu/early0_DivPlugin_logic_processing_div"
+     ]
+    },
+    {
+     "from": "cpu/execute_ctrl1_up_SrcStageables_REVERT_lane0_s0",
+     "to": "cpu/TrapPlugin_logic_harts_0_trap_pending_state_arg_0_s0",
+     "slack_ns": -7.031,
+     "arrival_ns": 17.326,
+     "logic_cells": 36,
+     "modules": [
+      "clock_ibuf",
+      "cpu"
+     ]
+    },
+    {
+     "from": "cpu/execute_ctrl1_up_SrcStageables_REVERT_lane0_s0",
+     "to": "cpu/TrapPlugin_logic_harts_0_trap_pending_state_tval_6_s0",
+     "slack_ns": -7.03,
+     "arrival_ns": 17.325,
      "logic_cells": 37,
      "modules": [
       "clock_ibuf",
@@ -140,52 +145,31 @@
   {
    "place_option": 2,
    "placement_failed": false,
-   "fmax_mhz": 85.95,
-   "levels": 14,
-   "logic": 3499,
-   "regs": 1614,
+   "fmax_mhz": 82.898,
+   "levels": 15,
+   "logic": 3443,
+   "regs": 1613,
    "lutram": 27,
    "bsram": 10,
    "dsp": 2,
    "critical_paths": [
     {
-     "from": "cpu/execute_ctrl1_up_SrcStageables_ZERO_lane0_s0",
-     "to": "cpu/TrapPlugin_logic_harts_0_trap_pending_state_tval_24_s0",
-     "slack_ns": -6.635,
-     "arrival_ns": 16.929,
-     "logic_cells": 37,
+     "from": "cpu/execute_ctrl1_up_integer_RS1_lane0_31_s0",
+     "to": "cpu/early0_DivPlugin_logic_processing_div/numerator_24_s1",
+     "slack_ns": -7.063,
+     "arrival_ns": 17.357,
+     "logic_cells": 15,
      "modules": [
       "clock_ibuf",
-      "cpu"
+      "cpu",
+      "cpu/early0_DivPlugin_logic_processing_div"
      ]
     },
     {
-     "from": "cpu/execute_ctrl1_up_early0_SrcPlugin_SRC1_lane0_2_s0",
-     "to": "cpu/execute_ctrl1_up_integer_RS2_lane0_8_s0",
-     "slack_ns": -6.631,
-     "arrival_ns": 16.925,
-     "logic_cells": 9,
-     "modules": [
-      "clock_ibuf",
-      "cpu"
-     ]
-    },
-    {
-     "from": "cpu/execute_ctrl1_up_SrcStageables_ZERO_lane0_s0",
-     "to": "cpu/TrapPlugin_logic_harts_0_trap_pending_state_tval_27_s0",
-     "slack_ns": -6.622,
-     "arrival_ns": 16.917,
-     "logic_cells": 37,
-     "modules": [
-      "clock_ibuf",
-      "cpu"
-     ]
-    },
-    {
-     "from": "cpu/execute_ctrl1_up_SrcStageables_ZERO_lane0_s0",
-     "to": "cpu/TrapPlugin_logic_harts_0_trap_pending_state_tval_19_s0",
-     "slack_ns": -6.62,
-     "arrival_ns": 16.914,
+     "from": "cpu/execute_ctrl1_up_SrcStageables_REVERT_lane0_s0",
+     "to": "cpu/TrapPlugin_logic_harts_0_trap_pending_state_tval_15_s0",
+     "slack_ns": -7.057,
+     "arrival_ns": 17.351,
      "logic_cells": 36,
      "modules": [
       "clock_ibuf",
@@ -193,10 +177,33 @@
      ]
     },
     {
-     "from": "cpu/execute_ctrl1_up_SrcStageables_ZERO_lane0_s0",
-     "to": "cpu/TrapPlugin_logic_harts_0_trap_pending_state_tval_9_s0",
-     "slack_ns": -6.619,
-     "arrival_ns": 16.913,
+     "from": "cpu/execute_ctrl1_up_integer_RS1_lane0_31_s0",
+     "to": "cpu/early0_DivPlugin_logic_processing_div/shifter_1_s1",
+     "slack_ns": -7.054,
+     "arrival_ns": 17.348,
+     "logic_cells": 14,
+     "modules": [
+      "clock_ibuf",
+      "cpu",
+      "cpu/early0_DivPlugin_logic_processing_div"
+     ]
+    },
+    {
+     "from": "cpu/execute_ctrl1_up_SrcStageables_REVERT_lane0_s0",
+     "to": "cpu/TrapPlugin_logic_harts_0_trap_pending_state_arg_0_s0",
+     "slack_ns": -7.031,
+     "arrival_ns": 17.326,
+     "logic_cells": 36,
+     "modules": [
+      "clock_ibuf",
+      "cpu"
+     ]
+    },
+    {
+     "from": "cpu/execute_ctrl1_up_SrcStageables_REVERT_lane0_s0",
+     "to": "cpu/TrapPlugin_logic_harts_0_trap_pending_state_tval_6_s0",
+     "slack_ns": -7.03,
+     "arrival_ns": 17.325,
      "logic_cells": 37,
      "modules": [
       "clock_ibuf",
@@ -208,40 +215,40 @@
  ],
  "summary": {
   "placement_failed": false,
-  "fmax_mhz": 85.95,
+  "fmax_mhz": 82.898,
   "seeds": [
-   71.649,
-   85.95,
-   85.95
+   83.928,
+   82.898,
+   82.898
   ],
   "perturbations": [
    [
     0,
-    71.649,
-    14
+    83.928,
+    13
    ],
    [
     1,
-    85.95,
-    14
+    82.898,
+    15
    ],
    [
     2,
-    85.95,
-    14
+    82.898,
+    15
    ]
   ],
-  "lut4": 3499,
-  "ff": 1614,
+  "lut4": 3443,
+  "ff": 1613,
   "lutram": 27,
   "bsram": 10,
   "dsp": 2,
-  "logic_levels": 14,
+  "logic_levels": 13,
   "critical_path": {
    "from": "cpu/execute_ctrl1_up_SrcStageables_ZERO_lane0_s0",
-   "to": "cpu/TrapPlugin_logic_harts_0_trap_pending_state_tval_31_s0",
-   "slack_ns": -8.957,
-   "arrival_ns": 19.251,
+   "to": "cpu/integer_RegFilePlugin_logic_regfile_fpga/asMem_ram_asMem_ram_0_0_s",
+   "slack_ns": -6.915,
+   "arrival_ns": 17.21,
    "logic_cells": 37,
    "modules": [
     "clock_ibuf",

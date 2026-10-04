@@ -71,8 +71,12 @@ CORES = {
     "vexriscv_nocache": {"sources": [RC / "vexriscv_nocache/VexRiscv.v"]},
     # VexiiRiscv 4e38f271: sbt "Test/runMain vexiiriscv.Generate --xlen=32 --with-rvm
     # --allow-bypass-from=0 --relaxed-branch --relaxed-btb --fetch-fork-at=1 --with-btb
-    # --with-gshare --with-ras --regfile-async" (Synt.scala "rv32im branchPredict").
-    "vexiiriscv": {"sources": [RC / "vexiiriscv/VexiiRiscv.v"]},
+    # --with-gshare --with-ras --regfile-async" (Synt.scala "rv32im branchPredict"),
+    # plus --reset-vector=0 --region base=0,size=100000,main=1,exe=1
+    # --region base=10000000,size=10000000,main=0,exe=0 so it runs the bench ELFs
+    # (stage 2). results/vexiiriscv_defaultmap.json is the same config with the
+    # default reset vector and memory map (0x80000000).
+    "vexiiriscv": {"sources": [RC / "vexiiriscv_benchmap/VexiiRiscv.v"]},
     "ibex_small": {"sources": [], "bench": GEN / "ibex_small_bench.v"},
     "ibex_maxperf": {"sources": [], "bench": GEN / "ibex_maxperf_bench.v"},
 }

@@ -1,0 +1,59 @@
+{
+ "core": "ibex_maxperf",
+ "fmax_mhz": 45.451,
+ "sim_args": [
+  "--reset-pc",
+  "80"
+ ],
+ "coremark": {
+  "valid": true,
+  "reason": null,
+  "cycles": 4434949,
+  "end": "ebreak_fetch",
+  "coremark_per_mhz": 2.254817360921174,
+  "score": 102.48370387122829
+ },
+ "holdout": {
+  "dhrystone": {
+   "valid": true,
+   "reason": null,
+   "cycles": 3312784,
+   "reps": 6000,
+   "end": "ebreak_fetch",
+   "iter_s": 82319.2819091133
+  },
+  "aha-mont64": {
+   "valid": true,
+   "reason": null,
+   "cycles": 2943341,
+   "reps": 200,
+   "end": "ebreak_fetch",
+   "iter_s": 3088.3951264906104
+  },
+  "crc32": {
+   "valid": true,
+   "reason": null,
+   "cycles": 3107465,
+   "reps": 90,
+   "end": "ebreak_fetch",
+   "iter_s": 1316.375244773473
+  },
+  "matmult-int": {
+   "valid": true,
+   "reason": null,
+   "cycles": 1537839,
+   "reps": 15,
+   "end": "ebreak_fetch",
+   "iter_s": 443.32664212573616
+  },
+  "edn": {
+   "valid": true,
+   "reason": null,
+   "cycles": 2862603,
+   "reps": 50,
+   "end": "ebreak_fetch",
+   "iter_s": 793.8753644847015
+  }
+ },
+ "holdout_geomean_iter_s": 2595.482224920409
+}

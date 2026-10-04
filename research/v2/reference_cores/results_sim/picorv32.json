@@ -1,0 +1,56 @@
+{
+ "core": "picorv32",
+ "fmax_mhz": 114.828,
+ "sim_args": [],
+ "coremark": {
+  "valid": true,
+  "reason": null,
+  "cycles": 15920551,
+  "end": "ebreak_fetch",
+  "coremark_per_mhz": 0.6281189639730435,
+  "score": 72.12564439509663
+ },
+ "holdout": {
+  "dhrystone": {
+   "valid": true,
+   "reason": null,
+   "cycles": 13100589,
+   "reps": 6000,
+   "end": "ebreak_fetch",
+   "iter_s": 52590.61252894813
+  },
+  "aha-mont64": {
+   "valid": true,
+   "reason": null,
+   "cycles": 9733772,
+   "reps": 200,
+   "end": "ebreak_fetch",
+   "iter_s": 2359.373118663556
+  },
+  "crc32": {
+   "valid": true,
+   "reason": null,
+   "cycles": 10744299,
+   "reps": 90,
+   "end": "ebreak_fetch",
+   "iter_s": 961.8607970608413
+  },
+  "matmult-int": {
+   "valid": true,
+   "reason": null,
+   "cycles": 6331785,
+   "reps": 15,
+   "end": "ebreak_fetch",
+   "iter_s": 272.02755621045253
+  },
+  "edn": {
+   "valid": true,
+   "reason": null,
+   "cycles": 11652189,
+   "reps": 50,
+   "end": "ebreak_fetch",
+   "iter_s": 492.731451575322
+  }
+ },
+ "holdout_geomean_iter_s": 1741.037209742171
+}

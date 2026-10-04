@@ -1,0 +1,59 @@
+{
+ "core": "vexriscv_maxperf",
+ "fmax_mhz": 87.764,
+ "sim_args": [
+  "--reset-pc",
+  "80000000"
+ ],
+ "coremark": {
+  "valid": true,
+  "reason": null,
+  "cycles": 3849540,
+  "end": "ebreak_fetch",
+  "coremark_per_mhz": 2.597712973498132,
+  "score": 227.98568140609007
+ },
+ "holdout": {
+  "dhrystone": {
+   "valid": true,
+   "reason": null,
+   "cycles": 2478201,
+   "reps": 6000,
+   "end": "idle",
+   "iter_s": 212486.39638189154
+  },
+  "aha-mont64": {
+   "valid": true,
+   "reason": null,
+   "cycles": 2384409,
+   "reps": 200,
+   "end": "idle",
+   "iter_s": 7361.48873788012
+  },
+  "crc32": {
+   "valid": true,
+   "reason": null,
+   "cycles": 2427849,
+   "reps": 90,
+   "end": "idle",
+   "iter_s": 3253.3983785647297
+  },
+  "matmult-int": {
+   "valid": true,
+   "reason": null,
+   "cycles": 1337910,
+   "reps": 15,
+   "end": "idle",
+   "iter_s": 983.9675314483037
+  },
+  "edn": {
+   "valid": true,
+   "reason": null,
+   "cycles": 2368754,
+   "reps": 50,
+   "end": "idle",
+   "iter_s": 1852.535130283685
+  }
+ },
+ "holdout_geomean_iter_s": 6215.50256354366
+}

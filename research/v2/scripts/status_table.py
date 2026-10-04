@@ -17,6 +17,7 @@ MODEL_ORDER = ["claude-opus-5_5_xhigh-v2", "gpt-6_1-sol_xhigh-v2", "gpt-6-sol_xh
 # cores in the harness's Gowin flow (median of place options 0-2). Their CoreMark is Fmax x a
 # published CoreMark/MHz, not a bench measurement; no held-out score (not run on the bench programs).
 REFERENCES = Path("research/v2/reference_cores/references.json")
+SIM_RESULTS = Path("research/v2/reference_cores/results_sim")
 
 
 def references():
@@ -28,8 +29,17 @@ def references():
         s = json.loads(res.read_text())["summary"]
         if s.get("placement_failed"):
             continue
-        out.append({**ref, "fmax_mhz": s["fmax_mhz"], "lut4": s["lut4"],
-                    "score": s["fmax_mhz"] * ref["coremark_per_mhz"]})
+        r = {**ref, "fmax_mhz": s["fmax_mhz"], "lut4": s["lut4"], "measured": False,
+             "score": s["fmax_mhz"] * ref["coremark_per_mhz"], "holdout": None}
+        # Stage 2 (research/v2/reference_cores/sim): the bench's own CoreMark and
+        # held-out ELFs in simulation, scored like the harness.
+        sim = SIM_RESULTS / f"{ref['key']}.json"
+        if sim.is_file():
+            m = json.loads(sim.read_text())
+            if m["coremark"]["valid"] and m["fmax_mhz"] == s["fmax_mhz"]:
+                r.update(measured=True, score=m["coremark"]["score"],
+                         holdout=m["holdout_geomean_iter_s"] or None)
+        out.append(r)
     return sorted(out, key=lambda r: -r["score"])
 
 
@@ -118,11 +128,14 @@ def main():
     refs = references()
     for v in refs:
         print("| " + " | ".join([f"{v['name']} (reference)", "external"] + [""] * nr + [
-            f"{v['score']:.1f}*", f"{v['fmax_mhz']}", f"{v['lut4']:,}", "n/a", ""]) + " |")
+            f"{v['score']:.1f}" + ("" if v["measured"] else "*"), f"{v['fmax_mhz']}", f"{v['lut4']:,}",
+            f"{v['holdout']:.0f}" if v["holdout"] else "n/a", ""]) + " |")
     if refs:
-        print("\n*References: open-source cores in the same Gowin flow; CoreMark = Fmax x published "
-              "CoreMark/MHz (indicative, not a bench measurement; basis per core in "
-              "research/v2/reference_cores/README.md); not run on the held-out programs.")
+        print("\nReferences: open-source cores in the same Gowin flow (Fmax, LUT4). CoreMark and held-out "
+              "are measured in simulation on the bench's own ELFs with the harness's stall model and "
+              "scoring, each core on its native bus with one-cycle synchronous memory "
+              "(research/v2/reference_cores/README.md). *Not yet simulated: Fmax x published CoreMark/MHz "
+              "(indicative only).")
     print("\u2020 Running rep: the current champion's loop measurement (Fmax, LUT4). Done reps show the "
           "held-out re-run Fmax and the final champion's LUT4.")
 

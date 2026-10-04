@@ -1,13 +1,86 @@
-# Open-source reference cores in the V2 Gowin flow
+# Open-source reference cores in the V2 flow
 
-Stage 1 of the reference comparison: Fmax and area of open-source RV32IM cores,
-measured with the harness's own Gowin flow. Each score is Fmax times a
-CoreMark/MHz published by someone else, so it is indicative only. Stage 2
-(after the campaign) runs the bench's own `coremark.elf` and the five held-out
-kernels on each reference in RTL simulation, replacing the published figure
-with a measured one.
+Ten configurations of eight open-source RV32IM cores, scored the way the
+bench scores an agent's core. Stage 1 measures Fmax and area with the
+harness's own Gowin flow. Stage 2 runs the bench's own CoreMark ELF and the
+five held-out kernel ELFs on each core in RTL simulation, with the harness's
+bus-stall model and scoring. The headline numbers are in "Stage 2 results".
 
-## Method
+## Stage 2 results (measured)
+
+CoreMark = Fmax x 1e6 x 10 iterations / bracketed cycles; held-out = geomean
+over the five kernels of Fmax x 1e6 x reps / bracketed cycles (the formulas of
+`tools/eval/fpga.py` and `tools/eval/holdout.py`). Every run passed the
+harness's checks: the CoreMark CRCs and "Correct operation validated." (via
+`validate_coremark_uart`), the held-out `status=PASS` line, both timing
+markers, no out-of-range access.
+
+| Core | Fmax MHz | LUT4 | CoreMark/MHz measured (published) | CoreMark | Held-out geomean iter/s |
+|---|---|---|---|---|---|
+| VexRiscv MaxPerf | 87.764 | 2,997 | 2.598 (2.57) | 228.0 | 6,216 |
+| VexRiscv NoCache | 88.486 | 2,519 | 1.934 (2.30) | 171.1 | 4,524 |
+| VexiiRiscv | 82.898 | 3,443 | 2.052 (2.99) | 170.1 | 4,362 |
+| Hazard3 | 50.449 | 2,801 | 2.373 (4.10 with Zb*) | 119.7 | 3,028 |
+| Ibex maxperf | 45.451 | 4,185 | 2.255 (3.13) | 102.5 | 2,596 |
+| Ibex small | 47.107 | 3,645 | 1.939 (2.47) | 91.3 | 2,188 |
+| ultraembedded riscv | 44.490 | 4,952 | 1.996 (2.94) | 88.8 | 2,206 |
+| NEORV32 | 92.028 | 2,058 | 0.940 (0.95) | 86.5 | 2,102 |
+| biRISC-V | 27.279 | 17,560 | 2.890 (4.1) | 78.8 | 2,012 |
+| PicoRV32 | 114.828 | 2,486 | 0.628 (0.553, third-party) | 72.1 | 1,741 |
+
+Two measured figures land on the published ones (VexRiscv MaxPerf 2.598 vs
+2.57, NEORV32 0.940 vs 0.95), which checks the simulator and stall model. The
+other published figures are higher because they were taken without bus
+stalls, with other compilers and flags, or with extra ISA extensions.
+
+Against the 32 finished agent runs (final CoreMark 113.0 to 308.8, held-out
+2,881 to 7,770): VexRiscv MaxPerf scores above 21 of them on CoreMark and 23
+on held-out. Every Opus 5.5 final and five of six Sonnet 5.5 finals beat it
+on CoreMark; no GPT-6.1 Sol, GPT-6 Astra, Luna or GPT-5.5 final does.
+VexRiscv NoCache and VexiiRiscv (about 170) sit inside the GPT-6 Astra range.
+The other seven score below every agent final, except Hazard3, which beats
+two finals on CoreMark and one on held-out. Five of those seven run at 27 to
+50 MHz on this LUT4 part; NEORV32 and PicoRV32 are fast but multi-cycle.
+
+### Stage 2 method
+
+- `sim/ref_sim.cpp` is a Verilator testbench written to match
+  `test/cosim/main.cpp --bench --istall --dstall`. It uses the same 1 MiB
+  memory image, the same xorshift stall model and seed (about 22% of cycles
+  stalled per port, imem drawn before dmem), the same UART and
+  BENCH_START/STOP markers, the same 50M-cycle ceiling and the same final JSON
+  line.
+- Each core sits in a `sim/ref_top_<core>.sv` adapter on its own bus. A
+  request is accepted on a ready draw, and the read data returns the next
+  cycle (synchronous memory). For AHB (Hazard3), the access happens in the
+  data phase. Cache refills (VexRiscv MaxPerf) stream one word per ready
+  cycle.
+- This differs from the agents' cores, which read memory combinationally (in
+  the same cycle). A one-cycle response is the minimum most of these native
+  protocols allow, and it is what the published figures assume.
+- Reference cores have no common RVFI port, so a run ends at the first of:
+  - the fetch of crt0's `ebreak` after BENCH_STOP;
+  - a fetch outside memory (the trap vector, when the `ebreak` runs from an
+    instruction cache);
+  - 200k cycles with no bus access (VexRiscv's `ebreak` enters debug halt).
+
+  Scores only use the marker cycles, so this rule only bounds the run.
+- Ibex boots at boot_addr + 0x80, and VexRiscv at 0x80000000. Each fetches
+  one `jalr x0, 0(x0)` at its reset PC (`--reset-pc`) before the timed
+  window. VexiiRiscv is generated with reset vector 0 and the bench memory
+  map instead (`--region`), and that build is the one timed in stage 1. The
+  default-map build is kept in `results/vexiiriscv_defaultmap.json` (85.95
+  MHz, 3,499 LUT4).
+- ELFs: the clone-built `coremark.elf` (its code and data are identical to
+  the main checkout's) and `bench/holdout/build/*.elf`, the ELFs the held-out
+  scoring uses, copied to `~/refcores/elfs`.
+- Run: `sim/ghdl_neorv32.sh` and `sim/ibex_sim_sv2v.sh <cfg>` (conversions),
+  `sim/build.sh <core>`, then `sim/run_all.sh`. Results are in
+  `results_sim/<core>.json`, with per-kernel cycles, reps and end reason.
+
+## Stage 1 (Gowin Fmax and area)
+
+### Stage 1 method
 
 - Flow: `tools/eval/gowin.py`, imported read-only (`project_tcl`, `_run_gw_sh`,
   `parse_reports`, `summarize`). GW2AR-LV18QN88C8/I7, 5 ns target, place
@@ -31,15 +104,16 @@ with a measured one.
 - These runs take no eval slot. They run at nice 19 beside the scored
   campaign, at most two cores (six Gowin processes) at a time.
 
-## Results
+### Stage 1 results
 
-Score = Fmax x the CoreMark/MHz in the "CM/MHz" column. The basis column says
+Score = Fmax x the CoreMark/MHz in the "CM/MHz" column (indicative; replaced
+by the measured stage 2 scores above). The basis column says
 how far that figure is from the bench's build (rv32im, `-O3`, 2K,
 `ITERATIONS=10`, single-cycle memory with the bench stall sequence).
 
 | Core | Commit | Config | Fmax MHz | LUT4 | FF | CM/MHz | Basis | Score |
 |---|---|---|---|---|---|---|---|---|
-| VexiiRiscv | 4e38f271 | rv32im branchPredict, no caches | 85.950 | 3,499 | 1,614 | 2.99 | official, marked "too early" by its authors | 257.0 |
+| VexiiRiscv | 4e38f271 | rv32im branchPredict, no caches, bench memory map | 82.898 | 3,443 | 1,613 | 2.99 | official, marked "too early" by its authors | 247.9 |
 | VexRiscv MaxPerf | baf7dc82 | GenFullNoMmuMaxPerf, 8 KB I$ and D$ | 87.764 | 2,997 | 1,186 | 2.57 | official | 225.6 |
 | Hazard3 | 8af99293 | rv32im, fast mul, branch predictor | 50.449 | 2,801 | 650 | 4.10 | official, different ISA (Zba/Zbb/Zbkb/Zbs, tuned flags) | 206.8 |
 | VexRiscv NoCache | baf7dc82 | GenFullNoMmuNoCache | 88.486 | 2,519 | 957 | 2.30 | official | 203.5 |
@@ -50,7 +124,7 @@ how far that figure is from the bench's build (rv32im, `-O3`, 2K,
 | NEORV32 | 7f769c7a | multi-cycle, fast mul and shifter | 92.028 | 2,058 | 820 | 0.95 | official upper bound (rv32imc, caches) | 87.4 |
 | PicoRV32 | ef203c2b | fast mul, div, barrel shifter | 114.828 | 2,486 | 930 | 0.553 | third-party (slow multiplier) | 63.5 |
 
-## Per-core notes
+### Per-core notes
 
 - **VexiiRiscv.** `sbt "Test/runMain vexiiriscv.Generate --xlen=32 --with-rvm
   --allow-bypass-from=0 --relaxed-branch --relaxed-btb --fetch-fork-at=1
