@@ -1,0 +1,2072 @@
+[
+ {
+  "key": "vexriscv_maxperf",
+  "name": "VexRiscv MaxPerf",
+  "fmax_mhz": 87.764,
+  "kernels": {
+   "aha-mont64": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "idle",
+    "cycles": 2384409,
+    "reps": 200,
+    "iter_s": 7361.48873788012
+   },
+   "crc32": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "idle",
+    "cycles": 2427849,
+    "reps": 90,
+    "iter_s": 3253.3983785647297
+   },
+   "depthconv": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "idle",
+    "cycles": 2197811,
+    "reps": 874,
+    "iter_s": 34900.970101614745
+   },
+   "dhrystone": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "idle",
+    "cycles": 2478201,
+    "reps": 6000,
+    "iter_s": 212486.39638189154
+   },
+   "edn": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "idle",
+    "cycles": 2368754,
+    "reps": 50,
+    "iter_s": 1852.535130283685
+   },
+   "huffbench": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "idle",
+    "cycles": 2254837,
+    "reps": 8,
+    "iter_s": 311.3803791582274
+   },
+   "matmult-int": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "idle",
+    "cycles": 1337910,
+    "reps": 15,
+    "iter_s": 983.9675314483037
+   },
+   "md5sum": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "idle",
+    "cycles": 2070105,
+    "reps": 39,
+    "iter_s": 1653.4407674973008
+   },
+   "nettle-aes": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "idle",
+    "cycles": 2490880,
+    "reps": 39,
+    "iter_s": 1374.1312307297019
+   },
+   "nettle-sha256": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "idle",
+    "cycles": 2189562,
+    "reps": 240,
+    "iter_s": 9619.896582056137
+   },
+   "nsichneu": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 5021558,
+    "reps": 681,
+    "iter_s": 11902.139535180117
+   },
+   "picojpeg": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 1985182,
+    "reps": 3,
+    "iter_s": 132.62864563551352
+   },
+   "qrduino": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "idle",
+    "cycles": 2110848,
+    "reps": 3,
+    "iter_s": 124.73280880480262
+   },
+   "sglib-combined": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "idle",
+    "cycles": 2297806,
+    "reps": 19,
+    "iter_s": 725.6992104642428
+   },
+   "slre": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "idle",
+    "cycles": 2578407,
+    "reps": 75,
+    "iter_s": 2552.855309499237
+   },
+   "statemate": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "idle",
+    "cycles": 2199094,
+    "reps": 1795,
+    "iter_s": 71636.94685174894
+   },
+   "tarfind": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "idle",
+    "cycles": 2071890,
+    "reps": 32,
+    "iter_s": 1355.500533329472
+   },
+   "ud": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "idle",
+    "cycles": 2440544,
+    "reps": 926,
+    "iter_s": 33299.73317424312
+   },
+   "wikisort": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "idle",
+    "cycles": 2195622,
+    "reps": 2,
+    "iter_s": 79.94454418838944
+   },
+   "xgboost": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "idle",
+    "cycles": 6291482,
+    "reps": 1,
+    "iter_s": 13.94965446932853
+   }
+  }
+ },
+ {
+  "key": "vexriscv_nocache",
+  "name": "VexRiscv NoCache",
+  "fmax_mhz": 88.486,
+  "kernels": {
+   "aha-mont64": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 3173192,
+    "reps": 200,
+    "iter_s": 5577.0971312167685
+   },
+   "crc32": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 3474331,
+    "reps": 90,
+    "iter_s": 2292.165024000304
+   },
+   "depthconv": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 3012353,
+    "reps": 874,
+    "iter_s": 25673.207622081474
+   },
+   "dhrystone": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 3625616,
+    "reps": 6000,
+    "iter_s": 146434.70240643245
+   },
+   "edn": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 3246264,
+    "reps": 50,
+    "iter_s": 1362.8897711338327
+   },
+   "huffbench": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 3070951,
+    "reps": 8,
+    "iter_s": 230.51100457154803
+   },
+   "matmult-int": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 1787612,
+    "reps": 15,
+    "iter_s": 742.4933374803928
+   },
+   "md5sum": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2960083,
+    "reps": 39,
+    "iter_s": 1165.8301473303281
+   },
+   "nettle-aes": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2986511,
+    "reps": 39,
+    "iter_s": 1155.513574200798
+   },
+   "nettle-sha256": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 3006897,
+    "reps": 240,
+    "iter_s": 7062.642983780289
+   },
+   "nsichneu": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 3022303,
+    "reps": 681,
+    "iter_s": 19938.095551637278
+   },
+   "picojpeg": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2909165,
+    "reps": 3,
+    "iter_s": 91.2488635055076
+   },
+   "qrduino": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2801741,
+    "reps": 3,
+    "iter_s": 94.74751591956573
+   },
+   "sglib-combined": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 3070651,
+    "reps": 19,
+    "iter_s": 547.5171225906167
+   },
+   "slre": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 3022227,
+    "reps": 75,
+    "iter_s": 2195.8807197473916
+   },
+   "statemate": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 3056378,
+    "reps": 1795,
+    "iter_s": 51967.515143742035
+   },
+   "tarfind": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 3002360,
+    "reps": 32,
+    "iter_s": 943.1087544465021
+   },
+   "ud": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2992893,
+    "reps": 926,
+    "iter_s": 27377.536049568094
+   },
+   "wikisort": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 3262490,
+    "reps": 2,
+    "iter_s": 54.244457454275725
+   },
+   "xgboost": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 5798651,
+    "reps": 1,
+    "iter_s": 15.259756105342433
+   }
+  }
+ },
+ {
+  "key": "vexiiriscv",
+  "name": "VexiiRiscv",
+  "fmax_mhz": 82.898,
+  "kernels": {
+   "aha-mont64": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 3125318,
+    "reps": 200,
+    "iter_s": 5304.93217010237
+   },
+   "crc32": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 3177072,
+    "reps": 90,
+    "iter_s": 2348.332049132031
+   },
+   "depthconv": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 3111112,
+    "reps": 874,
+    "iter_s": 23288.41006045427
+   },
+   "dhrystone": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 3582519,
+    "reps": 6000,
+    "iter_s": 138837.5051186051
+   },
+   "edn": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 3278362,
+    "reps": 50,
+    "iter_s": 1264.3204136699974
+   },
+   "huffbench": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 3098822,
+    "reps": 8,
+    "iter_s": 214.01164700650764
+   },
+   "matmult-int": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 1722110,
+    "reps": 15,
+    "iter_s": 722.0618891940701
+   },
+   "md5sum": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2882651,
+    "reps": 39,
+    "iter_s": 1121.5447169983463
+   },
+   "nettle-aes": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2830777,
+    "reps": 39,
+    "iter_s": 1142.097028483699
+   },
+   "nettle-sha256": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2799859,
+    "reps": 240,
+    "iter_s": 7105.900689999032
+   },
+   "nsichneu": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 3699457,
+    "reps": 681,
+    "iter_s": 15259.952474106334
+   },
+   "picojpeg": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2623219,
+    "reps": 3,
+    "iter_s": 94.80489429208923
+   },
+   "qrduino": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2720099,
+    "reps": 3,
+    "iter_s": 91.42828992621224
+   },
+   "sglib-combined": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2771273,
+    "reps": 19,
+    "iter_s": 568.3532441589118
+   },
+   "slre": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 3311610,
+    "reps": 75,
+    "iter_s": 1877.4402782936397
+   },
+   "statemate": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2866762,
+    "reps": 1795,
+    "iter_s": 51905.916849741974
+   },
+   "tarfind": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2994779,
+    "reps": 32,
+    "iter_s": 885.7868977978007
+   },
+   "ud": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2419470,
+    "reps": 926,
+    "iter_s": 31727.422948001007
+   },
+   "wikisort": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 3048045,
+    "reps": 2,
+    "iter_s": 54.39421005923469
+   },
+   "xgboost": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 5792298,
+    "reps": 1,
+    "iter_s": 14.311763655806383
+   }
+  }
+ },
+ {
+  "key": "ibex_maxperf",
+  "name": "Ibex maxperf",
+  "fmax_mhz": 45.451,
+  "kernels": {
+   "aha-mont64": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2943341,
+    "reps": 200,
+    "iter_s": 3088.3951264906104
+   },
+   "crc32": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 3107465,
+    "reps": 90,
+    "iter_s": 1316.375244773473
+   },
+   "depthconv": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2689428,
+    "reps": 874,
+    "iter_s": 14770.49171794151
+   },
+   "dhrystone": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 3312784,
+    "reps": 6000,
+    "iter_s": 82319.2819091133
+   },
+   "edn": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2862603,
+    "reps": 50,
+    "iter_s": 793.8753644847015
+   },
+   "huffbench": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2737127,
+    "reps": 8,
+    "iter_s": 132.84294079156723
+   },
+   "matmult-int": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 1537839,
+    "reps": 15,
+    "iter_s": 443.32664212573616
+   },
+   "md5sum": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2775025,
+    "reps": 39,
+    "iter_s": 638.7650561706652
+   },
+   "nettle-aes": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2876269,
+    "reps": 39,
+    "iter_s": 616.2806747213143
+   },
+   "nettle-sha256": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2738693,
+    "reps": 240,
+    "iter_s": 3983.0094136144503
+   },
+   "nsichneu": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2316809,
+    "reps": 681,
+    "iter_s": 13359.811274904405
+   },
+   "picojpeg": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2477830,
+    "reps": 3,
+    "iter_s": 55.02919893616592
+   },
+   "qrduino": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2400546,
+    "reps": 3,
+    "iter_s": 56.800827811672846
+   },
+   "sglib-combined": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2414276,
+    "reps": 19,
+    "iter_s": 357.69274101221237
+   },
+   "slre": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2508103,
+    "reps": 75,
+    "iter_s": 1359.1248046830613
+   },
+   "statemate": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2790316,
+    "reps": 1795,
+    "iter_s": 29238.46080515612
+   },
+   "tarfind": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2883167,
+    "reps": 32,
+    "iter_s": 504.4563842469063
+   },
+   "ud": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2658677,
+    "reps": 926,
+    "iter_s": 15830.289275455423
+   },
+   "wikisort": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2784314,
+    "reps": 2,
+    "iter_s": 32.64789818964384
+   },
+   "xgboost": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 5001504,
+    "reps": 1,
+    "iter_s": 9.087466490079784
+   }
+  }
+ },
+ {
+  "key": "ibex_small",
+  "name": "Ibex small",
+  "fmax_mhz": 47.107,
+  "kernels": {
+   "aha-mont64": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 3152084,
+    "reps": 200,
+    "iter_s": 2988.943188062247
+   },
+   "crc32": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 3433041,
+    "reps": 90,
+    "iter_s": 1234.9488398186913
+   },
+   "depthconv": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 3330433,
+    "reps": 874,
+    "iter_s": 12362.21176045277
+   },
+   "dhrystone": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 4141480,
+    "reps": 6000,
+    "iter_s": 68246.61715135652
+   },
+   "edn": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 3950523,
+    "reps": 50,
+    "iter_s": 596.2121977267313
+   },
+   "huffbench": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 3255867,
+    "reps": 8,
+    "iter_s": 115.74674272628458
+   },
+   "matmult-int": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2118016,
+    "reps": 15,
+    "iter_s": 333.616459932314
+   },
+   "md5sum": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 3084346,
+    "reps": 39,
+    "iter_s": 595.6442629977312
+   },
+   "nettle-aes": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 3156361,
+    "reps": 39,
+    "iter_s": 582.0541439968368
+   },
+   "nettle-sha256": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2911129,
+    "reps": 240,
+    "iter_s": 3883.606669439932
+   },
+   "nsichneu": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2643743,
+    "reps": 681,
+    "iter_s": 12134.260781021454
+   },
+   "picojpeg": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2987305,
+    "reps": 3,
+    "iter_s": 47.3071882516181
+   },
+   "qrduino": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2758199,
+    "reps": 3,
+    "iter_s": 51.23669466923888
+   },
+   "sglib-combined": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2885000,
+    "reps": 19,
+    "iter_s": 310.2367417677643
+   },
+   "slre": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2992086,
+    "reps": 75,
+    "iter_s": 1180.7899238190346
+   },
+   "statemate": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 3574701,
+    "reps": 1795,
+    "iter_s": 23654.304234116364
+   },
+   "tarfind": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 3521464,
+    "reps": 32,
+    "iter_s": 428.06741741502964
+   },
+   "ud": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 3094653,
+    "reps": 926,
+    "iter_s": 14095.629461526058
+   },
+   "wikisort": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 3369882,
+    "reps": 2,
+    "iter_s": 27.95765549060768
+   },
+   "xgboost": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 5653086,
+    "reps": 1,
+    "iter_s": 8.332970699543576
+   }
+  }
+ },
+ {
+  "key": "ueriscv",
+  "name": "ultraembedded riscv",
+  "fmax_mhz": 44.49,
+  "kernels": {
+   "aha-mont64": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 3118876,
+    "reps": 200,
+    "iter_s": 2852.950870762416
+   },
+   "crc32": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 3473019,
+    "reps": 90,
+    "iter_s": 1152.9162380050325
+   },
+   "depthconv": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2996667,
+    "reps": 874,
+    "iter_s": 12975.836153967057
+   },
+   "dhrystone": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 3913808,
+    "reps": 6000,
+    "iter_s": 68204.67432229685
+   },
+   "edn": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 3400313,
+    "reps": 50,
+    "iter_s": 654.2044805875224
+   },
+   "huffbench": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 3188282,
+    "reps": 8,
+    "iter_s": 111.63378898102489
+   },
+   "matmult-int": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 1874702,
+    "reps": 15,
+    "iter_s": 355.9765765438987
+   },
+   "md5sum": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 3082630,
+    "reps": 39,
+    "iter_s": 562.8667728530507
+   },
+   "nettle-aes": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 3057287,
+    "reps": 39,
+    "iter_s": 567.5325868981224
+   },
+   "nettle-sha256": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2876764,
+    "reps": 240,
+    "iter_s": 3711.670474185578
+   },
+   "nsichneu": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2711032,
+    "reps": 681,
+    "iter_s": 11175.703569710722
+   },
+   "picojpeg": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2825475,
+    "reps": 3,
+    "iter_s": 47.23807501393571
+   },
+   "qrduino": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2681037,
+    "reps": 3,
+    "iter_s": 49.782975766466485
+   },
+   "sglib-combined": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2800507,
+    "reps": 19,
+    "iter_s": 301.8417736502712
+   },
+   "slre": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2869982,
+    "reps": 75,
+    "iter_s": 1162.6379538268882
+   },
+   "statemate": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 3274938,
+    "reps": 1795,
+    "iter_s": 24385.057060622217
+   },
+   "tarfind": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 3388146,
+    "reps": 32,
+    "iter_s": 420.19440720677323
+   },
+   "ud": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2941630,
+    "reps": 926,
+    "iter_s": 14005.072017894841
+   },
+   "wikisort": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 3291070,
+    "reps": 2,
+    "iter_s": 27.036799581898897
+   },
+   "xgboost": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 5671283,
+    "reps": 1,
+    "iter_s": 7.844785738958891
+   }
+  }
+ },
+ {
+  "key": "hazard3",
+  "name": "Hazard3",
+  "fmax_mhz": 50.449,
+  "kernels": {
+   "aha-mont64": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2884503,
+    "reps": 200,
+    "iter_s": 3497.933612826889
+   },
+   "crc32": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2998353,
+    "reps": 90,
+    "iter_s": 1514.3013514419417
+   },
+   "depthconv": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2680581,
+    "reps": 874,
+    "iter_s": 16448.83180176238
+   },
+   "dhrystone": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 3186240,
+    "reps": 6000,
+    "iter_s": 95000.3766194637
+   },
+   "edn": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2670940,
+    "reps": 50,
+    "iter_s": 944.4053404419418
+   },
+   "huffbench": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2537348,
+    "reps": 8,
+    "iter_s": 159.06056244551397
+   },
+   "matmult-int": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 1412065,
+    "reps": 15,
+    "iter_s": 535.9066331932312
+   },
+   "md5sum": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2581131,
+    "reps": 39,
+    "iter_s": 762.2670062077439
+   },
+   "nettle-aes": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2824975,
+    "reps": 39,
+    "iter_s": 696.4702342498606
+   },
+   "nettle-sha256": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2707642,
+    "reps": 240,
+    "iter_s": 4471.698991225576
+   },
+   "nsichneu": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2328530,
+    "reps": 681,
+    "iter_s": 14754.27372634237
+   },
+   "picojpeg": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2412129,
+    "reps": 3,
+    "iter_s": 62.74415671798648
+   },
+   "qrduino": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2391443,
+    "reps": 3,
+    "iter_s": 63.2868941471739
+   },
+   "sglib-combined": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2382616,
+    "reps": 19,
+    "iter_s": 402.30192359994226
+   },
+   "slre": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2508425,
+    "reps": 75,
+    "iter_s": 1508.38673669733
+   },
+   "statemate": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2692281,
+    "reps": 1795,
+    "iter_s": 33635.402470990215
+   },
+   "tarfind": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2484781,
+    "reps": 32,
+    "iter_s": 649.7023278912709
+   },
+   "ud": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2313715,
+    "reps": 926,
+    "iter_s": 20190.807424423492
+   },
+   "wikisort": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2572583,
+    "reps": 2,
+    "iter_s": 39.22050328405342
+   },
+   "xgboost": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 5062953,
+    "reps": 1,
+    "iter_s": 9.964342943732639
+   }
+  }
+ },
+ {
+  "key": "biriscv",
+  "name": "biRISC-V",
+  "fmax_mhz": 27.279,
+  "kernels": {
+   "aha-mont64": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 1821474,
+    "reps": 200,
+    "iter_s": 2995.2664710009585
+   },
+   "crc32": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2129847,
+    "reps": 90,
+    "iter_s": 1152.7166035870182
+   },
+   "depthconv": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 1990606,
+    "reps": 874,
+    "iter_s": 11977.179813584406
+   },
+   "dhrystone": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 3104687,
+    "reps": 6000,
+    "iter_s": 52718.35776037971
+   },
+   "edn": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2291199,
+    "reps": 50,
+    "iter_s": 595.2996662446169
+   },
+   "huffbench": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2196469,
+    "reps": 8,
+    "iter_s": 99.35582974310131
+   },
+   "matmult-int": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 1346558,
+    "reps": 15,
+    "iter_s": 303.8747681124764
+   },
+   "md5sum": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 1848025,
+    "reps": 39,
+    "iter_s": 575.685393866425
+   },
+   "nettle-aes": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 1818809,
+    "reps": 39,
+    "iter_s": 584.9327774384226
+   },
+   "nettle-sha256": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 1776098,
+    "reps": 240,
+    "iter_s": 3686.147949043352
+   },
+   "nsichneu": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2890766,
+    "reps": 681,
+    "iter_s": 6426.324026226958
+   },
+   "picojpeg": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 1926322,
+    "reps": 3,
+    "iter_s": 42.483551555762745
+   },
+   "qrduino": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 1957199,
+    "reps": 3,
+    "iter_s": 41.81332608487946
+   },
+   "sglib-combined": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2189640,
+    "reps": 19,
+    "iter_s": 236.70603386858113
+   },
+   "slre": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2052204,
+    "reps": 75,
+    "iter_s": 996.9403626540052
+   },
+   "statemate": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2190782,
+    "reps": 1795,
+    "iter_s": 22350.834085728293
+   },
+   "tarfind": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 1962166,
+    "reps": 32,
+    "iter_s": 444.87979100646936
+   },
+   "ud": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2341608,
+    "reps": 926,
+    "iter_s": 10787.610052579254
+   },
+   "wikisort": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 2080125,
+    "reps": 2,
+    "iter_s": 26.22823147647377
+   },
+   "xgboost": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 4596339,
+    "reps": 1,
+    "iter_s": 5.934940830082376
+   }
+  }
+ },
+ {
+  "key": "neorv32",
+  "name": "NEORV32",
+  "fmax_mhz": 92.028,
+  "kernels": {
+   "aha-mont64": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 6158033,
+    "reps": 200,
+    "iter_s": 2988.8764805255187
+   },
+   "crc32": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 7308802,
+    "reps": 90,
+    "iter_s": 1133.2253904265021
+   },
+   "depthconv": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 6496343,
+    "reps": 874,
+    "iter_s": 12381.192310812407
+   },
+   "dhrystone": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 9137164,
+    "reps": 6000,
+    "iter_s": 60431.00463119629
+   },
+   "edn": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 7588508,
+    "reps": 50,
+    "iter_s": 606.3642550024326
+   },
+   "huffbench": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 6834599,
+    "reps": 8,
+    "iter_s": 107.72014568813766
+   },
+   "matmult-int": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 4178307,
+    "reps": 15,
+    "iter_s": 330.3778300637076
+   },
+   "md5sum": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 6190437,
+    "reps": 39,
+    "iter_s": 579.7800704538306
+   },
+   "nettle-aes": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 6548425,
+    "reps": 39,
+    "iter_s": 548.0847684748622
+   },
+   "nettle-sha256": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 5940116,
+    "reps": 240,
+    "iter_s": 3718.2304183958695
+   },
+   "nsichneu": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 6177109,
+    "reps": 681,
+    "iter_s": 10145.695664428133
+   },
+   "picojpeg": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 6297566,
+    "reps": 3,
+    "iter_s": 43.839794612712275
+   },
+   "qrduino": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 5694692,
+    "reps": 3,
+    "iter_s": 48.48093628241879
+   },
+   "sglib-combined": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 6298587,
+    "reps": 19,
+    "iter_s": 277.60702519469845
+   },
+   "slre": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 6418413,
+    "reps": 75,
+    "iter_s": 1075.3592827385835
+   },
+   "statemate": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 7699900,
+    "reps": 1795,
+    "iter_s": 21453.55913713165
+   },
+   "tarfind": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 7074078,
+    "reps": 32,
+    "iter_s": 416.2939679206251
+   },
+   "ud": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 5485957,
+    "reps": 926,
+    "iter_s": 15533.83083389097
+   },
+   "wikisort": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 7324544,
+    "reps": 2,
+    "iter_s": 25.128663299722138
+   },
+   "xgboost": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 12205557,
+    "reps": 1,
+    "iter_s": 7.53984435122461
+   }
+  }
+ },
+ {
+  "key": "picorv32",
+  "name": "PicoRV32",
+  "fmax_mhz": 114.828,
+  "kernels": {
+   "aha-mont64": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 9733772,
+    "reps": 200,
+    "iter_s": 2359.373118663556
+   },
+   "crc32": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 10744299,
+    "reps": 90,
+    "iter_s": 961.8607970608413
+   },
+   "depthconv": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 10240714,
+    "reps": 874,
+    "iter_s": 9800.06589384295
+   },
+   "dhrystone": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 13100589,
+    "reps": 6000,
+    "iter_s": 52590.61252894813
+   },
+   "edn": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 11652189,
+    "reps": 50,
+    "iter_s": 492.731451575322
+   },
+   "huffbench": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 10049600,
+    "reps": 8,
+    "iter_s": 91.4090113039325
+   },
+   "matmult-int": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 6331785,
+    "reps": 15,
+    "iter_s": 272.02755621045253
+   },
+   "md5sum": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 9776987,
+    "reps": 39,
+    "iter_s": 458.0441806867494
+   },
+   "nettle-aes": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 10580501,
+    "reps": 39,
+    "iter_s": 423.25897422059694
+   },
+   "nettle-sha256": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 9828967,
+    "reps": 240,
+    "iter_s": 2803.826689010147
+   },
+   "nsichneu": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 7979975,
+    "reps": 681,
+    "iter_s": 9799.262278390597
+   },
+   "picojpeg": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 9490623,
+    "reps": 3,
+    "iter_s": 36.297301030712106
+   },
+   "qrduino": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 8877004,
+    "reps": 3,
+    "iter_s": 38.80633601156426
+   },
+   "sglib-combined": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 8976149,
+    "reps": 19,
+    "iter_s": 243.05879949185336
+   },
+   "slre": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 9530612,
+    "reps": 75,
+    "iter_s": 903.6250767526786
+   },
+   "statemate": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 11483279,
+    "reps": 1795,
+    "iter_s": 17949.251254802744
+   },
+   "tarfind": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 10333195,
+    "reps": 32,
+    "iter_s": 355.60114756374963
+   },
+   "ud": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 8233295,
+    "reps": 926,
+    "iter_s": 12914.723449117273
+   },
+   "wikisort": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 10633995,
+    "reps": 2,
+    "iter_s": 21.596399095542175
+   },
+   "xgboost": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "reason": null,
+    "end": "ebreak_fetch",
+    "cycles": 18703512,
+    "reps": 1,
+    "iter_s": 6.139381737504699
+   }
+  }
+ }
+]

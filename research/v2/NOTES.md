@@ -392,3 +392,33 @@ MemoryMax on `hweagents-<acct>.slice` would not cover it: harness evals run as
 bench. The V3 fix in the 2026-09-30 entry (stream-parse the trace, bound
 concurrent trace processes, MemoryMax on harness evals) is the one that
 applies.
+
+## 2026-10-04: extended suite, 15 more Embench-IoT kernels (exploratory)
+
+`research/v2/extended_bench/` runs every finished champion (35 runs) and every
+reference core on the five held-out kernels plus the other 15 Embench-IoT
+kernels at the vendored commit. The ports and build flags are
+bench/holdout's. Champions are built with `test/cosim/build.sh`'s command and
+`test/cosim/main.cpp`; the held-out cycle counts reproduce exactly (175 of
+175).
+
+- All 700 champion-kernel runs give correct results.
+- On the new 15 the system order matches held-out exactly, with run-level
+  Kendall tau 0.954. Opus vs Sol is 1.279 (held-out 1.320).
+- Same verdicts, same gaps: Opus vs Sonnet and Sol vs Astra are not
+  distinguishable, as on held-out.
+
+Two V3 items:
+
+- Opus 5.5 rep6's champion puts wrong-path fetch addresses below 0
+  (0xFFFFFF20 to 0xFFFFFFF8) on `io_imemAddr` on 10 of the 15 new kernels.
+  The cause is an aliased next-fetch predictor entry applied to a PC near 0.
+  The results stay correct, but main.cpp flags them as out-of-range (CLAUDE.md
+  invariant 6). Every V2 gate missed it. Formal has no fetch-bounds property,
+  and the harness's programs never put that predictor state near address 0.
+  Fix in the contract: a fetch-valid signal, or a formal assertion that
+  `io_imemAddr` stays in range.
+- The held-out geomean takes only validated kernels (`tools/eval/holdout.py`),
+  so a failure can raise it. Under that rule Opus rep6's new-15 geomean is
+  2309 instead of 1971. No scored result is affected (every scored run
+  validates all five). Count a failed kernel as zero instead.
