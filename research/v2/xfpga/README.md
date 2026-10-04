@@ -178,3 +178,15 @@ VHDL-2008):
 
     python3 -B xfpga.py add mycore --group reference --top core_bench \
         --include path/to/inc --lib neorv32=path/a.vhd src1.v src2.vhd bench.sv
+
+## VexRiscv MaxPerf source provenance
+
+The VexRiscv MaxPerf Verilog Vivado read (`~/vexref/VexRiscv/VexRiscv.v`,
+sha256 42f9b653...a0ce88) was regenerated on 2026-10-04 from the same
+VexRiscv commit (baf7dc82), SpinalHDL version and unmodified generator
+(`GenFullNoMmuMaxPerf`) as the 2026-09-28 file the Gowin flow timed, which
+was not kept for a byte comparison. The generator is deterministic for a
+fixed commit and config, and the Vivado area matches the VexRiscv README's
+Artix-7 figures for this configuration: 1,919 slice LUTs against 1,935, and
+1,298 FFs against 1,216, where this build also counts the bench's LFSR, stall
+generator and dmem address registers.
