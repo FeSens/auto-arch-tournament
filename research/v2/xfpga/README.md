@@ -187,6 +187,6 @@ VexRiscv commit (baf7dc82), SpinalHDL version and unmodified generator
 (`GenFullNoMmuMaxPerf`) as the 2026-09-28 file the Gowin flow timed, which
 was not kept for a byte comparison. The generator is deterministic for a
 fixed commit and config, and the Vivado area matches the VexRiscv README's
-Artix-7 figures for this configuration: 1,919 slice LUTs against 1,935, and
-1,298 FFs against 1,216, where this build also counts the bench's LFSR, stall
-generator and dmem address registers.
+Artix-7 figures for this configuration: the `cpu` instance has 1,212 FFs
+against the README's 1,216, and the whole design 1,919 slice LUTs against
+1,935 (the core instance alone 1,850).
