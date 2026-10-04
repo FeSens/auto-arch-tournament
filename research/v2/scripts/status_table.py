@@ -12,7 +12,9 @@ PILOTS = {"gpt-6-sol_xhigh-v2"}   # amendment 11: replaced by GPT-6.1 Sol, rep1 
 # Row order: by model (primary comparison first, pilot next to its successor), then by rep.
 MODEL_ORDER = ["claude-opus-5_5_xhigh-v2", "gpt-6_1-sol_xhigh-v2", "gpt-6-sol_xhigh-v2", "gpt-6-luna_xhigh-v2",
                # amendment 13 extension systems
-               "claude-sonnet-5-5_xhigh-v2", "gpt-6-astra_xhigh-v2", "gpt-5_5_xhigh-v2"]
+               "claude-sonnet-5-5_xhigh-v2", "gpt-6-astra_xhigh-v2", "gpt-5_5_xhigh-v2",
+               # amendment 14 ablation (GPT-6.1 Sol, scribe skipped)
+               "gpt-6_1-sol_xhigh-v2-nolessons"]
 # External references (research/v2/reference_vexriscv, research/v2/reference_cores): open-source
 # cores in the harness's Gowin flow (median of place options 0-2). Their CoreMark is Fmax x a
 # published CoreMark/MHz, not a bench measurement; no held-out score (not run on the bench programs).
