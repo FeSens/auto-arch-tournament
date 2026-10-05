@@ -467,6 +467,9 @@ _AGENT_ENV_PASS = (
     "CODEX_HOME", "CODEX_MODEL", "CODEX_REASONING_EFFORT",
     "ANTHROPIC_MODEL", "CLAUDE_BENCH_SETTINGS", "CLAUDE_EFFORT",
     "CLAUDE_CODE_DISABLE_AUTO_MEMORY",
+    # The random-mutation control's seed (runner: 100 + rep). Dropped
+    # before harness 2.8.4, so every run drew with seed 0 (amendment 16).
+    "RANDOM_AGENT_SEED",
     "DISABLE_TELEMETRY", "DISABLE_ERROR_REPORTING", "DISABLE_AUTOUPDATER",
 )
 _AGENT_ENV_PREFIXES = ("AGENT_", "BENCH_", "HWE_")

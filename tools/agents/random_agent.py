@@ -12,9 +12,16 @@ is sniffed from prompt text.
 
   Hypothesis phase: writes a stub YAML at the pre-allocated id.
   Implementation phase: applies k ~ U{1,2,3} mutations drawn with
-  random.Random(f"{RANDOM_AGENT_SEED}:{hyp_id or notes}") to
+  random.Random(f"{RANDOM_AGENT_SEED}:{hyp_id}") to
   cores/<target>/rtl/*.sv, lints, redraws on lint failure (max 20),
-  and records every applied mutation in implementation_notes.md.
+  and records every applied mutation in implementation_notes.md and on
+  stdout (the archived agent log; the orchestrator keeps
+  implementation_notes.md only for slots that reach the FPGA eval).
+  The implementation prompt does not carry the hypothesis id, so the id
+  comes from the slot worktree's directory name (the orchestrator names
+  each worktree after its hypothesis id). Before harness 2.8.4 the agent
+  fell back to "no-id" here, so every slot of a run drew the same
+  mutations (V2 amendment 16).
 
 Operator pool (frozen for prereg): op_swap (+/-, &/|, ==/!=),
 ternary_swap, lit_perturb. Guards keep every mutation parse-valid so
@@ -35,7 +42,7 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 
-from tools.agents._hyp_parse import parse_hyp_id
+from tools.agents._hyp_parse import _HYP_ID, parse_hyp_id
 
 MAX_DRAWS = 20
 
@@ -216,11 +223,18 @@ def _write_hypothesis(prompt: str) -> None:
     print(f"[random-agent] wrote {yaml_dir / (hyp_id + '.yaml')}", flush=True)
 
 
+def _worktree_hyp_id(worktree: Path) -> str | None:
+    """The slot's hypothesis id from its worktree directory
+    (cores/<target>/worktrees/<hyp-id>)."""
+    m = _HYP_ID.fullmatch(worktree.name)
+    return m.group(0) if m else None
+
+
 def _implement(prompt: str) -> None:
     target = _target(prompt)
     worktree = Path.cwd()
     seed_base = os.environ.get("RANDOM_AGENT_SEED", "0")
-    hyp_id = _hyp_id(prompt) or "no-id"
+    hyp_id = _hyp_id(prompt) or _worktree_hyp_id(worktree) or "no-id"
     rng = random.Random(f"{seed_base}:{hyp_id}")
     k = rng.randint(1, 3)
 
@@ -253,11 +267,12 @@ def _implement(prompt: str) -> None:
     notes = Path("cores") / target / "implementation_notes.md"
     notes.parent.mkdir(parents=True, exist_ok=True)
     lint_str = {True: "pass", False: "fail", None: "verilator unavailable"}[lint]
-    notes.write_text(
-        "Random-mutation control (no LLM). Seeded mutations applied:\n"
-        + "".join(f"- {a}\n" for a in applied)
-        + f"\nDraws used: {draw}/{MAX_DRAWS}; final lint: {lint_str}.\n"
-        f"Seed material: {seed_base}:{hyp_id}; k={k}.\n")
+    record = ("Random-mutation control (no LLM). Seeded mutations applied:\n"
+              + "".join(f"- {a}\n" for a in applied)
+              + f"\nDraws used: {draw}/{MAX_DRAWS}; final lint: {lint_str}.\n"
+              f"Seed material: {seed_base}:{hyp_id}; k={k}.\n")
+    notes.write_text(record)
+    print(record, end="", flush=True)
     print(f"[random-agent] applied {len(applied)} mutation(s), "
           f"draw {draw}, lint {lint_str}", flush=True)
 

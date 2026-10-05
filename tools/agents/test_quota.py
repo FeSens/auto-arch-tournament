@@ -89,6 +89,17 @@ def test_agent_user_wrapper_drops_operator_env():
     assert as_agent_user(["codex"], {"HOME": "/x"}) == ["codex"]
 
 
+def test_agent_user_wrapper_keeps_random_agent_seed():
+    """The runner seeds the random-mutation control with 100 + rep; before
+    2.8.4 the wrapper dropped it and every run drew with seed 0."""
+    from tools.agents._runtime import as_agent_user
+    env = {"HWE_AGENT_USER": "hwebench", "HWE_AGENT_HOME": "/srv/hwebench/homes/r",
+           "HWE_AGENT_PATH": "/usr/bin:/bin", "AGENT_PROVIDER": "random",
+           "RANDOM_AGENT_SEED": "102"}
+    cmd = as_agent_user(["python3", "-m", "tools.agents.random_agent", "p"], env)
+    assert "RANDOM_AGENT_SEED=102" in cmd[cmd.index("-i") + 1:cmd.index("/bin/sh")]
+
+
 def _agent_env(provider, **extra):
     return {"HWE_AGENT_USER": "hwebench", "HWE_AGENT_HOME": "/srv/hwebench/homes/r",
             "HWE_AGENT_PATH": "/usr/bin:/bin", "AGENT_PROVIDER": provider,
