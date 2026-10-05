@@ -2,3 +2,6 @@
 2026-10-04T13:15:45Z guard started
 2026-10-05T01:37:34Z operator KILLED pid=2990332 owner=hwebench2 rss=56330MB avail=3988MB (memwatch alert, manual; run_cosim.py of ablation rep4 micro_earlyfwd_probe)
 2026-10-05T01:37:42Z guard started
+2026-10-05T01:38:09Z KILLED pid=2991638 owner=hwebench2 rss=56507MB avail=3848MB /srv/hwebench/venv/bin/python3 /srv/hwebench/clones/gpt-6_1-sol_xhigh-v2-nolessons-rep4/test/cosim/run_cosim.py /srv/hwebench/tmp/b62664fd/54d58d9a/micro_earlyfwd_probe/obj_dir/cosim_sim /srv/hwebench/clones/gpt-6_1-sol_xhigh-v2-nolessons-r
+2026-10-05T01:39:28Z KILLED pid=2994860 owner=hwebench2 rss=55716MB avail=3958MB /srv/hwebench/venv/bin/python3 /srv/hwebench/clones/gpt-6_1-sol_xhigh-v2-nolessons-rep4/test/cosim/run_cosim.py /srv/hwebench/tmp/b62664fd/54d58d9a/micro_earlyfwd_probe/obj_dir/cosim_sim /srv/hwebench/clones/gpt-6_1-sol_xhigh-v2-nolessons-r
+2026-10-05T01:40:46Z KILLED pid=2996084 owner=hwebench2 rss=55784MB avail=3976MB /srv/hwebench/venv/bin/python3 /srv/hwebench/clones/gpt-6_1-sol_xhigh-v2-nolessons-rep4/test/cosim/run_cosim.py /srv/hwebench/tmp/b62664fd/54d58d9a/micro_earlyfwd_probe/obj_dir/cosim_sim /srv/hwebench/clones/gpt-6_1-sol_xhigh-v2-nolessons-r

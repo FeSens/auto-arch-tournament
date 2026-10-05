@@ -234,5 +234,41 @@
   "cmd": 3338,
   "edit": 1584,
   "denied": 15
+ },
+ "gpt-6_1-sol_xhigh-v2-nolessons-rep1": {
+  "say": 984,
+  "cmd": 5859,
+  "denied": 15,
+  "edit": 2644
+ },
+ "gpt-6_1-sol_xhigh-v2-nolessons-rep3": {
+  "say": 985,
+  "cmd": 5946,
+  "edit": 3008,
+  "denied": 5
+ },
+ "gpt-6_1-sol_xhigh-v2-nolessons-rep5": {
+  "say": 880,
+  "cmd": 4986,
+  "denied": 17,
+  "edit": 2550
+ },
+ "gpt-6_1-sol_xhigh-v2-nolessons-rep6": {
+  "say": 888,
+  "cmd": 5013,
+  "edit": 2588,
+  "denied": 18
+ },
+ "gpt-6_1-sol_xhigh-v2-nolessons-rep2": {
+  "say": 951,
+  "cmd": 5493,
+  "edit": 2226,
+  "denied": 16
+ },
+ "gpt-6_1-sol_xhigh-v2-nolessons-rep4": {
+  "say": 967,
+  "cmd": 5751,
+  "edit": 3002,
+  "denied": 12
  }
 }

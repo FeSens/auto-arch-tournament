@@ -7,10 +7,15 @@ cd /home/bench/auto-arch-tournament
 # Amendment 13: the extension runners' files join once they exist.
 R="bench/v2/results.jsonl bench/v2/results-opus-luna.jsonl bench/v2/results-sol61.jsonl"
 L0="bench/v2/runner-opus-luna.log bench/v2/runner-sol61.log"
-for t in astra sonnet55 gpt55; do
+for t in astra sonnet55 gpt55 sol61nl-a sol61nl-b sol61nl-c rand-a rand-b rand-c; do
   [ -f bench/v2/results-$t.jsonl ] && R="$R bench/v2/results-$t.jsonl"
   [ -f bench/v2/runner-$t.log ] && L0="$L0 bench/v2/runner-$t.log"
 done
+# Amendment 15 smoke20 (one round, unscored).
+[ -f bench/v2/smoke-rand/results-smoke-rand.jsonl ] && R="$R bench/v2/smoke-rand/results-smoke-rand.jsonl"
+[ -f bench/v2/smoke-rand/runner-smoke-rand.log ] && L0="$L0 bench/v2/smoke-rand/runner-smoke-rand.log"
+[ -f bench/v2/smoke-rand-284/results-smoke-rand.jsonl ] && R="$R bench/v2/smoke-rand-284/results-smoke-rand.jsonl"
+[ -f bench/v2/smoke-rand-284/runner-smoke-rand.log ] && L0="$L0 bench/v2/smoke-rand-284/runner-smoke-rand.log"
 # Watch only runners still going: a finished log's "matrix done" would wake every tick.
 L=""; for f in $L0; do grep -q 'matrix done' "$f" || L="$L $f"; done; L="${L# }"
 research/v2/scripts/babysit.sh "$R" bench/v2 "$L" "${1:-600}" 2>&1 |
@@ -25,6 +30,6 @@ for l in open("/home/bench/monitor/alerts.jsonl"):
     if a["at"] >= sys.argv[1] and a["what"].startswith("RTL behaves differently") and " champion " in " " + a["detail"]:
         print("  ", a["at"], a["run"], a["detail"][:120])
 PY
-echo "== extension launcher:"; tail -n 3 bench/v2/ext-launcher.log 2>/dev/null; tail -n 2 bench/v2/smoke-ext/runner-smoke-sonnet55.log 2>/dev/null
+echo "== textbook scoring:"; tail -n 3 /home/bench/textbook-score.log 2>/dev/null | cut -c1-200; ls /home/bench/auto-arch-tournament/research/v2/textbook_baseline/results/ 2>/dev/null
 echo "== worktree retries:"; grep -h "worktree\] git" /srv/hwebench/clones/*/.tmp/orchestrator.log 2>/dev/null | tail -3
 true
