@@ -1,0 +1,37 @@
+fixture 6f898db; Verilator 5.047 devel rev v5.046-331-g2cd9b8df6 (mod)
+
+== RANDOM_AGENT_SEED=101
+Random-mutation control (no LLM). Seeded mutations applied:
+- cores/bench/rtl/decoder.sv:168 [lit_perturb] "3'd1:    mem_width = 2'd1;" -> "3'd1:    mem_width = 2'd0;"
+- cores/bench/rtl/ex_stage.sv:36 [lit_perturb] "2'd2:    rs1 = fwd_mem_wb;" -> "2'd3:    rs1 = fwd_mem_wb;"
+- cores/bench/rtl/decoder.sv:126 [op_swap] "end else if (funct3 == 3'd5 && funct7 == 7'b0000000) begin // SRLI" -> "end else if (funct3 != 3'd5 && funct7 == 7'b0000000) begin // SRLI"
+
+Draws used: 1/20; final lint: pass.
+Seed material: 101:no-id; k=3.
+
+== RANDOM_AGENT_SEED=102
+Random-mutation control (no LLM). Seeded mutations applied:
+- cores/bench/rtl/alu.sv:70 [lit_perturb] "ALU_REMU:   out = (a - b) ^ 32'h3138d0e1;" -> "ALU_REMU:   out = (a - b) ^ 32'h3138d0e0;"
+- cores/bench/rtl/if_stage.sv:34 [lit_perturb] "next_pc = redirect ? redirect_target : pc + 32'd4;" -> "next_pc = redirect ? redirect_target : pc + 32'd5;"
+
+Draws used: 2/20; final lint: pass.
+Seed material: 102:no-id; k=2.
+
+== RANDOM_AGENT_SEED=103
+Random-mutation control (no LLM). Seeded mutations applied:
+- cores/bench/rtl/decoder.sv:121 [op_swap] "end else if (funct3 == 3'd1 && funct7 == 7'b0000000) begin // SLLI" -> "end else if (funct3 == 3'd1 && funct7 != 7'b0000000) begin // SLLI"
+- cores/bench/rtl/decoder.sv:127 [lit_perturb] "is_illegal = 1'b0;" -> "is_illegal = 1'b1;"
+
+Draws used: 3/20; final lint: pass.
+Seed material: 103:no-id; k=2.
+
+fixture fad7d02; Verilator 5.047 devel rev v5.046-331-g2cd9b8df6 (mod)
+
+== RANDOM_AGENT_SEED=0
+Random-mutation control (no LLM). Seeded mutations applied:
+- cores/bench/rtl/alu.sv:68 [op_swap] "ALU_DIVU:   out = (a - b) ^ 32'h10e8fd70;" -> "ALU_DIVU:   out = (a + b) ^ 32'h10e8fd70;"
+- cores/bench/rtl/reg_file.sv:50 [op_swap] "if (rs2_addr == 5'b0)" -> "if (rs2_addr != 5'b0)"
+- cores/bench/rtl/decoder.sv:146 [lit_perturb] "mem_to_reg = 1'b1;" -> "mem_to_reg = 1'b0;"
+
+Draws used: 1/20; final lint: pass.
+Seed material: 0:no-id; k=3.
