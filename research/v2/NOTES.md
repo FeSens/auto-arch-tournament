@@ -561,3 +561,39 @@ bundle's history, no `lesson` field, no scribe run, no secrets). Analysis:
   different host load. Tokens are about equal (135M vs 138M in per run).
 - Not matched (amendment 14 `not_matched`): different dates, harness 2.8.3
   vs 2.8.2 (no behavior change outside the scribe), three runs at once.
+
+## 2026-10-05: the random-mutation control drew one mutation set per run, in V1 too (amendment 16)
+
+Smoke20 (amendment 15 part A, harness 2.8.3) finished done with three
+formal_failed slots, and the agent log said "applied 3 mutation(s), draw 1"
+for every slot. An offline replay of `tools/agents/random_agent.py`
+explained it:
+
+- The implementation prompt has the hypothesis title and text but not its
+  id. The agent's id parser returns nothing and every slot seeds with
+  `<seed>:no-id`. Nothing is ever accepted, so every slot starts from the
+  same RTL and applies the same edit.
+- Under V2's agent accounts the runner's seed (`RANDOM_AGENT_SEED`, 100 +
+  rep) is dropped by the environment allowlist, so the seed is 0 in every
+  run. Replaying `0:no-id` on V0 reproduces the smoke exactly: register
+  reads of x1..x31 return zero (`reg_file.sv:50` `==` to `!=`), an ALTOPS
+  DIVU formula and a decoder bit. 46 of 53 formal checks fail.
+- V1's control (EXP-2026-07-e1b-random-control) had the first defect but
+  not the second. Each V1 rep applied one mutation set in all 45 slots:
+  "0 of 135" is three distinct mutation sets, each repeated 45 times. The
+  three sets, replayed on V1's fixture (6f898db) with today's Verilator:
+  rep1 decoder mem_width, an ex_stage forward select and the SRLI decode;
+  rep2 the ALTOPS REMU constant and pc + 5; rep3 the SLLI decode and
+  is_illegal set on a legal path.
+
+Harness 2.8.4 (fixture bench-v2.8.4 = tag hwe-bench-v2.8.4) fixes both:
+the agent takes the id from its worktree's name (the orchestrator names
+each worktree after the hypothesis id), the seed passes to the agent
+account, and the agent prints its mutation record to the archived agent
+log (the orchestrator keeps implementation_notes.md only for slots that
+reach the FPGA eval, so the records of broken slots were lost). No LLM
+run is affected. Part A runs on 2.8.4 after smoke21.
+
+V3 item: a control's behavior needs a check of its own, not only its
+outcome. Here the outcome (everything fails formal) was the predicted
+one, which is why V1 never noticed that the 135 slots were 3 draws.
