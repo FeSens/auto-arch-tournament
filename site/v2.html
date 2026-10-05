@@ -1,0 +1,433 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HWE Bench · V2 results</title>
+<meta name="description" content="HWE Bench is an unbounded benchmark for LLM hardware engineering. Models design RISC-V CPUs that are scored by how fast they actually run on a real FPGA, only after passing formal correctness proofs.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400&display=swap">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/print.css">
+</head>
+<body>
+<div class="page">
+
+<nav class="top">
+  <a href="index.html" class="wordmark">HWE <span class="alt">Bench</span></a>
+  <ul>
+    <li><a href="v2.html" aria-current="page">V2 results</a></li>
+    <li><a href="index.html">V1 leaderboard</a></li>
+    <li><a href="methodology.html">Methodology</a></li>
+    <li><a href="models.html">Models</a></li>
+    <li><a href="data.html">Data</a></li>
+  </ul>
+  <div class="meta">
+    <a href="https://github.com/FeSens/auto-arch-tournament" class="repo" aria-label="HWE Bench source on GitHub, click to view repo and star">github</a>
+    <span class="version">v2 · 2026-10</span>
+  </div>
+</nav>
+
+<section class="hero-block">
+  <div class="hero-eyebrow">V2 · October 2026 · six agent systems · 36 scored runs</div>
+  <h1 class="hero">V2 results</h1>
+  <p class="hero-lede">
+    V2 rebuilt the score after V1's open-source timer turned out to miss whole classes of
+    circuit paths. Every design is now timed by the FPGA vendor's own tool, with memory stalls
+    present in the timed circuit, and ranked on five hidden programs the agents never see.
+    Six agent systems (a model inside its vendor's command-line agent) each ran six times from
+    the same starting core, 15 rounds of 3 attempts per run.
+  </p>
+  <div class="hero-thesis">
+    <span class="label">Result</span>
+    Three tiers: Opus 5.5 and Sonnet 5.5 (Claude Code), then GPT-6.1 Sol and GPT-6 Astra
+    (Codex CLI), then GPT-5.5 and GPT-6 Luna (Codex CLI). Pre-registered test, Opus 5.5 vs
+    GPT-6.1 Sol: 1.32x, 95% CI 1.18 to 1.47, p = 0.0005.
+  </div>
+</section>
+
+<section class="section">
+  <div class="eyebrow">Every scored run</div>
+  <h2>Held-out score per run</h2>
+  <figure class="chart">
+    <svg viewBox="0 0 960 366" role="img" aria-label="Held-out score of every scored V2 run, by system" class="chart">
+<line class="grid" x1="150.0" y1="36" x2="150.0" y2="332"/>
+<text class="tick" x="150.0" y="348" text-anchor="middle">0</text>
+<line class="grid" x1="247.5" y1="36" x2="247.5" y2="332"/>
+<text class="tick" x="247.5" y="348" text-anchor="middle">1,000</text>
+<line class="grid" x1="345.0" y1="36" x2="345.0" y2="332"/>
+<text class="tick" x="345.0" y="348" text-anchor="middle">2,000</text>
+<line class="grid" x1="442.5" y1="36" x2="442.5" y2="332"/>
+<text class="tick" x="442.5" y="348" text-anchor="middle">3,000</text>
+<line class="grid" x1="540.0" y1="36" x2="540.0" y2="332"/>
+<text class="tick" x="540.0" y="348" text-anchor="middle">4,000</text>
+<line class="grid" x1="637.5" y1="36" x2="637.5" y2="332"/>
+<text class="tick" x="637.5" y="348" text-anchor="middle">5,000</text>
+<line class="grid" x1="735.0" y1="36" x2="735.0" y2="332"/>
+<text class="tick" x="735.0" y="348" text-anchor="middle">6,000</text>
+<line class="grid" x1="832.5" y1="36" x2="832.5" y2="332"/>
+<text class="tick" x="832.5" y="348" text-anchor="middle">7,000</text>
+<line class="grid" x1="930.0" y1="36" x2="930.0" y2="332"/>
+<text class="tick" x="930.0" y="348" text-anchor="middle">8,000</text>
+<text class="axis-label" x="540.0" y="364" text-anchor="middle">held-out score (iterations per second on five hidden programs)</text>
+<line x1="756.0" y1="32" x2="756.0" y2="332" stroke="var(--c-human)" stroke-width="1" stroke-dasharray="4 3" data-tip="VexRiscv MaxPerf: 6,216 iter/s"/>
+<text class="tick" x="760.0" y="28" fill="var(--c-human)" style="fill:var(--c-human)">human reference 6,216</text>
+<line x1="407.9" y1="32" x2="407.9" y2="332" stroke="var(--ink-muted)" stroke-width="1" stroke-dasharray="4 3" data-tip="textbook edit: 2,645 iter/s"/>
+<text class="tick" x="411.9" y="16" fill="var(--ink-muted)" style="fill:var(--ink-muted)">textbook edit 2,645</text>
+<line x1="180.1" y1="32" x2="180.1" y2="332" stroke="var(--ink-muted)" stroke-width="1" stroke-dasharray="4 3" data-tip="V0: 309 iter/s"/>
+<text class="tick" x="184.1" y="28" fill="var(--ink-muted)" style="fill:var(--ink-muted)">V0 start 309</text>
+<text class="axis-label" x="138" y="66.0" text-anchor="end">Opus 5.5</text>
+<text class="tick" x="138" y="80.0" text-anchor="end">Claude Code</text>
+<line x1="834.9" y1="56.0" x2="834.9" y2="82.0" stroke="var(--c1)" stroke-width="3" data-tip="Opus 5.5: geometric mean 7,024 iter/s over 6 runs"/>
+<circle class="point" cx="907.5" cy="69.0" r="6" fill="var(--c1)" fill-opacity="0.75" data-tip="Opus 5.5 run 1: 7,770 iter/s, 109.5 MHz"/>
+<circle class="point" cx="863.5" cy="69.0" r="6" fill="var(--c1)" fill-opacity="0.75" data-tip="Opus 5.5 run 2: 7,318 iter/s, 104.0 MHz"/>
+<circle class="point" cx="771.8" cy="69.0" r="6" fill="var(--c1)" fill-opacity="0.75" data-tip="Opus 5.5 run 3: 6,378 iter/s, 106.1 MHz"/>
+<circle class="point" cx="734.1" cy="69.0" r="6" fill="var(--c1)" fill-opacity="0.75" data-tip="Opus 5.5 run 4: 5,991 iter/s, 109.9 MHz"/>
+<circle class="point" cx="879.7" cy="69.0" r="6" fill="var(--c1)" fill-opacity="0.75" data-tip="Opus 5.5 run 5: 7,484 iter/s, 100.9 MHz"/>
+<circle class="point" cx="870.3" cy="69.0" r="6" fill="var(--c1)" fill-opacity="0.75" data-tip="Opus 5.5 run 6: 7,387 iter/s, 126.2 MHz"/>
+<text class="axis-label" x="138" y="112.0" text-anchor="end">Sonnet 5.5</text>
+<text class="tick" x="138" y="126.0" text-anchor="end">Claude Code</text>
+<line x1="775.7" y1="102.0" x2="775.7" y2="128.0" stroke="var(--c4)" stroke-width="3" data-tip="Sonnet 5.5: geometric mean 6,418 iter/s over 6 runs"/>
+<circle class="point" cx="700.0" cy="115.0" r="6" fill="var(--c4)" fill-opacity="0.75" data-tip="Sonnet 5.5 run 1: 5,642 iter/s, 102.5 MHz"/>
+<circle class="point" cx="738.0" cy="115.0" r="6" fill="var(--c4)" fill-opacity="0.75" data-tip="Sonnet 5.5 run 2: 6,031 iter/s, 105.5 MHz"/>
+<circle class="point" cx="824.7" cy="115.0" r="6" fill="var(--c4)" fill-opacity="0.75" data-tip="Sonnet 5.5 run 3: 6,921 iter/s, 112.4 MHz"/>
+<circle class="point" cx="846.6" cy="115.0" r="6" fill="var(--c4)" fill-opacity="0.75" data-tip="Sonnet 5.5 run 4: 7,144 iter/s, 102.1 MHz"/>
+<circle class="point" cx="766.9" cy="115.0" r="6" fill="var(--c4)" fill-opacity="0.75" data-tip="Sonnet 5.5 run 5: 6,327 iter/s, 105.0 MHz"/>
+<circle class="point" cx="789.9" cy="115.0" r="6" fill="var(--c4)" fill-opacity="0.75" data-tip="Sonnet 5.5 run 6: 6,563 iter/s, 100.4 MHz"/>
+<text class="axis-label" x="138" y="158.0" text-anchor="end">GPT-6.1 Sol</text>
+<text class="tick" x="138" y="172.0" text-anchor="end">Codex CLI</text>
+<line x1="668.7" y1="148.0" x2="668.7" y2="174.0" stroke="var(--c2)" stroke-width="3" data-tip="GPT-6.1 Sol: geometric mean 5,320 iter/s over 6 runs"/>
+<circle class="point" cx="683.5" cy="161.0" r="6" fill="var(--c2)" fill-opacity="0.75" data-tip="GPT-6.1 Sol run 1: 5,472 iter/s, 93.7 MHz"/>
+<circle class="point" cx="631.7" cy="161.0" r="6" fill="var(--c2)" fill-opacity="0.75" data-tip="GPT-6.1 Sol run 2: 4,940 iter/s, 81.6 MHz"/>
+<circle class="point" cx="645.2" cy="161.0" r="6" fill="var(--c2)" fill-opacity="0.75" data-tip="GPT-6.1 Sol run 3: 5,079 iter/s, 85.6 MHz"/>
+<circle class="point" cx="687.4" cy="161.0" r="6" fill="var(--c2)" fill-opacity="0.75" data-tip="GPT-6.1 Sol run 4: 5,512 iter/s, 87.7 MHz"/>
+<circle class="point" cx="688.9" cy="161.0" r="6" fill="var(--c2)" fill-opacity="0.75" data-tip="GPT-6.1 Sol run 5: 5,528 iter/s, 96.0 MHz"/>
+<circle class="point" cx="678.4" cy="161.0" r="6" fill="var(--c2)" fill-opacity="0.75" data-tip="GPT-6.1 Sol run 6: 5,420 iter/s, 93.8 MHz"/>
+<text class="axis-label" x="138" y="204.0" text-anchor="end">GPT-6 Astra</text>
+<text class="tick" x="138" y="218.0" text-anchor="end">Codex CLI</text>
+<line x1="638.8" y1="194.0" x2="638.8" y2="220.0" stroke="var(--c3)" stroke-width="3" data-tip="GPT-6 Astra: geometric mean 5,014 iter/s over 6 runs"/>
+<circle class="point" cx="574.4" cy="207.0" r="6" fill="var(--c3)" fill-opacity="0.75" data-tip="GPT-6 Astra run 1: 4,353 iter/s, 73.8 MHz"/>
+<circle class="point" cx="665.7" cy="207.0" r="6" fill="var(--c3)" fill-opacity="0.75" data-tip="GPT-6 Astra run 2: 5,289 iter/s, 84.4 MHz"/>
+<circle class="point" cx="700.0" cy="207.0" r="6" fill="var(--c3)" fill-opacity="0.75" data-tip="GPT-6 Astra run 3: 5,641 iter/s, 89.6 MHz"/>
+<circle class="point" cx="626.7" cy="207.0" r="6" fill="var(--c3)" fill-opacity="0.75" data-tip="GPT-6 Astra run 4: 4,889 iter/s, 82.9 MHz"/>
+<circle class="point" cx="593.3" cy="207.0" r="6" fill="var(--c3)" fill-opacity="0.75" data-tip="GPT-6 Astra run 5: 4,546 iter/s, 73.9 MHz"/>
+<circle class="point" cx="686.5" cy="207.0" r="6" fill="var(--c3)" fill-opacity="0.75" data-tip="GPT-6 Astra run 6: 5,502 iter/s, 87.8 MHz"/>
+<text class="axis-label" x="138" y="250.0" text-anchor="end">GPT-5.5</text>
+<text class="tick" x="138" y="264.0" text-anchor="end">Codex CLI</text>
+<line x1="500.5" y1="240.0" x2="500.5" y2="266.0" stroke="var(--c5)" stroke-width="3" data-tip="GPT-5.5: geometric mean 3,595 iter/s over 6 runs"/>
+<circle class="point" cx="469.9" cy="253.0" r="6" fill="var(--c5)" fill-opacity="0.75" data-tip="GPT-5.5 run 1: 3,281 iter/s, 54.1 MHz"/>
+<circle class="point" cx="518.7" cy="253.0" r="6" fill="var(--c5)" fill-opacity="0.75" data-tip="GPT-5.5 run 2: 3,782 iter/s, 68.0 MHz"/>
+<circle class="point" cx="463.6" cy="253.0" r="6" fill="var(--c5)" fill-opacity="0.75" data-tip="GPT-5.5 run 3: 3,216 iter/s, 56.6 MHz"/>
+<circle class="point" cx="484.3" cy="253.0" r="6" fill="var(--c5)" fill-opacity="0.75" data-tip="GPT-5.5 run 4: 3,429 iter/s, 64.2 MHz"/>
+<circle class="point" cx="576.0" cy="253.0" r="6" fill="var(--c5)" fill-opacity="0.75" data-tip="GPT-5.5 run 5: 4,369 iter/s, 91.5 MHz"/>
+<circle class="point" cx="502.0" cy="253.0" r="6" fill="var(--c5)" fill-opacity="0.75" data-tip="GPT-5.5 run 6: 3,610 iter/s, 63.6 MHz"/>
+<text class="axis-label" x="138" y="296.0" text-anchor="end">GPT-6 Luna</text>
+<text class="tick" x="138" y="310.0" text-anchor="end">Codex CLI</text>
+<line x1="495.0" y1="286.0" x2="495.0" y2="312.0" stroke="var(--c6)" stroke-width="3" data-tip="GPT-6 Luna: geometric mean 3,538 iter/s over 6 runs"/>
+<circle class="point" cx="446.7" cy="299.0" r="6" fill="var(--c6)" fill-opacity="0.75" data-tip="GPT-6 Luna run 1: 3,043 iter/s, 51.0 MHz"/>
+<circle class="point" cx="525.3" cy="299.0" r="6" fill="var(--c6)" fill-opacity="0.75" data-tip="GPT-6 Luna run 2: 3,850 iter/s, 74.1 MHz"/>
+<circle class="point" cx="543.8" cy="299.0" r="6" fill="var(--c6)" fill-opacity="0.75" data-tip="GPT-6 Luna run 3: 4,039 iter/s, 70.9 MHz"/>
+<circle class="point" cx="490.1" cy="299.0" r="6" fill="var(--c6)" fill-opacity="0.75" data-tip="GPT-6 Luna run 4: 3,488 iter/s, 58.2 MHz"/>
+<circle class="point" cx="552.3" cy="299.0" r="6" fill="var(--c6)" fill-opacity="0.75" data-tip="GPT-6 Luna run 5: 4,126 iter/s, 72.4 MHz"/>
+<circle class="point" cx="430.9" cy="299.0" r="6" fill="var(--c6)" fill-opacity="0.75" data-tip="GPT-6 Luna run 6: 2,881 iter/s, 50.7 MHz"/>
+</svg>
+    <figcaption>
+      One dot per scored run (six per system), the bar is the system's geometric mean.
+      Held-out score = the design's maximum clock frequency (Gowin EDA, GW2A-18) times the
+      geometric mean of iterations per cycle on five benchmark programs the agents never saw.
+      Dashed lines: VexRiscv MaxPerf, the best of ten human-designed reference cores on the same
+      flow; the textbook edit (V0 plus an iterative divider); V0, the starting core.
+    </figcaption>
+  </figure>
+</section>
+
+<section class="section">
+  <div class="eyebrow">Final designs</div>
+  <h2>Six systems, six runs each</h2>
+  <div class="wide">
+  <table class="bench">
+    <caption>Geometric means over 6 runs; Fmax and LUT4 are medians. Rank interval: 95% bootstrap.
+      Blank cells do not apply. Harness 2.8.2 for every scored run.</caption>
+    <thead><tr>
+      <th>System (agent CLI)</th><th class="num">Held-out iter/s</th><th class="num">Rank interval</th>
+      <th class="num">CoreMark iter/s</th><th class="num">Fmax (MHz)</th><th class="num">Area (LUT4)</th>
+    </tr></thead>
+    <tbody>
+    <tr>
+      <td><span class="model-name">Opus 5.5</span> <span class="tick-cli">(Claude Code)</span></td>
+      <td class="num">7,024</td>
+      <td class="num">1 to 2</td>
+      <td class="num">280</td>
+      <td class="num">107.8</td>
+      <td class="num">3,161</td>
+    </tr>
+    <tr>
+      <td><span class="model-name">Sonnet 5.5</span> <span class="tick-cli">(Claude Code)</span></td>
+      <td class="num">6,418</td>
+      <td class="num">1 to 2</td>
+      <td class="num">259</td>
+      <td class="num">103.8</td>
+      <td class="num">4,232</td>
+    </tr>
+    <tr>
+      <td><span class="model-name">GPT-6.1 Sol</span> <span class="tick-cli">(Codex CLI)</span></td>
+      <td class="num">5,320</td>
+      <td class="num">3 to 4</td>
+      <td class="num">215</td>
+      <td class="num">90.7</td>
+      <td class="num">4,716</td>
+    </tr>
+    <tr>
+      <td><span class="model-name">GPT-6 Astra</span> <span class="tick-cli">(Codex CLI)</span></td>
+      <td class="num">5,014</td>
+      <td class="num">3 to 4</td>
+      <td class="num">201</td>
+      <td class="num">83.6</td>
+      <td class="num">5,546</td>
+    </tr>
+    <tr>
+      <td><span class="model-name">GPT-5.5</span> <span class="tick-cli">(Codex CLI)</span></td>
+      <td class="num">3,595</td>
+      <td class="num">5 to 6</td>
+      <td class="num">143</td>
+      <td class="num">63.9</td>
+      <td class="num">2,948</td>
+    </tr>
+    <tr>
+      <td><span class="model-name">GPT-6 Luna</span> <span class="tick-cli">(Codex CLI)</span></td>
+      <td class="num">3,538</td>
+      <td class="num">5 to 6</td>
+      <td class="num">137</td>
+      <td class="num">64.6</td>
+      <td class="num">2,934</td>
+    </tr>
+    <tr class="human-baseline">
+      <td><span class="model-name">VexRiscv MaxPerf</span> (human, best of ten reference cores)</td>
+      <td class="num">6,216</td><td class="num"></td><td class="num"></td>
+      <td class="num">87.8</td><td class="num"></td>
+    </tr>
+    <tr class="baseline-row">
+      <td><span class="model-name">textbook edit</span> (V0 with an iterative divider)</td>
+      <td class="num">2,645</td><td class="num"></td><td class="num">103.7</td>
+      <td class="num">46.6</td><td class="num">2,541</td>
+    </tr>
+    <tr class="baseline-row">
+      <td><span class="model-name">V0</span> (every run starts here)</td>
+      <td class="num">309</td><td class="num"></td><td class="num">12.1</td>
+      <td class="num">5.4</td><td class="num">12,312</td>
+    </tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="prose">
+  <p>
+    The pre-registered comparison, Opus 5.5 against GPT-6.1 Sol, separates:
+    ratio 1.320 [1.183, 1.473], p = 0.0005.
+    Of the 12 further pairs (Holm-corrected), 9 separate. The three that do not are the
+    pairs inside each tier: Opus 5.5 vs Sonnet 5.5, GPT-6.1 Sol vs GPT-6 Astra, and
+    GPT-5.5 vs GPT-6 Luna. Six runs per system resolve differences of about 20%, not the
+    6 to 10% gaps inside a tier.
+  </p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="eyebrow">Baselines and controls</div>
+  <h2>What the agents beat</h2>
+  <dl class="defs">
+    <dt>Textbook edit</dt>
+    <dd>V0's single-cycle divider replaced by a radix-2 iterative one, the first move most
+      agents make (34 of the 35 designs accepted in round 1 change the divider). It passes every
+      gate and scores 2,645 held-out iter/s, 8.6x V0, all of it clock frequency. Every
+      scored run beats it; system means are 1.3x (GPT-6 Luna) to 2.7x (Opus 5.5) its score.</dd>
+    <dt>Random-mutation control</dt>
+    <dd>No model: 1 to 3 random single-line edits per attempt (swapped operators, changed
+      constants), 135 attempts over 3 runs. 0 accepted:
+      117 fail formal verification, 12 fail
+      co-simulation against an instruction-set simulator, 6 pass every gate
+      but change nothing the design does. The gates do not hand out improvements to blind edits.</dd>
+    <dt>Lessons ablation</dt>
+    <dd>GPT-6.1 Sol run six more times without the lessons file (one-line notes an agent writes
+      after each attempt for later rounds). Full vs no lessons: 1.02x, 95% CI
+      0.91 to 1.14, p = 0.68. Not distinguishable; the
+      interval rules out a gain from the lessons above about 14%.</dd>
+    <dt>Human reference cores</dt>
+    <dd>Ten open-source RV32IM cores built on the same flow with the same stall model. VexRiscv
+      MaxPerf (6,216) falls between the first and second tiers; the other nine
+      score below every second-tier system.</dd>
+  </dl>
+</section>
+
+<section class="section">
+  <div class="eyebrow">Robustness</div>
+  <h2>Does the ranking hold?</h2>
+  <div class="prose">
+  <p>
+    <strong>Place-and-route settings.</strong> All final designs rebuilt under the six Gowin
+    placement and routing settings that change a build: the same system order, Opus 5.5 vs
+    GPT-6.1 Sol between 1.28x and 1.33x (every p &lt; 0.001), and the same 9 of 12 separating
+    pairs under every setting.
+  </p>
+  <p>
+    <strong>Unseen programs.</strong> On 15 more Embench-IoT programs no agent saw, the system
+    order, the rank intervals and the three indistinguishable pairs are the same; all 740
+    design-program runs give correct results.
+  </p>
+  <p>
+    <strong>Another FPGA.</strong> Every design synthesized for an AMD Artix-7 with Vivado. The
+    split between the top four and the bottom two holds; the order inside the top four does not
+    (Opus 5.5 vs GPT-6.1 Sol: 1.03x, p = 0.80). The agents' designs gain less
+    from the faster fabric than the human cores (Fmax ratio 1.17 vs
+    1.67), which suggests that fifteen rounds of tuning against one vendor's
+    timing report fit a design to that part. The V2 ranking is a ranking on the Gowin contract.
+  </p>
+  </div>
+  <div class="wide">
+  <table class="bench">
+    <caption>Held-out score on each FPGA, geometric means over 6 runs; Fmax ratio Artix-7 / Gowin.</caption>
+    <thead><tr><th>System</th><th class="num">Gowin GW2A-18</th><th class="num">Artix-7 200T</th>
+      <th class="num">Fmax ratio</th></tr></thead>
+    <tbody>
+    <tr><td><span class="model-name">Opus 5.5</span></td>
+      <td class="num">7,024</td><td class="num">6,724</td>
+      <td class="num">0.96</td></tr>
+    <tr><td><span class="model-name">Sonnet 5.5</span></td>
+      <td class="num">6,418</td><td class="num">7,511</td>
+      <td class="num">1.17</td></tr>
+    <tr><td><span class="model-name">GPT-6.1 Sol</span></td>
+      <td class="num">5,320</td><td class="num">6,543</td>
+      <td class="num">1.23</td></tr>
+    <tr><td><span class="model-name">GPT-6 Astra</span></td>
+      <td class="num">5,014</td><td class="num">6,236</td>
+      <td class="num">1.24</td></tr>
+    <tr><td><span class="model-name">GPT-5.5</span></td>
+      <td class="num">3,595</td><td class="num">4,385</td>
+      <td class="num">1.22</td></tr>
+    <tr><td><span class="model-name">GPT-6 Luna</span></td>
+      <td class="num">3,538</td><td class="num">4,245</td>
+      <td class="num">1.20</td></tr>
+    <tr class="human-baseline"><td><span class="model-name">VexRiscv MaxPerf</span> (human)</td>
+      <td class="num">6,216</td><td class="num">10,246</td>
+      <td class="num">1.65</td></tr>
+    <tr class="human-baseline"><td><span class="model-name">VexRiscv NoCache</span> (human)</td>
+      <td class="num">4,524</td><td class="num">8,772</td>
+      <td class="num">1.94</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section class="section">
+  <div class="eyebrow">Correctness</div>
+  <h2>What the gates missed</h2>
+  <div class="prose">
+  <p>
+    Three gaps in the correctness checks surfaced during and after scoring; none changes a
+    scored result.
+  </p>
+  <ul>
+    <li><strong>Instruction fetch address.</strong> No gate proves that the fetch address stays
+      inside memory. A bounded formal check written after scoring (any 64-word program whose own branches stay in range,
+      arbitrary memory stalls, 20 cycles from reset) passes 36 of 44 designs and finds one
+      failure: an Opus 5.5 design fetches from below address 0 on a mispredicted path, 9 cycles
+      after reset. Its results stay correct. Seven larger designs time out without a
+      counterexample.</li>
+    <li><strong>Multiply and divide arithmetic.</strong> The per-round formal gate replaces
+      multiplier and divider results with stand-in formulas, so co-simulation checks the
+      arithmetic. The vendored formal specification for signed DIV and REM computes the
+      unsigned result, so the contract's full-arithmetic check fails every correct divider.</li>
+    <li><strong>Formal saw different code.</strong> Two final designs gave the formal tool a
+      different version of one block than synthesis and simulation got. Both pass all 53 checks
+      when formal sees the synthesized version.</li>
+  </ul>
+  </div>
+</section>
+
+<section class="section">
+  <div class="eyebrow">From V1 to V2</div>
+  <h2>What changed, and what V1 got wrong</h2>
+  <div class="wide">
+  <table class="bench">
+    <thead><tr><th>V1</th><th>V2</th></tr></thead>
+    <tbody>
+    <tr><td>Open-source timer (nextpnr): misses whole path classes, a 32-bit divider timed at
+      123 MHz that the vendor tool times at 6.9 MHz</td><td>Vendor timer (Gowin EDA) for scoring
+      and for the agents</td></tr>
+    <tr><td>Memory stalls simulated but absent from the timed circuit, so stall logic was free</td>
+      <td>The same stall generator in simulation and in the timed circuit</td></tr>
+    <tr><td>Scored on CoreMark, the program the agents optimize</td><td>Scored on five hidden
+      programs; CoreMark stays the optimization signal</td></tr>
+    <tr><td>Any improvement accepted</td><td>A 4.6% margin, set from measured placement noise</td></tr>
+    <tr><td>2 to 3 runs per model, best run reported</td><td>6 runs per system, pre-registered
+      tests, geometric means</td></tr>
+    <tr><td>Read access differed by CLI (Codex agents could read anything)</td><td>One OS account
+      per concurrent run, the same rules for every CLI, hidden programs unreadable</td></tr>
+    <tr><td>Random-mutation control: 0 of 135 accepted, but a seeding bug made it 3 draws
+      repeated 45 times</td><td>135 independent draws, 0 accepted</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="prose">
+    The <a href="index.html">leaderboard on the home page</a> is V1's: its numbers come from the
+    open-source timer and are not comparable with these.
+  </p>
+</section>
+
+<section class="section">
+  <div class="eyebrow">Data</div>
+  <h2>Everything is in the repository</h2>
+  <div class="prose">
+  <ul>
+    <li><a href="https://github.com/FeSens/auto-arch-tournament/tree/v2/research/runs/EXP-2026-09-28-v2-main" class="ext">Pre-registration,
+      amendments and analyses</a> (index in its README)</li>
+    <li><a href="https://github.com/FeSens/auto-arch-tournament/tree/v2/bench/v2" class="ext">Every run</a>: final RTL, per-attempt log,
+      lessons file, full agent transcripts, git history</li>
+    <li><a href="https://github.com/FeSens/auto-arch-tournament/blob/v2/research/v2/NOTES.md" class="ext">Day-by-day research notes</a>,
+      including every incident that stopped a campaign</li>
+    <li><a href="https://github.com/FeSens/auto-arch-tournament/blob/v2/research/v2/V3.md" class="ext">What V2 does not fix</a></li>
+  </ul>
+  </div>
+</section>
+
+<footer class="bot">
+  <div>
+    HWE Bench · methodology v2 ·
+    <a href="https://github.com/FeSens/auto-arch-tournament" class="ext">source on GitHub</a> ·
+    <a href="https://github.com/FeSens/auto-arch-tournament/blob/main/CITATION.cff" class="ext">cite</a>
+  </div>
+  <div class="manifesto">a benchmark that respects how far a frontier model still has to go.</div>
+</footer>
+
+<div id="chart-tip" role="tooltip" hidden></div>
+<style>
+  #chart-tip { position: fixed; z-index: 50; pointer-events: none; max-width: 320px;
+    padding: 6px 9px; border-radius: 4px; background: var(--ink, #262a33); color: var(--bg, #faf9f7);
+    font: 12px/1.35 Inter, ui-sans-serif, system-ui, sans-serif; box-shadow: 0 2px 8px rgba(0,0,0,.18); }
+  svg [data-tip] { cursor: default; }
+</style>
+<script>
+(() => {
+  // Chart tooltips: any SVG element with data-tip shows it on hover or tap.
+  const tip = document.getElementById("chart-tip");
+  const place = (e) => {
+    const pad = 14, w = tip.offsetWidth, h = tip.offsetHeight;
+    let x = e.clientX + pad, y = e.clientY + pad;
+    if (x + w > innerWidth - 8) x = e.clientX - w - pad;
+    if (y + h > innerHeight - 8) y = e.clientY - h - pad;
+    tip.style.left = x + "px"; tip.style.top = y + "px";
+  };
+  document.addEventListener("pointerover", (e) => {
+    const t = e.target.closest && e.target.closest("[data-tip]");
+    if (!t) return;
+    tip.textContent = t.getAttribute("data-tip"); tip.hidden = false; place(e);
+  });
+  document.addEventListener("pointermove", (e) => { if (!tip.hidden) place(e); });
+  document.addEventListener("pointerout", (e) => {
+    const t = e.target.closest && e.target.closest("[data-tip]");
+    if (t && !(e.relatedTarget && t.contains(e.relatedTarget))) tip.hidden = true;
+  });
+})();
+</script>
+
+</div>
+</body>
+</html>
