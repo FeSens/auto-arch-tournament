@@ -105,6 +105,8 @@ champion CoreMark geomean, which round first exceeds 103.7):
 
 Every system's final design scores 1.3x (Luna) to 2.7x (Opus) the textbook
 edit on held-out, and every scored run beats it (the lowest, Luna rep6, 2,881).
-Most first-round agent designs are this edit or close to it (an iterative or
-multi-cycle divider). Among the reference cores the textbook edit's held-out
+In round 1 the agents mostly make this same move: 34 of the 35 designs
+accepted in round 1 (36 runs; Luna rep1 accepted nothing) change the divider
+(title or hypothesis text names it; the other is a GPT-6 Astra branch
+predictor). Among the reference cores the textbook edit's held-out
 score (2,645) sits between Hazard3 (3,028) and Ibex maxperf (2,595).
