@@ -38,6 +38,7 @@ gpt-6_1-sol_xhigh-v2_rep6,agent,gpt-6_1-sol_xhigh-v2,6,ok,95.484,9.949,95.868,95
 gpt-6-sol_xhigh-v2_rep1,pilot,gpt-6-sol_xhigh-v2,1,ok,74.421,12.765,76.005,74.761,74.206,74.761,4781,2356,1082,0,9,cpu,3094,2290,3756,-0.392,23,False,85.174,5589,531.2,
 v0,v0,,,ok,9.592,99.037,9.617,9.583,9.665,9.617,7796,1488,1024,0,12,cpu,6605,1422,6771,-4.95,334,False,,,859.9,
 gpt-6_1-sol_xhigh-v2-nolessons_rep1,ablation,gpt-6_1-sol_xhigh-v2-nolessons,1,ok,80.451,11.808,79.403,79.688,75.603,79.403,4929,2064,1024,0,12,cpu,3845,1998,3904,-0.786,11,False,,,397.3,
+gpt-6_1-sol_xhigh-v2-nolessons_rep2,ablation,gpt-6_1-sol_xhigh-v2-nolessons,2,ok,78.474,12.106,80.315,81.248,79.548,80.315,4111,1788,1077,0,4,cpu,1870,1706,3086,-0.345,16,False,,,260.1,
 gpt-6_1-sol_xhigh-v2-nolessons_rep3,ablation,gpt-6_1-sol_xhigh-v2-nolessons,3,ok,141.603,6.709,140.964,139.899,144.823,140.964,4224,1922,1024,0,5,cpu,3141,1856,3199,-0.385,9,False,,,313.1,
 gpt-6_1-sol_xhigh-v2-nolessons_rep5,ablation,gpt-6_1-sol_xhigh-v2-nolessons,5,ok,122.699,7.743,124.813,127.845,124.1,124.813,5046,2520,1024,0,4,cpu,3963,2454,4021,-0.269,9,False,,,327.8,
 gpt-6_1-sol_xhigh-v2-nolessons_rep6,ablation,gpt-6_1-sol_xhigh-v2-nolessons,6,ok,93.11,10.203,92.661,94.162,95.138,94.162,3473,1982,1024,0,4,cpu,2389,1916,2448,-0.589,14,False,,,257.6,
