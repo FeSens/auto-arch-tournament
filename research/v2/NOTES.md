@@ -519,3 +519,20 @@ covers the agent accounts with the same rule (MemAvailable under 4 GB and a
 `run_cosim.py` over 20 GB resident), so this class no longer depends on the
 operator's reaction time. A per-account memory cap is still a V3 item (V3.md
 item 6). Snapshot of the guard: `research/v2/scripts/ops/cosim_guard.sh`.
+
+## 2026-10-05 05:35Z: provider capacity errors cost two ablation slots
+
+Ablation rep6, round 10: hypothesis slots r10s0 and r10s2 broke as
+`hypothesis_gen_failed`. Both agent logs hold only `"Selected model is at
+capacity. Please try a different model."` on the first attempt and on the
+harness's one retry, so no agent ran. The third slot (r10s1) ran normally,
+and round 11's three agents started normally a few minutes later.
+
+The same Codex error appears in the agent logs of five scored campaign runs
+(GPT-6.1 Sol reps 2, 4 and 5, GPT-6 Astra reps 2 and 3) and of ablation rep3,
+but there the retry always succeeded, so this is the first time it cost slots.
+Treatment, as for every slot-level failure in V2: the slots count as broken
+and the run continues. The incident policy's re-run applies to a run stopped
+by a harness, host or provider failure, and amendment 01's quota rule to quota
+pauses; neither happened. The two slots are listed with the ablation's
+descriptive results.
