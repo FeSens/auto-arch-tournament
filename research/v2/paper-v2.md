@@ -116,6 +116,39 @@ own tool (Gowin EDA 1.9.11.03):
   `make timing`, prompts and logged critical paths are Gowin's; the agent
   account cannot run nextpnr. Yosys remains only inside riscv-formal.
 
+## 5a. Fixture, agent scope and security (V1 review items)
+
+**V0 provenance.** V0 is the same RTL as V1's (no diff in `cores/bench/rtl` between V1's fixture
+6f898db and tag hwe-bench-v2.8.4). An LLM agent wrote it from a human-written specification
+(`docs/bootstrap-prompt.md`). It passed the full gate stack and was frozen at a git tag before
+any benchmark run. It is a 5-stage in-order RV32IM core with no branch prediction and no
+caches. Its single-cycle divider limits it to 5.4 MHz under Gowin, which leaves the headroom
+the benchmark measures. The ten reference cores and the textbook edit place it on an
+external scale.
+
+**What each agent sees and may do** (harness 2.8.4, `tools/agents/`):
+
+| | Hypothesis agent | Implementation agent | Scribe |
+|---|---|---|---|
+| Prompt | full champion RTL, architecture and contract docs, `core.yaml` with the current Fmax, LUT4 and CoreMark, current and V0 fitness, the 4.6% margin, the last 5 slot outcomes (title, outcome, change, Fmax, worst path), the lessons file | the hypothesis, the docs, the full champion RTL; no metrics, history or lessons | one finished slot: its hypothesis, outcome, fitness, notes and RTL diff (8,000 characters) |
+| May write | its hypothesis file only; edits in its scratch worktree are discarded | `cores/bench/rtl/`, the cocotb tests, its notes | one appended line in `LESSONS.md` |
+| May run | Gowin timing, simulation | lint, formal, Gowin timing, cosim | nothing |
+| Wall clock | 20 min | 30 min | 4 min |
+
+- Search is greedy: K = 3 slots per round, N = 15 rounds. The best slot that beats the
+  champion by more than 4.6% replaces it; every other slot is discarded.
+- No weights change. Memory across rounds is the champion RTL, the run log (agents may read
+  it) and the lessons file. Every run starts from V0 with an empty log and no lessons file.
+- No web access. Agents run as separate OS accounts that cannot read the held-out kernels,
+  results or the operator's files.
+
+**Security caveat.** The gates prove functional correctness only. Accepted designs are not
+screened for timing side channels. Accepted designs routinely add state that makes timing
+depend on execution history: branch predictors (keyword match in title or hypothesis: 80 of
+301 accepted rounds, 34 of 37 runs) and fetch-side buffers or caches (22 rounds, 16 runs).
+Divider latency was not audited for operand dependence. Constant-time execution is out of
+scope.
+
 ## 5b. Leak audit (measured; details in `research/v2/LEAKS.md`)
 
 - **V1 contamination, measured on V1's own transcripts:** 14 of 36 published
