@@ -1,0 +1,82 @@
+SBY 13:14:42 [insn_div_ch0] Writing '/home/bench/deepformal/opus_rep1-d48-div-divu-rem-remu/formal/riscv-formal/cores/bench-deep/checks/insn_div_ch0/src/defines.sv'.
+SBY 13:14:42 [insn_div_ch0] Writing '/home/bench/deepformal/opus_rep1-d48-div-divu-rem-remu/formal/riscv-formal/cores/bench-deep/checks/insn_div_ch0/src/insn_div_ch0.sv'.
+SBY 13:14:42 [insn_div_ch0] Copy '/home/bench/deepformal/opus_rep1-d48-div-divu-rem-remu/formal/riscv-formal/cores/bench-deep/../../checks/rvfi_macros.vh' to '/home/bench/deepformal/opus_rep1-d48-div-divu-rem-remu/formal/riscv-formal/cores/bench-deep/checks/insn_div_ch0/src/rvfi_macros.vh'.
+SBY 13:14:42 [insn_div_ch0] Copy '/home/bench/deepformal/opus_rep1-d48-div-divu-rem-remu/formal/riscv-formal/cores/bench-deep/../../checks/rvfi_channel.sv' to '/home/bench/deepformal/opus_rep1-d48-div-divu-rem-remu/formal/riscv-formal/cores/bench-deep/checks/insn_div_ch0/src/rvfi_channel.sv'.
+SBY 13:14:42 [insn_div_ch0] Copy '/home/bench/deepformal/opus_rep1-d48-div-divu-rem-remu/formal/riscv-formal/cores/bench-deep/../../checks/rvfi_testbench.sv' to '/home/bench/deepformal/opus_rep1-d48-div-divu-rem-remu/formal/riscv-formal/cores/bench-deep/checks/insn_div_ch0/src/rvfi_testbench.sv'.
+SBY 13:14:42 [insn_div_ch0] Copy '/home/bench/deepformal/opus_rep1-d48-div-divu-rem-remu/formal/riscv-formal/cores/bench-deep/../../checks/rvfi_insn_check.sv' to '/home/bench/deepformal/opus_rep1-d48-div-divu-rem-remu/formal/riscv-formal/cores/bench-deep/checks/insn_div_ch0/src/rvfi_insn_check.sv'.
+SBY 13:14:42 [insn_div_ch0] Copy '/home/bench/deepformal/opus_rep1-d48-div-divu-rem-remu/formal/riscv-formal/cores/bench-deep/../../insns/insn_div.v' to '/home/bench/deepformal/opus_rep1-d48-div-divu-rem-remu/formal/riscv-formal/cores/bench-deep/checks/insn_div_ch0/src/insn_div.v'.
+SBY 13:14:42 [insn_div_ch0] engine_0: smtbmc bitwuzla
+SBY 13:14:42 [insn_div_ch0] base: starting process "cd insn_div_ch0/src; yosys -ql ../model/design.log ../model/design.ys"
+SBY 13:14:43 [insn_div_ch0] base: finished (returncode=0)
+SBY 13:14:43 [insn_div_ch0] prep: starting process "cd insn_div_ch0/model; yosys -ql design_prep.log design_prep.ys"
+SBY 13:14:43 [insn_div_ch0] prep: finished (returncode=0)
+SBY 13:14:43 [insn_div_ch0] smt2: starting process "cd insn_div_ch0/model; yosys -ql design_smt2.log design_smt2.ys"
+SBY 13:14:43 [insn_div_ch0] smt2: finished (returncode=0)
+SBY 13:14:43 [insn_div_ch0] engine_0: starting process "cd insn_div_ch0; yosys-smtbmc -s bitwuzla --presat --unroll --noprogress -t 48:49  --append 0 --dump-vcd engine_0/trace.vcd --dump-yw engine_0/trace.yw --dump-vlogtb engine_0/trace_tb.v --dump-smtc engine_0/trace.smtc model/design_smt2.smt2"
+SBY 13:14:43 [insn_div_ch0] engine_0: ##   0:00:00  Solver: bitwuzla
+SBY 13:14:44 [insn_div_ch0] engine_0: ##   0:00:00  Skipping step 0..
+SBY 13:14:44 [insn_div_ch0] engine_0: ##   0:00:00  Skipping step 1..
+SBY 13:14:44 [insn_div_ch0] engine_0: ##   0:00:00  Skipping step 2..
+SBY 13:14:44 [insn_div_ch0] engine_0: ##   0:00:00  Skipping step 3..
+SBY 13:14:44 [insn_div_ch0] engine_0: ##   0:00:00  Skipping step 4..
+SBY 13:14:44 [insn_div_ch0] engine_0: ##   0:00:00  Skipping step 5..
+SBY 13:14:44 [insn_div_ch0] engine_0: ##   0:00:00  Skipping step 6..
+SBY 13:14:44 [insn_div_ch0] engine_0: ##   0:00:00  Skipping step 7..
+SBY 13:14:44 [insn_div_ch0] engine_0: ##   0:00:00  Skipping step 8..
+SBY 13:14:44 [insn_div_ch0] engine_0: ##   0:00:00  Skipping step 9..
+SBY 13:14:44 [insn_div_ch0] engine_0: ##   0:00:00  Skipping step 10..
+SBY 13:14:44 [insn_div_ch0] engine_0: ##   0:00:00  Skipping step 11..
+SBY 13:14:44 [insn_div_ch0] engine_0: ##   0:00:00  Skipping step 12..
+SBY 13:14:44 [insn_div_ch0] engine_0: ##   0:00:00  Skipping step 13..
+SBY 13:14:44 [insn_div_ch0] engine_0: ##   0:00:00  Skipping step 14..
+SBY 13:14:44 [insn_div_ch0] engine_0: ##   0:00:00  Skipping step 15..
+SBY 13:14:44 [insn_div_ch0] engine_0: ##   0:00:00  Skipping step 16..
+SBY 13:14:44 [insn_div_ch0] engine_0: ##   0:00:00  Skipping step 17..
+SBY 13:14:44 [insn_div_ch0] engine_0: ##   0:00:00  Skipping step 18..
+SBY 13:14:44 [insn_div_ch0] engine_0: ##   0:00:00  Skipping step 19..
+SBY 13:14:44 [insn_div_ch0] engine_0: ##   0:00:00  Skipping step 20..
+SBY 13:14:44 [insn_div_ch0] engine_0: ##   0:00:00  Skipping step 21..
+SBY 13:14:44 [insn_div_ch0] engine_0: ##   0:00:00  Skipping step 22..
+SBY 13:14:44 [insn_div_ch0] engine_0: ##   0:00:00  Skipping step 23..
+SBY 13:14:44 [insn_div_ch0] engine_0: ##   0:00:00  Skipping step 24..
+SBY 13:14:44 [insn_div_ch0] engine_0: ##   0:00:00  Skipping step 25..
+SBY 13:14:44 [insn_div_ch0] engine_0: ##   0:00:00  Skipping step 26..
+SBY 13:14:44 [insn_div_ch0] engine_0: ##   0:00:00  Skipping step 27..
+SBY 13:14:44 [insn_div_ch0] engine_0: ##   0:00:00  Skipping step 28..
+SBY 13:14:44 [insn_div_ch0] engine_0: ##   0:00:00  Skipping step 29..
+SBY 13:14:44 [insn_div_ch0] engine_0: ##   0:00:00  Skipping step 30..
+SBY 13:14:44 [insn_div_ch0] engine_0: ##   0:00:00  Skipping step 31..
+SBY 13:14:44 [insn_div_ch0] engine_0: ##   0:00:00  Skipping step 32..
+SBY 13:14:44 [insn_div_ch0] engine_0: ##   0:00:00  Skipping step 33..
+SBY 13:14:44 [insn_div_ch0] engine_0: ##   0:00:01  Skipping step 34..
+SBY 13:14:45 [insn_div_ch0] engine_0: ##   0:00:01  Skipping step 35..
+SBY 13:14:45 [insn_div_ch0] engine_0: ##   0:00:01  Skipping step 36..
+SBY 13:14:45 [insn_div_ch0] engine_0: ##   0:00:01  Skipping step 37..
+SBY 13:14:45 [insn_div_ch0] engine_0: ##   0:00:01  Skipping step 38..
+SBY 13:14:45 [insn_div_ch0] engine_0: ##   0:00:01  Skipping step 39..
+SBY 13:14:45 [insn_div_ch0] engine_0: ##   0:00:01  Skipping step 40..
+SBY 13:14:45 [insn_div_ch0] engine_0: ##   0:00:01  Skipping step 41..
+SBY 13:14:45 [insn_div_ch0] engine_0: ##   0:00:01  Skipping step 42..
+SBY 13:14:45 [insn_div_ch0] engine_0: ##   0:00:01  Skipping step 43..
+SBY 13:14:45 [insn_div_ch0] engine_0: ##   0:00:01  Skipping step 44..
+SBY 13:14:45 [insn_div_ch0] engine_0: ##   0:00:01  Skipping step 45..
+SBY 13:14:45 [insn_div_ch0] engine_0: ##   0:00:01  Skipping step 46..
+SBY 13:14:45 [insn_div_ch0] engine_0: ##   0:00:01  Skipping step 47..
+SBY 13:14:45 [insn_div_ch0] engine_0: ##   0:00:01  Checking assumptions in step 48..
+SBY 13:14:53 [insn_div_ch0] engine_0: ##   0:00:09  Checking assertions in step 48..
+SBY 13:15:53 [insn_div_ch0] engine_0: ##   0:01:09  waiting for solver (1 minute)
+SBY 13:18:19 [insn_div_ch0] engine_0: ##   0:03:35  BMC failed!
+SBY 13:18:19 [insn_div_ch0] engine_0: ##   0:03:35  Assert failed in rvfi_testbench: rvfi_insn_check.sv:177.7-177.40 (_witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_177_117)
+SBY 13:18:19 [insn_div_ch0] engine_0: ##   0:03:35  Writing trace to VCD file: engine_0/trace.vcd
+SBY 13:18:20 [insn_div_ch0] engine_0: ##   0:03:36  Writing trace to Verilog testbench: engine_0/trace_tb.v
+SBY 13:18:20 [insn_div_ch0] engine_0: ##   0:03:36  Writing trace to constraints file: engine_0/trace.smtc
+SBY 13:18:20 [insn_div_ch0] engine_0: ##   0:03:36  Writing trace to Yosys witness file: engine_0/trace.yw
+SBY 13:18:21 [insn_div_ch0] engine_0: ##   0:03:37  Status: failed
+SBY 13:18:21 [insn_div_ch0] engine_0: finished (returncode=1)
+SBY 13:18:21 [insn_div_ch0] engine_0: Status returned by engine: FAIL
+SBY 13:18:21 [insn_div_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:03:39 (219)
+SBY 13:18:21 [insn_div_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:03:37 (217)
+SBY 13:18:21 [insn_div_ch0] summary: engine_0 (smtbmc bitwuzla) returned FAIL
+SBY 13:18:21 [insn_div_ch0] summary: counterexample trace: insn_div_ch0/engine_0/trace.vcd
+SBY 13:18:21 [insn_div_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_177_117 at rvfi_insn_check.sv:177.7-177.40 step 48
+SBY 13:18:21 [insn_div_ch0] DONE (FAIL, rc=0)

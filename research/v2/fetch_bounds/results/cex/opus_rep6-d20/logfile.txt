@@ -1,0 +1,29 @@
+##   0:00:00  Solver: bitwuzla
+##   0:00:00  Checking assumptions in step 0..
+##   0:00:00  Checking assertions in step 0..
+##   0:00:00  Checking assumptions in step 1..
+##   0:00:00  Checking assertions in step 1..
+##   0:00:00  Checking assumptions in step 2..
+##   0:00:00  Checking assertions in step 2..
+##   0:00:00  Checking assumptions in step 3..
+##   0:00:00  Checking assertions in step 3..
+##   0:00:01  Checking assumptions in step 4..
+##   0:00:01  Checking assertions in step 4..
+##   0:00:01  Checking assumptions in step 5..
+##   0:00:01  Checking assertions in step 5..
+##   0:00:01  Checking assumptions in step 6..
+##   0:00:02  Checking assertions in step 6..
+##   0:00:03  Checking assumptions in step 7..
+##   0:00:03  Checking assertions in step 7..
+##   0:00:06  Checking assumptions in step 8..
+##   0:00:07  Checking assertions in step 8..
+##   0:00:15  Checking assumptions in step 9..
+##   0:00:16  Checking assertions in step 9..
+##   0:00:19  BMC failed!
+##   0:00:19  Value for anyconst fetch_bounds_top.prog (fetch_bounds.sv:35.35-35.39): 126762988158048773303571294454289176773780000894157044721917767661903101559212663648528026587954936540211886349319919722361233747730675068778713981903878045309768942178639914591098118854279720994222843235187540475776496098784322240186352543305958748836698156216881368771558871725758765854454646518410889316882239838679231426380608435808925264955203550049060937886872549353914753329221585922390279674803594497143884028753759903328867073537174586177357937673526234291905824987579012229439410868724109351442202025348910198736070203656229913065054994811728244635883232913361568039367996938946661465132834994534003839075
+##   0:00:19  Assert failed in fetch_bounds_top: fetch_bounds.sv:67.27-67.56 (_witness_.check_assert_fetch_bounds_sv_67_21)
+##   0:00:19  Writing trace to VCD file: engine_0/trace.vcd
+##   0:00:19  Writing trace to Verilog testbench: engine_0/trace_tb.v
+##   0:00:19  Writing trace to constraints file: engine_0/trace.smtc
+##   0:00:19  Writing trace to Yosys witness file: engine_0/trace.yw
+##   0:00:20  Status: failed

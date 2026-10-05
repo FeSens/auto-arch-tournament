@@ -1,0 +1,31 @@
+[options]
+mode bmc
+depth 20
+
+[engines]
+smtbmc bitwuzla
+
+[script]
+read -formal -D RISCV_FORMAL_ALTOPS core_pkg.sv alu.sv core.sv decoder.sv divider.sv ex_stage.sv fetch_pred.sv forward_unit.sv hazard_unit.sv id_stage.sv if_stage.sv imm_gen.sv mem_stage.sv reg_file.sv wb_stage.sv fetch_bounds.sv
+prep -top fetch_bounds_top
+memory_map
+opt -fast
+setundef -zero -init
+
+[files]
+/home/bench/auto-arch-tournament/bench/v2/claude-opus-5_5_xhigh-v2/rep6/final-rtl/core_pkg.sv
+/home/bench/auto-arch-tournament/bench/v2/claude-opus-5_5_xhigh-v2/rep6/final-rtl/alu.sv
+/home/bench/auto-arch-tournament/bench/v2/claude-opus-5_5_xhigh-v2/rep6/final-rtl/core.sv
+/home/bench/auto-arch-tournament/bench/v2/claude-opus-5_5_xhigh-v2/rep6/final-rtl/decoder.sv
+/home/bench/auto-arch-tournament/bench/v2/claude-opus-5_5_xhigh-v2/rep6/final-rtl/divider.sv
+/home/bench/auto-arch-tournament/bench/v2/claude-opus-5_5_xhigh-v2/rep6/final-rtl/ex_stage.sv
+/home/bench/auto-arch-tournament/bench/v2/claude-opus-5_5_xhigh-v2/rep6/final-rtl/fetch_pred.sv
+/home/bench/auto-arch-tournament/bench/v2/claude-opus-5_5_xhigh-v2/rep6/final-rtl/forward_unit.sv
+/home/bench/auto-arch-tournament/bench/v2/claude-opus-5_5_xhigh-v2/rep6/final-rtl/hazard_unit.sv
+/home/bench/auto-arch-tournament/bench/v2/claude-opus-5_5_xhigh-v2/rep6/final-rtl/id_stage.sv
+/home/bench/auto-arch-tournament/bench/v2/claude-opus-5_5_xhigh-v2/rep6/final-rtl/if_stage.sv
+/home/bench/auto-arch-tournament/bench/v2/claude-opus-5_5_xhigh-v2/rep6/final-rtl/imm_gen.sv
+/home/bench/auto-arch-tournament/bench/v2/claude-opus-5_5_xhigh-v2/rep6/final-rtl/mem_stage.sv
+/home/bench/auto-arch-tournament/bench/v2/claude-opus-5_5_xhigh-v2/rep6/final-rtl/reg_file.sv
+/home/bench/auto-arch-tournament/bench/v2/claude-opus-5_5_xhigh-v2/rep6/final-rtl/wb_stage.sv
+/home/bench/auto-arch-tournament/research/v2/fetch_bounds/fetch_bounds.sv

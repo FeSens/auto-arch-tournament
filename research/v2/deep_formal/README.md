@@ -21,7 +21,8 @@ division, so the spec computes the unsigned quotient and remainder. Yosys
 answer) with the division wrapped in `$unsigned(...)`. The driver applies that
 wrap in its private copy (recorded in each result's `spec_fix`). Without it,
 `make formal-deep` (`formal/checks-deep.cfg`) fails DIV and REM on every
-correct divider.
+correct divider. The counterexamples (vendored spec, Opus rep1, depth 48) are
+in `results/cex/opus_rep1-d48-vendored-spec/` (log, Yosys witness, waveform).
 
 ## Pilot: Opus 5.5 rep1 (`results/`)
 

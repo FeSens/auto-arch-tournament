@@ -55,3 +55,6 @@ Operations note: SBY starts each solver engine in a process group of its
 own, so a timeout that killed only the driver's group left the engines
 running (they were killed by hand). Both drivers now also kill every process
 whose working directory is inside the job's work directory.
+
+`results/cex/opus_rep6-d20/`: the counterexample (SBY config, log, Yosys
+witness `trace.yw`, testbench `trace_tb.v`, waveform `trace.vcd.gz`).
