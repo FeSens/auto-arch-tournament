@@ -143,3 +143,28 @@ def test_verilator_absent_applies_no_mutations(tmp_path, monkeypatch):
     assert (wt / "cores/bench/rtl/alu.sv").read_text() == SV
     notes = (wt / "cores/bench/implementation_notes.md").read_text()
     assert "INVALID" in notes
+
+
+def test_hyp_id_from_worktree_name_when_prompt_has_none(tmp_path, monkeypatch, capsys):
+    """The implementation prompt carries no hypothesis id; the slot's
+    worktree is named after it (amendment 16: before 2.8.4 every slot
+    seeded with "no-id" and drew the same mutations)."""
+    monkeypatch.setattr(ra, "_lint_ok", lambda wt, target: True)
+    monkeypatch.setenv("RANDOM_AGENT_SEED", "101")
+    seeds = []
+    for hyp in ("hyp-20260101-001-r1s0", "hyp-20260101-002-r1s1"):
+        wt = _mk_worktree(tmp_path / hyp)
+        monkeypatch.chdir(wt)
+        ra._implement("TARGET CORE: cores/bench/ "
+                      "Edit, create, or delete files in the worktree.")
+        notes = (wt / "cores/bench/implementation_notes.md").read_text()
+        assert f"Seed material: 101:{hyp};" in notes
+        assert notes in capsys.readouterr().out
+        seeds.append(notes.splitlines()[-1])
+    assert seeds[0] != seeds[1]
+
+
+def test_worktree_hyp_id_ignores_other_names(tmp_path):
+    assert ra._worktree_hyp_id(tmp_path / "hyp-20260101-003-r12s2") == "hyp-20260101-003-r12s2"
+    assert ra._worktree_hyp_id(tmp_path / "bench") is None
+    assert ra._worktree_hyp_id(tmp_path / "hyp-20260101-003-r12s2-hypgen") is None
