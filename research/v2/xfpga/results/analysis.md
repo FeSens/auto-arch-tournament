@@ -53,6 +53,26 @@ Geometric means over each system's six runs; held-out in iterations/s, Fmax in M
 - Agents' finals: geomean 1.17 (range 0.80 to 1.51); reference cores 1.67 (1.33 to 1.94).
 - Welch on ln(ratio), agents vs references: ratio of geomeans 0.698, 95% CI [0.634, 0.769], p = 1.4e-07.
 
+## Amendment 14 ablation on both FPGAs
+
+GPT-6.1 Sol full (six campaign runs) vs no lessons (six ablation runs), held-out score, Welch on ln, ratio full / no lessons.
+
+| FPGA | ratio [95% CI] | bootstrap 95% CI | p | verdict |
+|---|---|---|---|---|
+| Gowin | 1.021 [0.913, 1.140] | [0.942, 1.114] | 0.678 | not distinguishable at n=6 |
+| Artix-7 | 1.147 [0.923, 1.426] | [0.965, 1.358] | 0.186 | not distinguishable at n=6 |
+
+| no-lessons rep | Fmax Gowin | Fmax Artix-7 | held-out Gowin | held-out Artix-7 |
+|---|---|---|---|---|
+| 1 | 70.4 | 79.4 | 4,374 | 4,935 |
+| 2 | 81.5 | 80.3 | 4,958 | 4,884 |
+| 3 | 107.9 | 141.0 | 5,652 | 7,384 |
+| 4 | 91.2 | 82.8 | 5,320 | 4,833 |
+| 5 | 92.9 | 124.8 | 5,239 | 7,040 |
+| 6 | 97.4 | 94.2 | 5,875 | 5,681 |
+
+Artix-7 held-out geomeans: full 6,543, no lessons 5,703; no-lessons Fmax ratio Artix-7 / Gowin 1.09.
+
 ## Reference cores
 
 | core | held-out Gowin | held-out Artix-7 | Fmax Gowin | Fmax Artix-7 |

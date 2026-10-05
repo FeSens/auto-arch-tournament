@@ -1244,5 +1244,124 @@
    "Sonnet 5.5": 1.1703583377509172,
    "GPT-5.5": 1.219759879966823
   }
+ },
+ "ablation": {
+  "runs": [
+   {
+    "system": "gpt-6_1-sol_xhigh-v2-nolessons",
+    "model": "gpt-6_1-sol_xhigh-v2-nolessons",
+    "rep": 1,
+    "gowin_fmax": 70.381,
+    "artix_fmax": 79.403,
+    "gowin_heldout": 4374.324643002022,
+    "artix_heldout": 4935.060593459728,
+    "gowin_coremark": 174.88,
+    "artix_coremark": 197.29546463686955,
+    "artix_luts": 4929,
+    "artix_ffs": 2064
+   },
+   {
+    "system": "gpt-6_1-sol_xhigh-v2-nolessons",
+    "model": "gpt-6_1-sol_xhigh-v2-nolessons",
+    "rep": 2,
+    "gowin_fmax": 81.537,
+    "artix_fmax": 80.315,
+    "gowin_heldout": 4958.338980777682,
+    "artix_heldout": 4884.028051573635,
+    "gowin_coremark": 199.92,
+    "artix_coremark": 191.34249938117145,
+    "artix_luts": 4111,
+    "artix_ffs": 1788
+   },
+   {
+    "system": "gpt-6_1-sol_xhigh-v2-nolessons",
+    "model": "gpt-6_1-sol_xhigh-v2-nolessons",
+    "rep": 3,
+    "gowin_fmax": 107.897,
+    "artix_fmax": 140.964,
+    "gowin_heldout": 5651.707091098646,
+    "artix_heldout": 7383.7756229517845,
+    "gowin_coremark": 238.34,
+    "artix_coremark": 311.38013960903197,
+    "artix_luts": 4224,
+    "artix_ffs": 1922
+   },
+   {
+    "system": "gpt-6_1-sol_xhigh-v2-nolessons",
+    "model": "gpt-6_1-sol_xhigh-v2-nolessons",
+    "rep": 4,
+    "gowin_fmax": 91.186,
+    "artix_fmax": 82.843,
+    "gowin_heldout": 5319.526230732218,
+    "artix_heldout": 4832.819857571871,
+    "gowin_coremark": 217.29,
+    "artix_coremark": 197.4049951377317,
+    "artix_luts": 4209,
+    "artix_ffs": 2331
+   },
+   {
+    "system": "gpt-6_1-sol_xhigh-v2-nolessons",
+    "model": "gpt-6_1-sol_xhigh-v2-nolessons",
+    "rep": 5,
+    "gowin_fmax": 92.886,
+    "artix_fmax": 124.813,
+    "gowin_heldout": 5239.085812789465,
+    "artix_heldout": 7039.87702723436,
+    "gowin_coremark": 220.5,
+    "artix_coremark": 296.2916364490962,
+    "artix_luts": 5046,
+    "artix_ffs": 2520
+   },
+   {
+    "system": "gpt-6_1-sol_xhigh-v2-nolessons",
+    "model": "gpt-6_1-sol_xhigh-v2-nolessons",
+    "rep": 6,
+    "gowin_fmax": 97.373,
+    "artix_fmax": 94.162,
+    "gowin_heldout": 5874.878246247343,
+    "artix_heldout": 5681.146574750102,
+    "gowin_coremark": 237.23,
+    "artix_coremark": 229.4103917581633,
+    "artix_luts": 3473,
+    "artix_ffs": 1982
+   }
+  ],
+  "gowin": {
+   "diff_ln": 0.020319298401311414,
+   "t": 0.43318130413372435,
+   "df": 7.016573769039014,
+   "p": 0.677887670977508,
+   "ratio": 1.0205271406946903,
+   "ci95": [
+    0.9134328762969598,
+    1.1401775345733158
+   ],
+   "boot95": [
+    0.9421230619070504,
+    1.1141424444928718
+   ],
+   "verdict": "not distinguishable at n=6"
+  },
+  "artix": {
+   "diff_ln": 0.13750397075895648,
+   "t": 1.4298208580869445,
+   "df": 9.058837831556973,
+   "p": 0.18633731967043532,
+   "ratio": 1.1474062620367185,
+   "ci95": [
+    0.9232737737487081,
+    1.4259488004469234
+   ],
+   "boot95": [
+    0.9646233056448792,
+    1.3575760425315004
+   ],
+   "verdict": "not distinguishable at n=6"
+  },
+  "fmax_ratio_gm": 1.0939549371239523,
+  "artix_heldout_gm": {
+   "full": 6543.483572961343,
+   "nolessons": 5702.8480577979835
+  }
  }
 }

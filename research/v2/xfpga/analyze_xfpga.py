@@ -14,7 +14,9 @@ the ten reference cores. (2) The prereg primary test, the amendment 01 pair and
 the amendment 13 extension family recomputed on Artix-7 scores with the
 functions of research/v2/scripts/analyze_main.py, side by side with Gowin.
 (3) Artix-7 / Gowin Fmax ratio, agents' finals vs reference cores, Welch on
-ln(ratio).
+ln(ratio). The amendment 14 ablation's six finals are scored the same way and
+its test (GPT-6.1 Sol full vs no lessons) is repeated on Artix-7; they are not
+part of (1) to (3).
 
     python3 -B research/v2/xfpga/analyze_xfpga.py
 
@@ -38,6 +40,8 @@ RESULTS = [REPO / "bench/v2" / f for f in (
     "results.jsonl", "results-opus-luna.jsonl", "results-sol61.jsonl",
     "results-astra.jsonl", "results-sonnet55.jsonl", "results-gpt55.jsonl")]
 RESCORED = [EXP / "incident_08/holdout_rescored.jsonl"]
+ABLATION = [REPO / "bench/v2" / f"results-sol61nl-{x}.jsonl" for x in "abc"]
+NOLESSONS = "gpt-6_1-sol_xhigh-v2-nolessons"
 REFS = ["vexriscv_maxperf", "vexriscv_nocache", "vexiiriscv", "hazard3", "ibex_maxperf",
         "ibex_small", "ueriscv", "neorv32", "biriscv", "picorv32"]
 SYSTEMS = list(am.SHORT)
@@ -114,26 +118,40 @@ def tests(ln: dict[str, list[float]]) -> dict:
     return out
 
 
+def run_record(m: str, rep: int, row: dict) -> dict:
+    x = json.loads((XF / f"{m}_rep{rep}.json").read_text())
+    assert x["status"] == "ok" and x["complete"], (m, rep)
+    k = row["holdout_kernels"]
+    assert all(v.get("validated") for v in k.values()), (m, rep)
+    g_check = heldout(row["holdout_fmax_mhz"], k)
+    assert abs(g_check / row["holdout_geomean_iter_s"] - 1) < 1e-6, (m, rep, g_check)
+    fa = x["fmax_mhz"]
+    return {"system": am.SHORT.get(m, m), "model": m, "rep": rep,
+            "gowin_fmax": row["holdout_fmax_mhz"], "artix_fmax": fa,
+            "gowin_heldout": row["holdout_geomean_iter_s"], "artix_heldout": heldout(fa, k),
+            "gowin_coremark": row["best_fitness"],
+            "artix_coremark": fa * 1e6 * row["best_iterations"] / row["best_cycles"],
+            "artix_luts": x["area"].get("slice_luts"), "artix_ffs": x["area"].get("slice_registers")}
+
+
+def ablation_test(full: list[dict], nl: list[dict], key: str) -> dict:
+    a = [math.log(r[key]) for r in full]
+    b = [math.log(r[key]) for r in nl]
+    res = am.welch(a, b)
+    res["boot95"] = am.bootstrap_ratio(a, b)
+    lo, hi = res["ci95"]
+    sep = res["p"] < am.ALPHA and (lo > 1 or hi < 1)
+    res["verdict"] = ("full scores higher" if res["ratio"] > 1 else "no lessons scores higher") \
+        if sep else "not distinguishable at n=6"
+    return res
+
+
 def main() -> int:
     scored, _ = am.load(RESULTS, RESCORED)
-    runs = []
-    for (m, rep), row in sorted(scored.items()):
-        if m not in am.SHORT:
-            continue
-        x = json.loads((XF / f"{m}_rep{rep}.json").read_text())
-        assert x["status"] == "ok" and x["complete"], (m, rep)
-        k = row["holdout_kernels"]
-        assert all(v.get("validated") for v in k.values()), (m, rep)
-        g_check = heldout(row["holdout_fmax_mhz"], k)
-        assert abs(g_check / row["holdout_geomean_iter_s"] - 1) < 1e-6, (m, rep, g_check)
-        fa = x["fmax_mhz"]
-        runs.append({"system": am.SHORT[m], "model": m, "rep": rep,
-                     "gowin_fmax": row["holdout_fmax_mhz"], "artix_fmax": fa,
-                     "gowin_heldout": row["holdout_geomean_iter_s"], "artix_heldout": heldout(fa, k),
-                     "gowin_coremark": row["best_fitness"],
-                     "artix_coremark": fa * 1e6 * row["best_iterations"] / row["best_cycles"],
-                     "artix_luts": x["area"].get("slice_luts"), "artix_ffs": x["area"].get("slice_registers")})
+    runs = [run_record(m, rep, row) for (m, rep), row in sorted(scored.items()) if m in am.SHORT]
     assert len(runs) == 36, len(runs)
+    abl_scored, _ = am.load(ABLATION)
+    ablation = [run_record(m, rep, row) for (m, rep), row in sorted(abl_scored.items()) if m == NOLESSONS]
     refs = []
     for r in REFS:
         sim = json.loads((REPO / f"research/v2/reference_cores/results_sim/{r}.json").read_text())
@@ -178,6 +196,17 @@ def main() -> int:
                            [math.log(r["artix_fmax"] / r["gowin_fmax"]) for r in runs if r["model"] == m]))
                            for m in SYSTEMS}},
     }
+    full = [r for r in runs if r["model"] == "gpt-6_1-sol_xhigh-v2"]
+    if len(ablation) == 6:
+        out["ablation"] = {
+            "runs": ablation,
+            "gowin": ablation_test(full, ablation, "gowin_heldout"),
+            "artix": ablation_test(full, ablation, "artix_heldout"),
+            "fmax_ratio_gm": math.exp(statistics.fmean(
+                math.log(r["artix_fmax"] / r["gowin_fmax"]) for r in ablation)),
+            "artix_heldout_gm": {"full": geomean([r["artix_heldout"] for r in full]),
+                                 "nolessons": geomean([r["artix_heldout"] for r in ablation])},
+        }
     (XF / "analysis.json").write_text(json.dumps(out, indent=1) + "\n")
 
     L = ["# Artix-7 cross-FPGA analysis (amendment 15 part C, exploratory)", ""]
@@ -219,6 +248,24 @@ def main() -> int:
           f"({fr['refs_range'][0]:.2f} to {fr['refs_range'][1]:.2f}).",
           f"- Welch on ln(ratio), agents vs references: ratio of geomeans {w['ratio']:.3f}, "
           f"95% CI [{w['ci95'][0]:.3f}, {w['ci95'][1]:.3f}], p = {w['p']:.2g}.", ""]
+    if "ablation" in out:
+        ab = out["ablation"]
+        L += ["## Amendment 14 ablation on both FPGAs", "",
+              "GPT-6.1 Sol full (six campaign runs) vs no lessons (six ablation runs), held-out score, "
+              "Welch on ln, ratio full / no lessons.", "",
+              "| FPGA | ratio [95% CI] | bootstrap 95% CI | p | verdict |", "|---|---|---|---|---|"]
+        for fpga, key in (("Gowin", "gowin"), ("Artix-7", "artix")):
+            t = ab[key]
+            L.append(f"| {fpga} | {t['ratio']:.3f} [{t['ci95'][0]:.3f}, {t['ci95'][1]:.3f}] | "
+                     f"[{t['boot95'][0]:.3f}, {t['boot95'][1]:.3f}] | {t['p']:.3f} | {t['verdict']} |")
+        L += ["", "| no-lessons rep | Fmax Gowin | Fmax Artix-7 | held-out Gowin | held-out Artix-7 |",
+              "|---|---|---|---|---|"]
+        for r in ab["runs"]:
+            L.append(f"| {r['rep']} | {r['gowin_fmax']:.1f} | {r['artix_fmax']:.1f} | "
+                     f"{r['gowin_heldout']:,.0f} | {r['artix_heldout']:,.0f} |")
+        L += ["", f"Artix-7 held-out geomeans: full {ab['artix_heldout_gm']['full']:,.0f}, no lessons "
+              f"{ab['artix_heldout_gm']['nolessons']:,.0f}; no-lessons Fmax ratio Artix-7 / Gowin "
+              f"{ab['fmax_ratio_gm']:.2f}.", ""]
     L += ["## Reference cores", "", "| core | held-out Gowin | held-out Artix-7 | Fmax Gowin | Fmax Artix-7 |",
           "|---|---|---|---|---|"]
     for r in sorted(refs, key=lambda r: -r["artix_heldout"]):

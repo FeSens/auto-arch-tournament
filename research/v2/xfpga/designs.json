@@ -932,5 +932,13 @@
   "rtl_dir": "bench/v2/gpt-6_1-sol_xhigh-v2-nolessons/rep2/final-rtl",
   "system": "gpt-6_1-sol_xhigh-v2-nolessons",
   "rep": 2
+ },
+ "gpt-6_1-sol_xhigh-v2-nolessons_rep4": {
+  "name": "gpt-6_1-sol_xhigh-v2-nolessons_rep4",
+  "group": "ablation",
+  "kind": "core_si",
+  "rtl_dir": "bench/v2/gpt-6_1-sol_xhigh-v2-nolessons/rep4/final-rtl",
+  "system": "gpt-6_1-sol_xhigh-v2-nolessons",
+  "rep": 4
  }
 }
