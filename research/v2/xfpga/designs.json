@@ -900,5 +900,21 @@
   "rtl_dir": "bench/v2/gpt-6_1-sol_xhigh-v2-nolessons/rep5/final-rtl",
   "system": "gpt-6_1-sol_xhigh-v2-nolessons",
   "rep": 5
+ },
+ "gpt-6_1-sol_xhigh-v2-nolessons_rep1": {
+  "name": "gpt-6_1-sol_xhigh-v2-nolessons_rep1",
+  "group": "ablation",
+  "kind": "core_si",
+  "rtl_dir": "bench/v2/gpt-6_1-sol_xhigh-v2-nolessons/rep1/final-rtl",
+  "system": "gpt-6_1-sol_xhigh-v2-nolessons",
+  "rep": 1
+ },
+ "gpt-6_1-sol_xhigh-v2-nolessons_rep3": {
+  "name": "gpt-6_1-sol_xhigh-v2-nolessons_rep3",
+  "group": "ablation",
+  "kind": "core_si",
+  "rtl_dir": "bench/v2/gpt-6_1-sol_xhigh-v2-nolessons/rep3/final-rtl",
+  "system": "gpt-6_1-sol_xhigh-v2-nolessons",
+  "rep": 3
  }
 }
