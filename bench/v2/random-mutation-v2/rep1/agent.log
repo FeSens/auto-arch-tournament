@@ -1,0 +1,544 @@
+=== /srv/hwebench/clones/random-mutation-v2-rep1/.tmp/agent-logs/impl.hyp-20261005-001-r10s0.log ===
+Random-mutation control (no LLM). Seeded mutations applied:
+- cores/bench/rtl/alu.sv:79 [op_swap] "else if (a == 32'h80000000 && b == 32'hFFFFFFFF)" -> "else if (a == 32'h80000000 && b != 32'hFFFFFFFF)"
+- cores/bench/rtl/mem_stage.sv:147 [lit_perturb] "reg_q.mem_rmask  <= (in.ctrl.mem_read  && !mem_misalign) ? byte_mask : 4'b0000;" -> "reg_q.mem_rmask  <= (in.ctrl.mem_read  && !mem_misalign) ? byte_mask : 4'b1;"
+
+Draws used: 1/20; final lint: pass.
+Seed material: 101:hyp-20261005-001-r10s0; k=2.
+[random-agent] applied 2 mutation(s), draw 1, lint pass
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/.tmp/agent-logs/impl.hyp-20261005-001-r11s0.log ===
+Random-mutation control (no LLM). Seeded mutations applied:
+- cores/bench/rtl/decoder.sv:140 [lit_perturb] "7'b0000011: begin" -> "7'b10: begin"
+- cores/bench/rtl/alu.sv:50 [lit_perturb] "ALU_SLTU:   out = {31'b0, a < b};" -> "ALU_SLTU:   out = {31'b1, a < b};"
+- cores/bench/rtl/decoder.sv:52 [lit_perturb] "alu_src    = 1'b0;" -> "alu_src    = 1'b1;"
+
+Draws used: 2/20; final lint: pass.
+Seed material: 101:hyp-20261005-001-r11s0; k=3.
+[random-agent] applied 3 mutation(s), draw 2, lint pass
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/.tmp/agent-logs/impl.hyp-20261005-001-r12s0.log ===
+Random-mutation control (no LLM). Seeded mutations applied:
+- cores/bench/rtl/decoder.sv:52 [lit_perturb] "alu_src    = 1'b0;" -> "alu_src    = 1'b1;"
+- cores/bench/rtl/alu.sv:79 [lit_perturb] "else if (a == 32'h80000000 && b == 32'hFFFFFFFF)" -> "else if (a == 32'h80000000 && b == 32'hfffffffe)"
+
+Draws used: 2/20; final lint: pass.
+Seed material: 101:hyp-20261005-001-r12s0; k=2.
+[random-agent] applied 2 mutation(s), draw 2, lint pass
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/.tmp/agent-logs/impl.hyp-20261005-001-r13s0.log ===
+Random-mutation control (no LLM). Seeded mutations applied:
+- cores/bench/rtl/decoder.sv:142 [op_swap] "if (funct3 == 3'd0 || funct3 == 3'd1 || funct3 == 3'd2 ||" -> "if (funct3 == 3'd0 || funct3 == 3'd1 || funct3 != 3'd2 ||"
+- cores/bench/rtl/forward_unit.sv:33 [op_swap] "if      (ex_mem_w_en && ex_mem_rd != 5'b0 && ex_mem_rd == id_ex_rs2) fwd_rs2 = 2'd1;" -> "if      (ex_mem_w_en && ex_mem_rd != 5'b0 && ex_mem_rd != id_ex_rs2) fwd_rs2 = 2'd1;"
+- cores/bench/rtl/decoder.sv:108 [op_swap] "if (funct3 != 3'd1 && funct3 != 3'd5) begin" -> "if (funct3 == 3'd1 && funct3 != 3'd5) begin"
+
+Draws used: 1/20; final lint: pass.
+Seed material: 101:hyp-20261005-001-r13s0; k=3.
+[random-agent] applied 3 mutation(s), draw 1, lint pass
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/.tmp/agent-logs/impl.hyp-20261005-001-r14s0.log ===
+Random-mutation control (no LLM). Seeded mutations applied:
+- cores/bench/rtl/decoder.sv:208 [lit_perturb] "alu_src    = 1'b1;" -> "alu_src    = 1'b0;"
+- cores/bench/rtl/decoder.sv:57 [lit_perturb] "is_lui     = 1'b0;" -> "is_lui     = 1'b1;"
+- cores/bench/rtl/decoder.sv:123 [lit_perturb] "reg_write  = 1'b1;" -> "reg_write  = 1'b0;"
+
+Draws used: 1/20; final lint: pass.
+Seed material: 101:hyp-20261005-001-r14s0; k=3.
+[random-agent] applied 3 mutation(s), draw 1, lint pass
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/.tmp/agent-logs/impl.hyp-20261005-001-r15s0.log ===
+Random-mutation control (no LLM). Seeded mutations applied:
+- cores/bench/rtl/decoder.sv:108 [op_swap] "if (funct3 != 3'd1 && funct3 != 3'd5) begin" -> "if (funct3 != 3'd1 && funct3 == 3'd5) begin"
+- cores/bench/rtl/decoder.sv:64 [lit_perturb] "mem_to_reg = 1'b0;" -> "mem_to_reg = 1'b1;"
+
+Draws used: 1/20; final lint: pass.
+Seed material: 101:hyp-20261005-001-r15s0; k=2.
+[random-agent] applied 2 mutation(s), draw 1, lint pass
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/.tmp/agent-logs/impl.hyp-20261005-001-r1s0.log ===
+Random-mutation control (no LLM). Seeded mutations applied:
+- cores/bench/rtl/alu.sv:40 [lit_perturb] "mul_uu = {32'b0, a} * {32'b0, b};" -> "mul_uu = {32'b1, a} * {32'b0, b};"
+- cores/bench/rtl/reg_file.sv:51 [lit_perturb] "rs2_data = 32'b0;" -> "rs2_data = 32'b1;"
+
+Draws used: 1/20; final lint: pass.
+Seed material: 101:hyp-20261005-001-r1s0; k=2.
+[random-agent] applied 2 mutation(s), draw 1, lint pass
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/.tmp/agent-logs/impl.hyp-20261005-001-r2s0.log ===
+Random-mutation control (no LLM). Seeded mutations applied:
+- cores/bench/rtl/alu.sv:64 [op_swap] "ALU_MULH:   out = (a + b) ^ 32'hf6583fb7;" -> "ALU_MULH:   out = (a - b) ^ 32'hf6583fb7;"
+- cores/bench/rtl/decoder.sv:181 [lit_perturb] "is_branch  = 1'b1;" -> "is_branch  = 1'b0;"
+
+Draws used: 1/20; final lint: pass.
+Seed material: 101:hyp-20261005-001-r2s0; k=2.
+[random-agent] applied 2 mutation(s), draw 1, lint pass
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/.tmp/agent-logs/impl.hyp-20261005-001-r3s0.log ===
+Random-mutation control (no LLM). Seeded mutations applied:
+- cores/bench/rtl/decoder.sv:57 [lit_perturb] "is_lui     = 1'b0;" -> "is_lui     = 1'b1;"
+
+Draws used: 1/20; final lint: pass.
+Seed material: 101:hyp-20261005-001-r3s0; k=1.
+[random-agent] applied 1 mutation(s), draw 1, lint pass
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/.tmp/agent-logs/impl.hyp-20261005-001-r4s0.log ===
+Random-mutation control (no LLM). Seeded mutations applied:
+- cores/bench/rtl/alu.sv:69 [lit_perturb] "ALU_REM:    out = (a - b) ^ 32'h8da68fa5;" -> "ALU_REM:    out = (a - b) ^ 32'h8da68fa4;"
+- cores/bench/rtl/wb_stage.sv:24 [ternary_swap] 'w_data = in.ctrl.mem_to_reg ? in.read_data : in.alu_result;' -> 'w_data = in.ctrl.mem_to_reg ? in.alu_result : in.read_data;'
+
+Draws used: 2/20; final lint: pass.
+Seed material: 101:hyp-20261005-001-r4s0; k=2.
+[random-agent] applied 2 mutation(s), draw 2, lint pass
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/.tmp/agent-logs/impl.hyp-20261005-001-r5s0.log ===
+Random-mutation control (no LLM). Seeded mutations applied:
+- cores/bench/rtl/decoder.sv:162 [op_swap] "if (funct3 == 3'd0 || funct3 == 3'd1 || funct3 == 3'd2) begin" -> "if (funct3 != 3'd0 || funct3 == 3'd1 || funct3 == 3'd2) begin"
+- cores/bench/rtl/decoder.sv:224 [op_swap] "if (instr == 32'h00100073) begin" -> "if (instr != 32'h00100073) begin"
+
+Draws used: 2/20; final lint: pass.
+Seed material: 101:hyp-20261005-001-r5s0; k=2.
+[random-agent] applied 2 mutation(s), draw 2, lint pass
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/.tmp/agent-logs/impl.hyp-20261005-001-r6s0.log ===
+Random-mutation control (no LLM). Seeded mutations applied:
+- cores/bench/rtl/decoder.sv:108 [op_swap] "if (funct3 != 3'd1 && funct3 != 3'd5) begin" -> "if (funct3 == 3'd1 && funct3 != 3'd5) begin"
+- cores/bench/rtl/mem_stage.sv:111 [lit_perturb] ": {16'b0,               hword_val};" -> ": {16'b1,               hword_val};"
+
+Draws used: 1/20; final lint: pass.
+Seed material: 101:hyp-20261005-001-r6s0; k=2.
+[random-agent] applied 2 mutation(s), draw 1, lint pass
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/.tmp/agent-logs/impl.hyp-20261005-001-r7s0.log ===
+Random-mutation control (no LLM). Seeded mutations applied:
+- cores/bench/rtl/decoder.sv:204 [lit_perturb] "is_illegal = 1'b0;" -> "is_illegal = 1'b1;"
+- cores/bench/rtl/decoder.sv:169 [lit_perturb] "3'd2:    mem_width = 2'd2;" -> "3'd3:    mem_width = 2'd2;"
+- cores/bench/rtl/decoder.sv:74 [lit_perturb] "(funct7 == 7'b0100000 && (funct3 == 3'd0 || funct3 == 3'd5)) ||" -> "(funct7 == 7'b100001 && (funct3 == 3'd0 || funct3 == 3'd5)) ||"
+
+Draws used: 3/20; final lint: pass.
+Seed material: 101:hyp-20261005-001-r7s0; k=3.
+[random-agent] applied 3 mutation(s), draw 3, lint pass
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/.tmp/agent-logs/impl.hyp-20261005-001-r8s0.log ===
+Random-mutation control (no LLM). Seeded mutations applied:
+- cores/bench/rtl/ex_stage.sv:130 [lit_perturb] "reg_q.alu_result    <= in.ctrl.is_jump ? (in.pc + 32'd4) : alu_result;" -> "reg_q.alu_result    <= in.ctrl.is_jump ? (in.pc + 32'd5) : alu_result;"
+- cores/bench/rtl/decoder.sv:75 [op_swap] "funct7 == 7'b0000001) begin" -> "funct7 != 7'b0000001) begin"
+
+Draws used: 1/20; final lint: pass.
+Seed material: 101:hyp-20261005-001-r8s0; k=2.
+[random-agent] applied 2 mutation(s), draw 1, lint pass
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/.tmp/agent-logs/impl.hyp-20261005-001-r9s0.log ===
+Random-mutation control (no LLM). Seeded mutations applied:
+- cores/bench/rtl/decoder.sv:133 [lit_perturb] "reg_write  = 1'b1;" -> "reg_write  = 1'b0;"
+- cores/bench/rtl/alu.sv:50 [lit_perturb] "ALU_SLTU:   out = {31'b0, a < b};" -> "ALU_SLTU:   out = {31'b1, a < b};"
+- cores/bench/rtl/decoder.sv:64 [lit_perturb] "mem_to_reg = 1'b0;" -> "mem_to_reg = 1'b1;"
+
+Draws used: 2/20; final lint: pass.
+Seed material: 101:hyp-20261005-001-r9s0; k=3.
+[random-agent] applied 3 mutation(s), draw 2, lint pass
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/.tmp/agent-logs/impl.hyp-20261005-002-r10s1.log ===
+Random-mutation control (no LLM). Seeded mutations applied:
+- cores/bench/rtl/decoder.sv:108 [lit_perturb] "if (funct3 != 3'd1 && funct3 != 3'd5) begin" -> "if (funct3 != 3'd1 && funct3 != 3'd4) begin"
+- cores/bench/rtl/alu.sv:70 [lit_perturb] "ALU_REMU:   out = (a - b) ^ 32'h3138d0e1;" -> "ALU_REMU:   out = (a - b) ^ 32'h3138d0e0;"
+- cores/bench/rtl/decoder.sv:126 [lit_perturb] "end else if (funct3 == 3'd5 && funct7 == 7'b0000000) begin // SRLI" -> "end else if (funct3 == 3'd4 && funct7 == 7'b0000000) begin // SRLI"
+
+Draws used: 1/20; final lint: pass.
+Seed material: 101:hyp-20261005-002-r10s1; k=3.
+[random-agent] applied 3 mutation(s), draw 1, lint pass
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/.tmp/agent-logs/impl.hyp-20261005-002-r11s1.log ===
+Random-mutation control (no LLM). Seeded mutations applied:
+- cores/bench/rtl/decoder.sv:129 [lit_perturb] "alu_src    = 1'b1;" -> "alu_src    = 1'b0;"
+- cores/bench/rtl/decoder.sv:73 [lit_perturb] "if (funct7 == 7'b0000000 ||" -> "if (funct7 == 7'b1 ||"
+
+Draws used: 1/20; final lint: pass.
+Seed material: 101:hyp-20261005-002-r11s1; k=2.
+[random-agent] applied 2 mutation(s), draw 1, lint pass
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/.tmp/agent-logs/impl.hyp-20261005-002-r12s1.log ===
+Random-mutation control (no LLM). Seeded mutations applied:
+- cores/bench/rtl/core_pkg.sv:124 [op_swap] 'logic [31:0] mem_addr;       // word-aligned for RVFI ALIGNED_MEM' -> 'logic [31:0] mem_addr;       // word+aligned for RVFI ALIGNED_MEM'
+- cores/bench/rtl/decoder.sv:109 [lit_perturb] "is_illegal = 1'b0;" -> "is_illegal = 1'b1;"
+
+Draws used: 1/20; final lint: pass.
+Seed material: 101:hyp-20261005-002-r12s1; k=2.
+[random-agent] applied 2 mutation(s), draw 1, lint pass
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/.tmp/agent-logs/impl.hyp-20261005-002-r13s1.log ===
+Random-mutation control (no LLM). Seeded mutations applied:
+- cores/bench/rtl/core.sv:231 [lit_perturb] "io_rvfi_rd_wdata_0  = rd_wen ? wb_w_data   : 32'b0;" -> "io_rvfi_rd_wdata_0  = rd_wen ? wb_w_data   : 32'b1;"
+- cores/bench/rtl/decoder.sv:162 [lit_perturb] "if (funct3 == 3'd0 || funct3 == 3'd1 || funct3 == 3'd2) begin" -> "if (funct3 == 3'd0 || funct3 == 3'd1 || funct3 == 3'd3) begin"
+
+Draws used: 2/20; final lint: pass.
+Seed material: 101:hyp-20261005-002-r13s1; k=2.
+[random-agent] applied 2 mutation(s), draw 2, lint pass
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/.tmp/agent-logs/impl.hyp-20261005-002-r14s1.log ===
+Random-mutation control (no LLM). Seeded mutations applied:
+- cores/bench/rtl/alu.sv:84 [lit_perturb] "ALU_DIVU: out = (b == 32'b0) ? 32'hFFFFFFFF : (a / b);" -> "ALU_DIVU: out = (b == 32'b0) ? 32'hfffffffe : (a / b);"
+
+Draws used: 1/20; final lint: pass.
+Seed material: 101:hyp-20261005-002-r14s1; k=1.
+[random-agent] applied 1 mutation(s), draw 1, lint pass
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/.tmp/agent-logs/impl.hyp-20261005-002-r15s1.log ===
+Random-mutation control (no LLM). Seeded mutations applied:
+- cores/bench/rtl/core.sv:145 [op_swap] ".fwd_mem_wb      (wb_w_data),            // WB-stage's write-mux output" -> ".fwd_mem_wb      (wb_w_data),            // WB+stage's write-mux output"
+- cores/bench/rtl/core.sv:225 [lit_perturb] "io_rvfi_ixl_0       = 2'd1;     // 32-bit ISA" -> "io_rvfi_ixl_0       = 2'd0;     // 32-bit ISA"
+
+Draws used: 2/20; final lint: pass.
+Seed material: 101:hyp-20261005-002-r15s1; k=2.
+[random-agent] applied 2 mutation(s), draw 2, lint pass
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/.tmp/agent-logs/impl.hyp-20261005-002-r1s1.log ===
+Random-mutation control (no LLM). Seeded mutations applied:
+- cores/bench/rtl/decoder.sv:121 [op_swap] "end else if (funct3 == 3'd1 && funct7 == 7'b0000000) begin // SLLI" -> "end else if (funct3 == 3'd1 && funct7 != 7'b0000000) begin // SLLI"
+- cores/bench/rtl/decoder.sv:169 [lit_perturb] "3'd2:    mem_width = 2'd2;" -> "3'd2:    mem_width = 2'd3;"
+
+Draws used: 1/20; final lint: pass.
+Seed material: 101:hyp-20261005-002-r1s1; k=2.
+[random-agent] applied 2 mutation(s), draw 1, lint pass
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/.tmp/agent-logs/impl.hyp-20261005-002-r2s1.log ===
+Random-mutation control (no LLM). Seeded mutations applied:
+- cores/bench/rtl/ex_stage.sv:85 [lit_perturb] "jump_target = in.ctrl.is_jalr ? {jalr_sum[31:1], 1'b0}" -> "jump_target = in.ctrl.is_jalr ? {jalr_sum[31:1], 1'b1}"
+- cores/bench/rtl/decoder.sv:142 [op_swap] "if (funct3 == 3'd0 || funct3 == 3'd1 || funct3 == 3'd2 ||" -> "if (funct3 != 3'd0 || funct3 == 3'd1 || funct3 == 3'd2 ||"
+
+Draws used: 1/20; final lint: pass.
+Seed material: 101:hyp-20261005-002-r2s1; k=2.
+[random-agent] applied 2 mutation(s), draw 1, lint pass
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/.tmp/agent-logs/impl.hyp-20261005-002-r3s1.log ===
+Random-mutation control (no LLM). Seeded mutations applied:
+- cores/bench/rtl/core.sv:210 [lit_perturb] "if (reset)                rvfi_order_q <= 64'b0;" -> "if (reset)                rvfi_order_q <= 64'b1;"
+- cores/bench/rtl/ex_stage.sv:82 [op_swap] 'branch_target = in.pc + in.imm;' -> 'branch_target = in.pc - in.imm;'
+
+Draws used: 1/20; final lint: pass.
+Seed material: 101:hyp-20261005-002-r3s1; k=2.
+[random-agent] applied 2 mutation(s), draw 1, lint pass
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/.tmp/agent-logs/impl.hyp-20261005-002-r4s1.log ===
+Random-mutation control (no LLM). Seeded mutations applied:
+- cores/bench/rtl/forward_unit.sv:34 [lit_perturb] "else if (mem_wb_w_en && mem_wb_rd != 5'b0 && mem_wb_rd == id_ex_rs2) fwd_rs2 = 2'd2;" -> "else if (mem_wb_w_en && mem_wb_rd != 5'b1 && mem_wb_rd == id_ex_rs2) fwd_rs2 = 2'd2;"
+
+Draws used: 1/20; final lint: pass.
+Seed material: 101:hyp-20261005-002-r4s1; k=1.
+[random-agent] applied 1 mutation(s), draw 1, lint pass
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/.tmp/agent-logs/impl.hyp-20261005-002-r5s1.log ===
+Random-mutation control (no LLM). Seeded mutations applied:
+- cores/bench/rtl/core.sv:222 [lit_perturb] "io_rvfi_halt_0      = 1'b0;" -> "io_rvfi_halt_0      = 1'b1;"
+
+Draws used: 1/20; final lint: pass.
+Seed material: 101:hyp-20261005-002-r5s1; k=1.
+[random-agent] applied 1 mutation(s), draw 1, lint pass
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/.tmp/agent-logs/impl.hyp-20261005-002-r6s1.log ===
+Random-mutation control (no LLM). Seeded mutations applied:
+- cores/bench/rtl/core_pkg.sv:99 [op_swap] 'logic [31:0] write_data;     // raw rs2 (post-forward), pre byte replication' -> 'logic [31:0] write_data;     // raw rs2 (post+forward), pre byte replication'
+
+Draws used: 1/20; final lint: pass.
+Seed material: 101:hyp-20261005-002-r6s1; k=1.
+[random-agent] applied 1 mutation(s), draw 1, lint pass
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/.tmp/agent-logs/impl.hyp-20261005-002-r7s1.log ===
+Random-mutation control (no LLM). Seeded mutations applied:
+- cores/bench/rtl/decoder.sv:164 [lit_perturb] "mem_write  = 1'b1;" -> "mem_write  = 1'b0;"
+- cores/bench/rtl/ex_stage.sv:51 [ternary_swap] 'alu_b = in.ctrl.alu_src  ? in.imm : rs2;' -> 'alu_b = in.ctrl.alu_src  ? rs2 : in.imm;'
+- cores/bench/rtl/decoder.sv:225 [lit_perturb] "is_illegal = 1'b0;" -> "is_illegal = 1'b1;"
+
+Draws used: 1/20; final lint: pass.
+Seed material: 101:hyp-20261005-002-r7s1; k=3.
+[random-agent] applied 3 mutation(s), draw 1, lint pass
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/.tmp/agent-logs/impl.hyp-20261005-002-r8s1.log ===
+Random-mutation control (no LLM). Seeded mutations applied:
+- cores/bench/rtl/decoder.sv:151 [lit_perturb] "3'd1, 3'd5: mem_width = 2'd1;" -> "3'd1, 3'd5: mem_width = 2'd0;"
+
+Draws used: 1/20; final lint: pass.
+Seed material: 101:hyp-20261005-002-r8s1; k=1.
+[random-agent] applied 1 mutation(s), draw 1, lint pass
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/.tmp/agent-logs/impl.hyp-20261005-002-r9s1.log ===
+Random-mutation control (no LLM). Seeded mutations applied:
+- cores/bench/rtl/alu.sv:84 [op_swap] "ALU_DIVU: out = (b == 32'b0) ? 32'hFFFFFFFF : (a / b);" -> "ALU_DIVU: out = (b != 32'b0) ? 32'hFFFFFFFF : (a / b);"
+
+Draws used: 1/20; final lint: pass.
+Seed material: 101:hyp-20261005-002-r9s1; k=1.
+[random-agent] applied 1 mutation(s), draw 1, lint pass
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/.tmp/agent-logs/impl.hyp-20261005-003-r10s2.log ===
+Random-mutation control (no LLM). Seeded mutations applied:
+- cores/bench/rtl/mem_stage.sv:85 [op_swap] "(in.ctrl.mem_width == 2'd1 && in.alu_result[0]   != 1'b0)" -> "(in.ctrl.mem_width != 2'd1 && in.alu_result[0]   != 1'b0)"
+- cores/bench/rtl/alu.sv:46 [op_swap] 'ALU_AND:    out = a & b;' -> 'ALU_AND:    out = a | b;'
+- cores/bench/rtl/core_pkg.sv:70 [op_swap] 'logic       is_illegal;  // default-true in decoder; cleared inside' -> 'logic       is_illegal;  // default+true in decoder; cleared inside'
+
+Draws used: 1/20; final lint: pass.
+Seed material: 101:hyp-20261005-003-r10s2; k=3.
+[random-agent] applied 3 mutation(s), draw 1, lint pass
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/.tmp/agent-logs/impl.hyp-20261005-003-r11s2.log ===
+Random-mutation control (no LLM). Seeded mutations applied:
+- cores/bench/rtl/decoder.sv:73 [lit_perturb] "if (funct7 == 7'b0000000 ||" -> "if (funct7 == 7'b1 ||"
+- cores/bench/rtl/ex_stage.sv:130 [ternary_swap] "reg_q.alu_result    <= in.ctrl.is_jump ? (in.pc + 32'd4) : alu_result;" -> "reg_q.alu_result    <= in.ctrl.is_jump ? alu_result : (in.pc + 32'd4);"
+
+Draws used: 1/20; final lint: pass.
+Seed material: 101:hyp-20261005-003-r11s2; k=2.
+[random-agent] applied 2 mutation(s), draw 1, lint pass
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/.tmp/agent-logs/impl.hyp-20261005-003-r12s2.log ===
+Random-mutation control (no LLM). Seeded mutations applied:
+- cores/bench/rtl/decoder.sv:60 [lit_perturb] "mem_write  = 1'b0;" -> "mem_write  = 1'b1;"
+
+Draws used: 1/20; final lint: pass.
+Seed material: 101:hyp-20261005-003-r12s2; k=1.
+[random-agent] applied 1 mutation(s), draw 1, lint pass
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/.tmp/agent-logs/impl.hyp-20261005-003-r13s2.log ===
+Random-mutation control (no LLM). Seeded mutations applied:
+- cores/bench/rtl/forward_unit.sv:27 [op_swap] "if      (ex_mem_w_en && ex_mem_rd != 5'b0 && ex_mem_rd == id_ex_rs1) fwd_rs1 = 2'd1;" -> "if      (ex_mem_w_en && ex_mem_rd == 5'b0 && ex_mem_rd == id_ex_rs1) fwd_rs1 = 2'd1;"
+- cores/bench/rtl/decoder.sv:74 [op_swap] "(funct7 == 7'b0100000 && (funct3 == 3'd0 || funct3 == 3'd5)) ||" -> "(funct7 == 7'b0100000 && (funct3 != 3'd0 || funct3 == 3'd5)) ||"
+
+Draws used: 1/20; final lint: pass.
+Seed material: 101:hyp-20261005-003-r13s2; k=2.
+[random-agent] applied 2 mutation(s), draw 1, lint pass
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/.tmp/agent-logs/impl.hyp-20261005-003-r14s2.log ===
+Random-mutation control (no LLM). Seeded mutations applied:
+- cores/bench/rtl/decoder.sv:181 [lit_perturb] "is_branch  = 1'b1;" -> "is_branch  = 1'b0;"
+- cores/bench/rtl/mem_stage.sv:84 [lit_perturb] "(in.ctrl.mem_width == 2'd2 && in.alu_result[1:0] != 2'b00) ||" -> "(in.ctrl.mem_width == 2'd3 && in.alu_result[1:0] != 2'b00) ||"
+
+Draws used: 4/20; final lint: pass.
+Seed material: 101:hyp-20261005-003-r14s2; k=2.
+[random-agent] applied 2 mutation(s), draw 4, lint pass
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/.tmp/agent-logs/impl.hyp-20261005-003-r15s2.log ===
+Random-mutation control (no LLM). Seeded mutations applied:
+- cores/bench/rtl/reg_file.sv:37 [lit_perturb] "end else if (w_en && w_addr != 5'b0) begin" -> "end else if (w_en && w_addr != 5'b1) begin"
+- cores/bench/rtl/alu.sv:88 [lit_perturb] "else if (a == 32'h80000000 && b == 32'hFFFFFFFF)" -> "else if (a == 32'h80000001 && b == 32'hFFFFFFFF)"
+- cores/bench/rtl/alu.sv:79 [op_swap] "else if (a == 32'h80000000 && b == 32'hFFFFFFFF)" -> "else if (a == 32'h80000000 && b != 32'hFFFFFFFF)"
+
+Draws used: 1/20; final lint: pass.
+Seed material: 101:hyp-20261005-003-r15s2; k=3.
+[random-agent] applied 3 mutation(s), draw 1, lint pass
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/.tmp/agent-logs/impl.hyp-20261005-003-r1s2.log ===
+Random-mutation control (no LLM). Seeded mutations applied:
+- cores/bench/rtl/decoder.sv:169 [lit_perturb] "3'd2:    mem_width = 2'd2;" -> "3'd2:    mem_width = 2'd3;"
+- cores/bench/rtl/core.sv:230 [lit_perturb] "io_rvfi_rd_addr_0   = rd_wen ? mem_wb_w.rd : 5'b0;" -> "io_rvfi_rd_addr_0   = rd_wen ? mem_wb_w.rd : 5'b1;"
+- cores/bench/rtl/mem_stage.sv:85 [op_swap] "(in.ctrl.mem_width == 2'd1 && in.alu_result[0]   != 1'b0)" -> "(in.ctrl.mem_width != 2'd1 && in.alu_result[0]   != 1'b0)"
+
+Draws used: 1/20; final lint: pass.
+Seed material: 101:hyp-20261005-003-r1s2; k=3.
+[random-agent] applied 3 mutation(s), draw 1, lint pass
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/.tmp/agent-logs/impl.hyp-20261005-003-r2s2.log ===
+Random-mutation control (no LLM). Seeded mutations applied:
+- cores/bench/rtl/decoder.sv:61 [lit_perturb] "mem_width  = 2'd2;" -> "mem_width  = 2'd3;"
+- cores/bench/rtl/if_stage.sv:53 [lit_perturb] "out.instr = (flush || redirect) ? 32'h0000_0013 : imem_data;" -> "out.instr = (flush || redirect) ? 32'h12 : imem_data;"
+- cores/bench/rtl/forward_unit.sv:33 [lit_perturb] "if      (ex_mem_w_en && ex_mem_rd != 5'b0 && ex_mem_rd == id_ex_rs2) fwd_rs2 = 2'd1;" -> "if      (ex_mem_w_en && ex_mem_rd != 5'b1 && ex_mem_rd == id_ex_rs2) fwd_rs2 = 2'd1;"
+
+Draws used: 2/20; final lint: pass.
+Seed material: 101:hyp-20261005-003-r2s2; k=3.
+[random-agent] applied 3 mutation(s), draw 2, lint pass
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/.tmp/agent-logs/impl.hyp-20261005-003-r3s2.log ===
+Random-mutation control (no LLM). Seeded mutations applied:
+- cores/bench/rtl/decoder.sv:121 [lit_perturb] "end else if (funct3 == 3'd1 && funct7 == 7'b0000000) begin // SLLI" -> "end else if (funct3 == 3'd1 && funct7 == 7'b1) begin // SLLI"
+- cores/bench/rtl/alu.sv:93 [op_swap] "ALU_REMU: out = (b == 32'b0) ? a : (a % b);" -> "ALU_REMU: out = (b != 32'b0) ? a : (a % b);"
+
+Draws used: 1/20; final lint: pass.
+Seed material: 101:hyp-20261005-003-r3s2; k=2.
+[random-agent] applied 2 mutation(s), draw 1, lint pass
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/.tmp/agent-logs/impl.hyp-20261005-003-r4s2.log ===
+Random-mutation control (no LLM). Seeded mutations applied:
+- cores/bench/rtl/alu.sv:63 [lit_perturb] "ALU_MUL:    out = (a + b) ^ 32'h5876063e;" -> "ALU_MUL:    out = (a + b) ^ 32'h5876063f;"
+- cores/bench/rtl/mem_stage.sv:147 [lit_perturb] "reg_q.mem_rmask  <= (in.ctrl.mem_read  && !mem_misalign) ? byte_mask : 4'b0000;" -> "reg_q.mem_rmask  <= (in.ctrl.mem_read  && !mem_misalign) ? byte_mask : 4'b1;"
+
+Draws used: 5/20; final lint: pass.
+Seed material: 101:hyp-20261005-003-r4s2; k=2.
+[random-agent] applied 2 mutation(s), draw 5, lint pass
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/.tmp/agent-logs/impl.hyp-20261005-003-r5s2.log ===
+Random-mutation control (no LLM). Seeded mutations applied:
+- cores/bench/rtl/forward_unit.sv:29 [lit_perturb] "else                                                                  fwd_rs1 = 2'd0;" -> "else                                                                  fwd_rs1 = 2'd1;"
+- cores/bench/rtl/alu.sv:63 [lit_perturb] "ALU_MUL:    out = (a + b) ^ 32'h5876063e;" -> "ALU_MUL:    out = (a + b) ^ 32'h5876063f;"
+- cores/bench/rtl/decoder.sv:148 [lit_perturb] "alu_src    = 1'b1;" -> "alu_src    = 1'b0;"
+
+Draws used: 1/20; final lint: pass.
+Seed material: 101:hyp-20261005-003-r5s2; k=3.
+[random-agent] applied 3 mutation(s), draw 1, lint pass
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/.tmp/agent-logs/impl.hyp-20261005-003-r6s2.log ===
+Random-mutation control (no LLM). Seeded mutations applied:
+- cores/bench/rtl/decoder.sv:223 [lit_perturb] "7'b1110011: begin" -> "7'b1110010: begin"
+
+Draws used: 1/20; final lint: pass.
+Seed material: 101:hyp-20261005-003-r6s2; k=1.
+[random-agent] applied 1 mutation(s), draw 1, lint pass
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/.tmp/agent-logs/impl.hyp-20261005-003-r7s2.log ===
+Random-mutation control (no LLM). Seeded mutations applied:
+- cores/bench/rtl/imm_gen.sv:32 [lit_perturb] "imm = {instr[31:12], 12'b0};" -> "imm = {instr[31:12], 12'b1};"
+- cores/bench/rtl/decoder.sv:223 [lit_perturb] "7'b1110011: begin" -> "7'b1110010: begin"
+- cores/bench/rtl/decoder.sv:162 [lit_perturb] "if (funct3 == 3'd0 || funct3 == 3'd1 || funct3 == 3'd2) begin" -> "if (funct3 == 3'd0 || funct3 == 3'd0 || funct3 == 3'd2) begin"
+
+Draws used: 1/20; final lint: pass.
+Seed material: 101:hyp-20261005-003-r7s2; k=3.
+[random-agent] applied 3 mutation(s), draw 1, lint pass
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/.tmp/agent-logs/impl.hyp-20261005-003-r8s2.log ===
+Random-mutation control (no LLM). Seeded mutations applied:
+- cores/bench/rtl/ex_stage.sv:130 [lit_perturb] "reg_q.alu_result    <= in.ctrl.is_jump ? (in.pc + 32'd4) : alu_result;" -> "reg_q.alu_result    <= in.ctrl.is_jump ? (in.pc + 32'd5) : alu_result;"
+
+Draws used: 1/20; final lint: pass.
+Seed material: 101:hyp-20261005-003-r8s2; k=1.
+[random-agent] applied 1 mutation(s), draw 1, lint pass
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/.tmp/agent-logs/impl.hyp-20261005-003-r9s2.log ===
+Random-mutation control (no LLM). Seeded mutations applied:
+- cores/bench/rtl/decoder.sv:162 [lit_perturb] "if (funct3 == 3'd0 || funct3 == 3'd1 || funct3 == 3'd2) begin" -> "if (funct3 == 3'd1 || funct3 == 3'd1 || funct3 == 3'd2) begin"
+- cores/bench/rtl/decoder.sv:190 [lit_perturb] "reg_write  = 1'b1;" -> "reg_write  = 1'b0;"
+- cores/bench/rtl/core_pkg.sv:67 [op_swap] 'logic       mem_sext;    // sign-extend load result' -> 'logic       mem_sext;    // sign+extend load result'
+
+Draws used: 1/20; final lint: pass.
+Seed material: 101:hyp-20261005-003-r9s2; k=3.
+[random-agent] applied 3 mutation(s), draw 1, lint pass
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/experiments/hypotheses/.agent.hyp-20261005-001-r10s0.log ===
+[random-agent] wrote cores/bench/experiments/hypotheses/hyp-20261005-001-r10s0.yaml
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/experiments/hypotheses/.agent.hyp-20261005-001-r11s0.log ===
+[random-agent] wrote cores/bench/experiments/hypotheses/hyp-20261005-001-r11s0.yaml
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/experiments/hypotheses/.agent.hyp-20261005-001-r12s0.log ===
+[random-agent] wrote cores/bench/experiments/hypotheses/hyp-20261005-001-r12s0.yaml
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/experiments/hypotheses/.agent.hyp-20261005-001-r13s0.log ===
+[random-agent] wrote cores/bench/experiments/hypotheses/hyp-20261005-001-r13s0.yaml
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/experiments/hypotheses/.agent.hyp-20261005-001-r14s0.log ===
+[random-agent] wrote cores/bench/experiments/hypotheses/hyp-20261005-001-r14s0.yaml
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/experiments/hypotheses/.agent.hyp-20261005-001-r15s0.log ===
+[random-agent] wrote cores/bench/experiments/hypotheses/hyp-20261005-001-r15s0.yaml
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/experiments/hypotheses/.agent.hyp-20261005-001-r1s0.log ===
+[random-agent] wrote cores/bench/experiments/hypotheses/hyp-20261005-001-r1s0.yaml
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/experiments/hypotheses/.agent.hyp-20261005-001-r2s0.log ===
+[random-agent] wrote cores/bench/experiments/hypotheses/hyp-20261005-001-r2s0.yaml
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/experiments/hypotheses/.agent.hyp-20261005-001-r3s0.log ===
+[random-agent] wrote cores/bench/experiments/hypotheses/hyp-20261005-001-r3s0.yaml
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/experiments/hypotheses/.agent.hyp-20261005-001-r4s0.log ===
+[random-agent] wrote cores/bench/experiments/hypotheses/hyp-20261005-001-r4s0.yaml
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/experiments/hypotheses/.agent.hyp-20261005-001-r5s0.log ===
+[random-agent] wrote cores/bench/experiments/hypotheses/hyp-20261005-001-r5s0.yaml
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/experiments/hypotheses/.agent.hyp-20261005-001-r6s0.log ===
+[random-agent] wrote cores/bench/experiments/hypotheses/hyp-20261005-001-r6s0.yaml
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/experiments/hypotheses/.agent.hyp-20261005-001-r7s0.log ===
+[random-agent] wrote cores/bench/experiments/hypotheses/hyp-20261005-001-r7s0.yaml
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/experiments/hypotheses/.agent.hyp-20261005-001-r8s0.log ===
+[random-agent] wrote cores/bench/experiments/hypotheses/hyp-20261005-001-r8s0.yaml
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/experiments/hypotheses/.agent.hyp-20261005-001-r9s0.log ===
+[random-agent] wrote cores/bench/experiments/hypotheses/hyp-20261005-001-r9s0.yaml
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/experiments/hypotheses/.agent.hyp-20261005-002-r10s1.log ===
+[random-agent] wrote cores/bench/experiments/hypotheses/hyp-20261005-002-r10s1.yaml
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/experiments/hypotheses/.agent.hyp-20261005-002-r11s1.log ===
+[random-agent] wrote cores/bench/experiments/hypotheses/hyp-20261005-002-r11s1.yaml
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/experiments/hypotheses/.agent.hyp-20261005-002-r12s1.log ===
+[random-agent] wrote cores/bench/experiments/hypotheses/hyp-20261005-002-r12s1.yaml
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/experiments/hypotheses/.agent.hyp-20261005-002-r13s1.log ===
+[random-agent] wrote cores/bench/experiments/hypotheses/hyp-20261005-002-r13s1.yaml
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/experiments/hypotheses/.agent.hyp-20261005-002-r14s1.log ===
+[random-agent] wrote cores/bench/experiments/hypotheses/hyp-20261005-002-r14s1.yaml
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/experiments/hypotheses/.agent.hyp-20261005-002-r15s1.log ===
+[random-agent] wrote cores/bench/experiments/hypotheses/hyp-20261005-002-r15s1.yaml
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/experiments/hypotheses/.agent.hyp-20261005-002-r1s1.log ===
+[random-agent] wrote cores/bench/experiments/hypotheses/hyp-20261005-002-r1s1.yaml
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/experiments/hypotheses/.agent.hyp-20261005-002-r2s1.log ===
+[random-agent] wrote cores/bench/experiments/hypotheses/hyp-20261005-002-r2s1.yaml
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/experiments/hypotheses/.agent.hyp-20261005-002-r3s1.log ===
+[random-agent] wrote cores/bench/experiments/hypotheses/hyp-20261005-002-r3s1.yaml
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/experiments/hypotheses/.agent.hyp-20261005-002-r4s1.log ===
+[random-agent] wrote cores/bench/experiments/hypotheses/hyp-20261005-002-r4s1.yaml
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/experiments/hypotheses/.agent.hyp-20261005-002-r5s1.log ===
+[random-agent] wrote cores/bench/experiments/hypotheses/hyp-20261005-002-r5s1.yaml
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/experiments/hypotheses/.agent.hyp-20261005-002-r6s1.log ===
+[random-agent] wrote cores/bench/experiments/hypotheses/hyp-20261005-002-r6s1.yaml
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/experiments/hypotheses/.agent.hyp-20261005-002-r7s1.log ===
+[random-agent] wrote cores/bench/experiments/hypotheses/hyp-20261005-002-r7s1.yaml
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/experiments/hypotheses/.agent.hyp-20261005-002-r8s1.log ===
+[random-agent] wrote cores/bench/experiments/hypotheses/hyp-20261005-002-r8s1.yaml
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/experiments/hypotheses/.agent.hyp-20261005-002-r9s1.log ===
+[random-agent] wrote cores/bench/experiments/hypotheses/hyp-20261005-002-r9s1.yaml
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/experiments/hypotheses/.agent.hyp-20261005-003-r10s2.log ===
+[random-agent] wrote cores/bench/experiments/hypotheses/hyp-20261005-003-r10s2.yaml
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/experiments/hypotheses/.agent.hyp-20261005-003-r11s2.log ===
+[random-agent] wrote cores/bench/experiments/hypotheses/hyp-20261005-003-r11s2.yaml
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/experiments/hypotheses/.agent.hyp-20261005-003-r12s2.log ===
+[random-agent] wrote cores/bench/experiments/hypotheses/hyp-20261005-003-r12s2.yaml
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/experiments/hypotheses/.agent.hyp-20261005-003-r13s2.log ===
+[random-agent] wrote cores/bench/experiments/hypotheses/hyp-20261005-003-r13s2.yaml
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/experiments/hypotheses/.agent.hyp-20261005-003-r14s2.log ===
+[random-agent] wrote cores/bench/experiments/hypotheses/hyp-20261005-003-r14s2.yaml
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/experiments/hypotheses/.agent.hyp-20261005-003-r15s2.log ===
+[random-agent] wrote cores/bench/experiments/hypotheses/hyp-20261005-003-r15s2.yaml
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/experiments/hypotheses/.agent.hyp-20261005-003-r1s2.log ===
+[random-agent] wrote cores/bench/experiments/hypotheses/hyp-20261005-003-r1s2.yaml
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/experiments/hypotheses/.agent.hyp-20261005-003-r2s2.log ===
+[random-agent] wrote cores/bench/experiments/hypotheses/hyp-20261005-003-r2s2.yaml
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/experiments/hypotheses/.agent.hyp-20261005-003-r3s2.log ===
+[random-agent] wrote cores/bench/experiments/hypotheses/hyp-20261005-003-r3s2.yaml
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/experiments/hypotheses/.agent.hyp-20261005-003-r4s2.log ===
+[random-agent] wrote cores/bench/experiments/hypotheses/hyp-20261005-003-r4s2.yaml
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/experiments/hypotheses/.agent.hyp-20261005-003-r5s2.log ===
+[random-agent] wrote cores/bench/experiments/hypotheses/hyp-20261005-003-r5s2.yaml
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/experiments/hypotheses/.agent.hyp-20261005-003-r6s2.log ===
+[random-agent] wrote cores/bench/experiments/hypotheses/hyp-20261005-003-r6s2.yaml
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/experiments/hypotheses/.agent.hyp-20261005-003-r7s2.log ===
+[random-agent] wrote cores/bench/experiments/hypotheses/hyp-20261005-003-r7s2.yaml
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/experiments/hypotheses/.agent.hyp-20261005-003-r8s2.log ===
+[random-agent] wrote cores/bench/experiments/hypotheses/hyp-20261005-003-r8s2.yaml
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/experiments/hypotheses/.agent.hyp-20261005-003-r9s2.log ===
+[random-agent] wrote cores/bench/experiments/hypotheses/hyp-20261005-003-r9s2.yaml
+

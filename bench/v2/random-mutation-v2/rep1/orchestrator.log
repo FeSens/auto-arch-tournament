@@ -1,0 +1,2435 @@
+[orchestrator] empty log for cores/bench — running baseline retest
+/srv/hwebench/clones/random-mutation-v2-rep1/tools/plot.py:136: UserWarning: Tight layout not applied. The left and right margins cannot be made large enough to accommodate all Axes decorations.
+  fig.tight_layout()
+[bench-v2.8.4 8fb2dae] log: baseline-bench-4871359 improvement
+ 3 files changed, 11 insertions(+), 8 deletions(-)
+ create mode 100644 cores/bench/experiments/log.jsonl
+ create mode 100644 cores/bench/experiments/progress.png
+
+============================================================
+Round 1  |  slots=3  |  current best=12.12
+============================================================
+  pre-allocated IDs: ['hyp-20261005-001-r1s0', 'hyp-20261005-002-r1s1', 'hyp-20261005-003-r1s2']
+  [slot 0] category=micro_opt id=hyp-20261005-001-r1s0
+  [slot 1] category=structural id=hyp-20261005-002-r1s1
+  [slot 2] category=predictor id=hyp-20261005-003-r1s2
+Preparing worktree (new branch 'bench-hyp-20261005-003-r1s2-hypgen')
+Preparing worktree (new branch 'bench-hyp-20261005-001-r1s0-hypgen')
+Preparing worktree (new branch 'bench-hyp-20261005-002-r1s1-hypgen')
+Deleted branch bench-hyp-20261005-003-r1s2-hypgen (was 8fb2dae).
+Preparing worktree (new branch 'bench-hyp-20261005-003-r1s2')
+HEAD is now at 8fb2dae log: baseline-bench-4871359 improvement
+HEAD is now at 8fb2dae log: baseline-bench-4871359 improvement
+HEAD is now at 8fb2dae log: baseline-bench-4871359 improvement
+HEAD is now at 8fb2dae log: baseline-bench-4871359 improvement
+  [slot 2] worktree=/srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-003-r1s2
+Deleted branch bench-hyp-20261005-001-r1s0-hypgen (was 8fb2dae).
+Deleted branch bench-hyp-20261005-002-r1s1-hypgen (was 8fb2dae).
+Preparing worktree (new branch 'bench-hyp-20261005-001-r1s0')
+HEAD is now at 8fb2dae log: baseline-bench-4871359 improvement
+  [slot 0] worktree=/srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-001-r1s0
+Preparing worktree (new branch 'bench-hyp-20261005-002-r1s1')
+HEAD is now at 8fb2dae log: baseline-bench-4871359 improvement
+  [slot 1] worktree=/srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-002-r1s1
+Deleted branch bench-hyp-20261005-002-r1s1 (was 8fb2dae).
+  [slot 1] broken: formal_failed: insn_slli_ch0
+] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:05 (5)
+SBY 12:57:24 [insn_sw_ch0] summary: engine_0 (smtbmc bitwuzla) returned FAIL
+SBY 12:57:24 [insn_sw_ch0] summary: counterexample trace: insn_sw_ch0/engine_0/trace.vcd
+SBY 12:57:24 [insn_sw_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_198_152 at rvfi_insn_check.sv:198.6-198.31 step 20
+SBY 12:57:24 [insn_sw_ch0] DONE (FAIL, rc=0)
+SBY 12:57:51 [reg_ch0] engine_0: ##   0:00:43  Status: passed
+SBY 12:57:51 [reg_ch0] engine_0: finished (returncode=0)
+SBY 12:57:51 [reg_ch0] engine_0: Status returned by engine: pass
+SBY 12:57:51 [reg_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:43 (43)
+SBY 12:57:51 [reg_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:44 (44)
+SBY 12:57:51 [reg_ch0] summary: engine_0 (smtbmc bitwuzla) returned pass
+SBY 12:57:51 [reg_ch0] summary: engine_0 did not produce any traces
+SBY 12:57:51 [reg_ch0] DONE (PASS, rc=0)
+
+Formal: 51 passed, 2 failed
+Failed: insn_slli_ch0 insn_sw_ch0
+
+--- insn_slli_ch0/logfile.txt (last 30 lines) ---
+SBY 12:57:16 [insn_slli_ch0] engine_0: ##   0:00:00  Skipping step 7..
+SBY 12:57:16 [insn_slli_ch0] engine_0: ##   0:00:00  Skipping step 8..
+SBY 12:57:16 [insn_slli_ch0] engine_0: ##   0:00:00  Skipping step 9..
+SBY 12:57:16 [insn_slli_ch0] engine_0: ##   0:00:00  Skipping step 10..
+SBY 12:57:16 [insn_slli_ch0] engine_0: ##   0:00:00  Skipping step 11..
+SBY 12:57:16 [insn_slli_ch0] engine_0: ##   0:00:00  Skipping step 12..
+SBY 12:57:16 [insn_slli_ch0] engine_0: ##   0:00:00  Skipping step 13..
+SBY 12:57:16 [insn_slli_ch0] engine_0: ##   0:00:00  Skipping step 14..
+SBY 12:57:16 [insn_slli_ch0] engine_0: ##   0:00:00  Skipping step 15..
+SBY 12:57:16 [insn_slli_ch0] engine_0: ##   0:00:00  Skipping step 16..
+SBY 12:57:16 [insn_slli_ch0] engine_0: ##   0:00:00  Skipping step 17..
+SBY 12:57:16 [insn_slli_ch0] engine_0: ##   0:00:00  Skipping step 18..
+SBY 12:57:16 [insn_slli_ch0] engine_0: ##   0:00:00  Skipping step 19..
+SBY 12:57:16 [insn_slli_ch0] engine_0: ##   0:00:00  Checking assumptions in step 20..
+SBY 12:57:16 [insn_slli_ch0] engine_0: ##   0:00:00  Checking assertions in step 20..
+SBY 12:57:17 [insn_slli_ch0] engine_0: ##   0:00:00  BMC failed!
+SBY 12:57:17 [insn_slli_ch0] engine_0: ##   0:00:00  Assert failed in rvfi_testbench: rvfi_insn_check.sv:198.6-198.31 (_witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_198_152)
+SBY 12:57:17 [insn_slli_ch0] engine_0: ##   0:00:00  Writing trace to VCD file: engine_0/trace.vcd
+SBY 12:57:17 [insn_slli_ch0] engine_0: ##   0:00:01  Writing trace to Verilog testbench: engine_0/trace_tb.v
+SBY 12:57:17 [insn_slli_ch0] engine_0: ##   0:00:01  Writing trace to constraints file: engine_0/trace.smtc
+SBY 12:57:17 [insn_slli_ch0] engine_0: ##   0:00:01  Writing trace to Yosys witness file: engine_0/trace.yw
+SBY 12:57:17 [insn_slli_ch0] engine_0: ##   0:00:01  Status: failed
+SBY 12:57:17 [insn_slli_ch0] engine_0: finished (returncode=1)
+SBY 12:57:17 [insn_slli_ch0] engine_0: Status returned by engine: FAIL
+SBY 12:57:17 [insn_slli_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:01 (1)
+SBY 12:57:17 [insn_slli_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:01 (1)
+SBY 12:57:17 [insn_slli_ch0] summary: engine_0 (smtbmc bitwuzla) returned FAIL
+SBY 12:57:17 [insn_slli_ch0] summary: counterexample trace: insn_slli_ch0/engine_0/trace.vcd
+SBY 12:57:17 [insn_slli_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_198_152 at rvfi_insn_check.sv:198.6-198.31 step 20
+SBY 12:57:17 [insn_slli_ch0] DONE (FAIL, rc=0)
+
+Full run log: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-002-r1s1/formal/last_run-h9be3d0ff502046f.log
+Per-check logs in: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-002-r1s1/formal/riscv-formal/cores/bench-h9be3d0ff502046f/checks/<check>/logfile.txt
+Deleted branch bench-hyp-20261005-003-r1s2 (was 8fb2dae).
+  [slot 2] broken: formal_failed: ill_ch0
+rned by engine: FAIL
+SBY 13:00:33 [insn_xori_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:08 (8)
+SBY 13:00:33 [insn_xori_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:08 (8)
+SBY 13:00:33 [insn_xori_ch0] summary: engine_0 (smtbmc bitwuzla) returned FAIL
+SBY 13:00:33 [insn_xori_ch0] summary: counterexample trace: insn_xori_ch0/engine_0/trace.vcd
+SBY 13:00:33 [insn_xori_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_176_111 at rvfi_insn_check.sv:176.7-176.38 step 20
+SBY 13:00:33 [insn_xori_ch0] DONE (FAIL, rc=0)
+
+Formal: 6 passed, 47 failed
+Failed: ill_ch0 insn_add_ch0 insn_addi_ch0 insn_and_ch0 insn_andi_ch0 insn_auipc_ch0 insn_beq_ch0 insn_bge_ch0 insn_bgeu_ch0 insn_blt_ch0 insn_bltu_ch0 insn_bne_ch0 insn_div_ch0 insn_divu_ch0 insn_jal_ch0 insn_jalr_ch0 insn_lb_ch0 insn_lbu_ch0 insn_lh_ch0 insn_lhu_ch0 insn_lui_ch0 insn_lw_ch0 insn_mul_ch0 insn_mulh_ch0 insn_mulhsu_ch0 insn_mulhu_ch0 insn_or_ch0 insn_ori_ch0 insn_rem_ch0 insn_remu_ch0 insn_sb_ch0 insn_sh_ch0 insn_sll_ch0 insn_slli_ch0 insn_slt_ch0 insn_slti_ch0 insn_sltiu_ch0 insn_sltu_ch0 insn_sra_ch0 insn_srai_ch0 insn_srl_ch0 insn_srli_ch0 insn_sub_ch0 insn_sw_ch0 insn_xor_ch0 insn_xori_ch0 reg_ch0
+
+--- ill_ch0/logfile.txt (last 30 lines) ---
+SBY 12:59:39 [ill_ch0] engine_0: ##   0:00:00  Skipping step 7..
+SBY 12:59:39 [ill_ch0] engine_0: ##   0:00:00  Skipping step 8..
+SBY 12:59:39 [ill_ch0] engine_0: ##   0:00:00  Skipping step 9..
+SBY 12:59:39 [ill_ch0] engine_0: ##   0:00:00  Skipping step 10..
+SBY 12:59:39 [ill_ch0] engine_0: ##   0:00:00  Skipping step 11..
+SBY 12:59:39 [ill_ch0] engine_0: ##   0:00:00  Skipping step 12..
+SBY 12:59:39 [ill_ch0] engine_0: ##   0:00:00  Skipping step 13..
+SBY 12:59:39 [ill_ch0] engine_0: ##   0:00:00  Skipping step 14..
+SBY 12:59:39 [ill_ch0] engine_0: ##   0:00:00  Skipping step 15..
+SBY 12:59:39 [ill_ch0] engine_0: ##   0:00:00  Skipping step 16..
+SBY 12:59:39 [ill_ch0] engine_0: ##   0:00:00  Skipping step 17..
+SBY 12:59:40 [ill_ch0] engine_0: ##   0:00:00  Skipping step 18..
+SBY 12:59:40 [ill_ch0] engine_0: ##   0:00:00  Skipping step 19..
+SBY 12:59:40 [ill_ch0] engine_0: ##   0:00:00  Checking assumptions in step 20..
+SBY 12:59:40 [ill_ch0] engine_0: ##   0:00:00  Checking assertions in step 20..
+SBY 12:59:48 [ill_ch0] engine_0: ##   0:00:08  BMC failed!
+SBY 12:59:48 [ill_ch0] engine_0: ##   0:00:08  Assert failed in rvfi_testbench: rvfi_ill_check.sv:51.5-51.25 (_witness_.check_flatten_checker_inst__assert_rvfi_ill_check_sv_51_61)
+SBY 12:59:48 [ill_ch0] engine_0: ##   0:00:08  Writing trace to VCD file: engine_0/trace.vcd
+SBY 12:59:48 [ill_ch0] engine_0: ##   0:00:08  Writing trace to Verilog testbench: engine_0/trace_tb.v
+SBY 12:59:48 [ill_ch0] engine_0: ##   0:00:08  Writing trace to constraints file: engine_0/trace.smtc
+SBY 12:59:48 [ill_ch0] engine_0: ##   0:00:08  Writing trace to Yosys witness file: engine_0/trace.yw
+SBY 12:59:48 [ill_ch0] engine_0: ##   0:00:09  Status: failed
+SBY 12:59:48 [ill_ch0] engine_0: finished (returncode=1)
+SBY 12:59:48 [ill_ch0] engine_0: Status returned by engine: FAIL
+SBY 12:59:48 [ill_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:09 (9)
+SBY 12:59:48 [ill_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:09 (9)
+SBY 12:59:48 [ill_ch0] summary: engine_0 (smtbmc bitwuzla) returned FAIL
+SBY 12:59:48 [ill_ch0] summary: counterexample trace: ill_ch0/engine_0/trace.vcd
+SBY 12:59:48 [ill_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_ill_check_sv_51_61 at rvfi_ill_check.sv:51.5-51.25 step 20
+SBY 12:59:48 [ill_ch0] DONE (FAIL, rc=0)
+
+Full run log: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-003-r1s2/formal/last_run-h01f72c6372144a5.log
+Per-check logs in: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-003-r1s2/formal/riscv-formal/cores/bench-h01f72c6372144a5/checks/<check>/logfile.txt
+Deleted branch bench-hyp-20261005-001-r1s0 (was 8fb2dae).
+  [slot 0] broken: formal_failed: insn_add_ch0
+cess time [H:MM:SS (secs)]: 0:00:16 (16)
+SBY 13:04:18 [insn_sw_ch0] summary: engine_0 (smtbmc bitwuzla) returned FAIL
+SBY 13:04:18 [insn_sw_ch0] summary: counterexample trace: insn_sw_ch0/engine_0/trace.vcd
+SBY 13:04:18 [insn_sw_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_167_102 at rvfi_insn_check.sv:167.7-167.29 step 20
+SBY 13:04:18 [insn_sw_ch0] DONE (FAIL, rc=0)
+
+Formal: 7 passed, 46 failed
+Failed: insn_add_ch0 insn_addi_ch0 insn_and_ch0 insn_andi_ch0 insn_auipc_ch0 insn_beq_ch0 insn_bge_ch0 insn_bgeu_ch0 insn_blt_ch0 insn_bltu_ch0 insn_bne_ch0 insn_div_ch0 insn_divu_ch0 insn_jal_ch0 insn_jalr_ch0 insn_lb_ch0 insn_lbu_ch0 insn_lh_ch0 insn_lhu_ch0 insn_lui_ch0 insn_lw_ch0 insn_mul_ch0 insn_mulh_ch0 insn_mulhsu_ch0 insn_mulhu_ch0 insn_or_ch0 insn_ori_ch0 insn_rem_ch0 insn_remu_ch0 insn_sb_ch0 insn_sh_ch0 insn_sll_ch0 insn_slli_ch0 insn_slt_ch0 insn_slti_ch0 insn_sltiu_ch0 insn_sltu_ch0 insn_sra_ch0 insn_srai_ch0 insn_srl_ch0 insn_srli_ch0 insn_sub_ch0 insn_sw_ch0 insn_xor_ch0 insn_xori_ch0 reg_ch0
+
+--- insn_add_ch0/logfile.txt (last 30 lines) ---
+SBY 13:02:51 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 7..
+SBY 13:02:51 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 8..
+SBY 13:02:51 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 9..
+SBY 13:02:52 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 10..
+SBY 13:02:52 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 11..
+SBY 13:02:52 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 12..
+SBY 13:02:52 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 13..
+SBY 13:02:52 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 14..
+SBY 13:02:52 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 15..
+SBY 13:02:52 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 16..
+SBY 13:02:52 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 17..
+SBY 13:02:52 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 18..
+SBY 13:02:52 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 19..
+SBY 13:02:52 [insn_add_ch0] engine_0: ##   0:00:00  Checking assumptions in step 20..
+SBY 13:02:52 [insn_add_ch0] engine_0: ##   0:00:00  Checking assertions in step 20..
+SBY 13:03:07 [insn_add_ch0] engine_0: ##   0:00:15  BMC failed!
+SBY 13:03:07 [insn_add_ch0] engine_0: ##   0:00:15  Assert failed in rvfi_testbench: rvfi_insn_check.sv:167.7-167.29 (_witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_167_102)
+SBY 13:03:07 [insn_add_ch0] engine_0: ##   0:00:15  Writing trace to VCD file: engine_0/trace.vcd
+SBY 13:03:07 [insn_add_ch0] engine_0: ##   0:00:15  Writing trace to Verilog testbench: engine_0/trace_tb.v
+SBY 13:03:07 [insn_add_ch0] engine_0: ##   0:00:15  Writing trace to constraints file: engine_0/trace.smtc
+SBY 13:03:07 [insn_add_ch0] engine_0: ##   0:00:15  Writing trace to Yosys witness file: engine_0/trace.yw
+SBY 13:03:07 [insn_add_ch0] engine_0: ##   0:00:15  Status: failed
+SBY 13:03:07 [insn_add_ch0] engine_0: finished (returncode=1)
+SBY 13:03:07 [insn_add_ch0] engine_0: Status returned by engine: FAIL
+SBY 13:03:07 [insn_add_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:16 (16)
+SBY 13:03:07 [insn_add_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:16 (16)
+SBY 13:03:07 [insn_add_ch0] summary: engine_0 (smtbmc bitwuzla) returned FAIL
+SBY 13:03:07 [insn_add_ch0] summary: counterexample trace: insn_add_ch0/engine_0/trace.vcd
+SBY 13:03:07 [insn_add_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_167_102 at rvfi_insn_check.sv:167.7-167.29 step 20
+SBY 13:03:07 [insn_add_ch0] DONE (FAIL, rc=0)
+
+Full run log: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-001-r1s0/formal/last_run-hf7b5099785a3481.log
+Per-check logs in: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-001-r1s0/formal/riscv-formal/cores/bench-hf7b5099785a3481/checks/<check>/logfile.txt
+[bench-v2.8.4 44e924a] log: hyp-20261005-001-r1s0 broken
+ 2 files changed, 1 insertion(+)
+[bench-v2.8.4 d02f8ac] log: hyp-20261005-002-r1s1 broken
+ 2 files changed, 1 insertion(+)
+[bench-v2.8.4 4f61a61] log: hyp-20261005-003-r1s2 broken
+ 1 file changed, 1 insertion(+)
+
+  Round 1 complete: slot 0=broken, slot 1=broken, slot 2=broken (no winner)
+
+============================================================
+Round 2  |  slots=3  |  current best=12.12
+============================================================
+  pre-allocated IDs: ['hyp-20261005-001-r2s0', 'hyp-20261005-002-r2s1', 'hyp-20261005-003-r2s2']
+  [slot 0] category=micro_opt id=hyp-20261005-001-r2s0
+  [slot 1] category=structural id=hyp-20261005-002-r2s1
+  [slot 2] category=predictor id=hyp-20261005-003-r2s2
+Preparing worktree (new branch 'bench-hyp-20261005-001-r2s0-hypgen')
+Preparing worktree (new branch 'bench-hyp-20261005-002-r2s1-hypgen')
+Preparing worktree (new branch 'bench-hyp-20261005-003-r2s2-hypgen')
+Deleted branch bench-hyp-20261005-001-r2s0-hypgen (was 4f61a61).
+Preparing worktree (new branch 'bench-hyp-20261005-001-r2s0')
+HEAD is now at 4f61a61 log: hyp-20261005-003-r1s2 broken
+HEAD is now at 4f61a61 log: hyp-20261005-003-r1s2 broken
+HEAD is now at 4f61a61 log: hyp-20261005-003-r1s2 broken
+HEAD is now at 4f61a61 log: hyp-20261005-003-r1s2 broken
+  [slot 0] worktree=/srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-001-r2s0
+Deleted branch bench-hyp-20261005-002-r2s1-hypgen (was 4f61a61).
+Preparing worktree (new branch 'bench-hyp-20261005-002-r2s1')
+HEAD is now at 4f61a61 log: hyp-20261005-003-r1s2 broken
+  [slot 1] worktree=/srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-002-r2s1
+Deleted branch bench-hyp-20261005-003-r2s2-hypgen (was 4f61a61).
+Preparing worktree (new branch 'bench-hyp-20261005-003-r2s2')
+HEAD is now at 4f61a61 log: hyp-20261005-003-r1s2 broken
+  [slot 2] worktree=/srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-003-r2s2
+Deleted branch bench-hyp-20261005-002-r2s1 (was 4f61a61).
+  [slot 1] broken: formal_failed: insn_jalr_ch0
+itwuzla) returned pass
+SBY 13:08:42 [insn_sub_ch0] summary: engine_0 did not produce any traces
+SBY 13:08:42 [insn_sub_ch0] DONE (PASS, rc=0)
+SBY 13:09:22 [reg_ch0] engine_0: ##   0:01:00  waiting for solver (1 minute)
+SBY 13:09:25 [reg_ch0] engine_0: ##   0:01:04  Status: passed
+SBY 13:09:25 [reg_ch0] engine_0: finished (returncode=0)
+SBY 13:09:25 [reg_ch0] engine_0: Status returned by engine: pass
+SBY 13:09:25 [reg_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:01:04 (64)
+SBY 13:09:25 [reg_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:01:04 (64)
+SBY 13:09:25 [reg_ch0] summary: engine_0 (smtbmc bitwuzla) returned pass
+SBY 13:09:25 [reg_ch0] summary: engine_0 did not produce any traces
+SBY 13:09:25 [reg_ch0] DONE (PASS, rc=0)
+
+Formal: 51 passed, 2 failed
+Failed: insn_jalr_ch0 insn_lb_ch0
+
+--- insn_jalr_ch0/logfile.txt (last 30 lines) ---
+SBY 13:08:28 [insn_jalr_ch0] engine_0: ##   0:00:00  Skipping step 9..
+SBY 13:08:28 [insn_jalr_ch0] engine_0: ##   0:00:00  Skipping step 10..
+SBY 13:08:28 [insn_jalr_ch0] engine_0: ##   0:00:00  Skipping step 11..
+SBY 13:08:28 [insn_jalr_ch0] engine_0: ##   0:00:00  Skipping step 12..
+SBY 13:08:28 [insn_jalr_ch0] engine_0: ##   0:00:00  Skipping step 13..
+SBY 13:08:28 [insn_jalr_ch0] engine_0: ##   0:00:00  Skipping step 14..
+SBY 13:08:28 [insn_jalr_ch0] engine_0: ##   0:00:00  Skipping step 15..
+SBY 13:08:28 [insn_jalr_ch0] engine_0: ##   0:00:00  Skipping step 16..
+SBY 13:08:28 [insn_jalr_ch0] engine_0: ##   0:00:00  Skipping step 17..
+SBY 13:08:28 [insn_jalr_ch0] engine_0: ##   0:00:00  Skipping step 18..
+SBY 13:08:28 [insn_jalr_ch0] engine_0: ##   0:00:00  Skipping step 19..
+SBY 13:08:28 [insn_jalr_ch0] engine_0: ##   0:00:00  Checking assumptions in step 20..
+SBY 13:08:28 [insn_jalr_ch0] engine_0: ##   0:00:00  Checking assertions in step 20..
+SBY 13:08:37 [insn_jalr_ch0] engine_0: ##   0:00:09  BMC failed!
+SBY 13:08:37 [insn_jalr_ch0] engine_0: ##   0:00:09  Assert failed in rvfi_testbench: rvfi_insn_check.sv:178.7-178.76 (_witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_178_115)
+SBY 13:08:37 [insn_jalr_ch0] engine_0: ##   0:00:09  Assert failed in rvfi_testbench: rvfi_insn_check.sv:198.6-198.31 (_witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_198_152)
+SBY 13:08:37 [insn_jalr_ch0] engine_0: ##   0:00:09  Writing trace to VCD file: engine_0/trace.vcd
+SBY 13:08:37 [insn_jalr_ch0] engine_0: ##   0:00:09  Writing trace to Verilog testbench: engine_0/trace_tb.v
+SBY 13:08:37 [insn_jalr_ch0] engine_0: ##   0:00:09  Writing trace to constraints file: engine_0/trace.smtc
+SBY 13:08:37 [insn_jalr_ch0] engine_0: ##   0:00:09  Writing trace to Yosys witness file: engine_0/trace.yw
+SBY 13:08:37 [insn_jalr_ch0] engine_0: ##   0:00:09  Status: failed
+SBY 13:08:37 [insn_jalr_ch0] engine_0: finished (returncode=1)
+SBY 13:08:37 [insn_jalr_ch0] engine_0: Status returned by engine: FAIL
+SBY 13:08:37 [insn_jalr_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:10 (10)
+SBY 13:08:37 [insn_jalr_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:10 (10)
+SBY 13:08:37 [insn_jalr_ch0] summary: engine_0 (smtbmc bitwuzla) returned FAIL
+SBY 13:08:37 [insn_jalr_ch0] summary: counterexample trace: insn_jalr_ch0/engine_0/trace.vcd
+SBY 13:08:37 [insn_jalr_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_178_115 at rvfi_insn_check.sv:178.7-178.76 step 20
+SBY 13:08:37 [insn_jalr_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_198_152 at rvfi_insn_check.sv:198.6-198.31 step 20
+SBY 13:08:37 [insn_jalr_ch0] DONE (FAIL, rc=0)
+
+Full run log: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-002-r2s1/formal/last_run-h4784486ed0184cf.log
+Per-check logs in: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-002-r2s1/formal/riscv-formal/cores/bench-h4784486ed0184cf/checks/<check>/logfile.txt
+Deleted branch bench-hyp-20261005-001-r2s0 (was 4f61a61).
+  [slot 0] broken: formal_failed: insn_beq_ch0
+) returned FAIL
+SBY 13:12:30 [insn_mulh_ch0] summary: counterexample trace: insn_mulh_ch0/engine_0/trace.vcd
+SBY 13:12:30 [insn_mulh_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_177_113 at rvfi_insn_check.sv:177.7-177.40 step 20
+SBY 13:12:30 [insn_mulh_ch0] DONE (FAIL, rc=0)
+SBY 13:12:39 [reg_ch0] engine_0: ##   0:01:00  waiting for solver (1 minute)
+SBY 13:13:03 [reg_ch0] engine_0: ##   0:01:25  Status: passed
+SBY 13:13:03 [reg_ch0] engine_0: finished (returncode=0)
+SBY 13:13:03 [reg_ch0] engine_0: Status returned by engine: pass
+SBY 13:13:03 [reg_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:01:25 (85)
+SBY 13:13:03 [reg_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:01:26 (86)
+SBY 13:13:03 [reg_ch0] summary: engine_0 (smtbmc bitwuzla) returned pass
+SBY 13:13:03 [reg_ch0] summary: engine_0 did not produce any traces
+SBY 13:13:03 [reg_ch0] DONE (PASS, rc=0)
+
+Formal: 46 passed, 7 failed
+Failed: insn_beq_ch0 insn_bge_ch0 insn_bgeu_ch0 insn_blt_ch0 insn_bltu_ch0 insn_bne_ch0 insn_mulh_ch0
+
+--- insn_beq_ch0/logfile.txt (last 30 lines) ---
+SBY 13:11:40 [insn_beq_ch0] engine_0: ##   0:00:00  Skipping step 7..
+SBY 13:11:40 [insn_beq_ch0] engine_0: ##   0:00:00  Skipping step 8..
+SBY 13:11:40 [insn_beq_ch0] engine_0: ##   0:00:00  Skipping step 9..
+SBY 13:11:40 [insn_beq_ch0] engine_0: ##   0:00:00  Skipping step 10..
+SBY 13:11:40 [insn_beq_ch0] engine_0: ##   0:00:00  Skipping step 11..
+SBY 13:11:40 [insn_beq_ch0] engine_0: ##   0:00:00  Skipping step 12..
+SBY 13:11:40 [insn_beq_ch0] engine_0: ##   0:00:00  Skipping step 13..
+SBY 13:11:40 [insn_beq_ch0] engine_0: ##   0:00:00  Skipping step 14..
+SBY 13:11:40 [insn_beq_ch0] engine_0: ##   0:00:00  Skipping step 15..
+SBY 13:11:40 [insn_beq_ch0] engine_0: ##   0:00:00  Skipping step 16..
+SBY 13:11:40 [insn_beq_ch0] engine_0: ##   0:00:00  Skipping step 17..
+SBY 13:11:40 [insn_beq_ch0] engine_0: ##   0:00:00  Skipping step 18..
+SBY 13:11:40 [insn_beq_ch0] engine_0: ##   0:00:00  Skipping step 19..
+SBY 13:11:40 [insn_beq_ch0] engine_0: ##   0:00:00  Checking assumptions in step 20..
+SBY 13:11:41 [insn_beq_ch0] engine_0: ##   0:00:00  Checking assertions in step 20..
+SBY 13:11:57 [insn_beq_ch0] engine_0: ##   0:00:16  BMC failed!
+SBY 13:11:57 [insn_beq_ch0] engine_0: ##   0:00:16  Assert failed in rvfi_testbench: rvfi_insn_check.sv:198.6-198.31 (_witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_198_152)
+SBY 13:11:57 [insn_beq_ch0] engine_0: ##   0:00:16  Writing trace to VCD file: engine_0/trace.vcd
+SBY 13:11:57 [insn_beq_ch0] engine_0: ##   0:00:17  Writing trace to Verilog testbench: engine_0/trace_tb.v
+SBY 13:11:57 [insn_beq_ch0] engine_0: ##   0:00:17  Writing trace to constraints file: engine_0/trace.smtc
+SBY 13:11:57 [insn_beq_ch0] engine_0: ##   0:00:17  Writing trace to Yosys witness file: engine_0/trace.yw
+SBY 13:11:57 [insn_beq_ch0] engine_0: ##   0:00:17  Status: failed
+SBY 13:11:57 [insn_beq_ch0] engine_0: finished (returncode=1)
+SBY 13:11:57 [insn_beq_ch0] engine_0: Status returned by engine: FAIL
+SBY 13:11:57 [insn_beq_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:17 (17)
+SBY 13:11:57 [insn_beq_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:17 (17)
+SBY 13:11:57 [insn_beq_ch0] summary: engine_0 (smtbmc bitwuzla) returned FAIL
+SBY 13:11:57 [insn_beq_ch0] summary: counterexample trace: insn_beq_ch0/engine_0/trace.vcd
+SBY 13:11:57 [insn_beq_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_198_152 at rvfi_insn_check.sv:198.6-198.31 step 20
+SBY 13:11:57 [insn_beq_ch0] DONE (FAIL, rc=0)
+
+Full run log: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-001-r2s0/formal/last_run-h3121f8a9025e41e.log
+Per-check logs in: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-001-r2s0/formal/riscv-formal/cores/bench-h3121f8a9025e41e/checks/<check>/logfile.txt
+Deleted branch bench-hyp-20261005-003-r2s2 (was 4f61a61).
+  [slot 2] broken: formal_failed: insn_add_ch0
+ary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_177_113 at rvfi_insn_check.sv:177.7-177.40 step 20
+SBY 13:16:06 [insn_sub_ch0] DONE (FAIL, rc=0)
+
+Formal: 7 passed, 46 failed
+Failed: insn_add_ch0 insn_addi_ch0 insn_and_ch0 insn_andi_ch0 insn_auipc_ch0 insn_beq_ch0 insn_bge_ch0 insn_bgeu_ch0 insn_blt_ch0 insn_bltu_ch0 insn_bne_ch0 insn_div_ch0 insn_divu_ch0 insn_jal_ch0 insn_jalr_ch0 insn_lb_ch0 insn_lbu_ch0 insn_lh_ch0 insn_lhu_ch0 insn_lui_ch0 insn_lw_ch0 insn_mul_ch0 insn_mulh_ch0 insn_mulhsu_ch0 insn_mulhu_ch0 insn_or_ch0 insn_ori_ch0 insn_rem_ch0 insn_remu_ch0 insn_sb_ch0 insn_sh_ch0 insn_sll_ch0 insn_slli_ch0 insn_slt_ch0 insn_slti_ch0 insn_sltiu_ch0 insn_sltu_ch0 insn_sra_ch0 insn_srai_ch0 insn_srl_ch0 insn_srli_ch0 insn_sub_ch0 insn_sw_ch0 insn_xor_ch0 insn_xori_ch0 reg_ch0
+
+--- insn_add_ch0/logfile.txt (last 30 lines) ---
+SBY 13:14:01 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 9..
+SBY 13:14:01 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 10..
+SBY 13:14:01 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 11..
+SBY 13:14:01 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 12..
+SBY 13:14:01 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 13..
+SBY 13:14:01 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 14..
+SBY 13:14:01 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 15..
+SBY 13:14:01 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 16..
+SBY 13:14:01 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 17..
+SBY 13:14:01 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 18..
+SBY 13:14:01 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 19..
+SBY 13:14:01 [insn_add_ch0] engine_0: ##   0:00:00  Checking assumptions in step 20..
+SBY 13:14:02 [insn_add_ch0] engine_0: ##   0:00:00  Checking assertions in step 20..
+SBY 13:14:17 [insn_add_ch0] engine_0: ##   0:00:15  BMC failed!
+SBY 13:14:17 [insn_add_ch0] engine_0: ##   0:00:15  Assert failed in rvfi_testbench: rvfi_insn_check.sv:167.7-167.29 (_witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_167_102)
+SBY 13:14:17 [insn_add_ch0] engine_0: ##   0:00:15  Assert failed in rvfi_testbench: rvfi_insn_check.sv:177.7-177.40 (_witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_177_113)
+SBY 13:14:17 [insn_add_ch0] engine_0: ##   0:00:15  Writing trace to VCD file: engine_0/trace.vcd
+SBY 13:14:17 [insn_add_ch0] engine_0: ##   0:00:16  Writing trace to Verilog testbench: engine_0/trace_tb.v
+SBY 13:14:17 [insn_add_ch0] engine_0: ##   0:00:16  Writing trace to constraints file: engine_0/trace.smtc
+SBY 13:14:17 [insn_add_ch0] engine_0: ##   0:00:16  Writing trace to Yosys witness file: engine_0/trace.yw
+SBY 13:14:17 [insn_add_ch0] engine_0: ##   0:00:16  Status: failed
+SBY 13:14:17 [insn_add_ch0] engine_0: finished (returncode=1)
+SBY 13:14:17 [insn_add_ch0] engine_0: Status returned by engine: FAIL
+SBY 13:14:17 [insn_add_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:16 (16)
+SBY 13:14:17 [insn_add_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:16 (16)
+SBY 13:14:17 [insn_add_ch0] summary: engine_0 (smtbmc bitwuzla) returned FAIL
+SBY 13:14:17 [insn_add_ch0] summary: counterexample trace: insn_add_ch0/engine_0/trace.vcd
+SBY 13:14:17 [insn_add_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_167_102 at rvfi_insn_check.sv:167.7-167.29 step 20
+SBY 13:14:17 [insn_add_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_177_113 at rvfi_insn_check.sv:177.7-177.40 step 20
+SBY 13:14:17 [insn_add_ch0] DONE (FAIL, rc=0)
+
+Full run log: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-003-r2s2/formal/last_run-hbf607633ea1e4e9.log
+Per-check logs in: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-003-r2s2/formal/riscv-formal/cores/bench-hbf607633ea1e4e9/checks/<check>/logfile.txt
+[bench-v2.8.4 0b14313] log: hyp-20261005-001-r2s0 broken
+ 2 files changed, 1 insertion(+)
+[bench-v2.8.4 b5451d5] log: hyp-20261005-002-r2s1 broken
+ 2 files changed, 1 insertion(+)
+[bench-v2.8.4 68b2aa8] log: hyp-20261005-003-r2s2 broken
+ 1 file changed, 1 insertion(+)
+
+  Round 2 complete: slot 0=broken, slot 1=broken, slot 2=broken (no winner)
+
+============================================================
+Round 3  |  slots=3  |  current best=12.12
+============================================================
+  pre-allocated IDs: ['hyp-20261005-001-r3s0', 'hyp-20261005-002-r3s1', 'hyp-20261005-003-r3s2']
+  [slot 0] category=micro_opt id=hyp-20261005-001-r3s0
+  [slot 1] category=structural id=hyp-20261005-002-r3s1
+  [slot 2] category=predictor id=hyp-20261005-003-r3s2
+Preparing worktree (new branch 'bench-hyp-20261005-001-r3s0-hypgen')
+Preparing worktree (new branch 'bench-hyp-20261005-003-r3s2-hypgen')
+Preparing worktree (new branch 'bench-hyp-20261005-002-r3s1-hypgen')
+Deleted branch bench-hyp-20261005-001-r3s0-hypgen (was 68b2aa8).
+Preparing worktree (new branch 'bench-hyp-20261005-001-r3s0')
+HEAD is now at 68b2aa8 log: hyp-20261005-003-r2s2 broken
+HEAD is now at 68b2aa8 log: hyp-20261005-003-r2s2 broken
+HEAD is now at 68b2aa8 log: hyp-20261005-003-r2s2 broken
+HEAD is now at 68b2aa8 log: hyp-20261005-003-r2s2 broken
+  [slot 0] worktree=/srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-001-r3s0
+Deleted branch bench-hyp-20261005-003-r3s2-hypgen (was 68b2aa8).
+Preparing worktree (new branch 'bench-hyp-20261005-003-r3s2')
+HEAD is now at 68b2aa8 log: hyp-20261005-003-r2s2 broken
+  [slot 2] worktree=/srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-003-r3s2
+Deleted branch bench-hyp-20261005-002-r3s1-hypgen (was 68b2aa8).
+Preparing worktree (new branch 'bench-hyp-20261005-002-r3s1')
+HEAD is now at 68b2aa8 log: hyp-20261005-003-r2s2 broken
+  [slot 1] worktree=/srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-002-r3s1
+  [slot 0] eval ok: fitness=12.12 lut4=12312 fmax=5.4MHz
+Deleted branch bench-hyp-20261005-003-r3s2 (was 68b2aa8).
+  [slot 2] broken: formal_failed: insn_slli_ch0
+urned by engine: pass
+SBY 13:23:54 [insn_sub_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:02 (2)
+SBY 13:23:54 [insn_sub_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:02 (2)
+SBY 13:23:54 [insn_sub_ch0] summary: engine_0 (smtbmc bitwuzla) returned pass
+SBY 13:23:54 [insn_sub_ch0] summary: engine_0 did not produce any traces
+SBY 13:23:54 [insn_sub_ch0] DONE (PASS, rc=0)
+SBY 13:24:38 [reg_ch0] engine_0: ##   0:01:00  waiting for solver (1 minute)
+SBY 13:24:49 [reg_ch0] engine_0: ##   0:01:12  Status: passed
+SBY 13:24:49 [reg_ch0] engine_0: finished (returncode=0)
+SBY 13:24:49 [reg_ch0] engine_0: Status returned by engine: pass
+SBY 13:24:49 [reg_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:01:12 (72)
+SBY 13:24:49 [reg_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:01:12 (72)
+SBY 13:24:49 [reg_ch0] summary: engine_0 (smtbmc bitwuzla) returned pass
+SBY 13:24:49 [reg_ch0] summary: engine_0 did not produce any traces
+SBY 13:24:49 [reg_ch0] DONE (PASS, rc=0)
+
+Formal: 52 passed, 1 failed
+Failed: insn_slli_ch0
+
+--- insn_slli_ch0/logfile.txt (last 30 lines) ---
+SBY 13:23:49 [insn_slli_ch0] engine_0: ##   0:00:00  Skipping step 7..
+SBY 13:23:49 [insn_slli_ch0] engine_0: ##   0:00:00  Skipping step 8..
+SBY 13:23:49 [insn_slli_ch0] engine_0: ##   0:00:00  Skipping step 9..
+SBY 13:23:49 [insn_slli_ch0] engine_0: ##   0:00:00  Skipping step 10..
+SBY 13:23:49 [insn_slli_ch0] engine_0: ##   0:00:00  Skipping step 11..
+SBY 13:23:49 [insn_slli_ch0] engine_0: ##   0:00:00  Skipping step 12..
+SBY 13:23:49 [insn_slli_ch0] engine_0: ##   0:00:00  Skipping step 13..
+SBY 13:23:49 [insn_slli_ch0] engine_0: ##   0:00:00  Skipping step 14..
+SBY 13:23:49 [insn_slli_ch0] engine_0: ##   0:00:00  Skipping step 15..
+SBY 13:23:49 [insn_slli_ch0] engine_0: ##   0:00:00  Skipping step 16..
+SBY 13:23:49 [insn_slli_ch0] engine_0: ##   0:00:00  Skipping step 17..
+SBY 13:23:49 [insn_slli_ch0] engine_0: ##   0:00:00  Skipping step 18..
+SBY 13:23:49 [insn_slli_ch0] engine_0: ##   0:00:00  Skipping step 19..
+SBY 13:23:49 [insn_slli_ch0] engine_0: ##   0:00:00  Checking assumptions in step 20..
+SBY 13:23:50 [insn_slli_ch0] engine_0: ##   0:00:00  Checking assertions in step 20..
+SBY 13:23:51 [insn_slli_ch0] engine_0: ##   0:00:02  BMC failed!
+SBY 13:23:51 [insn_slli_ch0] engine_0: ##   0:00:02  Assert failed in rvfi_testbench: rvfi_insn_check.sv:198.6-198.31 (_witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_198_152)
+SBY 13:23:51 [insn_slli_ch0] engine_0: ##   0:00:02  Writing trace to VCD file: engine_0/trace.vcd
+SBY 13:23:51 [insn_slli_ch0] engine_0: ##   0:00:02  Writing trace to Verilog testbench: engine_0/trace_tb.v
+SBY 13:23:51 [insn_slli_ch0] engine_0: ##   0:00:02  Writing trace to constraints file: engine_0/trace.smtc
+SBY 13:23:51 [insn_slli_ch0] engine_0: ##   0:00:02  Writing trace to Yosys witness file: engine_0/trace.yw
+SBY 13:23:51 [insn_slli_ch0] engine_0: ##   0:00:02  Status: failed
+SBY 13:23:51 [insn_slli_ch0] engine_0: finished (returncode=1)
+SBY 13:23:51 [insn_slli_ch0] engine_0: Status returned by engine: FAIL
+SBY 13:23:51 [insn_slli_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:02 (2)
+SBY 13:23:51 [insn_slli_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:03 (3)
+SBY 13:23:51 [insn_slli_ch0] summary: engine_0 (smtbmc bitwuzla) returned FAIL
+SBY 13:23:51 [insn_slli_ch0] summary: counterexample trace: insn_slli_ch0/engine_0/trace.vcd
+SBY 13:23:51 [insn_slli_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_198_152 at rvfi_insn_check.sv:198.6-198.31 step 20
+SBY 13:23:51 [insn_slli_ch0] DONE (FAIL, rc=0)
+
+Full run log: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-003-r3s2/formal/last_run-h117d19be7b67464.log
+Per-check logs in: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-003-r3s2/formal/riscv-formal/cores/bench-h117d19be7b67464/checks/<check>/logfile.txt
+Deleted branch bench-hyp-20261005-002-r3s1 (was 68b2aa8).
+  [slot 1] broken: formal_failed: insn_beq_ch0
+mtbmc bitwuzla) returned FAIL
+SBY 13:28:35 [insn_bltu_ch0] summary: counterexample trace: insn_bltu_ch0/engine_0/trace.vcd
+SBY 13:28:35 [insn_bltu_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_178_115 at rvfi_insn_check.sv:178.7-178.76 step 20
+SBY 13:28:35 [insn_bltu_ch0] DONE (FAIL, rc=0)
+SBY 13:29:00 [reg_ch0] engine_0: ##   0:01:00  waiting for solver (1 minute)
+SBY 13:29:10 [reg_ch0] engine_0: ##   0:01:11  Status: passed
+SBY 13:29:10 [reg_ch0] engine_0: finished (returncode=0)
+SBY 13:29:10 [reg_ch0] engine_0: Status returned by engine: pass
+SBY 13:29:10 [reg_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:01:11 (71)
+SBY 13:29:10 [reg_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:01:11 (71)
+SBY 13:29:10 [reg_ch0] summary: engine_0 (smtbmc bitwuzla) returned pass
+SBY 13:29:10 [reg_ch0] summary: engine_0 did not produce any traces
+SBY 13:29:10 [reg_ch0] DONE (PASS, rc=0)
+
+Formal: 47 passed, 6 failed
+Failed: insn_beq_ch0 insn_bge_ch0 insn_bgeu_ch0 insn_blt_ch0 insn_bltu_ch0 insn_bne_ch0
+
+--- insn_beq_ch0/logfile.txt (last 30 lines) ---
+SBY 13:28:02 [insn_beq_ch0] engine_0: ##   0:00:00  Skipping step 7..
+SBY 13:28:02 [insn_beq_ch0] engine_0: ##   0:00:00  Skipping step 8..
+SBY 13:28:02 [insn_beq_ch0] engine_0: ##   0:00:00  Skipping step 9..
+SBY 13:28:02 [insn_beq_ch0] engine_0: ##   0:00:00  Skipping step 10..
+SBY 13:28:02 [insn_beq_ch0] engine_0: ##   0:00:00  Skipping step 11..
+SBY 13:28:02 [insn_beq_ch0] engine_0: ##   0:00:00  Skipping step 12..
+SBY 13:28:02 [insn_beq_ch0] engine_0: ##   0:00:00  Skipping step 13..
+SBY 13:28:02 [insn_beq_ch0] engine_0: ##   0:00:00  Skipping step 14..
+SBY 13:28:02 [insn_beq_ch0] engine_0: ##   0:00:00  Skipping step 15..
+SBY 13:28:02 [insn_beq_ch0] engine_0: ##   0:00:00  Skipping step 16..
+SBY 13:28:02 [insn_beq_ch0] engine_0: ##   0:00:00  Skipping step 17..
+SBY 13:28:02 [insn_beq_ch0] engine_0: ##   0:00:00  Skipping step 18..
+SBY 13:28:02 [insn_beq_ch0] engine_0: ##   0:00:00  Skipping step 19..
+SBY 13:28:02 [insn_beq_ch0] engine_0: ##   0:00:00  Checking assumptions in step 20..
+SBY 13:28:02 [insn_beq_ch0] engine_0: ##   0:00:01  Checking assertions in step 20..
+SBY 13:28:11 [insn_beq_ch0] engine_0: ##   0:00:09  BMC failed!
+SBY 13:28:11 [insn_beq_ch0] engine_0: ##   0:00:09  Assert failed in rvfi_testbench: rvfi_insn_check.sv:178.7-178.76 (_witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_178_115)
+SBY 13:28:11 [insn_beq_ch0] engine_0: ##   0:00:09  Writing trace to VCD file: engine_0/trace.vcd
+SBY 13:28:11 [insn_beq_ch0] engine_0: ##   0:00:10  Writing trace to Verilog testbench: engine_0/trace_tb.v
+SBY 13:28:11 [insn_beq_ch0] engine_0: ##   0:00:10  Writing trace to constraints file: engine_0/trace.smtc
+SBY 13:28:11 [insn_beq_ch0] engine_0: ##   0:00:10  Writing trace to Yosys witness file: engine_0/trace.yw
+SBY 13:28:12 [insn_beq_ch0] engine_0: ##   0:00:10  Status: failed
+SBY 13:28:12 [insn_beq_ch0] engine_0: finished (returncode=1)
+SBY 13:28:12 [insn_beq_ch0] engine_0: Status returned by engine: FAIL
+SBY 13:28:12 [insn_beq_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:10 (10)
+SBY 13:28:12 [insn_beq_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:10 (10)
+SBY 13:28:12 [insn_beq_ch0] summary: engine_0 (smtbmc bitwuzla) returned FAIL
+SBY 13:28:12 [insn_beq_ch0] summary: counterexample trace: insn_beq_ch0/engine_0/trace.vcd
+SBY 13:28:12 [insn_beq_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_178_115 at rvfi_insn_check.sv:178.7-178.76 step 20
+SBY 13:28:12 [insn_beq_ch0] DONE (FAIL, rc=0)
+
+Full run log: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-002-r3s1/formal/last_run-h483ef18bc12242c.log
+Per-check logs in: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-002-r3s1/formal/riscv-formal/cores/bench-h483ef18bc12242c/checks/<check>/logfile.txt
+Deleted branch bench-hyp-20261005-001-r3s0 (was 68b2aa8).
+[bench-v2.8.4 d33776b] log: hyp-20261005-001-r3s0 regression
+ 2 files changed, 1 insertion(+)
+[bench-v2.8.4 e0d77f0] log: hyp-20261005-002-r3s1 broken
+ 2 files changed, 1 insertion(+)
+[bench-v2.8.4 c55249b] log: hyp-20261005-003-r3s2 broken
+ 1 file changed, 1 insertion(+)
+
+  Round 3 complete: slot 0=regression, slot 1=broken, slot 2=broken (no winner)
+
+============================================================
+Round 4  |  slots=3  |  current best=12.12
+============================================================
+  pre-allocated IDs: ['hyp-20261005-001-r4s0', 'hyp-20261005-002-r4s1', 'hyp-20261005-003-r4s2']
+  [slot 0] category=micro_opt id=hyp-20261005-001-r4s0
+  [slot 1] category=structural id=hyp-20261005-002-r4s1
+  [slot 2] category=predictor id=hyp-20261005-003-r4s2
+Preparing worktree (new branch 'bench-hyp-20261005-001-r4s0-hypgen')
+Preparing worktree (new branch 'bench-hyp-20261005-002-r4s1-hypgen')
+Preparing worktree (new branch 'bench-hyp-20261005-003-r4s2-hypgen')
+Deleted branch bench-hyp-20261005-001-r4s0-hypgen (was c55249b).
+Preparing worktree (new branch 'bench-hyp-20261005-001-r4s0')
+HEAD is now at c55249b log: hyp-20261005-003-r3s2 broken
+HEAD is now at c55249b log: hyp-20261005-003-r3s2 broken
+HEAD is now at c55249b log: hyp-20261005-003-r3s2 broken
+HEAD is now at c55249b log: hyp-20261005-003-r3s2 broken
+  [slot 0] worktree=/srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-001-r4s0
+Deleted branch bench-hyp-20261005-002-r4s1-hypgen (was c55249b).
+Deleted branch bench-hyp-20261005-003-r4s2-hypgen (was c55249b).
+Preparing worktree (new branch 'bench-hyp-20261005-002-r4s1')
+HEAD is now at c55249b log: hyp-20261005-003-r3s2 broken
+  [slot 1] worktree=/srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-002-r4s1
+Preparing worktree (new branch 'bench-hyp-20261005-003-r4s2')
+HEAD is now at c55249b log: hyp-20261005-003-r3s2 broken
+  [slot 2] worktree=/srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-003-r4s2
+Deleted branch bench-hyp-20261005-002-r4s1 (was c55249b).
+  [slot 1] broken: formal_failed: insn_add_ch0
+engine_0/trace.vcd
+SBY 13:34:50 [insn_sub_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_167_102 at rvfi_insn_check.sv:167.7-167.29 step 20
+SBY 13:34:50 [insn_sub_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_177_113 at rvfi_insn_check.sv:177.7-177.40 step 20
+SBY 13:34:50 [insn_sub_ch0] DONE (FAIL, rc=0)
+
+Formal: 7 passed, 46 failed
+Failed: insn_add_ch0 insn_addi_ch0 insn_and_ch0 insn_andi_ch0 insn_auipc_ch0 insn_beq_ch0 insn_bge_ch0 insn_bgeu_ch0 insn_blt_ch0 insn_bltu_ch0 insn_bne_ch0 insn_div_ch0 insn_divu_ch0 insn_jal_ch0 insn_jalr_ch0 insn_lb_ch0 insn_lbu_ch0 insn_lh_ch0 insn_lhu_ch0 insn_lui_ch0 insn_lw_ch0 insn_mul_ch0 insn_mulh_ch0 insn_mulhsu_ch0 insn_mulhu_ch0 insn_or_ch0 insn_ori_ch0 insn_rem_ch0 insn_remu_ch0 insn_sb_ch0 insn_sh_ch0 insn_sll_ch0 insn_slli_ch0 insn_slt_ch0 insn_slti_ch0 insn_sltiu_ch0 insn_sltu_ch0 insn_sra_ch0 insn_srai_ch0 insn_srl_ch0 insn_srli_ch0 insn_sub_ch0 insn_sw_ch0 insn_xor_ch0 insn_xori_ch0 reg_ch0
+
+--- insn_add_ch0/logfile.txt (last 30 lines) ---
+SBY 13:32:39 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 7..
+SBY 13:32:39 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 8..
+SBY 13:32:39 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 9..
+SBY 13:32:39 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 10..
+SBY 13:32:39 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 11..
+SBY 13:32:39 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 12..
+SBY 13:32:39 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 13..
+SBY 13:32:39 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 14..
+SBY 13:32:39 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 15..
+SBY 13:32:39 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 16..
+SBY 13:32:39 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 17..
+SBY 13:32:39 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 18..
+SBY 13:32:39 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 19..
+SBY 13:32:39 [insn_add_ch0] engine_0: ##   0:00:00  Checking assumptions in step 20..
+SBY 13:32:40 [insn_add_ch0] engine_0: ##   0:00:00  Checking assertions in step 20..
+SBY 13:32:52 [insn_add_ch0] engine_0: ##   0:00:13  BMC failed!
+SBY 13:32:52 [insn_add_ch0] engine_0: ##   0:00:13  Assert failed in rvfi_testbench: rvfi_insn_check.sv:167.7-167.29 (_witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_167_102)
+SBY 13:32:52 [insn_add_ch0] engine_0: ##   0:00:13  Writing trace to VCD file: engine_0/trace.vcd
+SBY 13:32:52 [insn_add_ch0] engine_0: ##   0:00:13  Writing trace to Verilog testbench: engine_0/trace_tb.v
+SBY 13:32:52 [insn_add_ch0] engine_0: ##   0:00:13  Writing trace to constraints file: engine_0/trace.smtc
+SBY 13:32:52 [insn_add_ch0] engine_0: ##   0:00:13  Writing trace to Yosys witness file: engine_0/trace.yw
+SBY 13:32:52 [insn_add_ch0] engine_0: ##   0:00:13  Status: failed
+SBY 13:32:53 [insn_add_ch0] engine_0: finished (returncode=1)
+SBY 13:32:53 [insn_add_ch0] engine_0: Status returned by engine: FAIL
+SBY 13:32:53 [insn_add_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:14 (14)
+SBY 13:32:53 [insn_add_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:14 (14)
+SBY 13:32:53 [insn_add_ch0] summary: engine_0 (smtbmc bitwuzla) returned FAIL
+SBY 13:32:53 [insn_add_ch0] summary: counterexample trace: insn_add_ch0/engine_0/trace.vcd
+SBY 13:32:53 [insn_add_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_167_102 at rvfi_insn_check.sv:167.7-167.29 step 20
+SBY 13:32:53 [insn_add_ch0] DONE (FAIL, rc=0)
+
+Full run log: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-002-r4s1/formal/last_run-h4bac7c20d03a41b.log
+Per-check logs in: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-002-r4s1/formal/riscv-formal/cores/bench-h4bac7c20d03a41b/checks/<check>/logfile.txt
+Deleted branch bench-hyp-20261005-001-r4s0 (was c55249b).
+  [slot 0] broken: formal_failed: insn_add_ch0
+r_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:09 (9)
+SBY 13:38:54 [insn_xor_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:09 (9)
+SBY 13:38:54 [insn_xor_ch0] summary: engine_0 (smtbmc bitwuzla) returned FAIL
+SBY 13:38:54 [insn_xor_ch0] summary: counterexample trace: insn_xor_ch0/engine_0/trace.vcd
+SBY 13:38:54 [insn_xor_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_177_113 at rvfi_insn_check.sv:177.7-177.40 step 20
+SBY 13:38:54 [insn_xor_ch0] DONE (FAIL, rc=0)
+
+Formal: 16 passed, 37 failed
+Failed: insn_add_ch0 insn_addi_ch0 insn_and_ch0 insn_andi_ch0 insn_auipc_ch0 insn_div_ch0 insn_divu_ch0 insn_jal_ch0 insn_jalr_ch0 insn_lb_ch0 insn_lbu_ch0 insn_lh_ch0 insn_lhu_ch0 insn_lui_ch0 insn_lw_ch0 insn_mul_ch0 insn_mulh_ch0 insn_mulhsu_ch0 insn_mulhu_ch0 insn_or_ch0 insn_ori_ch0 insn_rem_ch0 insn_remu_ch0 insn_sll_ch0 insn_slli_ch0 insn_slt_ch0 insn_slti_ch0 insn_sltiu_ch0 insn_sltu_ch0 insn_sra_ch0 insn_srai_ch0 insn_srl_ch0 insn_srli_ch0 insn_sub_ch0 insn_xor_ch0 insn_xori_ch0 reg_ch0
+
+--- insn_add_ch0/logfile.txt (last 30 lines) ---
+SBY 13:38:09 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 7..
+SBY 13:38:09 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 8..
+SBY 13:38:09 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 9..
+SBY 13:38:09 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 10..
+SBY 13:38:09 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 11..
+SBY 13:38:09 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 12..
+SBY 13:38:09 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 13..
+SBY 13:38:09 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 14..
+SBY 13:38:09 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 15..
+SBY 13:38:09 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 16..
+SBY 13:38:09 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 17..
+SBY 13:38:09 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 18..
+SBY 13:38:09 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 19..
+SBY 13:38:09 [insn_add_ch0] engine_0: ##   0:00:00  Checking assumptions in step 20..
+SBY 13:38:09 [insn_add_ch0] engine_0: ##   0:00:00  Checking assertions in step 20..
+SBY 13:38:12 [insn_add_ch0] engine_0: ##   0:00:03  BMC failed!
+SBY 13:38:12 [insn_add_ch0] engine_0: ##   0:00:03  Assert failed in rvfi_testbench: rvfi_insn_check.sv:177.7-177.40 (_witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_177_113)
+SBY 13:38:12 [insn_add_ch0] engine_0: ##   0:00:03  Writing trace to VCD file: engine_0/trace.vcd
+SBY 13:38:12 [insn_add_ch0] engine_0: ##   0:00:03  Writing trace to Verilog testbench: engine_0/trace_tb.v
+SBY 13:38:12 [insn_add_ch0] engine_0: ##   0:00:03  Writing trace to constraints file: engine_0/trace.smtc
+SBY 13:38:12 [insn_add_ch0] engine_0: ##   0:00:03  Writing trace to Yosys witness file: engine_0/trace.yw
+SBY 13:38:12 [insn_add_ch0] engine_0: ##   0:00:04  Status: failed
+SBY 13:38:12 [insn_add_ch0] engine_0: finished (returncode=1)
+SBY 13:38:12 [insn_add_ch0] engine_0: Status returned by engine: FAIL
+SBY 13:38:12 [insn_add_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:04 (4)
+SBY 13:38:12 [insn_add_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:04 (4)
+SBY 13:38:12 [insn_add_ch0] summary: engine_0 (smtbmc bitwuzla) returned FAIL
+SBY 13:38:12 [insn_add_ch0] summary: counterexample trace: insn_add_ch0/engine_0/trace.vcd
+SBY 13:38:12 [insn_add_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_177_113 at rvfi_insn_check.sv:177.7-177.40 step 20
+SBY 13:38:12 [insn_add_ch0] DONE (FAIL, rc=0)
+
+Full run log: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-001-r4s0/formal/last_run-h5074f753c26e4fe.log
+Per-check logs in: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-001-r4s0/formal/riscv-formal/cores/bench-h5074f753c26e4fe/checks/<check>/logfile.txt
+Deleted branch bench-hyp-20261005-003-r4s2 (was c55249b).
+  [slot 2] broken: formal_failed: insn_mul_ch0
+ (secs)]: 0:00:17 (17)
+SBY 13:41:44 [insn_mul_ch0] summary: engine_0 (smtbmc bitwuzla) returned FAIL
+SBY 13:41:44 [insn_mul_ch0] summary: counterexample trace: insn_mul_ch0/engine_0/trace.vcd
+SBY 13:41:44 [insn_mul_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_177_113 at rvfi_insn_check.sv:177.7-177.40 step 20
+SBY 13:41:44 [insn_mul_ch0] DONE (FAIL, rc=0)
+SBY 13:42:19 [reg_ch0] engine_0: ##   0:01:00  waiting for solver (1 minute)
+SBY 13:42:23 [reg_ch0] engine_0: ##   0:01:04  Status: passed
+SBY 13:42:23 [reg_ch0] engine_0: finished (returncode=0)
+SBY 13:42:23 [reg_ch0] engine_0: Status returned by engine: pass
+SBY 13:42:23 [reg_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:01:04 (64)
+SBY 13:42:23 [reg_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:01:04 (64)
+SBY 13:42:23 [reg_ch0] summary: engine_0 (smtbmc bitwuzla) returned pass
+SBY 13:42:23 [reg_ch0] summary: engine_0 did not produce any traces
+SBY 13:42:23 [reg_ch0] DONE (PASS, rc=0)
+
+Formal: 52 passed, 1 failed
+Failed: insn_mul_ch0
+
+--- insn_mul_ch0/logfile.txt (last 30 lines) ---
+SBY 13:41:27 [insn_mul_ch0] engine_0: ##   0:00:00  Skipping step 7..
+SBY 13:41:27 [insn_mul_ch0] engine_0: ##   0:00:00  Skipping step 8..
+SBY 13:41:27 [insn_mul_ch0] engine_0: ##   0:00:00  Skipping step 9..
+SBY 13:41:27 [insn_mul_ch0] engine_0: ##   0:00:00  Skipping step 10..
+SBY 13:41:27 [insn_mul_ch0] engine_0: ##   0:00:00  Skipping step 11..
+SBY 13:41:27 [insn_mul_ch0] engine_0: ##   0:00:00  Skipping step 12..
+SBY 13:41:27 [insn_mul_ch0] engine_0: ##   0:00:00  Skipping step 13..
+SBY 13:41:27 [insn_mul_ch0] engine_0: ##   0:00:00  Skipping step 14..
+SBY 13:41:27 [insn_mul_ch0] engine_0: ##   0:00:00  Skipping step 15..
+SBY 13:41:27 [insn_mul_ch0] engine_0: ##   0:00:00  Skipping step 16..
+SBY 13:41:27 [insn_mul_ch0] engine_0: ##   0:00:00  Skipping step 17..
+SBY 13:41:27 [insn_mul_ch0] engine_0: ##   0:00:00  Skipping step 18..
+SBY 13:41:27 [insn_mul_ch0] engine_0: ##   0:00:00  Skipping step 19..
+SBY 13:41:27 [insn_mul_ch0] engine_0: ##   0:00:00  Checking assumptions in step 20..
+SBY 13:41:27 [insn_mul_ch0] engine_0: ##   0:00:00  Checking assertions in step 20..
+SBY 13:41:43 [insn_mul_ch0] engine_0: ##   0:00:16  BMC failed!
+SBY 13:41:43 [insn_mul_ch0] engine_0: ##   0:00:16  Assert failed in rvfi_testbench: rvfi_insn_check.sv:177.7-177.40 (_witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_177_113)
+SBY 13:41:43 [insn_mul_ch0] engine_0: ##   0:00:16  Writing trace to VCD file: engine_0/trace.vcd
+SBY 13:41:43 [insn_mul_ch0] engine_0: ##   0:00:17  Writing trace to Verilog testbench: engine_0/trace_tb.v
+SBY 13:41:43 [insn_mul_ch0] engine_0: ##   0:00:17  Writing trace to constraints file: engine_0/trace.smtc
+SBY 13:41:43 [insn_mul_ch0] engine_0: ##   0:00:17  Writing trace to Yosys witness file: engine_0/trace.yw
+SBY 13:41:44 [insn_mul_ch0] engine_0: ##   0:00:17  Status: failed
+SBY 13:41:44 [insn_mul_ch0] engine_0: finished (returncode=1)
+SBY 13:41:44 [insn_mul_ch0] engine_0: Status returned by engine: FAIL
+SBY 13:41:44 [insn_mul_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:17 (17)
+SBY 13:41:44 [insn_mul_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:17 (17)
+SBY 13:41:44 [insn_mul_ch0] summary: engine_0 (smtbmc bitwuzla) returned FAIL
+SBY 13:41:44 [insn_mul_ch0] summary: counterexample trace: insn_mul_ch0/engine_0/trace.vcd
+SBY 13:41:44 [insn_mul_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_177_113 at rvfi_insn_check.sv:177.7-177.40 step 20
+SBY 13:41:44 [insn_mul_ch0] DONE (FAIL, rc=0)
+
+Full run log: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-003-r4s2/formal/last_run-h9e48bfdc7f494cf.log
+Per-check logs in: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-003-r4s2/formal/riscv-formal/cores/bench-h9e48bfdc7f494cf/checks/<check>/logfile.txt
+[bench-v2.8.4 75f14ff] log: hyp-20261005-001-r4s0 broken
+ 2 files changed, 1 insertion(+)
+[bench-v2.8.4 a114ea0] log: hyp-20261005-002-r4s1 broken
+ 2 files changed, 1 insertion(+)
+[bench-v2.8.4 4d4e8aa] log: hyp-20261005-003-r4s2 broken
+ 1 file changed, 1 insertion(+)
+
+  Round 4 complete: slot 0=broken, slot 1=broken, slot 2=broken (no winner)
+
+============================================================
+Round 5  |  slots=3  |  current best=12.12
+============================================================
+  pre-allocated IDs: ['hyp-20261005-001-r5s0', 'hyp-20261005-002-r5s1', 'hyp-20261005-003-r5s2']
+  [slot 0] category=micro_opt id=hyp-20261005-001-r5s0
+  [slot 1] category=structural id=hyp-20261005-002-r5s1
+  [slot 2] category=predictor id=hyp-20261005-003-r5s2
+Preparing worktree (new branch 'bench-hyp-20261005-002-r5s1-hypgen')
+Preparing worktree (new branch 'bench-hyp-20261005-003-r5s2-hypgen')
+Preparing worktree (new branch 'bench-hyp-20261005-001-r5s0-hypgen')
+Deleted branch bench-hyp-20261005-002-r5s1-hypgen (was 4d4e8aa).
+Preparing worktree (new branch 'bench-hyp-20261005-002-r5s1')
+HEAD is now at 4d4e8aa log: hyp-20261005-003-r4s2 broken
+HEAD is now at 4d4e8aa log: hyp-20261005-003-r4s2 broken
+HEAD is now at 4d4e8aa log: hyp-20261005-003-r4s2 broken
+HEAD is now at 4d4e8aa log: hyp-20261005-003-r4s2 broken
+  [slot 1] worktree=/srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-002-r5s1
+Deleted branch bench-hyp-20261005-003-r5s2-hypgen (was 4d4e8aa).
+Deleted branch bench-hyp-20261005-001-r5s0-hypgen (was 4d4e8aa).
+Preparing worktree (new branch 'bench-hyp-20261005-003-r5s2')
+HEAD is now at 4d4e8aa log: hyp-20261005-003-r4s2 broken
+  [slot 2] worktree=/srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-003-r5s2
+Preparing worktree (new branch 'bench-hyp-20261005-001-r5s0')
+HEAD is now at 4d4e8aa log: hyp-20261005-003-r4s2 broken
+  [slot 0] worktree=/srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-001-r5s0
+Deleted branch bench-hyp-20261005-002-r5s1 (was 4d4e8aa).
+  [slot 1] broken: formal_failed: liveness_ch0
+[insn_xor_ch0] summary: engine_0 (smtbmc bitwuzla) returned pass
+SBY 13:45:17 [insn_xor_ch0] summary: engine_0 did not produce any traces
+SBY 13:45:17 [insn_xor_ch0] DONE (PASS, rc=0)
+SBY 13:45:17 [insn_xori_ch0] engine_0: ##   0:00:01  Status: passed
+SBY 13:45:17 [insn_xori_ch0] engine_0: finished (returncode=0)
+SBY 13:45:17 [insn_xori_ch0] engine_0: Status returned by engine: pass
+SBY 13:45:17 [insn_xori_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:01 (1)
+SBY 13:45:17 [insn_xori_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:01 (1)
+SBY 13:45:17 [insn_xori_ch0] summary: engine_0 (smtbmc bitwuzla) returned pass
+SBY 13:45:17 [insn_xori_ch0] summary: engine_0 did not produce any traces
+SBY 13:45:17 [insn_xori_ch0] DONE (PASS, rc=0)
+SBY 13:45:58 [reg_ch0] engine_0: ##   0:01:00  waiting for solver (1 minute)
+SBY 13:46:07 [reg_ch0] engine_0: ##   0:01:10  Status: passed
+SBY 13:46:07 [reg_ch0] engine_0: finished (returncode=0)
+SBY 13:46:07 [reg_ch0] engine_0: Status returned by engine: pass
+SBY 13:46:07 [reg_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:01:10 (70)
+SBY 13:46:07 [reg_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:01:10 (70)
+SBY 13:46:07 [reg_ch0] summary: engine_0 (smtbmc bitwuzla) returned pass
+SBY 13:46:07 [reg_ch0] summary: engine_0 did not produce any traces
+SBY 13:46:07 [reg_ch0] DONE (PASS, rc=0)
+make: Target 'all' not remade because of errors.
+
+Formal: 52 passed, 1 failed
+Failed: liveness_ch0
+
+--- liveness_ch0/logfile.txt (last 30 lines) ---
+SBY 13:44:56 [liveness_ch0] engine_0: ##   0:00:00  Skipping step 0..
+SBY 13:44:56 [liveness_ch0] engine_0: ##   0:00:00  Skipping step 1..
+SBY 13:44:56 [liveness_ch0] engine_0: ##   0:00:00  Skipping step 2..
+SBY 13:44:56 [liveness_ch0] engine_0: ##   0:00:00  Skipping step 3..
+SBY 13:44:56 [liveness_ch0] engine_0: ##   0:00:00  Skipping step 4..
+SBY 13:44:56 [liveness_ch0] engine_0: ##   0:00:00  Skipping step 5..
+SBY 13:44:56 [liveness_ch0] engine_0: ##   0:00:00  Skipping step 6..
+SBY 13:44:56 [liveness_ch0] engine_0: ##   0:00:00  Skipping step 7..
+SBY 13:44:56 [liveness_ch0] engine_0: ##   0:00:00  Skipping step 8..
+SBY 13:44:56 [liveness_ch0] engine_0: ##   0:00:00  Skipping step 9..
+SBY 13:44:56 [liveness_ch0] engine_0: ##   0:00:00  Skipping step 10..
+SBY 13:44:56 [liveness_ch0] engine_0: ##   0:00:00  Skipping step 11..
+SBY 13:44:56 [liveness_ch0] engine_0: ##   0:00:00  Skipping step 12..
+SBY 13:44:56 [liveness_ch0] engine_0: ##   0:00:00  Skipping step 13..
+SBY 13:44:56 [liveness_ch0] engine_0: ##   0:00:00  Skipping step 14..
+SBY 13:44:56 [liveness_ch0] engine_0: ##   0:00:00  Skipping step 15..
+SBY 13:44:56 [liveness_ch0] engine_0: ##   0:00:00  Skipping step 16..
+SBY 13:44:56 [liveness_ch0] engine_0: ##   0:00:00  Skipping step 17..
+SBY 13:44:56 [liveness_ch0] engine_0: ##   0:00:00  Skipping step 18..
+SBY 13:44:56 [liveness_ch0] engine_0: ##   0:00:00  Skipping step 19..
+SBY 13:44:56 [liveness_ch0] engine_0: ##   0:00:00  Checking assumptions in step 20..
+SBY 13:44:56 [liveness_ch0] engine_0: ##   0:00:00  Assumptions are unsatisfiable!
+SBY 13:44:56 [liveness_ch0] engine_0: ##   0:00:00  Status: PREUNSAT
+SBY 13:44:56 [liveness_ch0] engine_0: finished (returncode=1)
+SBY 13:44:56 [liveness_ch0] engine_0: Status returned by engine: ERROR
+SBY 13:44:56 [liveness_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:00 (0)
+SBY 13:44:56 [liveness_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:00 (0)
+SBY 13:44:56 [liveness_ch0] summary: engine_0 (smtbmc bitwuzla) returned ERROR
+SBY 13:44:56 [liveness_ch0] summary: engine_0 did not produce any traces
+SBY 13:44:56 [liveness_ch0] DONE (ERROR, rc=16)
+
+Full run log: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-002-r5s1/formal/last_run-h514e77fd3a694a4.log
+Per-check logs in: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-002-r5s1/formal/riscv-formal/cores/bench-h514e77fd3a694a4/checks/<check>/logfile.txt
+Deleted branch bench-hyp-20261005-003-r5s2 (was 4d4e8aa).
+  [slot 2] broken: formal_failed: insn_add_ch0
+ss time [H:MM:SS (secs)]: 0:00:49 (49)
+SBY 13:54:32 [insn_sub_ch0] summary: engine_0 (smtbmc bitwuzla) returned FAIL
+SBY 13:54:32 [insn_sub_ch0] summary: counterexample trace: insn_sub_ch0/engine_0/trace.vcd
+SBY 13:54:32 [insn_sub_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_164_99 at rvfi_insn_check.sv:164.7-164.29 step 20
+SBY 13:54:32 [insn_sub_ch0] DONE (FAIL, rc=0)
+
+Formal: 7 passed, 46 failed
+Failed: insn_add_ch0 insn_addi_ch0 insn_and_ch0 insn_andi_ch0 insn_auipc_ch0 insn_beq_ch0 insn_bge_ch0 insn_bgeu_ch0 insn_blt_ch0 insn_bltu_ch0 insn_bne_ch0 insn_div_ch0 insn_divu_ch0 insn_jal_ch0 insn_jalr_ch0 insn_lb_ch0 insn_lbu_ch0 insn_lh_ch0 insn_lhu_ch0 insn_lui_ch0 insn_lw_ch0 insn_mul_ch0 insn_mulh_ch0 insn_mulhsu_ch0 insn_mulhu_ch0 insn_or_ch0 insn_ori_ch0 insn_rem_ch0 insn_remu_ch0 insn_sb_ch0 insn_sh_ch0 insn_sll_ch0 insn_slli_ch0 insn_slt_ch0 insn_slti_ch0 insn_sltiu_ch0 insn_sltu_ch0 insn_sra_ch0 insn_srai_ch0 insn_srl_ch0 insn_srli_ch0 insn_sub_ch0 insn_sw_ch0 insn_xor_ch0 insn_xori_ch0 reg_ch0
+
+--- insn_add_ch0/logfile.txt (last 30 lines) ---
+SBY 13:48:35 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 7..
+SBY 13:48:35 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 8..
+SBY 13:48:35 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 9..
+SBY 13:48:35 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 10..
+SBY 13:48:35 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 11..
+SBY 13:48:35 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 12..
+SBY 13:48:35 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 13..
+SBY 13:48:35 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 14..
+SBY 13:48:35 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 15..
+SBY 13:48:35 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 16..
+SBY 13:48:35 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 17..
+SBY 13:48:36 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 18..
+SBY 13:48:36 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 19..
+SBY 13:48:36 [insn_add_ch0] engine_0: ##   0:00:00  Checking assumptions in step 20..
+SBY 13:48:36 [insn_add_ch0] engine_0: ##   0:00:00  Checking assertions in step 20..
+SBY 13:49:30 [insn_add_ch0] engine_0: ##   0:00:54  BMC failed!
+SBY 13:49:30 [insn_add_ch0] engine_0: ##   0:00:54  Assert failed in rvfi_testbench: rvfi_insn_check.sv:164.7-164.29 (_witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_164_99)
+SBY 13:49:30 [insn_add_ch0] engine_0: ##   0:00:54  Writing trace to VCD file: engine_0/trace.vcd
+SBY 13:49:30 [insn_add_ch0] engine_0: ##   0:00:55  Writing trace to Verilog testbench: engine_0/trace_tb.v
+SBY 13:49:30 [insn_add_ch0] engine_0: ##   0:00:55  Writing trace to constraints file: engine_0/trace.smtc
+SBY 13:49:30 [insn_add_ch0] engine_0: ##   0:00:55  Writing trace to Yosys witness file: engine_0/trace.yw
+SBY 13:49:30 [insn_add_ch0] engine_0: ##   0:00:55  Status: failed
+SBY 13:49:30 [insn_add_ch0] engine_0: finished (returncode=1)
+SBY 13:49:30 [insn_add_ch0] engine_0: Status returned by engine: FAIL
+SBY 13:49:30 [insn_add_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:55 (55)
+SBY 13:49:30 [insn_add_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:55 (55)
+SBY 13:49:30 [insn_add_ch0] summary: engine_0 (smtbmc bitwuzla) returned FAIL
+SBY 13:49:30 [insn_add_ch0] summary: counterexample trace: insn_add_ch0/engine_0/trace.vcd
+SBY 13:49:30 [insn_add_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_164_99 at rvfi_insn_check.sv:164.7-164.29 step 20
+SBY 13:49:30 [insn_add_ch0] DONE (FAIL, rc=0)
+
+Full run log: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-003-r5s2/formal/last_run-hc7924503c8624e4.log
+Per-check logs in: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-003-r5s2/formal/riscv-formal/cores/bench-hc7924503c8624e4/checks/<check>/logfile.txt
+Deleted branch bench-hyp-20261005-001-r5s0 (was 4d4e8aa).
+  [slot 0] broken: formal_failed: insn_sb_ch0
+g_ch0] engine_0: ##   0:01:00  waiting for solver (1 minute)
+SBY 13:58:25 [reg_ch0] engine_0: ##   0:01:20  Status: passed
+SBY 13:58:25 [reg_ch0] engine_0: finished (returncode=0)
+SBY 13:58:25 [reg_ch0] engine_0: Status returned by engine: pass
+SBY 13:58:25 [reg_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:01:20 (80)
+SBY 13:58:25 [reg_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:01:20 (80)
+SBY 13:58:25 [reg_ch0] summary: engine_0 (smtbmc bitwuzla) returned pass
+SBY 13:58:25 [reg_ch0] summary: engine_0 did not produce any traces
+SBY 13:58:25 [reg_ch0] DONE (PASS, rc=0)
+
+Formal: 52 passed, 1 failed
+Failed: insn_sb_ch0
+
+--- insn_sb_ch0/logfile.txt (last 30 lines) ---
+SBY 13:57:18 [insn_sb_ch0] engine_0: ##   0:00:00  Skipping step 11..
+SBY 13:57:18 [insn_sb_ch0] engine_0: ##   0:00:00  Skipping step 12..
+SBY 13:57:18 [insn_sb_ch0] engine_0: ##   0:00:00  Skipping step 13..
+SBY 13:57:18 [insn_sb_ch0] engine_0: ##   0:00:00  Skipping step 14..
+SBY 13:57:18 [insn_sb_ch0] engine_0: ##   0:00:00  Skipping step 15..
+SBY 13:57:18 [insn_sb_ch0] engine_0: ##   0:00:00  Skipping step 16..
+SBY 13:57:18 [insn_sb_ch0] engine_0: ##   0:00:00  Skipping step 17..
+SBY 13:57:18 [insn_sb_ch0] engine_0: ##   0:00:00  Skipping step 18..
+SBY 13:57:18 [insn_sb_ch0] engine_0: ##   0:00:00  Skipping step 19..
+SBY 13:57:18 [insn_sb_ch0] engine_0: ##   0:00:00  Checking assumptions in step 20..
+SBY 13:57:19 [insn_sb_ch0] engine_0: ##   0:00:00  Checking assertions in step 20..
+SBY 13:57:30 [insn_sb_ch0] engine_0: ##   0:00:12  BMC failed!
+SBY 13:57:30 [insn_sb_ch0] engine_0: ##   0:00:12  Assert failed in rvfi_testbench: rvfi_insn_check.sv:181.8-181.79 (_witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_181_120)
+SBY 13:57:30 [insn_sb_ch0] engine_0: ##   0:00:12  Assert failed in rvfi_testbench: rvfi_insn_check.sv:186.9-186.29 (_witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_186_131)
+SBY 13:57:30 [insn_sb_ch0] engine_0: ##   0:00:12  Assert failed in rvfi_testbench: rvfi_insn_check.sv:198.6-198.31 (_witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_198_152)
+SBY 13:57:30 [insn_sb_ch0] engine_0: ##   0:00:12  Writing trace to VCD file: engine_0/trace.vcd
+SBY 13:57:30 [insn_sb_ch0] engine_0: ##   0:00:12  Writing trace to Verilog testbench: engine_0/trace_tb.v
+SBY 13:57:30 [insn_sb_ch0] engine_0: ##   0:00:12  Writing trace to constraints file: engine_0/trace.smtc
+SBY 13:57:30 [insn_sb_ch0] engine_0: ##   0:00:12  Writing trace to Yosys witness file: engine_0/trace.yw
+SBY 13:57:31 [insn_sb_ch0] engine_0: ##   0:00:12  Status: failed
+SBY 13:57:31 [insn_sb_ch0] engine_0: finished (returncode=1)
+SBY 13:57:31 [insn_sb_ch0] engine_0: Status returned by engine: FAIL
+SBY 13:57:31 [insn_sb_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:13 (13)
+SBY 13:57:31 [insn_sb_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:13 (13)
+SBY 13:57:31 [insn_sb_ch0] summary: engine_0 (smtbmc bitwuzla) returned FAIL
+SBY 13:57:31 [insn_sb_ch0] summary: counterexample trace: insn_sb_ch0/engine_0/trace.vcd
+SBY 13:57:31 [insn_sb_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_181_120 at rvfi_insn_check.sv:181.8-181.79 step 20
+SBY 13:57:31 [insn_sb_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_186_131 at rvfi_insn_check.sv:186.9-186.29 step 20
+SBY 13:57:31 [insn_sb_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_198_152 at rvfi_insn_check.sv:198.6-198.31 step 20
+SBY 13:57:31 [insn_sb_ch0] DONE (FAIL, rc=0)
+
+Full run log: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-001-r5s0/formal/last_run-hce6ab46171e84c0.log
+Per-check logs in: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-001-r5s0/formal/riscv-formal/cores/bench-hce6ab46171e84c0/checks/<check>/logfile.txt
+[bench-v2.8.4 161fbc4] log: hyp-20261005-001-r5s0 broken
+ 2 files changed, 1 insertion(+)
+[bench-v2.8.4 dad3719] log: hyp-20261005-002-r5s1 broken
+ 2 files changed, 1 insertion(+)
+[bench-v2.8.4 9d2fad9] log: hyp-20261005-003-r5s2 broken
+ 1 file changed, 1 insertion(+)
+
+  Round 5 complete: slot 0=broken, slot 1=broken, slot 2=broken (no winner)
+
+============================================================
+Round 6  |  slots=3  |  current best=12.12
+============================================================
+  pre-allocated IDs: ['hyp-20261005-001-r6s0', 'hyp-20261005-002-r6s1', 'hyp-20261005-003-r6s2']
+  [slot 0] category=micro_opt id=hyp-20261005-001-r6s0
+  [slot 1] category=structural id=hyp-20261005-002-r6s1
+  [slot 2] category=predictor id=hyp-20261005-003-r6s2
+Preparing worktree (new branch 'bench-hyp-20261005-002-r6s1-hypgen')
+Preparing worktree (new branch 'bench-hyp-20261005-003-r6s2-hypgen')
+Preparing worktree (new branch 'bench-hyp-20261005-001-r6s0-hypgen')
+Deleted branch bench-hyp-20261005-002-r6s1-hypgen (was 9d2fad9).
+Preparing worktree (new branch 'bench-hyp-20261005-002-r6s1')
+HEAD is now at 9d2fad9 log: hyp-20261005-003-r5s2 broken
+HEAD is now at 9d2fad9 log: hyp-20261005-003-r5s2 broken
+HEAD is now at 9d2fad9 log: hyp-20261005-003-r5s2 broken
+HEAD is now at 9d2fad9 log: hyp-20261005-003-r5s2 broken
+  [slot 1] worktree=/srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-002-r6s1
+Deleted branch bench-hyp-20261005-003-r6s2-hypgen (was 9d2fad9).
+Deleted branch bench-hyp-20261005-001-r6s0-hypgen (was 9d2fad9).
+Preparing worktree (new branch 'bench-hyp-20261005-003-r6s2')
+HEAD is now at 9d2fad9 log: hyp-20261005-003-r5s2 broken
+  [slot 2] worktree=/srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-003-r6s2
+Preparing worktree (new branch 'bench-hyp-20261005-001-r6s0')
+HEAD is now at 9d2fad9 log: hyp-20261005-003-r5s2 broken
+  [slot 0] worktree=/srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-001-r6s0
+  [slot 1] eval ok: fitness=12.12 lut4=12312 fmax=5.4MHz
+Deleted branch bench-hyp-20261005-003-r6s2 (was 9d2fad9).
+  [slot 2] broken: cosim_failed: selftest.elf
+Deleted branch bench-hyp-20261005-001-r6s0 (was 9d2fad9).
+  [slot 0] broken: formal_failed: insn_addi_ch0
+y: counterexample trace: insn_xori_ch0/engine_0/trace.vcd
+SBY 14:08:43 [insn_xori_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_198_152 at rvfi_insn_check.sv:198.6-198.31 step 20
+SBY 14:08:43 [insn_xori_ch0] DONE (FAIL, rc=0)
+SBY 14:09:01 [reg_ch0] engine_0: ##   0:01:00  waiting for solver (1 minute)
+SBY 14:09:44 [reg_ch0] engine_0: ##   0:01:43  Status: passed
+SBY 14:09:44 [reg_ch0] engine_0: finished (returncode=0)
+SBY 14:09:44 [reg_ch0] engine_0: Status returned by engine: pass
+SBY 14:09:44 [reg_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:01:43 (103)
+SBY 14:09:44 [reg_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:01:44 (104)
+SBY 14:09:44 [reg_ch0] summary: engine_0 (smtbmc bitwuzla) returned pass
+SBY 14:09:44 [reg_ch0] summary: engine_0 did not produce any traces
+SBY 14:09:44 [reg_ch0] DONE (PASS, rc=0)
+
+Formal: 45 passed, 8 failed
+Failed: insn_addi_ch0 insn_andi_ch0 insn_lhu_ch0 insn_ori_ch0 insn_slli_ch0 insn_slti_ch0 insn_sltiu_ch0 insn_xori_ch0
+
+--- insn_addi_ch0/logfile.txt (last 30 lines) ---
+SBY 14:08:01 [insn_addi_ch0] engine_0: ##   0:00:00  Skipping step 7..
+SBY 14:08:01 [insn_addi_ch0] engine_0: ##   0:00:00  Skipping step 8..
+SBY 14:08:01 [insn_addi_ch0] engine_0: ##   0:00:00  Skipping step 9..
+SBY 14:08:01 [insn_addi_ch0] engine_0: ##   0:00:00  Skipping step 10..
+SBY 14:08:01 [insn_addi_ch0] engine_0: ##   0:00:00  Skipping step 11..
+SBY 14:08:01 [insn_addi_ch0] engine_0: ##   0:00:00  Skipping step 12..
+SBY 14:08:01 [insn_addi_ch0] engine_0: ##   0:00:00  Skipping step 13..
+SBY 14:08:01 [insn_addi_ch0] engine_0: ##   0:00:00  Skipping step 14..
+SBY 14:08:01 [insn_addi_ch0] engine_0: ##   0:00:00  Skipping step 15..
+SBY 14:08:01 [insn_addi_ch0] engine_0: ##   0:00:00  Skipping step 16..
+SBY 14:08:01 [insn_addi_ch0] engine_0: ##   0:00:00  Skipping step 17..
+SBY 14:08:01 [insn_addi_ch0] engine_0: ##   0:00:00  Skipping step 18..
+SBY 14:08:01 [insn_addi_ch0] engine_0: ##   0:00:00  Skipping step 19..
+SBY 14:08:01 [insn_addi_ch0] engine_0: ##   0:00:00  Checking assumptions in step 20..
+SBY 14:08:02 [insn_addi_ch0] engine_0: ##   0:00:00  Checking assertions in step 20..
+SBY 14:08:12 [insn_addi_ch0] engine_0: ##   0:00:10  BMC failed!
+SBY 14:08:12 [insn_addi_ch0] engine_0: ##   0:00:10  Assert failed in rvfi_testbench: rvfi_insn_check.sv:198.6-198.31 (_witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_198_152)
+SBY 14:08:12 [insn_addi_ch0] engine_0: ##   0:00:10  Writing trace to VCD file: engine_0/trace.vcd
+SBY 14:08:12 [insn_addi_ch0] engine_0: ##   0:00:11  Writing trace to Verilog testbench: engine_0/trace_tb.v
+SBY 14:08:12 [insn_addi_ch0] engine_0: ##   0:00:11  Writing trace to constraints file: engine_0/trace.smtc
+SBY 14:08:12 [insn_addi_ch0] engine_0: ##   0:00:11  Writing trace to Yosys witness file: engine_0/trace.yw
+SBY 14:08:12 [insn_addi_ch0] engine_0: ##   0:00:11  Status: failed
+SBY 14:08:12 [insn_addi_ch0] engine_0: finished (returncode=1)
+SBY 14:08:12 [insn_addi_ch0] engine_0: Status returned by engine: FAIL
+SBY 14:08:12 [insn_addi_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:11 (11)
+SBY 14:08:12 [insn_addi_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:11 (11)
+SBY 14:08:12 [insn_addi_ch0] summary: engine_0 (smtbmc bitwuzla) returned FAIL
+SBY 14:08:12 [insn_addi_ch0] summary: counterexample trace: insn_addi_ch0/engine_0/trace.vcd
+SBY 14:08:12 [insn_addi_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_198_152 at rvfi_insn_check.sv:198.6-198.31 step 20
+SBY 14:08:12 [insn_addi_ch0] DONE (FAIL, rc=0)
+
+Full run log: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-001-r6s0/formal/last_run-h99bcb43e8c24467.log
+Per-check logs in: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-001-r6s0/formal/riscv-formal/cores/bench-h99bcb43e8c24467/checks/<check>/logfile.txt
+Deleted branch bench-hyp-20261005-002-r6s1 (was 9d2fad9).
+[bench-v2.8.4 1e76d61] log: hyp-20261005-001-r6s0 broken
+ 2 files changed, 1 insertion(+)
+[bench-v2.8.4 5f62b68] log: hyp-20261005-002-r6s1 regression
+ 2 files changed, 1 insertion(+)
+[bench-v2.8.4 efa4756] log: hyp-20261005-003-r6s2 broken
+ 1 file changed, 1 insertion(+)
+
+  Round 6 complete: slot 0=broken, slot 1=regression, slot 2=broken (no winner)
+
+============================================================
+Round 7  |  slots=3  |  current best=12.12
+============================================================
+  pre-allocated IDs: ['hyp-20261005-001-r7s0', 'hyp-20261005-002-r7s1', 'hyp-20261005-003-r7s2']
+  [slot 0] category=micro_opt id=hyp-20261005-001-r7s0
+  [slot 1] category=structural id=hyp-20261005-002-r7s1
+  [slot 2] category=predictor id=hyp-20261005-003-r7s2
+Preparing worktree (new branch 'bench-hyp-20261005-001-r7s0-hypgen')
+Preparing worktree (new branch 'bench-hyp-20261005-003-r7s2-hypgen')
+Preparing worktree (new branch 'bench-hyp-20261005-002-r7s1-hypgen')
+Deleted branch bench-hyp-20261005-001-r7s0-hypgen (was efa4756).
+Preparing worktree (new branch 'bench-hyp-20261005-001-r7s0')
+HEAD is now at efa4756 log: hyp-20261005-003-r6s2 broken
+HEAD is now at efa4756 log: hyp-20261005-003-r6s2 broken
+HEAD is now at efa4756 log: hyp-20261005-003-r6s2 broken
+HEAD is now at efa4756 log: hyp-20261005-003-r6s2 broken
+  [slot 0] worktree=/srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-001-r7s0
+Deleted branch bench-hyp-20261005-002-r7s1-hypgen (was efa4756).
+Preparing worktree (new branch 'bench-hyp-20261005-002-r7s1')
+HEAD is now at efa4756 log: hyp-20261005-003-r6s2 broken
+  [slot 1] worktree=/srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-002-r7s1
+Deleted branch bench-hyp-20261005-003-r7s2-hypgen (was efa4756).
+Preparing worktree (new branch 'bench-hyp-20261005-003-r7s2')
+HEAD is now at efa4756 log: hyp-20261005-003-r6s2 broken
+  [slot 2] worktree=/srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-003-r7s2
+Deleted branch bench-hyp-20261005-001-r7s0 (was efa4756).
+  [slot 0] broken: formal_failed: insn_lui_ch0
+ace_tb.v
+SBY 14:13:37 [insn_sub_ch0] engine_0: ##   0:00:17  Writing trace to constraints file: engine_0/trace.smtc
+SBY 14:13:37 [insn_sub_ch0] engine_0: ##   0:00:17  Writing trace to Yosys witness file: engine_0/trace.yw
+SBY 14:13:38 [insn_sub_ch0] engine_0: ##   0:00:17  Status: failed
+SBY 14:13:38 [insn_sub_ch0] engine_0: finished (returncode=1)
+SBY 14:13:38 [insn_sub_ch0] engine_0: Status returned by engine: FAIL
+SBY 14:13:38 [insn_sub_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:18 (18)
+SBY 14:13:38 [insn_sub_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:18 (18)
+SBY 14:13:38 [insn_sub_ch0] summary: engine_0 (smtbmc bitwuzla) returned FAIL
+SBY 14:13:38 [insn_sub_ch0] summary: counterexample trace: insn_sub_ch0/engine_0/trace.vcd
+SBY 14:13:38 [insn_sub_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_198_152 at rvfi_insn_check.sv:198.6-198.31 step 20
+SBY 14:13:38 [insn_sub_ch0] DONE (FAIL, rc=0)
+
+Formal: 49 passed, 4 failed
+Failed: insn_lui_ch0 insn_sra_ch0 insn_sub_ch0 reg_ch0
+
+--- insn_lui_ch0/logfile.txt (last 30 lines) ---
+SBY 14:13:11 [insn_lui_ch0] engine_0: ##   0:00:00  Skipping step 7..
+SBY 14:13:11 [insn_lui_ch0] engine_0: ##   0:00:00  Skipping step 8..
+SBY 14:13:11 [insn_lui_ch0] engine_0: ##   0:00:00  Skipping step 9..
+SBY 14:13:11 [insn_lui_ch0] engine_0: ##   0:00:00  Skipping step 10..
+SBY 14:13:11 [insn_lui_ch0] engine_0: ##   0:00:00  Skipping step 11..
+SBY 14:13:11 [insn_lui_ch0] engine_0: ##   0:00:00  Skipping step 12..
+SBY 14:13:11 [insn_lui_ch0] engine_0: ##   0:00:00  Skipping step 13..
+SBY 14:13:11 [insn_lui_ch0] engine_0: ##   0:00:00  Skipping step 14..
+SBY 14:13:11 [insn_lui_ch0] engine_0: ##   0:00:00  Skipping step 15..
+SBY 14:13:11 [insn_lui_ch0] engine_0: ##   0:00:00  Skipping step 16..
+SBY 14:13:11 [insn_lui_ch0] engine_0: ##   0:00:00  Skipping step 17..
+SBY 14:13:11 [insn_lui_ch0] engine_0: ##   0:00:00  Skipping step 18..
+SBY 14:13:11 [insn_lui_ch0] engine_0: ##   0:00:00  Skipping step 19..
+SBY 14:13:11 [insn_lui_ch0] engine_0: ##   0:00:00  Checking assumptions in step 20..
+SBY 14:13:11 [insn_lui_ch0] engine_0: ##   0:00:00  Checking assertions in step 20..
+SBY 14:13:26 [insn_lui_ch0] engine_0: ##   0:00:15  BMC failed!
+SBY 14:13:26 [insn_lui_ch0] engine_0: ##   0:00:15  Assert failed in rvfi_testbench: rvfi_insn_check.sv:198.6-198.31 (_witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_198_152)
+SBY 14:13:26 [insn_lui_ch0] engine_0: ##   0:00:15  Writing trace to VCD file: engine_0/trace.vcd
+SBY 14:13:26 [insn_lui_ch0] engine_0: ##   0:00:15  Writing trace to Verilog testbench: engine_0/trace_tb.v
+SBY 14:13:26 [insn_lui_ch0] engine_0: ##   0:00:15  Writing trace to constraints file: engine_0/trace.smtc
+SBY 14:13:26 [insn_lui_ch0] engine_0: ##   0:00:15  Writing trace to Yosys witness file: engine_0/trace.yw
+SBY 14:13:27 [insn_lui_ch0] engine_0: ##   0:00:16  Status: failed
+SBY 14:13:27 [insn_lui_ch0] engine_0: finished (returncode=1)
+SBY 14:13:27 [insn_lui_ch0] engine_0: Status returned by engine: FAIL
+SBY 14:13:27 [insn_lui_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:16 (16)
+SBY 14:13:27 [insn_lui_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:16 (16)
+SBY 14:13:27 [insn_lui_ch0] summary: engine_0 (smtbmc bitwuzla) returned FAIL
+SBY 14:13:27 [insn_lui_ch0] summary: counterexample trace: insn_lui_ch0/engine_0/trace.vcd
+SBY 14:13:27 [insn_lui_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_198_152 at rvfi_insn_check.sv:198.6-198.31 step 20
+SBY 14:13:27 [insn_lui_ch0] DONE (FAIL, rc=0)
+
+Full run log: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-001-r7s0/formal/last_run-hbb392d7eedda4a0.log
+Per-check logs in: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-001-r7s0/formal/riscv-formal/cores/bench-hbb392d7eedda4a0/checks/<check>/logfile.txt
+Deleted branch bench-hyp-20261005-002-r7s1 (was efa4756).
+  [slot 1] broken: formal_failed: insn_add_ch0
+mmary: Elapsed clock time [H:MM:SS (secs)]: 0:00:22 (22)
+SBY 14:20:35 [insn_xori_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:23 (23)
+SBY 14:20:35 [insn_xori_ch0] summary: engine_0 (smtbmc bitwuzla) returned FAIL
+SBY 14:20:35 [insn_xori_ch0] summary: counterexample trace: insn_xori_ch0/engine_0/trace.vcd
+SBY 14:20:35 [insn_xori_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_177_113 at rvfi_insn_check.sv:177.7-177.40 step 20
+SBY 14:20:35 [insn_xori_ch0] DONE (FAIL, rc=0)
+
+Formal: 16 passed, 37 failed
+Failed: insn_add_ch0 insn_addi_ch0 insn_and_ch0 insn_andi_ch0 insn_auipc_ch0 insn_div_ch0 insn_divu_ch0 insn_lb_ch0 insn_lbu_ch0 insn_lh_ch0 insn_lhu_ch0 insn_lui_ch0 insn_lw_ch0 insn_mul_ch0 insn_mulh_ch0 insn_mulhsu_ch0 insn_mulhu_ch0 insn_or_ch0 insn_ori_ch0 insn_rem_ch0 insn_remu_ch0 insn_sb_ch0 insn_sh_ch0 insn_sll_ch0 insn_slli_ch0 insn_slt_ch0 insn_slti_ch0 insn_sltiu_ch0 insn_sltu_ch0 insn_sra_ch0 insn_srai_ch0 insn_srl_ch0 insn_srli_ch0 insn_sub_ch0 insn_sw_ch0 insn_xor_ch0 insn_xori_ch0
+
+--- insn_add_ch0/logfile.txt (last 30 lines) ---
+SBY 14:17:19 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 7..
+SBY 14:17:19 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 8..
+SBY 14:17:19 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 9..
+SBY 14:17:19 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 10..
+SBY 14:17:19 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 11..
+SBY 14:17:19 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 12..
+SBY 14:17:19 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 13..
+SBY 14:17:19 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 14..
+SBY 14:17:19 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 15..
+SBY 14:17:19 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 16..
+SBY 14:17:19 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 17..
+SBY 14:17:19 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 18..
+SBY 14:17:19 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 19..
+SBY 14:17:19 [insn_add_ch0] engine_0: ##   0:00:00  Checking assumptions in step 20..
+SBY 14:17:20 [insn_add_ch0] engine_0: ##   0:00:01  Checking assertions in step 20..
+SBY 14:17:25 [insn_add_ch0] engine_0: ##   0:00:05  BMC failed!
+SBY 14:17:25 [insn_add_ch0] engine_0: ##   0:00:05  Assert failed in rvfi_testbench: rvfi_insn_check.sv:177.7-177.40 (_witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_177_113)
+SBY 14:17:25 [insn_add_ch0] engine_0: ##   0:00:05  Writing trace to VCD file: engine_0/trace.vcd
+SBY 14:17:25 [insn_add_ch0] engine_0: ##   0:00:05  Writing trace to Verilog testbench: engine_0/trace_tb.v
+SBY 14:17:25 [insn_add_ch0] engine_0: ##   0:00:05  Writing trace to constraints file: engine_0/trace.smtc
+SBY 14:17:25 [insn_add_ch0] engine_0: ##   0:00:05  Writing trace to Yosys witness file: engine_0/trace.yw
+SBY 14:17:25 [insn_add_ch0] engine_0: ##   0:00:06  Status: failed
+SBY 14:17:25 [insn_add_ch0] engine_0: finished (returncode=1)
+SBY 14:17:25 [insn_add_ch0] engine_0: Status returned by engine: FAIL
+SBY 14:17:25 [insn_add_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:06 (6)
+SBY 14:17:25 [insn_add_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:06 (6)
+SBY 14:17:25 [insn_add_ch0] summary: engine_0 (smtbmc bitwuzla) returned FAIL
+SBY 14:17:25 [insn_add_ch0] summary: counterexample trace: insn_add_ch0/engine_0/trace.vcd
+SBY 14:17:25 [insn_add_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_177_113 at rvfi_insn_check.sv:177.7-177.40 step 20
+SBY 14:17:25 [insn_add_ch0] DONE (FAIL, rc=0)
+
+Full run log: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-002-r7s1/formal/last_run-h560f11882f134b7.log
+Per-check logs in: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-002-r7s1/formal/riscv-formal/cores/bench-h560f11882f134b7/checks/<check>/logfile.txt
+Deleted branch bench-hyp-20261005-003-r7s2 (was efa4756).
+  [slot 2] broken: formal_failed: insn_auipc_ch0
+24:02 [insn_sh_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_186_145 at rvfi_insn_check.sv:186.9-186.29 step 20
+SBY 14:24:02 [insn_sh_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_198_152 at rvfi_insn_check.sv:198.6-198.31 step 20
+SBY 14:24:02 [insn_sh_ch0] DONE (FAIL, rc=0)
+SBY 14:25:39 [reg_ch0] engine_0: ##   0:02:38  Status: passed
+SBY 14:25:39 [reg_ch0] engine_0: finished (returncode=0)
+SBY 14:25:39 [reg_ch0] engine_0: Status returned by engine: pass
+SBY 14:25:39 [reg_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:02:38 (158)
+SBY 14:25:39 [reg_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:02:38 (158)
+SBY 14:25:39 [reg_ch0] summary: engine_0 (smtbmc bitwuzla) returned pass
+SBY 14:25:39 [reg_ch0] summary: engine_0 did not produce any traces
+SBY 14:25:39 [reg_ch0] DONE (PASS, rc=0)
+
+Formal: 50 passed, 3 failed
+Failed: insn_auipc_ch0 insn_lui_ch0 insn_sh_ch0
+
+--- insn_auipc_ch0/logfile.txt (last 30 lines) ---
+SBY 14:23:03 [insn_auipc_ch0] engine_0: ##   0:00:00  Skipping step 7..
+SBY 14:23:03 [insn_auipc_ch0] engine_0: ##   0:00:00  Skipping step 8..
+SBY 14:23:04 [insn_auipc_ch0] engine_0: ##   0:00:00  Skipping step 9..
+SBY 14:23:04 [insn_auipc_ch0] engine_0: ##   0:00:00  Skipping step 10..
+SBY 14:23:04 [insn_auipc_ch0] engine_0: ##   0:00:00  Skipping step 11..
+SBY 14:23:04 [insn_auipc_ch0] engine_0: ##   0:00:00  Skipping step 12..
+SBY 14:23:04 [insn_auipc_ch0] engine_0: ##   0:00:00  Skipping step 13..
+SBY 14:23:04 [insn_auipc_ch0] engine_0: ##   0:00:00  Skipping step 14..
+SBY 14:23:04 [insn_auipc_ch0] engine_0: ##   0:00:00  Skipping step 15..
+SBY 14:23:04 [insn_auipc_ch0] engine_0: ##   0:00:00  Skipping step 16..
+SBY 14:23:04 [insn_auipc_ch0] engine_0: ##   0:00:00  Skipping step 17..
+SBY 14:23:04 [insn_auipc_ch0] engine_0: ##   0:00:00  Skipping step 18..
+SBY 14:23:04 [insn_auipc_ch0] engine_0: ##   0:00:00  Skipping step 19..
+SBY 14:23:04 [insn_auipc_ch0] engine_0: ##   0:00:00  Checking assumptions in step 20..
+SBY 14:23:04 [insn_auipc_ch0] engine_0: ##   0:00:01  Checking assertions in step 20..
+SBY 14:23:32 [insn_auipc_ch0] engine_0: ##   0:00:28  BMC failed!
+SBY 14:23:32 [insn_auipc_ch0] engine_0: ##   0:00:28  Assert failed in rvfi_testbench: rvfi_insn_check.sv:177.7-177.40 (_witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_177_113)
+SBY 14:23:32 [insn_auipc_ch0] engine_0: ##   0:00:28  Writing trace to VCD file: engine_0/trace.vcd
+SBY 14:23:33 [insn_auipc_ch0] engine_0: ##   0:00:29  Writing trace to Verilog testbench: engine_0/trace_tb.v
+SBY 14:23:33 [insn_auipc_ch0] engine_0: ##   0:00:29  Writing trace to constraints file: engine_0/trace.smtc
+SBY 14:23:33 [insn_auipc_ch0] engine_0: ##   0:00:29  Writing trace to Yosys witness file: engine_0/trace.yw
+SBY 14:23:33 [insn_auipc_ch0] engine_0: ##   0:00:29  Status: failed
+SBY 14:23:33 [insn_auipc_ch0] engine_0: finished (returncode=1)
+SBY 14:23:33 [insn_auipc_ch0] engine_0: Status returned by engine: FAIL
+SBY 14:23:33 [insn_auipc_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:30 (30)
+SBY 14:23:33 [insn_auipc_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:30 (30)
+SBY 14:23:33 [insn_auipc_ch0] summary: engine_0 (smtbmc bitwuzla) returned FAIL
+SBY 14:23:33 [insn_auipc_ch0] summary: counterexample trace: insn_auipc_ch0/engine_0/trace.vcd
+SBY 14:23:33 [insn_auipc_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_177_113 at rvfi_insn_check.sv:177.7-177.40 step 20
+SBY 14:23:33 [insn_auipc_ch0] DONE (FAIL, rc=0)
+
+Full run log: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-003-r7s2/formal/last_run-hdc75392da3d3455.log
+Per-check logs in: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-003-r7s2/formal/riscv-formal/cores/bench-hdc75392da3d3455/checks/<check>/logfile.txt
+[bench-v2.8.4 0735d68] log: hyp-20261005-001-r7s0 broken
+ 2 files changed, 1 insertion(+)
+[bench-v2.8.4 cf78e2b] log: hyp-20261005-002-r7s1 broken
+ 2 files changed, 1 insertion(+)
+[bench-v2.8.4 f88f1a7] log: hyp-20261005-003-r7s2 broken
+ 1 file changed, 1 insertion(+)
+
+  Round 7 complete: slot 0=broken, slot 1=broken, slot 2=broken (no winner)
+
+============================================================
+Round 8  |  slots=3  |  current best=12.12
+============================================================
+  pre-allocated IDs: ['hyp-20261005-001-r8s0', 'hyp-20261005-002-r8s1', 'hyp-20261005-003-r8s2']
+  [slot 0] category=micro_opt id=hyp-20261005-001-r8s0
+  [slot 1] category=structural id=hyp-20261005-002-r8s1
+  [slot 2] category=predictor id=hyp-20261005-003-r8s2
+Preparing worktree (new branch 'bench-hyp-20261005-002-r8s1-hypgen')
+Preparing worktree (new branch 'bench-hyp-20261005-003-r8s2-hypgen')
+Preparing worktree (new branch 'bench-hyp-20261005-001-r8s0-hypgen')
+Deleted branch bench-hyp-20261005-002-r8s1-hypgen (was f88f1a7).
+Preparing worktree (new branch 'bench-hyp-20261005-002-r8s1')
+HEAD is now at f88f1a7 log: hyp-20261005-003-r7s2 broken
+HEAD is now at f88f1a7 log: hyp-20261005-003-r7s2 broken
+HEAD is now at f88f1a7 log: hyp-20261005-003-r7s2 broken
+HEAD is now at f88f1a7 log: hyp-20261005-003-r7s2 broken
+  [slot 1] worktree=/srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-002-r8s1
+Deleted branch bench-hyp-20261005-003-r8s2-hypgen (was f88f1a7).
+Preparing worktree (new branch 'bench-hyp-20261005-003-r8s2')
+HEAD is now at f88f1a7 log: hyp-20261005-003-r7s2 broken
+  [slot 2] worktree=/srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-003-r8s2
+Deleted branch bench-hyp-20261005-001-r8s0-hypgen (was f88f1a7).
+Preparing worktree (new branch 'bench-hyp-20261005-001-r8s0')
+HEAD is now at f88f1a7 log: hyp-20261005-003-r7s2 broken
+  [slot 0] worktree=/srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-001-r8s0
+Deleted branch bench-hyp-20261005-001-r8s0 (was f88f1a7).
+  [slot 0] broken: formal_failed: insn_div_ch0
+00:01 (1)
+SBY 14:29:37 [insn_xori_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:01 (1)
+SBY 14:29:37 [insn_xori_ch0] summary: engine_0 (smtbmc bitwuzla) returned pass
+SBY 14:29:37 [insn_xori_ch0] summary: engine_0 did not produce any traces
+SBY 14:29:37 [insn_xori_ch0] DONE (PASS, rc=0)
+SBY 14:30:15 [reg_ch0] engine_0: ##   0:01:01  waiting for solver (1 minute)
+SBY 14:30:38 [reg_ch0] engine_0: ##   0:01:24  Status: passed
+SBY 14:30:38 [reg_ch0] engine_0: finished (returncode=0)
+SBY 14:30:38 [reg_ch0] engine_0: Status returned by engine: pass
+SBY 14:30:38 [reg_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:01:24 (84)
+SBY 14:30:38 [reg_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:01:24 (84)
+SBY 14:30:38 [reg_ch0] summary: engine_0 (smtbmc bitwuzla) returned pass
+SBY 14:30:38 [reg_ch0] summary: engine_0 did not produce any traces
+SBY 14:30:38 [reg_ch0] DONE (PASS, rc=0)
+
+Formal: 43 passed, 10 failed
+Failed: insn_div_ch0 insn_divu_ch0 insn_jal_ch0 insn_jalr_ch0 insn_mul_ch0 insn_mulh_ch0 insn_mulhsu_ch0 insn_mulhu_ch0 insn_rem_ch0 insn_remu_ch0
+
+--- insn_div_ch0/logfile.txt (last 30 lines) ---
+SBY 14:29:19 [insn_div_ch0] engine_0: ##   0:00:00  Skipping step 7..
+SBY 14:29:20 [insn_div_ch0] engine_0: ##   0:00:00  Skipping step 8..
+SBY 14:29:20 [insn_div_ch0] engine_0: ##   0:00:00  Skipping step 9..
+SBY 14:29:20 [insn_div_ch0] engine_0: ##   0:00:00  Skipping step 10..
+SBY 14:29:20 [insn_div_ch0] engine_0: ##   0:00:00  Skipping step 11..
+SBY 14:29:20 [insn_div_ch0] engine_0: ##   0:00:00  Skipping step 12..
+SBY 14:29:20 [insn_div_ch0] engine_0: ##   0:00:00  Skipping step 13..
+SBY 14:29:20 [insn_div_ch0] engine_0: ##   0:00:00  Skipping step 14..
+SBY 14:29:20 [insn_div_ch0] engine_0: ##   0:00:00  Skipping step 15..
+SBY 14:29:20 [insn_div_ch0] engine_0: ##   0:00:00  Skipping step 16..
+SBY 14:29:20 [insn_div_ch0] engine_0: ##   0:00:00  Skipping step 17..
+SBY 14:29:20 [insn_div_ch0] engine_0: ##   0:00:00  Skipping step 18..
+SBY 14:29:20 [insn_div_ch0] engine_0: ##   0:00:00  Skipping step 19..
+SBY 14:29:20 [insn_div_ch0] engine_0: ##   0:00:00  Checking assumptions in step 20..
+SBY 14:29:20 [insn_div_ch0] engine_0: ##   0:00:01  Checking assertions in step 20..
+SBY 14:29:22 [insn_div_ch0] engine_0: ##   0:00:02  BMC failed!
+SBY 14:29:22 [insn_div_ch0] engine_0: ##   0:00:02  Assert failed in rvfi_testbench: rvfi_insn_check.sv:198.6-198.31 (_witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_198_152)
+SBY 14:29:22 [insn_div_ch0] engine_0: ##   0:00:02  Writing trace to VCD file: engine_0/trace.vcd
+SBY 14:29:22 [insn_div_ch0] engine_0: ##   0:00:02  Writing trace to Verilog testbench: engine_0/trace_tb.v
+SBY 14:29:22 [insn_div_ch0] engine_0: ##   0:00:02  Writing trace to constraints file: engine_0/trace.smtc
+SBY 14:29:22 [insn_div_ch0] engine_0: ##   0:00:02  Writing trace to Yosys witness file: engine_0/trace.yw
+SBY 14:29:22 [insn_div_ch0] engine_0: ##   0:00:02  Status: failed
+SBY 14:29:22 [insn_div_ch0] engine_0: finished (returncode=1)
+SBY 14:29:22 [insn_div_ch0] engine_0: Status returned by engine: FAIL
+SBY 14:29:22 [insn_div_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:03 (3)
+SBY 14:29:22 [insn_div_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:03 (3)
+SBY 14:29:22 [insn_div_ch0] summary: engine_0 (smtbmc bitwuzla) returned FAIL
+SBY 14:29:22 [insn_div_ch0] summary: counterexample trace: insn_div_ch0/engine_0/trace.vcd
+SBY 14:29:22 [insn_div_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_198_152 at rvfi_insn_check.sv:198.6-198.31 step 20
+SBY 14:29:22 [insn_div_ch0] DONE (FAIL, rc=0)
+
+Full run log: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-001-r8s0/formal/last_run-h06f01e3727b6406.log
+Per-check logs in: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-001-r8s0/formal/riscv-formal/cores/bench-h06f01e3727b6406/checks/<check>/logfile.txt
+Deleted branch bench-hyp-20261005-003-r8s2 (was f88f1a7).
+  [slot 2] broken: formal_failed: insn_jal_ch0
+ngine_0: Status returned by engine: pass
+SBY 14:38:22 [insn_sub_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:03 (3)
+SBY 14:38:22 [insn_sub_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:03 (3)
+SBY 14:38:22 [insn_sub_ch0] summary: engine_0 (smtbmc bitwuzla) returned pass
+SBY 14:38:22 [insn_sub_ch0] summary: engine_0 did not produce any traces
+SBY 14:38:22 [insn_sub_ch0] DONE (PASS, rc=0)
+SBY 14:38:58 [reg_ch0] engine_0: ##   0:01:01  waiting for solver (1 minute)
+SBY 14:39:28 [reg_ch0] engine_0: ##   0:01:31  Status: passed
+SBY 14:39:28 [reg_ch0] engine_0: finished (returncode=0)
+SBY 14:39:28 [reg_ch0] engine_0: Status returned by engine: pass
+SBY 14:39:28 [reg_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:01:32 (92)
+SBY 14:39:28 [reg_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:01:32 (92)
+SBY 14:39:28 [reg_ch0] summary: engine_0 (smtbmc bitwuzla) returned pass
+SBY 14:39:28 [reg_ch0] summary: engine_0 did not produce any traces
+SBY 14:39:28 [reg_ch0] DONE (PASS, rc=0)
+
+Formal: 51 passed, 2 failed
+Failed: insn_jal_ch0 insn_jalr_ch0
+
+--- insn_jal_ch0/logfile.txt (last 30 lines) ---
+SBY 14:38:05 [insn_jal_ch0] engine_0: ##   0:00:00  Skipping step 7..
+SBY 14:38:05 [insn_jal_ch0] engine_0: ##   0:00:00  Skipping step 8..
+SBY 14:38:05 [insn_jal_ch0] engine_0: ##   0:00:00  Skipping step 9..
+SBY 14:38:05 [insn_jal_ch0] engine_0: ##   0:00:00  Skipping step 10..
+SBY 14:38:05 [insn_jal_ch0] engine_0: ##   0:00:00  Skipping step 11..
+SBY 14:38:05 [insn_jal_ch0] engine_0: ##   0:00:00  Skipping step 12..
+SBY 14:38:05 [insn_jal_ch0] engine_0: ##   0:00:00  Skipping step 13..
+SBY 14:38:05 [insn_jal_ch0] engine_0: ##   0:00:00  Skipping step 14..
+SBY 14:38:05 [insn_jal_ch0] engine_0: ##   0:00:00  Skipping step 15..
+SBY 14:38:05 [insn_jal_ch0] engine_0: ##   0:00:00  Skipping step 16..
+SBY 14:38:05 [insn_jal_ch0] engine_0: ##   0:00:00  Skipping step 17..
+SBY 14:38:05 [insn_jal_ch0] engine_0: ##   0:00:00  Skipping step 18..
+SBY 14:38:05 [insn_jal_ch0] engine_0: ##   0:00:00  Skipping step 19..
+SBY 14:38:05 [insn_jal_ch0] engine_0: ##   0:00:00  Checking assumptions in step 20..
+SBY 14:38:06 [insn_jal_ch0] engine_0: ##   0:00:01  Checking assertions in step 20..
+SBY 14:38:07 [insn_jal_ch0] engine_0: ##   0:00:02  BMC failed!
+SBY 14:38:07 [insn_jal_ch0] engine_0: ##   0:00:02  Assert failed in rvfi_testbench: rvfi_insn_check.sv:177.7-177.40 (_witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_177_113)
+SBY 14:38:07 [insn_jal_ch0] engine_0: ##   0:00:02  Writing trace to VCD file: engine_0/trace.vcd
+SBY 14:38:08 [insn_jal_ch0] engine_0: ##   0:00:02  Writing trace to Verilog testbench: engine_0/trace_tb.v
+SBY 14:38:08 [insn_jal_ch0] engine_0: ##   0:00:02  Writing trace to constraints file: engine_0/trace.smtc
+SBY 14:38:08 [insn_jal_ch0] engine_0: ##   0:00:03  Writing trace to Yosys witness file: engine_0/trace.yw
+SBY 14:38:08 [insn_jal_ch0] engine_0: ##   0:00:03  Status: failed
+SBY 14:38:08 [insn_jal_ch0] engine_0: finished (returncode=1)
+SBY 14:38:08 [insn_jal_ch0] engine_0: Status returned by engine: FAIL
+SBY 14:38:08 [insn_jal_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:03 (3)
+SBY 14:38:08 [insn_jal_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:04 (4)
+SBY 14:38:08 [insn_jal_ch0] summary: engine_0 (smtbmc bitwuzla) returned FAIL
+SBY 14:38:08 [insn_jal_ch0] summary: counterexample trace: insn_jal_ch0/engine_0/trace.vcd
+SBY 14:38:08 [insn_jal_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_177_113 at rvfi_insn_check.sv:177.7-177.40 step 20
+SBY 14:38:08 [insn_jal_ch0] DONE (FAIL, rc=0)
+
+Full run log: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-003-r8s2/formal/last_run-he7b78e74ea15486.log
+Per-check logs in: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-003-r8s2/formal/riscv-formal/cores/bench-he7b78e74ea15486/checks/<check>/logfile.txt
+Deleted branch bench-hyp-20261005-002-r8s1 (was f88f1a7).
+  [slot 1] broken: formal_failed: insn_lh_ch0
+4:42:02 [insn_xori_ch0] engine_0: Status returned by engine: pass
+SBY 14:42:02 [insn_xori_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:01 (1)
+SBY 14:42:02 [insn_xori_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:01 (1)
+SBY 14:42:02 [insn_xori_ch0] summary: engine_0 (smtbmc bitwuzla) returned pass
+SBY 14:42:02 [insn_xori_ch0] summary: engine_0 did not produce any traces
+SBY 14:42:02 [insn_xori_ch0] DONE (PASS, rc=0)
+SBY 14:42:34 [reg_ch0] engine_0: ##   0:01:01  waiting for solver (1 minute)
+SBY 14:43:13 [reg_ch0] engine_0: ##   0:01:40  Status: passed
+SBY 14:43:13 [reg_ch0] engine_0: finished (returncode=0)
+SBY 14:43:13 [reg_ch0] engine_0: Status returned by engine: pass
+SBY 14:43:13 [reg_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:01:41 (101)
+SBY 14:43:13 [reg_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:01:41 (101)
+SBY 14:43:13 [reg_ch0] summary: engine_0 (smtbmc bitwuzla) returned pass
+SBY 14:43:13 [reg_ch0] summary: engine_0 did not produce any traces
+SBY 14:43:13 [reg_ch0] DONE (PASS, rc=0)
+
+Formal: 51 passed, 2 failed
+Failed: insn_lh_ch0 insn_lhu_ch0
+
+--- insn_lh_ch0/logfile.txt (last 30 lines) ---
+SBY 14:41:41 [insn_lh_ch0] engine_0: ##   0:00:00  Skipping step 7..
+SBY 14:41:41 [insn_lh_ch0] engine_0: ##   0:00:00  Skipping step 8..
+SBY 14:41:41 [insn_lh_ch0] engine_0: ##   0:00:00  Skipping step 9..
+SBY 14:41:41 [insn_lh_ch0] engine_0: ##   0:00:00  Skipping step 10..
+SBY 14:41:41 [insn_lh_ch0] engine_0: ##   0:00:00  Skipping step 11..
+SBY 14:41:41 [insn_lh_ch0] engine_0: ##   0:00:00  Skipping step 12..
+SBY 14:41:41 [insn_lh_ch0] engine_0: ##   0:00:00  Skipping step 13..
+SBY 14:41:41 [insn_lh_ch0] engine_0: ##   0:00:00  Skipping step 14..
+SBY 14:41:41 [insn_lh_ch0] engine_0: ##   0:00:00  Skipping step 15..
+SBY 14:41:41 [insn_lh_ch0] engine_0: ##   0:00:00  Skipping step 16..
+SBY 14:41:41 [insn_lh_ch0] engine_0: ##   0:00:00  Skipping step 17..
+SBY 14:41:41 [insn_lh_ch0] engine_0: ##   0:00:00  Skipping step 18..
+SBY 14:41:41 [insn_lh_ch0] engine_0: ##   0:00:00  Skipping step 19..
+SBY 14:41:42 [insn_lh_ch0] engine_0: ##   0:00:00  Checking assumptions in step 20..
+SBY 14:41:42 [insn_lh_ch0] engine_0: ##   0:00:01  Checking assertions in step 20..
+SBY 14:41:55 [insn_lh_ch0] engine_0: ##   0:00:13  BMC failed!
+SBY 14:41:55 [insn_lh_ch0] engine_0: ##   0:00:13  Assert failed in rvfi_testbench: rvfi_insn_check.sv:198.6-198.31 (_witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_198_152)
+SBY 14:41:55 [insn_lh_ch0] engine_0: ##   0:00:13  Writing trace to VCD file: engine_0/trace.vcd
+SBY 14:41:55 [insn_lh_ch0] engine_0: ##   0:00:13  Writing trace to Verilog testbench: engine_0/trace_tb.v
+SBY 14:41:55 [insn_lh_ch0] engine_0: ##   0:00:13  Writing trace to constraints file: engine_0/trace.smtc
+SBY 14:41:55 [insn_lh_ch0] engine_0: ##   0:00:13  Writing trace to Yosys witness file: engine_0/trace.yw
+SBY 14:41:55 [insn_lh_ch0] engine_0: ##   0:00:13  Status: failed
+SBY 14:41:55 [insn_lh_ch0] engine_0: finished (returncode=1)
+SBY 14:41:55 [insn_lh_ch0] engine_0: Status returned by engine: FAIL
+SBY 14:41:55 [insn_lh_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:14 (14)
+SBY 14:41:55 [insn_lh_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:14 (14)
+SBY 14:41:55 [insn_lh_ch0] summary: engine_0 (smtbmc bitwuzla) returned FAIL
+SBY 14:41:55 [insn_lh_ch0] summary: counterexample trace: insn_lh_ch0/engine_0/trace.vcd
+SBY 14:41:55 [insn_lh_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_198_152 at rvfi_insn_check.sv:198.6-198.31 step 20
+SBY 14:41:55 [insn_lh_ch0] DONE (FAIL, rc=0)
+
+Full run log: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-002-r8s1/formal/last_run-haeccb7b1b77b40e.log
+Per-check logs in: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-002-r8s1/formal/riscv-formal/cores/bench-haeccb7b1b77b40e/checks/<check>/logfile.txt
+[bench-v2.8.4 4650f61] log: hyp-20261005-001-r8s0 broken
+ 2 files changed, 1 insertion(+)
+[bench-v2.8.4 65e4dbb] log: hyp-20261005-002-r8s1 broken
+ 2 files changed, 1 insertion(+)
+[bench-v2.8.4 633fb39] log: hyp-20261005-003-r8s2 broken
+ 1 file changed, 1 insertion(+)
+
+  Round 8 complete: slot 0=broken, slot 1=broken, slot 2=broken (no winner)
+
+============================================================
+Round 9  |  slots=3  |  current best=12.12
+============================================================
+  pre-allocated IDs: ['hyp-20261005-001-r9s0', 'hyp-20261005-002-r9s1', 'hyp-20261005-003-r9s2']
+  [slot 0] category=micro_opt id=hyp-20261005-001-r9s0
+  [slot 1] category=structural id=hyp-20261005-002-r9s1
+  [slot 2] category=predictor id=hyp-20261005-003-r9s2
+Preparing worktree (new branch 'bench-hyp-20261005-001-r9s0-hypgen')
+Preparing worktree (new branch 'bench-hyp-20261005-003-r9s2-hypgen')
+Preparing worktree (new branch 'bench-hyp-20261005-002-r9s1-hypgen')
+Deleted branch bench-hyp-20261005-001-r9s0-hypgen (was 633fb39).
+Preparing worktree (new branch 'bench-hyp-20261005-001-r9s0')
+HEAD is now at 633fb39 log: hyp-20261005-003-r8s2 broken
+HEAD is now at 633fb39 log: hyp-20261005-003-r8s2 broken
+HEAD is now at 633fb39 log: hyp-20261005-003-r8s2 broken
+HEAD is now at 633fb39 log: hyp-20261005-003-r8s2 broken
+  [slot 0] worktree=/srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-001-r9s0
+Deleted branch bench-hyp-20261005-003-r9s2-hypgen (was 633fb39).
+Preparing worktree (new branch 'bench-hyp-20261005-003-r9s2')
+HEAD is now at 633fb39 log: hyp-20261005-003-r8s2 broken
+  [slot 2] worktree=/srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-003-r9s2
+Deleted branch bench-hyp-20261005-002-r9s1-hypgen (was 633fb39).
+Preparing worktree (new branch 'bench-hyp-20261005-002-r9s1')
+HEAD is now at 633fb39 log: hyp-20261005-003-r8s2 broken
+  [slot 1] worktree=/srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-002-r9s1
+Deleted branch bench-hyp-20261005-002-r9s1 (was 633fb39).
+  [slot 1] broken: cosim_failed: random2.elf [--istall --dstall]
+Deleted branch bench-hyp-20261005-001-r9s0 (was 633fb39).
+  [slot 0] broken: formal_failed: insn_add_ch0
+ine_0: Status returned by engine: FAIL
+SBY 14:51:40 [insn_srl_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:22 (22)
+SBY 14:51:40 [insn_srl_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:23 (23)
+SBY 14:51:40 [insn_srl_ch0] summary: engine_0 (smtbmc bitwuzla) returned FAIL
+SBY 14:51:40 [insn_srl_ch0] summary: counterexample trace: insn_srl_ch0/engine_0/trace.vcd
+SBY 14:51:40 [insn_srl_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_177_113 at rvfi_insn_check.sv:177.7-177.40 step 20
+SBY 14:51:40 [insn_srl_ch0] DONE (FAIL, rc=0)
+
+Formal: 21 passed, 32 failed
+Failed: insn_add_ch0 insn_addi_ch0 insn_and_ch0 insn_andi_ch0 insn_auipc_ch0 insn_div_ch0 insn_divu_ch0 insn_jal_ch0 insn_jalr_ch0 insn_lui_ch0 insn_mul_ch0 insn_mulh_ch0 insn_mulhsu_ch0 insn_mulhu_ch0 insn_or_ch0 insn_ori_ch0 insn_rem_ch0 insn_remu_ch0 insn_sll_ch0 insn_slli_ch0 insn_slt_ch0 insn_slti_ch0 insn_sltiu_ch0 insn_sltu_ch0 insn_sra_ch0 insn_srai_ch0 insn_srl_ch0 insn_srli_ch0 insn_sub_ch0 insn_xor_ch0 insn_xori_ch0 reg_ch0
+
+--- insn_add_ch0/logfile.txt (last 30 lines) ---
+SBY 14:50:26 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 7..
+SBY 14:50:26 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 8..
+SBY 14:50:26 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 9..
+SBY 14:50:26 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 10..
+SBY 14:50:26 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 11..
+SBY 14:50:26 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 12..
+SBY 14:50:26 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 13..
+SBY 14:50:26 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 14..
+SBY 14:50:26 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 15..
+SBY 14:50:26 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 16..
+SBY 14:50:26 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 17..
+SBY 14:50:26 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 18..
+SBY 14:50:26 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 19..
+SBY 14:50:26 [insn_add_ch0] engine_0: ##   0:00:00  Checking assumptions in step 20..
+SBY 14:50:27 [insn_add_ch0] engine_0: ##   0:00:01  Checking assertions in step 20..
+SBY 14:50:31 [insn_add_ch0] engine_0: ##   0:00:05  BMC failed!
+SBY 14:50:31 [insn_add_ch0] engine_0: ##   0:00:05  Assert failed in rvfi_testbench: rvfi_insn_check.sv:177.7-177.40 (_witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_177_113)
+SBY 14:50:31 [insn_add_ch0] engine_0: ##   0:00:05  Writing trace to VCD file: engine_0/trace.vcd
+SBY 14:50:32 [insn_add_ch0] engine_0: ##   0:00:05  Writing trace to Verilog testbench: engine_0/trace_tb.v
+SBY 14:50:32 [insn_add_ch0] engine_0: ##   0:00:05  Writing trace to constraints file: engine_0/trace.smtc
+SBY 14:50:32 [insn_add_ch0] engine_0: ##   0:00:05  Writing trace to Yosys witness file: engine_0/trace.yw
+SBY 14:50:32 [insn_add_ch0] engine_0: ##   0:00:06  Status: failed
+SBY 14:50:32 [insn_add_ch0] engine_0: finished (returncode=1)
+SBY 14:50:32 [insn_add_ch0] engine_0: Status returned by engine: FAIL
+SBY 14:50:32 [insn_add_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:06 (6)
+SBY 14:50:32 [insn_add_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:06 (6)
+SBY 14:50:32 [insn_add_ch0] summary: engine_0 (smtbmc bitwuzla) returned FAIL
+SBY 14:50:32 [insn_add_ch0] summary: counterexample trace: insn_add_ch0/engine_0/trace.vcd
+SBY 14:50:32 [insn_add_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_177_113 at rvfi_insn_check.sv:177.7-177.40 step 20
+SBY 14:50:32 [insn_add_ch0] DONE (FAIL, rc=0)
+
+Full run log: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-001-r9s0/formal/last_run-hddf81a6d6d624c0.log
+Per-check logs in: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-001-r9s0/formal/riscv-formal/cores/bench-hddf81a6d6d624c0/checks/<check>/logfile.txt
+Deleted branch bench-hyp-20261005-003-r9s2 (was 633fb39).
+  [slot 2] broken: formal_failed: insn_jal_ch0
+fi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_198_152 at rvfi_insn_check.sv:198.6-198.31 step 20
+SBY 14:56:01 [insn_sb_ch0] DONE (FAIL, rc=0)
+SBY 14:56:34 [reg_ch0] engine_0: ##   0:01:01  waiting for solver (1 minute)
+SBY 14:57:12 [reg_ch0] engine_0: ##   0:01:39  Status: passed
+SBY 14:57:12 [reg_ch0] engine_0: finished (returncode=0)
+SBY 14:57:12 [reg_ch0] engine_0: Status returned by engine: pass
+SBY 14:57:12 [reg_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:01:40 (100)
+SBY 14:57:12 [reg_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:01:40 (100)
+SBY 14:57:12 [reg_ch0] summary: engine_0 (smtbmc bitwuzla) returned pass
+SBY 14:57:12 [reg_ch0] summary: engine_0 did not produce any traces
+SBY 14:57:12 [reg_ch0] DONE (PASS, rc=0)
+
+Formal: 51 passed, 2 failed
+Failed: insn_jal_ch0 insn_sb_ch0
+
+--- insn_jal_ch0/logfile.txt (last 30 lines) ---
+SBY 14:55:40 [insn_jal_ch0] engine_0: ##   0:00:00  Skipping step 9..
+SBY 14:55:40 [insn_jal_ch0] engine_0: ##   0:00:00  Skipping step 10..
+SBY 14:55:40 [insn_jal_ch0] engine_0: ##   0:00:00  Skipping step 11..
+SBY 14:55:40 [insn_jal_ch0] engine_0: ##   0:00:00  Skipping step 12..
+SBY 14:55:40 [insn_jal_ch0] engine_0: ##   0:00:00  Skipping step 13..
+SBY 14:55:40 [insn_jal_ch0] engine_0: ##   0:00:00  Skipping step 14..
+SBY 14:55:40 [insn_jal_ch0] engine_0: ##   0:00:00  Skipping step 15..
+SBY 14:55:40 [insn_jal_ch0] engine_0: ##   0:00:00  Skipping step 16..
+SBY 14:55:40 [insn_jal_ch0] engine_0: ##   0:00:00  Skipping step 17..
+SBY 14:55:40 [insn_jal_ch0] engine_0: ##   0:00:00  Skipping step 18..
+SBY 14:55:40 [insn_jal_ch0] engine_0: ##   0:00:00  Skipping step 19..
+SBY 14:55:40 [insn_jal_ch0] engine_0: ##   0:00:00  Checking assumptions in step 20..
+SBY 14:55:41 [insn_jal_ch0] engine_0: ##   0:00:01  Checking assertions in step 20..
+SBY 14:55:54 [insn_jal_ch0] engine_0: ##   0:00:14  BMC failed!
+SBY 14:55:54 [insn_jal_ch0] engine_0: ##   0:00:14  Assert failed in rvfi_testbench: rvfi_insn_check.sv:176.7-176.38 (_witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_176_111)
+SBY 14:55:54 [insn_jal_ch0] engine_0: ##   0:00:14  Assert failed in rvfi_testbench: rvfi_insn_check.sv:177.7-177.40 (_witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_177_113)
+SBY 14:55:54 [insn_jal_ch0] engine_0: ##   0:00:14  Writing trace to VCD file: engine_0/trace.vcd
+SBY 14:55:54 [insn_jal_ch0] engine_0: ##   0:00:14  Writing trace to Verilog testbench: engine_0/trace_tb.v
+SBY 14:55:54 [insn_jal_ch0] engine_0: ##   0:00:14  Writing trace to constraints file: engine_0/trace.smtc
+SBY 14:55:54 [insn_jal_ch0] engine_0: ##   0:00:14  Writing trace to Yosys witness file: engine_0/trace.yw
+SBY 14:55:55 [insn_jal_ch0] engine_0: ##   0:00:15  Status: failed
+SBY 14:55:55 [insn_jal_ch0] engine_0: finished (returncode=1)
+SBY 14:55:55 [insn_jal_ch0] engine_0: Status returned by engine: FAIL
+SBY 14:55:55 [insn_jal_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:15 (15)
+SBY 14:55:55 [insn_jal_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:15 (15)
+SBY 14:55:55 [insn_jal_ch0] summary: engine_0 (smtbmc bitwuzla) returned FAIL
+SBY 14:55:55 [insn_jal_ch0] summary: counterexample trace: insn_jal_ch0/engine_0/trace.vcd
+SBY 14:55:55 [insn_jal_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_176_111 at rvfi_insn_check.sv:176.7-176.38 step 20
+SBY 14:55:55 [insn_jal_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_177_113 at rvfi_insn_check.sv:177.7-177.40 step 20
+SBY 14:55:55 [insn_jal_ch0] DONE (FAIL, rc=0)
+
+Full run log: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-003-r9s2/formal/last_run-hf948eb0309e041e.log
+Per-check logs in: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-003-r9s2/formal/riscv-formal/cores/bench-hf948eb0309e041e/checks/<check>/logfile.txt
+[bench-v2.8.4 924e4bc] log: hyp-20261005-001-r9s0 broken
+ 2 files changed, 1 insertion(+)
+[bench-v2.8.4 c59acf0] log: hyp-20261005-002-r9s1 broken
+ 2 files changed, 1 insertion(+)
+[bench-v2.8.4 f75fc2a] log: hyp-20261005-003-r9s2 broken
+ 1 file changed, 1 insertion(+)
+
+  Round 9 complete: slot 0=broken, slot 1=broken, slot 2=broken (no winner)
+
+============================================================
+Round 10  |  slots=3  |  current best=12.12
+============================================================
+  pre-allocated IDs: ['hyp-20261005-001-r10s0', 'hyp-20261005-002-r10s1', 'hyp-20261005-003-r10s2']
+  [slot 0] category=micro_opt id=hyp-20261005-001-r10s0
+  [slot 1] category=structural id=hyp-20261005-002-r10s1
+  [slot 2] category=predictor id=hyp-20261005-003-r10s2
+Preparing worktree (new branch 'bench-hyp-20261005-001-r10s0-hypgen')
+Preparing worktree (new branch 'bench-hyp-20261005-002-r10s1-hypgen')
+Preparing worktree (new branch 'bench-hyp-20261005-003-r10s2-hypgen')
+Deleted branch bench-hyp-20261005-001-r10s0-hypgen (was f75fc2a).
+Preparing worktree (new branch 'bench-hyp-20261005-001-r10s0')
+HEAD is now at f75fc2a log: hyp-20261005-003-r9s2 broken
+HEAD is now at f75fc2a log: hyp-20261005-003-r9s2 broken
+HEAD is now at f75fc2a log: hyp-20261005-003-r9s2 broken
+HEAD is now at f75fc2a log: hyp-20261005-003-r9s2 broken
+  [slot 0] worktree=/srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-001-r10s0
+Deleted branch bench-hyp-20261005-002-r10s1-hypgen (was f75fc2a).
+Preparing worktree (new branch 'bench-hyp-20261005-002-r10s1')
+HEAD is now at f75fc2a log: hyp-20261005-003-r9s2 broken
+  [slot 1] worktree=/srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-002-r10s1
+Deleted branch bench-hyp-20261005-003-r10s2-hypgen (was f75fc2a).
+Preparing worktree (new branch 'bench-hyp-20261005-003-r10s2')
+HEAD is now at f75fc2a log: hyp-20261005-003-r9s2 broken
+  [slot 2] worktree=/srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-003-r10s2
+Deleted branch bench-hyp-20261005-003-r10s2 (was f75fc2a).
+  [slot 2] broken: formal_failed: insn_and_ch0
+a) returned FAIL
+SBY 15:02:12 [insn_sh_ch0] summary: counterexample trace: insn_sh_ch0/engine_0/trace.vcd
+SBY 15:02:12 [insn_sh_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_198_152 at rvfi_insn_check.sv:198.6-198.31 step 20
+SBY 15:02:12 [insn_sh_ch0] DONE (FAIL, rc=0)
+SBY 15:02:31 [reg_ch0] engine_0: ##   0:01:01  waiting for solver (1 minute)
+SBY 15:02:53 [reg_ch0] engine_0: ##   0:01:22  Status: passed
+SBY 15:02:53 [reg_ch0] engine_0: finished (returncode=0)
+SBY 15:02:53 [reg_ch0] engine_0: Status returned by engine: pass
+SBY 15:02:53 [reg_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:01:23 (83)
+SBY 15:02:53 [reg_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:01:23 (83)
+SBY 15:02:53 [reg_ch0] summary: engine_0 (smtbmc bitwuzla) returned pass
+SBY 15:02:53 [reg_ch0] summary: engine_0 did not produce any traces
+SBY 15:02:53 [reg_ch0] DONE (PASS, rc=0)
+
+Formal: 45 passed, 8 failed
+Failed: insn_and_ch0 insn_andi_ch0 insn_lb_ch0 insn_lbu_ch0 insn_lh_ch0 insn_lhu_ch0 insn_sb_ch0 insn_sh_ch0
+
+--- insn_and_ch0/logfile.txt (last 30 lines) ---
+SBY 15:01:31 [insn_and_ch0] engine_0: ##   0:00:00  Skipping step 7..
+SBY 15:01:31 [insn_and_ch0] engine_0: ##   0:00:00  Skipping step 8..
+SBY 15:01:31 [insn_and_ch0] engine_0: ##   0:00:00  Skipping step 9..
+SBY 15:01:31 [insn_and_ch0] engine_0: ##   0:00:00  Skipping step 10..
+SBY 15:01:31 [insn_and_ch0] engine_0: ##   0:00:00  Skipping step 11..
+SBY 15:01:31 [insn_and_ch0] engine_0: ##   0:00:00  Skipping step 12..
+SBY 15:01:31 [insn_and_ch0] engine_0: ##   0:00:00  Skipping step 13..
+SBY 15:01:31 [insn_and_ch0] engine_0: ##   0:00:00  Skipping step 14..
+SBY 15:01:31 [insn_and_ch0] engine_0: ##   0:00:00  Skipping step 15..
+SBY 15:01:31 [insn_and_ch0] engine_0: ##   0:00:00  Skipping step 16..
+SBY 15:01:31 [insn_and_ch0] engine_0: ##   0:00:00  Skipping step 17..
+SBY 15:01:31 [insn_and_ch0] engine_0: ##   0:00:00  Skipping step 18..
+SBY 15:01:31 [insn_and_ch0] engine_0: ##   0:00:00  Skipping step 19..
+SBY 15:01:31 [insn_and_ch0] engine_0: ##   0:00:00  Checking assumptions in step 20..
+SBY 15:01:32 [insn_and_ch0] engine_0: ##   0:00:01  Checking assertions in step 20..
+SBY 15:01:34 [insn_and_ch0] engine_0: ##   0:00:02  BMC failed!
+SBY 15:01:34 [insn_and_ch0] engine_0: ##   0:00:02  Assert failed in rvfi_testbench: rvfi_insn_check.sv:177.7-177.40 (_witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_177_113)
+SBY 15:01:34 [insn_and_ch0] engine_0: ##   0:00:02  Writing trace to VCD file: engine_0/trace.vcd
+SBY 15:01:34 [insn_and_ch0] engine_0: ##   0:00:02  Writing trace to Verilog testbench: engine_0/trace_tb.v
+SBY 15:01:34 [insn_and_ch0] engine_0: ##   0:00:02  Writing trace to constraints file: engine_0/trace.smtc
+SBY 15:01:34 [insn_and_ch0] engine_0: ##   0:00:02  Writing trace to Yosys witness file: engine_0/trace.yw
+SBY 15:01:34 [insn_and_ch0] engine_0: ##   0:00:03  Status: failed
+SBY 15:01:34 [insn_and_ch0] engine_0: finished (returncode=1)
+SBY 15:01:34 [insn_and_ch0] engine_0: Status returned by engine: FAIL
+SBY 15:01:34 [insn_and_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:03 (3)
+SBY 15:01:34 [insn_and_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:03 (3)
+SBY 15:01:34 [insn_and_ch0] summary: engine_0 (smtbmc bitwuzla) returned FAIL
+SBY 15:01:34 [insn_and_ch0] summary: counterexample trace: insn_and_ch0/engine_0/trace.vcd
+SBY 15:01:34 [insn_and_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_177_113 at rvfi_insn_check.sv:177.7-177.40 step 20
+SBY 15:01:34 [insn_and_ch0] DONE (FAIL, rc=0)
+
+Full run log: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-003-r10s2/formal/last_run-hbe80f776acab4d2.log
+Per-check logs in: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-003-r10s2/formal/riscv-formal/cores/bench-hbe80f776acab4d2/checks/<check>/logfile.txt
+Deleted branch bench-hyp-20261005-002-r10s1 (was f75fc2a).
+  [slot 1] broken: formal_failed: insn_remu_ch0
+_witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_177_113 at rvfi_insn_check.sv:177.7-177.40 step 20
+SBY 15:05:42 [insn_xori_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_198_152 at rvfi_insn_check.sv:198.6-198.31 step 20
+SBY 15:05:42 [insn_xori_ch0] DONE (FAIL, rc=0)
+SBY 15:06:06 [reg_ch0] engine_0: ##   0:01:01  waiting for solver (1 minute)
+SBY 15:06:34 [reg_ch0] engine_0: ##   0:01:28  Status: passed
+SBY 15:06:34 [reg_ch0] engine_0: finished (returncode=0)
+SBY 15:06:34 [reg_ch0] engine_0: Status returned by engine: pass
+SBY 15:06:34 [reg_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:01:29 (89)
+SBY 15:06:34 [reg_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:01:29 (89)
+SBY 15:06:34 [reg_ch0] summary: engine_0 (smtbmc bitwuzla) returned pass
+SBY 15:06:34 [reg_ch0] summary: engine_0 did not produce any traces
+SBY 15:06:34 [reg_ch0] DONE (PASS, rc=0)
+
+Formal: 49 passed, 4 failed
+Failed: insn_remu_ch0 insn_srai_ch0 insn_srli_ch0 insn_xori_ch0
+
+--- insn_remu_ch0/logfile.txt (last 30 lines) ---
+SBY 15:05:20 [insn_remu_ch0] engine_0: ##   0:00:00  Skipping step 7..
+SBY 15:05:20 [insn_remu_ch0] engine_0: ##   0:00:00  Skipping step 8..
+SBY 15:05:20 [insn_remu_ch0] engine_0: ##   0:00:00  Skipping step 9..
+SBY 15:05:20 [insn_remu_ch0] engine_0: ##   0:00:00  Skipping step 10..
+SBY 15:05:20 [insn_remu_ch0] engine_0: ##   0:00:00  Skipping step 11..
+SBY 15:05:20 [insn_remu_ch0] engine_0: ##   0:00:00  Skipping step 12..
+SBY 15:05:20 [insn_remu_ch0] engine_0: ##   0:00:00  Skipping step 13..
+SBY 15:05:20 [insn_remu_ch0] engine_0: ##   0:00:00  Skipping step 14..
+SBY 15:05:20 [insn_remu_ch0] engine_0: ##   0:00:00  Skipping step 15..
+SBY 15:05:20 [insn_remu_ch0] engine_0: ##   0:00:00  Skipping step 16..
+SBY 15:05:20 [insn_remu_ch0] engine_0: ##   0:00:00  Skipping step 17..
+SBY 15:05:20 [insn_remu_ch0] engine_0: ##   0:00:00  Skipping step 18..
+SBY 15:05:20 [insn_remu_ch0] engine_0: ##   0:00:00  Skipping step 19..
+SBY 15:05:20 [insn_remu_ch0] engine_0: ##   0:00:00  Checking assumptions in step 20..
+SBY 15:05:20 [insn_remu_ch0] engine_0: ##   0:00:00  Checking assertions in step 20..
+SBY 15:05:21 [insn_remu_ch0] engine_0: ##   0:00:01  BMC failed!
+SBY 15:05:21 [insn_remu_ch0] engine_0: ##   0:00:01  Assert failed in rvfi_testbench: rvfi_insn_check.sv:177.7-177.40 (_witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_177_113)
+SBY 15:05:21 [insn_remu_ch0] engine_0: ##   0:00:01  Writing trace to VCD file: engine_0/trace.vcd
+SBY 15:05:21 [insn_remu_ch0] engine_0: ##   0:00:01  Writing trace to Verilog testbench: engine_0/trace_tb.v
+SBY 15:05:21 [insn_remu_ch0] engine_0: ##   0:00:01  Writing trace to constraints file: engine_0/trace.smtc
+SBY 15:05:21 [insn_remu_ch0] engine_0: ##   0:00:01  Writing trace to Yosys witness file: engine_0/trace.yw
+SBY 15:05:22 [insn_remu_ch0] engine_0: ##   0:00:02  Status: failed
+SBY 15:05:22 [insn_remu_ch0] engine_0: finished (returncode=1)
+SBY 15:05:22 [insn_remu_ch0] engine_0: Status returned by engine: FAIL
+SBY 15:05:22 [insn_remu_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:02 (2)
+SBY 15:05:22 [insn_remu_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:02 (2)
+SBY 15:05:22 [insn_remu_ch0] summary: engine_0 (smtbmc bitwuzla) returned FAIL
+SBY 15:05:22 [insn_remu_ch0] summary: counterexample trace: insn_remu_ch0/engine_0/trace.vcd
+SBY 15:05:22 [insn_remu_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_177_113 at rvfi_insn_check.sv:177.7-177.40 step 20
+SBY 15:05:22 [insn_remu_ch0] DONE (FAIL, rc=0)
+
+Full run log: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-002-r10s1/formal/last_run-h3122797da4a947f.log
+Per-check logs in: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-002-r10s1/formal/riscv-formal/cores/bench-h3122797da4a947f/checks/<check>/logfile.txt
+Deleted branch bench-hyp-20261005-001-r10s0 (was f75fc2a).
+  [slot 0] broken: cosim_failed: selftest.elf
+[bench-v2.8.4 b3fa1c8] log: hyp-20261005-001-r10s0 broken
+ 2 files changed, 1 insertion(+)
+[bench-v2.8.4 f5350d6] log: hyp-20261005-002-r10s1 broken
+ 2 files changed, 1 insertion(+)
+[bench-v2.8.4 26ab5c6] log: hyp-20261005-003-r10s2 broken
+ 1 file changed, 1 insertion(+)
+
+  Round 10 complete: slot 0=broken, slot 1=broken, slot 2=broken (no winner)
+
+============================================================
+Round 11  |  slots=3  |  current best=12.12
+============================================================
+  pre-allocated IDs: ['hyp-20261005-001-r11s0', 'hyp-20261005-002-r11s1', 'hyp-20261005-003-r11s2']
+  [slot 0] category=micro_opt id=hyp-20261005-001-r11s0
+  [slot 1] category=structural id=hyp-20261005-002-r11s1
+  [slot 2] category=predictor id=hyp-20261005-003-r11s2
+Preparing worktree (new branch 'bench-hyp-20261005-002-r11s1-hypgen')
+Preparing worktree (new branch 'bench-hyp-20261005-001-r11s0-hypgen')
+Preparing worktree (new branch 'bench-hyp-20261005-003-r11s2-hypgen')
+Deleted branch bench-hyp-20261005-002-r11s1-hypgen (was 26ab5c6).
+Preparing worktree (new branch 'bench-hyp-20261005-002-r11s1')
+HEAD is now at 26ab5c6 log: hyp-20261005-003-r10s2 broken
+HEAD is now at 26ab5c6 log: hyp-20261005-003-r10s2 broken
+HEAD is now at 26ab5c6 log: hyp-20261005-003-r10s2 broken
+HEAD is now at 26ab5c6 log: hyp-20261005-003-r10s2 broken
+  [slot 1] worktree=/srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-002-r11s1
+Deleted branch bench-hyp-20261005-001-r11s0-hypgen (was 26ab5c6).
+Preparing worktree (new branch 'bench-hyp-20261005-001-r11s0')
+HEAD is now at 26ab5c6 log: hyp-20261005-003-r10s2 broken
+  [slot 0] worktree=/srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-001-r11s0
+Deleted branch bench-hyp-20261005-003-r11s2-hypgen (was 26ab5c6).
+Preparing worktree (new branch 'bench-hyp-20261005-003-r11s2')
+HEAD is now at 26ab5c6 log: hyp-20261005-003-r10s2 broken
+  [slot 2] worktree=/srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-003-r11s2
+Deleted branch bench-hyp-20261005-002-r11s1 (was 26ab5c6).
+  [slot 1] broken: formal_failed: insn_add_ch0
+13 [insn_srli_ch0] summary: counterexample trace: insn_srli_ch0/engine_0/trace.vcd
+SBY 15:15:13 [insn_srli_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_177_113 at rvfi_insn_check.sv:177.7-177.40 step 20
+SBY 15:15:13 [insn_srli_ch0] DONE (FAIL, rc=0)
+SBY 15:15:22 [reg_ch0] engine_0: ##   0:01:01  waiting for solver (1 minute)
+SBY 15:15:49 [reg_ch0] engine_0: ##   0:01:28  Status: passed
+SBY 15:15:49 [reg_ch0] engine_0: finished (returncode=0)
+SBY 15:15:49 [reg_ch0] engine_0: Status returned by engine: pass
+SBY 15:15:49 [reg_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:01:28 (88)
+SBY 15:15:49 [reg_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:01:28 (88)
+SBY 15:15:49 [reg_ch0] summary: engine_0 (smtbmc bitwuzla) returned pass
+SBY 15:15:49 [reg_ch0] summary: engine_0 did not produce any traces
+SBY 15:15:49 [reg_ch0] DONE (PASS, rc=0)
+
+Formal: 44 passed, 9 failed
+Failed: insn_add_ch0 insn_and_ch0 insn_or_ch0 insn_sll_ch0 insn_slt_ch0 insn_sltu_ch0 insn_srl_ch0 insn_srli_ch0 insn_xor_ch0
+
+--- insn_add_ch0/logfile.txt (last 30 lines) ---
+SBY 15:14:21 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 7..
+SBY 15:14:21 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 8..
+SBY 15:14:21 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 9..
+SBY 15:14:21 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 10..
+SBY 15:14:21 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 11..
+SBY 15:14:21 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 12..
+SBY 15:14:21 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 13..
+SBY 15:14:21 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 14..
+SBY 15:14:21 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 15..
+SBY 15:14:21 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 16..
+SBY 15:14:21 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 17..
+SBY 15:14:21 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 18..
+SBY 15:14:21 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 19..
+SBY 15:14:21 [insn_add_ch0] engine_0: ##   0:00:00  Checking assumptions in step 20..
+SBY 15:14:22 [insn_add_ch0] engine_0: ##   0:00:01  Checking assertions in step 20..
+SBY 15:14:36 [insn_add_ch0] engine_0: ##   0:00:15  BMC failed!
+SBY 15:14:36 [insn_add_ch0] engine_0: ##   0:00:15  Assert failed in rvfi_testbench: rvfi_insn_check.sv:198.6-198.31 (_witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_198_152)
+SBY 15:14:36 [insn_add_ch0] engine_0: ##   0:00:15  Writing trace to VCD file: engine_0/trace.vcd
+SBY 15:14:37 [insn_add_ch0] engine_0: ##   0:00:15  Writing trace to Verilog testbench: engine_0/trace_tb.v
+SBY 15:14:37 [insn_add_ch0] engine_0: ##   0:00:15  Writing trace to constraints file: engine_0/trace.smtc
+SBY 15:14:37 [insn_add_ch0] engine_0: ##   0:00:15  Writing trace to Yosys witness file: engine_0/trace.yw
+SBY 15:14:37 [insn_add_ch0] engine_0: ##   0:00:16  Status: failed
+SBY 15:14:37 [insn_add_ch0] engine_0: finished (returncode=1)
+SBY 15:14:37 [insn_add_ch0] engine_0: Status returned by engine: FAIL
+SBY 15:14:37 [insn_add_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:16 (16)
+SBY 15:14:37 [insn_add_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:16 (16)
+SBY 15:14:37 [insn_add_ch0] summary: engine_0 (smtbmc bitwuzla) returned FAIL
+SBY 15:14:37 [insn_add_ch0] summary: counterexample trace: insn_add_ch0/engine_0/trace.vcd
+SBY 15:14:37 [insn_add_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_198_152 at rvfi_insn_check.sv:198.6-198.31 step 20
+SBY 15:14:37 [insn_add_ch0] DONE (FAIL, rc=0)
+
+Full run log: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-002-r11s1/formal/last_run-h23c80e6c0ae4483.log
+Per-check logs in: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-002-r11s1/formal/riscv-formal/cores/bench-h23c80e6c0ae4483/checks/<check>/logfile.txt
+Deleted branch bench-hyp-20261005-003-r11s2 (was 26ab5c6).
+  [slot 2] broken: formal_failed: insn_add_ch0
+0:39 [reg_ch0] engine_0: ##   0:00:36  Status: passed
+SBY 15:20:39 [reg_ch0] engine_0: finished (returncode=0)
+SBY 15:20:39 [reg_ch0] engine_0: Status returned by engine: pass
+SBY 15:20:39 [reg_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:36 (36)
+SBY 15:20:39 [reg_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:37 (37)
+SBY 15:20:39 [reg_ch0] summary: engine_0 (smtbmc bitwuzla) returned pass
+SBY 15:20:39 [reg_ch0] summary: engine_0 did not produce any traces
+SBY 15:20:39 [reg_ch0] DONE (PASS, rc=0)
+
+Formal: 14 passed, 39 failed
+Failed: insn_add_ch0 insn_addi_ch0 insn_and_ch0 insn_andi_ch0 insn_auipc_ch0 insn_div_ch0 insn_divu_ch0 insn_jal_ch0 insn_jalr_ch0 insn_lb_ch0 insn_lbu_ch0 insn_lh_ch0 insn_lhu_ch0 insn_lui_ch0 insn_lw_ch0 insn_mul_ch0 insn_mulh_ch0 insn_mulhsu_ch0 insn_mulhu_ch0 insn_or_ch0 insn_ori_ch0 insn_rem_ch0 insn_remu_ch0 insn_sb_ch0 insn_sh_ch0 insn_sll_ch0 insn_slli_ch0 insn_slt_ch0 insn_slti_ch0 insn_sltiu_ch0 insn_sltu_ch0 insn_sra_ch0 insn_srai_ch0 insn_srl_ch0 insn_srli_ch0 insn_sub_ch0 insn_sw_ch0 insn_xor_ch0 insn_xori_ch0
+
+--- insn_add_ch0/logfile.txt (last 30 lines) ---
+SBY 15:20:03 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 7..
+SBY 15:20:03 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 8..
+SBY 15:20:03 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 9..
+SBY 15:20:03 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 10..
+SBY 15:20:03 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 11..
+SBY 15:20:03 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 12..
+SBY 15:20:03 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 13..
+SBY 15:20:03 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 14..
+SBY 15:20:03 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 15..
+SBY 15:20:03 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 16..
+SBY 15:20:03 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 17..
+SBY 15:20:03 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 18..
+SBY 15:20:03 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 19..
+SBY 15:20:03 [insn_add_ch0] engine_0: ##   0:00:00  Checking assumptions in step 20..
+SBY 15:20:04 [insn_add_ch0] engine_0: ##   0:00:00  Checking assertions in step 20..
+SBY 15:20:04 [insn_add_ch0] engine_0: ##   0:00:01  BMC failed!
+SBY 15:20:04 [insn_add_ch0] engine_0: ##   0:00:01  Assert failed in rvfi_testbench: rvfi_insn_check.sv:198.6-198.31 (_witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_198_152)
+SBY 15:20:04 [insn_add_ch0] engine_0: ##   0:00:01  Writing trace to VCD file: engine_0/trace.vcd
+SBY 15:20:05 [insn_add_ch0] engine_0: ##   0:00:01  Writing trace to Verilog testbench: engine_0/trace_tb.v
+SBY 15:20:05 [insn_add_ch0] engine_0: ##   0:00:01  Writing trace to constraints file: engine_0/trace.smtc
+SBY 15:20:05 [insn_add_ch0] engine_0: ##   0:00:01  Writing trace to Yosys witness file: engine_0/trace.yw
+SBY 15:20:05 [insn_add_ch0] engine_0: ##   0:00:01  Status: failed
+SBY 15:20:05 [insn_add_ch0] engine_0: finished (returncode=1)
+SBY 15:20:05 [insn_add_ch0] engine_0: Status returned by engine: FAIL
+SBY 15:20:05 [insn_add_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:02 (2)
+SBY 15:20:05 [insn_add_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:02 (2)
+SBY 15:20:05 [insn_add_ch0] summary: engine_0 (smtbmc bitwuzla) returned FAIL
+SBY 15:20:05 [insn_add_ch0] summary: counterexample trace: insn_add_ch0/engine_0/trace.vcd
+SBY 15:20:05 [insn_add_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_198_152 at rvfi_insn_check.sv:198.6-198.31 step 20
+SBY 15:20:05 [insn_add_ch0] DONE (FAIL, rc=0)
+
+Full run log: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-003-r11s2/formal/last_run-h3dd0f0f56b5748f.log
+Per-check logs in: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-003-r11s2/formal/riscv-formal/cores/bench-h3dd0f0f56b5748f/checks/<check>/logfile.txt
+Deleted branch bench-hyp-20261005-001-r11s0 (was 26ab5c6).
+  [slot 0] broken: formal_failed: insn_add_ch0
+led assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_177_113 at rvfi_insn_check.sv:177.7-177.40 step 20
+SBY 15:27:14 [insn_xor_ch0] DONE (FAIL, rc=0)
+SBY 15:27:39 [reg_ch0] engine_0: ##   0:02:11  Status: passed
+SBY 15:27:39 [reg_ch0] engine_0: finished (returncode=0)
+SBY 15:27:39 [reg_ch0] engine_0: Status returned by engine: pass
+SBY 15:27:39 [reg_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:02:12 (132)
+SBY 15:27:39 [reg_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:02:12 (132)
+SBY 15:27:39 [reg_ch0] summary: engine_0 (smtbmc bitwuzla) returned pass
+SBY 15:27:39 [reg_ch0] summary: engine_0 did not produce any traces
+SBY 15:27:39 [reg_ch0] DONE (PASS, rc=0)
+
+Formal: 29 passed, 24 failed
+Failed: insn_add_ch0 insn_and_ch0 insn_div_ch0 insn_divu_ch0 insn_lb_ch0 insn_lbu_ch0 insn_lh_ch0 insn_lhu_ch0 insn_lw_ch0 insn_mul_ch0 insn_mulh_ch0 insn_mulhsu_ch0 insn_mulhu_ch0 insn_or_ch0 insn_rem_ch0 insn_remu_ch0 insn_sll_ch0 insn_slt_ch0 insn_sltiu_ch0 insn_sltu_ch0 insn_sra_ch0 insn_srl_ch0 insn_sub_ch0 insn_xor_ch0
+
+--- insn_add_ch0/logfile.txt (last 30 lines) ---
+SBY 15:25:27 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 7..
+SBY 15:25:27 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 8..
+SBY 15:25:27 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 9..
+SBY 15:25:27 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 10..
+SBY 15:25:27 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 11..
+SBY 15:25:27 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 12..
+SBY 15:25:27 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 13..
+SBY 15:25:28 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 14..
+SBY 15:25:28 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 15..
+SBY 15:25:28 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 16..
+SBY 15:25:28 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 17..
+SBY 15:25:28 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 18..
+SBY 15:25:28 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 19..
+SBY 15:25:28 [insn_add_ch0] engine_0: ##   0:00:00  Checking assumptions in step 20..
+SBY 15:25:28 [insn_add_ch0] engine_0: ##   0:00:00  Checking assertions in step 20..
+SBY 15:25:44 [insn_add_ch0] engine_0: ##   0:00:16  BMC failed!
+SBY 15:25:44 [insn_add_ch0] engine_0: ##   0:00:16  Assert failed in rvfi_testbench: rvfi_insn_check.sv:177.7-177.40 (_witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_177_113)
+SBY 15:25:44 [insn_add_ch0] engine_0: ##   0:00:16  Writing trace to VCD file: engine_0/trace.vcd
+SBY 15:25:44 [insn_add_ch0] engine_0: ##   0:00:16  Writing trace to Verilog testbench: engine_0/trace_tb.v
+SBY 15:25:44 [insn_add_ch0] engine_0: ##   0:00:16  Writing trace to constraints file: engine_0/trace.smtc
+SBY 15:25:44 [insn_add_ch0] engine_0: ##   0:00:16  Writing trace to Yosys witness file: engine_0/trace.yw
+SBY 15:25:44 [insn_add_ch0] engine_0: ##   0:00:16  Status: failed
+SBY 15:25:44 [insn_add_ch0] engine_0: finished (returncode=1)
+SBY 15:25:44 [insn_add_ch0] engine_0: Status returned by engine: FAIL
+SBY 15:25:44 [insn_add_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:17 (17)
+SBY 15:25:44 [insn_add_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:17 (17)
+SBY 15:25:44 [insn_add_ch0] summary: engine_0 (smtbmc bitwuzla) returned FAIL
+SBY 15:25:44 [insn_add_ch0] summary: counterexample trace: insn_add_ch0/engine_0/trace.vcd
+SBY 15:25:44 [insn_add_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_177_113 at rvfi_insn_check.sv:177.7-177.40 step 20
+SBY 15:25:44 [insn_add_ch0] DONE (FAIL, rc=0)
+
+Full run log: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-001-r11s0/formal/last_run-hc67f8c8184864cd.log
+Per-check logs in: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-001-r11s0/formal/riscv-formal/cores/bench-hc67f8c8184864cd/checks/<check>/logfile.txt
+[bench-v2.8.4 4870dbd] log: hyp-20261005-001-r11s0 broken
+ 2 files changed, 1 insertion(+)
+[bench-v2.8.4 74adc6d] log: hyp-20261005-002-r11s1 broken
+ 2 files changed, 1 insertion(+)
+[bench-v2.8.4 c119873] log: hyp-20261005-003-r11s2 broken
+ 1 file changed, 1 insertion(+)
+
+  Round 11 complete: slot 0=broken, slot 1=broken, slot 2=broken (no winner)
+
+============================================================
+Round 12  |  slots=3  |  current best=12.12
+============================================================
+  pre-allocated IDs: ['hyp-20261005-001-r12s0', 'hyp-20261005-002-r12s1', 'hyp-20261005-003-r12s2']
+  [slot 0] category=micro_opt id=hyp-20261005-001-r12s0
+  [slot 1] category=structural id=hyp-20261005-002-r12s1
+  [slot 2] category=predictor id=hyp-20261005-003-r12s2
+Preparing worktree (new branch 'bench-hyp-20261005-002-r12s1-hypgen')
+Preparing worktree (new branch 'bench-hyp-20261005-003-r12s2-hypgen')
+Preparing worktree (new branch 'bench-hyp-20261005-001-r12s0-hypgen')
+Deleted branch bench-hyp-20261005-002-r12s1-hypgen (was c119873).
+Preparing worktree (new branch 'bench-hyp-20261005-002-r12s1')
+HEAD is now at c119873 log: hyp-20261005-003-r11s2 broken
+HEAD is now at c119873 log: hyp-20261005-003-r11s2 broken
+HEAD is now at c119873 log: hyp-20261005-003-r11s2 broken
+HEAD is now at c119873 log: hyp-20261005-003-r11s2 broken
+  [slot 1] worktree=/srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-002-r12s1
+Deleted branch bench-hyp-20261005-003-r12s2-hypgen (was c119873).
+Preparing worktree (new branch 'bench-hyp-20261005-003-r12s2')
+HEAD is now at c119873 log: hyp-20261005-003-r11s2 broken
+  [slot 2] worktree=/srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-003-r12s2
+Deleted branch bench-hyp-20261005-001-r12s0-hypgen (was c119873).
+Preparing worktree (new branch 'bench-hyp-20261005-001-r12s0')
+HEAD is now at c119873 log: hyp-20261005-003-r11s2 broken
+  [slot 0] worktree=/srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-001-r12s0
+Deleted branch bench-hyp-20261005-002-r12s1 (was c119873).
+  [slot 1] broken: formal_failed: insn_addi_ch0
+file: engine_0/trace.smtc
+SBY 15:32:20 [insn_slti_ch0] engine_0: ##   0:00:18  Writing trace to Yosys witness file: engine_0/trace.yw
+SBY 15:32:20 [insn_slti_ch0] engine_0: ##   0:00:18  Status: failed
+SBY 15:32:20 [insn_slti_ch0] engine_0: finished (returncode=1)
+SBY 15:32:20 [insn_slti_ch0] engine_0: Status returned by engine: FAIL
+SBY 15:32:20 [insn_slti_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:18 (18)
+SBY 15:32:20 [insn_slti_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:19 (19)
+SBY 15:32:20 [insn_slti_ch0] summary: engine_0 (smtbmc bitwuzla) returned FAIL
+SBY 15:32:20 [insn_slti_ch0] summary: counterexample trace: insn_slti_ch0/engine_0/trace.vcd
+SBY 15:32:20 [insn_slti_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_198_152 at rvfi_insn_check.sv:198.6-198.31 step 20
+SBY 15:32:20 [insn_slti_ch0] DONE (FAIL, rc=0)
+
+Formal: 46 passed, 7 failed
+Failed: insn_addi_ch0 insn_andi_ch0 insn_ori_ch0 insn_slti_ch0 insn_sltiu_ch0 insn_xori_ch0 reg_ch0
+
+--- insn_addi_ch0/logfile.txt (last 30 lines) ---
+SBY 15:31:44 [insn_addi_ch0] engine_0: ##   0:00:00  Skipping step 7..
+SBY 15:31:44 [insn_addi_ch0] engine_0: ##   0:00:00  Skipping step 8..
+SBY 15:31:44 [insn_addi_ch0] engine_0: ##   0:00:00  Skipping step 9..
+SBY 15:31:44 [insn_addi_ch0] engine_0: ##   0:00:00  Skipping step 10..
+SBY 15:31:44 [insn_addi_ch0] engine_0: ##   0:00:00  Skipping step 11..
+SBY 15:31:44 [insn_addi_ch0] engine_0: ##   0:00:00  Skipping step 12..
+SBY 15:31:44 [insn_addi_ch0] engine_0: ##   0:00:00  Skipping step 13..
+SBY 15:31:44 [insn_addi_ch0] engine_0: ##   0:00:00  Skipping step 14..
+SBY 15:31:44 [insn_addi_ch0] engine_0: ##   0:00:00  Skipping step 15..
+SBY 15:31:44 [insn_addi_ch0] engine_0: ##   0:00:00  Skipping step 16..
+SBY 15:31:44 [insn_addi_ch0] engine_0: ##   0:00:00  Skipping step 17..
+SBY 15:31:44 [insn_addi_ch0] engine_0: ##   0:00:00  Skipping step 18..
+SBY 15:31:44 [insn_addi_ch0] engine_0: ##   0:00:00  Skipping step 19..
+SBY 15:31:44 [insn_addi_ch0] engine_0: ##   0:00:00  Checking assumptions in step 20..
+SBY 15:31:45 [insn_addi_ch0] engine_0: ##   0:00:00  Checking assertions in step 20..
+SBY 15:31:58 [insn_addi_ch0] engine_0: ##   0:00:13  BMC failed!
+SBY 15:31:58 [insn_addi_ch0] engine_0: ##   0:00:13  Assert failed in rvfi_testbench: rvfi_insn_check.sv:198.6-198.31 (_witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_198_152)
+SBY 15:31:58 [insn_addi_ch0] engine_0: ##   0:00:13  Writing trace to VCD file: engine_0/trace.vcd
+SBY 15:31:58 [insn_addi_ch0] engine_0: ##   0:00:13  Writing trace to Verilog testbench: engine_0/trace_tb.v
+SBY 15:31:58 [insn_addi_ch0] engine_0: ##   0:00:13  Writing trace to constraints file: engine_0/trace.smtc
+SBY 15:31:58 [insn_addi_ch0] engine_0: ##   0:00:13  Writing trace to Yosys witness file: engine_0/trace.yw
+SBY 15:31:58 [insn_addi_ch0] engine_0: ##   0:00:14  Status: failed
+SBY 15:31:58 [insn_addi_ch0] engine_0: finished (returncode=1)
+SBY 15:31:58 [insn_addi_ch0] engine_0: Status returned by engine: FAIL
+SBY 15:31:58 [insn_addi_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:14 (14)
+SBY 15:31:58 [insn_addi_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:14 (14)
+SBY 15:31:58 [insn_addi_ch0] summary: engine_0 (smtbmc bitwuzla) returned FAIL
+SBY 15:31:58 [insn_addi_ch0] summary: counterexample trace: insn_addi_ch0/engine_0/trace.vcd
+SBY 15:31:58 [insn_addi_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_198_152 at rvfi_insn_check.sv:198.6-198.31 step 20
+SBY 15:31:58 [insn_addi_ch0] DONE (FAIL, rc=0)
+
+Full run log: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-002-r12s1/formal/last_run-h7d7841c7eb2a40c.log
+Per-check logs in: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-002-r12s1/formal/riscv-formal/cores/bench-h7d7841c7eb2a40c/checks/<check>/logfile.txt
+Deleted branch bench-hyp-20261005-003-r12s2 (was c119873).
+  [slot 2] broken: formal_failed: ill_ch0
+ [insn_xor_ch0] engine_0: Status returned by engine: FAIL
+SBY 15:42:15 [insn_xor_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:39 (39)
+SBY 15:42:15 [insn_xor_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:39 (39)
+SBY 15:42:15 [insn_xor_ch0] summary: engine_0 (smtbmc bitwuzla) returned FAIL
+SBY 15:42:15 [insn_xor_ch0] summary: counterexample trace: insn_xor_ch0/engine_0/trace.vcd
+SBY 15:42:15 [insn_xor_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_198_152 at rvfi_insn_check.sv:198.6-198.31 step 20
+SBY 15:42:15 [insn_xor_ch0] DONE (FAIL, rc=0)
+
+Formal: 9 passed, 44 failed
+Failed: ill_ch0 insn_add_ch0 insn_addi_ch0 insn_and_ch0 insn_andi_ch0 insn_auipc_ch0 insn_beq_ch0 insn_bge_ch0 insn_bgeu_ch0 insn_blt_ch0 insn_bltu_ch0 insn_bne_ch0 insn_div_ch0 insn_divu_ch0 insn_jal_ch0 insn_jalr_ch0 insn_lb_ch0 insn_lbu_ch0 insn_lh_ch0 insn_lhu_ch0 insn_lui_ch0 insn_lw_ch0 insn_mul_ch0 insn_mulh_ch0 insn_mulhsu_ch0 insn_mulhu_ch0 insn_or_ch0 insn_ori_ch0 insn_rem_ch0 insn_remu_ch0 insn_sll_ch0 insn_slli_ch0 insn_slt_ch0 insn_slti_ch0 insn_sltiu_ch0 insn_sltu_ch0 insn_sra_ch0 insn_srai_ch0 insn_srl_ch0 insn_srli_ch0 insn_sub_ch0 insn_xor_ch0 insn_xori_ch0 reg_ch0
+
+--- ill_ch0/logfile.txt (last 30 lines) ---
+SBY 15:35:39 [ill_ch0] engine_0: ##   0:00:00  Skipping step 7..
+SBY 15:35:39 [ill_ch0] engine_0: ##   0:00:00  Skipping step 8..
+SBY 15:35:39 [ill_ch0] engine_0: ##   0:00:00  Skipping step 9..
+SBY 15:35:39 [ill_ch0] engine_0: ##   0:00:00  Skipping step 10..
+SBY 15:35:39 [ill_ch0] engine_0: ##   0:00:00  Skipping step 11..
+SBY 15:35:39 [ill_ch0] engine_0: ##   0:00:00  Skipping step 12..
+SBY 15:35:39 [ill_ch0] engine_0: ##   0:00:00  Skipping step 13..
+SBY 15:35:39 [ill_ch0] engine_0: ##   0:00:00  Skipping step 14..
+SBY 15:35:39 [ill_ch0] engine_0: ##   0:00:00  Skipping step 15..
+SBY 15:35:39 [ill_ch0] engine_0: ##   0:00:00  Skipping step 16..
+SBY 15:35:39 [ill_ch0] engine_0: ##   0:00:00  Skipping step 17..
+SBY 15:35:39 [ill_ch0] engine_0: ##   0:00:00  Skipping step 18..
+SBY 15:35:39 [ill_ch0] engine_0: ##   0:00:00  Skipping step 19..
+SBY 15:35:39 [ill_ch0] engine_0: ##   0:00:00  Checking assumptions in step 20..
+SBY 15:35:40 [ill_ch0] engine_0: ##   0:00:00  Checking assertions in step 20..
+SBY 15:36:38 [ill_ch0] engine_0: ##   0:00:58  BMC failed!
+SBY 15:36:38 [ill_ch0] engine_0: ##   0:00:58  Assert failed in rvfi_testbench: rvfi_ill_check.sv:53.5-53.27 (_witness_.check_flatten_checker_inst__assert_rvfi_ill_check_sv_53_65)
+SBY 15:36:38 [ill_ch0] engine_0: ##   0:00:58  Writing trace to VCD file: engine_0/trace.vcd
+SBY 15:36:38 [ill_ch0] engine_0: ##   0:00:58  Writing trace to Verilog testbench: engine_0/trace_tb.v
+SBY 15:36:38 [ill_ch0] engine_0: ##   0:00:58  Writing trace to constraints file: engine_0/trace.smtc
+SBY 15:36:38 [ill_ch0] engine_0: ##   0:00:58  Writing trace to Yosys witness file: engine_0/trace.yw
+SBY 15:36:38 [ill_ch0] engine_0: ##   0:00:59  Status: failed
+SBY 15:36:38 [ill_ch0] engine_0: finished (returncode=1)
+SBY 15:36:38 [ill_ch0] engine_0: Status returned by engine: FAIL
+SBY 15:36:38 [ill_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:59 (59)
+SBY 15:36:38 [ill_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:59 (59)
+SBY 15:36:38 [ill_ch0] summary: engine_0 (smtbmc bitwuzla) returned FAIL
+SBY 15:36:38 [ill_ch0] summary: counterexample trace: ill_ch0/engine_0/trace.vcd
+SBY 15:36:38 [ill_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_ill_check_sv_53_65 at rvfi_ill_check.sv:53.5-53.27 step 20
+SBY 15:36:38 [ill_ch0] DONE (FAIL, rc=0)
+
+Full run log: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-003-r12s2/formal/last_run-h471d98eb6efe4ef.log
+Per-check logs in: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-003-r12s2/formal/riscv-formal/cores/bench-h471d98eb6efe4ef/checks/<check>/logfile.txt
+Deleted branch bench-hyp-20261005-001-r12s0 (was c119873).
+  [slot 0] broken: formal_failed: insn_add_ch0
+e: insn_srl_ch0/engine_0/trace.vcd
+SBY 15:46:42 [insn_srl_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_177_113 at rvfi_insn_check.sv:177.7-177.40 step 20
+SBY 15:46:42 [insn_srl_ch0] DONE (FAIL, rc=0)
+SBY 15:46:58 [reg_ch0] engine_0: ##   0:01:39  Status: passed
+SBY 15:46:58 [reg_ch0] engine_0: finished (returncode=0)
+SBY 15:46:58 [reg_ch0] engine_0: Status returned by engine: pass
+SBY 15:46:58 [reg_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:01:40 (100)
+SBY 15:46:58 [reg_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:01:40 (100)
+SBY 15:46:58 [reg_ch0] summary: engine_0 (smtbmc bitwuzla) returned pass
+SBY 15:46:58 [reg_ch0] summary: engine_0 did not produce any traces
+SBY 15:46:58 [reg_ch0] DONE (PASS, rc=0)
+
+Formal: 35 passed, 18 failed
+Failed: insn_add_ch0 insn_and_ch0 insn_div_ch0 insn_divu_ch0 insn_mul_ch0 insn_mulh_ch0 insn_mulhsu_ch0 insn_mulhu_ch0 insn_or_ch0 insn_rem_ch0 insn_remu_ch0 insn_sll_ch0 insn_slt_ch0 insn_sltu_ch0 insn_sra_ch0 insn_srl_ch0 insn_sub_ch0 insn_xor_ch0
+
+--- insn_add_ch0/logfile.txt (last 30 lines) ---
+SBY 15:45:18 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 7..
+SBY 15:45:18 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 8..
+SBY 15:45:18 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 9..
+SBY 15:45:18 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 10..
+SBY 15:45:18 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 11..
+SBY 15:45:18 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 12..
+SBY 15:45:18 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 13..
+SBY 15:45:18 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 14..
+SBY 15:45:18 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 15..
+SBY 15:45:18 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 16..
+SBY 15:45:18 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 17..
+SBY 15:45:18 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 18..
+SBY 15:45:18 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 19..
+SBY 15:45:18 [insn_add_ch0] engine_0: ##   0:00:00  Checking assumptions in step 20..
+SBY 15:45:19 [insn_add_ch0] engine_0: ##   0:00:01  Checking assertions in step 20..
+SBY 15:45:41 [insn_add_ch0] engine_0: ##   0:00:23  BMC failed!
+SBY 15:45:41 [insn_add_ch0] engine_0: ##   0:00:23  Assert failed in rvfi_testbench: rvfi_insn_check.sv:177.7-177.40 (_witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_177_113)
+SBY 15:45:41 [insn_add_ch0] engine_0: ##   0:00:23  Writing trace to VCD file: engine_0/trace.vcd
+SBY 15:45:41 [insn_add_ch0] engine_0: ##   0:00:23  Writing trace to Verilog testbench: engine_0/trace_tb.v
+SBY 15:45:41 [insn_add_ch0] engine_0: ##   0:00:23  Writing trace to constraints file: engine_0/trace.smtc
+SBY 15:45:41 [insn_add_ch0] engine_0: ##   0:00:23  Writing trace to Yosys witness file: engine_0/trace.yw
+SBY 15:45:42 [insn_add_ch0] engine_0: ##   0:00:23  Status: failed
+SBY 15:45:42 [insn_add_ch0] engine_0: finished (returncode=1)
+SBY 15:45:42 [insn_add_ch0] engine_0: Status returned by engine: FAIL
+SBY 15:45:42 [insn_add_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:24 (24)
+SBY 15:45:42 [insn_add_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:24 (24)
+SBY 15:45:42 [insn_add_ch0] summary: engine_0 (smtbmc bitwuzla) returned FAIL
+SBY 15:45:42 [insn_add_ch0] summary: counterexample trace: insn_add_ch0/engine_0/trace.vcd
+SBY 15:45:42 [insn_add_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_177_113 at rvfi_insn_check.sv:177.7-177.40 step 20
+SBY 15:45:42 [insn_add_ch0] DONE (FAIL, rc=0)
+
+Full run log: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-001-r12s0/formal/last_run-h92b51b3ccea3418.log
+Per-check logs in: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-001-r12s0/formal/riscv-formal/cores/bench-h92b51b3ccea3418/checks/<check>/logfile.txt
+[bench-v2.8.4 1ad1774] log: hyp-20261005-001-r12s0 broken
+ 2 files changed, 1 insertion(+)
+[bench-v2.8.4 c5149ec] log: hyp-20261005-002-r12s1 broken
+ 2 files changed, 1 insertion(+)
+[bench-v2.8.4 3d4a3a1] log: hyp-20261005-003-r12s2 broken
+ 1 file changed, 1 insertion(+)
+
+  Round 12 complete: slot 0=broken, slot 1=broken, slot 2=broken (no winner)
+
+============================================================
+Round 13  |  slots=3  |  current best=12.12
+============================================================
+  pre-allocated IDs: ['hyp-20261005-001-r13s0', 'hyp-20261005-002-r13s1', 'hyp-20261005-003-r13s2']
+  [slot 0] category=micro_opt id=hyp-20261005-001-r13s0
+  [slot 1] category=structural id=hyp-20261005-002-r13s1
+  [slot 2] category=predictor id=hyp-20261005-003-r13s2
+Preparing worktree (new branch 'bench-hyp-20261005-002-r13s1-hypgen')
+Preparing worktree (new branch 'bench-hyp-20261005-003-r13s2-hypgen')
+Preparing worktree (new branch 'bench-hyp-20261005-001-r13s0-hypgen')
+Deleted branch bench-hyp-20261005-002-r13s1-hypgen (was 3d4a3a1).
+Preparing worktree (new branch 'bench-hyp-20261005-002-r13s1')
+HEAD is now at 3d4a3a1 log: hyp-20261005-003-r12s2 broken
+HEAD is now at 3d4a3a1 log: hyp-20261005-003-r12s2 broken
+HEAD is now at 3d4a3a1 log: hyp-20261005-003-r12s2 broken
+HEAD is now at 3d4a3a1 log: hyp-20261005-003-r12s2 broken
+  [slot 1] worktree=/srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-002-r13s1
+Deleted branch bench-hyp-20261005-003-r13s2-hypgen (was 3d4a3a1).
+Preparing worktree (new branch 'bench-hyp-20261005-003-r13s2')
+HEAD is now at 3d4a3a1 log: hyp-20261005-003-r12s2 broken
+  [slot 2] worktree=/srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-003-r13s2
+Deleted branch bench-hyp-20261005-001-r13s0-hypgen (was 3d4a3a1).
+Preparing worktree (new branch 'bench-hyp-20261005-001-r13s0')
+HEAD is now at 3d4a3a1 log: hyp-20261005-003-r12s2 broken
+  [slot 0] worktree=/srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-001-r13s0
+Deleted branch bench-hyp-20261005-001-r13s0 (was 3d4a3a1).
+  [slot 0] broken: formal_failed: insn_add_ch0
+y:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_177_113 at rvfi_insn_check.sv:177.7-177.40 step 20
+SBY 15:51:26 [insn_xor_ch0] DONE (FAIL, rc=0)
+
+Formal: 7 passed, 46 failed
+Failed: insn_add_ch0 insn_addi_ch0 insn_and_ch0 insn_andi_ch0 insn_auipc_ch0 insn_beq_ch0 insn_bge_ch0 insn_bgeu_ch0 insn_blt_ch0 insn_bltu_ch0 insn_bne_ch0 insn_div_ch0 insn_divu_ch0 insn_jal_ch0 insn_jalr_ch0 insn_lb_ch0 insn_lbu_ch0 insn_lh_ch0 insn_lhu_ch0 insn_lui_ch0 insn_lw_ch0 insn_mul_ch0 insn_mulh_ch0 insn_mulhsu_ch0 insn_mulhu_ch0 insn_or_ch0 insn_ori_ch0 insn_rem_ch0 insn_remu_ch0 insn_sb_ch0 insn_sh_ch0 insn_sll_ch0 insn_slli_ch0 insn_slt_ch0 insn_slti_ch0 insn_sltiu_ch0 insn_sltu_ch0 insn_sra_ch0 insn_srai_ch0 insn_srl_ch0 insn_srli_ch0 insn_sub_ch0 insn_sw_ch0 insn_xor_ch0 insn_xori_ch0 reg_ch0
+
+--- insn_add_ch0/logfile.txt (last 30 lines) ---
+SBY 15:49:06 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 9..
+SBY 15:49:06 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 10..
+SBY 15:49:06 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 11..
+SBY 15:49:06 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 12..
+SBY 15:49:06 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 13..
+SBY 15:49:06 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 14..
+SBY 15:49:06 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 15..
+SBY 15:49:06 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 16..
+SBY 15:49:06 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 17..
+SBY 15:49:06 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 18..
+SBY 15:49:06 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 19..
+SBY 15:49:06 [insn_add_ch0] engine_0: ##   0:00:00  Checking assumptions in step 20..
+SBY 15:49:07 [insn_add_ch0] engine_0: ##   0:00:01  Checking assertions in step 20..
+SBY 15:49:16 [insn_add_ch0] engine_0: ##   0:00:10  BMC failed!
+SBY 15:49:16 [insn_add_ch0] engine_0: ##   0:00:10  Assert failed in rvfi_testbench: rvfi_insn_check.sv:167.7-167.29 (_witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_167_102)
+SBY 15:49:16 [insn_add_ch0] engine_0: ##   0:00:10  Assert failed in rvfi_testbench: rvfi_insn_check.sv:177.7-177.40 (_witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_177_113)
+SBY 15:49:16 [insn_add_ch0] engine_0: ##   0:00:10  Writing trace to VCD file: engine_0/trace.vcd
+SBY 15:49:17 [insn_add_ch0] engine_0: ##   0:00:10  Writing trace to Verilog testbench: engine_0/trace_tb.v
+SBY 15:49:17 [insn_add_ch0] engine_0: ##   0:00:10  Writing trace to constraints file: engine_0/trace.smtc
+SBY 15:49:17 [insn_add_ch0] engine_0: ##   0:00:10  Writing trace to Yosys witness file: engine_0/trace.yw
+SBY 15:49:17 [insn_add_ch0] engine_0: ##   0:00:10  Status: failed
+SBY 15:49:17 [insn_add_ch0] engine_0: finished (returncode=1)
+SBY 15:49:17 [insn_add_ch0] engine_0: Status returned by engine: FAIL
+SBY 15:49:17 [insn_add_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:11 (11)
+SBY 15:49:17 [insn_add_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:11 (11)
+SBY 15:49:17 [insn_add_ch0] summary: engine_0 (smtbmc bitwuzla) returned FAIL
+SBY 15:49:17 [insn_add_ch0] summary: counterexample trace: insn_add_ch0/engine_0/trace.vcd
+SBY 15:49:17 [insn_add_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_167_102 at rvfi_insn_check.sv:167.7-167.29 step 20
+SBY 15:49:17 [insn_add_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_177_113 at rvfi_insn_check.sv:177.7-177.40 step 20
+SBY 15:49:17 [insn_add_ch0] DONE (FAIL, rc=0)
+
+Full run log: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-001-r13s0/formal/last_run-h9e13f8c1c456485.log
+Per-check logs in: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-001-r13s0/formal/riscv-formal/cores/bench-h9e13f8c1c456485/checks/<check>/logfile.txt
+Deleted branch bench-hyp-20261005-003-r13s2 (was 3d4a3a1).
+  [slot 2] broken: formal_failed: insn_add_ch0
+mmary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_164_99 at rvfi_insn_check.sv:164.7-164.29 step 20
+SBY 15:56:35 [insn_sw_ch0] DONE (FAIL, rc=0)
+
+Formal: 7 passed, 46 failed
+Failed: insn_add_ch0 insn_addi_ch0 insn_and_ch0 insn_andi_ch0 insn_auipc_ch0 insn_beq_ch0 insn_bge_ch0 insn_bgeu_ch0 insn_blt_ch0 insn_bltu_ch0 insn_bne_ch0 insn_div_ch0 insn_divu_ch0 insn_jal_ch0 insn_jalr_ch0 insn_lb_ch0 insn_lbu_ch0 insn_lh_ch0 insn_lhu_ch0 insn_lui_ch0 insn_lw_ch0 insn_mul_ch0 insn_mulh_ch0 insn_mulhsu_ch0 insn_mulhu_ch0 insn_or_ch0 insn_ori_ch0 insn_rem_ch0 insn_remu_ch0 insn_sb_ch0 insn_sh_ch0 insn_sll_ch0 insn_slli_ch0 insn_slt_ch0 insn_slti_ch0 insn_sltiu_ch0 insn_sltu_ch0 insn_sra_ch0 insn_srai_ch0 insn_srl_ch0 insn_srli_ch0 insn_sub_ch0 insn_sw_ch0 insn_xor_ch0 insn_xori_ch0 reg_ch0
+
+--- insn_add_ch0/logfile.txt (last 30 lines) ---
+SBY 15:54:48 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 9..
+SBY 15:54:48 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 10..
+SBY 15:54:48 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 11..
+SBY 15:54:48 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 12..
+SBY 15:54:48 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 13..
+SBY 15:54:48 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 14..
+SBY 15:54:48 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 15..
+SBY 15:54:48 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 16..
+SBY 15:54:48 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 17..
+SBY 15:54:48 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 18..
+SBY 15:54:48 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 19..
+SBY 15:54:48 [insn_add_ch0] engine_0: ##   0:00:00  Checking assumptions in step 20..
+SBY 15:54:49 [insn_add_ch0] engine_0: ##   0:00:01  Checking assertions in step 20..
+SBY 15:55:04 [insn_add_ch0] engine_0: ##   0:00:16  BMC failed!
+SBY 15:55:04 [insn_add_ch0] engine_0: ##   0:00:16  Assert failed in rvfi_testbench: rvfi_insn_check.sv:164.7-164.29 (_witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_164_99)
+SBY 15:55:04 [insn_add_ch0] engine_0: ##   0:00:16  Assert failed in rvfi_testbench: rvfi_insn_check.sv:177.7-177.40 (_witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_177_113)
+SBY 15:55:04 [insn_add_ch0] engine_0: ##   0:00:16  Writing trace to VCD file: engine_0/trace.vcd
+SBY 15:55:04 [insn_add_ch0] engine_0: ##   0:00:16  Writing trace to Verilog testbench: engine_0/trace_tb.v
+SBY 15:55:04 [insn_add_ch0] engine_0: ##   0:00:16  Writing trace to constraints file: engine_0/trace.smtc
+SBY 15:55:04 [insn_add_ch0] engine_0: ##   0:00:16  Writing trace to Yosys witness file: engine_0/trace.yw
+SBY 15:55:04 [insn_add_ch0] engine_0: ##   0:00:16  Status: failed
+SBY 15:55:05 [insn_add_ch0] engine_0: finished (returncode=1)
+SBY 15:55:05 [insn_add_ch0] engine_0: Status returned by engine: FAIL
+SBY 15:55:05 [insn_add_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:17 (17)
+SBY 15:55:05 [insn_add_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:17 (17)
+SBY 15:55:05 [insn_add_ch0] summary: engine_0 (smtbmc bitwuzla) returned FAIL
+SBY 15:55:05 [insn_add_ch0] summary: counterexample trace: insn_add_ch0/engine_0/trace.vcd
+SBY 15:55:05 [insn_add_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_164_99 at rvfi_insn_check.sv:164.7-164.29 step 20
+SBY 15:55:05 [insn_add_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_177_113 at rvfi_insn_check.sv:177.7-177.40 step 20
+SBY 15:55:05 [insn_add_ch0] DONE (FAIL, rc=0)
+
+Full run log: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-003-r13s2/formal/last_run-h19044ac046f9444.log
+Per-check logs in: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-003-r13s2/formal/riscv-formal/cores/bench-h19044ac046f9444/checks/<check>/logfile.txt
+Deleted branch bench-hyp-20261005-002-r13s1 (was 3d4a3a1).
+  [slot 1] broken: formal_failed: ill_ch0
+urned by engine: FAIL
+SBY 16:00:55 [insn_srl_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:24 (24)
+SBY 16:00:55 [insn_srl_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:24 (24)
+SBY 16:00:55 [insn_srl_ch0] summary: engine_0 (smtbmc bitwuzla) returned FAIL
+SBY 16:00:55 [insn_srl_ch0] summary: counterexample trace: insn_srl_ch0/engine_0/trace.vcd
+SBY 16:00:55 [insn_srl_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_177_113 at rvfi_insn_check.sv:177.7-177.40 step 20
+SBY 16:00:55 [insn_srl_ch0] DONE (FAIL, rc=0)
+
+Formal: 6 passed, 47 failed
+Failed: ill_ch0 insn_add_ch0 insn_addi_ch0 insn_and_ch0 insn_andi_ch0 insn_auipc_ch0 insn_beq_ch0 insn_bge_ch0 insn_bgeu_ch0 insn_blt_ch0 insn_bltu_ch0 insn_bne_ch0 insn_div_ch0 insn_divu_ch0 insn_jal_ch0 insn_jalr_ch0 insn_lb_ch0 insn_lbu_ch0 insn_lh_ch0 insn_lhu_ch0 insn_lui_ch0 insn_lw_ch0 insn_mul_ch0 insn_mulh_ch0 insn_mulhsu_ch0 insn_mulhu_ch0 insn_or_ch0 insn_ori_ch0 insn_rem_ch0 insn_remu_ch0 insn_sb_ch0 insn_sh_ch0 insn_sll_ch0 insn_slli_ch0 insn_slt_ch0 insn_slti_ch0 insn_sltiu_ch0 insn_sltu_ch0 insn_sra_ch0 insn_srai_ch0 insn_srl_ch0 insn_srli_ch0 insn_sub_ch0 insn_sw_ch0 insn_xor_ch0 insn_xori_ch0 reg_ch0
+
+--- ill_ch0/logfile.txt (last 30 lines) ---
+SBY 15:59:31 [ill_ch0] engine_0: ##   0:00:00  Skipping step 7..
+SBY 15:59:31 [ill_ch0] engine_0: ##   0:00:00  Skipping step 8..
+SBY 15:59:31 [ill_ch0] engine_0: ##   0:00:00  Skipping step 9..
+SBY 15:59:31 [ill_ch0] engine_0: ##   0:00:00  Skipping step 10..
+SBY 15:59:31 [ill_ch0] engine_0: ##   0:00:00  Skipping step 11..
+SBY 15:59:31 [ill_ch0] engine_0: ##   0:00:00  Skipping step 12..
+SBY 15:59:31 [ill_ch0] engine_0: ##   0:00:00  Skipping step 13..
+SBY 15:59:31 [ill_ch0] engine_0: ##   0:00:00  Skipping step 14..
+SBY 15:59:31 [ill_ch0] engine_0: ##   0:00:00  Skipping step 15..
+SBY 15:59:31 [ill_ch0] engine_0: ##   0:00:00  Skipping step 16..
+SBY 15:59:31 [ill_ch0] engine_0: ##   0:00:00  Skipping step 17..
+SBY 15:59:31 [ill_ch0] engine_0: ##   0:00:00  Skipping step 18..
+SBY 15:59:31 [ill_ch0] engine_0: ##   0:00:00  Skipping step 19..
+SBY 15:59:31 [ill_ch0] engine_0: ##   0:00:00  Checking assumptions in step 20..
+SBY 15:59:32 [ill_ch0] engine_0: ##   0:00:00  Checking assertions in step 20..
+SBY 15:59:41 [ill_ch0] engine_0: ##   0:00:09  BMC failed!
+SBY 15:59:41 [ill_ch0] engine_0: ##   0:00:09  Assert failed in rvfi_testbench: rvfi_ill_check.sv:52.5-52.26 (_witness_.check_flatten_checker_inst__assert_rvfi_ill_check_sv_52_63)
+SBY 15:59:41 [ill_ch0] engine_0: ##   0:00:09  Writing trace to VCD file: engine_0/trace.vcd
+SBY 15:59:41 [ill_ch0] engine_0: ##   0:00:09  Writing trace to Verilog testbench: engine_0/trace_tb.v
+SBY 15:59:41 [ill_ch0] engine_0: ##   0:00:09  Writing trace to constraints file: engine_0/trace.smtc
+SBY 15:59:41 [ill_ch0] engine_0: ##   0:00:09  Writing trace to Yosys witness file: engine_0/trace.yw
+SBY 15:59:41 [ill_ch0] engine_0: ##   0:00:09  Status: failed
+SBY 15:59:41 [ill_ch0] engine_0: finished (returncode=1)
+SBY 15:59:41 [ill_ch0] engine_0: Status returned by engine: FAIL
+SBY 15:59:41 [ill_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:10 (10)
+SBY 15:59:41 [ill_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:10 (10)
+SBY 15:59:41 [ill_ch0] summary: engine_0 (smtbmc bitwuzla) returned FAIL
+SBY 15:59:41 [ill_ch0] summary: counterexample trace: ill_ch0/engine_0/trace.vcd
+SBY 15:59:41 [ill_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_ill_check_sv_52_63 at rvfi_ill_check.sv:52.5-52.26 step 20
+SBY 15:59:41 [ill_ch0] DONE (FAIL, rc=0)
+
+Full run log: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-002-r13s1/formal/last_run-h79622ae26fda476.log
+Per-check logs in: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-002-r13s1/formal/riscv-formal/cores/bench-h79622ae26fda476/checks/<check>/logfile.txt
+[bench-v2.8.4 cc8b793] log: hyp-20261005-001-r13s0 broken
+ 2 files changed, 1 insertion(+)
+[bench-v2.8.4 5ea83d6] log: hyp-20261005-002-r13s1 broken
+ 2 files changed, 1 insertion(+)
+[bench-v2.8.4 f2ec128] log: hyp-20261005-003-r13s2 broken
+ 1 file changed, 1 insertion(+)
+
+  Round 13 complete: slot 0=broken, slot 1=broken, slot 2=broken (no winner)
+
+============================================================
+Round 14  |  slots=3  |  current best=12.12
+============================================================
+  pre-allocated IDs: ['hyp-20261005-001-r14s0', 'hyp-20261005-002-r14s1', 'hyp-20261005-003-r14s2']
+  [slot 0] category=micro_opt id=hyp-20261005-001-r14s0
+  [slot 1] category=structural id=hyp-20261005-002-r14s1
+  [slot 2] category=predictor id=hyp-20261005-003-r14s2
+Preparing worktree (new branch 'bench-hyp-20261005-003-r14s2-hypgen')
+Preparing worktree (new branch 'bench-hyp-20261005-002-r14s1-hypgen')
+Preparing worktree (new branch 'bench-hyp-20261005-001-r14s0-hypgen')
+Deleted branch bench-hyp-20261005-003-r14s2-hypgen (was f2ec128).
+Preparing worktree (new branch 'bench-hyp-20261005-003-r14s2')
+HEAD is now at f2ec128 log: hyp-20261005-003-r13s2 broken
+HEAD is now at f2ec128 log: hyp-20261005-003-r13s2 broken
+HEAD is now at f2ec128 log: hyp-20261005-003-r13s2 broken
+HEAD is now at f2ec128 log: hyp-20261005-003-r13s2 broken
+  [slot 2] worktree=/srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-003-r14s2
+Deleted branch bench-hyp-20261005-001-r14s0-hypgen (was f2ec128).
+Deleted branch bench-hyp-20261005-002-r14s1-hypgen (was f2ec128).
+Preparing worktree (new branch 'bench-hyp-20261005-001-r14s0')
+HEAD is now at f2ec128 log: hyp-20261005-003-r13s2 broken
+  [slot 0] worktree=/srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-001-r14s0
+Preparing worktree (new branch 'bench-hyp-20261005-002-r14s1')
+HEAD is now at f2ec128 log: hyp-20261005-003-r13s2 broken
+  [slot 1] worktree=/srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-002-r14s1
+Deleted branch bench-hyp-20261005-002-r14s1 (was f2ec128).
+  [slot 1] broken: cosim_failed: random1.elf [--istall --dstall]
+Deleted branch bench-hyp-20261005-003-r14s2 (was f2ec128).
+  [slot 2] broken: formal_failed: insn_beq_ch0
+:00:15 (15)
+SBY 16:09:17 [insn_sw_ch0] summary: engine_0 (smtbmc bitwuzla) returned FAIL
+SBY 16:09:17 [insn_sw_ch0] summary: counterexample trace: insn_sw_ch0/engine_0/trace.vcd
+SBY 16:09:17 [insn_sw_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_198_152 at rvfi_insn_check.sv:198.6-198.31 step 20
+SBY 16:09:17 [insn_sw_ch0] DONE (FAIL, rc=0)
+SBY 16:09:48 [reg_ch0] engine_0: ##   0:01:34  Status: passed
+SBY 16:09:48 [reg_ch0] engine_0: finished (returncode=0)
+SBY 16:09:48 [reg_ch0] engine_0: Status returned by engine: pass
+SBY 16:09:48 [reg_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:01:34 (94)
+SBY 16:09:48 [reg_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:01:34 (94)
+SBY 16:09:48 [reg_ch0] summary: engine_0 (smtbmc bitwuzla) returned pass
+SBY 16:09:48 [reg_ch0] summary: engine_0 did not produce any traces
+SBY 16:09:48 [reg_ch0] DONE (PASS, rc=0)
+
+Formal: 45 passed, 8 failed
+Failed: insn_beq_ch0 insn_bge_ch0 insn_bgeu_ch0 insn_blt_ch0 insn_bltu_ch0 insn_bne_ch0 insn_lw_ch0 insn_sw_ch0
+
+--- insn_beq_ch0/logfile.txt (last 30 lines) ---
+SBY 16:08:16 [insn_beq_ch0] engine_0: ##   0:00:00  Skipping step 7..
+SBY 16:08:16 [insn_beq_ch0] engine_0: ##   0:00:00  Skipping step 8..
+SBY 16:08:16 [insn_beq_ch0] engine_0: ##   0:00:00  Skipping step 9..
+SBY 16:08:16 [insn_beq_ch0] engine_0: ##   0:00:00  Skipping step 10..
+SBY 16:08:16 [insn_beq_ch0] engine_0: ##   0:00:00  Skipping step 11..
+SBY 16:08:16 [insn_beq_ch0] engine_0: ##   0:00:00  Skipping step 12..
+SBY 16:08:16 [insn_beq_ch0] engine_0: ##   0:00:00  Skipping step 13..
+SBY 16:08:16 [insn_beq_ch0] engine_0: ##   0:00:00  Skipping step 14..
+SBY 16:08:17 [insn_beq_ch0] engine_0: ##   0:00:00  Skipping step 15..
+SBY 16:08:17 [insn_beq_ch0] engine_0: ##   0:00:00  Skipping step 16..
+SBY 16:08:17 [insn_beq_ch0] engine_0: ##   0:00:00  Skipping step 17..
+SBY 16:08:17 [insn_beq_ch0] engine_0: ##   0:00:00  Skipping step 18..
+SBY 16:08:17 [insn_beq_ch0] engine_0: ##   0:00:00  Skipping step 19..
+SBY 16:08:17 [insn_beq_ch0] engine_0: ##   0:00:00  Checking assumptions in step 20..
+SBY 16:08:17 [insn_beq_ch0] engine_0: ##   0:00:01  Checking assertions in step 20..
+SBY 16:08:51 [insn_beq_ch0] engine_0: ##   0:00:34  BMC failed!
+SBY 16:08:51 [insn_beq_ch0] engine_0: ##   0:00:34  Assert failed in rvfi_testbench: rvfi_insn_check.sv:178.7-178.76 (_witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_178_115)
+SBY 16:08:51 [insn_beq_ch0] engine_0: ##   0:00:34  Writing trace to VCD file: engine_0/trace.vcd
+SBY 16:08:51 [insn_beq_ch0] engine_0: ##   0:00:35  Writing trace to Verilog testbench: engine_0/trace_tb.v
+SBY 16:08:51 [insn_beq_ch0] engine_0: ##   0:00:35  Writing trace to constraints file: engine_0/trace.smtc
+SBY 16:08:51 [insn_beq_ch0] engine_0: ##   0:00:35  Writing trace to Yosys witness file: engine_0/trace.yw
+SBY 16:08:52 [insn_beq_ch0] engine_0: ##   0:00:35  Status: failed
+SBY 16:08:52 [insn_beq_ch0] engine_0: finished (returncode=1)
+SBY 16:08:52 [insn_beq_ch0] engine_0: Status returned by engine: FAIL
+SBY 16:08:52 [insn_beq_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:35 (35)
+SBY 16:08:52 [insn_beq_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:36 (36)
+SBY 16:08:52 [insn_beq_ch0] summary: engine_0 (smtbmc bitwuzla) returned FAIL
+SBY 16:08:52 [insn_beq_ch0] summary: counterexample trace: insn_beq_ch0/engine_0/trace.vcd
+SBY 16:08:52 [insn_beq_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_178_115 at rvfi_insn_check.sv:178.7-178.76 step 20
+SBY 16:08:52 [insn_beq_ch0] DONE (FAIL, rc=0)
+
+Full run log: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-003-r14s2/formal/last_run-h78a6db854f414da.log
+Per-check logs in: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-003-r14s2/formal/riscv-formal/cores/bench-h78a6db854f414da/checks/<check>/logfile.txt
+Deleted branch bench-hyp-20261005-001-r14s0 (was f2ec128).
+  [slot 0] broken: formal_failed: insn_lui_ch0
+30)
+SBY 16:11:48 [insn_slli_ch0] summary: engine_0 (smtbmc bitwuzla) returned FAIL
+SBY 16:11:48 [insn_slli_ch0] summary: counterexample trace: insn_slli_ch0/engine_0/trace.vcd
+SBY 16:11:48 [insn_slli_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_176_111 at rvfi_insn_check.sv:176.7-176.38 step 20
+SBY 16:11:48 [insn_slli_ch0] DONE (FAIL, rc=0)
+SBY 16:12:03 [reg_ch0] engine_0: ##   0:01:00  waiting for solver (1 minute)
+SBY 16:12:36 [reg_ch0] engine_0: ##   0:01:34  Status: passed
+SBY 16:12:36 [reg_ch0] engine_0: finished (returncode=0)
+SBY 16:12:36 [reg_ch0] engine_0: Status returned by engine: pass
+SBY 16:12:36 [reg_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:01:34 (94)
+SBY 16:12:36 [reg_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:01:34 (94)
+SBY 16:12:36 [reg_ch0] summary: engine_0 (smtbmc bitwuzla) returned pass
+SBY 16:12:36 [reg_ch0] summary: engine_0 did not produce any traces
+SBY 16:12:36 [reg_ch0] DONE (PASS, rc=0)
+
+Formal: 51 passed, 2 failed
+Failed: insn_lui_ch0 insn_slli_ch0
+
+--- insn_lui_ch0/logfile.txt (last 30 lines) ---
+SBY 16:11:12 [insn_lui_ch0] engine_0: ##   0:00:00  Skipping step 7..
+SBY 16:11:12 [insn_lui_ch0] engine_0: ##   0:00:00  Skipping step 8..
+SBY 16:11:13 [insn_lui_ch0] engine_0: ##   0:00:00  Skipping step 9..
+SBY 16:11:13 [insn_lui_ch0] engine_0: ##   0:00:00  Skipping step 10..
+SBY 16:11:13 [insn_lui_ch0] engine_0: ##   0:00:00  Skipping step 11..
+SBY 16:11:13 [insn_lui_ch0] engine_0: ##   0:00:00  Skipping step 12..
+SBY 16:11:13 [insn_lui_ch0] engine_0: ##   0:00:00  Skipping step 13..
+SBY 16:11:13 [insn_lui_ch0] engine_0: ##   0:00:00  Skipping step 14..
+SBY 16:11:13 [insn_lui_ch0] engine_0: ##   0:00:00  Skipping step 15..
+SBY 16:11:13 [insn_lui_ch0] engine_0: ##   0:00:00  Skipping step 16..
+SBY 16:11:13 [insn_lui_ch0] engine_0: ##   0:00:00  Skipping step 17..
+SBY 16:11:13 [insn_lui_ch0] engine_0: ##   0:00:00  Skipping step 18..
+SBY 16:11:13 [insn_lui_ch0] engine_0: ##   0:00:00  Skipping step 19..
+SBY 16:11:13 [insn_lui_ch0] engine_0: ##   0:00:00  Checking assumptions in step 20..
+SBY 16:11:13 [insn_lui_ch0] engine_0: ##   0:00:00  Checking assertions in step 20..
+SBY 16:11:14 [insn_lui_ch0] engine_0: ##   0:00:01  BMC failed!
+SBY 16:11:14 [insn_lui_ch0] engine_0: ##   0:00:01  Assert failed in rvfi_testbench: rvfi_insn_check.sv:177.7-177.40 (_witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_177_113)
+SBY 16:11:14 [insn_lui_ch0] engine_0: ##   0:00:01  Writing trace to VCD file: engine_0/trace.vcd
+SBY 16:11:15 [insn_lui_ch0] engine_0: ##   0:00:02  Writing trace to Verilog testbench: engine_0/trace_tb.v
+SBY 16:11:15 [insn_lui_ch0] engine_0: ##   0:00:02  Writing trace to constraints file: engine_0/trace.smtc
+SBY 16:11:15 [insn_lui_ch0] engine_0: ##   0:00:02  Writing trace to Yosys witness file: engine_0/trace.yw
+SBY 16:11:15 [insn_lui_ch0] engine_0: ##   0:00:02  Status: failed
+SBY 16:11:15 [insn_lui_ch0] engine_0: finished (returncode=1)
+SBY 16:11:15 [insn_lui_ch0] engine_0: Status returned by engine: FAIL
+SBY 16:11:15 [insn_lui_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:03 (3)
+SBY 16:11:15 [insn_lui_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:03 (3)
+SBY 16:11:15 [insn_lui_ch0] summary: engine_0 (smtbmc bitwuzla) returned FAIL
+SBY 16:11:15 [insn_lui_ch0] summary: counterexample trace: insn_lui_ch0/engine_0/trace.vcd
+SBY 16:11:15 [insn_lui_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_177_113 at rvfi_insn_check.sv:177.7-177.40 step 20
+SBY 16:11:15 [insn_lui_ch0] DONE (FAIL, rc=0)
+
+Full run log: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-001-r14s0/formal/last_run-h4d6884a9726148d.log
+Per-check logs in: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-001-r14s0/formal/riscv-formal/cores/bench-h4d6884a9726148d/checks/<check>/logfile.txt
+[bench-v2.8.4 4d4014b] log: hyp-20261005-001-r14s0 broken
+ 2 files changed, 1 insertion(+)
+[bench-v2.8.4 29ef1d7] log: hyp-20261005-002-r14s1 broken
+ 2 files changed, 1 insertion(+)
+[bench-v2.8.4 b8a33dc] log: hyp-20261005-003-r14s2 broken
+ 1 file changed, 1 insertion(+)
+
+  Round 14 complete: slot 0=broken, slot 1=broken, slot 2=broken (no winner)
+
+============================================================
+Round 15  |  slots=3  |  current best=12.12
+============================================================
+  pre-allocated IDs: ['hyp-20261005-001-r15s0', 'hyp-20261005-002-r15s1', 'hyp-20261005-003-r15s2']
+  [slot 0] category=micro_opt id=hyp-20261005-001-r15s0
+  [slot 1] category=structural id=hyp-20261005-002-r15s1
+  [slot 2] category=predictor id=hyp-20261005-003-r15s2
+Preparing worktree (new branch 'bench-hyp-20261005-002-r15s1-hypgen')
+Preparing worktree (new branch 'bench-hyp-20261005-001-r15s0-hypgen')
+Preparing worktree (new branch 'bench-hyp-20261005-003-r15s2-hypgen')
+Deleted branch bench-hyp-20261005-002-r15s1-hypgen (was b8a33dc).
+Deleted branch bench-hyp-20261005-001-r15s0-hypgen (was b8a33dc).
+Preparing worktree (new branch 'bench-hyp-20261005-002-r15s1')
+HEAD is now at b8a33dc log: hyp-20261005-003-r14s2 broken
+HEAD is now at b8a33dc log: hyp-20261005-003-r14s2 broken
+HEAD is now at b8a33dc log: hyp-20261005-003-r14s2 broken
+HEAD is now at b8a33dc log: hyp-20261005-003-r14s2 broken
+  [slot 1] worktree=/srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-002-r15s1
+Preparing worktree (new branch 'bench-hyp-20261005-001-r15s0')
+HEAD is now at b8a33dc log: hyp-20261005-003-r14s2 broken
+  [slot 0] worktree=/srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-001-r15s0
+Deleted branch bench-hyp-20261005-003-r15s2-hypgen (was b8a33dc).
+Preparing worktree (new branch 'bench-hyp-20261005-003-r15s2')
+HEAD is now at b8a33dc log: hyp-20261005-003-r14s2 broken
+  [slot 2] worktree=/srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-003-r15s2
+Deleted branch bench-hyp-20261005-003-r15s2 (was b8a33dc).
+  [slot 2] broken: formal_failed: reg_ch0
+0:21  Writing trace to VCD file: engine_0/trace.vcd
+SBY 16:16:01 [reg_ch0] engine_0: ##   0:00:22  Writing trace to Verilog testbench: engine_0/trace_tb.v
+SBY 16:16:01 [reg_ch0] engine_0: ##   0:00:22  Writing trace to constraints file: engine_0/trace.smtc
+SBY 16:16:01 [reg_ch0] engine_0: ##   0:00:22  Writing trace to Yosys witness file: engine_0/trace.yw
+SBY 16:16:01 [reg_ch0] engine_0: ##   0:00:22  Status: failed
+SBY 16:16:01 [reg_ch0] engine_0: finished (returncode=1)
+SBY 16:16:01 [reg_ch0] engine_0: Status returned by engine: FAIL
+SBY 16:16:01 [reg_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:22 (22)
+SBY 16:16:01 [reg_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:22 (22)
+SBY 16:16:01 [reg_ch0] summary: engine_0 (smtbmc bitwuzla) returned FAIL
+SBY 16:16:01 [reg_ch0] summary: counterexample trace: reg_ch0/engine_0/trace.vcd
+SBY 16:16:01 [reg_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_reg_check_sv_42_56 at rvfi_reg_check.sv:42.6-42.59 step 20
+SBY 16:16:01 [reg_ch0] DONE (FAIL, rc=0)
+
+Formal: 52 passed, 1 failed
+Failed: reg_ch0
+
+--- reg_ch0/logfile.txt (last 30 lines) ---
+SBY 16:15:39 [reg_ch0] engine_0: ##   0:00:00  Skipping step 9..
+SBY 16:15:39 [reg_ch0] engine_0: ##   0:00:00  Skipping step 10..
+SBY 16:15:39 [reg_ch0] engine_0: ##   0:00:00  Skipping step 11..
+SBY 16:15:39 [reg_ch0] engine_0: ##   0:00:00  Skipping step 12..
+SBY 16:15:39 [reg_ch0] engine_0: ##   0:00:00  Skipping step 13..
+SBY 16:15:39 [reg_ch0] engine_0: ##   0:00:00  Skipping step 14..
+SBY 16:15:39 [reg_ch0] engine_0: ##   0:00:00  Skipping step 15..
+SBY 16:15:39 [reg_ch0] engine_0: ##   0:00:00  Skipping step 16..
+SBY 16:15:39 [reg_ch0] engine_0: ##   0:00:00  Skipping step 17..
+SBY 16:15:39 [reg_ch0] engine_0: ##   0:00:00  Skipping step 18..
+SBY 16:15:39 [reg_ch0] engine_0: ##   0:00:00  Skipping step 19..
+SBY 16:15:39 [reg_ch0] engine_0: ##   0:00:00  Checking assumptions in step 20..
+SBY 16:15:40 [reg_ch0] engine_0: ##   0:00:00  Checking assertions in step 20..
+SBY 16:16:00 [reg_ch0] engine_0: ##   0:00:21  BMC failed!
+SBY 16:16:00 [reg_ch0] engine_0: ##   0:00:21  Value for anyconst rvfi_testbench.insn_order (rvfi_reg_check.sv:19.24-19.34): 15
+SBY 16:16:00 [reg_ch0] engine_0: ##   0:00:21  Value for anyconst rvfi_testbench.register_index (rvfi_reg_check.sv:20.23-20.37): 1
+SBY 16:16:00 [reg_ch0] engine_0: ##   0:00:21  Assert failed in rvfi_testbench: rvfi_reg_check.sv:42.6-42.59 (_witness_.check_flatten_checker_inst__assert_rvfi_reg_check_sv_42_56)
+SBY 16:16:00 [reg_ch0] engine_0: ##   0:00:21  Writing trace to VCD file: engine_0/trace.vcd
+SBY 16:16:01 [reg_ch0] engine_0: ##   0:00:22  Writing trace to Verilog testbench: engine_0/trace_tb.v
+SBY 16:16:01 [reg_ch0] engine_0: ##   0:00:22  Writing trace to constraints file: engine_0/trace.smtc
+SBY 16:16:01 [reg_ch0] engine_0: ##   0:00:22  Writing trace to Yosys witness file: engine_0/trace.yw
+SBY 16:16:01 [reg_ch0] engine_0: ##   0:00:22  Status: failed
+SBY 16:16:01 [reg_ch0] engine_0: finished (returncode=1)
+SBY 16:16:01 [reg_ch0] engine_0: Status returned by engine: FAIL
+SBY 16:16:01 [reg_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:22 (22)
+SBY 16:16:01 [reg_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:22 (22)
+SBY 16:16:01 [reg_ch0] summary: engine_0 (smtbmc bitwuzla) returned FAIL
+SBY 16:16:01 [reg_ch0] summary: counterexample trace: reg_ch0/engine_0/trace.vcd
+SBY 16:16:01 [reg_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_reg_check_sv_42_56 at rvfi_reg_check.sv:42.6-42.59 step 20
+SBY 16:16:01 [reg_ch0] DONE (FAIL, rc=0)
+
+Full run log: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-003-r15s2/formal/last_run-h2a8a1f5e70b44fc.log
+Per-check logs in: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-003-r15s2/formal/riscv-formal/cores/bench-h2a8a1f5e70b44fc/checks/<check>/logfile.txt
+Deleted branch bench-hyp-20261005-002-r15s1 (was b8a33dc).
+  [slot 1] broken: cosim_failed: selftest.elf [--istall --dstall]
+Deleted branch bench-hyp-20261005-001-r15s0 (was b8a33dc).
+  [slot 0] broken: formal_failed: insn_add_ch0
+e_0: Status returned by engine: FAIL
+SBY 16:22:13 [insn_xor_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:09 (9)
+SBY 16:22:13 [insn_xor_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:09 (9)
+SBY 16:22:13 [insn_xor_ch0] summary: engine_0 (smtbmc bitwuzla) returned FAIL
+SBY 16:22:13 [insn_xor_ch0] summary: counterexample trace: insn_xor_ch0/engine_0/trace.vcd
+SBY 16:22:13 [insn_xor_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_177_113 at rvfi_insn_check.sv:177.7-177.40 step 20
+SBY 16:22:13 [insn_xor_ch0] DONE (FAIL, rc=0)
+
+Formal: 21 passed, 32 failed
+Failed: insn_add_ch0 insn_addi_ch0 insn_and_ch0 insn_andi_ch0 insn_auipc_ch0 insn_div_ch0 insn_divu_ch0 insn_jal_ch0 insn_jalr_ch0 insn_lui_ch0 insn_mul_ch0 insn_mulh_ch0 insn_mulhsu_ch0 insn_mulhu_ch0 insn_or_ch0 insn_ori_ch0 insn_rem_ch0 insn_remu_ch0 insn_sll_ch0 insn_slli_ch0 insn_slt_ch0 insn_slti_ch0 insn_sltiu_ch0 insn_sltu_ch0 insn_sra_ch0 insn_srai_ch0 insn_srl_ch0 insn_srli_ch0 insn_sub_ch0 insn_xor_ch0 insn_xori_ch0 reg_ch0
+
+--- insn_add_ch0/logfile.txt (last 30 lines) ---
+SBY 16:21:03 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 7..
+SBY 16:21:03 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 8..
+SBY 16:21:03 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 9..
+SBY 16:21:03 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 10..
+SBY 16:21:03 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 11..
+SBY 16:21:03 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 12..
+SBY 16:21:03 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 13..
+SBY 16:21:03 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 14..
+SBY 16:21:03 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 15..
+SBY 16:21:03 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 16..
+SBY 16:21:03 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 17..
+SBY 16:21:03 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 18..
+SBY 16:21:03 [insn_add_ch0] engine_0: ##   0:00:00  Skipping step 19..
+SBY 16:21:03 [insn_add_ch0] engine_0: ##   0:00:00  Checking assumptions in step 20..
+SBY 16:21:04 [insn_add_ch0] engine_0: ##   0:00:00  Checking assertions in step 20..
+SBY 16:21:18 [insn_add_ch0] engine_0: ##   0:00:15  BMC failed!
+SBY 16:21:18 [insn_add_ch0] engine_0: ##   0:00:15  Assert failed in rvfi_testbench: rvfi_insn_check.sv:177.7-177.40 (_witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_177_113)
+SBY 16:21:18 [insn_add_ch0] engine_0: ##   0:00:15  Writing trace to VCD file: engine_0/trace.vcd
+SBY 16:21:18 [insn_add_ch0] engine_0: ##   0:00:15  Writing trace to Verilog testbench: engine_0/trace_tb.v
+SBY 16:21:18 [insn_add_ch0] engine_0: ##   0:00:15  Writing trace to constraints file: engine_0/trace.smtc
+SBY 16:21:18 [insn_add_ch0] engine_0: ##   0:00:15  Writing trace to Yosys witness file: engine_0/trace.yw
+SBY 16:21:19 [insn_add_ch0] engine_0: ##   0:00:15  Status: failed
+SBY 16:21:19 [insn_add_ch0] engine_0: finished (returncode=1)
+SBY 16:21:19 [insn_add_ch0] engine_0: Status returned by engine: FAIL
+SBY 16:21:19 [insn_add_ch0] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:16 (16)
+SBY 16:21:19 [insn_add_ch0] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:16 (16)
+SBY 16:21:19 [insn_add_ch0] summary: engine_0 (smtbmc bitwuzla) returned FAIL
+SBY 16:21:19 [insn_add_ch0] summary: counterexample trace: insn_add_ch0/engine_0/trace.vcd
+SBY 16:21:19 [insn_add_ch0] summary:   failed assertion rvfi_testbench._witness_.check_flatten_checker_inst__assert_rvfi_insn_check_sv_177_113 at rvfi_insn_check.sv:177.7-177.40 step 20
+SBY 16:21:19 [insn_add_ch0] DONE (FAIL, rc=0)
+
+Full run log: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-001-r15s0/formal/last_run-h5f89110f727c446.log
+Per-check logs in: /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/worktrees/hyp-20261005-001-r15s0/formal/riscv-formal/cores/bench-h5f89110f727c446/checks/<check>/logfile.txt
+[bench-v2.8.4 da37053] log: hyp-20261005-001-r15s0 broken
+ 2 files changed, 1 insertion(+)
+[bench-v2.8.4 089d1dc] log: hyp-20261005-002-r15s1 broken
+ 2 files changed, 1 insertion(+)
+[bench-v2.8.4 c795515] log: hyp-20261005-003-r15s2 broken
+ 1 file changed, 1 insertion(+)
+
+  Round 15 complete: slot 0=broken, slot 1=broken, slot 2=broken (no winner)

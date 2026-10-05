@@ -1,0 +1,4449 @@
+{
+ "slots": [
+  {
+   "rep": 1,
+   "id": "hyp-20261005-001-r1s0",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_add_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "101:hyp-20261005-001-r1s0",
+   "k": 2,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/alu.sv",
+     "line": 40,
+     "op": "lit_perturb",
+     "old": "mul_uu = {32'b0, a} * {32'b0, b};",
+     "new": "mul_uu = {32'b1, a} * {32'b0, b};",
+     "formal_blind": true,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/reg_file.sv",
+     "line": 51,
+     "op": "lit_perturb",
+     "old": "rs2_data = 32'b0;",
+     "new": "rs2_data = 32'b1;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 1,
+   "id": "hyp-20261005-002-r1s1",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_slli_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "101:hyp-20261005-002-r1s1",
+   "k": 2,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 121,
+     "op": "op_swap",
+     "old": "end else if (funct3 == 3'd1 && funct7 == 7'b0000000) begin // SLLI",
+     "new": "end else if (funct3 == 3'd1 && funct7 != 7'b0000000) begin // SLLI",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 169,
+     "op": "lit_perturb",
+     "old": "3'd2:    mem_width = 2'd2;",
+     "new": "3'd2:    mem_width = 2'd3;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 1,
+   "id": "hyp-20261005-003-r1s2",
+   "gate": "formal_failed",
+   "detail": "formal_failed: ill_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "101:hyp-20261005-003-r1s2",
+   "k": 3,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 169,
+     "op": "lit_perturb",
+     "old": "3'd2:    mem_width = 2'd2;",
+     "new": "3'd2:    mem_width = 2'd3;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/core.sv",
+     "line": 230,
+     "op": "lit_perturb",
+     "old": "io_rvfi_rd_addr_0   = rd_wen ? mem_wb_w.rd : 5'b0;",
+     "new": "io_rvfi_rd_addr_0   = rd_wen ? mem_wb_w.rd : 5'b1;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/mem_stage.sv",
+     "line": 85,
+     "op": "op_swap",
+     "old": "(in.ctrl.mem_width == 2'd1 && in.alu_result[0]   != 1'b0)",
+     "new": "(in.ctrl.mem_width != 2'd1 && in.alu_result[0]   != 1'b0)",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 1,
+   "id": "hyp-20261005-001-r2s0",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_beq_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "101:hyp-20261005-001-r2s0",
+   "k": 2,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/alu.sv",
+     "line": 64,
+     "op": "op_swap",
+     "old": "ALU_MULH:   out = (a + b) ^ 32'hf6583fb7;",
+     "new": "ALU_MULH:   out = (a - b) ^ 32'hf6583fb7;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 181,
+     "op": "lit_perturb",
+     "old": "is_branch  = 1'b1;",
+     "new": "is_branch  = 1'b0;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 1,
+   "id": "hyp-20261005-002-r2s1",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_jalr_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "101:hyp-20261005-002-r2s1",
+   "k": 2,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/ex_stage.sv",
+     "line": 85,
+     "op": "lit_perturb",
+     "old": "jump_target = in.ctrl.is_jalr ? {jalr_sum[31:1], 1'b0}",
+     "new": "jump_target = in.ctrl.is_jalr ? {jalr_sum[31:1], 1'b1}",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 142,
+     "op": "op_swap",
+     "old": "if (funct3 == 3'd0 || funct3 == 3'd1 || funct3 == 3'd2 ||",
+     "new": "if (funct3 != 3'd0 || funct3 == 3'd1 || funct3 == 3'd2 ||",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 1,
+   "id": "hyp-20261005-003-r2s2",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_add_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 2,
+   "lint": "pass",
+   "seed": "101:hyp-20261005-003-r2s2",
+   "k": 3,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 61,
+     "op": "lit_perturb",
+     "old": "mem_width  = 2'd2;",
+     "new": "mem_width  = 2'd3;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/if_stage.sv",
+     "line": 53,
+     "op": "lit_perturb",
+     "old": "out.instr = (flush || redirect) ? 32'h0000_0013 : imem_data;",
+     "new": "out.instr = (flush || redirect) ? 32'h12 : imem_data;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/forward_unit.sv",
+     "line": 33,
+     "op": "lit_perturb",
+     "old": "if      (ex_mem_w_en && ex_mem_rd != 5'b0 && ex_mem_rd == id_ex_rs2) fwd_rs2 = 2'd1;",
+     "new": "if      (ex_mem_w_en && ex_mem_rd != 5'b1 && ex_mem_rd == id_ex_rs2) fwd_rs2 = 2'd1;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 1,
+   "id": "hyp-20261005-001-r3s0",
+   "gate": "regression",
+   "detail": "",
+   "fitness": 12.12,
+   "fmax": 5.442,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "101:hyp-20261005-001-r3s0",
+   "k": 1,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 57,
+     "op": "lit_perturb",
+     "old": "is_lui     = 1'b0;",
+     "new": "is_lui     = 1'b1;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 1,
+   "id": "hyp-20261005-002-r3s1",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_beq_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "101:hyp-20261005-002-r3s1",
+   "k": 2,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/core.sv",
+     "line": 210,
+     "op": "lit_perturb",
+     "old": "if (reset)                rvfi_order_q <= 64'b0;",
+     "new": "if (reset)                rvfi_order_q <= 64'b1;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/ex_stage.sv",
+     "line": 82,
+     "op": "op_swap",
+     "old": "branch_target = in.pc + in.imm;",
+     "new": "branch_target = in.pc - in.imm;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 1,
+   "id": "hyp-20261005-003-r3s2",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_slli_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "101:hyp-20261005-003-r3s2",
+   "k": 2,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 121,
+     "op": "lit_perturb",
+     "old": "end else if (funct3 == 3'd1 && funct7 == 7'b0000000) begin // SLLI",
+     "new": "end else if (funct3 == 3'd1 && funct7 == 7'b1) begin // SLLI",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/alu.sv",
+     "line": 93,
+     "op": "op_swap",
+     "old": "ALU_REMU: out = (b == 32'b0) ? a : (a % b);",
+     "new": "ALU_REMU: out = (b != 32'b0) ? a : (a % b);",
+     "formal_blind": true,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 1,
+   "id": "hyp-20261005-001-r4s0",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_add_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 2,
+   "lint": "pass",
+   "seed": "101:hyp-20261005-001-r4s0",
+   "k": 2,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/alu.sv",
+     "line": 69,
+     "op": "lit_perturb",
+     "old": "ALU_REM:    out = (a - b) ^ 32'h8da68fa5;",
+     "new": "ALU_REM:    out = (a - b) ^ 32'h8da68fa4;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/wb_stage.sv",
+     "line": 24,
+     "op": "ternary_swap",
+     "old": "w_data = in.ctrl.mem_to_reg ? in.read_data : in.alu_result;",
+     "new": "w_data = in.ctrl.mem_to_reg ? in.alu_result : in.read_data;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 1,
+   "id": "hyp-20261005-002-r4s1",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_add_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "101:hyp-20261005-002-r4s1",
+   "k": 1,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/forward_unit.sv",
+     "line": 34,
+     "op": "lit_perturb",
+     "old": "else if (mem_wb_w_en && mem_wb_rd != 5'b0 && mem_wb_rd == id_ex_rs2) fwd_rs2 = 2'd2;",
+     "new": "else if (mem_wb_w_en && mem_wb_rd != 5'b1 && mem_wb_rd == id_ex_rs2) fwd_rs2 = 2'd2;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 1,
+   "id": "hyp-20261005-003-r4s2",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_mul_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 5,
+   "lint": "pass",
+   "seed": "101:hyp-20261005-003-r4s2",
+   "k": 2,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/alu.sv",
+     "line": 63,
+     "op": "lit_perturb",
+     "old": "ALU_MUL:    out = (a + b) ^ 32'h5876063e;",
+     "new": "ALU_MUL:    out = (a + b) ^ 32'h5876063f;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/mem_stage.sv",
+     "line": 147,
+     "op": "lit_perturb",
+     "old": "reg_q.mem_rmask  <= (in.ctrl.mem_read  && !mem_misalign) ? byte_mask : 4'b0000;",
+     "new": "reg_q.mem_rmask  <= (in.ctrl.mem_read  && !mem_misalign) ? byte_mask : 4'b1;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 1,
+   "id": "hyp-20261005-001-r5s0",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_sb_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 2,
+   "lint": "pass",
+   "seed": "101:hyp-20261005-001-r5s0",
+   "k": 2,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 162,
+     "op": "op_swap",
+     "old": "if (funct3 == 3'd0 || funct3 == 3'd1 || funct3 == 3'd2) begin",
+     "new": "if (funct3 != 3'd0 || funct3 == 3'd1 || funct3 == 3'd2) begin",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 224,
+     "op": "op_swap",
+     "old": "if (instr == 32'h00100073) begin",
+     "new": "if (instr != 32'h00100073) begin",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 1,
+   "id": "hyp-20261005-002-r5s1",
+   "gate": "formal_failed",
+   "detail": "formal_failed: liveness_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "101:hyp-20261005-002-r5s1",
+   "k": 1,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/core.sv",
+     "line": 222,
+     "op": "lit_perturb",
+     "old": "io_rvfi_halt_0      = 1'b0;",
+     "new": "io_rvfi_halt_0      = 1'b1;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 1,
+   "id": "hyp-20261005-003-r5s2",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_add_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "101:hyp-20261005-003-r5s2",
+   "k": 3,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/forward_unit.sv",
+     "line": 29,
+     "op": "lit_perturb",
+     "old": "else                                                                  fwd_rs1 = 2'd0;",
+     "new": "else                                                                  fwd_rs1 = 2'd1;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/alu.sv",
+     "line": 63,
+     "op": "lit_perturb",
+     "old": "ALU_MUL:    out = (a + b) ^ 32'h5876063e;",
+     "new": "ALU_MUL:    out = (a + b) ^ 32'h5876063f;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 148,
+     "op": "lit_perturb",
+     "old": "alu_src    = 1'b1;",
+     "new": "alu_src    = 1'b0;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 1,
+   "id": "hyp-20261005-001-r6s0",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_addi_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "101:hyp-20261005-001-r6s0",
+   "k": 2,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 108,
+     "op": "op_swap",
+     "old": "if (funct3 != 3'd1 && funct3 != 3'd5) begin",
+     "new": "if (funct3 == 3'd1 && funct3 != 3'd5) begin",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/mem_stage.sv",
+     "line": 111,
+     "op": "lit_perturb",
+     "old": ": {16'b0,               hword_val};",
+     "new": ": {16'b1,               hword_val};",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 1,
+   "id": "hyp-20261005-002-r6s1",
+   "gate": "regression",
+   "detail": "",
+   "fitness": 12.12,
+   "fmax": 5.442,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "101:hyp-20261005-002-r6s1",
+   "k": 1,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/core_pkg.sv",
+     "line": 99,
+     "op": "op_swap",
+     "old": "logic [31:0] write_data;     // raw rs2 (post-forward), pre byte replication",
+     "new": "logic [31:0] write_data;     // raw rs2 (post+forward), pre byte replication",
+     "formal_blind": false,
+     "comment_only": true
+    }
+   ]
+  },
+  {
+   "rep": 1,
+   "id": "hyp-20261005-003-r6s2",
+   "gate": "cosim_failed",
+   "detail": "cosim_failed: selftest.elf",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "101:hyp-20261005-003-r6s2",
+   "k": 1,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 223,
+     "op": "lit_perturb",
+     "old": "7'b1110011: begin",
+     "new": "7'b1110010: begin",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 1,
+   "id": "hyp-20261005-001-r7s0",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_lui_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 3,
+   "lint": "pass",
+   "seed": "101:hyp-20261005-001-r7s0",
+   "k": 3,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 204,
+     "op": "lit_perturb",
+     "old": "is_illegal = 1'b0;",
+     "new": "is_illegal = 1'b1;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 169,
+     "op": "lit_perturb",
+     "old": "3'd2:    mem_width = 2'd2;",
+     "new": "3'd3:    mem_width = 2'd2;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 74,
+     "op": "lit_perturb",
+     "old": "(funct7 == 7'b0100000 && (funct3 == 3'd0 || funct3 == 3'd5)) ||",
+     "new": "(funct7 == 7'b100001 && (funct3 == 3'd0 || funct3 == 3'd5)) ||",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 1,
+   "id": "hyp-20261005-002-r7s1",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_add_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "101:hyp-20261005-002-r7s1",
+   "k": 3,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 164,
+     "op": "lit_perturb",
+     "old": "mem_write  = 1'b1;",
+     "new": "mem_write  = 1'b0;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/ex_stage.sv",
+     "line": 51,
+     "op": "ternary_swap",
+     "old": "alu_b = in.ctrl.alu_src  ? in.imm : rs2;",
+     "new": "alu_b = in.ctrl.alu_src  ? rs2 : in.imm;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 225,
+     "op": "lit_perturb",
+     "old": "is_illegal = 1'b0;",
+     "new": "is_illegal = 1'b1;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 1,
+   "id": "hyp-20261005-003-r7s2",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_auipc_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "101:hyp-20261005-003-r7s2",
+   "k": 3,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/imm_gen.sv",
+     "line": 32,
+     "op": "lit_perturb",
+     "old": "imm = {instr[31:12], 12'b0};",
+     "new": "imm = {instr[31:12], 12'b1};",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 223,
+     "op": "lit_perturb",
+     "old": "7'b1110011: begin",
+     "new": "7'b1110010: begin",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 162,
+     "op": "lit_perturb",
+     "old": "if (funct3 == 3'd0 || funct3 == 3'd1 || funct3 == 3'd2) begin",
+     "new": "if (funct3 == 3'd0 || funct3 == 3'd0 || funct3 == 3'd2) begin",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 1,
+   "id": "hyp-20261005-001-r8s0",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_div_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "101:hyp-20261005-001-r8s0",
+   "k": 2,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/ex_stage.sv",
+     "line": 130,
+     "op": "lit_perturb",
+     "old": "reg_q.alu_result    <= in.ctrl.is_jump ? (in.pc + 32'd4) : alu_result;",
+     "new": "reg_q.alu_result    <= in.ctrl.is_jump ? (in.pc + 32'd5) : alu_result;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 75,
+     "op": "op_swap",
+     "old": "funct7 == 7'b0000001) begin",
+     "new": "funct7 != 7'b0000001) begin",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 1,
+   "id": "hyp-20261005-002-r8s1",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_lh_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "101:hyp-20261005-002-r8s1",
+   "k": 1,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 151,
+     "op": "lit_perturb",
+     "old": "3'd1, 3'd5: mem_width = 2'd1;",
+     "new": "3'd1, 3'd5: mem_width = 2'd0;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 1,
+   "id": "hyp-20261005-003-r8s2",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_jal_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "101:hyp-20261005-003-r8s2",
+   "k": 1,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/ex_stage.sv",
+     "line": 130,
+     "op": "lit_perturb",
+     "old": "reg_q.alu_result    <= in.ctrl.is_jump ? (in.pc + 32'd4) : alu_result;",
+     "new": "reg_q.alu_result    <= in.ctrl.is_jump ? (in.pc + 32'd5) : alu_result;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 1,
+   "id": "hyp-20261005-001-r9s0",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_add_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 2,
+   "lint": "pass",
+   "seed": "101:hyp-20261005-001-r9s0",
+   "k": 3,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 133,
+     "op": "lit_perturb",
+     "old": "reg_write  = 1'b1;",
+     "new": "reg_write  = 1'b0;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/alu.sv",
+     "line": 50,
+     "op": "lit_perturb",
+     "old": "ALU_SLTU:   out = {31'b0, a < b};",
+     "new": "ALU_SLTU:   out = {31'b1, a < b};",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 64,
+     "op": "lit_perturb",
+     "old": "mem_to_reg = 1'b0;",
+     "new": "mem_to_reg = 1'b1;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 1,
+   "id": "hyp-20261005-002-r9s1",
+   "gate": "cosim_failed",
+   "detail": "cosim_failed: random2.elf [--istall --dstall]",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "101:hyp-20261005-002-r9s1",
+   "k": 1,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/alu.sv",
+     "line": 84,
+     "op": "op_swap",
+     "old": "ALU_DIVU: out = (b == 32'b0) ? 32'hFFFFFFFF : (a / b);",
+     "new": "ALU_DIVU: out = (b != 32'b0) ? 32'hFFFFFFFF : (a / b);",
+     "formal_blind": true,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 1,
+   "id": "hyp-20261005-003-r9s2",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_jal_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "101:hyp-20261005-003-r9s2",
+   "k": 3,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 162,
+     "op": "lit_perturb",
+     "old": "if (funct3 == 3'd0 || funct3 == 3'd1 || funct3 == 3'd2) begin",
+     "new": "if (funct3 == 3'd1 || funct3 == 3'd1 || funct3 == 3'd2) begin",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 190,
+     "op": "lit_perturb",
+     "old": "reg_write  = 1'b1;",
+     "new": "reg_write  = 1'b0;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/core_pkg.sv",
+     "line": 67,
+     "op": "op_swap",
+     "old": "logic       mem_sext;    // sign-extend load result",
+     "new": "logic       mem_sext;    // sign+extend load result",
+     "formal_blind": false,
+     "comment_only": true
+    }
+   ]
+  },
+  {
+   "rep": 1,
+   "id": "hyp-20261005-001-r10s0",
+   "gate": "cosim_failed",
+   "detail": "cosim_failed: selftest.elf",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "101:hyp-20261005-001-r10s0",
+   "k": 2,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/alu.sv",
+     "line": 79,
+     "op": "op_swap",
+     "old": "else if (a == 32'h80000000 && b == 32'hFFFFFFFF)",
+     "new": "else if (a == 32'h80000000 && b != 32'hFFFFFFFF)",
+     "formal_blind": true,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/mem_stage.sv",
+     "line": 147,
+     "op": "lit_perturb",
+     "old": "reg_q.mem_rmask  <= (in.ctrl.mem_read  && !mem_misalign) ? byte_mask : 4'b0000;",
+     "new": "reg_q.mem_rmask  <= (in.ctrl.mem_read  && !mem_misalign) ? byte_mask : 4'b1;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 1,
+   "id": "hyp-20261005-002-r10s1",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_remu_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "101:hyp-20261005-002-r10s1",
+   "k": 3,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 108,
+     "op": "lit_perturb",
+     "old": "if (funct3 != 3'd1 && funct3 != 3'd5) begin",
+     "new": "if (funct3 != 3'd1 && funct3 != 3'd4) begin",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/alu.sv",
+     "line": 70,
+     "op": "lit_perturb",
+     "old": "ALU_REMU:   out = (a - b) ^ 32'h3138d0e1;",
+     "new": "ALU_REMU:   out = (a - b) ^ 32'h3138d0e0;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 126,
+     "op": "lit_perturb",
+     "old": "end else if (funct3 == 3'd5 && funct7 == 7'b0000000) begin // SRLI",
+     "new": "end else if (funct3 == 3'd4 && funct7 == 7'b0000000) begin // SRLI",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 1,
+   "id": "hyp-20261005-003-r10s2",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_and_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "101:hyp-20261005-003-r10s2",
+   "k": 3,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/mem_stage.sv",
+     "line": 85,
+     "op": "op_swap",
+     "old": "(in.ctrl.mem_width == 2'd1 && in.alu_result[0]   != 1'b0)",
+     "new": "(in.ctrl.mem_width != 2'd1 && in.alu_result[0]   != 1'b0)",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/alu.sv",
+     "line": 46,
+     "op": "op_swap",
+     "old": "ALU_AND:    out = a & b;",
+     "new": "ALU_AND:    out = a | b;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/core_pkg.sv",
+     "line": 70,
+     "op": "op_swap",
+     "old": "logic       is_illegal;  // default-true in decoder; cleared inside",
+     "new": "logic       is_illegal;  // default+true in decoder; cleared inside",
+     "formal_blind": false,
+     "comment_only": true
+    }
+   ]
+  },
+  {
+   "rep": 1,
+   "id": "hyp-20261005-001-r11s0",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_add_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 2,
+   "lint": "pass",
+   "seed": "101:hyp-20261005-001-r11s0",
+   "k": 3,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 140,
+     "op": "lit_perturb",
+     "old": "7'b0000011: begin",
+     "new": "7'b10: begin",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/alu.sv",
+     "line": 50,
+     "op": "lit_perturb",
+     "old": "ALU_SLTU:   out = {31'b0, a < b};",
+     "new": "ALU_SLTU:   out = {31'b1, a < b};",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 52,
+     "op": "lit_perturb",
+     "old": "alu_src    = 1'b0;",
+     "new": "alu_src    = 1'b1;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 1,
+   "id": "hyp-20261005-002-r11s1",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_add_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "101:hyp-20261005-002-r11s1",
+   "k": 2,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 129,
+     "op": "lit_perturb",
+     "old": "alu_src    = 1'b1;",
+     "new": "alu_src    = 1'b0;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 73,
+     "op": "lit_perturb",
+     "old": "if (funct7 == 7'b0000000 ||",
+     "new": "if (funct7 == 7'b1 ||",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 1,
+   "id": "hyp-20261005-003-r11s2",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_add_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "101:hyp-20261005-003-r11s2",
+   "k": 2,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 73,
+     "op": "lit_perturb",
+     "old": "if (funct7 == 7'b0000000 ||",
+     "new": "if (funct7 == 7'b1 ||",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/ex_stage.sv",
+     "line": 130,
+     "op": "ternary_swap",
+     "old": "reg_q.alu_result    <= in.ctrl.is_jump ? (in.pc + 32'd4) : alu_result;",
+     "new": "reg_q.alu_result    <= in.ctrl.is_jump ? alu_result : (in.pc + 32'd4);",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 1,
+   "id": "hyp-20261005-001-r12s0",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_add_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 2,
+   "lint": "pass",
+   "seed": "101:hyp-20261005-001-r12s0",
+   "k": 2,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 52,
+     "op": "lit_perturb",
+     "old": "alu_src    = 1'b0;",
+     "new": "alu_src    = 1'b1;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/alu.sv",
+     "line": 79,
+     "op": "lit_perturb",
+     "old": "else if (a == 32'h80000000 && b == 32'hFFFFFFFF)",
+     "new": "else if (a == 32'h80000000 && b == 32'hfffffffe)",
+     "formal_blind": true,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 1,
+   "id": "hyp-20261005-002-r12s1",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_addi_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "101:hyp-20261005-002-r12s1",
+   "k": 2,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/core_pkg.sv",
+     "line": 124,
+     "op": "op_swap",
+     "old": "logic [31:0] mem_addr;       // word-aligned for RVFI ALIGNED_MEM",
+     "new": "logic [31:0] mem_addr;       // word+aligned for RVFI ALIGNED_MEM",
+     "formal_blind": false,
+     "comment_only": true
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 109,
+     "op": "lit_perturb",
+     "old": "is_illegal = 1'b0;",
+     "new": "is_illegal = 1'b1;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 1,
+   "id": "hyp-20261005-003-r12s2",
+   "gate": "formal_failed",
+   "detail": "formal_failed: ill_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "101:hyp-20261005-003-r12s2",
+   "k": 1,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 60,
+     "op": "lit_perturb",
+     "old": "mem_write  = 1'b0;",
+     "new": "mem_write  = 1'b1;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 1,
+   "id": "hyp-20261005-001-r13s0",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_add_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "101:hyp-20261005-001-r13s0",
+   "k": 3,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 142,
+     "op": "op_swap",
+     "old": "if (funct3 == 3'd0 || funct3 == 3'd1 || funct3 == 3'd2 ||",
+     "new": "if (funct3 == 3'd0 || funct3 == 3'd1 || funct3 != 3'd2 ||",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/forward_unit.sv",
+     "line": 33,
+     "op": "op_swap",
+     "old": "if      (ex_mem_w_en && ex_mem_rd != 5'b0 && ex_mem_rd == id_ex_rs2) fwd_rs2 = 2'd1;",
+     "new": "if      (ex_mem_w_en && ex_mem_rd != 5'b0 && ex_mem_rd != id_ex_rs2) fwd_rs2 = 2'd1;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 108,
+     "op": "op_swap",
+     "old": "if (funct3 != 3'd1 && funct3 != 3'd5) begin",
+     "new": "if (funct3 == 3'd1 && funct3 != 3'd5) begin",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 1,
+   "id": "hyp-20261005-002-r13s1",
+   "gate": "formal_failed",
+   "detail": "formal_failed: ill_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 2,
+   "lint": "pass",
+   "seed": "101:hyp-20261005-002-r13s1",
+   "k": 2,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/core.sv",
+     "line": 231,
+     "op": "lit_perturb",
+     "old": "io_rvfi_rd_wdata_0  = rd_wen ? wb_w_data   : 32'b0;",
+     "new": "io_rvfi_rd_wdata_0  = rd_wen ? wb_w_data   : 32'b1;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 162,
+     "op": "lit_perturb",
+     "old": "if (funct3 == 3'd0 || funct3 == 3'd1 || funct3 == 3'd2) begin",
+     "new": "if (funct3 == 3'd0 || funct3 == 3'd1 || funct3 == 3'd3) begin",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 1,
+   "id": "hyp-20261005-003-r13s2",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_add_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "101:hyp-20261005-003-r13s2",
+   "k": 2,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/forward_unit.sv",
+     "line": 27,
+     "op": "op_swap",
+     "old": "if      (ex_mem_w_en && ex_mem_rd != 5'b0 && ex_mem_rd == id_ex_rs1) fwd_rs1 = 2'd1;",
+     "new": "if      (ex_mem_w_en && ex_mem_rd == 5'b0 && ex_mem_rd == id_ex_rs1) fwd_rs1 = 2'd1;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 74,
+     "op": "op_swap",
+     "old": "(funct7 == 7'b0100000 && (funct3 == 3'd0 || funct3 == 3'd5)) ||",
+     "new": "(funct7 == 7'b0100000 && (funct3 != 3'd0 || funct3 == 3'd5)) ||",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 1,
+   "id": "hyp-20261005-001-r14s0",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_lui_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "101:hyp-20261005-001-r14s0",
+   "k": 3,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 208,
+     "op": "lit_perturb",
+     "old": "alu_src    = 1'b1;",
+     "new": "alu_src    = 1'b0;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 57,
+     "op": "lit_perturb",
+     "old": "is_lui     = 1'b0;",
+     "new": "is_lui     = 1'b1;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 123,
+     "op": "lit_perturb",
+     "old": "reg_write  = 1'b1;",
+     "new": "reg_write  = 1'b0;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 1,
+   "id": "hyp-20261005-002-r14s1",
+   "gate": "cosim_failed",
+   "detail": "cosim_failed: random1.elf [--istall --dstall]",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "101:hyp-20261005-002-r14s1",
+   "k": 1,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/alu.sv",
+     "line": 84,
+     "op": "lit_perturb",
+     "old": "ALU_DIVU: out = (b == 32'b0) ? 32'hFFFFFFFF : (a / b);",
+     "new": "ALU_DIVU: out = (b == 32'b0) ? 32'hfffffffe : (a / b);",
+     "formal_blind": true,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 1,
+   "id": "hyp-20261005-003-r14s2",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_beq_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 4,
+   "lint": "pass",
+   "seed": "101:hyp-20261005-003-r14s2",
+   "k": 2,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 181,
+     "op": "lit_perturb",
+     "old": "is_branch  = 1'b1;",
+     "new": "is_branch  = 1'b0;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/mem_stage.sv",
+     "line": 84,
+     "op": "lit_perturb",
+     "old": "(in.ctrl.mem_width == 2'd2 && in.alu_result[1:0] != 2'b00) ||",
+     "new": "(in.ctrl.mem_width == 2'd3 && in.alu_result[1:0] != 2'b00) ||",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 1,
+   "id": "hyp-20261005-001-r15s0",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_add_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "101:hyp-20261005-001-r15s0",
+   "k": 2,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 108,
+     "op": "op_swap",
+     "old": "if (funct3 != 3'd1 && funct3 != 3'd5) begin",
+     "new": "if (funct3 != 3'd1 && funct3 == 3'd5) begin",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 64,
+     "op": "lit_perturb",
+     "old": "mem_to_reg = 1'b0;",
+     "new": "mem_to_reg = 1'b1;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 1,
+   "id": "hyp-20261005-002-r15s1",
+   "gate": "cosim_failed",
+   "detail": "cosim_failed: selftest.elf [--istall --dstall]",
+   "fitness": null,
+   "fmax": null,
+   "draws": 2,
+   "lint": "pass",
+   "seed": "101:hyp-20261005-002-r15s1",
+   "k": 2,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/core.sv",
+     "line": 145,
+     "op": "op_swap",
+     "old": ".fwd_mem_wb      (wb_w_data),            // WB-stage's write-mux output",
+     "new": ".fwd_mem_wb      (wb_w_data),            // WB+stage's write-mux output",
+     "formal_blind": false,
+     "comment_only": true
+    },
+    {
+     "file": "cores/bench/rtl/core.sv",
+     "line": 225,
+     "op": "lit_perturb",
+     "old": "io_rvfi_ixl_0       = 2'd1;     // 32-bit ISA",
+     "new": "io_rvfi_ixl_0       = 2'd0;     // 32-bit ISA",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 1,
+   "id": "hyp-20261005-003-r15s2",
+   "gate": "formal_failed",
+   "detail": "formal_failed: reg_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "101:hyp-20261005-003-r15s2",
+   "k": 3,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/reg_file.sv",
+     "line": 37,
+     "op": "lit_perturb",
+     "old": "end else if (w_en && w_addr != 5'b0) begin",
+     "new": "end else if (w_en && w_addr != 5'b1) begin",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/alu.sv",
+     "line": 88,
+     "op": "lit_perturb",
+     "old": "else if (a == 32'h80000000 && b == 32'hFFFFFFFF)",
+     "new": "else if (a == 32'h80000001 && b == 32'hFFFFFFFF)",
+     "formal_blind": true,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/alu.sv",
+     "line": 79,
+     "op": "op_swap",
+     "old": "else if (a == 32'h80000000 && b == 32'hFFFFFFFF)",
+     "new": "else if (a == 32'h80000000 && b != 32'hFFFFFFFF)",
+     "formal_blind": true,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 2,
+   "id": "hyp-20261005-001-r1s0",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_beq_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "102:hyp-20261005-001-r1s0",
+   "k": 1,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 181,
+     "op": "lit_perturb",
+     "old": "is_branch  = 1'b1;",
+     "new": "is_branch  = 1'b0;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 2,
+   "id": "hyp-20261005-002-r1s1",
+   "gate": "cosim_failed",
+   "detail": "cosim_failed: random1.elf [--istall --dstall]",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "102:hyp-20261005-002-r1s1",
+   "k": 3,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/imm_gen.sv",
+     "line": 21,
+     "op": "lit_perturb",
+     "old": "7'b0000011, 7'b0010011, 7'b1100111, 7'b1110011:",
+     "new": "7'b0000011, 7'b0010011, 7'b1100111, 7'b1110010:",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/alu.sv",
+     "line": 40,
+     "op": "lit_perturb",
+     "old": "mul_uu = {32'b0, a} * {32'b0, b};",
+     "new": "mul_uu = {32'b0, a} * {32'b1, b};",
+     "formal_blind": true,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/if_stage.sv",
+     "line": 53,
+     "op": "lit_perturb",
+     "old": "out.instr = (flush || redirect) ? 32'h0000_0013 : imem_data;",
+     "new": "out.instr = (flush || redirect) ? 32'h12 : imem_data;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 2,
+   "id": "hyp-20261005-003-r1s2",
+   "gate": "formal_failed",
+   "detail": "formal_failed: reg_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "102:hyp-20261005-003-r1s2",
+   "k": 1,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/forward_unit.sv",
+     "line": 27,
+     "op": "lit_perturb",
+     "old": "if      (ex_mem_w_en && ex_mem_rd != 5'b0 && ex_mem_rd == id_ex_rs1) fwd_rs1 = 2'd1;",
+     "new": "if      (ex_mem_w_en && ex_mem_rd != 5'b0 && ex_mem_rd == id_ex_rs1) fwd_rs1 = 2'd0;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 2,
+   "id": "hyp-20261005-001-r2s0",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_add_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 3,
+   "lint": "pass",
+   "seed": "102:hyp-20261005-001-r2s0",
+   "k": 2,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/alu.sv",
+     "line": 65,
+     "op": "lit_perturb",
+     "old": "ALU_MULHU:  out = (a + b) ^ 32'h949ce5e8;",
+     "new": "ALU_MULHU:  out = (a + b) ^ 32'h949ce5e9;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/forward_unit.sv",
+     "line": 34,
+     "op": "op_swap",
+     "old": "else if (mem_wb_w_en && mem_wb_rd != 5'b0 && mem_wb_rd == id_ex_rs2) fwd_rs2 = 2'd2;",
+     "new": "else if (mem_wb_w_en && mem_wb_rd == 5'b0 && mem_wb_rd == id_ex_rs2) fwd_rs2 = 2'd2;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 2,
+   "id": "hyp-20261005-002-r2s1",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_lbu_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "102:hyp-20261005-002-r2s1",
+   "k": 3,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/reg_file.sv",
+     "line": 37,
+     "op": "lit_perturb",
+     "old": "end else if (w_en && w_addr != 5'b0) begin",
+     "new": "end else if (w_en && w_addr != 5'b1) begin",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 143,
+     "op": "op_swap",
+     "old": "funct3 == 3'd4 || funct3 == 3'd5) begin",
+     "new": "funct3 != 3'd4 || funct3 == 3'd5) begin",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/core_pkg.sv",
+     "line": 103,
+     "op": "op_swap",
+     "old": "logic [31:0] rs1_val;        // post-forward rs1 used by EX",
+     "new": "logic [31:0] rs1_val;        // post+forward rs1 used by EX",
+     "formal_blind": false,
+     "comment_only": true
+    }
+   ]
+  },
+  {
+   "rep": 2,
+   "id": "hyp-20261005-003-r2s2",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_add_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "102:hyp-20261005-003-r2s2",
+   "k": 3,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 143,
+     "op": "op_swap",
+     "old": "funct3 == 3'd4 || funct3 == 3'd5) begin",
+     "new": "funct3 != 3'd4 || funct3 == 3'd5) begin",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/mem_stage.sv",
+     "line": 77,
+     "op": "lit_perturb",
+     "old": "2'd0:    byte_mask = (4'b0001 << in.alu_result[1:0]);",
+     "new": "2'd0:    byte_mask = (4'b0 << in.alu_result[1:0]);",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/forward_unit.sv",
+     "line": 29,
+     "op": "lit_perturb",
+     "old": "else                                                                  fwd_rs1 = 2'd0;",
+     "new": "else                                                                  fwd_rs1 = 2'd1;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 2,
+   "id": "hyp-20261005-001-r3s0",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_divu_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "102:hyp-20261005-001-r3s0",
+   "k": 2,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/alu.sv",
+     "line": 68,
+     "op": "lit_perturb",
+     "old": "ALU_DIVU:   out = (a - b) ^ 32'h10e8fd70;",
+     "new": "ALU_DIVU:   out = (a - b) ^ 32'h10e8fd71;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 169,
+     "op": "lit_perturb",
+     "old": "3'd2:    mem_width = 2'd2;",
+     "new": "3'd3:    mem_width = 2'd2;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 2,
+   "id": "hyp-20261005-002-r3s1",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_beq_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "102:hyp-20261005-002-r3s1",
+   "k": 3,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/mem_stage.sv",
+     "line": 85,
+     "op": "op_swap",
+     "old": "(in.ctrl.mem_width == 2'd1 && in.alu_result[0]   != 1'b0)",
+     "new": "(in.ctrl.mem_width == 2'd1 && in.alu_result[0]   == 1'b0)",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 181,
+     "op": "lit_perturb",
+     "old": "is_branch  = 1'b1;",
+     "new": "is_branch  = 1'b0;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 148,
+     "op": "lit_perturb",
+     "old": "alu_src    = 1'b1;",
+     "new": "alu_src    = 1'b0;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 2,
+   "id": "hyp-20261005-003-r3s2",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_add_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "102:hyp-20261005-003-r3s2",
+   "k": 3,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/alu.sv",
+     "line": 79,
+     "op": "op_swap",
+     "old": "else if (a == 32'h80000000 && b == 32'hFFFFFFFF)",
+     "new": "else if (a != 32'h80000000 && b == 32'hFFFFFFFF)",
+     "formal_blind": true,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/alu.sv",
+     "line": 49,
+     "op": "lit_perturb",
+     "old": "ALU_SLT:    out = {31'b0, $signed(a) < $signed(b)};",
+     "new": "ALU_SLT:    out = {31'b1, $signed(a) < $signed(b)};",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/reg_file.sv",
+     "line": 43,
+     "op": "op_swap",
+     "old": "if (rs1_addr == 5'b0)",
+     "new": "if (rs1_addr != 5'b0)",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 2,
+   "id": "hyp-20261005-001-r4s0",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_sra_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "102:hyp-20261005-001-r4s0",
+   "k": 2,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/core.sv",
+     "line": 210,
+     "op": "lit_perturb",
+     "old": "if (reset)                rvfi_order_q <= 64'b0;",
+     "new": "if (reset)                rvfi_order_q <= 64'b1;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 74,
+     "op": "op_swap",
+     "old": "(funct7 == 7'b0100000 && (funct3 == 3'd0 || funct3 == 3'd5)) ||",
+     "new": "(funct7 == 7'b0100000 && (funct3 == 3'd0 || funct3 != 3'd5)) ||",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 2,
+   "id": "hyp-20261005-002-r4s1",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_add_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "102:hyp-20261005-002-r4s1",
+   "k": 1,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/ex_stage.sv",
+     "line": 40,
+     "op": "lit_perturb",
+     "old": "2'd1:    rs2 = fwd_ex_mem;",
+     "new": "2'd0:    rs2 = fwd_ex_mem;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 2,
+   "id": "hyp-20261005-003-r4s2",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_add_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 4,
+   "lint": "pass",
+   "seed": "102:hyp-20261005-003-r4s2",
+   "k": 3,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/ex_stage.sv",
+     "line": 85,
+     "op": "lit_perturb",
+     "old": "jump_target = in.ctrl.is_jalr ? {jalr_sum[31:1], 1'b0}",
+     "new": "jump_target = in.ctrl.is_jalr ? {jalr_sum[31:1], 1'b1}",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/forward_unit.sv",
+     "line": 33,
+     "op": "lit_perturb",
+     "old": "if      (ex_mem_w_en && ex_mem_rd != 5'b0 && ex_mem_rd == id_ex_rs2) fwd_rs2 = 2'd1;",
+     "new": "if      (ex_mem_w_en && ex_mem_rd != 5'b1 && ex_mem_rd == id_ex_rs2) fwd_rs2 = 2'd1;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/core_pkg.sv",
+     "line": 126,
+     "op": "op_swap",
+     "old": "logic [31:0] mem_wdata;      // replicated byte-lane write data",
+     "new": "logic [31:0] mem_wdata;      // replicated byte+lane write data",
+     "formal_blind": false,
+     "comment_only": true
+    }
+   ]
+  },
+  {
+   "rep": 2,
+   "id": "hyp-20261005-001-r5s0",
+   "gate": "regression",
+   "detail": "",
+   "fitness": 12.12,
+   "fmax": 5.442,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "102:hyp-20261005-001-r5s0",
+   "k": 1,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 152,
+     "op": "lit_perturb",
+     "old": "3'd2:       mem_width = 2'd2;",
+     "new": "3'd3:       mem_width = 2'd2;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 2,
+   "id": "hyp-20261005-002-r5s1",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_addi_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "102:hyp-20261005-002-r5s1",
+   "k": 3,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 108,
+     "op": "op_swap",
+     "old": "if (funct3 != 3'd1 && funct3 != 3'd5) begin",
+     "new": "if (funct3 != 3'd1 && funct3 == 3'd5) begin",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 126,
+     "op": "op_swap",
+     "old": "end else if (funct3 == 3'd5 && funct7 == 7'b0000000) begin // SRLI",
+     "new": "end else if (funct3 != 3'd5 && funct7 == 7'b0000000) begin // SRLI",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/alu.sv",
+     "line": 46,
+     "op": "op_swap",
+     "old": "ALU_AND:    out = a & b;",
+     "new": "ALU_AND:    out = a | b;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 2,
+   "id": "hyp-20261005-003-r5s2",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_add_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 2,
+   "lint": "pass",
+   "seed": "102:hyp-20261005-003-r5s2",
+   "k": 2,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/forward_unit.sv",
+     "line": 33,
+     "op": "lit_perturb",
+     "old": "if      (ex_mem_w_en && ex_mem_rd != 5'b0 && ex_mem_rd == id_ex_rs2) fwd_rs2 = 2'd1;",
+     "new": "if      (ex_mem_w_en && ex_mem_rd != 5'b1 && ex_mem_rd == id_ex_rs2) fwd_rs2 = 2'd1;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 126,
+     "op": "op_swap",
+     "old": "end else if (funct3 == 3'd5 && funct7 == 7'b0000000) begin // SRLI",
+     "new": "end else if (funct3 != 3'd5 && funct7 == 7'b0000000) begin // SRLI",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 2,
+   "id": "hyp-20261005-001-r6s0",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_add_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "102:hyp-20261005-001-r6s0",
+   "k": 3,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/wb_stage.sv",
+     "line": 24,
+     "op": "ternary_swap",
+     "old": "w_data = in.ctrl.mem_to_reg ? in.read_data : in.alu_result;",
+     "new": "w_data = in.ctrl.mem_to_reg ? in.alu_result : in.read_data;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/hazard_unit.sv",
+     "line": 49,
+     "op": "op_swap",
+     "old": "&& (id_ex_rd == if_id_rs1 || id_ex_rd == if_id_rs2)",
+     "new": "&& (id_ex_rd == if_id_rs1 || id_ex_rd != if_id_rs2)",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 122,
+     "op": "lit_perturb",
+     "old": "is_illegal = 1'b0;",
+     "new": "is_illegal = 1'b1;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 2,
+   "id": "hyp-20261005-002-r6s1",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_beq_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 2,
+   "lint": "pass",
+   "seed": "102:hyp-20261005-002-r6s1",
+   "k": 3,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/mem_stage.sv",
+     "line": 78,
+     "op": "lit_perturb",
+     "old": "2'd1:    byte_mask = (4'b0011 << in.alu_result[1:0]);",
+     "new": "2'd1:    byte_mask = (4'b10 << in.alu_result[1:0]);",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/ex_stage.sv",
+     "line": 82,
+     "op": "op_swap",
+     "old": "branch_target = in.pc + in.imm;",
+     "new": "branch_target = in.pc - in.imm;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/core.sv",
+     "line": 145,
+     "op": "op_swap",
+     "old": ".fwd_mem_wb      (wb_w_data),            // WB-stage's write-mux output",
+     "new": ".fwd_mem_wb      (wb_w_data),            // WB+stage's write-mux output",
+     "formal_blind": false,
+     "comment_only": true
+    }
+   ]
+  },
+  {
+   "rep": 2,
+   "id": "hyp-20261005-003-r6s2",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_jal_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "102:hyp-20261005-003-r6s2",
+   "k": 3,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 190,
+     "op": "lit_perturb",
+     "old": "reg_write  = 1'b1;",
+     "new": "reg_write  = 1'b0;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 127,
+     "op": "lit_perturb",
+     "old": "is_illegal = 1'b0;",
+     "new": "is_illegal = 1'b1;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 168,
+     "op": "lit_perturb",
+     "old": "3'd1:    mem_width = 2'd1;",
+     "new": "3'd1:    mem_width = 2'd0;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 2,
+   "id": "hyp-20261005-001-r7s0",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_jalr_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 3,
+   "lint": "pass",
+   "seed": "102:hyp-20261005-001-r7s0",
+   "k": 2,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/core.sv",
+     "line": 222,
+     "op": "lit_perturb",
+     "old": "io_rvfi_halt_0      = 1'b0;",
+     "new": "io_rvfi_halt_0      = 1'b1;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/ex_stage.sv",
+     "line": 84,
+     "op": "op_swap",
+     "old": "jalr_sum    = rs1 + in.imm;",
+     "new": "jalr_sum    = rs1 - in.imm;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 2,
+   "id": "hyp-20261005-002-r7s1",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_addi_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 5,
+   "lint": "pass",
+   "seed": "102:hyp-20261005-002-r7s1",
+   "k": 3,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/imm_gen.sv",
+     "line": 21,
+     "op": "lit_perturb",
+     "old": "7'b0000011, 7'b0010011, 7'b1100111, 7'b1110011:",
+     "new": "7'b0000011, 7'b10010, 7'b1100111, 7'b1110011:",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/alu.sv",
+     "line": 79,
+     "op": "op_swap",
+     "old": "else if (a == 32'h80000000 && b == 32'hFFFFFFFF)",
+     "new": "else if (a == 32'h80000000 && b != 32'hFFFFFFFF)",
+     "formal_blind": true,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 194,
+     "op": "lit_perturb",
+     "old": "is_illegal = 1'b0;",
+     "new": "is_illegal = 1'b1;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 2,
+   "id": "hyp-20261005-003-r7s2",
+   "gate": "cosim_failed",
+   "detail": "cosim_failed: selftest.elf",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "102:hyp-20261005-003-r7s2",
+   "k": 1,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/core.sv",
+     "line": 225,
+     "op": "lit_perturb",
+     "old": "io_rvfi_ixl_0       = 2'd1;     // 32-bit ISA",
+     "new": "io_rvfi_ixl_0       = 2'd0;     // 32-bit ISA",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 2,
+   "id": "hyp-20261005-001-r8s0",
+   "gate": "cosim_failed",
+   "detail": "cosim_failed: random1.elf [--istall --dstall]",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "102:hyp-20261005-001-r8s0",
+   "k": 1,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/alu.sv",
+     "line": 89,
+     "op": "lit_perturb",
+     "old": "out = 32'b0;",
+     "new": "out = 32'b1;",
+     "formal_blind": true,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 2,
+   "id": "hyp-20261005-002-r8s1",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_jalr_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "102:hyp-20261005-002-r8s1",
+   "k": 3,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 192,
+     "op": "lit_perturb",
+     "old": "7'b1100111: begin // JALR \u2014 funct3 must be 0",
+     "new": "7'b1100110: begin // JALR \u2014 funct3 must be 0",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 57,
+     "op": "lit_perturb",
+     "old": "is_lui     = 1'b0;",
+     "new": "is_lui     = 1'b1;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/forward_unit.sv",
+     "line": 28,
+     "op": "lit_perturb",
+     "old": "else if (mem_wb_w_en && mem_wb_rd != 5'b0 && mem_wb_rd == id_ex_rs1) fwd_rs1 = 2'd2;",
+     "new": "else if (mem_wb_w_en && mem_wb_rd != 5'b0 && mem_wb_rd == id_ex_rs1) fwd_rs1 = 2'd3;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 2,
+   "id": "hyp-20261005-003-r8s2",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_add_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "102:hyp-20261005-003-r8s2",
+   "k": 2,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/ex_stage.sv",
+     "line": 40,
+     "op": "lit_perturb",
+     "old": "2'd1:    rs2 = fwd_ex_mem;",
+     "new": "2'd0:    rs2 = fwd_ex_mem;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/if_stage.sv",
+     "line": 34,
+     "op": "ternary_swap",
+     "old": "next_pc = redirect ? redirect_target : pc + 32'd4;",
+     "new": "next_pc = redirect ? pc + 32'd4 : redirect_target;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 2,
+   "id": "hyp-20261005-001-r9s0",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_add_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "102:hyp-20261005-001-r9s0",
+   "k": 3,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/forward_unit.sv",
+     "line": 34,
+     "op": "op_swap",
+     "old": "else if (mem_wb_w_en && mem_wb_rd != 5'b0 && mem_wb_rd == id_ex_rs2) fwd_rs2 = 2'd2;",
+     "new": "else if (mem_wb_w_en && mem_wb_rd == 5'b0 && mem_wb_rd == id_ex_rs2) fwd_rs2 = 2'd2;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/core.sv",
+     "line": 225,
+     "op": "lit_perturb",
+     "old": "io_rvfi_ixl_0       = 2'd1;     // 32-bit ISA",
+     "new": "io_rvfi_ixl_0       = 2'd0;     // 32-bit ISA",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 58,
+     "op": "lit_perturb",
+     "old": "is_auipc   = 1'b0;",
+     "new": "is_auipc   = 1'b1;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 2,
+   "id": "hyp-20261005-002-r9s1",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_jal_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "102:hyp-20261005-002-r9s1",
+   "k": 2,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 187,
+     "op": "lit_perturb",
+     "old": "7'b1101111: begin // JAL",
+     "new": "7'b1101110: begin // JAL",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/core_pkg.sv",
+     "line": 124,
+     "op": "op_swap",
+     "old": "logic [31:0] mem_addr;       // word-aligned for RVFI ALIGNED_MEM",
+     "new": "logic [31:0] mem_addr;       // word+aligned for RVFI ALIGNED_MEM",
+     "formal_blind": false,
+     "comment_only": true
+    }
+   ]
+  },
+  {
+   "rep": 2,
+   "id": "hyp-20261005-003-r9s2",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_lb_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 2,
+   "lint": "pass",
+   "seed": "102:hyp-20261005-003-r9s2",
+   "k": 2,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/alu.sv",
+     "line": 70,
+     "op": "lit_perturb",
+     "old": "ALU_REMU:   out = (a - b) ^ 32'h3138d0e1;",
+     "new": "ALU_REMU:   out = (a - b) ^ 32'h3138d0e0;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/mem_stage.sv",
+     "line": 84,
+     "op": "op_swap",
+     "old": "(in.ctrl.mem_width == 2'd2 && in.alu_result[1:0] != 2'b00) ||",
+     "new": "(in.ctrl.mem_width != 2'd2 && in.alu_result[1:0] != 2'b00) ||",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 2,
+   "id": "hyp-20261005-001-r10s0",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_lb_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "102:hyp-20261005-001-r10s0",
+   "k": 2,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 143,
+     "op": "op_swap",
+     "old": "funct3 == 3'd4 || funct3 == 3'd5) begin",
+     "new": "funct3 == 3'd4 || funct3 != 3'd5) begin",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 146,
+     "op": "lit_perturb",
+     "old": "mem_to_reg = 1'b1;",
+     "new": "mem_to_reg = 1'b0;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 2,
+   "id": "hyp-20261005-002-r10s1",
+   "gate": "formal_failed",
+   "detail": "formal_failed: causal_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 2,
+   "lint": "pass",
+   "seed": "102:hyp-20261005-002-r10s1",
+   "k": 3,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 187,
+     "op": "lit_perturb",
+     "old": "7'b1101111: begin // JAL",
+     "new": "7'b1101110: begin // JAL",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/forward_unit.sv",
+     "line": 33,
+     "op": "op_swap",
+     "old": "if      (ex_mem_w_en && ex_mem_rd != 5'b0 && ex_mem_rd == id_ex_rs2) fwd_rs2 = 2'd1;",
+     "new": "if      (ex_mem_w_en && ex_mem_rd == 5'b0 && ex_mem_rd == id_ex_rs2) fwd_rs2 = 2'd1;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/core.sv",
+     "line": 215,
+     "op": "op_swap",
+     "old": "rd_wen = mem_wb_w.ctrl.reg_write && (mem_wb_w.rd != 5'b0);",
+     "new": "rd_wen = mem_wb_w.ctrl.reg_write && (mem_wb_w.rd == 5'b0);",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 2,
+   "id": "hyp-20261005-003-r10s2",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_jal_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "102:hyp-20261005-003-r10s2",
+   "k": 2,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 189,
+     "op": "lit_perturb",
+     "old": "is_jump    = 1'b1;",
+     "new": "is_jump    = 1'b0;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 127,
+     "op": "lit_perturb",
+     "old": "is_illegal = 1'b0;",
+     "new": "is_illegal = 1'b1;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 2,
+   "id": "hyp-20261005-001-r11s0",
+   "gate": "formal_failed",
+   "detail": "formal_failed: pc_fwd_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "102:hyp-20261005-001-r11s0",
+   "k": 3,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 218,
+     "op": "lit_perturb",
+     "old": "7'b0001111: begin",
+     "new": "7'b1110: begin",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/alu.sv",
+     "line": 77,
+     "op": "lit_perturb",
+     "old": "if (b == 32'b0)",
+     "new": "if (b == 32'b1)",
+     "formal_blind": true,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/ex_stage.sv",
+     "line": 140,
+     "op": "lit_perturb",
+     "old": "reg_q.pc_next       <= misalign_fault     ? (in.pc + 32'd4)",
+     "new": "reg_q.pc_next       <= misalign_fault     ? (in.pc + 32'd5)",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 2,
+   "id": "hyp-20261005-002-r11s1",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_add_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 2,
+   "lint": "pass",
+   "seed": "102:hyp-20261005-002-r11s1",
+   "k": 2,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/forward_unit.sv",
+     "line": 27,
+     "op": "op_swap",
+     "old": "if      (ex_mem_w_en && ex_mem_rd != 5'b0 && ex_mem_rd == id_ex_rs1) fwd_rs1 = 2'd1;",
+     "new": "if      (ex_mem_w_en && ex_mem_rd != 5'b0 && ex_mem_rd != id_ex_rs1) fwd_rs1 = 2'd1;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/alu.sv",
+     "line": 88,
+     "op": "op_swap",
+     "old": "else if (a == 32'h80000000 && b == 32'hFFFFFFFF)",
+     "new": "else if (a != 32'h80000000 && b == 32'hFFFFFFFF)",
+     "formal_blind": true,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 2,
+   "id": "hyp-20261005-003-r11s2",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_add_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "102:hyp-20261005-003-r11s2",
+   "k": 2,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/core_pkg.sv",
+     "line": 124,
+     "op": "op_swap",
+     "old": "logic [31:0] mem_addr;       // word-aligned for RVFI ALIGNED_MEM",
+     "new": "logic [31:0] mem_addr;       // word+aligned for RVFI ALIGNED_MEM",
+     "formal_blind": false,
+     "comment_only": true
+    },
+    {
+     "file": "cores/bench/rtl/forward_unit.sv",
+     "line": 34,
+     "op": "op_swap",
+     "old": "else if (mem_wb_w_en && mem_wb_rd != 5'b0 && mem_wb_rd == id_ex_rs2) fwd_rs2 = 2'd2;",
+     "new": "else if (mem_wb_w_en && mem_wb_rd == 5'b0 && mem_wb_rd == id_ex_rs2) fwd_rs2 = 2'd2;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 2,
+   "id": "hyp-20261005-001-r12s0",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_addi_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 2,
+   "lint": "pass",
+   "seed": "102:hyp-20261005-001-r12s0",
+   "k": 3,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 121,
+     "op": "lit_perturb",
+     "old": "end else if (funct3 == 3'd1 && funct7 == 7'b0000000) begin // SLLI",
+     "new": "end else if (funct3 == 3'd0 && funct7 == 7'b0000000) begin // SLLI",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 110,
+     "op": "lit_perturb",
+     "old": "reg_write  = 1'b1;",
+     "new": "reg_write  = 1'b0;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/core_pkg.sv",
+     "line": 124,
+     "op": "op_swap",
+     "old": "logic [31:0] mem_addr;       // word-aligned for RVFI ALIGNED_MEM",
+     "new": "logic [31:0] mem_addr;       // word+aligned for RVFI ALIGNED_MEM",
+     "formal_blind": false,
+     "comment_only": true
+    }
+   ]
+  },
+  {
+   "rep": 2,
+   "id": "hyp-20261005-002-r12s1",
+   "gate": "formal_failed",
+   "detail": "formal_failed: ill_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 2,
+   "lint": "pass",
+   "seed": "102:hyp-20261005-002-r12s1",
+   "k": 3,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 65,
+     "op": "lit_perturb",
+     "old": "is_illegal = 1'b1;",
+     "new": "is_illegal = 1'b0;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/alu.sv",
+     "line": 66,
+     "op": "op_swap",
+     "old": "ALU_MULHSU: out = (a - b) ^ 32'hecfbe137;",
+     "new": "ALU_MULHSU: out = (a + b) ^ 32'hecfbe137;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 176,
+     "op": "lit_perturb",
+     "old": "7'b1100011: begin",
+     "new": "7'b1100010: begin",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 2,
+   "id": "hyp-20261005-003-r12s2",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_auipc_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "102:hyp-20261005-003-r12s2",
+   "k": 3,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 168,
+     "op": "lit_perturb",
+     "old": "3'd1:    mem_width = 2'd1;",
+     "new": "3'd1:    mem_width = 2'd0;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 210,
+     "op": "lit_perturb",
+     "old": "7'b0010111: begin // AUIPC",
+     "new": "7'b10110: begin // AUIPC",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 74,
+     "op": "lit_perturb",
+     "old": "(funct7 == 7'b0100000 && (funct3 == 3'd0 || funct3 == 3'd5)) ||",
+     "new": "(funct7 == 7'b0100000 && (funct3 == 3'd1 || funct3 == 3'd5)) ||",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 2,
+   "id": "hyp-20261005-001-r13s0",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_srai_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "102:hyp-20261005-001-r13s0",
+   "k": 3,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 134,
+     "op": "lit_perturb",
+     "old": "alu_src    = 1'b1;",
+     "new": "alu_src    = 1'b0;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/core_pkg.sv",
+     "line": 104,
+     "op": "op_swap",
+     "old": "logic [31:0] rs2_val;        // post-forward rs2 used by EX",
+     "new": "logic [31:0] rs2_val;        // post+forward rs2 used by EX",
+     "formal_blind": false,
+     "comment_only": true
+    },
+    {
+     "file": "cores/bench/rtl/reg_file.sv",
+     "line": 37,
+     "op": "op_swap",
+     "old": "end else if (w_en && w_addr != 5'b0) begin",
+     "new": "end else if (w_en && w_addr == 5'b0) begin",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 2,
+   "id": "hyp-20261005-002-r13s1",
+   "gate": "formal_failed",
+   "detail": "formal_failed: ill_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 2,
+   "lint": "pass",
+   "seed": "102:hyp-20261005-002-r13s1",
+   "k": 3,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/mem_stage.sv",
+     "line": 84,
+     "op": "lit_perturb",
+     "old": "(in.ctrl.mem_width == 2'd2 && in.alu_result[1:0] != 2'b00) ||",
+     "new": "(in.ctrl.mem_width == 2'd3 && in.alu_result[1:0] != 2'b00) ||",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/mem_stage.sv",
+     "line": 146,
+     "op": "ternary_swap",
+     "old": "reg_q.mem_wmask  <= (in.ctrl.mem_write && !mem_misalign) ? byte_mask : 4'b0000;",
+     "new": "reg_q.mem_wmask  <= (in.ctrl.mem_write && !mem_misalign) ? 4'b0000 : byte_mask;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 165,
+     "op": "lit_perturb",
+     "old": "alu_src    = 1'b1;",
+     "new": "alu_src    = 1'b0;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 2,
+   "id": "hyp-20261005-003-r13s2",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_add_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "102:hyp-20261005-003-r13s2",
+   "k": 3,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 162,
+     "op": "op_swap",
+     "old": "if (funct3 == 3'd0 || funct3 == 3'd1 || funct3 == 3'd2) begin",
+     "new": "if (funct3 == 3'd0 || funct3 != 3'd1 || funct3 == 3'd2) begin",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 198,
+     "op": "lit_perturb",
+     "old": "alu_src    = 1'b1;",
+     "new": "alu_src    = 1'b0;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/forward_unit.sv",
+     "line": 33,
+     "op": "op_swap",
+     "old": "if      (ex_mem_w_en && ex_mem_rd != 5'b0 && ex_mem_rd == id_ex_rs2) fwd_rs2 = 2'd1;",
+     "new": "if      (ex_mem_w_en && ex_mem_rd == 5'b0 && ex_mem_rd == id_ex_rs2) fwd_rs2 = 2'd1;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 2,
+   "id": "hyp-20261005-001-r14s0",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_add_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "102:hyp-20261005-001-r14s0",
+   "k": 2,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 131,
+     "op": "lit_perturb",
+     "old": "end else if (funct3 == 3'd5 && funct7 == 7'b0100000) begin // SRAI",
+     "new": "end else if (funct3 == 3'd5 && funct7 == 7'b100001) begin // SRAI",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/forward_unit.sv",
+     "line": 27,
+     "op": "lit_perturb",
+     "old": "if      (ex_mem_w_en && ex_mem_rd != 5'b0 && ex_mem_rd == id_ex_rs1) fwd_rs1 = 2'd1;",
+     "new": "if      (ex_mem_w_en && ex_mem_rd != 5'b1 && ex_mem_rd == id_ex_rs1) fwd_rs1 = 2'd1;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 2,
+   "id": "hyp-20261005-002-r14s1",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_add_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 2,
+   "lint": "pass",
+   "seed": "102:hyp-20261005-002-r14s1",
+   "k": 3,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/ex_stage.sv",
+     "line": 50,
+     "op": "ternary_swap",
+     "old": "alu_a = in.ctrl.is_auipc ? in.pc  : rs1;",
+     "new": "alu_a = in.ctrl.is_auipc ? rs1 : in.pc;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 122,
+     "op": "lit_perturb",
+     "old": "is_illegal = 1'b0;",
+     "new": "is_illegal = 1'b1;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 165,
+     "op": "lit_perturb",
+     "old": "alu_src    = 1'b1;",
+     "new": "alu_src    = 1'b0;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 2,
+   "id": "hyp-20261005-003-r14s2",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_mulhsu_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "102:hyp-20261005-003-r14s2",
+   "k": 2,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/alu.sv",
+     "line": 84,
+     "op": "op_swap",
+     "old": "ALU_DIVU: out = (b == 32'b0) ? 32'hFFFFFFFF : (a / b);",
+     "new": "ALU_DIVU: out = (b != 32'b0) ? 32'hFFFFFFFF : (a / b);",
+     "formal_blind": true,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/alu.sv",
+     "line": 66,
+     "op": "lit_perturb",
+     "old": "ALU_MULHSU: out = (a - b) ^ 32'hecfbe137;",
+     "new": "ALU_MULHSU: out = (a - b) ^ 32'hecfbe136;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 2,
+   "id": "hyp-20261005-001-r15s0",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_beq_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "102:hyp-20261005-001-r15s0",
+   "k": 1,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/if_stage.sv",
+     "line": 28,
+     "op": "lit_perturb",
+     "old": "localparam logic [31:0] RESET_PC = 32'h0000_0000;",
+     "new": "localparam logic [31:0] RESET_PC = 32'h1;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 2,
+   "id": "hyp-20261005-002-r15s1",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_jal_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "102:hyp-20261005-002-r15s1",
+   "k": 1,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/ex_stage.sv",
+     "line": 130,
+     "op": "op_swap",
+     "old": "reg_q.alu_result    <= in.ctrl.is_jump ? (in.pc + 32'd4) : alu_result;",
+     "new": "reg_q.alu_result    <= in.ctrl.is_jump ? (in.pc - 32'd4) : alu_result;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 2,
+   "id": "hyp-20261005-003-r15s2",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_srli_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "102:hyp-20261005-003-r15s2",
+   "k": 1,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 126,
+     "op": "op_swap",
+     "old": "end else if (funct3 == 3'd5 && funct7 == 7'b0000000) begin // SRLI",
+     "new": "end else if (funct3 != 3'd5 && funct7 == 7'b0000000) begin // SRLI",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 3,
+   "id": "hyp-20261005-001-r1s0",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_jal_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "103:hyp-20261005-001-r1s0",
+   "k": 2,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/ex_stage.sv",
+     "line": 102,
+     "op": "lit_perturb",
+     "old": "misalign_jump   = in.ctrl.is_jump && (jump_target[1:0] != 2'b00);",
+     "new": "misalign_jump   = in.ctrl.is_jump && (jump_target[1:0] != 2'b1);",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/alu.sv",
+     "line": 65,
+     "op": "op_swap",
+     "old": "ALU_MULHU:  out = (a + b) ^ 32'h949ce5e8;",
+     "new": "ALU_MULHU:  out = (a - b) ^ 32'h949ce5e8;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 3,
+   "id": "hyp-20261005-002-r1s1",
+   "gate": "formal_failed",
+   "detail": "formal_failed: pc_fwd_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "103:hyp-20261005-002-r1s1",
+   "k": 1,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/ex_stage.sv",
+     "line": 140,
+     "op": "lit_perturb",
+     "old": "reg_q.pc_next       <= misalign_fault     ? (in.pc + 32'd4)",
+     "new": "reg_q.pc_next       <= misalign_fault     ? (in.pc + 32'd5)",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 3,
+   "id": "hyp-20261005-003-r1s2",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_add_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "103:hyp-20261005-003-r1s2",
+   "k": 3,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 121,
+     "op": "lit_perturb",
+     "old": "end else if (funct3 == 3'd1 && funct7 == 7'b0000000) begin // SLLI",
+     "new": "end else if (funct3 == 3'd1 && funct7 == 7'b1) begin // SLLI",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/core.sv",
+     "line": 231,
+     "op": "ternary_swap",
+     "old": "io_rvfi_rd_wdata_0  = rd_wen ? wb_w_data   : 32'b0;",
+     "new": "io_rvfi_rd_wdata_0  = rd_wen ? 32'b0 : wb_w_data;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/mem_stage.sv",
+     "line": 78,
+     "op": "lit_perturb",
+     "old": "2'd1:    byte_mask = (4'b0011 << in.alu_result[1:0]);",
+     "new": "2'd1:    byte_mask = (4'b10 << in.alu_result[1:0]);",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 3,
+   "id": "hyp-20261005-001-r2s0",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_add_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "103:hyp-20261005-001-r2s0",
+   "k": 2,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/wb_stage.sv",
+     "line": 24,
+     "op": "ternary_swap",
+     "old": "w_data = in.ctrl.mem_to_reg ? in.read_data : in.alu_result;",
+     "new": "w_data = in.ctrl.mem_to_reg ? in.alu_result : in.read_data;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/alu.sv",
+     "line": 88,
+     "op": "op_swap",
+     "old": "else if (a == 32'h80000000 && b == 32'hFFFFFFFF)",
+     "new": "else if (a == 32'h80000000 && b != 32'hFFFFFFFF)",
+     "formal_blind": true,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 3,
+   "id": "hyp-20261005-002-r2s1",
+   "gate": "formal_failed",
+   "detail": "formal_failed: reg_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "103:hyp-20261005-002-r2s1",
+   "k": 1,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/reg_file.sv",
+     "line": 37,
+     "op": "op_swap",
+     "old": "end else if (w_en && w_addr != 5'b0) begin",
+     "new": "end else if (w_en && w_addr == 5'b0) begin",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 3,
+   "id": "hyp-20261005-003-r2s2",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_lhu_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "103:hyp-20261005-003-r2s2",
+   "k": 1,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 143,
+     "op": "lit_perturb",
+     "old": "funct3 == 3'd4 || funct3 == 3'd5) begin",
+     "new": "funct3 == 3'd4 || funct3 == 3'd4) begin",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 3,
+   "id": "hyp-20261005-001-r3s0",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_sb_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "103:hyp-20261005-001-r3s0",
+   "k": 3,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 74,
+     "op": "op_swap",
+     "old": "(funct7 == 7'b0100000 && (funct3 == 3'd0 || funct3 == 3'd5)) ||",
+     "new": "(funct7 != 7'b0100000 && (funct3 == 3'd0 || funct3 == 3'd5)) ||",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 153,
+     "op": "lit_perturb",
+     "old": "default:    mem_width = 2'd2;",
+     "new": "default:    mem_width = 2'd3;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 167,
+     "op": "lit_perturb",
+     "old": "3'd0:    mem_width = 2'd0;",
+     "new": "3'd0:    mem_width = 2'd1;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 3,
+   "id": "hyp-20261005-002-r3s1",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_sb_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "103:hyp-20261005-002-r3s1",
+   "k": 3,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/alu.sv",
+     "line": 86,
+     "op": "op_swap",
+     "old": "if (b == 32'b0)",
+     "new": "if (b != 32'b0)",
+     "formal_blind": true,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/imm_gen.sv",
+     "line": 38,
+     "op": "lit_perturb",
+     "old": "imm = 32'b0;",
+     "new": "imm = 32'b1;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 163,
+     "op": "lit_perturb",
+     "old": "is_illegal = 1'b0;",
+     "new": "is_illegal = 1'b1;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 3,
+   "id": "hyp-20261005-003-r3s2",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_beq_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 3,
+   "lint": "pass",
+   "seed": "103:hyp-20261005-003-r3s2",
+   "k": 3,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/ex_stage.sv",
+     "line": 73,
+     "op": "op_swap",
+     "old": "BR_BEQ:  branch_cond = (rs1 == rs2);",
+     "new": "BR_BEQ:  branch_cond = (rs1 != rs2);",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 57,
+     "op": "lit_perturb",
+     "old": "is_lui     = 1'b0;",
+     "new": "is_lui     = 1'b1;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 160,
+     "op": "lit_perturb",
+     "old": "7'b0100011: begin",
+     "new": "7'b100010: begin",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 3,
+   "id": "hyp-20261005-001-r4s0",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_sw_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "103:hyp-20261005-001-r4s0",
+   "k": 1,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 169,
+     "op": "lit_perturb",
+     "old": "3'd2:    mem_width = 2'd2;",
+     "new": "3'd2:    mem_width = 2'd3;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 3,
+   "id": "hyp-20261005-002-r4s1",
+   "gate": "cosim_failed",
+   "detail": "cosim_failed: random2.elf [--istall --dstall]",
+   "fitness": null,
+   "fmax": null,
+   "draws": 2,
+   "lint": "pass",
+   "seed": "103:hyp-20261005-002-r4s1",
+   "k": 1,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/alu.sv",
+     "line": 84,
+     "op": "op_swap",
+     "old": "ALU_DIVU: out = (b == 32'b0) ? 32'hFFFFFFFF : (a / b);",
+     "new": "ALU_DIVU: out = (b != 32'b0) ? 32'hFFFFFFFF : (a / b);",
+     "formal_blind": true,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 3,
+   "id": "hyp-20261005-003-r4s2",
+   "gate": "regression",
+   "detail": "",
+   "fitness": 12.05,
+   "fmax": 5.41,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "103:hyp-20261005-003-r4s2",
+   "k": 1,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 170,
+     "op": "lit_perturb",
+     "old": "default: mem_width = 2'd2;",
+     "new": "default: mem_width = 2'd3;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 3,
+   "id": "hyp-20261005-001-r5s0",
+   "gate": "formal_failed",
+   "detail": "formal_failed: reg_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "103:hyp-20261005-001-r5s0",
+   "k": 3,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/alu.sv",
+     "line": 84,
+     "op": "lit_perturb",
+     "old": "ALU_DIVU: out = (b == 32'b0) ? 32'hFFFFFFFF : (a / b);",
+     "new": "ALU_DIVU: out = (b == 32'b0) ? 32'hfffffffe : (a / b);",
+     "formal_blind": true,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/alu.sv",
+     "line": 88,
+     "op": "op_swap",
+     "old": "else if (a == 32'h80000000 && b == 32'hFFFFFFFF)",
+     "new": "else if (a != 32'h80000000 && b == 32'hFFFFFFFF)",
+     "formal_blind": true,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/reg_file.sv",
+     "line": 37,
+     "op": "op_swap",
+     "old": "end else if (w_en && w_addr != 5'b0) begin",
+     "new": "end else if (w_en && w_addr == 5'b0) begin",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 3,
+   "id": "hyp-20261005-002-r5s1",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_lhu_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "103:hyp-20261005-002-r5s1",
+   "k": 2,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 143,
+     "op": "lit_perturb",
+     "old": "funct3 == 3'd4 || funct3 == 3'd5) begin",
+     "new": "funct3 == 3'd4 || funct3 == 3'd4) begin",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/if_stage.sv",
+     "line": 53,
+     "op": "lit_perturb",
+     "old": "out.instr = (flush || redirect) ? 32'h0000_0013 : imem_data;",
+     "new": "out.instr = (flush || redirect) ? 32'h12 : imem_data;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 3,
+   "id": "hyp-20261005-003-r5s2",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_add_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "103:hyp-20261005-003-r5s2",
+   "k": 2,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/core.sv",
+     "line": 230,
+     "op": "ternary_swap",
+     "old": "io_rvfi_rd_addr_0   = rd_wen ? mem_wb_w.rd : 5'b0;",
+     "new": "io_rvfi_rd_addr_0   = rd_wen ? 5'b0 : mem_wb_w.rd;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/core_pkg.sv",
+     "line": 103,
+     "op": "op_swap",
+     "old": "logic [31:0] rs1_val;        // post-forward rs1 used by EX",
+     "new": "logic [31:0] rs1_val;        // post+forward rs1 used by EX",
+     "formal_blind": false,
+     "comment_only": true
+    }
+   ]
+  },
+  {
+   "rep": 3,
+   "id": "hyp-20261005-001-r6s0",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_divu_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "103:hyp-20261005-001-r6s0",
+   "k": 1,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/alu.sv",
+     "line": 68,
+     "op": "lit_perturb",
+     "old": "ALU_DIVU:   out = (a - b) ^ 32'h10e8fd70;",
+     "new": "ALU_DIVU:   out = (a - b) ^ 32'h10e8fd71;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 3,
+   "id": "hyp-20261005-002-r6s1",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_auipc_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 2,
+   "lint": "pass",
+   "seed": "103:hyp-20261005-002-r6s1",
+   "k": 1,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 211,
+     "op": "lit_perturb",
+     "old": "is_illegal = 1'b0;",
+     "new": "is_illegal = 1'b1;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 3,
+   "id": "hyp-20261005-003-r6s2",
+   "gate": "cosim_failed",
+   "detail": "cosim_failed: selftest.elf [--istall --dstall]",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "103:hyp-20261005-003-r6s2",
+   "k": 1,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/core.sv",
+     "line": 225,
+     "op": "lit_perturb",
+     "old": "io_rvfi_ixl_0       = 2'd1;     // 32-bit ISA",
+     "new": "io_rvfi_ixl_0       = 2'd0;     // 32-bit ISA",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 3,
+   "id": "hyp-20261005-001-r7s0",
+   "gate": "formal_failed",
+   "detail": "formal_failed: ill_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "103:hyp-20261005-001-r7s0",
+   "k": 2,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/mem_stage.sv",
+     "line": 146,
+     "op": "lit_perturb",
+     "old": "reg_q.mem_wmask  <= (in.ctrl.mem_write && !mem_misalign) ? byte_mask : 4'b0000;",
+     "new": "reg_q.mem_wmask  <= (in.ctrl.mem_write && !mem_misalign) ? byte_mask : 4'b1;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/alu.sv",
+     "line": 40,
+     "op": "lit_perturb",
+     "old": "mul_uu = {32'b0, a} * {32'b0, b};",
+     "new": "mul_uu = {32'b0, a} * {32'b1, b};",
+     "formal_blind": true,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 3,
+   "id": "hyp-20261005-002-r7s1",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_jal_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 2,
+   "lint": "pass",
+   "seed": "103:hyp-20261005-002-r7s1",
+   "k": 1,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/ex_stage.sv",
+     "line": 130,
+     "op": "op_swap",
+     "old": "reg_q.alu_result    <= in.ctrl.is_jump ? (in.pc + 32'd4) : alu_result;",
+     "new": "reg_q.alu_result    <= in.ctrl.is_jump ? (in.pc - 32'd4) : alu_result;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 3,
+   "id": "hyp-20261005-003-r7s2",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_sra_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "103:hyp-20261005-003-r7s2",
+   "k": 2,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 224,
+     "op": "lit_perturb",
+     "old": "if (instr == 32'h00100073) begin",
+     "new": "if (instr == 32'h100072) begin",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 86,
+     "op": "lit_perturb",
+     "old": "10'b0100000_101: alu_op = ALU_SRA;",
+     "new": "10'b100000100: alu_op = ALU_SRA;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 3,
+   "id": "hyp-20261005-001-r8s0",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_sub_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "103:hyp-20261005-001-r8s0",
+   "k": 2,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/reg_file.sv",
+     "line": 36,
+     "op": "lit_perturb",
+     "old": "for (int i = 0; i < 32; i++) regs[i] <= 32'b0;",
+     "new": "for (int i = 0; i < 32; i++) regs[i] <= 32'b1;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 80,
+     "op": "lit_perturb",
+     "old": "10'b0100000_000: alu_op = ALU_SUB;",
+     "new": "10'b100000001: alu_op = ALU_SUB;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 3,
+   "id": "hyp-20261005-002-r8s1",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_sh_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "103:hyp-20261005-002-r8s1",
+   "k": 2,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 162,
+     "op": "op_swap",
+     "old": "if (funct3 == 3'd0 || funct3 == 3'd1 || funct3 == 3'd2) begin",
+     "new": "if (funct3 == 3'd0 || funct3 != 3'd1 || funct3 == 3'd2) begin",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/ex_stage.sv",
+     "line": 23,
+     "op": "op_swap",
+     "old": "input  logic [31:0]        fwd_mem_wb,    // WB-stage write-data mux output",
+     "new": "input  logic [31:0]        fwd_mem_wb,    // WB-stage write+data mux output",
+     "formal_blind": false,
+     "comment_only": true
+    }
+   ]
+  },
+  {
+   "rep": 3,
+   "id": "hyp-20261005-003-r8s2",
+   "gate": "regression",
+   "detail": "",
+   "fitness": 11.85,
+   "fmax": 5.323,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "103:hyp-20261005-003-r8s2",
+   "k": 2,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/core_pkg.sv",
+     "line": 28,
+     "op": "lit_perturb",
+     "old": "localparam logic [4:0] ALU_SLL    = 5'd7;",
+     "new": "localparam logic [4:0] ALU_SLL    = 5'd6;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/core_pkg.sv",
+     "line": 27,
+     "op": "lit_perturb",
+     "old": "localparam logic [4:0] ALU_SLTU   = 5'd6;",
+     "new": "localparam logic [4:0] ALU_SLTU   = 5'd7;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 3,
+   "id": "hyp-20261005-001-r9s0",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_jal_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "103:hyp-20261005-001-r9s0",
+   "k": 2,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 189,
+     "op": "lit_perturb",
+     "old": "is_jump    = 1'b1;",
+     "new": "is_jump    = 1'b0;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/ex_stage.sv",
+     "line": 130,
+     "op": "op_swap",
+     "old": "reg_q.alu_result    <= in.ctrl.is_jump ? (in.pc + 32'd4) : alu_result;",
+     "new": "reg_q.alu_result    <= in.ctrl.is_jump ? (in.pc - 32'd4) : alu_result;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 3,
+   "id": "hyp-20261005-002-r9s1",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_beq_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "103:hyp-20261005-002-r9s1",
+   "k": 3,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/core_pkg.sv",
+     "line": 103,
+     "op": "op_swap",
+     "old": "logic [31:0] rs1_val;        // post-forward rs1 used by EX",
+     "new": "logic [31:0] rs1_val;        // post+forward rs1 used by EX",
+     "formal_blind": false,
+     "comment_only": true
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 148,
+     "op": "lit_perturb",
+     "old": "alu_src    = 1'b1;",
+     "new": "alu_src    = 1'b0;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/ex_stage.sv",
+     "line": 101,
+     "op": "op_swap",
+     "old": "&& (branch_target[1:0] != 2'b00);",
+     "new": "&& (branch_target[1:0] == 2'b00);",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 3,
+   "id": "hyp-20261005-003-r9s2",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_beq_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "103:hyp-20261005-003-r9s2",
+   "k": 2,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 181,
+     "op": "lit_perturb",
+     "old": "is_branch  = 1'b1;",
+     "new": "is_branch  = 1'b0;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 122,
+     "op": "lit_perturb",
+     "old": "is_illegal = 1'b0;",
+     "new": "is_illegal = 1'b1;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 3,
+   "id": "hyp-20261005-001-r10s0",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_jal_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "103:hyp-20261005-001-r10s0",
+   "k": 3,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 131,
+     "op": "op_swap",
+     "old": "end else if (funct3 == 3'd5 && funct7 == 7'b0100000) begin // SRAI",
+     "new": "end else if (funct3 != 3'd5 && funct7 == 7'b0100000) begin // SRAI",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/imm_gen.sv",
+     "line": 34,
+     "op": "lit_perturb",
+     "old": "7'b1101111:",
+     "new": "7'b1101110:",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/alu.sv",
+     "line": 86,
+     "op": "op_swap",
+     "old": "if (b == 32'b0)",
+     "new": "if (b != 32'b0)",
+     "formal_blind": true,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 3,
+   "id": "hyp-20261005-002-r10s1",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_jalr_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "103:hyp-20261005-002-r10s1",
+   "k": 1,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/ex_stage.sv",
+     "line": 85,
+     "op": "lit_perturb",
+     "old": "jump_target = in.ctrl.is_jalr ? {jalr_sum[31:1], 1'b0}",
+     "new": "jump_target = in.ctrl.is_jalr ? {jalr_sum[31:1], 1'b1}",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 3,
+   "id": "hyp-20261005-003-r10s2",
+   "gate": "cosim_failed",
+   "detail": "cosim_failed: random1.elf [--istall --dstall]",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "103:hyp-20261005-003-r10s2",
+   "k": 1,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/alu.sv",
+     "line": 93,
+     "op": "op_swap",
+     "old": "ALU_REMU: out = (b == 32'b0) ? a : (a % b);",
+     "new": "ALU_REMU: out = (b != 32'b0) ? a : (a % b);",
+     "formal_blind": true,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 3,
+   "id": "hyp-20261005-001-r11s0",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_lb_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "103:hyp-20261005-001-r11s0",
+   "k": 1,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/mem_stage.sv",
+     "line": 85,
+     "op": "op_swap",
+     "old": "(in.ctrl.mem_width == 2'd1 && in.alu_result[0]   != 1'b0)",
+     "new": "(in.ctrl.mem_width != 2'd1 && in.alu_result[0]   != 1'b0)",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 3,
+   "id": "hyp-20261005-002-r11s1",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_lb_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "103:hyp-20261005-002-r11s1",
+   "k": 3,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 179,
+     "op": "lit_perturb",
+     "old": "if (funct3 != 3'd2 && funct3 != 3'd3) begin",
+     "new": "if (funct3 != 3'd2 && funct3 != 3'd2) begin",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 146,
+     "op": "lit_perturb",
+     "old": "mem_to_reg = 1'b1;",
+     "new": "mem_to_reg = 1'b0;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 121,
+     "op": "op_swap",
+     "old": "end else if (funct3 == 3'd1 && funct7 == 7'b0000000) begin // SLLI",
+     "new": "end else if (funct3 == 3'd1 && funct7 != 7'b0000000) begin // SLLI",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 3,
+   "id": "hyp-20261005-003-r11s2",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_add_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "103:hyp-20261005-003-r11s2",
+   "k": 1,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/forward_unit.sv",
+     "line": 28,
+     "op": "op_swap",
+     "old": "else if (mem_wb_w_en && mem_wb_rd != 5'b0 && mem_wb_rd == id_ex_rs1) fwd_rs1 = 2'd2;",
+     "new": "else if (mem_wb_w_en && mem_wb_rd != 5'b0 && mem_wb_rd != id_ex_rs1) fwd_rs1 = 2'd2;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 3,
+   "id": "hyp-20261005-001-r12s0",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_srai_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "103:hyp-20261005-001-r12s0",
+   "k": 1,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 131,
+     "op": "op_swap",
+     "old": "end else if (funct3 == 3'd5 && funct7 == 7'b0100000) begin // SRAI",
+     "new": "end else if (funct3 == 3'd5 && funct7 != 7'b0100000) begin // SRAI",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 3,
+   "id": "hyp-20261005-002-r12s1",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_beq_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 2,
+   "lint": "pass",
+   "seed": "103:hyp-20261005-002-r12s1",
+   "k": 2,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 179,
+     "op": "op_swap",
+     "old": "if (funct3 != 3'd2 && funct3 != 3'd3) begin",
+     "new": "if (funct3 == 3'd2 && funct3 != 3'd3) begin",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 206,
+     "op": "lit_perturb",
+     "old": "reg_write  = 1'b1;",
+     "new": "reg_write  = 1'b0;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 3,
+   "id": "hyp-20261005-003-r12s2",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_add_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "103:hyp-20261005-003-r12s2",
+   "k": 2,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 181,
+     "op": "lit_perturb",
+     "old": "is_branch  = 1'b1;",
+     "new": "is_branch  = 1'b0;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/ex_stage.sv",
+     "line": 50,
+     "op": "ternary_swap",
+     "old": "alu_a = in.ctrl.is_auipc ? in.pc  : rs1;",
+     "new": "alu_a = in.ctrl.is_auipc ? rs1 : in.pc;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 3,
+   "id": "hyp-20261005-001-r13s0",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_srai_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "103:hyp-20261005-001-r13s0",
+   "k": 3,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 223,
+     "op": "lit_perturb",
+     "old": "7'b1110011: begin",
+     "new": "7'b1110010: begin",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 132,
+     "op": "lit_perturb",
+     "old": "is_illegal = 1'b0;",
+     "new": "is_illegal = 1'b1;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 162,
+     "op": "lit_perturb",
+     "old": "if (funct3 == 3'd0 || funct3 == 3'd1 || funct3 == 3'd2) begin",
+     "new": "if (funct3 == 3'd0 || funct3 == 3'd1 || funct3 == 3'd3) begin",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 3,
+   "id": "hyp-20261005-002-r13s1",
+   "gate": "cosim_failed",
+   "detail": "cosim_failed: random2.elf",
+   "fitness": null,
+   "fmax": null,
+   "draws": 2,
+   "lint": "pass",
+   "seed": "103:hyp-20261005-002-r13s1",
+   "k": 1,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/alu.sv",
+     "line": 93,
+     "op": "lit_perturb",
+     "old": "ALU_REMU: out = (b == 32'b0) ? a : (a % b);",
+     "new": "ALU_REMU: out = (b == 32'b1) ? a : (a % b);",
+     "formal_blind": true,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 3,
+   "id": "hyp-20261005-003-r13s2",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_lb_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 2,
+   "lint": "pass",
+   "seed": "103:hyp-20261005-003-r13s2",
+   "k": 3,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/mem_stage.sv",
+     "line": 85,
+     "op": "lit_perturb",
+     "old": "(in.ctrl.mem_width == 2'd1 && in.alu_result[0]   != 1'b0)",
+     "new": "(in.ctrl.mem_width == 2'd0 && in.alu_result[0]   != 1'b0)",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/reg_file.sv",
+     "line": 37,
+     "op": "op_swap",
+     "old": "end else if (w_en && w_addr != 5'b0) begin",
+     "new": "end else if (w_en && w_addr == 5'b0) begin",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 203,
+     "op": "lit_perturb",
+     "old": "7'b0110111: begin // LUI",
+     "new": "7'b110110: begin // LUI",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 3,
+   "id": "hyp-20261005-001-r14s0",
+   "gate": "regression",
+   "detail": "",
+   "fitness": 12.12,
+   "fmax": 5.442,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "103:hyp-20261005-001-r14s0",
+   "k": 1,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/core_pkg.sv",
+     "line": 126,
+     "op": "op_swap",
+     "old": "logic [31:0] mem_wdata;      // replicated byte-lane write data",
+     "new": "logic [31:0] mem_wdata;      // replicated byte+lane write data",
+     "formal_blind": false,
+     "comment_only": true
+    }
+   ]
+  },
+  {
+   "rep": 3,
+   "id": "hyp-20261005-002-r14s1",
+   "gate": "formal_failed",
+   "detail": "formal_failed: causal_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "103:hyp-20261005-002-r14s1",
+   "k": 2,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/if_stage.sv",
+     "line": 53,
+     "op": "ternary_swap",
+     "old": "out.instr = (flush || redirect) ? 32'h0000_0013 : imem_data;",
+     "new": "out.instr = (flush || redirect) ? imem_data : 32'h0000_0013;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 192,
+     "op": "lit_perturb",
+     "old": "7'b1100111: begin // JALR \u2014 funct3 must be 0",
+     "new": "7'b1100110: begin // JALR \u2014 funct3 must be 0",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 3,
+   "id": "hyp-20261005-003-r14s2",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_beq_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 2,
+   "lint": "pass",
+   "seed": "103:hyp-20261005-003-r14s2",
+   "k": 1,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/ex_stage.sv",
+     "line": 113,
+     "op": "ternary_swap",
+     "old": "assign redirect_target = in.ctrl.is_jump ? jump_target : branch_target;",
+     "new": "assign redirect_target = in.ctrl.is_jump ? branch_target : jump_target;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 3,
+   "id": "hyp-20261005-001-r15s0",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_lb_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "103:hyp-20261005-001-r15s0",
+   "k": 3,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/mem_stage.sv",
+     "line": 98,
+     "op": "lit_perturb",
+     "old": "dmem_wen   = (in.ctrl.mem_write && !mem_misalign) ? byte_mask : 4'b0000;",
+     "new": "dmem_wen   = (in.ctrl.mem_write && !mem_misalign) ? byte_mask : 4'b1;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/forward_unit.sv",
+     "line": 34,
+     "op": "lit_perturb",
+     "old": "else if (mem_wb_w_en && mem_wb_rd != 5'b0 && mem_wb_rd == id_ex_rs2) fwd_rs2 = 2'd2;",
+     "new": "else if (mem_wb_w_en && mem_wb_rd != 5'b0 && mem_wb_rd == id_ex_rs2) fwd_rs2 = 2'd3;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 145,
+     "op": "lit_perturb",
+     "old": "mem_read   = 1'b1;",
+     "new": "mem_read   = 1'b0;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 3,
+   "id": "hyp-20261005-002-r15s1",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_sb_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 3,
+   "lint": "pass",
+   "seed": "103:hyp-20261005-002-r15s1",
+   "k": 2,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 164,
+     "op": "lit_perturb",
+     "old": "mem_write  = 1'b1;",
+     "new": "mem_write  = 1'b0;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 122,
+     "op": "lit_perturb",
+     "old": "is_illegal = 1'b0;",
+     "new": "is_illegal = 1'b1;",
+     "formal_blind": false,
+     "comment_only": false
+    }
+   ]
+  },
+  {
+   "rep": 3,
+   "id": "hyp-20261005-003-r15s2",
+   "gate": "formal_failed",
+   "detail": "formal_failed: insn_add_ch0",
+   "fitness": null,
+   "fmax": null,
+   "draws": 1,
+   "lint": "pass",
+   "seed": "103:hyp-20261005-003-r15s2",
+   "k": 3,
+   "mutations": [
+    {
+     "file": "cores/bench/rtl/wb_stage.sv",
+     "line": 24,
+     "op": "ternary_swap",
+     "old": "w_data = in.ctrl.mem_to_reg ? in.read_data : in.alu_result;",
+     "new": "w_data = in.ctrl.mem_to_reg ? in.alu_result : in.read_data;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/decoder.sv",
+     "line": 194,
+     "op": "lit_perturb",
+     "old": "is_illegal = 1'b0;",
+     "new": "is_illegal = 1'b1;",
+     "formal_blind": false,
+     "comment_only": false
+    },
+    {
+     "file": "cores/bench/rtl/core.sv",
+     "line": 224,
+     "op": "op_swap",
+     "old": "io_rvfi_mode_0      = 2'd3;     // M-mode only",
+     "new": "io_rvfi_mode_0      = 2'd3;     // M+mode only",
+     "formal_blind": false,
+     "comment_only": true
+    }
+   ]
+  }
+ ],
+ "rows": {
+  "1": {
+   "status": "done",
+   "harness_version": "2.8.4",
+   "fixture_commit": "072e7ea85bffbb2baed647301ae61fbf0d91e4aa",
+   "final_fitness": 12.12,
+   "holdout_geomean_iter_s": 308.978259917353,
+   "wall_clock_sec": 12584
+  },
+  "2": {
+   "status": "done",
+   "harness_version": "2.8.4",
+   "fixture_commit": "072e7ea85bffbb2baed647301ae61fbf0d91e4aa",
+   "final_fitness": 12.12,
+   "holdout_geomean_iter_s": 308.978259917353,
+   "wall_clock_sec": 12476
+  },
+  "3": {
+   "status": "done",
+   "harness_version": "2.8.4",
+   "fixture_commit": "072e7ea85bffbb2baed647301ae61fbf0d91e4aa",
+   "final_fitness": 12.12,
+   "holdout_geomean_iter_s": 308.978259917353,
+   "wall_clock_sec": 12653
+  }
+ }
+}

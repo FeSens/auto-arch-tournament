@@ -648,3 +648,38 @@ private trees, the eight RV32M insn checks).
   depth 20; at depth 20 the four divide checks are vacuous (no DIV can
   retire before its 35 cycles end). The depth-48 runs with the fixed spec
   are still going.
+
+## 2026-10-05: amendment 15 part A result, the random control accepts nothing
+
+Three runs of the random-mutation control on harness 2.8.4 (seeds 101 to
+103, N=15, K=3, agent accounts hwebench 1 to 3, started 10:54Z, about 3.5 h
+each), analysis in `research/v2/random_control/analysis.md`
+(`research/v2/scripts/analyze_random.py`, which joins each slot's gate
+outcome with its mutation record from the archived agent log).
+
+- 0 of 135 slots accepted. 117 failed formal, 12 passed formal and failed
+  cosim, 6 passed every gate without improving fitness. Every run ends on
+  V0 (CoreMark 12.12, held-out 309). Every results row is done on 2.8.4,
+  fixture 072e7ea, runner clean, all held-out kernels validated.
+- The fix held: 135 distinct seed materials and 132 distinct edit sets (V1
+  had 3), all lint-clean; k = 1, 2, 3 in 37, 50, 48 slots.
+- First failing formal check: insn_add 34, insn_beq 12, insn_jal 10, ill 6,
+  then a long tail. Most edits land in the decoder (124 of 281).
+- Cosim is the gate that catches what formal does not. Of the 18 slots that
+  passed formal, 8 carry an edit to the real multiplier or divider (the code
+  ALTOPS replaces, or `mul_uu`, which only that code reads); cosim failed all
+  8. The other 4 cosim failures are RVFI or trap behavior outside the
+  configured formal checks: `io_rvfi_ixl_0` set to 0 (three times) and the
+  SYSTEM opcode match changed, which makes EBREAK trap.
+- The 6 that passed every gate are semantic no-ops: a decoder default that a
+  later assignment overrides, two mem_width cases that are never reached, a
+  swap of two ALU opcode constants (both uses change together), and two
+  edits to trailing comments only. Their fitness is V0's or lower (11.85 to
+  12.12, place-and-route noise).
+- Operator flaw: the operators skip whole-line comments but not trailing
+  ones, so 17 of 281 mutations change only a comment and 2 slots make no RTL
+  change at all. It does not change the result.
+
+V1's "0 of 135" holds with 135 independent draws: blind single-line edits to
+V0 do not get through the gates, and the systems' accepted rounds are not
+something the gates hand out to any edit.
