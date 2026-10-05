@@ -56,7 +56,7 @@ DEFAULT_RESULTS = REPO / "bench" / "results.jsonl"
 DEFAULT_OUT = REPO / "site"
 
 BASELINE_FITNESS = 282.82
-SITE_VERSION = "v1 · 2026-09"
+SITE_VERSION = "v2 · 2026-10"
 
 # Models registered for the next field but not yet fully represented in
 # bench/results.jsonl. The status table is rendered on the leaderboard and
@@ -423,7 +423,8 @@ def head(title: str, current: str, stars: Optional[int] = None) -> str:
 <nav class="top">
   <a href="index.html" class="wordmark">HWE <span class="alt">Bench</span></a>
   <ul>
-    <li><a href="index.html"{' aria-current="page"' if current=='index' else ''}>Leaderboard</a></li>
+    <li><a href="v2.html"{' aria-current="page"' if current=='v2' else ''}>V2 results</a></li>
+    <li><a href="index.html"{' aria-current="page"' if current=='index' else ''}>V1 leaderboard</a></li>
     <li><a href="methodology.html"{' aria-current="page"' if current=='methodology' else ''}>Methodology</a></li>
     <li><a href="models.html"{' aria-current="page"' if current=='models' else ''}>Models</a></li>
     <li><a href="data.html"{' aria-current="page"' if current=='data' else ''}>Data</a></li>
@@ -1147,6 +1148,18 @@ def render_index(aggs: list[ModelAgg], reps: list[Rep], stars: Optional[int] = N
     The fitness number reflects an actual microarchitecture, and microarchitecture
     has room to grow as long as models keep finding it.
   </div>
+</section>
+
+<section class="section v2-notice">
+  <div class="eyebrow">V2 results, October 2026</div>
+  <h2>This leaderboard is V1. <a href="v2.html">See V2.</a></h2>
+  <p class="prose">
+    V2 found that V1's open-source timer (nextpnr) misses whole classes of circuit paths, so the
+    Fmax and fitness numbers below overstate many designs. V2 times every design with the FPGA
+    vendor's tool, ranks on hidden programs, and ran six agent systems six times each. Its
+    result is three tiers: Opus 5.5 and Sonnet 5.5, then GPT-6.1 Sol and GPT-6 Astra, then
+    GPT-5.5 and GPT-6 Luna. <a href="v2.html">V2 results</a>
+  </p>
 </section>
 
 {scheduled_html}

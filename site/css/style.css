@@ -399,3 +399,8 @@ figure.chart figcaption {
   table.bench th, table.bench td { padding: var(--s-3) var(--s-2); }
   .hero-block { padding: var(--s-12) 0 var(--s-8); }
 }
+
+/* V2 page and the V2 notice on the V1 home page */
+.tick-cli { color: var(--ink-muted); font-size: var(--text-sm); }
+section.v2-notice { border-left: 3px solid var(--accent); padding-left: var(--s-6); }
+section.v2-notice h2 a { color: var(--accent); }
