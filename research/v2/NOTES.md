@@ -648,6 +648,10 @@ private trees, the eight RV32M insn checks).
   depth 20; at depth 20 the four divide checks are vacuous (no DIV can
   retire before its 35 cycles end). The depth-48 runs with the fixed spec
   are still going.
+- Update 15:30Z: at depth 48 DIVU passes (6,852 s); REMU (vendored spec, no
+  defect) and DIV and REM with the fixed spec all time out at 4 h, with no
+  counterexample. Two of eight instructions proven for one design; the item
+  stops at this pilot (`research/v2/deep_formal/README.md`).
 
 ## 2026-10-05: amendment 15 part A result, the random control accepts nothing
 

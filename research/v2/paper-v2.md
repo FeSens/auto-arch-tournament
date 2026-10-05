@@ -554,8 +554,8 @@ Formal checks run after scoring (exploratory):
   has unsigned arms, and Verilog then evaluates the division unsigned. So the contract's
   `make formal-deep` fails every correct divider; there is no record it was ever run. MUL
   proves in 3 s, DIVU in 1.9 h at depth 48; MULH, MULHSU and MULHU do not finish in 2 h at
-  depth 20. Proving real arithmetic on all 36 finals is out of reach at this cost
-  (`research/v2/deep_formal/`).
+  depth 20, and DIV, REM (fixed spec) and REMU do not finish in 4 h at depth 48. Proving
+  real arithmetic on all 36 finals is out of reach at this cost (`research/v2/deep_formal/`).
 
 ## 8. Limitations to state
 

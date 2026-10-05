@@ -1,0 +1,23 @@
+{
+ "design": "opus_rep1",
+ "rtl_dir": "bench/v2/claude-opus-5_5_xhigh-v2/rep1/final-rtl",
+ "fixture": "hwe-bench-v2.8.4",
+ "depth": 48,
+ "spec_fix": {
+  "insn_div.v": "$unsigned($signed(rvfi_rs1_rdata) / $signed(rvfi_rs2_rdata));",
+  "insn_rem.v": "$unsigned($signed(rvfi_rs1_rdata) % $signed(rvfi_rs2_rdata));"
+ },
+ "started": "2026-10-05T11:29:37.582869+00:00",
+ "seconds": 14400,
+ "checks": {
+  "insn_div_ch0": {
+   "outcome": "TIMEOUT",
+   "seconds": null
+  },
+  "insn_rem_ch0": {
+   "outcome": "TIMEOUT",
+   "seconds": null
+  }
+ },
+ "ended": "2026-10-05T15:29:37.688415+00:00"
+}

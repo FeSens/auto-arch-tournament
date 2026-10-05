@@ -1,0 +1,27 @@
+{
+ "design": "opus_rep1",
+ "rtl_dir": "bench/v2/claude-opus-5_5_xhigh-v2/rep1/final-rtl",
+ "fixture": "hwe-bench-v2.8.4",
+ "depth": 48,
+ "started": "2026-10-05T11:14:42.387034+00:00",
+ "seconds": 14400,
+ "checks": {
+  "insn_div_ch0": {
+   "outcome": "FAIL",
+   "seconds": 219
+  },
+  "insn_divu_ch0": {
+   "outcome": "PASS",
+   "seconds": 6852
+  },
+  "insn_rem_ch0": {
+   "outcome": "FAIL",
+   "seconds": 323
+  },
+  "insn_remu_ch0": {
+   "outcome": "TIMEOUT",
+   "seconds": null
+  }
+ },
+ "ended": "2026-10-05T15:14:42.450412+00:00"
+}
