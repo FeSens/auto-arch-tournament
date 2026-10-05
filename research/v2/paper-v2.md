@@ -131,8 +131,8 @@ external scale.
 | | Hypothesis agent | Implementation agent | Scribe |
 |---|---|---|---|
 | Prompt | full champion RTL, architecture and contract docs, `core.yaml` with the current Fmax, LUT4 and CoreMark, current and V0 fitness, the 4.6% margin, the last 5 slot outcomes (title, outcome, change, Fmax, worst path), the lessons file | the hypothesis, the docs, the full champion RTL; no metrics, history or lessons | one finished slot: its hypothesis, outcome, fitness, notes and RTL diff (8,000 characters) |
-| May write | its hypothesis file only; edits in its scratch worktree are discarded | `cores/bench/rtl/`, the cocotb tests, its notes | one appended line in `LESSONS.md` |
-| May run | Gowin timing, simulation | lint, formal, Gowin timing, cosim | nothing |
+| May write | its hypothesis file only; edits in its scratch worktree are discarded | `cores/bench/rtl/`, the cocotb tests, `core.yaml`, its notes | one appended line in `LESSONS.md` (a rewrite is reverted) |
+| Tools the prompt names | Gowin timing, simulation | lint, formal, Gowin timing, cosim | none (it may read files) |
 | Wall clock | 20 min | 30 min | 4 min |
 
 - Search is greedy: K = 3 slots per round, N = 15 rounds. The best slot that beats the
