@@ -575,7 +575,7 @@ explained it:
   same RTL and applies the same edit.
 - Under V2's agent accounts the runner's seed (`RANDOM_AGENT_SEED`, 100 +
   rep) is dropped by the environment allowlist, so the seed is 0 in every
-  run. Replaying `0:no-id` on V0 reproduces the smoke exactly: register
+  run. Replaying `0:no-id` on V0 reproduces the smoke exactly: second-operand
   reads of x1..x31 return zero (`reg_file.sv:50` `==` to `!=`), an ALTOPS
   DIVU formula and a decoder bit. 46 of 53 formal checks fail.
 - V1's control (EXP-2026-07-e1b-random-control) had the first defect but
