@@ -500,3 +500,22 @@ Analysis: `research/v2/xfpga/results/analysis.md` (exploratory).
   produce designs specialized to that part. The V2 ranking is a ranking on
   the Gowin contract; across FPGAs only the split between the top four and
   {GPT-5.5, Luna} holds.
+
+## 2026-10-05 01:36Z: agent-side cosim runaway, operator kill (amendment 14 ablation)
+
+An implementation agent of ablation rep4 (hwebench2, round 3) ran the harness
+cosim script on a probe build of its candidate (`test/cosim/run_cosim.py
+.../micro_earlyfwd_probe/obj_dir/cosim_sim`). The process grew to 56 GB in
+about 80 s, the class of the 09-30 eval runaway and the 10-02 agent near miss.
+At 01:36:33Z the memory watch reported 3,988 MB available (swap 2.5 GB used);
+the operator killed that one process at 01:36:47Z (SIGKILL), and available
+memory returned to 57 GB. No kernel OOM kill happened, every runner and
+orchestrator kept running, and the slot itself continued (the agent sees its
+own probe command fail; a design that drives the trace to that size never
+reaches `ebreak`, so it would have failed cosim anyway).
+
+The operator's cosim guard only watched bench-owned processes. It now also
+covers the agent accounts with the same rule (MemAvailable under 4 GB and a
+`run_cosim.py` over 20 GB resident), so this class no longer depends on the
+operator's reaction time. A per-account memory cap is still a V3 item (V3.md
+item 6). Snapshot of the guard: `research/v2/scripts/ops/cosim_guard.sh`.
