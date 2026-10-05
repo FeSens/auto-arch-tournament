@@ -602,3 +602,21 @@ run is affected. Part A runs on 2.8.4 after smoke21.
 V3 item: a control's behavior needs a check of its own, not only its
 outcome. Here the outcome (everything fails formal) was the predicted
 one, which is why V1 never noticed that the 135 slots were 3 draws.
+
+## 2026-10-05: placement robustness, the ranking does not depend on the Gowin setting
+
+The score's Fmax is the median over place_option 0, 1, 2 with the default
+router, and options 1 and 2 build identically (gowin calibration), so it is
+in effect option 1. This Gowin version rejects place_option 3 and 4; the only
+other settings that change a build are route_option 1 and 2. All 42 finals
+(36 scored plus the 6 no-lessons) were rebuilt under place {0, 1} x route
+{1, 2}: 168 builds plus V0 and the textbook edit, none failing. The flow
+reproduces the scored Fmax exactly for the default router (V0 5.140 and
+5.442, textbook 47.562 and 46.590). `research/v2/placement/`.
+
+- Per design, the SD of ln Fmax over the six settings has median 0.022
+  (max 0.075).
+- Every view (scored, median of six, best, worst, each setting alone) gives
+  the same system order, Opus vs Sol 1.283 to 1.334 (every p < 0.001), and
+  the same 9 of 12 extension pairs separating. The three that never separate
+  are the scored result's: Opus vs Sonnet 5.5, Sol vs Astra, GPT-5.5 vs Luna.
