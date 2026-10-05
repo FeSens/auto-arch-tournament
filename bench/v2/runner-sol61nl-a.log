@@ -1,0 +1,20 @@
+[preflight] toolchain:
+  verilator            /opt/hwe-toolchain/oss-cad-suite/bin/verilator
+  yosys                /opt/hwe-toolchain/oss-cad-suite/bin/yosys
+  sby                  /opt/hwe-toolchain/oss-cad-suite/bin/sby
+  bitwuzla             /opt/hwe-toolchain/oss-cad-suite/bin/bitwuzla
+  gw_sh                /opt/gowin/IDE/bin/gw_sh
+  GowinSynthesis       /opt/gowin/IDE/bin/GowinSynthesis
+[bench] 2 job(s) queued (0 already done)
+        - gpt-6_1-sol_xhigh-v2-nolessons-rep1  ->  codex:gpt-6.1-sol  (cli cli/codex-0.159.0)
+        - gpt-6_1-sol_xhigh-v2-nolessons-rep2  ->  codex:gpt-6.1-sol  (cli cli/codex-0.159.0)
+[bench] config: N=15 K=3 reps=2 parallel=1
+[bench] clone base: /srv/hwebench/clones
+[bench] results: /home/bench/auto-arch-tournament/bench/v2/results-sol61nl-a.jsonl
+
+[bench] === gpt-6_1-sol_xhigh-v2-nolessons-rep1 starting at 2026-10-04T13:47:32+00:00 ===
+[bench] gpt-6_1-sol_xhigh-v2-nolessons-rep1 sandbox probe: confined
+[bench] === gpt-6_1-sol_xhigh-v2-nolessons-rep1 done in 36931s, fitness=174.88, cost=$0.00 ===
+
+[bench] === gpt-6_1-sol_xhigh-v2-nolessons-rep2 starting at 2026-10-05T00:03:03+00:00 ===
+[bench] gpt-6_1-sol_xhigh-v2-nolessons-rep2 sandbox probe: confined
