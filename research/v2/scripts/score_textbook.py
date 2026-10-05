@@ -77,6 +77,7 @@ def score(design: str) -> dict:
     from tools.eval.cosim import run_cosim
     from tools.eval.fpga import run_fpga_eval, measure_fmax
     from tools.eval.holdout import run_holdout
+    from tools.tournament import _machine_lock
 
     tree = make_tree(design)
     wt = str(tree)
@@ -85,7 +86,10 @@ def score(design: str) -> dict:
     build = timed(rec, "build", lambda: emit_verilog(wt, target=TARGET))
     rec["build"] = build if isinstance(build, dict) else {"ok": build[0], "reason": build[1][-2000:]}
     rec["ch0_contract"] = check_ch0_contract(tree / "cores" / TARGET / "rtl")
-    rec["formal"] = timed(rec, "formal", lambda: run_formal(wt, target=TARGET))
+    # The tournament's machine-wide formal lock, so this never runs formal
+    # next to a runner's formal gate (tools/tournament.py:_machine_lock).
+    with _machine_lock("formal"):
+        rec["formal"] = timed(rec, "formal", lambda: run_formal(wt, target=TARGET))
     rec["cosim"] = timed(rec, "cosim", lambda: run_cosim(wt, target=TARGET))
     fpga = timed(rec, "fpga", lambda: run_fpga_eval(wt, target=TARGET))
     rec["fpga"] = {k: v for k, v in fpga.items() if k != "critical_paths"} | (
