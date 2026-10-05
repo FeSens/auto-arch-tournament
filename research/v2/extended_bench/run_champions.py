@@ -14,7 +14,10 @@ re-measured champion Fmax its held-out score used).
 Check: for the five held-out kernels the cycle counts must equal the ones in
 the run's results row (holdout_kernels); a mismatch is reported per run.
 
-    nice -n 19 python3 -B run_champions.py [--jobs 4]
+    nice -n 19 python3 -B run_champions.py [--jobs 4] [--ablation]
+
+--ablation runs the amendment 14 no-lessons finals instead
+(results-sol61nl-*.jsonl) and writes results/ablation_champions.json.
 """
 import json
 import math
@@ -31,16 +34,17 @@ ELFS = Path.home() / "extbench/elfs"
 SIMS = Path.home() / "extbench/sims"
 RESULTS = ["results.jsonl", "results-opus-luna.jsonl", "results-sol61.jsonl", "results-astra.jsonl",
            "results-sonnet55.jsonl", "results-gpt55.jsonl"]
+ABLATION = ["results-sol61nl-a.jsonl", "results-sol61nl-b.jsonl", "results-sol61nl-c.jsonl"]
 RESCORED = REPO / "research/runs/EXP-2026-09-28-v2-main/incident_08/holdout_rescored.jsonl"
 STATUS = re.compile(r"HOLDOUT\s+(\S+)\s+reps=(\d+)\s+status=(PASS|FAIL)")
 ENV = {**os.environ, "PATH": "/opt/hwe-toolchain/oss-cad-suite/bin:" + os.environ["PATH"]}
 
 
-def runs() -> list[dict]:
+def runs(files: list[str] = RESULTS) -> list[dict]:
     """Finished runs (a later results file's row wins), with incident 08's
     rescored held-out numbers where the runner had none."""
     done = {}
-    for f in RESULTS:
+    for f in files:
         for line in (REPO / "bench/v2" / f).read_text().splitlines():
             try:
                 r = json.loads(line)
@@ -127,11 +131,13 @@ def one(r: dict) -> dict:
 
 def main(argv):
     jobs = int(argv[argv.index("--jobs") + 1]) if "--jobs" in argv else 4
-    rs = runs()
+    abl = "--ablation" in argv
+    rs = runs(ABLATION if abl else RESULTS)
     with ThreadPoolExecutor(max_workers=jobs) as ex:
         res = list(ex.map(one, rs))
     (HERE / "results").mkdir(exist_ok=True)
-    (HERE / "results/champions.json").write_text(json.dumps(res, indent=1))
+    out = "results/ablation_champions.json" if abl else "results/champions.json"
+    (HERE / out).write_text(json.dumps(res, indent=1))
     bad = [f"{r['model']} rep{r['rep']}" for r in res
            if r.get("error") or not all(c["match"] for c in r["check"].values())]
     print("runs", len(res), "| build errors or held-out mismatches:", bad or "none")

@@ -561,6 +561,11 @@ bundle's history, no `lesson` field, no scribe run, no secrets). Analysis:
   different host load. Tokens are about equal (135M vs 138M in per run).
 - Not matched (amendment 14 `not_matched`): different dates, harness 2.8.3
   vs 2.8.2 (no behavior change outside the scribe), three runs at once.
+- Exploratory, same answer: on the 15 extended-suite kernels no agent saw,
+  full / no lessons 1.024 [0.901, 1.164], p = 0.67 (all 120 kernel runs of
+  the six no-lessons finals correct and in range, held-out cycles 30 of 30
+  reproduced; `research/v2/extended_bench/results/ablation.md`). On
+  Artix-7, 1.147 [0.923, 1.426], p = 0.19 (`research/v2/xfpga/results/analysis.md`).
 
 ## 2026-10-05: the random-mutation control drew one mutation set per run, in V1 too (amendment 16)
 

@@ -1,0 +1,1172 @@
+[
+ {
+  "model": "gpt-6_1-sol_xhigh-v2-nolessons",
+  "rep": 1,
+  "fmax_mhz": 70.381,
+  "holdout_geomean_iter_s": 4374.324643002022,
+  "kernels": {
+   "aha-mont64": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2805265,
+    "reps": 200,
+    "iter_s": 5017.779069000611
+   },
+   "crc32": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2933746,
+    "reps": 90,
+    "iter_s": 2159.113297470197
+   },
+   "depthconv": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2513738,
+    "reps": 874,
+    "iter_s": 24470.72606612145
+   },
+   "dhrystone": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 3022674,
+    "reps": 6000,
+    "iter_s": 139706.1012864768
+   },
+   "edn": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2585864,
+    "reps": 50,
+    "iter_s": 1360.8797678454862
+   },
+   "huffbench": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2448141,
+    "reps": 8,
+    "iter_s": 229.99002099960745
+   },
+   "matmult-int": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 1357731,
+    "reps": 15,
+    "iter_s": 777.5582939477703
+   },
+   "md5sum": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2502092,
+    "reps": 39,
+    "iter_s": 1097.0256089704135
+   },
+   "nettle-aes": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2715235,
+    "reps": 39,
+    "iter_s": 1010.9102895329502
+   },
+   "nettle-sha256": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2677564,
+    "reps": 240,
+    "iter_s": 6308.510272770324
+   },
+   "nsichneu": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2230741,
+    "reps": 681,
+    "iter_s": 21485.89235594809
+   },
+   "picojpeg": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2282398,
+    "reps": 3,
+    "iter_s": 92.50928190438302
+   },
+   "qrduino": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2310189,
+    "reps": 3,
+    "iter_s": 91.39641821513305
+   },
+   "sglib-combined": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2284797,
+    "reps": 19,
+    "iter_s": 585.2769414525667
+   },
+   "slre": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2419858,
+    "reps": 75,
+    "iter_s": 2181.3573358436734
+   },
+   "statemate": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2567690,
+    "reps": 1795,
+    "iter_s": 49201.381397287056
+   },
+   "tarfind": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2409339,
+    "reps": 32,
+    "iter_s": 934.7758866643507
+   },
+   "ud": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2051725,
+    "reps": 926,
+    "iter_s": 31764.88369542702
+   },
+   "wikisort": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2616582,
+    "reps": 2,
+    "iter_s": 53.79613556922734
+   },
+   "xgboost": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 4848340,
+    "reps": 1,
+    "iter_s": 14.51651493088356
+   }
+  },
+  "check": {
+   "aha-mont64": {
+    "scored_cycles": 2805265,
+    "cycles": 2805265,
+    "match": true
+   },
+   "crc32": {
+    "scored_cycles": 2933746,
+    "cycles": 2933746,
+    "match": true
+   },
+   "dhrystone": {
+    "scored_cycles": 3022674,
+    "cycles": 3022674,
+    "match": true
+   },
+   "edn": {
+    "scored_cycles": 2585864,
+    "cycles": 2585864,
+    "match": true
+   },
+   "matmult-int": {
+    "scored_cycles": 1357731,
+    "cycles": 1357731,
+    "match": true
+   }
+  }
+ },
+ {
+  "model": "gpt-6_1-sol_xhigh-v2-nolessons",
+  "rep": 2,
+  "fmax_mhz": 81.537,
+  "holdout_geomean_iter_s": 4958.338980777682,
+  "kernels": {
+   "aha-mont64": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2769051,
+    "reps": 200,
+    "iter_s": 5889.165638336022
+   },
+   "crc32": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2796851,
+    "reps": 90,
+    "iter_s": 2623.782961623626
+   },
+   "depthconv": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2570522,
+    "reps": 874,
+    "iter_s": 27723.294334769358
+   },
+   "dhrystone": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 3197905,
+    "reps": 6000,
+    "iter_s": 152982.0304230426
+   },
+   "edn": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2724402,
+    "reps": 50,
+    "iter_s": 1496.420131830765
+   },
+   "huffbench": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2550328,
+    "reps": 8,
+    "iter_s": 255.7694539682739
+   },
+   "matmult-int": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 1443579,
+    "reps": 15,
+    "iter_s": 847.2380105280002
+   },
+   "md5sum": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2595750,
+    "reps": 39,
+    "iter_s": 1225.0574978329962
+   },
+   "nettle-aes": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2941584,
+    "reps": 39,
+    "iter_s": 1081.030832367867
+   },
+   "nettle-sha256": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2753190,
+    "reps": 240,
+    "iter_s": 7107.71141839103
+   },
+   "nsichneu": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2464830,
+    "reps": 681,
+    "iter_s": 22527.597035089642
+   },
+   "picojpeg": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2379360,
+    "reps": 3,
+    "iter_s": 102.80537623562638
+   },
+   "qrduino": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2367639,
+    "reps": 3,
+    "iter_s": 103.31431438661046
+   },
+   "sglib-combined": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2342200,
+    "reps": 19,
+    "iter_s": 661.4307061736829
+   },
+   "slre": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2453241,
+    "reps": 75,
+    "iter_s": 2492.733082481501
+   },
+   "statemate": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2731791,
+    "reps": 1795,
+    "iter_s": 53576.175849470186
+   },
+   "tarfind": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2448517,
+    "reps": 32,
+    "iter_s": 1065.6180863763657
+   },
+   "ud": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2615394,
+    "reps": 926,
+    "iter_s": 28868.790706103937
+   },
+   "wikisort": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2584043,
+    "reps": 2,
+    "iter_s": 63.10808295372794
+   },
+   "xgboost": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 5064641,
+    "reps": 1,
+    "iter_s": 16.099265476072244
+   }
+  },
+  "check": {
+   "aha-mont64": {
+    "scored_cycles": 2769051,
+    "cycles": 2769051,
+    "match": true
+   },
+   "crc32": {
+    "scored_cycles": 2796851,
+    "cycles": 2796851,
+    "match": true
+   },
+   "dhrystone": {
+    "scored_cycles": 3197905,
+    "cycles": 3197905,
+    "match": true
+   },
+   "edn": {
+    "scored_cycles": 2724402,
+    "cycles": 2724402,
+    "match": true
+   },
+   "matmult-int": {
+    "scored_cycles": 1443579,
+    "cycles": 1443579,
+    "match": true
+   }
+  }
+ },
+ {
+  "model": "gpt-6_1-sol_xhigh-v2-nolessons",
+  "rep": 3,
+  "fmax_mhz": 107.897,
+  "holdout_geomean_iter_s": 5651.707091098646,
+  "kernels": {
+   "aha-mont64": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2872465,
+    "reps": 200,
+    "iter_s": 7512.502328139769
+   },
+   "crc32": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 3258575,
+    "reps": 90,
+    "iter_s": 2980.054164780617
+   },
+   "depthconv": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 3191840,
+    "reps": 874,
+    "iter_s": 29544.70712817685
+   },
+   "dhrystone": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 3257901,
+    "reps": 6000,
+    "iter_s": 198711.3788908871
+   },
+   "edn": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 3721201,
+    "reps": 50,
+    "iter_s": 1449.760440244964
+   },
+   "huffbench": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2608111,
+    "reps": 8,
+    "iter_s": 330.9583066058155
+   },
+   "matmult-int": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 1810215,
+    "reps": 15,
+    "iter_s": 894.0678317216464
+   },
+   "md5sum": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2605303,
+    "reps": 39,
+    "iter_s": 1615.1606934011131
+   },
+   "nettle-aes": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2944191,
+    "reps": 39,
+    "iter_s": 1429.249325196633
+   },
+   "nettle-sha256": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2756103,
+    "reps": 240,
+    "iter_s": 9395.614024584713
+   },
+   "nsichneu": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2472157,
+    "reps": 681,
+    "iter_s": 29722.16449036206
+   },
+   "picojpeg": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2563045,
+    "reps": 3,
+    "iter_s": 126.29157896174277
+   },
+   "qrduino": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2564220,
+    "reps": 3,
+    "iter_s": 126.23370849615088
+   },
+   "sglib-combined": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2483885,
+    "reps": 19,
+    "iter_s": 825.3373243930375
+   },
+   "slre": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2549100,
+    "reps": 75,
+    "iter_s": 3174.561609979993
+   },
+   "statemate": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2736348,
+    "reps": 1795,
+    "iter_s": 70778.68567886834
+   },
+   "tarfind": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2797671,
+    "reps": 32,
+    "iter_s": 1234.135107380389
+   },
+   "ud": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2926291,
+    "reps": 926,
+    "iter_s": 34143.09171575896
+   },
+   "wikisort": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2829527,
+    "reps": 2,
+    "iter_s": 76.26504359209154
+   },
+   "xgboost": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 5194563,
+    "reps": 1,
+    "iter_s": 20.771140902516727
+   }
+  },
+  "check": {
+   "aha-mont64": {
+    "scored_cycles": 2872465,
+    "cycles": 2872465,
+    "match": true
+   },
+   "crc32": {
+    "scored_cycles": 3258575,
+    "cycles": 3258575,
+    "match": true
+   },
+   "dhrystone": {
+    "scored_cycles": 3257901,
+    "cycles": 3257901,
+    "match": true
+   },
+   "edn": {
+    "scored_cycles": 3721201,
+    "cycles": 3721201,
+    "match": true
+   },
+   "matmult-int": {
+    "scored_cycles": 1810215,
+    "cycles": 1810215,
+    "match": true
+   }
+  }
+ },
+ {
+  "model": "gpt-6_1-sol_xhigh-v2-nolessons",
+  "rep": 4,
+  "fmax_mhz": 91.186,
+  "holdout_geomean_iter_s": 5319.526230732218,
+  "kernels": {
+   "aha-mont64": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2883801,
+    "reps": 200,
+    "iter_s": 6324.014729171673
+   },
+   "crc32": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 3335966,
+    "reps": 90,
+    "iter_s": 2460.079029582436
+   },
+   "depthconv": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2807913,
+    "reps": 874,
+    "iter_s": 28382.846619535576
+   },
+   "dhrystone": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 3209589,
+    "reps": 6000,
+    "iter_s": 170462.94712500574
+   },
+   "edn": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2714968,
+    "reps": 50,
+    "iter_s": 1679.3199772520338
+   },
+   "huffbench": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2569984,
+    "reps": 8,
+    "iter_s": 283.84923797190953
+   },
+   "matmult-int": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 1430079,
+    "reps": 15,
+    "iter_s": 956.4436650003252
+   },
+   "md5sum": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2584008,
+    "reps": 39,
+    "iter_s": 1376.2550270742197
+   },
+   "nettle-aes": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2921743,
+    "reps": 39,
+    "iter_s": 1217.168655833179
+   },
+   "nettle-sha256": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2740027,
+    "reps": 240,
+    "iter_s": 7987.01618633685
+   },
+   "nsichneu": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2326088,
+    "reps": 681,
+    "iter_s": 26696.18088395624
+   },
+   "picojpeg": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2381677,
+    "reps": 3,
+    "iter_s": 114.85940368908126
+   },
+   "qrduino": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2397933,
+    "reps": 3,
+    "iter_s": 114.08075204770108
+   },
+   "sglib-combined": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2412690,
+    "reps": 19,
+    "iter_s": 718.0922538743063
+   },
+   "slre": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2493378,
+    "reps": 75,
+    "iter_s": 2742.8452484942113
+   },
+   "statemate": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2693750,
+    "reps": 1795,
+    "iter_s": 60762.457540603245
+   },
+   "tarfind": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2681167,
+    "reps": 32,
+    "iter_s": 1088.3141557389004
+   },
+   "ud": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2660656,
+    "reps": 926,
+    "iter_s": 31735.87115358017
+   },
+   "wikisort": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2781713,
+    "reps": 2,
+    "iter_s": 65.56104098445813
+   },
+   "xgboost": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 5113290,
+    "reps": 1,
+    "iter_s": 17.83313678668724
+   }
+  },
+  "check": {
+   "aha-mont64": {
+    "scored_cycles": 2883801,
+    "cycles": 2883801,
+    "match": true
+   },
+   "crc32": {
+    "scored_cycles": 3335966,
+    "cycles": 3335966,
+    "match": true
+   },
+   "dhrystone": {
+    "scored_cycles": 3209589,
+    "cycles": 3209589,
+    "match": true
+   },
+   "edn": {
+    "scored_cycles": 2714968,
+    "cycles": 2714968,
+    "match": true
+   },
+   "matmult-int": {
+    "scored_cycles": 1430079,
+    "cycles": 1430079,
+    "match": true
+   }
+  }
+ },
+ {
+  "model": "gpt-6_1-sol_xhigh-v2-nolessons",
+  "rep": 5,
+  "fmax_mhz": 92.886,
+  "holdout_geomean_iter_s": 5239.085812789465,
+  "kernels": {
+   "aha-mont64": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2809849,
+    "reps": 200,
+    "iter_s": 6611.458480509095
+   },
+   "crc32": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 3032543,
+    "reps": 90,
+    "iter_s": 2756.676492303654
+   },
+   "depthconv": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2880131,
+    "reps": 874,
+    "iter_s": 28187.03871455847
+   },
+   "dhrystone": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 3002054,
+    "reps": 6000,
+    "iter_s": 185644.89512846872
+   },
+   "edn": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 3377404,
+    "reps": 50,
+    "iter_s": 1375.1094035537353
+   },
+   "huffbench": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2420567,
+    "reps": 8,
+    "iter_s": 306.98923020928567
+   },
+   "matmult-int": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 1642356,
+    "reps": 15,
+    "iter_s": 848.3483483483484
+   },
+   "md5sum": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2515804,
+    "reps": 39,
+    "iter_s": 1439.9190079990333
+   },
+   "nettle-aes": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2745179,
+    "reps": 39,
+    "iter_s": 1319.6057524846285
+   },
+   "nettle-sha256": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2690369,
+    "reps": 240,
+    "iter_s": 8286.090123696786
+   },
+   "nsichneu": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2143823,
+    "reps": 681,
+    "iter_s": 29505.871520176806
+   },
+   "picojpeg": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2396486,
+    "reps": 3,
+    "iter_s": 116.27775000563325
+   },
+   "qrduino": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2375798,
+    "reps": 3,
+    "iter_s": 117.29027467823443
+   },
+   "sglib-combined": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2235520,
+    "reps": 19,
+    "iter_s": 789.4512238763241
+   },
+   "slre": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2346169,
+    "reps": 75,
+    "iter_s": 2969.287378701193
+   },
+   "statemate": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2547885,
+    "reps": 1795,
+    "iter_s": 65438.7344797744
+   },
+   "tarfind": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2546371,
+    "reps": 32,
+    "iter_s": 1167.289448395383
+   },
+   "ud": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2209703,
+    "reps": 926,
+    "iter_s": 38924.88538052399
+   },
+   "wikisort": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2538317,
+    "reps": 2,
+    "iter_s": 73.18707631867888
+   },
+   "xgboost": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 4771331,
+    "reps": 1,
+    "iter_s": 19.46752384187976
+   }
+  },
+  "check": {
+   "aha-mont64": {
+    "scored_cycles": 2809849,
+    "cycles": 2809849,
+    "match": true
+   },
+   "crc32": {
+    "scored_cycles": 3032543,
+    "cycles": 3032543,
+    "match": true
+   },
+   "dhrystone": {
+    "scored_cycles": 3002054,
+    "cycles": 3002054,
+    "match": true
+   },
+   "edn": {
+    "scored_cycles": 3377404,
+    "cycles": 3377404,
+    "match": true
+   },
+   "matmult-int": {
+    "scored_cycles": 1642356,
+    "cycles": 1642356,
+    "match": true
+   }
+  }
+ },
+ {
+  "model": "gpt-6_1-sol_xhigh-v2-nolessons",
+  "rep": 6,
+  "fmax_mhz": 97.373,
+  "holdout_geomean_iter_s": 5874.878246247343,
+  "kernels": {
+   "aha-mont64": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2818634,
+    "reps": 200,
+    "iter_s": 6909.233337850888
+   },
+   "crc32": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 3051840,
+    "reps": 90,
+    "iter_s": 2871.5692827933312
+   },
+   "depthconv": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2532685,
+    "reps": 874,
+    "iter_s": 33602.284532028265
+   },
+   "dhrystone": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 3101452,
+    "reps": 6000,
+    "iter_s": 188375.6382494393
+   },
+   "edn": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2680867,
+    "reps": 50,
+    "iter_s": 1816.0729346140633
+   },
+   "huffbench": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2498447,
+    "reps": 8,
+    "iter_s": 311.78728225973975
+   },
+   "matmult-int": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 1416585,
+    "reps": 15,
+    "iter_s": 1031.0676733129321
+   },
+   "md5sum": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2527800,
+    "reps": 39,
+    "iter_s": 1502.3130785663423
+   },
+   "nettle-aes": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2857497,
+    "reps": 39,
+    "iter_s": 1328.9767233351427
+   },
+   "nettle-sha256": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2755259,
+    "reps": 240,
+    "iter_s": 8481.787011674765
+   },
+   "nsichneu": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2472601,
+    "reps": 681,
+    "iter_s": 26818.323295994785
+   },
+   "picojpeg": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2408737,
+    "reps": 3,
+    "iter_s": 121.27475934483508
+   },
+   "qrduino": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2375360,
+    "reps": 3,
+    "iter_s": 122.97883268220396
+   },
+   "sglib-combined": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2356454,
+    "reps": 19,
+    "iter_s": 785.1148378029021
+   },
+   "slre": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2493878,
+    "reps": 75,
+    "iter_s": 2928.360970344179
+   },
+   "statemate": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2590166,
+    "reps": 1795,
+    "iter_s": 67480.05147160453
+   },
+   "tarfind": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2463617,
+    "reps": 32,
+    "iter_s": 1264.7810110094224
+   },
+   "ud": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2644991,
+    "reps": 926,
+    "iter_s": 34089.86949293967
+   },
+   "wikisort": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 2661231,
+    "reps": 2,
+    "iter_s": 73.1789160730504
+   },
+   "xgboost": {
+    "valid": true,
+    "correct": true,
+    "oob": false,
+    "cycles": 4885762,
+    "reps": 1,
+    "iter_s": 19.92995156129177
+   }
+  },
+  "check": {
+   "aha-mont64": {
+    "scored_cycles": 2818634,
+    "cycles": 2818634,
+    "match": true
+   },
+   "crc32": {
+    "scored_cycles": 3051840,
+    "cycles": 3051840,
+    "match": true
+   },
+   "dhrystone": {
+    "scored_cycles": 3101452,
+    "cycles": 3101452,
+    "match": true
+   },
+   "edn": {
+    "scored_cycles": 2680867,
+    "cycles": 2680867,
+    "match": true
+   },
+   "matmult-int": {
+    "scored_cycles": 1416585,
+    "cycles": 1416585,
+    "match": true
+   }
+  }
+ }
+]
