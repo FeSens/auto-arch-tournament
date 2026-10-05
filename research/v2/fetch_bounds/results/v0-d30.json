@@ -1,0 +1,7 @@
+{
+ "design": "v0",
+ "rtl_dir": "/home/bench/placement-work/v0-rtl",
+ "depth": 30,
+ "seconds": 1121,
+ "outcome": "PASS"
+}
