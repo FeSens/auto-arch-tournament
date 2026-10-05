@@ -52,6 +52,24 @@ OUT = Path(__file__).resolve().parent / "results"
 MEXT = ("mul", "mulh", "mulhsu", "mulhu", "div", "divu", "rem", "remu")
 
 
+def kill_under(work: Path) -> None:
+    """SIGKILL every process whose working directory is inside `work`. SBY
+    starts each solver engine in a process group of its own, so killing the
+    driver's group alone leaves the engines running."""
+    for d in Path("/proc").iterdir():
+        if not d.name.isdigit():
+            continue
+        try:
+            cwd = Path(os.readlink(d / "cwd"))
+        except OSError:
+            continue
+        if cwd == work or work in cwd.parents:
+            try:
+                os.kill(int(d.name), signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+
+
 def make_tree(name: str, rtl_dir: Path) -> Path:
     tree = WORK / name
     if tree.exists():
@@ -144,6 +162,7 @@ def main() -> int:
     except subprocess.TimeoutExpired:
         timed_out = True
         os.killpg(p.pid, signal.SIGKILL)
+        kill_under(tree)
         p.communicate()
     rec["seconds"] = round(time.time() - t0)
     checks = tree / "formal/riscv-formal/cores/bench-deep/checks"

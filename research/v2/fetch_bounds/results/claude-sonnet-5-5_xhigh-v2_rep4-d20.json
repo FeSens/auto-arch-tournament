@@ -1,0 +1,8 @@
+{
+ "design": "claude-sonnet-5-5_xhigh-v2_rep4",
+ "rtl_dir": "/home/bench/auto-arch-tournament/bench/v2/claude-sonnet-5-5_xhigh-v2/rep4/final-rtl",
+ "depth": 20,
+ "seconds": 5400,
+ "outcome": "TIMEOUT",
+ "no_cex_through_step": 11
+}

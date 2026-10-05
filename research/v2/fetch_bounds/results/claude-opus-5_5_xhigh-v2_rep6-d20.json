@@ -1,0 +1,20 @@
+{
+ "design": "claude-opus-5_5_xhigh-v2_rep6",
+ "rtl_dir": "/home/bench/auto-arch-tournament/bench/v2/claude-opus-5_5_xhigh-v2/rep6/final-rtl",
+ "depth": 20,
+ "seconds": 22,
+ "outcome": "FAIL",
+ "fail_step": 9,
+ "imem_addr_trace": [
+  "0x0",
+  "0x0",
+  "0x0",
+  "0x4",
+  "0x8",
+  "0x0",
+  "0x0",
+  "0x4",
+  "0x0",
+  "0xfffffffc"
+ ]
+}

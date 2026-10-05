@@ -556,6 +556,13 @@ Formal checks run after scoring (exploratory):
   proves in 3 s, DIVU in 1.9 h at depth 48; MULH, MULHSU and MULHU do not finish in 2 h at
   depth 20, and DIV, REM (fixed spec) and REMU do not finish in 4 h at depth 48. Proving
   real arithmetic on all 36 finals is out of reach at this cost (`research/v2/deep_formal/`).
+- Fetch-address bounds. No gate proves that the instruction fetch address stays inside the
+  1 MiB memory, and Opus rep6 fetches below address 0 on wrong paths in 10 of the 15
+  extended kernels. A bounded check written after scoring (any fixed 64-word program whose
+  own branches stay in range, free stalls, zero initial state, 20 cycles from reset) passes
+  36 of 44 designs, fails Opus rep6 at cycle 9 from a two-instruction loop at address 0, and
+  times out on 7 larger designs (Opus 3, Sonnet 5.5 1, GPT-6.1 Sol 2, the Sol pilot) with no
+  counterexample through cycles 11 to 18 (`research/v2/fetch_bounds/`).
 
 ## 8. Limitations to state
 
@@ -566,8 +573,9 @@ Formal checks run after scoring (exploratory):
   four and {GPT-5.5, Luna} holds.
 - Two contract gaps found after scoring, neither changing a scored result: formal has no bound
   on the fetch address (Opus 5.5 rep6 puts wrong-path addresses below 0 on 10 of the 15
-  extended kernels, with correct results), and formal could check different RTL than
-  simulation and synthesis (amendment 12; both affected champions pass on the synthesized RTL).
+  extended kernels, with correct results; a bounded check reaches it from reset in 9 cycles),
+  and formal could check different RTL than simulation and synthesis (amendment 12; both
+  affected champions pass on the synthesized RTL).
 - Three systems joined mid-campaign; same harness, host and budget, but not interleaved with
   the first three.
 - Gowin EDA Education edition: closed source, one version, one part; results

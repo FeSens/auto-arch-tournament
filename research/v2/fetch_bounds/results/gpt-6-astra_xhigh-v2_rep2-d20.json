@@ -1,0 +1,7 @@
+{
+ "design": "gpt-6-astra_xhigh-v2_rep2",
+ "rtl_dir": "/home/bench/auto-arch-tournament/bench/v2/gpt-6-astra_xhigh-v2/rep2/final-rtl",
+ "depth": 20,
+ "seconds": 2638,
+ "outcome": "PASS"
+}

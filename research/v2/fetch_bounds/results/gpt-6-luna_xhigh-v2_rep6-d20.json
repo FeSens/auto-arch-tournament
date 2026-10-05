@@ -1,0 +1,7 @@
+{
+ "design": "gpt-6-luna_xhigh-v2_rep6",
+ "rtl_dir": "/home/bench/auto-arch-tournament/bench/v2/gpt-6-luna_xhigh-v2/rep6/final-rtl",
+ "depth": 20,
+ "seconds": 271,
+ "outcome": "PASS"
+}

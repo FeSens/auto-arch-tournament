@@ -1,0 +1,7 @@
+{
+ "design": "textbook",
+ "rtl_dir": "/home/bench/auto-arch-tournament/research/v2/textbook_baseline/rtl",
+ "depth": 20,
+ "seconds": 203,
+ "outcome": "PASS"
+}

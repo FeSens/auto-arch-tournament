@@ -1,0 +1,7 @@
+{
+ "design": "gpt-5_5_xhigh-v2_rep1",
+ "rtl_dir": "/home/bench/auto-arch-tournament/bench/v2/gpt-5_5_xhigh-v2/rep1/final-rtl",
+ "depth": 20,
+ "seconds": 344,
+ "outcome": "PASS"
+}

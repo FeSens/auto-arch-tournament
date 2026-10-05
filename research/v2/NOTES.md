@@ -687,3 +687,28 @@ outcome with its mutation record from the archived agent log).
 V1's "0 of 135" holds with 135 independent draws: blind single-line edits to
 V0 do not get through the gates, and the systems' accepted rounds are not
 something the gates hand out to any edit.
+
+## 2026-10-05: fetch-address bounds formal, one failure (Opus 5.5 rep6), seven open
+
+Item 2 of the post-campaign list: a bounded formal check that `io_imemAddr`
+stays inside the 1 MiB memory, on every final, the GPT-6 Sol pilot and the
+textbook edit (`research/v2/fetch_bounds/`, README there). Environment: any
+fixed 64-word program whose own branches and jumps stay in [0, 256), free
+data memory and ready signals (stalls included), zero initial state,
+synthesis RTL with the ALTOPS stand-ins. Depth 20, 90 minutes per design.
+
+- 36 PASS, 1 FAIL, 7 TIMEOUT (`results/summary-d20.md`).
+- The FAIL is Opus 5.5 rep6: a two-word loop at address 0 makes it fetch
+  0xfffffffc at step 9. The extended-kernel finding (NOTES 2026-10-04, extended suite) is
+  therefore reachable from reset in 9 cycles, not only after the kernels'
+  predictor history.
+- The 7 timeouts found no counterexample through steps 11 to 18. They are
+  the larger designs: Opus rep1, rep2, rep5, Sonnet 5.5 rep4, GPT-6.1 Sol rep1
+  and rep2, the Sol pilot. Every Astra, GPT-5.5, Luna and no-lessons final
+  passes.
+- No scored result changes: rep6's results are correct on every program run,
+  and the contract has no fetch-bounds property (V3 item 18).
+- Operations: SBY puts each solver engine in its own process group, so the
+  driver's timeout left 2 engines per timed-out design running; killed by
+  hand at 15:42Z (zero solvers left). Both research drivers now kill by
+  working directory as well.

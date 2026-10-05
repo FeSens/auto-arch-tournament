@@ -37,6 +37,24 @@ OSS = "/opt/hwe-toolchain/oss-cad-suite/bin"
 V2 = REPO / "bench/v2"
 
 
+def kill_under(work: Path) -> None:
+    """SIGKILL every process whose working directory is inside `work`. SBY
+    starts each solver engine in a process group of its own, so killing the
+    driver's group alone leaves the engines running."""
+    for d in Path("/proc").iterdir():
+        if not d.name.isdigit():
+            continue
+        try:
+            cwd = Path(os.readlink(d / "cwd"))
+        except OSError:
+            continue
+        if cwd == work or work in cwd.parents:
+            try:
+                os.kill(int(d.name), signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+
+
 def sby_text(rtl: list[Path], depth: int) -> str:
     files = [f.name for f in rtl] + ["fetch_bounds.sv"]
     return "\n".join([
@@ -84,6 +102,7 @@ def one(name: str, rtl_dir: Path, depth: int, timeout: int = 10800) -> dict:
         timed_out = False
     except subprocess.TimeoutExpired:
         os.killpg(p.pid, signal.SIGKILL)
+        kill_under(work)
         out, _ = p.communicate()
         timed_out = True
     rec = {"design": name, "rtl_dir": str(rtl_dir), "depth": depth, "seconds": round(time.time() - t0)}

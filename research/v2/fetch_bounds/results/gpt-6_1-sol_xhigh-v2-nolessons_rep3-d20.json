@@ -1,0 +1,7 @@
+{
+ "design": "gpt-6_1-sol_xhigh-v2-nolessons_rep3",
+ "rtl_dir": "/home/bench/auto-arch-tournament/bench/v2/gpt-6_1-sol_xhigh-v2-nolessons/rep3/final-rtl",
+ "depth": 20,
+ "seconds": 223,
+ "outcome": "PASS"
+}
