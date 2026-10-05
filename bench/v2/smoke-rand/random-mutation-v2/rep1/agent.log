@@ -1,0 +1,18 @@
+=== /srv/hwebench/clones/random-mutation-v2-rep1/.tmp/agent-logs/impl.hyp-20261005-001-r1s0.log ===
+[random-agent] applied 3 mutation(s), draw 1, lint pass
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/.tmp/agent-logs/impl.hyp-20261005-002-r1s1.log ===
+[random-agent] applied 3 mutation(s), draw 1, lint pass
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/.tmp/agent-logs/impl.hyp-20261005-003-r1s2.log ===
+[random-agent] applied 3 mutation(s), draw 1, lint pass
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/experiments/hypotheses/.agent.hyp-20261005-001-r1s0.log ===
+[random-agent] wrote cores/bench/experiments/hypotheses/hyp-20261005-001-r1s0.yaml
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/experiments/hypotheses/.agent.hyp-20261005-002-r1s1.log ===
+[random-agent] wrote cores/bench/experiments/hypotheses/hyp-20261005-002-r1s1.yaml
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/experiments/hypotheses/.agent.hyp-20261005-003-r1s2.log ===
+[random-agent] wrote cores/bench/experiments/hypotheses/hyp-20261005-003-r1s2.yaml
+

@@ -1,0 +1,55 @@
+# WRITE-ONCE. Amendment 16 to prereg.yaml, written 2026-10-05 (about 11:10Z) after smoke20
+# of amendment 15 part A failed and before any run under harness 2.8.4; its commit time is
+# the authoritative timestamp.
+reason: >
+  Smoke20 (amendment 15 part A, harness 2.8.3, 10:30:45Z to 10:42Z, bench/v2/smoke-rand)
+  ran to completion (row done, 3 slots, all formal_failed) but its agent log shows every
+  slot "applied 3 mutation(s), draw 1". Replaying tools/agents/random_agent.py offline found
+  two defects, so the control did not do what amendment 15 describes:
+  (1) The implementation prompt (tools/agents/implement.py) carries the hypothesis title and
+  text but not its id, so the agent's id parser returns nothing and every slot seeds with
+  "<seed>:no-id". Every slot of a run draws the same mutations; since no slot is ever
+  accepted, every slot of the run starts from the same RTL and applies the same edit.
+  (2) RANDOM_AGENT_SEED, which the runner sets to 100 + rep, is not on the environment
+  allowlist for agents run as an agent account (tools/agents/_runtime.py, V2 isolation), so
+  every run seeds with 0. Under 2.8.3 all three runs would apply one mutation set 135 times.
+  The replay of seed "0:no-id" on V0 reproduces the smoke exactly (3 mutations, first draw,
+  lint pass): reg_file.sv:50 `==` to `!=` (register reads return zero), an ALTOPS DIVU
+  formula `-` to `+`, and decoder.sv:146 mem_to_reg 1 to 0.
+  Defect (1) also affected V1 (EXP-2026-07-e1b-random-control, ref 6f898db): its prompt had
+  no id either, while its seed did reach the agent (V1 had no agent accounts). Each V1 rep
+  applied one mutation set in all 45 slots, so "0 of 135 mutations accepted" is three
+  distinct mutation sets (seeds 101, 102, 103 with "no-id"), each repeated 45 times. Offline
+  replay on 6f898db with today's Verilator (5.047; V1's lint version may have redrawn
+  differently): rep1 3 mutations (decoder mem_width, ex_stage forward select, SRLI decode),
+  rep2 2 (ALTOPS REMU constant, pc + 5), rep3 2 (SLLI decode, is_illegal on a legal path).
+change: >
+  HARNESS_VERSION 2.8.4, fixture branch bench-v2.8.4 = tag hwe-bench-v2.8.4 = bench-v2.8.3
+  plus one commit (v2 commit e6e5fcb): random_agent.py takes the hypothesis id from the slot
+  worktree's directory name when the prompt has none (the orchestrator names each worktree
+  after its id), and prints its mutation record (the implementation_notes.md text: each
+  mutation, draws used, lint result, seed material) to stdout, which the harness archives
+  in agent.full.log.gz (the orchestrator keeps implementation_notes.md only for slots that
+  reach the FPGA eval); _runtime.py passes RANDOM_AGENT_SEED to the agent account. Tests
+  for both. random_agent.py runs only for provider "random" and RANDOM_AGENT_SEED is set
+  only for it, so no LLM run is affected; every scored V2 run stays on its harness.
+part_a_now: >
+  Amendment 15 part A runs on 2.8.4 (--ref bench-v2.8.4), otherwise exactly as amendment
+  15 says (models file, N=15, K=3, reps 1-3, seeds 101-103, three runners at once). The
+  amendment's "unchanged since V1" for the agent is replaced by this change.
+smoke21: >
+  One round (N=1, K=3) on hwebench, unscored, results bench/v2/smoke-rand-284/. The reps
+  start only if: the row is done with harness 2.8.4 and fixture_commit 072e7ea; every slot
+  reached the gates; the archived agent log has one mutation record per slot whose seed
+  material reads "101:<that slot's hypothesis id>"; the three records are not all
+  identical; and an offline replay of each record (same seed material, V0) reproduces it.
+smoke20: kept unscored in bench/v2/smoke-rand as the record of the defect.
+report_additions: >
+  Part A also reports the number of distinct mutation sets (by seed material and by applied
+  edits) per run and overall, and lint draws used per slot (from the archived agent logs).
+  The V2 paper describes V1's control as three mutation sets, each repeated 45 times.
+unchanged: >
+  Amendment 15 parts B and C, its prediction (0 accepted) and its report; amendments 13 and
+  14; every scored run and verdict.
+launched: >
+  To be filled in afterwards with the smoke21 verdict and the runners' start times.
