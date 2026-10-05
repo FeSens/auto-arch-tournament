@@ -1,0 +1,59 @@
+{
+ "n": {
+  "Sol 6.1 (full)": 6,
+  "Sol 6.1 (no lessons)": 6
+ },
+ "descriptive": {
+  "Sol 6.1 (full)": {
+   "n": 6,
+   "holdout_geomean": 5320.064862581648,
+   "coremark_geomean": 215.1138789021594,
+   "fmax_mean": 89.73133333333334,
+   "lut4_mean": 5181.833333333333,
+   "accepted": 54,
+   "rejected": 208,
+   "broken": 7,
+   "broken_by_class": {
+    "cosim_failed": 1,
+    "formal_failed": 5,
+    "sandbox_violation": 1
+   },
+   "wall_h_mean": 13.301296296296295,
+   "tokens_in_mean": 137775246.66666666,
+   "tokens_out_mean": 1768382.5
+  },
+  "Sol 6.1 (no lessons)": {
+   "n": 6,
+   "holdout_geomean": 5213.055734078947,
+   "coremark_geomean": 212.48062816429066,
+   "fmax_mean": 90.21,
+   "lut4_mean": 4388.0,
+   "accepted": 52,
+   "rejected": 215,
+   "broken": 3,
+   "broken_by_class": {
+    "formal_failed": 1,
+    "hypothesis_gen_failed": 2
+   },
+   "wall_h_mean": 9.947407407407407,
+   "tokens_in_mean": 134511872.16666666,
+   "tokens_out_mean": 1817639.1666666667
+  }
+ },
+ "test": {
+  "diff_ln": 0.020319298401311414,
+  "t": 0.43318130413372435,
+  "df": 7.016573769039014,
+  "p": 0.677887670977508,
+  "ratio": 1.0205271406946903,
+  "ci95": [
+   0.9134328762969598,
+   1.1401775345733158
+  ],
+  "boot95": [
+   0.9421230619070504,
+   1.1141424444928718
+  ],
+  "verdict": "not distinguishable at n=6"
+ }
+}

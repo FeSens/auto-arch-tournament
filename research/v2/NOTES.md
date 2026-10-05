@@ -536,3 +536,28 @@ and the run continues. The incident policy's re-run applies to a run stopped
 by a harness, host or provider failure, and amendment 01's quota rule to quota
 pauses; neither happened. The two slots are listed with the ablation's
 descriptive results.
+
+## 2026-10-05: amendment 14 result, lessons make no measurable difference for GPT-6.1 Sol
+
+The last ablation run (rep4) finished at 10:29Z; all six no-lessons runs are
+scored and passed the per-run checks (harness 2.8.3, fixture fad7d02, clean
+runner, probe confined, five held-out kernels validated, no LESSONS.md in any
+bundle's history, no `lesson` field, no scribe run, no secrets). Analysis:
+`research/runs/EXP-2026-09-28-v2-main/analysis_ablation.md`
+(`research/v2/scripts/analyze_ablation.py`).
+
+- Pre-registered test, held-out score, full / no lessons: 1.021, 95% CI
+  [0.913, 1.140], bootstrap [0.942, 1.114], p = 0.68. Verdict: not
+  distinguishable at n=6. The CI rules out a gain from the lessons larger
+  than about 14%.
+- Geometric means 5,320 (full) and 5,213 (no lessons); CoreMark 215.1 and
+  212.5. Without lessons the runs spread twice as wide (SD of ln held-out
+  0.104 vs 0.048): they hold both the lowest Sol run (rep1, 4,374) and the
+  highest (rep6, 5,875).
+- Slots: 54 / 208 / 7 (full) and 52 / 215 / 3 (no lessons) accepted /
+  rejected / broken. Two of the three no-lessons breaks are the rep6
+  capacity errors; one is a formal timeout.
+- Wall time 9.9 h vs 13.3 h per run, mostly the skipped scribe step and the
+  different host load. Tokens are about equal (135M vs 138M in per run).
+- Not matched (amendment 14 `not_matched`): different dates, harness 2.8.3
+  vs 2.8.2 (no behavior change outside the scribe), three runs at once.
