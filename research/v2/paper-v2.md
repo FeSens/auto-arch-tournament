@@ -80,6 +80,21 @@ own tool (Gowin EDA 1.9.11.03):
   sanity test (`tools/eval/test_gate_sanity.py`) shows V0 passes and all three
   planted bugs are rejected, on the Mac and on the Linux run host.
 
+## 4b. V1's random control was three draws, not 135 (measured)
+
+- V1's random-mutation control (no LLM; 1 to 3 seeded single-line edits per slot, lint-clean)
+  reported 0 of 135 slots accepted. The agent seeded each slot from the hypothesis id, and the
+  implementation prompt does not contain the id, so every slot of a run drew the same edits.
+  Nothing was accepted, so every slot started from the same RTL: each V1 run tested one
+  mutation set 45 times. Replaying V1's three seeds on V1's fixture recovers the three sets.
+- The expected outcome (everything fails formal) hid the defect. V2 found it in a smoke run:
+  every slot's log reported the same draw, and an offline replay showed one edit set.
+- V2 fix (harness 2.8.4, amendment 16): the id comes from the worktree name, the seed reaches
+  the agent account, and every slot's mutation record goes into the archived agent log.
+  135 slots now give 135 seed materials and 132 distinct edit sets (section 7).
+- Evidence: `research/v2/NOTES.md` (2026-10-05, amendment 16),
+  `research/runs/EXP-2026-09-28-v2-main/amendment_16.yaml`.
+
 ## 5. Methodology changes (what V2 is)
 
 - Metric: held-out score (5 kernels the agents never see) x vendor Fmax,
@@ -456,11 +471,66 @@ bootstrap.
   shrank its fetch store under formal; Sonnet 5.5 rep5 swapped its RAM register file for flops.
   Both pass all 53 checks when formal sees the synthesized RTL, so no run is removed.
 
+Baselines and controls (amendment 15, run after the campaign):
+
+- Textbook edit: V0 with its single-cycle divider replaced by a radix-2 iterative one (34
+  cycles, the pipeline stalls until it finishes). It passes every gate and scores 2,645
+  held-out iter/s (V0: 309). The whole gain is Fmax (5.4 to 46.6 MHz); the held-out kernels
+  contain no divide, so their cycle counts do not change. Every scored run beats it (lowest:
+  Luna rep6, 2,881); system means are 1.3x (Luna) to 2.7x (Opus) the textbook edit. In round
+  1 the agents make the same move: 34 of the 35 designs accepted in round 1 change the
+  divider (`research/v2/textbook_baseline/`).
+- Random-mutation control: 3 runs of 45 slots, 1 to 3 seeded single-line edits per slot
+  (operator swaps, ternary swaps, constant changes), no LLM. 0 of 135 accepted: 117 fail
+  formal, 12 pass formal and fail cosim, 6 pass every gate without changing what the design
+  does (an overridden default, unreachable cases, comment-only edits). Of the 18 that pass
+  formal, 8 edit the real multiplier or divider, which formal replaces with stand-in
+  formulas (ALTOPS); cosim rejects all 8. Blind edits to V0 do not get through the gates, so
+  the systems' accepted rounds are not something the gates give away
+  (`research/v2/random_control/analysis.md`).
+
+Ablation (amendment 14): GPT-6.1 Sol run six more times without the lessons file (the
+notes a scribe agent writes after each round and the next round's agents read). Full / no
+lessons, held-out: 1.021, 95% CI [0.913, 1.140], p = 0.68, not distinguishable at n = 6. The
+interval rules out a gain from the lessons above about 14%. Without lessons the six runs
+spread twice as wide (SD of ln score 0.104 vs 0.048). The 15 extended kernels (1.024,
+p = 0.67) and Artix-7 (1.147, p = 0.19) give the same answer
+(`research/runs/EXP-2026-09-28-v2-main/analysis_ablation.md`).
+
+Robustness of the ranking:
+
+- Placement: the 42 finals rebuilt under all six Gowin place/route settings that change a
+  build. Per design, the SD of ln Fmax across settings has median 0.022. Every setting, and
+  the median, best and worst over settings, gives the same system order, Opus vs Sol 1.283 to
+  1.334 (every p < 0.001), and the same 9 of 12 separating pairs (`research/v2/placement/`).
+- Another FPGA (exploratory): every design synthesized for an AMD Artix-7 200T with Vivado
+  2026.1. The split between the top four systems and {GPT-5.5, Luna} holds (8 of 8 pairs
+  separate on both parts). The order inside the top four does not: Sonnet 5.5 7,511 > Opus
+  6,724 > GPT-6.1 Sol 6,543 > Astra 6,236, and the primary pair gives 1.028 [0.813, 1.299].
+  Kendall tau over the six systems 0.867. The agents' designs gain less from the faster
+  fabric than the ten human cores (Artix-7 / Gowin Fmax 1.17 vs 1.67, p = 1.4e-7), and on
+  Artix-7 two VexRiscv configurations score above every system's mean. Fifteen rounds of
+  tuning against one vendor's timing report produce designs fitted to that part
+  (`research/v2/xfpga/results/analysis.md`).
+
+Formal checks run after scoring (exploratory):
+
+- Deep formal (real multiplier and divider, no ALTOPS) on Opus rep1. At the vendored
+  riscv-formal commit the DIV and REM specifications compute the unsigned quotient: the
+  conditional `rs2 == 0 ? <all ones> : <overflow> ? <INT_MIN> : $signed(a) / $signed(b)`
+  has unsigned arms, and Verilog then evaluates the division unsigned. So the contract's
+  `make formal-deep` fails every correct divider; there is no record it was ever run. MUL
+  proves in 3 s, DIVU in 1.9 h at depth 48; MULH, MULHSU and MULHU do not finish in 2 h at
+  depth 20. Proving real arithmetic on all 36 finals is out of reach at this cost
+  (`research/v2/deep_formal/`).
+
 ## 8. Limitations to state
 
 - n = 6 per system separates tiers, not systems within a tier.
-- No textbook-edit baseline and no no-lessons ablation were run. The ten reference cores are
-  the human baseline instead.
+- The ablation covers one system (GPT-6.1 Sol). It rules out a lessons effect above about 14%
+  for that system, not for the others.
+- The ranking is a ranking on the Gowin contract. On Artix-7 only the split between the top
+  four and {GPT-5.5, Luna} holds.
 - Two contract gaps found after scoring, neither changing a scored result: formal has no bound
   on the fetch address (Opus 5.5 rep6 puts wrong-path addresses below 0 on 10 of the 15
   extended kernels, with correct results), and formal could check different RTL than
@@ -471,6 +541,10 @@ bootstrap.
   are relative to that vendor's timer and placement.
 - The placement-option median is effectively one value (options 1 and 2
   coincide), so the margin's independence assumption does not hold; the
-  single-draw margin would be 6.5%.
+  single-draw margin would be 6.5%. The final ranking does not depend on the
+  setting (section 7), but per-round acceptances near the margin might.
+- Formal ties the memory ready signals high and proves the M extension only
+  with stand-in formulas. Real arithmetic is covered by cosim and unit tests;
+  the deep-formal path in the contract cannot pass as vendored.
 - One benchmark workload (CoreMark) drives optimization. The held-out five are small
   programs; the 15-kernel extended suite is exploratory, not pre-registered.
