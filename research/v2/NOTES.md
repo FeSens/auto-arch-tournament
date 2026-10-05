@@ -620,3 +620,31 @@ reproduces the scored Fmax exactly for the default router (V0 5.140 and
   the same system order, Opus vs Sol 1.283 to 1.334 (every p < 0.001), and
   the same 9 of 12 extension pairs separating. The three that never separate
   are the scored result's: Opus vs Sonnet 5.5, Sol vs Astra, GPT-5.5 vs Luna.
+
+## 2026-10-05: deep formal, the vendored DIV/REM spec is unsigned
+
+Item 1 of the post-campaign list (deep formal, no ALTOPS, on the finals) ran
+its pilot on Opus 5.5 rep1 (`research/v2/deep_formal/deep_formal.py`,
+private trees, the eight RV32M insn checks).
+
+- At depth 48 (its divider takes 35 cycles in EX) `insn_div` and `insn_rem`
+  failed in 4 minutes. The counterexample: DIV of 0xffd47ff1 (-2,850,831) by
+  0xad8887ff (-1,383,561,217). The design wrote 0, the correct quotient; the
+  spec expected 1, the unsigned quotient. At the vendored riscv-formal commit
+  (2aa7b49) `insns/insn_div.v` and `insn_rem.v` compute
+  `rs2 == 0 ? <all ones> : <overflow case> ? <INT_MIN> : $signed(a) / $signed(b)`;
+  the unsigned arms make the conditional unsigned, and Verilog propagates
+  that into the division. Yosys `eval` confirms: 1 as written, 0 with the
+  division wrapped in `$unsigned(...)`. DIVU, REMU and the MUL family are
+  written without the problem.
+- So `make formal-deep` (`formal/checks-deep.cfg`), which CLAUDE.md calls the
+  only path that proves the real M-extension arithmetic, fails DIV and REM on
+  every correct design. There is no record that it was ever run. Scored
+  results are unaffected: the gate uses ALTOPS, and cosim compares every
+  retired DIV/REM with the Python ISS.
+- The research driver applies the `$unsigned(...)` fix in its private copies
+  only; the vendored checkout is untouched.
+- Cost: MUL proves in 3 s; MULH, MULHSU and MULHU did not finish in 2 h at
+  depth 20; at depth 20 the four divide checks are vacuous (no DIV can
+  retire before its 35 cycles end). The depth-48 runs with the fixed spec
+  are still going.

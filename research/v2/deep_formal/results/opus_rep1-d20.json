@@ -1,0 +1,43 @@
+{
+ "design": "opus_rep1",
+ "rtl_dir": "bench/v2/claude-opus-5_5_xhigh-v2/rep1/final-rtl",
+ "fixture": "hwe-bench-v2.8.4",
+ "depth": 20,
+ "started": "2026-10-05T11:00:11.789698+00:00",
+ "seconds": 7200,
+ "checks": {
+  "insn_mul_ch0": {
+   "outcome": "PASS",
+   "seconds": 3
+  },
+  "insn_mulh_ch0": {
+   "outcome": "TIMEOUT",
+   "seconds": null
+  },
+  "insn_mulhsu_ch0": {
+   "outcome": "TIMEOUT",
+   "seconds": null
+  },
+  "insn_mulhu_ch0": {
+   "outcome": "TIMEOUT",
+   "seconds": null
+  },
+  "insn_div_ch0": {
+   "outcome": "PREUNSAT",
+   "seconds": 2
+  },
+  "insn_divu_ch0": {
+   "outcome": "PREUNSAT",
+   "seconds": 2
+  },
+  "insn_rem_ch0": {
+   "outcome": "PREUNSAT",
+   "seconds": 2
+  },
+  "insn_remu_ch0": {
+   "outcome": "PREUNSAT",
+   "seconds": 2
+  }
+ },
+ "ended": "2026-10-05T13:00:11.905115+00:00"
+}
