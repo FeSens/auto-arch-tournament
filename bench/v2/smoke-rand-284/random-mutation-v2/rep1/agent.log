@@ -1,0 +1,37 @@
+=== /srv/hwebench/clones/random-mutation-v2-rep1/.tmp/agent-logs/impl.hyp-20261005-001-r1s0.log ===
+Random-mutation control (no LLM). Seeded mutations applied:
+- cores/bench/rtl/alu.sv:40 [lit_perturb] "mul_uu = {32'b0, a} * {32'b0, b};" -> "mul_uu = {32'b1, a} * {32'b0, b};"
+- cores/bench/rtl/reg_file.sv:51 [lit_perturb] "rs2_data = 32'b0;" -> "rs2_data = 32'b1;"
+
+Draws used: 1/20; final lint: pass.
+Seed material: 101:hyp-20261005-001-r1s0; k=2.
+[random-agent] applied 2 mutation(s), draw 1, lint pass
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/.tmp/agent-logs/impl.hyp-20261005-002-r1s1.log ===
+Random-mutation control (no LLM). Seeded mutations applied:
+- cores/bench/rtl/decoder.sv:121 [op_swap] "end else if (funct3 == 3'd1 && funct7 == 7'b0000000) begin // SLLI" -> "end else if (funct3 == 3'd1 && funct7 != 7'b0000000) begin // SLLI"
+- cores/bench/rtl/decoder.sv:169 [lit_perturb] "3'd2:    mem_width = 2'd2;" -> "3'd2:    mem_width = 2'd3;"
+
+Draws used: 1/20; final lint: pass.
+Seed material: 101:hyp-20261005-002-r1s1; k=2.
+[random-agent] applied 2 mutation(s), draw 1, lint pass
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/.tmp/agent-logs/impl.hyp-20261005-003-r1s2.log ===
+Random-mutation control (no LLM). Seeded mutations applied:
+- cores/bench/rtl/decoder.sv:169 [lit_perturb] "3'd2:    mem_width = 2'd2;" -> "3'd2:    mem_width = 2'd3;"
+- cores/bench/rtl/core.sv:230 [lit_perturb] "io_rvfi_rd_addr_0   = rd_wen ? mem_wb_w.rd : 5'b0;" -> "io_rvfi_rd_addr_0   = rd_wen ? mem_wb_w.rd : 5'b1;"
+- cores/bench/rtl/mem_stage.sv:85 [op_swap] "(in.ctrl.mem_width == 2'd1 && in.alu_result[0]   != 1'b0)" -> "(in.ctrl.mem_width != 2'd1 && in.alu_result[0]   != 1'b0)"
+
+Draws used: 1/20; final lint: pass.
+Seed material: 101:hyp-20261005-003-r1s2; k=3.
+[random-agent] applied 3 mutation(s), draw 1, lint pass
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/experiments/hypotheses/.agent.hyp-20261005-001-r1s0.log ===
+[random-agent] wrote cores/bench/experiments/hypotheses/hyp-20261005-001-r1s0.yaml
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/experiments/hypotheses/.agent.hyp-20261005-002-r1s1.log ===
+[random-agent] wrote cores/bench/experiments/hypotheses/hyp-20261005-002-r1s1.yaml
+
+=== /srv/hwebench/clones/random-mutation-v2-rep1/cores/bench/experiments/hypotheses/.agent.hyp-20261005-003-r1s2.log ===
+[random-agent] wrote cores/bench/experiments/hypotheses/hyp-20261005-003-r1s2.yaml
+

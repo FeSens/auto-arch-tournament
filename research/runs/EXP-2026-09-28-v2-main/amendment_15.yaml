@@ -135,3 +135,8 @@ launched: >
   before any harness eval: under RISCV_FORMAL_ALTOPS the divider answers one cycle after the
   request instead of keeping its 34-cycle latency, because the liveness check (trigger at
   step 10, check at 20) needs the next retirement within 10 cycles.
+  Part B evals ran 2026-10-05 10:31Z to 10:39Z (research/v2/textbook_baseline/results), the
+  formal step under the tournament's machine-wide formal lock.
+  Part A: smoke20 (harness 2.8.3) ran 10:30:45Z to 10:42Z and failed its check: every slot
+  drew the same mutations. Amendment 16 records the defects and harness 2.8.4; smoke21 passed
+  and the three runners started 10:54:21Z on 2.8.4 (see amendment 16).

@@ -1,0 +1,144 @@
+{
+ "design": "textbook",
+ "fixture": "hwe-bench-v2.8.3",
+ "tree": "/home/bench/textbook-score/textbook",
+ "seconds": {
+  "build": 4.8,
+  "formal": 100.3,
+  "cosim": 1.5,
+  "fpga": 24.9,
+  "final_fmax": 23.7,
+  "holdout": 3.9,
+  "unit_tests": 17.9
+ },
+ "started": "2026-10-05T10:35:51.538797+00:00",
+ "build": {
+  "ok": true,
+  "reason": ""
+ },
+ "ch0_contract": {
+  "passed": true
+ },
+ "formal": {
+  "passed": true,
+  "checks_passed": 53
+ },
+ "cosim": {
+  "passed": true,
+  "elfs_tested": 5
+ },
+ "fpga": {
+  "placement_failed": false,
+  "fmax_mhz": 46.59,
+  "seeds": [
+   47.562,
+   46.59,
+   46.59
+  ],
+  "perturbations": [
+   [
+    0,
+    47.562,
+    20
+   ],
+   [
+    1,
+    46.59,
+    20
+   ],
+   [
+    2,
+    46.59,
+    20
+   ]
+  ],
+  "lut4": 2541,
+  "ff": 600,
+  "lutram": 8,
+  "bsram": 6,
+  "dsp": 6,
+  "logic_levels": 20,
+  "critical_path": {
+   "from": "cpu/u_rf/regs_regs_0_0_s",
+   "to": "cpu/u_id/id_ex_w.rs1_val_0_s100",
+   "slack_ns": -16.025,
+   "arrival_ns": 26.32,
+   "logic_cells": 48,
+   "modules": [
+    "clock_ibuf",
+    "cpu/u_id",
+    "cpu/u_ex",
+    "cpu/u_if",
+    "cpu/u_hazard",
+    "cpu/u_id"
+   ]
+  },
+  "ipc_coremark": 2e-06,
+  "fitness": 103.72,
+  "cycles": 4491817,
+  "iterations": 10
+ },
+ "final_fmax": {
+  "fmax_mhz": 46.59,
+  "pairs": [
+   [
+    0,
+    47.562,
+    20
+   ],
+   [
+    1,
+    46.59,
+    20
+   ],
+   [
+    2,
+    46.59,
+    20
+   ]
+  ],
+  "placed": 3
+ },
+ "holdout": {
+  "kernels": {
+   "dhrystone": {
+    "cycles": 3389923,
+    "reps": 6000,
+    "iter_s": 82462.05002296512,
+    "validated": true
+   },
+   "aha-mont64": {
+    "cycles": 2896973,
+    "reps": 200,
+    "iter_s": 3216.4607678428483,
+    "validated": true
+   },
+   "crc32": {
+    "cycles": 3073181,
+    "reps": 90,
+    "iter_s": 1364.416869686491,
+    "validated": true
+   },
+   "matmult-int": {
+    "cycles": 1560047,
+    "reps": 15,
+    "iter_s": 447.9672727808842,
+    "validated": true
+   },
+   "edn": {
+    "cycles": 2915936,
+    "reps": 50,
+    "iter_s": 798.8858466029433,
+    "validated": true
+   }
+  },
+  "geomean_iter_s": 2645.221817263773,
+  "all_validated": true
+ },
+ "unit_tests": {
+  "returncode": 0,
+  "tail": "......                                                                   [100%]\n6 passed in 17.59s\n"
+ },
+ "gates_passed": true,
+ "ended": "2026-10-05T10:39:55.826076+00:00"
+}

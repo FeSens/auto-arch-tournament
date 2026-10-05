@@ -1,0 +1,17 @@
+[preflight] toolchain:
+  verilator            /opt/hwe-toolchain/oss-cad-suite/bin/verilator
+  yosys                /opt/hwe-toolchain/oss-cad-suite/bin/yosys
+  sby                  /opt/hwe-toolchain/oss-cad-suite/bin/sby
+  bitwuzla             /opt/hwe-toolchain/oss-cad-suite/bin/bitwuzla
+  gw_sh                /opt/gowin/IDE/bin/gw_sh
+  GowinSynthesis       /opt/gowin/IDE/bin/GowinSynthesis
+[bench] 1 job(s) queued (0 already done)
+        - random-mutation-v2-rep1  ->  random:random-mutation
+[bench] config: N=1 K=3 reps=1 parallel=1
+[bench] clone base: /srv/hwebench/clones
+[bench] results: /home/bench/auto-arch-tournament/bench/v2/smoke-rand-284/results-smoke-rand.jsonl
+
+[bench] === random-mutation-v2-rep1 starting at 2026-10-05T10:47:34+00:00 ===
+[bench] === random-mutation-v2-rep1 done in 361s, fitness=12.12, cost=$0.00 ===
+
+[bench] matrix done — 1/1 successful

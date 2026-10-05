@@ -53,3 +53,14 @@ unchanged: >
   14; every scored run and verdict.
 launched: >
   To be filled in afterwards with the smoke21 verdict and the runners' start times.
+  Written and committed 2026-10-05T10:47:23Z (70e82e7); the header's "about 11:10Z" is a typo.
+  The reason's "register reads return zero" is the second read port only (rs2 of x1..x31).
+  smoke21: started 10:47:34Z on hwebench (tmux rand-smoke2), ended done 10:53Z. Row: harness
+  2.8.4, fixture_commit 072e7ea, runner clean, orchestrator exit 0, held-out scored (V0, all
+  five kernels validated). All three slots reached formal and failed it on different checks
+  (insn_add, insn_slli, ill). The archived agent log has one mutation record per slot with
+  seed material 101:hyp-20261005-001-r1s0, -002-r1s1, -003-r1s2; the three differ (k = 2, 2,
+  3); an offline replay of each with the 2.8.4 agent on V0 reproduces it line for line.
+  Every smoke21 check passed.
+  Runners: rand-a (hwebench, rep1), rand-b (hwebench2, rep2), rand-c (hwebench3, rep3), all
+  started 2026-10-05T10:54:21Z with --ref bench-v2.8.4; results bench/v2/results-rand-{a,b,c}.jsonl.
