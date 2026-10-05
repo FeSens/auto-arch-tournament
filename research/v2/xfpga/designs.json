@@ -940,5 +940,11 @@
   "rtl_dir": "bench/v2/gpt-6_1-sol_xhigh-v2-nolessons/rep4/final-rtl",
   "system": "gpt-6_1-sol_xhigh-v2-nolessons",
   "rep": 4
+ },
+ "textbook_baseline": {
+  "name": "textbook_baseline",
+  "group": "baseline",
+  "kind": "core_si",
+  "rtl_dir": "research/v2/textbook_baseline/rtl"
  }
 }
