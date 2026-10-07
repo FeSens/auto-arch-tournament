@@ -99,19 +99,48 @@ fi
 export PATH="$BIN_DIR:$PATH"
 
 # ── Persist PATH (only if we installed something locally) ─────────────────
-for profile in "$HOME/.zshrc" "$HOME/.bashrc"; do
-  if [ -f "$profile" ]; then
-    if [ -d "$OSS_DIR/bin" ] && ! grep -qF "$OSS_DIR/bin" "$profile"; then
-      echo "export PATH=\"$OSS_DIR/bin:\$PATH\"" >> "$profile"
-      echo "  Added $OSS_DIR/bin to $profile"
+# Collect the PATH lines that would be needed.
+_NEED_PATH=false
+if [ -d "$OSS_DIR/bin" ]; then
+  for profile in "$HOME/.zshrc" "$HOME/.bashrc"; do
+    if [ -f "$profile" ] && ! grep -qF "$OSS_DIR/bin" "$profile"; then
+      _NEED_PATH=true
     fi
-    if [ -d "$BIN_DIR" ] && [ -n "$(ls -A "$BIN_DIR" 2>/dev/null)" ] \
-        && ! grep -qF "$BIN_DIR" "$profile"; then
-      echo "export PATH=\"$BIN_DIR:\$PATH\"" >> "$profile"
-      echo "  Added $BIN_DIR to $profile"
+  done
+fi
+if [ -d "$BIN_DIR" ] && [ -n "$(ls -A "$BIN_DIR" 2>/dev/null)" ]; then
+  for profile in "$HOME/.zshrc" "$HOME/.bashrc"; do
+    if [ -f "$profile" ] && ! grep -qF "$BIN_DIR" "$profile"; then
+      _NEED_PATH=true
     fi
+  done
+fi
+if [ "$_NEED_PATH" = true ]; then
+  echo
+  echo "  The following PATH entries can be added to your shell profiles:"
+  if [ -d "$OSS_DIR/bin" ]; then echo "    export PATH=\"$OSS_DIR/bin:\$PATH\""; fi
+  if [ -d "$BIN_DIR" ] && [ -n "$(ls -A "$BIN_DIR" 2>/dev/null)" ]; then
+    echo "    export PATH=\"$BIN_DIR:\$PATH\""
   fi
-done
+  read -p "  Add them to ~/.zshrc and ~/.bashrc? [Y/n] " _answer 2>/dev/null || _answer="n"
+  if [ "$_answer" != "n" ] && [ "$_answer" != "N" ]; then
+    for profile in "$HOME/.zshrc" "$HOME/.bashrc"; do
+      if [ -f "$profile" ]; then
+        if [ -d "$OSS_DIR/bin" ] && ! grep -qF "$OSS_DIR/bin" "$profile"; then
+          echo "export PATH=\"$OSS_DIR/bin:\$PATH\"" >> "$profile"
+          echo "  Added $OSS_DIR/bin to $profile"
+        fi
+        if [ -d "$BIN_DIR" ] && [ -n "$(ls -A "$BIN_DIR" 2>/dev/null)" ] \
+            && ! grep -qF "$BIN_DIR" "$profile"; then
+          echo "export PATH=\"$BIN_DIR:\$PATH\"" >> "$profile"
+          echo "  Added $BIN_DIR to $profile"
+        fi
+      fi
+    done
+  else
+    echo "  Skipped. Add these lines to your shell profile manually if needed."
+  fi
+fi
 
 # ── Python deps (cocotb is the test harness; jsonschema/pyyaml/matplotlib drive the orchestrator) ──
 step "Python: cocotb cocotb-test pytest jsonschema pyyaml matplotlib"
