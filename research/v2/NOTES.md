@@ -712,3 +712,28 @@ synthesis RTL with the ALTOPS stand-ins. Depth 20, 90 minutes per design.
   driver's timeout left 2 engines per timed-out design running; killed by
   hand at 15:42Z (zero solvers left). Both research drivers now kill by
   working directory as well.
+
+## 2026-11-19: amendment 17, GPT-6.2 Astra and GPT-6.2 Sol launched; Fable 5.2 after them
+
+Operator: run GPT-6.2 Astra and GPT-6.2 Sol, and only after both, Fable 5.2, all at xhigh
+(every V2 system ran at xhigh), with the newer Codex; the Fable smoke also waits for both.
+Amendment 17 (commit d3eb782) pre-registers it before any run.
+
+- CLIs: Codex 0.170.0 for both GPT-6.2 models (0.159.0 refuses gpt-6.2-sol for a ChatGPT
+  login), pinned as cli/codex-0.170.0; Claude Code 2.1.327 for Fable 5.2, pinned as
+  cli/claude-2.1.327. The proxy check: 2.1.283/2.1.284 do not know claude-fable-5-2 and send
+  it max_tokens 32000; 2.1.322+ send it what 2.1.283 sends Opus 5.5.
+- Shared Codex login: Codex 0.170.0 replaces auth.json with a 0600 file on a token refresh.
+  The 12:35Z check prompt refreshed the 41-day-old login and locked hwebench2/3 out (no run
+  active). Restored, and a systemd path unit plus timer (hwe-codex-auth-perms) now restores
+  hwecodex 660 within a second; every babysit tick prints the mode.
+- Pre-launch audit (4 auditors, 22 adversarial verifiers; summary kept in the session):
+  disjoint runner pools (a runner kills every process of its accounts at start), a smoke
+  per new CLI, the new systems in a family of their own, and rebuilt ops scripts
+  (~/ext2-ops: tick.sh, tick_quiet.sh, nscheck.sh, nssample.sh, cosim_guard.sh; the old
+  campaign's monitor state moved to ~/monitor-v2-campaign).
+- smoke22 passed every gate (amendment 17 launched field). Phase 1 launched 14:04:09Z,
+  tmux main-g62, --interleave on hwebench,hwebench2; ext2_launcher.py waits in tmux
+  ext2-launch. Monitor in tmux monitor-ext2, cosim guard in tmux cosim-guard.
+- Left alone: two of the operator's processes from other projects (a gowin-4k loop and
+  a 32-day-old bonetto-formal yosys-smtbmc); they show up in host-wide solver counts.

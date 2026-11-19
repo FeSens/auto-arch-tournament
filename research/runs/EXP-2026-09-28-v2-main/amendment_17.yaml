@@ -173,3 +173,19 @@ results_files: >
 unchanged: question, metrics, tests and verdict rules of the campaign, budget (N=15, K=3), runs per system (6), effort (xhigh), incident policy
 launched: >
   To be filled in afterwards with each runner's start time, account and first probe verdict.
+  smoke22: 2026-11-19 13:30:45Z to 14:03Z, tmux smoke-g62, hwebench (Astra) and hwebench2
+  (Sol), --keep-clones; both probes confined; runner "matrix done, 2/2 successful". Both rows
+  pass every gate (research/v2/scripts/ext2_checks.py row and codex): done, harness 2.8.4,
+  fixture 072e7ea, runner_dirty false, codex_cli 0.170.0, cli_dir cli/codex-0.170.0,
+  held-out 5/5 kernels validated, no 'git bundle failed'; the kept clones hold 11 (Astra)
+  and 12 (Sol) Codex sessions, every one with cli_version 0.170.0, its own model and effort
+  xhigh, no spawn_agent and no error events (sessions archived as
+  bench/v2/smoke-ext2/<name>/rep1/codex-sessions.tar.gz). Unscored numbers, one round:
+  Astra CoreMark 90.85, held-out 2316.7 iter/s; Sol CoreMark 102.12, held-out 2604.2
+  iter/s; 2 accepted, 2 rejected, 0 broken each. Namespace samples every 15 s
+  (bench/v2/smoke-ext2/ns-sample-g62.log): host-namespace processes only codex,
+  codex-code-mode, codex-linux-san and bwrap (the CLI and its sandbox launcher, as on
+  0.156.1/0.159.0); every agent command ran in a sandbox namespace; codex-exec-server
+  never ran. Phase 1: launched 2026-11-19T14:04:09Z in tmux main-g62 on hwebench,hwebench2
+  (accounts idle, no runner alive), 12 jobs, rep1 probes confined for both systems.
+  ext2_launcher.py started 14:04:59Z in tmux ext2-launch.
