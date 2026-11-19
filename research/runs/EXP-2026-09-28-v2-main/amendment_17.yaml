@@ -1,0 +1,175 @@
+# WRITE-ONCE. Amendment 17 to prereg.yaml, written 2026-11-19 (about 13:29Z), 46 days
+# after the campaign ended (2026-10-04) and before any run of the systems it adds; its
+# commit time is the authoritative timestamp. Only the launched field is filled in later.
+reason: >
+  The operator asked to extend the V2 ranking with three newer systems (2026-11-19: "lets
+  run for the new models Astra 6.2 and Sol 6.2 (and only after that), run fable 5.2"), all at
+  xhigh as every V2 system ran, with the newer Codex CLI ("use the newer codex"), and the
+  Fable smoke only after both GPT-6.2 systems finish. Added after all main, extension and
+  control data, so no earlier analysis changes.
+harness: >
+  Unchanged: HARNESS_VERSION 2.8.4, fixture branch bench-v2.8.4 = tag hwe-bench-v2.8.4 =
+  072e7ea, N=15, K=3, budgets, prompts (full profile), evals, held-out scoring, acceptance
+  margin, incident policy. 2.8.3 and 2.8.4 differ from 2.8.2 (the scored six) only under the
+  nolessons profile (scribe skipped) and for the random agent (seed and id), so an LLM
+  system under the full profile runs exactly what 2.8.2 ran. The only repo change for this
+  amendment is three entries in tools/bench/models-v2.yaml, committed with this file.
+systems:
+  - name: gpt-6_2-astra_xhigh-v2
+    cli: >
+      Codex CLI 0.170.0 (latest stable release, 2026-11-18), pinned in
+      /srv/hwebench/cli/codex-0.170.0 (GitHub release
+      codex-package-x86_64-unknown-linux-musl.tar.gz, sha256
+      a77ff87be7ba809d715728270a78f5ce3527dc07529416d1ef8929b90b8475eb; bin/codex sha256
+      880819aab735adcf16f36cd628940b9f1e652a36c01d10a5d32f83cc84902971, byte-identical to
+      the operator's 0.170.0); models yaml cli_dir cli/codex-0.170.0.
+    model: gpt-6.2-astra
+    effort: xhigh
+    checked: >
+      Listed by `codex debug models` under 0.170.0, not under 0.156.1 or 0.159.0 (0.159.0
+      refuses gpt-6.2-sol: "The 'gpt-6.2-sol' model is not supported when using Codex with a
+      ChatGPT account"). Catalog: supported efforts low..ultra including xhigh, default low,
+      context window 272,000. Answered one prompt at xhigh through the pinned 0.170.0 as
+      hwebench (2026-11-19 12:35Z); the session records cli_version 0.170.0, model
+      gpt-6.2-astra, effort xhigh.
+  - name: gpt-6_2-sol_xhigh-v2
+    cli: Codex CLI 0.170.0, the same pinned copy (cli_dir cli/codex-0.170.0)
+    model: gpt-6.2-sol
+    effort: xhigh
+    checked: >
+      As Astra: listed under 0.170.0 only; efforts low..ultra including xhigh, default low,
+      context window 500,000; one prompt at xhigh as hwebench, session records cli_version
+      0.170.0, model gpt-6.2-sol, effort xhigh.
+  - name: claude-fable-5_2_xhigh-v2
+    cli: >
+      Claude Code 2.1.327, pinned in /srv/hwebench/cli/claude-2.1.327 (root-owned copy of the
+      operator's 2.1.327 binary, sha256
+      343c744baa14bfd38286a7cb90871051f04379956da6c5b803a9e66019a76ac9; claude.version
+      written from the binary's --version); models yaml cli_dir cli/claude-2.1.327.
+    model: claude-fable-5-2
+    effort: xhigh
+    why_this_cli: >
+      The body-recording proxy of amendment 13 (request-body fields only, never headers),
+      2026-11-19: 2.1.283 and 2.1.284 answer for claude-fable-5-2 with
+      [claude-code:unrecognized_model] and send it max_tokens 32000 and no per-turn-control
+      beta. 2.1.322, 2.1.327 and 2.1.328 know the model and send it thinking adaptive,
+      output_config.effort xhigh, max_tokens 128000 and the per-turn-control beta
+      (per-turn-control-2026-07-01 in 2.1.327), which is exactly what 2.1.283 sends Opus 5.5 (and 2.1.327 sends Opus 5.5 the
+      same). 2.1.327 over 2.1.322: it adds a security fix for zstd-compressed response
+      decoding, sandbox hardening (2.1.326) and a fix for `claude -p` hanging before its
+      first request; over 2.1.328: 2.1.328's changes are not documented offline.
+cli_differences_recorded: >
+  The new systems differ from their predecessors in CLI as well as model (GPT-6 Astra ran
+  Codex 0.156.1, GPT-6.1 Sol 0.159.0, Opus 5.5 Claude Code 2.1.283), so a comparison is
+  between systems (model inside its CLI, prereg unit_of_comparison), never bare models.
+  Codex 0.170.0 under the harness's isolated config: every flag and config key the harness
+  uses parses and behaves as in 0.159.0, the sandbox policy and environment blocks the
+  model sees are identical, and the 14 features the harness pins off are still off. It
+  enables 22 features that are off or absent in 0.156.1/0.159.0 (60 enabled vs 39):
+  api_key_cyber_access_programs, api_key_model_discovery, bedrock_setup_wizard,
+  browser_annotation_api, cli_daybreak, code_mode_host_grpc,
+  code_mode_host_output_truncation, code_mode_interrupt, deferred_tool_world_state,
+  guardian_include_additional_context, in_app_voice, incremental_tools,
+  incremental_tools_legacy, incremental_tools_legacy_gcp, instant_interrupt,
+  mcp_oauth_refresh_coordination, prediction_preserve_parent_tools,
+  reasoning_effort_override, retain_client_tool_outputs, ultrafast_mode,
+  unified_image_budget, untrusted_as_tool_output. They are left at the CLI's defaults (no
+  harness change): the GPT-6.2 models are code-mode-only, none of the 22 gives web, MCP,
+  browser, plugin or memory access (those stay pinned off), and the systems are run as
+  their CLI ships. The model-visible tool list adds request_user_input(_async) and
+  send_message_to_user_async (no one answers in exec mode) and spawn_agent model and
+  reasoning_effort overrides; the smoke and the per-rep checks look for them. No service
+  tier is configured (the 6.2 catalog has no default tier), as for every earlier Codex
+  system. Claude Code 2.1.327 against 2.1.283/2.1.284: same flags, settings schema,
+  fail-closed sandbox logic and output parsing; it can lower a rejected effort and retry
+  (2.1.314+), which the per-rep check catches ("Invalid effort level"), and the smoke
+  compares its init event (tools, MCP servers, plugins, permission mode, agents, skills)
+  with the Opus/Sonnet baseline.
+host_change: >
+  Codex 0.170.0 saves a refreshed login by renaming a new 0600 tempfile over the pool's
+  shared /srv/hwebench/auth/auth.json and creates auth.json.lock 0600 (0.156.1/0.159.0
+  write through the symlink and keep the 660 inode). The 2026-11-19 12:35Z check prompt
+  refreshed the 41-day-old login this way and locked hwebench2 and hwebench3 out; no run
+  was active. Fixed by hand (660 hwecodex) and guarded by a systemd path unit plus a 30 s
+  timer (hwe-codex-auth-perms, setup_server.sh 6a'), which restored a simulated
+  replacement within 0.5 s. Not a harness change; every babysit pass checks the file mode.
+smoke22: >
+  GPT-6.2 Astra and GPT-6.2 Sol, one round each (N=1, K=3), interleaved on
+  hwebench,hwebench2 with --keep-clones, results bench/v2/smoke-ext2/results-smoke-g62.jsonl
+  (unscored). The reps start only if, for both rows (research/v2/scripts/ext2_checks.py):
+  status done, harness 2.8.4, fixture_commit 072e7ea, runner_dirty false, sandbox probe ok,
+  codex_cli 0.170.0, cli_dir cli/codex-0.170.0, held-out numeric with 5 of 5 kernels
+  validated, no 'git bundle failed'; every Codex session in the kept clone records
+  cli_version 0.170.0, its own model and effort xhigh (subagent sessions included); and the
+  agent-scope process sample taken during the smoke shows no agent command in the host
+  namespace. Error events (capacity, quota) are recorded verbatim. The kept clones'
+  session files are archived to the smoke dir before the clones are removed.
+smoke23: >
+  Fable 5.2, one round (N=1, K=3) on hwebench3, results
+  bench/v2/smoke-ext2/results-smoke-fable52.jsonl, run by the launcher only after both
+  GPT-6.2 systems finish (operator, 2026-11-19). Gates as smoke22 with claude_cli 2.1.327
+  and cli_dir cli/claude-2.1.327, plus: every init event has model claude-fable-5-2,
+  claude_code_version 2.1.327 and the baseline tools [Task, Bash, Edit, NotebookEdit, Read,
+  ReportFindings, Skill, TaskStop, Write], no MCP servers, the agents-md plugin only and
+  permission mode acceptEdits; every assistant message and modelUsage key is
+  claude-fable-5-2; zero unrecognized_model, "Sandbox is enabled but failed", "Sandboxing is
+  disabled" and "Invalid effort level". A difference in agents, skills or fast mode stops
+  the launch until the operator reviews it. If the smoke shows a needed harness change, it
+  is made and smoked then, under a further amendment, before any Fable rep.
+schedule: >
+  Phase 1: one runner, tmux main-g62, --interleave on hwebench,hwebench2 (the V2 schedule:
+  one batch per rep holding both systems, started together, launch order alternating),
+  reps 1-6, results bench/v2/results-g62.jsonl, log bench/v2/runner-g62.log, rep dirs
+  bench/v2/<name>/rep<N>. A rep that ends not done is rerun (amendment 01 policy) by a
+  runner on the same account pool into results-g62-rerun<N>.jsonl with --first-rep.
+  Phase 2: research/v2/scripts/ext2_launcher.py (tmux ext2-launch, log
+  bench/v2/ext2-launcher.log) waits until all 12 GPT-6.2 reps have a done, scored row, no
+  runner process is alive and all three accounts are idle; runs smoke23; then starts three
+  Fable runners at once, one per account, two reps each (amendment 14's layout): reps 1-2
+  hwebench (main-f52a), 3-4 hwebench2 (main-f52b), 5-6 hwebench3 (main-f52c), results
+  bench/v2/results-fable52-{a,b,c}.jsonl. Runner pools never overlap (a runner kills every
+  process of its accounts at start).
+not_matched: >
+  These runs start 46 days after the campaign ended, against provider model states and
+  quotas that may have changed; no earlier system is rerun alongside them as a drift
+  anchor. Phase 1 runs two systems at once (the campaign kept three runs in progress,
+  amendment 14 three), so host load differs; the eval is deterministic and budgets are per
+  agent, so load changes wall-clock, not the work an agent may do. GPT-6.2 Astra and Sol
+  share one Codex subscription quota at the same time. Fable runs three at once on one
+  Claude token, after phase 1, with no other system alongside. Quota pauses rerun the
+  interrupted attempt (amendment 01 policy).
+capacity_errors: >
+  Unchanged harness behavior, stated here because a newly launched model is the likely case:
+  "Selected model is at capacity" (and 0.170.0's "Policy-restricted capacity is
+  unavailable") is neither a quota nor a transient error to the harness; the call is
+  retried once, and if that fails the slot counts as broken against the system, as in the
+  campaign (13 of 16 such retries recovered there). Broken slots are reported per system
+  with their error text.
+analysis:
+  earlier_families: >
+    Unchanged and not recomputed with the new systems: the primary test, amendment 11's
+    secondary family, amendment 13's 12-pair extension family and amendment 14's ablation
+    keep their published numbers.
+  extension2: >
+    Every pairwise comparison between systems with 6 scored runs in which at least one is
+    an amendment 17 system: each new system against the six scored earlier systems (Opus
+    5.5, GPT-6.1 Sol, Luna, GPT-6 Astra, Sonnet 5.5, GPT-5.5) and against each other (21
+    pairs if all three complete; a system that does not reach 6 scored runs is reported
+    descriptively only). Each: Welch two-sided on ln(held-out score), ratio of geometric
+    means with its 95% CI and the 10,000-sample bootstrap CI, as in prereg.yaml.
+    Holm-adjusted across this family at family alpha 0.05, a family of its own. Same
+    verdict wording ("ranks higher" / "not distinguishable at n=6"); every comparison with
+    an earlier system carries the not_matched period difference.
+  descriptive: >
+    All nine scored systems ordered by geometric-mean held-out score with 10,000-sample
+    bootstrap rank intervals; CoreMark, Fmax, accepted/broken rounds, tokens and
+    API-equivalent cost per system as in analysis_final.md.
+  scoring_rows: >
+    Only the main results files (results-g62*.jsonl, results-fable52-*.jsonl) enter the
+    analysis; smoke rows (bench/v2/smoke-ext2) never do.
+results_files: >
+  bench/v2/results-g62.jsonl (+ any results-g62-rerun<N>.jsonl), bench/v2/results-fable52-{a,b,c}.jsonl;
+  smokes in bench/v2/smoke-ext2/.
+unchanged: question, metrics, tests and verdict rules of the campaign, budget (N=15, K=3), runs per system (6), effort (xhigh), incident policy
+launched: >
+  To be filled in afterwards with each runner's start time, account and first probe verdict.

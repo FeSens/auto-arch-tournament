@@ -115,6 +115,35 @@ if [ ! -x "$D/codex" ]; then
   ln -sfn "$D/codex-pkg/bin/codex" "$D/codex"
   install -m 644 "$D/codex-pkg/codex-package.json" "$D/codex.version.json"
 fi
+# Amendment 17: GPT-6.2 Astra and GPT-6.2 Sol are refused by 0.159.0 and listed
+# by 0.170.0 (latest stable, 2026-11-18). Package sha256 a77ff87b...b8475eb; its
+# bin/codex (880819aa...902971) is byte-identical to the operator's 0.170.0.
+CODEX_G62_VERSION=0.170.0
+D="$SHARED/cli/codex-$CODEX_G62_VERSION"
+if [ ! -x "$D/codex" ]; then
+  tmp=$(mktemp -d)
+  curl -fsSL -o "$tmp/p.tgz" "https://github.com/openai/codex/releases/download/rust-v$CODEX_G62_VERSION/codex-package-x86_64-unknown-linux-musl.tar.gz"
+  echo "a77ff87be7ba809d715728270a78f5ce3527dc07529416d1ef8929b90b8475eb  $tmp/p.tgz" | sha256sum -c --quiet
+  install -d -m 755 "$SHARED/cli" "$D" "$D/codex-pkg"
+  tar xzf "$tmp/p.tgz" -C "$D/codex-pkg" --no-same-owner && rm -rf "$tmp"
+  chmod -R go-w,a+rX "$D"
+  ln -sfn "$D/codex-pkg/bin/codex" "$D/codex"
+  install -m 644 "$D/codex-pkg/codex-package.json" "$D/codex.version.json"
+fi
+# Claude Code per-model copies (root-owned, claude.version written from the binary).
+# Amendment 13: 2.1.284 for Sonnet 5.5 (sha256 5cd90aab...afbf88f). Amendment 17:
+# 2.1.327 for Fable 5.2 (2.1.283/2.1.284 do not know claude-fable-5-2).
+for v in 2.1.284:5cd90aabd83f8a15136c35aa37bb1d92b348993573316643dc3fe4e04afbf88f \
+         2.1.327:343c744baa14bfd38286a7cb90871051f04379956da6c5b803a9e66019a76ac9; do
+  ver=${v%%:*}; sum=${v#*:}; D="$SHARED/cli/claude-$ver"
+  if [ ! -x "$D/claude" ]; then
+    curl -fsSL https://claude.ai/install.sh | bash -s "$ver" >/dev/null
+    echo "$sum  /root/.local/share/claude/versions/$ver" | sha256sum -c --quiet
+    install -d -m 755 "$SHARED/cli" "$D"
+    install -m 755 "/root/.local/share/claude/versions/$ver" "$D/claude"
+    "$D/claude" --version | cut -d' ' -f1 > "$D/claude.version"; chmod 644 "$D/claude.version"
+  fi
+done
 
 ln -sfn "$SHARED/bin/claude" /usr/local/bin/claude
 ln -sfn "$SHARED/bin/codex" /usr/local/bin/codex
@@ -171,6 +200,30 @@ for a in $POOL; do
   chown -h "$a:$a" "/home/$a/.codex/auth.json"
 done
 install -d -o root -g hwecodex -m 2770 "$SHARED/auth"
+# 6a'. Codex 0.170.0 (amendment 17) saves a refreshed login by renaming a new
+#      0600 tempfile over the shared file (and makes auth.json.lock 0600), which
+#      locked the other accounts out on 2026-11-19. A path unit (plus a 30 s
+#      timer backstop) restores group read-write within a second.
+cat > /usr/local/sbin/hwe-codex-auth-perms <<'EOF'
+#!/bin/sh
+# Restore hwecodex 660 on the shared Codex login after Codex replaces it.
+set -eu
+for f in /srv/hwebench/auth/auth.json /srv/hwebench/auth/auth.json.lock; do
+  [ -e "$f" ] || continue
+  [ "$(stat -c '%G %a' "$f")" = "hwecodex 660" ] && continue
+  chgrp hwecodex "$f"; chmod 660 "$f"
+  logger -t hwe-codex-auth-perms "restored hwecodex 660 on $f"
+done
+EOF
+chmod 755 /usr/local/sbin/hwe-codex-auth-perms
+printf '[Unit]\nDescription=Restore group access to the shared Codex login (HWE Bench)\n\n[Service]\nType=oneshot\nExecStart=/usr/local/sbin/hwe-codex-auth-perms\n' \
+  > /etc/systemd/system/hwe-codex-auth-perms.service
+printf '[Unit]\nDescription=Watch the shared Codex login for replacement (HWE Bench)\n\n[Path]\nPathChanged=%s/auth/auth.json\nPathChanged=%s/auth/auth.json.lock\nPathModified=%s/auth\nUnit=hwe-codex-auth-perms.service\n\n[Install]\nWantedBy=multi-user.target\n' \
+  "$SHARED" "$SHARED" "$SHARED" > /etc/systemd/system/hwe-codex-auth-perms.path
+printf '[Unit]\nDescription=Backstop for hwe-codex-auth-perms.path (HWE Bench)\n\n[Timer]\nOnBootSec=1min\nOnUnitActiveSec=30s\nAccuracySec=5s\n\n[Install]\nWantedBy=timers.target\n' \
+  > /etc/systemd/system/hwe-codex-auth-perms.timer
+systemctl daemon-reload
+systemctl enable --now hwe-codex-auth-perms.path hwe-codex-auth-perms.timer
 
 # 6b. Agents see only their own processes (other runs' command lines are a
 #     leak); the operator's group sees all.

@@ -50,3 +50,26 @@ models:
     model: gpt-5.5
     variant: xhigh
     oauth: true
+  # Amendment 17 (second extension): GPT-6.2 Astra and GPT-6.2 Sol need Codex
+  # 0.170.0 (0.159.0 is refused: "not supported when using Codex with a ChatGPT
+  # account"); Fable 5.2 needs Claude Code 2.1.322 or later (2.1.283 and 2.1.284
+  # do not know claude-fable-5-2 and send it 32,000 max output tokens), and
+  # 2.1.327 sends it what 2.1.283 sends Opus 5.5.
+  - name: gpt-6_2-astra_xhigh-v2
+    provider: codex
+    model: gpt-6.2-astra
+    variant: xhigh
+    oauth: true
+    cli_dir: cli/codex-0.170.0
+  - name: gpt-6_2-sol_xhigh-v2
+    provider: codex
+    model: gpt-6.2-sol
+    variant: xhigh
+    oauth: true
+    cli_dir: cli/codex-0.170.0
+  - name: claude-fable-5_2_xhigh-v2
+    provider: claude
+    model: claude-fable-5-2
+    variant: xhigh
+    oauth: true
+    cli_dir: cli/claude-2.1.327
