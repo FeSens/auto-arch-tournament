@@ -14,7 +14,9 @@ MODEL_ORDER = ["claude-opus-5_5_xhigh-v2", "gpt-6_1-sol_xhigh-v2", "gpt-6-sol_xh
                # amendment 13 extension systems
                "claude-sonnet-5-5_xhigh-v2", "gpt-6-astra_xhigh-v2", "gpt-5_5_xhigh-v2",
                # amendment 14 ablation (GPT-6.1 Sol, scribe skipped)
-               "gpt-6_1-sol_xhigh-v2-nolessons"]
+               "gpt-6_1-sol_xhigh-v2-nolessons",
+               # amendment 17 second extension
+               "gpt-6_2-astra_xhigh-v2", "gpt-6_2-sol_xhigh-v2", "claude-fable-5_2_xhigh-v2"]
 # External references (research/v2/reference_vexriscv, research/v2/reference_cores): open-source
 # cores in the harness's Gowin flow (median of place options 0-2). Their CoreMark is Fmax x a
 # published CoreMark/MHz, not a bench measurement; no held-out score (not run on the bench programs).
