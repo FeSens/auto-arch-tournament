@@ -2,7 +2,7 @@
 # One amendment-17 babysit tick; shows only alerts newer than the last tick.
 O=$HOME/ext2-ops
 since=$(cat $O/tick.since 2>/dev/null || echo 2026-11-19T13:00)
-date -u +%Y-%m-%dT%H:%M:%S > $O/tick.since
+TZ=Europe/Berlin date +%Y-%m-%dT%H:%M:%S > $O/tick.since   # the monitor stamps alerts in Berlin time
 cd /home/bench/auto-arch-tournament
 R=""; L0=""
 for f in bench/v2/results-g62*.jsonl bench/v2/results-fable52-*.jsonl; do [ -f "$f" ] && R="$R $f"; done
