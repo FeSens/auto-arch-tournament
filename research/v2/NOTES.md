@@ -737,3 +737,22 @@ Amendment 17 (commit d3eb782) pre-registers it before any run.
   ext2-launch. Monitor in tmux monitor-ext2, cosim guard in tmux cosim-guard.
 - Left alone: two of the operator's processes from other projects (a gowin-4k loop and
   a 32-day-old bonetto-formal yosys-smtbmc); they show up in host-wide solver counts.
+
+## 2026-11-20: amendment 17 rep1 of both GPT-6.2 systems done
+
+Both rep1 rows pass ext2_checks.py (row and codex gates): done, harness 2.8.4, fixture
+072e7ea, runner clean, probe confined, codex_cli 0.170.0, held-out 5/5 validated, 0 broken.
+
+| system | rep | CoreMark | held-out iter/s | acc/rej/broken | wall h | tokens in |
+|---|---|---|---|---|---|---|
+| GPT-6.2 Sol | 1 | 270.88 | 6595.8 | 11/35/0 | 11.3 | 529M |
+| GPT-6.2 Astra | 1 | 303.39 | 7095.2 | 13/33/0 | 12.5 | 357M |
+
+n=1 per system: no comparison. Rep2 batch started 02:32:58Z (Sol first, launch order
+alternates), both probes confined. Notes from the night: the monitor's "collision" MEDIUMs
+are design vocabulary (both systems build replay/fetch collision logic); one HIGH yosys
+SAT proof and one HIGH scribe .tmp listing, both benign classes (monitor_review.md). The
+1200 s hypothesis and 1800 s implementation kills occur at GPT-6 Astra / GPT-6.1 Sol rates.
+CPU bursts to load 50-74 come from both agents' own formal runs; memory never fell below
+39 GB available, no slot broke. api_equivalent_cost_usd is 0 for the 0.170.0 rows (None
+for earlier Codex rows): no Codex system has a priced cost; treat both as missing.
