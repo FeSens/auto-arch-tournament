@@ -772,3 +772,18 @@ rep1 table above); status_table.py subtracts it (Astra rep2 9/36/0, rep1 12/33/0
 rep1 10/35/0). Astra rep2's last accepted design was round 9; rounds 10-15 produced 18
 rejected slots, most of them cutting cycles but losing more in Fmax (72-80 MHz against
 the champion's 85.3). Sol rep2 is in round 15; the rep3 batch starts when it ends.
+
+## 2026-11-20: amendment 17 GPT-6.2 Sol rep2 done; rep3 batch started
+
+Passes ext2_checks.py (row and codex gates). Done 19:39Z after 61582 s (17.1 h).
+
+| system | rep | CoreMark | held-out iter/s | acc/rej/broken (row) | wall h | tokens in |
+|---|---|---|---|---|---|---|
+| GPT-6.2 Sol | 2 | 262.78 | 6595.2 | 11/35/0 | 17.1 | 584M |
+
+Sol rep2's held-out score matches rep1's (6595.8) to 0.01% with different finals (262.78 vs
+270.88) and different champions (Fmax 91.7 vs 86.8 MHz): a coincidence of two different
+designs, not a copy (separate clones from the same fixture). Plateau r8-r10 at 237.1, then
++5.3% (r11) and +5.3% (r12), flat r13-r15. Rep3 batch started 19:39:21Z (Astra first),
+both probes confined. Two more benign scribe .tmp listings and one "timing runs ...
+replay collision" regex false positive in monitor_review.md.
