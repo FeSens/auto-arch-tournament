@@ -756,3 +756,19 @@ SAT proof and one HIGH scribe .tmp listing, both benign classes (monitor_review.
 CPU bursts to load 50-74 come from both agents' own formal runs; memory never fell below
 39 GB available, no slot broke. api_equivalent_cost_usd is 0 for the 0.170.0 rows (None
 for earlier Codex rows): no Codex system has a priced cost; treat both as missing.
+
+## 2026-11-20: amendment 17 GPT-6.2 Astra rep2 done
+
+Passes ext2_checks.py (row and codex gates). Done 18:3xZ after 57554 s (16.0 h; the
+longest so far: Sol's round-8 to round-11 formal gates ran 25-30 min each at
+HARNESS_EVAL_JOBS=6 and the other run's eval waited on the machine-wide formal lock).
+
+| system | rep | CoreMark | held-out iter/s | acc/rej/broken (row) | wall h | tokens in |
+|---|---|---|---|---|---|---|
+| GPT-6.2 Astra | 2 | 263.77 | 6244.8 | 10/36/0 | 16.0 | 447M |
+
+Counting convention: the result row's `accepted` includes the baseline row (as in the
+rep1 table above); status_table.py subtracts it (Astra rep2 9/36/0, rep1 12/33/0, Sol
+rep1 10/35/0). Astra rep2's last accepted design was round 9; rounds 10-15 produced 18
+rejected slots, most of them cutting cycles but losing more in Fmax (72-80 MHz against
+the champion's 85.3). Sol rep2 is in round 15; the rep3 batch starts when it ends.
