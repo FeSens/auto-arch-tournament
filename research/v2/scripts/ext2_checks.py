@@ -38,6 +38,20 @@ CLAUDE_BASE = {
                "run-skill-generator"],
     "fast_mode_state": "off",
 }
+# Claude Code 2.1.327 ships agents-md as cc-plugin-agents-md plus two more built-in plugins
+# and the plugin-authoring skill; amendment 18 accepts exactly this set (operator, 2026-11-23).
+CLAUDE_BASE_BY_CLI = {
+    "2.1.327": {
+        **CLAUDE_BASE,
+        "plugins": [
+            {"name": "cc-plugin-agents-md", "path": "builtin", "source": "cc-plugin-agents-md@builtin"},
+            {"name": "cc-plugin-privacy", "path": "builtin", "source": "cc-plugin-privacy@builtin"},
+            {"name": "cc-plugin-plugin-authoring", "path": "builtin",
+             "source": "cc-plugin-plugin-authoring@builtin"},
+        ],
+        "skills": CLAUDE_BASE["skills"] + ["plugin-authoring"],
+    },
+}
 # Strings that mean the sandbox did not start, the CLI did not know the model, or the
 # CLI changed the effort on its own (2.1.314+ lowers a rejected effort and retries).
 CLAUDE_BAD = ["unrecognized_model", "Sandbox is enabled but failed", "Sandboxing is disabled",
@@ -108,6 +122,7 @@ def claude_gate(rep_dir: Path, model: str, cli_version: str) -> tuple[list, list
     fails, reviews = [], []
     if "probe" not in texts or "agents" not in texts:
         return [f"missing logs in {rep_dir}: have {sorted(texts)}"], []
+    base = CLAUDE_BASE_BY_CLI.get(cli_version, CLAUDE_BASE)
     inits, models, usage_keys, results = 0, set(), set(), 0
     seen_diff = set()
     for src, text in texts.items():
@@ -120,15 +135,15 @@ def claude_gate(rep_dir: Path, model: str, cli_version: str) -> tuple[list, list
                 if ev.get("claude_code_version") != cli_version:
                     fails.append(f"{src} init claude_code_version {ev.get('claude_code_version')!r}")
                 for key in ("tools", "mcp_servers", "permissionMode", "plugins"):
-                    if ev.get(key) != CLAUDE_BASE[key] and (key, json.dumps(ev.get(key))) not in seen_diff:
+                    if ev.get(key) != base[key] and (key, json.dumps(ev.get(key))) not in seen_diff:
                         seen_diff.add((key, json.dumps(ev.get(key))))
                         fails.append(f"{src} init {key} {ev.get(key)!r} differs from the Opus/Sonnet "
-                                     f"baseline {CLAUDE_BASE[key]!r}")
+                                     f"baseline {base[key]!r}")
                 for key in ("agents", "skills", "fast_mode_state"):
-                    if ev.get(key) != CLAUDE_BASE[key] and (key, json.dumps(ev.get(key))) not in seen_diff:
+                    if ev.get(key) != base[key] and (key, json.dumps(ev.get(key))) not in seen_diff:
                         seen_diff.add((key, json.dumps(ev.get(key))))
                         reviews.append(f"init {key} {ev.get(key)!r} differs from the baseline "
-                                       f"{CLAUDE_BASE[key]!r}")
+                                       f"{base[key]!r}")
             elif t == "assistant":
                 m = (ev.get("message") or {}).get("model")
                 if m:

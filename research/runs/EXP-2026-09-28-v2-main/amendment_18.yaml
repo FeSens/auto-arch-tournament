@@ -1,0 +1,61 @@
+# WRITE-ONCE. Amendment 18 to prereg.yaml, written 2026-11-23 (about 23:50Z) after smoke23
+# of amendment 17 failed one gate and before any scored Fable 5.2 rep; its commit time is
+# the authoritative timestamp. Only the launched field is filled in later.
+reason: >
+  Smoke23 (Fable 5.2, amendment 17, 2026-11-23 21:58:40Z to 22:27Z on hwebench3,
+  bench/v2/smoke-ext2) ran to completion and passed every gate but one: the plugin list
+  in the init event. Amendment 17 pinned "the agents-md plugin only", the list that every
+  Opus 5.5 and Sonnet 5.5 session reports on Claude Code 2.1.283 and 2.1.284. Every
+  2.1.327 init event (11 of 11, probe and agents) reports three built-in plugins instead:
+  cc-plugin-agents-md (agents-md under its new name), cc-plugin-privacy and
+  cc-plugin-plugin-authoring. The skills list adds plugin-authoring. The rest of the
+  init event matches the baseline: tools [Task, Bash, Edit, NotebookEdit, Read,
+  ReportFindings, Skill, TaskStop, Write], no MCP servers, permission mode acceptEdits,
+  the same agents, fast mode off.
+what_they_are: >
+  Read from the pinned 2.1.327 binary (sha256
+  343c744baa14bfd38286a7cb90871051f04379956da6c5b803a9e66019a76ac9, unchanged since
+  amendment 17). cc-plugin-privacy is a tool.check hook on Bash, Monitor, PowerShell,
+  Write, Edit, NotebookEdit, WebFetch and MCP calls. It refuses a call that holds the
+  signed-in account's email next to a client-identity pattern (a User-Agent or From
+  header, git user.email, a SEC EDGAR identity), or a call that puts the address in a
+  URL. A second hook (session.identity) keeps the account email away from plugins that
+  are not built in. It can only refuse a call, never allow one. cc-plugin-plugin-authoring
+  adds one user-invocable skill, plugin-authoring ("Write a mod: a live pane, view or
+  behaviour change in Claude Code"). The CLI registers both by default: privacy for every
+  entrypoint, plugin-authoring for every entrypoint except local-agent.
+smoke_use: >
+  The smoke's agents made 245 tool calls (Bash 160, Edit 63, Write 18, Read 3,
+  TaskStop 1). None was a Skill call and none was refused by the privacy hook.
+decision: >
+  Operator, 2026-11-23, given the choice between accepting the plugins as shipped and a
+  harness change that turns the two new plugins off: "Accept as shipped". The harness
+  change would have meant HARNESS_VERSION 2.8.5, a new fixture and a new smoke, and Fable
+  5.2 would have run on a different harness from every other V2 system. As with the 22
+  features that Codex 0.170.0 newly enables (amendment 17 cli_differences_recorded), the
+  system runs as its CLI ships. Neither plugin gives web, MCP, browser or memory access.
+  Privacy can only refuse calls. plugin-authoring adds a skill whose subject (Claude Code
+  mods) is outside the task.
+change: >
+  research/v2/scripts/ext2_checks.py claude_gate: for claude_code_version 2.1.327 it
+  expects exactly these three plugins, and the baseline skills plus plugin-authoring. Any
+  other plugin difference still fails. Any other difference in agents, skills or fast mode
+  still needs review. This applies to the smoke and to every Fable rep. No harness change:
+  HARNESS_VERSION 2.8.4, fixture bench-v2.8.4 (072e7ea) and the models file stay as they are.
+smoke23_outcome: >
+  Row (research/v2/scripts/ext2_checks.py row): done, harness 2.8.4, fixture 072e7ea,
+  runner_dirty false, claude_cli 2.1.327, cli_dir cli/claude-2.1.327, sandbox probe ok
+  (confined, network blocked, account home hidden), held-out 5 of 5 kernels validated,
+  no 'git bundle failed'. Claude check: 11 init events and 11 result events. Every init
+  event has model claude-fable-5-2 and claude_code_version 2.1.327. Every assistant
+  message comes from claude-fable-5-2. There are zero unrecognized_model, "Sandbox is
+  enabled but failed", "Sandboxing is disabled" and "Invalid effort level". Unscored
+  numbers from one round: CoreMark 138.1 (baseline 12.12), held-out 3443.4 iter/s, 2
+  accepted, 2 rejected, 0 broken. Host-namespace snapshots taken during the smoke show
+  only the CLI's own processes: claude, socat, bwrap, and the transient
+  "/bin/sh -c bwrap ..." that launches each sandbox. Every agent command ran in a sandbox
+  namespace.
+unchanged: everything else in amendment 17 (systems, schedule, gates, analysis, Holm family)
+launched: >
+  To be filled in afterwards with each Fable runner's start time, account and first probe
+  verdict.
