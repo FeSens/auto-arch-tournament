@@ -158,14 +158,20 @@ def main() -> int:
     log(f"ext2 launcher started: {MODEL} after {', '.join(PRED)} reps 1-6")
     alerted = {}
     while True:
-        missing, latest = pred_state()
-        for k, st in latest.items():
-            if alerted.get(k) != st:
-                alerted[k] = st
-                log(f"ALERT {k[0]} rep{k[1]} latest row {st!r} and no done row; it needs a "
-                    f"rerun (into a new results-g62-*.jsonl) before Fable can start")
-        if not missing and host_idle():
-            break
+        # A transient error (a fork failing with ENOMEM under host memory
+        # pressure, 2026-11-21) must not end the wait: the first launcher
+        # died silently that way, its traceback lost with its tmux pane.
+        try:
+            missing, latest = pred_state()
+            for k, st in latest.items():
+                if alerted.get(k) != st:
+                    alerted[k] = st
+                    log(f"ALERT {k[0]} rep{k[1]} latest row {st!r} and no done row; it needs a "
+                        f"rerun (into a new results-g62-*.jsonl) before Fable can start")
+            if not missing and host_idle():
+                break
+        except OSError as e:
+            log(f"ALERT wait loop error, retrying in 60 s: {e!r}")
         time.sleep(60)
     log("fable52: all 12 GPT-6.2 reps done and scored; no runner alive, all accounts idle")
     if not smoke():
@@ -190,4 +196,9 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    try:
+        sys.exit(main())
+    except Exception:
+        import traceback
+        log("ALERT launcher crashed:\n" + traceback.format_exc())
+        raise
