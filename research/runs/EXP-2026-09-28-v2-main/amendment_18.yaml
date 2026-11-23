@@ -59,3 +59,8 @@ unchanged: everything else in amendment 17 (systems, schedule, gates, analysis, 
 launched: >
   To be filled in afterwards with each Fable runner's start time, account and first probe
   verdict.
+  The launcher, restarted at 23:47:58Z, re-ran the gates on the smoke at 23:48:58Z (pass, no
+  review items) and started tmux main-f52a (hwebench, reps 1-2) at 23:49:58Z, main-f52b
+  (hwebench2, reps 3-4) at 23:50:03Z and main-f52c (hwebench3, reps 5-6) at 23:50:08Z,
+  writing bench/v2/results-fable52-{a,b,c}.jsonl. The sandbox probes for rep1, rep3 and
+  rep5 all report confined.
