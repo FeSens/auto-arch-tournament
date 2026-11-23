@@ -787,3 +787,35 @@ designs, not a copy (separate clones from the same fixture). Plateau r8-r10 at 2
 +5.3% (r11) and +5.3% (r12), flat r13-r15. Rep3 batch started 19:39:21Z (Astra first),
 both probes confined. Two more benign scribe .tmp listings and one "timing runs ...
 replay collision" regex false positive in monitor_review.md.
+
+## 2026-11-23: amendment 17 phase 1 done (GPT-6.2 Astra and Sol, 12/12)
+
+All 12 rows pass ext2_checks.py (row and codex gates). Runner: "matrix done, 12/12
+successful"; last row (Astra rep6) done about 11:04Z Nov 23. acc/rej/broken below exclude
+the baseline row (status_table.py convention).
+
+| system | rep | CoreMark | held-out iter/s | Fmax | acc/rej/broken | wall h |
+|---|---|---|---|---|---|---|
+| GPT-6.2 Astra | 1 | 303.39 | 7095.2 | 92.0 | 12/33/0 | 12.5 |
+| GPT-6.2 Astra | 2 | 263.77 | 6244.8 | 85.3 | 9/36/0 | 16.0 |
+| GPT-6.2 Astra | 3 | 284.20 | 6982.2 | 87.6 | 11/33/1 | 13.1 |
+| GPT-6.2 Astra | 4 | 319.48 | 7633.1 | 97.3 | 13/32/0 | 12.1 |
+| GPT-6.2 Astra | 5 | 292.05 | 7127.3 | 89.4 | 10/35/0 | 16.6 |
+| GPT-6.2 Astra | 6 | 282.47 | 6711.7 | 88.7 | 11/33/1 | 13.3 |
+| GPT-6.2 Sol | 1 | 270.88 | 6595.8 | 86.8 | 10/35/0 | 11.3 |
+| GPT-6.2 Sol | 2 | 262.78 | 6595.2 | 91.7 | 10/35/0 | 17.1 |
+| GPT-6.2 Sol | 3 | 286.24 | 6638.9 | 102.0 | 9/33/3 | 17.5 |
+| GPT-6.2 Sol | 4 | 280.23 | 6761.2 | 90.8 | 12/32/1 | 13.4 |
+| GPT-6.2 Sol | 5 | 250.19 | 6107.5 | 96.8 | 8/36/1 | 19.2 |
+| GPT-6.2 Sol | 6 | 312.39 | 7526.5 | 105.6 | 12/33/0 | 12.4 |
+
+Held-out geomean (95% t CI): Astra 6953 (6480-7460), Sol 6691 (6234-7182); Opus 5.5 7024
+(6305-7826). Provisional Welch on ln held-out, unadjusted (the amendment-17 Holm family of 21
+pairs completes only with Fable 5.2): Astra/Opus 0.990 (0.883-1.110) p=0.84, Sol/Opus 0.953
+(0.850-1.068) p=0.36, Astra/Sol 1.039 p=0.35; both GPT-6.2 systems above GPT-6.1 Sol
+(1.31, 1.26), GPT-6 Astra (1.39, 1.33), GPT-5.5 and GPT-6 Luna (about 1.9), all p<0.001.
+Broken slots (8): six 2700 s formal timeouts on large designs (Astra 2, Sol 4) and two genuine
+Sol rep3 pc_fwd counterexamples. Operator notes: babysit gap Nov 21 05:21Z to Nov 23 21:55Z
+(Claude Code's low-memory reaper; restarted on the operator's answer); two kernel OOM kills
+hit the operator's unrelated bonetto-formal solver, no benchmark process; the ext2 launcher
+had died (tmux pane gone), fixed to log and retry, restarted 21:57Z for the Fable smoke.
