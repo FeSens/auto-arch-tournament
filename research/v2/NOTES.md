@@ -817,5 +817,7 @@ pairs completes only with Fable 5.2): Astra/Opus 0.990 (0.883-1.110) p=0.84, Sol
 Broken slots (8): six 2700 s formal timeouts on large designs (Astra 2, Sol 4) and two genuine
 Sol rep3 pc_fwd counterexamples. Operator notes: babysit gap Nov 21 05:21Z to Nov 23 21:55Z
 (Claude Code's low-memory reaper; restarted on the operator's answer); two kernel OOM kills
-hit the operator's unrelated bonetto-formal solver, no benchmark process; the ext2 launcher
+(Nov 21: an unidentified non-benchmark bench-account solver; Nov 22: the harness's own
+10.6 GB causal_ch0 solver in Sol rep5 r9s2's gate, 2 minutes before that gate's 2700 s
+ceiling, outcome unchanged); the ext2 launcher
 had died (tmux pane gone), fixed to log and retry, restarted 21:57Z for the Fable smoke.
