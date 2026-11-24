@@ -1,0 +1,39 @@
+// rtl/alu.sv
+//
+// Combinational ALU for base integer operations.
+//
+// Latency:        combinational (0 cycles).
+// RVFI fields:    feeds rd_wdata via EX/MEM/WB.
+module alu (
+  input  logic [4:0]  op,
+  input  logic [31:0] a,
+  input  logic [31:0] b,
+  output logic [31:0] out,
+  output logic [31:0] add_sum
+);
+
+  logic        [4:0]  shamt;
+
+  assign add_sum = a + b;
+
+  always_comb begin
+    shamt = b[4:0];
+
+    case (op)
+      ALU_ADD:    out = add_sum;
+      ALU_SUB:    out = a - b;
+      ALU_AND:    out = a & b;
+      ALU_OR:     out = a | b;
+      ALU_XOR:    out = a ^ b;
+      ALU_SLT:    out = {31'b0, $signed(a) < $signed(b)};
+      ALU_SLTU:   out = {31'b0, a < b};
+      ALU_SLL:    out = a << shamt;
+      ALU_SRL:    out = a >> shamt;
+      ALU_SRA:    out = $unsigned($signed(a) >>> shamt);
+      ALU_LUI:    out = b;
+
+      default:  out = 32'b0;
+    endcase
+  end
+
+endmodule

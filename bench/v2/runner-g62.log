@@ -1,0 +1,79 @@
+[preflight] toolchain:
+  verilator            /opt/hwe-toolchain/oss-cad-suite/bin/verilator
+  yosys                /opt/hwe-toolchain/oss-cad-suite/bin/yosys
+  sby                  /opt/hwe-toolchain/oss-cad-suite/bin/sby
+  bitwuzla             /opt/hwe-toolchain/oss-cad-suite/bin/bitwuzla
+  gw_sh                /opt/gowin/IDE/bin/gw_sh
+  GowinSynthesis       /opt/gowin/IDE/bin/GowinSynthesis
+[bench] 12 job(s) queued (0 already done)
+        - gpt-6_2-astra_xhigh-v2-rep1  ->  codex:gpt-6.2-astra  (cli cli/codex-0.170.0)
+        - gpt-6_2-astra_xhigh-v2-rep2  ->  codex:gpt-6.2-astra  (cli cli/codex-0.170.0)
+        - gpt-6_2-astra_xhigh-v2-rep3  ->  codex:gpt-6.2-astra  (cli cli/codex-0.170.0)
+        - gpt-6_2-astra_xhigh-v2-rep4  ->  codex:gpt-6.2-astra  (cli cli/codex-0.170.0)
+        - gpt-6_2-astra_xhigh-v2-rep5  ->  codex:gpt-6.2-astra  (cli cli/codex-0.170.0)
+        - gpt-6_2-astra_xhigh-v2-rep6  ->  codex:gpt-6.2-astra  (cli cli/codex-0.170.0)
+        - gpt-6_2-sol_xhigh-v2-rep1  ->  codex:gpt-6.2-sol  (cli cli/codex-0.170.0)
+        - gpt-6_2-sol_xhigh-v2-rep2  ->  codex:gpt-6.2-sol  (cli cli/codex-0.170.0)
+        - gpt-6_2-sol_xhigh-v2-rep3  ->  codex:gpt-6.2-sol  (cli cli/codex-0.170.0)
+        - gpt-6_2-sol_xhigh-v2-rep4  ->  codex:gpt-6.2-sol  (cli cli/codex-0.170.0)
+        - gpt-6_2-sol_xhigh-v2-rep5  ->  codex:gpt-6.2-sol  (cli cli/codex-0.170.0)
+        - gpt-6_2-sol_xhigh-v2-rep6  ->  codex:gpt-6.2-sol  (cli cli/codex-0.170.0)
+[bench] config: N=15 K=3 reps=6 parallel=1
+[bench] clone base: /srv/hwebench/clones
+[bench] results: /home/bench/auto-arch-tournament/bench/v2/results-g62.jsonl
+[bench] batch: gpt-6_2-astra_xhigh-v2-rep1, gpt-6_2-sol_xhigh-v2-rep1
+
+[bench] === gpt-6_2-astra_xhigh-v2-rep1 starting at 2026-11-19T14:04:10+00:00 ===
+
+[bench] === gpt-6_2-sol_xhigh-v2-rep1 starting at 2026-11-19T14:04:15+00:00 ===
+[bench] gpt-6_2-astra_xhigh-v2-rep1 sandbox probe: confined
+[bench] gpt-6_2-sol_xhigh-v2-rep1 sandbox probe: confined
+[bench] === gpt-6_2-sol_xhigh-v2-rep1 done in 40817s, fitness=270.88, cost=$0.00 ===
+[bench] === gpt-6_2-astra_xhigh-v2-rep1 done in 44928s, fitness=303.39, cost=$0.00 ===
+[bench] batch: gpt-6_2-sol_xhigh-v2-rep2, gpt-6_2-astra_xhigh-v2-rep2
+
+[bench] === gpt-6_2-sol_xhigh-v2-rep2 starting at 2026-11-20T02:32:58+00:00 ===
+
+[bench] === gpt-6_2-astra_xhigh-v2-rep2 starting at 2026-11-20T02:33:03+00:00 ===
+[bench] gpt-6_2-sol_xhigh-v2-rep2 sandbox probe: confined
+[bench] gpt-6_2-astra_xhigh-v2-rep2 sandbox probe: confined
+[bench] === gpt-6_2-astra_xhigh-v2-rep2 done in 57554s, fitness=263.77, cost=$0.00 ===
+[bench] === gpt-6_2-sol_xhigh-v2-rep2 done in 61582s, fitness=262.78, cost=$0.00 ===
+[bench] batch: gpt-6_2-astra_xhigh-v2-rep3, gpt-6_2-sol_xhigh-v2-rep3
+
+[bench] === gpt-6_2-astra_xhigh-v2-rep3 starting at 2026-11-20T19:39:21+00:00 ===
+
+[bench] === gpt-6_2-sol_xhigh-v2-rep3 starting at 2026-11-20T19:39:26+00:00 ===
+[bench] gpt-6_2-astra_xhigh-v2-rep3 sandbox probe: confined
+[bench] gpt-6_2-sol_xhigh-v2-rep3 sandbox probe: confined
+[bench] === gpt-6_2-astra_xhigh-v2-rep3 done in 47058s, fitness=284.2, cost=$0.00 ===
+[bench] === gpt-6_2-sol_xhigh-v2-rep3 done in 63121s, fitness=286.24, cost=$0.00 ===
+[bench] batch: gpt-6_2-sol_xhigh-v2-rep4, gpt-6_2-astra_xhigh-v2-rep4
+
+[bench] === gpt-6_2-sol_xhigh-v2-rep4 starting at 2026-11-21T13:11:27+00:00 ===
+
+[bench] === gpt-6_2-astra_xhigh-v2-rep4 starting at 2026-11-21T13:11:33+00:00 ===
+[bench] gpt-6_2-astra_xhigh-v2-rep4 sandbox probe: confined
+[bench] gpt-6_2-sol_xhigh-v2-rep4 sandbox probe: confined
+[bench] === gpt-6_2-astra_xhigh-v2-rep4 done in 43501s, fitness=319.48, cost=$0.00 ===
+[bench] === gpt-6_2-sol_xhigh-v2-rep4 done in 48127s, fitness=280.23, cost=$0.00 ===
+[bench] batch: gpt-6_2-astra_xhigh-v2-rep5, gpt-6_2-sol_xhigh-v2-rep5
+
+[bench] === gpt-6_2-astra_xhigh-v2-rep5 starting at 2026-11-22T02:33:35+00:00 ===
+
+[bench] === gpt-6_2-sol_xhigh-v2-rep5 starting at 2026-11-22T02:33:40+00:00 ===
+[bench] gpt-6_2-astra_xhigh-v2-rep5 sandbox probe: confined
+[bench] gpt-6_2-sol_xhigh-v2-rep5 sandbox probe: confined
+[bench] === gpt-6_2-astra_xhigh-v2-rep5 done in 59844s, fitness=292.05, cost=$0.00 ===
+[bench] === gpt-6_2-sol_xhigh-v2-rep5 done in 69100s, fitness=250.19, cost=$0.00 ===
+[bench] batch: gpt-6_2-sol_xhigh-v2-rep6, gpt-6_2-astra_xhigh-v2-rep6
+
+[bench] === gpt-6_2-sol_xhigh-v2-rep6 starting at 2026-11-22T21:45:21+00:00 ===
+
+[bench] === gpt-6_2-astra_xhigh-v2-rep6 starting at 2026-11-22T21:45:26+00:00 ===
+[bench] gpt-6_2-astra_xhigh-v2-rep6 sandbox probe: confined
+[bench] gpt-6_2-sol_xhigh-v2-rep6 sandbox probe: confined
+[bench] === gpt-6_2-sol_xhigh-v2-rep6 done in 44579s, fitness=312.39, cost=$0.00 ===
+[bench] === gpt-6_2-astra_xhigh-v2-rep6 done in 47899s, fitness=282.47, cost=$0.00 ===
+
+[bench] matrix done — 12/12 successful
