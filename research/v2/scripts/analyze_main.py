@@ -24,6 +24,13 @@ the same Welch test and bootstrap, Holm-adjusted across the whole family at
 geometric-mean held-out score, with 95% bootstrap rank intervals. The primary
 and secondary tests are unchanged.
 
+Amendment 17 adds GPT-6.2 Astra, GPT-6.2 Sol and Fable 5.2 (results-g62*.jsonl,
+results-fable52-*.jsonl). Its own family (extension2): every pair of systems
+with 6 scored runs in which at least one is an amendment 17 system, Holm-adjusted
+across that family. Until all three have 6 scored runs the family is reported
+as provisional (complete: false), with the missing system's pairs left out.
+Amendment 13's family keeps its six original systems.
+
     research/v2/scripts/analyze_main.py bench/v2/results.jsonl \
         bench/v2/results-opus-luna.jsonl bench/v2/results-sol61.jsonl \
         bench/v2/results-astra.jsonl bench/v2/results-sonnet55.jsonl bench/v2/results-gpt55.jsonl \
@@ -46,8 +53,12 @@ SECONDARY = [("gpt-6-luna_xhigh-v2", "gpt-6_1-sol_xhigh-v2"),
              ("gpt-6-luna_xhigh-v2", "claude-opus-5_5_xhigh-v2")]
 SHORT = {"claude-opus-5_5_xhigh-v2": "Opus", "gpt-6_1-sol_xhigh-v2": "Sol 6.1",
          "gpt-6-luna_xhigh-v2": "Luna", "gpt-6-astra_xhigh-v2": "Astra",
-         "claude-sonnet-5-5_xhigh-v2": "Sonnet 5.5", "gpt-5_5_xhigh-v2": "GPT-5.5"}
+         "claude-sonnet-5-5_xhigh-v2": "Sonnet 5.5", "gpt-5_5_xhigh-v2": "GPT-5.5",
+         "gpt-6_2-astra_xhigh-v2": "Astra 6.2", "gpt-6_2-sol_xhigh-v2": "Sol 6.2",
+         "claude-fable-5_2_xhigh-v2": "Fable 5.2"}
 ADDED = ("gpt-6-astra_xhigh-v2", "claude-sonnet-5-5_xhigh-v2", "gpt-5_5_xhigh-v2")
+ADDED2 = ("gpt-6_2-astra_xhigh-v2", "gpt-6_2-sol_xhigh-v2", "claude-fable-5_2_xhigh-v2")
+EARLIER = tuple(m for m in SHORT if m not in ADDED2)
 FULL_N = 6
 PILOTS = {"gpt-6-sol_xhigh-v2": "GPT-6 Sol (pilot)"}
 ALPHA = 0.05
@@ -274,7 +285,8 @@ def main() -> None:
                   f"Holm p = {r['p_holm']:.4f}. {r['verdict']}")
 
     full = [m for m in SHORT if len(ln[m]) == FULL_N]
-    ext = [(a, b) for i, a in enumerate(full) for b in full[i + 1:] if a in ADDED or b in ADDED]
+    ext = [(a, b) for i, a in enumerate(full) for b in full[i + 1:]
+           if (a in ADDED or b in ADDED) and a in EARLIER and b in EARLIER]
     if ext:
         res = [welch(ln[a], ln[b]) for a, b in ext]
         for r, p_adj, (a, b) in zip(res, holm([r["p"] for r in res]), ext):
@@ -290,6 +302,24 @@ def main() -> None:
     pending = [SHORT[m] for m in ADDED if 0 < len(ln[m]) < FULL_N]
     if pending:
         print(f"\nExtension: not yet {FULL_N} scored runs for {', '.join(pending)}; their pairs are left out.")
+
+    ext2 = [(a, b) for i, a in enumerate(full) for b in full[i + 1:] if a in ADDED2 or b in ADDED2]
+    if ext2:
+        res = [welch(ln[a], ln[b]) for a, b in ext2]
+        for r, p_adj, (a, b) in zip(res, holm([r["p"] for r in res]), ext2):
+            r["p_holm"] = p_adj
+            r["boot95"] = bootstrap_ratio(ln[a], ln[b])
+            r["verdict"] = verdict(r, p_adj, a, b)
+        missing2 = [SHORT[m] for m in ADDED2 if len(ln[m]) < FULL_N]
+        out["extension2"] = {f"{SHORT[a]} vs {SHORT[b]}": r for r, (a, b) in zip(res, ext2)}
+        out["extension2_complete"] = not missing2
+        out["extension2_missing"] = missing2
+        state = "complete" if not missing2 else f"PROVISIONAL, without {', '.join(missing2)}"
+        print(f"\n## Extension 2 (amendment 17, Holm across the {len(ext2)} pairs; {state})\n")
+        for name, r in out["extension2"].items():
+            print(f"{name}: ratio {r['ratio']:.3f}, 95% CI [{r['ci95'][0]:.3f}, {r['ci95'][1]:.3f}], "
+                  f"bootstrap [{r['boot95'][0]:.3f}, {r['boot95'][1]:.3f}]; p = {r['p']:.4f}, "
+                  f"Holm p = {r['p_holm']:.4f}. {r['verdict']}")
 
     ranked = {m: xs for m, xs in ln.items() if len(xs) >= 2}
     if ranked:
