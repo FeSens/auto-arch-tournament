@@ -21,8 +21,12 @@ from tools.site.build import DEFAULT_RESULTS, REPO, SCHEDULED_MODELS
 
 
 FINAL_STATUSES = {"done", "failed", "timed_out"}
-SITE_OUTPUTS = (
-    "site/index.html",
+SITE_OUTPUTS = (  # build.py's outputs: the V1 pages and the redirects at their old addresses
+    "site/v1/index.html",
+    "site/v1/models.html",
+    "site/v1/methodology.html",
+    "site/v1/data.html",
+    "site/v2.html",
     "site/models.html",
     "site/methodology.html",
     "site/data.html",
