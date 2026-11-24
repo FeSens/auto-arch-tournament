@@ -1,0 +1,497 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HWE Bench · Data</title>
+<meta name="description" content="HWE Bench is an unbounded benchmark for LLM hardware engineering. Models design RISC-V CPUs that are scored by how fast they actually run on a real FPGA, only after passing formal correctness proofs.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400&display=swap">
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../css/print.css">
+</head>
+<body>
+<div class="page">
+
+<nav class="top">
+  <a href="../index.html" class="wordmark">HWE <span class="alt">Bench</span></a>
+  <ul>
+    <li><a href="../index.html">V2 results</a></li>
+    <li><a href="index.html">V1 leaderboard</a></li>
+    <li><a href="methodology.html">Methodology</a></li>
+    <li><a href="models.html">Models</a></li>
+    <li><a href="data.html" aria-current="page">Data</a></li>
+  </ul>
+  <div class="meta">
+    <a href="https://github.com/FeSens/auto-arch-tournament" class="repo" aria-label="HWE Bench source on GitHub, click to view repo and star">github <span class="star">★</span> <span class="star-count">216</span></a>
+    <span class="version">v2 · 2026-11</span>
+  </div>
+</nav>
+
+<section class="hero-block">
+  <div class="hero-eyebrow">Raw data</div>
+  <h1>Every iteration, every transcript.</h1>
+  <p class="hero-lede">
+    The full per-iteration journal and agent transcript for every rep are committed to
+    the repository. No data is summarized away. Below is the index.
+  </p>
+</section>
+
+<section class="section">
+  <div class="eyebrow">Downloads</div>
+  <h2>Aggregate</h2>
+  <ul class="prose">
+    <li><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/results.jsonl" class="ext"><code>bench/results.jsonl</code></a>: one row per rep, structured. Schema: model, rep, status, final_fitness, best_fitness, baseline_fitness, delta_pct, iterations, accepted, rejected, broken, broken_by_class, wall_clock_sec, total_cost_usd, total_tokens_in/out, best_lut4, best_ff, best_fmax_mhz, best_iterations, best_cycles, best_ipc_coremark.</li>
+    <li><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/leaderboard.csv" class="ext"><code>bench/leaderboard.csv</code></a>: per-model aggregate (mean fitness, best, broken counts).</li>
+    <li><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/LEADERBOARD.md" class="ext"><code>bench/LEADERBOARD.md</code></a>: human-readable leaderboard with failure-mode breakdowns.</li>
+  </ul>
+</section>
+
+<section class="section">
+  <div class="eyebrow">Per-rep</div>
+  <h2>Index of all reps</h2>
+  <div class="wide">
+  <table class="bench">
+    <caption>38 reps</caption>
+    <thead>
+      <tr>
+        <th>Model</th><th>Rep</th><th>Status</th>
+        <th class="num">Iters</th><th class="num">Best fit</th>
+        <th>Log</th><th>Transcript</th><th>Summary</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="model-name">claude-opus-5_5_xhigh</span></td>
+        <td>rep1</td>
+        <td>done</td>
+        <td class="num">46</td>
+        <td class="num">983.24</td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/claude-opus-5_5_xhigh/rep1/log.jsonl" class="ext">log.jsonl</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/claude-opus-5_5_xhigh/rep1/agent.log" class="ext">agent.log</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/claude-opus-5_5_xhigh/rep1/summary.json" class="ext">summary.json</a></td>
+      </tr>
+      <tr>
+        <td><span class="model-name">gemini-3_1-pro</span></td>
+        <td>rep1</td>
+        <td>done</td>
+        <td class="num">46</td>
+        <td class="num">354.73</td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gemini-3_1-pro/rep1/log.jsonl" class="ext">log.jsonl</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gemini-3_1-pro/rep1/agent.log" class="ext">agent.log</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gemini-3_1-pro/rep1/summary.json" class="ext">summary.json</a></td>
+      </tr>
+      <tr>
+        <td><span class="model-name">gemini-3_1-pro</span></td>
+        <td>rep2</td>
+        <td>done</td>
+        <td class="num">46</td>
+        <td class="num">339.62</td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gemini-3_1-pro/rep2/log.jsonl" class="ext">log.jsonl</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gemini-3_1-pro/rep2/agent.log" class="ext">agent.log</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gemini-3_1-pro/rep2/summary.json" class="ext">summary.json</a></td>
+      </tr>
+      <tr>
+        <td><span class="model-name">gemini-3_1-pro</span></td>
+        <td>rep3</td>
+        <td>done</td>
+        <td class="num">46</td>
+        <td class="num">323.92</td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gemini-3_1-pro/rep3/log.jsonl" class="ext">log.jsonl</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gemini-3_1-pro/rep3/agent.log" class="ext">agent.log</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gemini-3_1-pro/rep3/summary.json" class="ext">summary.json</a></td>
+      </tr>
+      <tr>
+        <td><span class="model-name">gemini-3_5-flash</span></td>
+        <td>rep2</td>
+        <td>failed</td>
+        <td class="num">4</td>
+        <td class="num">359.04</td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gemini-3_5-flash/rep2/log.jsonl" class="ext">log.jsonl</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gemini-3_5-flash/rep2/agent.log" class="ext">agent.log</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gemini-3_5-flash/rep2/summary.json" class="ext">summary.json</a></td>
+      </tr>
+      <tr>
+        <td><span class="model-name">gpt-5_4-mini</span></td>
+        <td>rep1</td>
+        <td>done</td>
+        <td class="num">46</td>
+        <td class="num">341.86</td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_4-mini/rep1/log.jsonl" class="ext">log.jsonl</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_4-mini/rep1/agent.log" class="ext">agent.log</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_4-mini/rep1/summary.json" class="ext">summary.json</a></td>
+      </tr>
+      <tr>
+        <td><span class="model-name">gpt-5_4-mini</span></td>
+        <td>rep2</td>
+        <td>done</td>
+        <td class="num">46</td>
+        <td class="num">349.46</td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_4-mini/rep2/log.jsonl" class="ext">log.jsonl</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_4-mini/rep2/agent.log" class="ext">agent.log</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_4-mini/rep2/summary.json" class="ext">summary.json</a></td>
+      </tr>
+      <tr>
+        <td><span class="model-name">gpt-5_4-mini</span></td>
+        <td>rep3</td>
+        <td>done</td>
+        <td class="num">46</td>
+        <td class="num">395.53</td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_4-mini/rep3/log.jsonl" class="ext">log.jsonl</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_4-mini/rep3/agent.log" class="ext">agent.log</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_4-mini/rep3/summary.json" class="ext">summary.json</a></td>
+      </tr>
+      <tr>
+        <td><span class="model-name">gpt-5_4_xhigh</span></td>
+        <td>rep1</td>
+        <td>done</td>
+        <td class="num">46</td>
+        <td class="num">496.11</td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_4_xhigh/rep1/log.jsonl" class="ext">log.jsonl</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_4_xhigh/rep1/agent.log" class="ext">agent.log</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_4_xhigh/rep1/summary.json" class="ext">summary.json</a></td>
+      </tr>
+      <tr>
+        <td><span class="model-name">gpt-5_4_xhigh</span></td>
+        <td>rep2</td>
+        <td>done</td>
+        <td class="num">46</td>
+        <td class="num">513.84</td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_4_xhigh/rep2/log.jsonl" class="ext">log.jsonl</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_4_xhigh/rep2/agent.log" class="ext">agent.log</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_4_xhigh/rep2/summary.json" class="ext">summary.json</a></td>
+      </tr>
+      <tr>
+        <td><span class="model-name">gpt-5_4_xhigh</span></td>
+        <td>rep3</td>
+        <td>done</td>
+        <td class="num">46</td>
+        <td class="num">447.40</td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_4_xhigh/rep3/log.jsonl" class="ext">log.jsonl</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_4_xhigh/rep3/agent.log" class="ext">agent.log</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_4_xhigh/rep3/summary.json" class="ext">summary.json</a></td>
+      </tr>
+      <tr>
+        <td><span class="model-name">gpt-5_5_high</span></td>
+        <td>rep1</td>
+        <td>done</td>
+        <td class="num">46</td>
+        <td class="num">461.87</td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_5_high/rep1/log.jsonl" class="ext">log.jsonl</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_5_high/rep1/agent.log" class="ext">agent.log</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_5_high/rep1/summary.json" class="ext">summary.json</a></td>
+      </tr>
+      <tr>
+        <td><span class="model-name">gpt-5_5_high</span></td>
+        <td>rep2</td>
+        <td>done</td>
+        <td class="num">46</td>
+        <td class="num">420.61</td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_5_high/rep2/log.jsonl" class="ext">log.jsonl</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_5_high/rep2/agent.log" class="ext">agent.log</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_5_high/rep2/summary.json" class="ext">summary.json</a></td>
+      </tr>
+      <tr>
+        <td><span class="model-name">gpt-5_5_high</span></td>
+        <td>rep3</td>
+        <td>done</td>
+        <td class="num">46</td>
+        <td class="num">408.01</td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_5_high/rep3/log.jsonl" class="ext">log.jsonl</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_5_high/rep3/agent.log" class="ext">agent.log</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_5_high/rep3/summary.json" class="ext">summary.json</a></td>
+      </tr>
+      <tr>
+        <td><span class="model-name">gpt-5_5_medium</span></td>
+        <td>rep1</td>
+        <td>done</td>
+        <td class="num">46</td>
+        <td class="num">431.58</td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_5_medium/rep1/log.jsonl" class="ext">log.jsonl</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_5_medium/rep1/agent.log" class="ext">agent.log</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_5_medium/rep1/summary.json" class="ext">summary.json</a></td>
+      </tr>
+      <tr>
+        <td><span class="model-name">gpt-5_5_medium</span></td>
+        <td>rep2</td>
+        <td>done</td>
+        <td class="num">46</td>
+        <td class="num">407.55</td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_5_medium/rep2/log.jsonl" class="ext">log.jsonl</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_5_medium/rep2/agent.log" class="ext">agent.log</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_5_medium/rep2/summary.json" class="ext">summary.json</a></td>
+      </tr>
+      <tr>
+        <td><span class="model-name">gpt-5_5_medium</span></td>
+        <td>rep3</td>
+        <td>done</td>
+        <td class="num">46</td>
+        <td class="num">431.24</td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_5_medium/rep3/log.jsonl" class="ext">log.jsonl</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_5_medium/rep3/agent.log" class="ext">agent.log</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_5_medium/rep3/summary.json" class="ext">summary.json</a></td>
+      </tr>
+      <tr>
+        <td><span class="model-name">gpt-5_5_xhigh</span></td>
+        <td>rep1</td>
+        <td>done</td>
+        <td class="num">46</td>
+        <td class="num">397.83</td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_5_xhigh/rep1/log.jsonl" class="ext">log.jsonl</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_5_xhigh/rep1/agent.log" class="ext">agent.log</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_5_xhigh/rep1/summary.json" class="ext">summary.json</a></td>
+      </tr>
+      <tr>
+        <td><span class="model-name">gpt-5_5_xhigh</span></td>
+        <td>rep2</td>
+        <td>done</td>
+        <td class="num">46</td>
+        <td class="num">525.04</td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_5_xhigh/rep2/log.jsonl" class="ext">log.jsonl</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_5_xhigh/rep2/agent.log" class="ext">agent.log</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_5_xhigh/rep2/summary.json" class="ext">summary.json</a></td>
+      </tr>
+      <tr>
+        <td><span class="model-name">gpt-5_5_xhigh</span></td>
+        <td>rep3</td>
+        <td>done</td>
+        <td class="num">46</td>
+        <td class="num">482.03</td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_5_xhigh/rep3/log.jsonl" class="ext">log.jsonl</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_5_xhigh/rep3/agent.log" class="ext">agent.log</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_5_xhigh/rep3/summary.json" class="ext">summary.json</a></td>
+      </tr>
+      <tr>
+        <td><span class="model-name">gpt-5_6-luna</span></td>
+        <td>rep1</td>
+        <td>done</td>
+        <td class="num">46</td>
+        <td class="num">462.59</td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_6-luna/rep1/log.jsonl" class="ext">log.jsonl</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_6-luna/rep1/agent.log" class="ext">agent.log</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_6-luna/rep1/summary.json" class="ext">summary.json</a></td>
+      </tr>
+      <tr>
+        <td><span class="model-name">gpt-5_6-luna</span></td>
+        <td>rep2</td>
+        <td>done</td>
+        <td class="num">46</td>
+        <td class="num">480.90</td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_6-luna/rep2/log.jsonl" class="ext">log.jsonl</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_6-luna/rep2/agent.log" class="ext">agent.log</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_6-luna/rep2/summary.json" class="ext">summary.json</a></td>
+      </tr>
+      <tr>
+        <td><span class="model-name">gpt-5_6-luna</span></td>
+        <td>rep3</td>
+        <td>done</td>
+        <td class="num">46</td>
+        <td class="num">412.38</td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_6-luna/rep3/log.jsonl" class="ext">log.jsonl</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_6-luna/rep3/agent.log" class="ext">agent.log</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_6-luna/rep3/summary.json" class="ext">summary.json</a></td>
+      </tr>
+      <tr>
+        <td><span class="model-name">gpt-5_6-sol</span></td>
+        <td>rep1</td>
+        <td>done</td>
+        <td class="num">46</td>
+        <td class="num">470.80</td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_6-sol/rep1/log.jsonl" class="ext">log.jsonl</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_6-sol/rep1/agent.log" class="ext">agent.log</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_6-sol/rep1/summary.json" class="ext">summary.json</a></td>
+      </tr>
+      <tr>
+        <td><span class="model-name">gpt-5_6-sol</span></td>
+        <td>rep2</td>
+        <td>failed</td>
+        <td class="num">34</td>
+        <td class="num">441.11</td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_6-sol/rep2/log.jsonl" class="ext">log.jsonl</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_6-sol/rep2/agent.log" class="ext">agent.log</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_6-sol/rep2/summary.json" class="ext">summary.json</a></td>
+      </tr>
+      <tr>
+        <td><span class="model-name">gpt-5_6-sol</span></td>
+        <td>rep3</td>
+        <td>failed</td>
+        <td class="num">28</td>
+        <td class="num">412.87</td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_6-sol/rep3/log.jsonl" class="ext">log.jsonl</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_6-sol/rep3/agent.log" class="ext">agent.log</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_6-sol/rep3/summary.json" class="ext">summary.json</a></td>
+      </tr>
+      <tr>
+        <td><span class="model-name">gpt-5_6-terra</span></td>
+        <td>rep1</td>
+        <td>done</td>
+        <td class="num">46</td>
+        <td class="num">430.45</td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_6-terra/rep1/log.jsonl" class="ext">log.jsonl</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_6-terra/rep1/agent.log" class="ext">agent.log</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_6-terra/rep1/summary.json" class="ext">summary.json</a></td>
+      </tr>
+      <tr>
+        <td><span class="model-name">gpt-5_6-terra</span></td>
+        <td>rep2</td>
+        <td>done</td>
+        <td class="num">46</td>
+        <td class="num">515.70</td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_6-terra/rep2/log.jsonl" class="ext">log.jsonl</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_6-terra/rep2/agent.log" class="ext">agent.log</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_6-terra/rep2/summary.json" class="ext">summary.json</a></td>
+      </tr>
+      <tr>
+        <td><span class="model-name">gpt-5_6-terra</span></td>
+        <td>rep3</td>
+        <td>done</td>
+        <td class="num">46</td>
+        <td class="num">380.62</td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_6-terra/rep3/log.jsonl" class="ext">log.jsonl</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_6-terra/rep3/agent.log" class="ext">agent.log</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-5_6-terra/rep3/summary.json" class="ext">summary.json</a></td>
+      </tr>
+      <tr>
+        <td><span class="model-name">gpt-6-astra_max</span></td>
+        <td>rep1</td>
+        <td>done</td>
+        <td class="num">46</td>
+        <td class="num">388.66</td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-6-astra_max/rep1/log.jsonl" class="ext">log.jsonl</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-6-astra_max/rep1/agent.log" class="ext">agent.log</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-6-astra_max/rep1/summary.json" class="ext">summary.json</a></td>
+      </tr>
+      <tr>
+        <td><span class="model-name">gpt-6-astra_max</span></td>
+        <td>rep2</td>
+        <td>done</td>
+        <td class="num">46</td>
+        <td class="num">411.53</td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-6-astra_max/rep2/log.jsonl" class="ext">log.jsonl</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-6-astra_max/rep2/agent.log" class="ext">agent.log</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-6-astra_max/rep2/summary.json" class="ext">summary.json</a></td>
+      </tr>
+      <tr>
+        <td><span class="model-name">gpt-6-astra_max</span></td>
+        <td>rep3</td>
+        <td>done</td>
+        <td class="num">46</td>
+        <td class="num">474.27</td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-6-astra_max/rep3/log.jsonl" class="ext">log.jsonl</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-6-astra_max/rep3/agent.log" class="ext">agent.log</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-6-astra_max/rep3/summary.json" class="ext">summary.json</a></td>
+      </tr>
+      <tr>
+        <td><span class="model-name">gpt-6-sol_xhigh</span></td>
+        <td>rep1</td>
+        <td>done</td>
+        <td class="num">46</td>
+        <td class="num">435.24</td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-6-sol_xhigh/rep1/log.jsonl" class="ext">log.jsonl</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-6-sol_xhigh/rep1/agent.log" class="ext">agent.log</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/gpt-6-sol_xhigh/rep1/summary.json" class="ext">summary.json</a></td>
+      </tr>
+      <tr>
+        <td><span class="model-name">kimi-k2_6</span></td>
+        <td>rep1</td>
+        <td>done</td>
+        <td class="num">46</td>
+        <td class="num">347.76</td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/kimi-k2_6/rep1/log.jsonl" class="ext">log.jsonl</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/kimi-k2_6/rep1/agent.log" class="ext">agent.log</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/kimi-k2_6/rep1/summary.json" class="ext">summary.json</a></td>
+      </tr>
+      <tr>
+        <td><span class="model-name">kimi-k2_6</span></td>
+        <td>rep2</td>
+        <td>done</td>
+        <td class="num">46</td>
+        <td class="num">331.22</td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/kimi-k2_6/rep2/log.jsonl" class="ext">log.jsonl</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/kimi-k2_6/rep2/agent.log" class="ext">agent.log</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/kimi-k2_6/rep2/summary.json" class="ext">summary.json</a></td>
+      </tr>
+      <tr>
+        <td><span class="model-name">kimi-k2_6</span></td>
+        <td>rep3</td>
+        <td>failed</td>
+        <td class="num">31</td>
+        <td class="num">396.13</td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/kimi-k2_6/rep3/log.jsonl" class="ext">log.jsonl</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/kimi-k2_6/rep3/agent.log" class="ext">agent.log</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/kimi-k2_6/rep3/summary.json" class="ext">summary.json</a></td>
+      </tr>
+      <tr>
+        <td><span class="model-name">static</span></td>
+        <td>rep1</td>
+        <td>done</td>
+        <td class="num">46</td>
+        <td class="num">282.82</td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/static/rep1/log.jsonl" class="ext">log.jsonl</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/static/rep1/agent.log" class="ext">agent.log</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/static/rep1/summary.json" class="ext">summary.json</a></td>
+      </tr>
+      <tr>
+        <td><span class="model-name">static</span></td>
+        <td>rep2</td>
+        <td>done</td>
+        <td class="num">46</td>
+        <td class="num">282.82</td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/static/rep2/log.jsonl" class="ext">log.jsonl</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/static/rep2/agent.log" class="ext">agent.log</a></td>
+        <td><a href="https://github.com/FeSens/auto-arch-tournament/blob/main/bench/static/rep2/summary.json" class="ext">summary.json</a></td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="prose">
+    Each <code>log.jsonl</code> is one row per iteration: hypothesis ID, title, outcome
+    (<code>improvement</code> / <code>regression</code> / <code>broken</code>), fitness,
+    delta vs baseline, LUT4, FF, Fmax, IPC, cycles, error class if broken, timestamp.
+    Each <code>agent.log</code> is the verbatim model transcript: every bash command,
+    every file read, every write.
+  </p>
+</section>
+
+<footer class="bot">
+  <div>
+    HWE Bench · methodology v1 ·
+    <a href="https://github.com/FeSens/auto-arch-tournament" class="ext">source on GitHub</a> ·
+    <a href="https://github.com/FeSens/auto-arch-tournament/blob/main/CITATION.cff" class="ext">cite</a>
+  </div>
+  <div class="manifesto">a benchmark that respects how far a frontier model still has to go.</div>
+</footer>
+
+<div id="chart-tip" role="tooltip" hidden></div>
+<style>
+  #chart-tip { position: fixed; z-index: 50; pointer-events: none; max-width: 320px;
+    padding: 6px 9px; border-radius: 4px; background: var(--ink, #262a33); color: var(--bg, #faf9f7);
+    font: 12px/1.35 Inter, ui-sans-serif, system-ui, sans-serif; box-shadow: 0 2px 8px rgba(0,0,0,.18); }
+  svg [data-tip] { cursor: default; }
+</style>
+<script>
+(() => {
+  // Chart tooltips: any SVG element with data-tip shows it on hover or tap.
+  const tip = document.getElementById("chart-tip");
+  const place = (e) => {
+    const pad = 14, w = tip.offsetWidth, h = tip.offsetHeight;
+    let x = e.clientX + pad, y = e.clientY + pad;
+    if (x + w > innerWidth - 8) x = e.clientX - w - pad;
+    if (y + h > innerHeight - 8) y = e.clientY - h - pad;
+    tip.style.left = x + "px"; tip.style.top = y + "px";
+  };
+  document.addEventListener("pointerover", (e) => {
+    const t = e.target.closest && e.target.closest("[data-tip]");
+    if (!t) return;
+    tip.textContent = t.getAttribute("data-tip"); tip.hidden = false; place(e);
+  });
+  document.addEventListener("pointermove", (e) => { if (!tip.hidden) place(e); });
+  document.addEventListener("pointerout", (e) => {
+    const t = e.target.closest && e.target.closest("[data-tip]");
+    if (t && !(e.relatedTarget && t.contains(e.relatedTarget))) tip.hidden = true;
+  });
+})();
+</script>
+
+</div>
+</body>
+</html>

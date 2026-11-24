@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>HWE Bench · RISC-V CPU design benchmark for LLMs</title>
+<title>HWE Bench · V2 results</title>
 <meta name="description" content="HWE Bench is an unbounded benchmark for LLM hardware engineering. Models design RISC-V CPUs that are scored by how fast they actually run on a real FPGA, only after passing formal correctness proofs.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400&display=swap">
 <link rel="stylesheet" href="css/style.css">
@@ -15,601 +15,430 @@
 <nav class="top">
   <a href="index.html" class="wordmark">HWE <span class="alt">Bench</span></a>
   <ul>
-    <li><a href="v2.html">V2 results</a></li>
-    <li><a href="index.html" aria-current="page">V1 leaderboard</a></li>
-    <li><a href="methodology.html">Methodology</a></li>
-    <li><a href="models.html">Models</a></li>
-    <li><a href="data.html">Data</a></li>
+    <li><a href="index.html" aria-current="page">V2 results</a></li>
+    <li><a href="v1/index.html">V1 archive</a></li>
   </ul>
   <div class="meta">
-    <a href="https://github.com/FeSens/auto-arch-tournament" class="repo" aria-label="HWE Bench source on GitHub, click to view repo and star">github <span class="star">★</span> <span class="star-count">150</span></a>
-    <span class="version">v2 · 2026-10</span>
+    <a href="https://github.com/FeSens/auto-arch-tournament" class="repo" aria-label="HWE Bench source on GitHub, click to view repo and star">github</a>
+    <span class="version">v2 · 2026-11</span>
   </div>
 </nav>
 
 <section class="hero-block">
-  <div class="hero-eyebrow">RISC-V · RV32IM · single-issue · FPGA-grounded</div>
-  <h1 class="hero">HWE Bench</h1>
+  <div class="hero-eyebrow">V2 · October to November 2026 · eight agent systems · 48 scored runs</div>
+  <h1 class="hero">V2 results</h1>
   <p class="hero-lede">
-    An unbounded benchmark for LLM hardware engineering.
-    Large language models design RISC-V CPUs from scratch.
-    Every design must first pass a full battery of formal correctness proofs,
-    so buggy CPUs are thrown out. The ones that survive are then scored by how
-    fast they would actually run on a physical FPGA.
-    <a href="https://github.com/FeSens/auto-arch-tournament" class="ext">See on GitHub</a>
+    V2 rebuilt the score after V1's open-source timer turned out to miss whole classes of
+    circuit paths. Every design is now timed by the FPGA vendor's own tool, with memory stalls
+    present in the timed circuit, and ranked on five hidden programs the agents never see.
+    Eight agent systems (a model inside its vendor's command-line agent) each ran six
+    times from the same starting core, 15 rounds of 3 attempts per run. Fable 5.2 (Claude Code)
+    is running now.
   </p>
   <div class="hero-thesis">
-    <span class="label">Thesis</span>
-    SWE-bench tops out at 100%. HWE Bench doesn't have a top.<br>
-    The fitness number reflects an actual microarchitecture, and microarchitecture
-    has room to grow as long as models keep finding it.
+    <span class="label">Result</span>
+    Three tiers: Opus 5.5, GPT-6.2 Astra, GPT-6.2 Sol and Sonnet 5.5, then GPT-6.1 Sol and
+    GPT-6 Astra, then GPT-5.5 and GPT-6 Luna. Pre-registered test, Opus 5.5 vs GPT-6.1 Sol:
+    1.32x, 95% CI 1.18 to 1.47, p = 0.0005.
   </div>
 </section>
 
-<section class="section v2-notice">
-  <div class="eyebrow">V2 results, October 2026</div>
-  <h2>This leaderboard is V1. <a href="v2.html">See V2.</a></h2>
-  <p class="prose">
-    V2 found that V1's open-source timer (nextpnr) misses whole classes of circuit paths, so the
-    Fmax and fitness numbers below overstate many designs. V2 times every design with the FPGA
-    vendor's tool, ranks on hidden programs, and ran six agent systems six times each. Its
-    result is three tiers: Opus 5.5 and Sonnet 5.5, then GPT-6.1 Sol and GPT-6 Astra, then
-    GPT-5.5 and GPT-6 Luna. <a href="v2.html">V2 results</a>
-  </p>
-</section>
-
-
-
 <section class="section">
-  <div class="eyebrow">Speed vs size</div>
-  <h2>Score × Area</h2>
+  <div class="eyebrow">Every scored run</div>
+  <h2>Held-out score per run</h2>
   <figure class="chart">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 560" role="img" aria-label="Fitness versus LUT4 by model">
-  <style>
-    text { font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
-    .axis-line { stroke: var(--rule, #d8d4cf); stroke-width: 1; }
-    .grid { stroke: var(--rule, #d8d4cf); stroke-width: .6; }
-    .axis-label { font-size: 12px; fill: var(--ink, #262a33); }
-    .tick { font-family: ui-monospace, SFMono-Regular, monospace; font-size: 10px; fill: var(--ink-muted, #77716c); }
-    .legend { font-size: 11.5px; fill: var(--ink-muted, #77716c); }
-    .name { font-size: 12px; font-weight: 600; paint-order: stroke;
-            stroke: var(--bg, #faf9f7); stroke-width: 4px; stroke-linejoin: round; }
-    .note { font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; }
-    .pt { stroke: var(--bg, #faf9f7); stroke-width: 2; }
-    .baseline { stroke: var(--ink-muted, #77716c); stroke-width: 1; stroke-dasharray: 4 3; }
-    g.dot:hover .pt { stroke: var(--ink, #262a33); }
-  </style>
-  <rect x="80" y="58" width="180.7" height="371.7" fill="var(--c2)" opacity="0.08"/>
-  <text class="note" x="88" y="74" style="fill: var(--c2)">Smaller and</text>
-  <text class="note" x="88" y="87" style="fill: var(--c2)">faster than</text>
-  <text class="note" x="88" y="100" style="fill: var(--c2)">human baseline</text>
-  <line class="grid" x1="80" y1="413.1" x2="870" y2="413.1"/>
-  <text class="tick" x="70" y="417.1" text-anchor="end">400</text>
-  <line class="grid" x1="80" y1="302.5" x2="870" y2="302.5"/>
-  <text class="tick" x="70" y="306.5" text-anchor="end">600</text>
-  <line class="grid" x1="80" y1="191.9" x2="870" y2="191.9"/>
-  <text class="tick" x="70" y="195.9" text-anchor="end">800</text>
-  <line class="grid" x1="80" y1="81.3" x2="870" y2="81.3"/>
-  <text class="tick" x="70" y="85.3" text-anchor="end">1000</text>
-  <text class="tick" x="80.0" y="514" text-anchor="middle">0</text>
-  <text class="tick" x="212.8" y="514" text-anchor="middle">2.5k</text>
-  <text class="tick" x="345.5" y="514" text-anchor="middle">5k</text>
-  <text class="tick" x="478.3" y="514" text-anchor="middle">7.5k</text>
-  <text class="tick" x="611.1" y="514" text-anchor="middle">10k</text>
-  <text class="tick" x="743.9" y="514" text-anchor="middle">12.5k</text>
-  <line class="axis-line" x1="80" y1="496" x2="870" y2="496"/>
-  <text class="axis-label" x="475.0" y="538.0" text-anchor="middle">Area · LUT4 count (← smaller is better)</text>
-  <text class="axis-label" x="30.0" y="277.0" text-anchor="middle" transform="rotate(-90 30.0 277.0)">Fitness · CoreMark iter/s (↑ better)</text>
-  <line stroke="var(--c-human)" stroke-width="1.2" stroke-dasharray="5 4" x1="80" y1="429.7" x2="870" y2="429.7"/>
-  <line stroke="var(--c-human)" stroke-width="1.2" stroke-dasharray="5 4" x1="260.7" y1="58" x2="260.7" y2="496"/>
-  <text class="tick" x="864.0" y="423.7" text-anchor="end" style="fill: var(--c-human)">Human reference (VexRiscv 370)</text>
-  <circle cx="85.0" cy="18.0" r="5" fill="var(--c2)"/>
-  <text class="legend" x="95.0" y="22.0">OpenAI</text>
-  <circle cx="155.2" cy="18.0" r="5" fill="var(--c1)"/>
-  <text class="legend" x="165.2" y="22.0">Google</text>
-  <circle cx="225.4" cy="18.0" r="5" fill="var(--c3)"/>
-  <text class="legend" x="235.4" y="22.0">Moonshot (Kimi)</text>
-  <circle cx="351.4" cy="18.0" r="5" fill="#D97757"/>
-  <text class="legend" x="361.4" y="22.0">Anthropic</text>
-  <rect x="440.2" y="18.0" width="9" height="9" transform="rotate(45 440.2 18.0) translate(-4.5 -4.5)" fill="var(--c-human)"/>
-  <text class="legend" x="450.2" y="22.0">VexRiscv (human)</text>
-  <circle cx="572.4" cy="18.0" r="4.5" fill="var(--bg)" stroke="var(--ink-muted)" stroke-width="1.5"/>
-  <text class="legend" x="582.4" y="22.0">V0 baseline</text>
-  <line x1="620.0" y1="373.9" x2="628.0" y2="385.9" stroke="var(--c2)" stroke-width="1" opacity="0.4"/>
-  <line x1="600.8" y1="378.9" x2="592.8" y2="390.9" stroke="var(--c2)" stroke-width="1" opacity="0.4"/>
-  <line x1="494.4" y1="395.6" x2="486.4" y2="407.6" stroke="var(--c2)" stroke-width="1" opacity="0.4"/>
-  <line x1="623.3" y1="415.5" x2="631.3" y2="401.5" stroke="var(--c2)" stroke-width="1" opacity="0.4"/>
-  <line x1="811.5" y1="435.7" x2="803.5" y2="447.7" stroke="var(--c1)" stroke-width="1" opacity="0.4"/>
-  <line x1="624.0" y1="438.1" x2="616.0" y2="450.1" stroke="var(--c1)" stroke-width="1" opacity="0.4"/>
-  <line x1="260.7" y1="429.7" x2="252.7" y2="415.7" stroke="var(--c-human)" stroke-width="1" opacity="0.4"/>
-  <g data-tip="VexRiscv (human reference) · fitness 370 · 3,402 LUT4"><circle cx="260.7" cy="429.7" r="12" fill="transparent"/><rect x="256.2" y="425.2" width="9" height="9" transform="rotate(45 260.7 429.7)" fill="var(--c-human)"/></g>
-  <g data-tip="V0 baseline · fitness 283 · 9,563 LUT4"><circle cx="587.9" cy="477.9" r="12" fill="transparent"/><circle cx="587.9" cy="477.9" r="4.5" fill="var(--bg)" stroke="var(--ink-muted)" stroke-width="1.5"/></g>
-  <g class="dot" data-tip="Claude Opus 5.5 xhigh · fitness 983 · 3,128 LUT4"><circle cx="246.1" cy="90.6" r="12" fill="transparent"/><circle class="pt" cx="246.1" cy="90.6" r="6.5" fill="#D97757"/></g>
-  <g class="dot" data-tip="GPT-5.5 xhigh · fitness 525 · 5,453 LUT4"><circle cx="369.6" cy="343.9" r="12" fill="transparent"/><circle class="pt" cx="369.6" cy="343.9" r="6.5" fill="var(--c2)"/></g>
-  <g class="dot" data-tip="GPT-5.6 Terra · fitness 516 · 10,525 LUT4"><circle cx="639.0" cy="349.1" r="12" fill="transparent"/><circle class="pt" cx="639.0" cy="349.1" r="6.5" fill="var(--c2)"/></g>
-  <g class="dot" data-tip="GPT-5.4 xhigh · fitness 514 · 10,108 LUT4"><circle cx="616.8" cy="350.1" r="12" fill="transparent"/><circle class="pt" cx="616.8" cy="350.1" r="6.5" fill="var(--c2)"/></g>
-  <g class="dot" data-tip="GPT-5.6 Luna · fitness 481 · 10,135 LUT4"><circle cx="618.3" cy="368.3" r="12" fill="transparent"/><circle class="pt" cx="618.3" cy="368.3" r="6.5" fill="var(--c2)"/></g>
-  <g class="dot" data-tip="GPT-6 Astra max · fitness 474 · 6,247 LUT4"><circle cx="411.8" cy="372.0" r="12" fill="transparent"/><circle class="pt" cx="411.8" cy="372.0" r="6.5" fill="var(--c2)"/></g>
-  <g class="dot" data-tip="GPT-5.6 Sol · fitness 471 · 10,168 LUT4"><circle cx="620.0" cy="373.9" r="12" fill="transparent"/><circle class="pt" cx="620.0" cy="373.9" r="6.5" fill="var(--c2)"/></g>
-  <g class="dot" data-tip="GPT-5.5 high · fitness 462 · 9,807 LUT4"><circle cx="600.8" cy="378.9" r="12" fill="transparent"/><circle class="pt" cx="600.8" cy="378.9" r="6.5" fill="var(--c2)"/></g>
-  <g class="dot" data-tip="GPT-6 Sol xhigh · fitness 435 · 5,713 LUT4"><circle cx="383.4" cy="393.6" r="12" fill="transparent"/><circle class="pt" cx="383.4" cy="393.6" r="6.5" fill="var(--c2)"/></g>
-  <g class="dot" data-tip="GPT-5.5 medium · fitness 432 · 7,803 LUT4"><circle cx="494.4" cy="395.6" r="12" fill="transparent"/><circle class="pt" cx="494.4" cy="395.6" r="6.5" fill="var(--c2)"/></g>
-  <g class="dot" data-tip="Kimi K2.6 · fitness 396 · 9,927 LUT4"><circle cx="607.2" cy="415.2" r="12" fill="transparent"/><circle class="pt" cx="607.2" cy="415.2" r="6.5" fill="var(--c3)"/></g>
-  <g class="dot" data-tip="GPT-5.4 mini · fitness 396 · 10,230 LUT4"><circle cx="623.3" cy="415.5" r="12" fill="transparent"/><circle class="pt" cx="623.3" cy="415.5" r="6.5" fill="var(--c2)"/></g>
-  <g class="dot" data-tip="Gemini 3.5 Flash · fitness 359 · 13,773 LUT4"><circle cx="811.5" cy="435.7" r="12" fill="transparent"/><circle class="pt" cx="811.5" cy="435.7" r="6.5" fill="var(--c1)"/></g>
-  <g class="dot" data-tip="Gemini 3.1 Pro · fitness 355 · 10,242 LUT4"><circle cx="624.0" cy="438.1" r="12" fill="transparent"/><circle class="pt" cx="624.0" cy="438.1" r="6.5" fill="var(--c1)"/></g>
-  <text class="name" x="257.1" y="93.6" text-anchor="start" style="fill: #D97757">Claude Opus 5.5 xhigh</text>
-  <text class="name" x="380.6" y="346.9" text-anchor="start" style="fill: var(--c2)">GPT-5.5 xhigh</text>
-  <text class="name" x="650.0" y="352.1" text-anchor="start" style="fill: var(--c2)">GPT-5.6 Terra</text>
-  <text class="name" x="605.8" y="353.1" text-anchor="end" style="fill: var(--c2)">GPT-5.4 xhigh</text>
-  <text class="name" x="629.3" y="371.3" text-anchor="start" style="fill: var(--c2)">GPT-5.6 Luna</text>
-  <text class="name" x="422.8" y="375.0" text-anchor="start" style="fill: var(--c2)">GPT-6 Astra max</text>
-  <text class="name" x="631.0" y="389.9" text-anchor="start" style="fill: var(--c2)">GPT-5.6 Sol</text>
-  <text class="name" x="589.8" y="394.9" text-anchor="end" style="fill: var(--c2)">GPT-5.5 high</text>
-  <text class="name" x="372.4" y="396.6" text-anchor="end" style="fill: var(--c2)">GPT-6 Sol xhigh</text>
-  <text class="name" x="483.4" y="411.6" text-anchor="end" style="fill: var(--c2)">GPT-5.5 medium</text>
-  <text class="name" x="596.2" y="418.2" text-anchor="end" style="fill: var(--c3)">Kimi K2.6</text>
-  <text class="name" x="634.3" y="405.5" text-anchor="start" style="fill: var(--c2)">GPT-5.4 mini</text>
-  <text class="name" x="800.5" y="451.7" text-anchor="end" style="fill: var(--c1)">Gemini 3.5 Flash</text>
-  <text class="name" x="613.0" y="454.1" text-anchor="end" style="fill: var(--c1)">Gemini 3.1 Pro</text>
-  <text class="name" x="249.7" y="419.7" text-anchor="end" style="fill: var(--c-human)">VexRiscv (human)</text>
-  <text class="name" x="598.9" y="480.9" text-anchor="start" style="fill: var(--ink-muted)">V0 baseline</text>
+    <svg viewBox="0 0 960 458" role="img" aria-label="Held-out score of every scored V2 run, by system" class="chart">
+<line class="grid" x1="150.0" y1="36" x2="150.0" y2="424"/>
+<text class="tick" x="150.0" y="440" text-anchor="middle">0</text>
+<line class="grid" x1="247.5" y1="36" x2="247.5" y2="424"/>
+<text class="tick" x="247.5" y="440" text-anchor="middle">1,000</text>
+<line class="grid" x1="345.0" y1="36" x2="345.0" y2="424"/>
+<text class="tick" x="345.0" y="440" text-anchor="middle">2,000</text>
+<line class="grid" x1="442.5" y1="36" x2="442.5" y2="424"/>
+<text class="tick" x="442.5" y="440" text-anchor="middle">3,000</text>
+<line class="grid" x1="540.0" y1="36" x2="540.0" y2="424"/>
+<text class="tick" x="540.0" y="440" text-anchor="middle">4,000</text>
+<line class="grid" x1="637.5" y1="36" x2="637.5" y2="424"/>
+<text class="tick" x="637.5" y="440" text-anchor="middle">5,000</text>
+<line class="grid" x1="735.0" y1="36" x2="735.0" y2="424"/>
+<text class="tick" x="735.0" y="440" text-anchor="middle">6,000</text>
+<line class="grid" x1="832.5" y1="36" x2="832.5" y2="424"/>
+<text class="tick" x="832.5" y="440" text-anchor="middle">7,000</text>
+<line class="grid" x1="930.0" y1="36" x2="930.0" y2="424"/>
+<text class="tick" x="930.0" y="440" text-anchor="middle">8,000</text>
+<text class="axis-label" x="540.0" y="456" text-anchor="middle">held-out score (iterations per second on five hidden programs)</text>
+<line x1="756.0" y1="32" x2="756.0" y2="424" stroke="var(--c-human)" stroke-width="1" stroke-dasharray="4 3" data-tip="VexRiscv MaxPerf: 6,216 iter/s"/>
+<text class="tick" x="760.0" y="28" fill="var(--c-human)" style="fill:var(--c-human)">human reference 6,216</text>
+<line x1="407.9" y1="32" x2="407.9" y2="424" stroke="var(--ink-muted)" stroke-width="1" stroke-dasharray="4 3" data-tip="textbook edit: 2,645 iter/s"/>
+<text class="tick" x="411.9" y="16" fill="var(--ink-muted)" style="fill:var(--ink-muted)">textbook edit 2,645</text>
+<line x1="180.1" y1="32" x2="180.1" y2="424" stroke="var(--ink-muted)" stroke-width="1" stroke-dasharray="4 3" data-tip="V0: 309 iter/s"/>
+<text class="tick" x="184.1" y="28" fill="var(--ink-muted)" style="fill:var(--ink-muted)">V0 start 309</text>
+<text class="axis-label" x="138" y="66.0" text-anchor="end">Opus 5.5</text>
+<text class="tick" x="138" y="80.0" text-anchor="end">Claude Code</text>
+<line x1="834.9" y1="56.0" x2="834.9" y2="82.0" stroke="var(--c1)" stroke-width="3" data-tip="Opus 5.5: geometric mean 7,024 iter/s over 6 runs"/>
+<circle class="point" cx="907.5" cy="69.0" r="6" fill="var(--c1)" fill-opacity="0.75" data-tip="Opus 5.5 run 1: 7,770 iter/s, 109.5 MHz"/>
+<circle class="point" cx="863.5" cy="69.0" r="6" fill="var(--c1)" fill-opacity="0.75" data-tip="Opus 5.5 run 2: 7,318 iter/s, 104.0 MHz"/>
+<circle class="point" cx="771.8" cy="69.0" r="6" fill="var(--c1)" fill-opacity="0.75" data-tip="Opus 5.5 run 3: 6,378 iter/s, 106.1 MHz"/>
+<circle class="point" cx="734.1" cy="69.0" r="6" fill="var(--c1)" fill-opacity="0.75" data-tip="Opus 5.5 run 4: 5,991 iter/s, 109.9 MHz"/>
+<circle class="point" cx="879.7" cy="69.0" r="6" fill="var(--c1)" fill-opacity="0.75" data-tip="Opus 5.5 run 5: 7,484 iter/s, 100.9 MHz"/>
+<circle class="point" cx="870.3" cy="69.0" r="6" fill="var(--c1)" fill-opacity="0.75" data-tip="Opus 5.5 run 6: 7,387 iter/s, 126.2 MHz"/>
+<text class="axis-label" x="138" y="112.0" text-anchor="end">GPT-6.2 Astra</text>
+<text class="tick" x="138" y="126.0" text-anchor="end">Codex CLI</text>
+<line x1="827.9" y1="102.0" x2="827.9" y2="128.0" stroke="var(--c7)" stroke-width="3" data-tip="GPT-6.2 Astra: geometric mean 6,953 iter/s over 6 runs"/>
+<circle class="point" cx="841.8" cy="115.0" r="6" fill="var(--c7)" fill-opacity="0.75" data-tip="GPT-6.2 Astra run 1: 7,095 iter/s, 92.0 MHz"/>
+<circle class="point" cx="758.9" cy="115.0" r="6" fill="var(--c7)" fill-opacity="0.75" data-tip="GPT-6.2 Astra run 2: 6,245 iter/s, 85.3 MHz"/>
+<circle class="point" cx="830.8" cy="115.0" r="6" fill="var(--c7)" fill-opacity="0.75" data-tip="GPT-6.2 Astra run 3: 6,982 iter/s, 87.6 MHz"/>
+<circle class="point" cx="894.2" cy="115.0" r="6" fill="var(--c7)" fill-opacity="0.75" data-tip="GPT-6.2 Astra run 4: 7,633 iter/s, 97.3 MHz"/>
+<circle class="point" cx="844.9" cy="115.0" r="6" fill="var(--c7)" fill-opacity="0.75" data-tip="GPT-6.2 Astra run 5: 7,127 iter/s, 89.4 MHz"/>
+<circle class="point" cx="804.4" cy="115.0" r="6" fill="var(--c7)" fill-opacity="0.75" data-tip="GPT-6.2 Astra run 6: 6,712 iter/s, 88.7 MHz"/>
+<text class="axis-label" x="138" y="158.0" text-anchor="end">GPT-6.2 Sol</text>
+<text class="tick" x="138" y="172.0" text-anchor="end">Codex CLI</text>
+<line x1="802.4" y1="148.0" x2="802.4" y2="174.0" stroke="var(--c8)" stroke-width="3" data-tip="GPT-6.2 Sol: geometric mean 6,691 iter/s over 6 runs"/>
+<circle class="point" cx="793.1" cy="161.0" r="6" fill="var(--c8)" fill-opacity="0.75" data-tip="GPT-6.2 Sol run 1: 6,596 iter/s, 86.8 MHz"/>
+<circle class="point" cx="793.0" cy="161.0" r="6" fill="var(--c8)" fill-opacity="0.75" data-tip="GPT-6.2 Sol run 2: 6,595 iter/s, 91.7 MHz"/>
+<circle class="point" cx="797.3" cy="161.0" r="6" fill="var(--c8)" fill-opacity="0.75" data-tip="GPT-6.2 Sol run 3: 6,639 iter/s, 102.0 MHz"/>
+<circle class="point" cx="809.2" cy="161.0" r="6" fill="var(--c8)" fill-opacity="0.75" data-tip="GPT-6.2 Sol run 4: 6,761 iter/s, 90.8 MHz"/>
+<circle class="point" cx="745.5" cy="161.0" r="6" fill="var(--c8)" fill-opacity="0.75" data-tip="GPT-6.2 Sol run 5: 6,108 iter/s, 96.8 MHz"/>
+<circle class="point" cx="883.8" cy="161.0" r="6" fill="var(--c8)" fill-opacity="0.75" data-tip="GPT-6.2 Sol run 6: 7,526 iter/s, 105.6 MHz"/>
+<text class="axis-label" x="138" y="204.0" text-anchor="end">Sonnet 5.5</text>
+<text class="tick" x="138" y="218.0" text-anchor="end">Claude Code</text>
+<line x1="775.7" y1="194.0" x2="775.7" y2="220.0" stroke="var(--c4)" stroke-width="3" data-tip="Sonnet 5.5: geometric mean 6,418 iter/s over 6 runs"/>
+<circle class="point" cx="700.0" cy="207.0" r="6" fill="var(--c4)" fill-opacity="0.75" data-tip="Sonnet 5.5 run 1: 5,642 iter/s, 102.5 MHz"/>
+<circle class="point" cx="738.0" cy="207.0" r="6" fill="var(--c4)" fill-opacity="0.75" data-tip="Sonnet 5.5 run 2: 6,031 iter/s, 105.5 MHz"/>
+<circle class="point" cx="824.7" cy="207.0" r="6" fill="var(--c4)" fill-opacity="0.75" data-tip="Sonnet 5.5 run 3: 6,921 iter/s, 112.4 MHz"/>
+<circle class="point" cx="846.6" cy="207.0" r="6" fill="var(--c4)" fill-opacity="0.75" data-tip="Sonnet 5.5 run 4: 7,144 iter/s, 102.1 MHz"/>
+<circle class="point" cx="766.9" cy="207.0" r="6" fill="var(--c4)" fill-opacity="0.75" data-tip="Sonnet 5.5 run 5: 6,327 iter/s, 105.0 MHz"/>
+<circle class="point" cx="789.9" cy="207.0" r="6" fill="var(--c4)" fill-opacity="0.75" data-tip="Sonnet 5.5 run 6: 6,563 iter/s, 100.4 MHz"/>
+<text class="axis-label" x="138" y="250.0" text-anchor="end">GPT-6.1 Sol</text>
+<text class="tick" x="138" y="264.0" text-anchor="end">Codex CLI</text>
+<line x1="668.7" y1="240.0" x2="668.7" y2="266.0" stroke="var(--c2)" stroke-width="3" data-tip="GPT-6.1 Sol: geometric mean 5,320 iter/s over 6 runs"/>
+<circle class="point" cx="683.5" cy="253.0" r="6" fill="var(--c2)" fill-opacity="0.75" data-tip="GPT-6.1 Sol run 1: 5,472 iter/s, 93.7 MHz"/>
+<circle class="point" cx="631.7" cy="253.0" r="6" fill="var(--c2)" fill-opacity="0.75" data-tip="GPT-6.1 Sol run 2: 4,940 iter/s, 81.6 MHz"/>
+<circle class="point" cx="645.2" cy="253.0" r="6" fill="var(--c2)" fill-opacity="0.75" data-tip="GPT-6.1 Sol run 3: 5,079 iter/s, 85.6 MHz"/>
+<circle class="point" cx="687.4" cy="253.0" r="6" fill="var(--c2)" fill-opacity="0.75" data-tip="GPT-6.1 Sol run 4: 5,512 iter/s, 87.7 MHz"/>
+<circle class="point" cx="688.9" cy="253.0" r="6" fill="var(--c2)" fill-opacity="0.75" data-tip="GPT-6.1 Sol run 5: 5,528 iter/s, 96.0 MHz"/>
+<circle class="point" cx="678.4" cy="253.0" r="6" fill="var(--c2)" fill-opacity="0.75" data-tip="GPT-6.1 Sol run 6: 5,420 iter/s, 93.8 MHz"/>
+<text class="axis-label" x="138" y="296.0" text-anchor="end">GPT-6 Astra</text>
+<text class="tick" x="138" y="310.0" text-anchor="end">Codex CLI</text>
+<line x1="638.8" y1="286.0" x2="638.8" y2="312.0" stroke="var(--c3)" stroke-width="3" data-tip="GPT-6 Astra: geometric mean 5,014 iter/s over 6 runs"/>
+<circle class="point" cx="574.4" cy="299.0" r="6" fill="var(--c3)" fill-opacity="0.75" data-tip="GPT-6 Astra run 1: 4,353 iter/s, 73.8 MHz"/>
+<circle class="point" cx="665.7" cy="299.0" r="6" fill="var(--c3)" fill-opacity="0.75" data-tip="GPT-6 Astra run 2: 5,289 iter/s, 84.4 MHz"/>
+<circle class="point" cx="700.0" cy="299.0" r="6" fill="var(--c3)" fill-opacity="0.75" data-tip="GPT-6 Astra run 3: 5,641 iter/s, 89.6 MHz"/>
+<circle class="point" cx="626.7" cy="299.0" r="6" fill="var(--c3)" fill-opacity="0.75" data-tip="GPT-6 Astra run 4: 4,889 iter/s, 82.9 MHz"/>
+<circle class="point" cx="593.3" cy="299.0" r="6" fill="var(--c3)" fill-opacity="0.75" data-tip="GPT-6 Astra run 5: 4,546 iter/s, 73.9 MHz"/>
+<circle class="point" cx="686.5" cy="299.0" r="6" fill="var(--c3)" fill-opacity="0.75" data-tip="GPT-6 Astra run 6: 5,502 iter/s, 87.8 MHz"/>
+<text class="axis-label" x="138" y="342.0" text-anchor="end">GPT-5.5</text>
+<text class="tick" x="138" y="356.0" text-anchor="end">Codex CLI</text>
+<line x1="500.5" y1="332.0" x2="500.5" y2="358.0" stroke="var(--c5)" stroke-width="3" data-tip="GPT-5.5: geometric mean 3,595 iter/s over 6 runs"/>
+<circle class="point" cx="469.9" cy="345.0" r="6" fill="var(--c5)" fill-opacity="0.75" data-tip="GPT-5.5 run 1: 3,281 iter/s, 54.1 MHz"/>
+<circle class="point" cx="518.7" cy="345.0" r="6" fill="var(--c5)" fill-opacity="0.75" data-tip="GPT-5.5 run 2: 3,782 iter/s, 68.0 MHz"/>
+<circle class="point" cx="463.6" cy="345.0" r="6" fill="var(--c5)" fill-opacity="0.75" data-tip="GPT-5.5 run 3: 3,216 iter/s, 56.6 MHz"/>
+<circle class="point" cx="484.3" cy="345.0" r="6" fill="var(--c5)" fill-opacity="0.75" data-tip="GPT-5.5 run 4: 3,429 iter/s, 64.2 MHz"/>
+<circle class="point" cx="576.0" cy="345.0" r="6" fill="var(--c5)" fill-opacity="0.75" data-tip="GPT-5.5 run 5: 4,369 iter/s, 91.5 MHz"/>
+<circle class="point" cx="502.0" cy="345.0" r="6" fill="var(--c5)" fill-opacity="0.75" data-tip="GPT-5.5 run 6: 3,610 iter/s, 63.6 MHz"/>
+<text class="axis-label" x="138" y="388.0" text-anchor="end">GPT-6 Luna</text>
+<text class="tick" x="138" y="402.0" text-anchor="end">Codex CLI</text>
+<line x1="495.0" y1="378.0" x2="495.0" y2="404.0" stroke="var(--c6)" stroke-width="3" data-tip="GPT-6 Luna: geometric mean 3,538 iter/s over 6 runs"/>
+<circle class="point" cx="446.7" cy="391.0" r="6" fill="var(--c6)" fill-opacity="0.75" data-tip="GPT-6 Luna run 1: 3,043 iter/s, 51.0 MHz"/>
+<circle class="point" cx="525.3" cy="391.0" r="6" fill="var(--c6)" fill-opacity="0.75" data-tip="GPT-6 Luna run 2: 3,850 iter/s, 74.1 MHz"/>
+<circle class="point" cx="543.8" cy="391.0" r="6" fill="var(--c6)" fill-opacity="0.75" data-tip="GPT-6 Luna run 3: 4,039 iter/s, 70.9 MHz"/>
+<circle class="point" cx="490.1" cy="391.0" r="6" fill="var(--c6)" fill-opacity="0.75" data-tip="GPT-6 Luna run 4: 3,488 iter/s, 58.2 MHz"/>
+<circle class="point" cx="552.3" cy="391.0" r="6" fill="var(--c6)" fill-opacity="0.75" data-tip="GPT-6 Luna run 5: 4,126 iter/s, 72.4 MHz"/>
+<circle class="point" cx="430.9" cy="391.0" r="6" fill="var(--c6)" fill-opacity="0.75" data-tip="GPT-6 Luna run 6: 2,881 iter/s, 50.7 MHz"/>
 </svg>
     <figcaption>
-      Vertical axis: CoreMark fitness (how fast the CPU runs the benchmark).
-      Horizontal axis: chip area (LUT4 count, basically how many gates the design uses on the FPGA).
-      One point per model's best run. VexRiscv (3,402 LUT4 · fitness 370) is the human-engineered
-      reference. Up and to the left is the goal: faster chip, smaller chip.
-    </figcaption>
-  </figure>
-</section>
-
-<section class="section" id="release-curve">
-  <div class="eyebrow">Capability over time</div>
-  <h2>Model release date × peak HWE score</h2>
-  <figure class="chart">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 580" role="img" aria-label="Peak HWE fitness by model release date">
-  <style>
-    text { font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
-    .axis-line { stroke: var(--rule, #d8d4cf); stroke-width: 1; }
-    .grid { stroke: var(--rule, #d8d4cf); stroke-width: .6; }
-    .axis-label { font-size: 12px; fill: var(--ink, #262a33); }
-    .tick { font-family: ui-monospace, SFMono-Regular, monospace; font-size: 10px; fill: var(--ink-muted, #77716c); }
-    .legend { font-size: 11.5px; fill: var(--ink-muted, #77716c); }
-    .name { font-size: 12px; font-weight: 600; paint-order: stroke;
-            stroke: var(--bg, #faf9f7); stroke-width: 4px; stroke-linejoin: round; }
-    .note { font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; }
-    .pt { stroke: var(--bg, #faf9f7); stroke-width: 2; }
-    .baseline { stroke: var(--ink-muted, #77716c); stroke-width: 1; stroke-dasharray: 4 3; }
-    g.dot:hover .pt { stroke: var(--ink, #262a33); }
-  </style>
-  <circle cx="95.0" cy="18.0" r="5" fill="var(--c2)"/>
-  <text class="legend" x="105.0" y="22.0">OpenAI</text>
-  <circle cx="165.2" cy="18.0" r="5" fill="var(--c1)"/>
-  <text class="legend" x="175.2" y="22.0">Google</text>
-  <circle cx="235.4" cy="18.0" r="5" fill="var(--c3)"/>
-  <text class="legend" x="245.4" y="22.0">Moonshot (Kimi)</text>
-  <circle cx="361.4" cy="18.0" r="5" fill="#D97757"/>
-  <text class="legend" x="371.4" y="22.0">Anthropic</text>
-  <line x1="443.2" y1="18.0" x2="456.2" y2="18.0" stroke="var(--c2)" stroke-width="2" stroke-dasharray="5 3" opacity="0.6"/>
-  <text class="legend" x="460.2" y="22.0">OLS trend</text>
-  <text class="tick" x="90.0" y="536" text-anchor="middle">Feb 2026</text>
-  <text class="tick" x="181.4" y="536" text-anchor="middle">Mar</text>
-  <text class="tick" x="282.6" y="536" text-anchor="middle">Apr</text>
-  <text class="tick" x="380.5" y="536" text-anchor="middle">May</text>
-  <text class="tick" x="481.7" y="536" text-anchor="middle">Jun</text>
-  <text class="tick" x="579.7" y="536" text-anchor="middle">Jul</text>
-  <text class="tick" x="680.9" y="536" text-anchor="middle">Aug</text>
-  <text class="tick" x="782.1" y="536" text-anchor="middle">Sep</text>
-  <text class="tick" x="880.0" y="536" text-anchor="middle">Oct</text>
-  <line class="grid" x1="90" y1="440.6" x2="880" y2="440.6"/>
-  <text class="tick" x="80" y="444.6" text-anchor="end">400</text>
-  <line class="grid" x1="90" y1="323.3" x2="880" y2="323.3"/>
-  <text class="tick" x="80" y="327.3" text-anchor="end">600</text>
-  <line class="grid" x1="90" y1="205.9" x2="880" y2="205.9"/>
-  <text class="tick" x="80" y="209.9" text-anchor="end">800</text>
-  <line class="grid" x1="90" y1="88.6" x2="880" y2="88.6"/>
-  <text class="tick" x="80" y="92.6" text-anchor="end">1000</text>
-  <line class="axis-line" x1="90" y1="516" x2="880" y2="516"/>
-  <line class="baseline" x1="90" y1="509.4" x2="880" y2="509.4"/>
-  <text class="tick" x="98" y="502.4">V0 baseline · 283</text>
-  <line x1="90.0" y1="466.0" x2="880.0" y2="313.5" stroke="var(--c2)" stroke-width="2" stroke-dasharray="7 6" opacity="0.55"/>
-  <text class="axis-label" x="485.0" y="558.0" text-anchor="middle">Public model release date</text>
-  <text class="axis-label" x="40.0" y="287.0" text-anchor="middle" transform="rotate(-90 40.0 287.0)">Peak HWE fitness (↑ better)</text>
-  <line stroke="var(--c-human)" stroke-width="1.2" stroke-dasharray="5 4" x1="90" y1="458.2" x2="880" y2="458.2"/>
-  <text class="tick" x="874.0" y="452.2" text-anchor="end" paint-order="stroke" stroke="var(--bg, #faf9f7)" stroke-width="6" stroke-linejoin="round" style="fill: var(--c-human)">Human reference (VexRiscv 370)</text>
-  <g class="dot" data-tip="Claude Opus 5.5 xhigh · peak fitness 983 · released Sep 22, 2026"><circle cx="850.6" cy="98.4" r="12" fill="transparent"/><circle class="pt" cx="850.6" cy="98.4" r="6.5" fill="#D97757"/></g>
-  <g class="dot" data-tip="GPT-5.5 xhigh · peak fitness 525 · released Apr 23, 2026"><circle cx="354.4" cy="367.2" r="12" fill="transparent"/><circle class="pt" cx="354.4" cy="367.2" r="6.5" fill="var(--c2)"/></g>
-  <g class="dot" data-tip="GPT-5.6 Terra · peak fitness 516 · released Jul 10, 2026"><circle cx="609.0" cy="372.7" r="12" fill="transparent"/><circle class="pt" cx="609.0" cy="372.7" r="6.5" fill="var(--c2)"/></g>
-  <g class="dot" data-tip="GPT-5.4 xhigh · peak fitness 514 · released Mar 05, 2026"><circle cx="194.5" cy="373.8" r="12" fill="transparent"/><circle class="pt" cx="194.5" cy="373.8" r="6.5" fill="var(--c2)"/></g>
-  <g class="dot" data-tip="GPT-5.6 Luna · peak fitness 481 · released Jul 10, 2026"><circle cx="609.0" cy="393.1" r="12" fill="transparent"/><circle class="pt" cx="609.0" cy="393.1" r="6.5" fill="var(--c2)"/></g>
-  <g class="dot" data-tip="GPT-6 Astra max · peak fitness 474 · released Sep 03, 2026"><circle cx="788.6" cy="397.0" r="12" fill="transparent"/><circle class="pt" cx="788.6" cy="397.0" r="6.5" fill="var(--c2)"/></g>
-  <g class="dot" data-tip="GPT-5.6 Sol · peak fitness 471 · released Jul 10, 2026"><circle cx="609.0" cy="399.1" r="12" fill="transparent"/><circle class="pt" cx="609.0" cy="399.1" r="6.5" fill="var(--c2)"/></g>
-  <g class="dot" data-tip="GPT-5.5 high · peak fitness 462 · released Apr 23, 2026"><circle cx="354.4" cy="404.3" r="12" fill="transparent"/><circle class="pt" cx="354.4" cy="404.3" r="6.5" fill="var(--c2)"/></g>
-  <g class="dot" data-tip="GPT-6 Sol xhigh · peak fitness 435 · released Sep 22, 2026"><circle cx="850.6" cy="419.9" r="12" fill="transparent"/><circle class="pt" cx="850.6" cy="419.9" r="6.5" fill="var(--c2)"/></g>
-  <g class="dot" data-tip="GPT-5.5 medium · peak fitness 432 · released Apr 23, 2026"><circle cx="354.4" cy="422.1" r="12" fill="transparent"/><circle class="pt" cx="354.4" cy="422.1" r="6.5" fill="var(--c2)"/></g>
-  <g class="dot" data-tip="Kimi K2.6 · peak fitness 396 · released Apr 20, 2026"><circle cx="344.6" cy="442.9" r="12" fill="transparent"/><circle class="pt" cx="344.6" cy="442.9" r="6.5" fill="var(--c3)"/></g>
-  <g class="dot" data-tip="GPT-5.4 mini · peak fitness 396 · released Mar 17, 2026"><circle cx="233.6" cy="443.2" r="12" fill="transparent"/><circle class="pt" cx="233.6" cy="443.2" r="6.5" fill="var(--c2)"/></g>
-  <g class="dot" data-tip="Gemini 3.5 Flash · peak fitness 359 · released May 19, 2026"><circle cx="439.3" cy="464.6" r="12" fill="transparent"/><circle class="pt" cx="439.3" cy="464.6" r="6.5" fill="var(--c1)"/></g>
-  <g class="dot" data-tip="Gemini 3.1 Pro · peak fitness 355 · released Feb 19, 2026"><circle cx="148.8" cy="467.2" r="12" fill="transparent"/><circle class="pt" cx="148.8" cy="467.2" r="6.5" fill="var(--c1)"/></g>
-  <text class="name" x="839.6" y="101.4" text-anchor="end" style="fill: #D97757">Claude Opus 5.5 xhigh</text>
-  <text class="name" x="365.4" y="370.2" text-anchor="start" style="fill: var(--c2)">GPT-5.5 xhigh</text>
-  <text class="name" x="620.0" y="375.7" text-anchor="start" style="fill: var(--c2)">GPT-5.6 Terra</text>
-  <text class="name" x="205.5" y="376.8" text-anchor="start" style="fill: var(--c2)">GPT-5.4 xhigh</text>
-  <text class="name" x="620.0" y="396.1" text-anchor="start" style="fill: var(--c2)">GPT-5.6 Luna</text>
-  <text class="name" x="799.6" y="400.0" text-anchor="start" style="fill: var(--c2)">GPT-6 Astra max</text>
-  <text class="name" x="598.0" y="402.1" text-anchor="end" style="fill: var(--c2)">GPT-5.6 Sol</text>
-  <text class="name" x="365.4" y="407.3" text-anchor="start" style="fill: var(--c2)">GPT-5.5 high</text>
-  <text class="name" x="839.6" y="422.9" text-anchor="end" style="fill: var(--c2)">GPT-6 Sol xhigh</text>
-  <text class="name" x="365.4" y="425.1" text-anchor="start" style="fill: var(--c2)">GPT-5.5 medium</text>
-  <text class="name" x="355.6" y="445.9" text-anchor="start" style="fill: var(--c3)">Kimi K2.6</text>
-  <text class="name" x="244.6" y="446.2" text-anchor="start" style="fill: var(--c2)">GPT-5.4 mini</text>
-  <text class="name" x="450.3" y="467.6" text-anchor="start" style="fill: var(--c1)">Gemini 3.5 Flash</text>
-  <text class="name" x="159.8" y="470.2" text-anchor="start" style="fill: var(--c1)">Gemini 3.1 Pro</text>
-</svg>
-    <figcaption>
-      Each point is one model configuration's best completed HWE Bench rep;
-      reasoning-effort variants share their underlying model family's public release date.
-      The dashed fit is descriptive, not a forecast. Release dates come from the
-      <a href="https://learn.chatgpt.com/docs/changelog" class="ext">OpenAI Codex notes</a>,
-      <a href="https://ai.google.dev/gemini-api/docs/changelog" class="ext">Gemini API changelog</a>,
-      <a href="https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md" class="ext">Claude Code changelog</a>,
-      and <a href="https://www.kimi.com/blog/kimi-k2-6" class="ext">Kimi K2.6 announcement</a>.
+      One dot per scored run (six per system), the bar is the system's geometric mean.
+      Held-out score = the design's maximum clock frequency (Gowin EDA, GW2A-18) times the
+      geometric mean of iterations per cycle on five benchmark programs the agents never saw.
+      Dashed lines: VexRiscv MaxPerf, the best of ten human-designed reference cores on the same
+      flow; the textbook edit (V0 plus an iterative divider); V0, the starting core.
     </figcaption>
   </figure>
 </section>
 
 <section class="section">
-  <div class="eyebrow">Leaderboard</div>
-  <h2>Peak fitness per model</h2>
+  <div class="eyebrow">Final designs</div>
+  <h2>Eight systems, six runs each</h2>
   <div class="wide">
   <table class="bench">
-    <caption>Best of recorded reps per model · 38 reps total · VexRiscv human reference in red · baseline V0 in italic</caption>
-    <thead>
-      <tr>
-        <th class="num">#</th>
-        <th>Model</th>
-        <th class="num">Reps</th>
-        <th class="num">Best</th>
-        <th class="num">Δ%</th>
-        <th class="num">Mean ± std</th>
-        <th class="num">Area (LUT4)</th>
-        <th class="num">Fmax (MHz)</th>
-      </tr>
-    </thead>
+    <caption>Geometric means over 6 runs; Fmax and LUT4 are medians. Rank interval: 95% bootstrap.
+      Blank cells do not apply. Harness 2.8.2 for the first six systems, 2.8.4 for GPT-6.2
+      Astra and Sol (the same agent setup, scoring and gates).</caption>
+    <thead><tr>
+      <th>System (agent CLI)</th><th class="num">Held-out iter/s</th><th class="num">Rank interval</th>
+      <th class="num">CoreMark iter/s</th><th class="num">Fmax (MHz)</th><th class="num">Area (LUT4)</th>
+    </tr></thead>
     <tbody>
     <tr>
-      <td class="num">1</td>
-      <td><span class="model-name">claude-opus-5_5_xhigh</span></td>
-      <td class="num">1/1</td>
-      <td class="num">983.24</td>
-      <td class="num">+247.7%</td>
-      <td class="num">983.2</td>
-      <td class="num">3.1k</td>
-      <td class="num">302</td>
+      <td><span class="model-name">Opus 5.5</span> <span class="tick-cli">(Claude Code)</span></td>
+      <td class="num">7,024</td>
+      <td class="num">1 to 4</td>
+      <td class="num">280</td>
+      <td class="num">107.8</td>
+      <td class="num">3,161</td>
     </tr>
     <tr>
-      <td class="num">2</td>
-      <td><span class="model-name">gpt-5_5_xhigh</span></td>
-      <td class="num">3/3</td>
-      <td class="num">525.04</td>
-      <td class="num">+85.6%</td>
-      <td class="num">468.3 ± 52.8</td>
-      <td class="num">5.5k</td>
-      <td class="num">220</td>
+      <td><span class="model-name">GPT-6.2 Astra</span> <span class="tick-cli">(Codex CLI)</span></td>
+      <td class="num">6,953</td>
+      <td class="num">1 to 3</td>
+      <td class="num">290</td>
+      <td class="num">89.1</td>
+      <td class="num">4,876</td>
     </tr>
     <tr>
-      <td class="num">3</td>
-      <td><span class="model-name">gpt-5_6-terra</span></td>
-      <td class="num">3/3</td>
-      <td class="num">515.70</td>
-      <td class="num">+82.3%</td>
-      <td class="num">442.3 ± 55.8</td>
-      <td class="num">10.5k</td>
-      <td class="num">209</td>
+      <td><span class="model-name">GPT-6.2 Sol</span> <span class="tick-cli">(Codex CLI)</span></td>
+      <td class="num">6,691</td>
+      <td class="num">1 to 4</td>
+      <td class="num">276</td>
+      <td class="num">94.2</td>
+      <td class="num">6,093</td>
     </tr>
     <tr>
-      <td class="num">4</td>
-      <td><span class="model-name">gpt-5_4_xhigh</span></td>
-      <td class="num">3/3</td>
-      <td class="num">513.84</td>
-      <td class="num">+81.7%</td>
-      <td class="num">485.8 ± 28.1</td>
-      <td class="num">10.1k</td>
-      <td class="num">203</td>
+      <td><span class="model-name">Sonnet 5.5</span> <span class="tick-cli">(Claude Code)</span></td>
+      <td class="num">6,418</td>
+      <td class="num">2 to 4</td>
+      <td class="num">259</td>
+      <td class="num">103.8</td>
+      <td class="num">4,232</td>
     </tr>
     <tr>
-      <td class="num">5</td>
-      <td><span class="model-name">gpt-5_6-luna</span></td>
-      <td class="num">3/3</td>
-      <td class="num">480.90</td>
-      <td class="num">+70.0%</td>
-      <td class="num">452.0 ± 29.0</td>
-      <td class="num">10.1k</td>
-      <td class="num">209</td>
+      <td><span class="model-name">GPT-6.1 Sol</span> <span class="tick-cli">(Codex CLI)</span></td>
+      <td class="num">5,320</td>
+      <td class="num">5 to 6</td>
+      <td class="num">215</td>
+      <td class="num">90.7</td>
+      <td class="num">4,716</td>
     </tr>
     <tr>
-      <td class="num">6</td>
-      <td><span class="model-name">gpt-6-astra_max</span></td>
-      <td class="num">3/3</td>
-      <td class="num">474.27</td>
-      <td class="num">+67.7%</td>
-      <td class="num">424.8 ± 36.2</td>
-      <td class="num">6.2k</td>
-      <td class="num">199</td>
-    </tr>
-    <tr>
-      <td class="num">7</td>
-      <td><span class="model-name">gpt-5_6-sol</span></td>
-      <td class="num">1/3</td>
-      <td class="num">470.80</td>
-      <td class="num">+66.5%</td>
-      <td class="num">470.8</td>
-      <td class="num">10.2k</td>
-      <td class="num">200</td>
-    </tr>
-    <tr>
-      <td class="num">8</td>
-      <td><span class="model-name">gpt-5_5_high</span></td>
-      <td class="num">3/3</td>
-      <td class="num">461.87</td>
-      <td class="num">+63.3%</td>
-      <td class="num">430.2 ± 23.0</td>
-      <td class="num">9.8k</td>
-      <td class="num">187</td>
-    </tr>
-    <tr>
-      <td class="num">9</td>
-      <td><span class="model-name">gpt-6-sol_xhigh</span></td>
-      <td class="num">1/1</td>
-      <td class="num">435.24</td>
-      <td class="num">+53.9%</td>
-      <td class="num">435.2</td>
-      <td class="num">5.7k</td>
-      <td class="num">189</td>
-    </tr>
-    <tr>
-      <td class="num">10</td>
-      <td><span class="model-name">gpt-5_5_medium</span></td>
-      <td class="num">3/3</td>
-      <td class="num">431.58</td>
-      <td class="num">+52.6%</td>
-      <td class="num">423.5 ± 11.2</td>
-      <td class="num">7.8k</td>
+      <td><span class="model-name">GPT-6 Astra</span> <span class="tick-cli">(Codex CLI)</span></td>
+      <td class="num">5,014</td>
+      <td class="num">5 to 6</td>
       <td class="num">201</td>
+      <td class="num">83.6</td>
+      <td class="num">5,546</td>
     </tr>
     <tr>
-      <td class="num">11</td>
-      <td><span class="model-name">kimi-k2_6</span></td>
-      <td class="num">2/3</td>
-      <td class="num">396.13</td>
-      <td class="num">+40.1%</td>
-      <td class="num">339.5 ± 8.3</td>
-      <td class="num">9.9k</td>
-      <td class="num">166</td>
+      <td><span class="model-name">GPT-5.5</span> <span class="tick-cli">(Codex CLI)</span></td>
+      <td class="num">3,595</td>
+      <td class="num">7 to 8</td>
+      <td class="num">143</td>
+      <td class="num">63.9</td>
+      <td class="num">2,948</td>
     </tr>
     <tr>
-      <td class="num">12</td>
-      <td><span class="model-name">gpt-5_4-mini</span></td>
-      <td class="num">3/3</td>
-      <td class="num">395.53</td>
-      <td class="num">+39.9%</td>
-      <td class="num">362.3 ± 23.7</td>
-      <td class="num">10.2k</td>
-      <td class="num">187</td>
+      <td><span class="model-name">GPT-6 Luna</span> <span class="tick-cli">(Codex CLI)</span></td>
+      <td class="num">3,538</td>
+      <td class="num">7 to 8</td>
+      <td class="num">137</td>
+      <td class="num">64.6</td>
+      <td class="num">2,934</td>
     </tr>
     <tr class="human-baseline">
-      <td class="num">13</td>
-      <td><span class="model-name">VexRiscv  (human ref)</span></td>
-      <td class="num">n/a</td>
-      <td class="num">370.00</td>
-      <td class="num">+30.8%</td>
-      <td class="num">n/a</td>
-      <td class="num">3.4k</td>
-      <td class="num">144</td>
-    </tr>
-    <tr>
-      <td class="num">14</td>
-      <td><span class="model-name">gemini-3_5-flash</span></td>
-      <td class="num">0/1</td>
-      <td class="num">359.04</td>
-      <td class="num">+27.0%</td>
-      <td class="num">n/a</td>
-      <td class="num">13.8k</td>
-      <td class="num">125</td>
-    </tr>
-    <tr>
-      <td class="num">15</td>
-      <td><span class="model-name">gemini-3_1-pro</span></td>
-      <td class="num">3/3</td>
-      <td class="num">354.73</td>
-      <td class="num">+25.4%</td>
-      <td class="num">339.4 ± 12.6</td>
-      <td class="num">10.2k</td>
-      <td class="num">150</td>
-    </tr>
-    <tr>
-      <td class="num">16</td>
-      <td><span class="model-name">static</span></td>
-      <td class="num">2/2</td>
-      <td class="num">282.82</td>
-      <td class="num">+0.0%</td>
-      <td class="num">282.8</td>
-      <td class="num">9.6k</td>
-      <td class="num">127</td>
+      <td><span class="model-name">VexRiscv MaxPerf</span> (human, best of ten reference cores)</td>
+      <td class="num">6,216</td><td class="num"></td><td class="num"></td>
+      <td class="num">87.8</td><td class="num"></td>
     </tr>
     <tr class="baseline-row">
-      <td class="num">17</td>
-      <td><span class="model-name">baseline V0  (fixture)</span></td>
-      <td class="num">n/a</td>
-      <td class="num">282.82</td>
-      <td class="num">n/a</td>
-      <td class="num">n/a</td>
-      <td class="num">9.6k</td>
-      <td class="num">127</td>
+      <td><span class="model-name">textbook edit</span> (V0 with an iterative divider)</td>
+      <td class="num">2,645</td><td class="num"></td><td class="num">103.7</td>
+      <td class="num">46.6</td><td class="num">2,541</td>
+    </tr>
+    <tr class="baseline-row">
+      <td><span class="model-name">V0</span> (every run starts here)</td>
+      <td class="num">309</td><td class="num"></td><td class="num">12.1</td>
+      <td class="num">5.4</td><td class="num">12,312</td>
     </tr>
     </tbody>
   </table>
   </div>
-  <p class="prose">
-    The VexRiscv row is the human-engineered reference, a well-known open-source RV32IM CPU
-    synthesized on the same FPGA used for the benchmark. <strong>12</strong>
-    of the LLM-generated designs beat it. See the <a href="methodology.html">methodology page</a>
-    for the full procedure.
-  </p>
-  <p class="prose">Single repetition (n=1): <code>claude-opus-5_5_xhigh</code>. Each of these rows is one run; repeatability is unmeasured, so rank differences involving them are untested.</p>
-</section>
-
-<section class="section">
-  <div class="eyebrow">Why unbounded</div>
-  <h2>SWE-bench saturates. HWE Bench doesn't.</h2>
   <div class="prose">
   <p>
-    Most LLM benchmarks have a fixed ceiling. SWE-bench tops out at 100% issue-resolution.
-    Multiple-choice evals approach 99%. Once a model lands at the ceiling, every subsequent
-    model gets the same score, and the benchmark stops being useful for tracking capability.
+    The pre-registered comparison, Opus 5.5 against GPT-6.1 Sol, separates:
+    ratio 1.320 [1.183, 1.473], p = 0.0005.
+    Of the 12 further pairs among the first six systems (Holm-corrected), 9 separate. The three that do not are the
+    pairs inside each tier: Opus 5.5 vs Sonnet 5.5, GPT-6.1 Sol vs GPT-6 Astra, and
+    GPT-5.5 vs GPT-6 Luna. Six runs per system resolve differences of about 20%, not the
+    6 to 10% gaps inside a tier.
   </p>
   <p>
-    HWE Bench has no ceiling. Fitness is the CPU's actual speed running CoreMark on a real
-    FPGA, operating frequency times instructions-per-cycle (Fmax × IPC for the technically
-    inclined). There's no theoretical maximum: a smarter microarchitecture always scores
-    higher. As long as models keep finding new tricks (deeper pipelines, smarter branch
-    predictors, restructured ALUs), the leaderboard keeps moving.
-  </p>
-  <p>
-    Empirically: the current best is <strong>983.24</strong>
-    iter/s (one repetition, n=1; untested), <strong>+247.7%</strong> over the V0 baseline core, and clear of the
-    VexRiscv human reference. There is no theoretical ceiling, and within current budgets
-    the curve has not saturated.
+    GPT-6.2 Astra and GPT-6.2 Sol (Codex CLI 0.170.0) ran in November, 46 days after the
+    others, in a test family of their own (amendment 17, Holm-corrected; provisional until
+    Fable 5.2's runs finish). 8 of its 13 pairs separate: each GPT-6.2 system ranks above
+    GPT-6.1 Sol and GPT-6 Astra (1.26x to 1.39x) and above
+    GPT-5.5 and GPT-6 Luna (1.86x to 1.97x). Neither separates
+    from Opus 5.5, Sonnet 5.5 or the other: Opus 5.5 vs GPT-6.2 Astra is
+    1.01x [0.90, 1.13]. A comparison with an earlier
+    system also spans the gap in time and the newer Codex CLI.
   </p>
   </div>
 </section>
 
 <section class="section">
-  <div class="eyebrow">Trajectory</div>
-  <h2>Fitness over rounds, best rep per model</h2>
-  <figure class="chart">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 480" role="img" aria-label="Best fitness over rounds, per model">
-  <style>
-    text { font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
-    .axis-line { stroke: var(--rule, #d8d4cf); stroke-width: 1; }
-    .grid { stroke: var(--rule, #d8d4cf); stroke-width: .6; }
-    .axis-label { font-size: 12px; fill: var(--ink, #262a33); }
-    .tick { font-family: ui-monospace, SFMono-Regular, monospace; font-size: 10px; fill: var(--ink-muted, #77716c); }
-    .legend { font-size: 11.5px; fill: var(--ink-muted, #77716c); }
-    .name { font-size: 12px; font-weight: 600; paint-order: stroke;
-            stroke: var(--bg, #faf9f7); stroke-width: 4px; stroke-linejoin: round; }
-    .note { font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; }
-    .pt { stroke: var(--bg, #faf9f7); stroke-width: 2; }
-    .baseline { stroke: var(--ink-muted, #77716c); stroke-width: 1; stroke-dasharray: 4 3; }
-    g.dot:hover .pt { stroke: var(--ink, #262a33); }
-  </style>
-  <line class="grid" x1="90" y1="347.7" x2="670" y2="347.7"/>
-  <text class="tick" x="82" y="351.7" text-anchor="end">400</text>
-  <line class="grid" x1="90" y1="243.7" x2="670" y2="243.7"/>
-  <text class="tick" x="82" y="247.7" text-anchor="end">600</text>
-  <line class="grid" x1="90" y1="139.7" x2="670" y2="139.7"/>
-  <text class="tick" x="82" y="143.7" text-anchor="end">800</text>
-  <line class="grid" x1="90" y1="35.7" x2="670" y2="35.7"/>
-  <text class="tick" x="82" y="39.7" text-anchor="end">1000</text>
-  <line class="grid" x1="90.0" y1="24" x2="90.0" y2="416"/>
-  <text class="tick" x="90.0" y="434" text-anchor="middle">0</text>
-  <text class="tick" x="128.7" y="434" text-anchor="middle">1</text>
-  <text class="tick" x="167.3" y="434" text-anchor="middle">2</text>
-  <text class="tick" x="206.0" y="434" text-anchor="middle">3</text>
-  <text class="tick" x="244.7" y="434" text-anchor="middle">4</text>
-  <line class="grid" x1="283.3" y1="24" x2="283.3" y2="416"/>
-  <text class="tick" x="283.3" y="434" text-anchor="middle">5</text>
-  <text class="tick" x="322.0" y="434" text-anchor="middle">6</text>
-  <text class="tick" x="360.7" y="434" text-anchor="middle">7</text>
-  <text class="tick" x="399.3" y="434" text-anchor="middle">8</text>
-  <text class="tick" x="438.0" y="434" text-anchor="middle">9</text>
-  <line class="grid" x1="476.7" y1="24" x2="476.7" y2="416"/>
-  <text class="tick" x="476.7" y="434" text-anchor="middle">10</text>
-  <text class="tick" x="515.3" y="434" text-anchor="middle">11</text>
-  <text class="tick" x="554.0" y="434" text-anchor="middle">12</text>
-  <text class="tick" x="592.7" y="434" text-anchor="middle">13</text>
-  <text class="tick" x="631.3" y="434" text-anchor="middle">14</text>
-  <line class="grid" x1="670.0" y1="24" x2="670.0" y2="416"/>
-  <text class="tick" x="670.0" y="434" text-anchor="middle">15</text>
-  <line class="axis-line" x1="90" y1="416" x2="670" y2="416"/>
-  <line class="axis-line" x1="90" y1="24" x2="90" y2="416"/>
-  <line class="baseline" x1="90" y1="408.6" x2="670" y2="408.6"/>
-  <text class="label" x="664.0" y="402.6" text-anchor="end" paint-order="stroke" stroke="var(--bg, #faf9f7)" stroke-width="3.5" fill="var(--ink-muted)">baseline 283</text>
-  <line stroke="var(--c-human)" stroke-width="1.2" stroke-dasharray="5 4" x1="90" y1="363.3" x2="670" y2="363.3"/>
-  <text class="axis-label" x="380.0" y="458.0" text-anchor="middle">Round (3 hypothesis slots each)</text>
-  <text class="axis-label" x="40.0" y="220.0" text-anchor="middle" transform="rotate(-90 40.0 220.0)">Best fitness so far</text>
-  <g data-tip="Claude Opus 5.5 xhigh · best 983"><path d="M 90.0 408.6 L 128.7 408.6 L 128.7 369.0 L 167.3 369.0 L 167.3 369.0 L 206.0 369.0 L 206.0 327.7 L 244.7 327.7 L 244.7 317.1 L 283.3 317.1 L 283.3 289.4 L 322.0 289.4 L 322.0 289.4 L 360.7 289.4 L 360.7 221.2 L 399.3 221.2 L 399.3 221.2 L 438.0 221.2 L 438.0 194.2 L 476.7 194.2 L 476.7 108.7 L 515.3 108.7 L 515.3 108.7 L 554.0 108.7 L 554.0 90.6 L 592.7 90.6 L 592.7 90.6 L 631.3 90.6 L 631.3 44.5 L 670.0 44.5 L 670.0 44.5" stroke="transparent" stroke-width="10" fill="none"/><path d="M 90.0 408.6 L 128.7 408.6 L 128.7 369.0 L 167.3 369.0 L 167.3 369.0 L 206.0 369.0 L 206.0 327.7 L 244.7 327.7 L 244.7 317.1 L 283.3 317.1 L 283.3 289.4 L 322.0 289.4 L 322.0 289.4 L 360.7 289.4 L 360.7 221.2 L 399.3 221.2 L 399.3 221.2 L 438.0 221.2 L 438.0 194.2 L 476.7 194.2 L 476.7 108.7 L 515.3 108.7 L 515.3 108.7 L 554.0 108.7 L 554.0 90.6 L 592.7 90.6 L 592.7 90.6 L 631.3 90.6 L 631.3 44.5 L 670.0 44.5 L 670.0 44.5" stroke="#D97757" stroke-width="1.8" fill="none"/></g>
-  <g data-tip="GPT-5.5 xhigh · best 525"><path d="M 90.0 408.6 L 128.7 408.6 L 128.7 347.4 L 167.3 347.4 L 167.3 347.4 L 206.0 347.4 L 206.0 347.4 L 244.7 347.4 L 244.7 347.4 L 283.3 347.4 L 283.3 347.4 L 322.0 347.4 L 322.0 333.4 L 360.7 333.4 L 360.7 331.0 L 399.3 331.0 L 399.3 331.0 L 438.0 331.0 L 438.0 331.0 L 476.7 331.0 L 476.7 282.7 L 515.3 282.7 L 515.3 282.7 L 554.0 282.7 L 554.0 282.7 L 592.7 282.7 L 592.7 282.7 L 631.3 282.7 L 631.3 282.7 L 670.0 282.7 L 670.0 282.7" stroke="transparent" stroke-width="10" fill="none"/><path d="M 90.0 408.6 L 128.7 408.6 L 128.7 347.4 L 167.3 347.4 L 167.3 347.4 L 206.0 347.4 L 206.0 347.4 L 244.7 347.4 L 244.7 347.4 L 283.3 347.4 L 283.3 347.4 L 322.0 347.4 L 322.0 333.4 L 360.7 333.4 L 360.7 331.0 L 399.3 331.0 L 399.3 331.0 L 438.0 331.0 L 438.0 331.0 L 476.7 331.0 L 476.7 282.7 L 515.3 282.7 L 515.3 282.7 L 554.0 282.7 L 554.0 282.7 L 592.7 282.7 L 592.7 282.7 L 631.3 282.7 L 631.3 282.7 L 670.0 282.7 L 670.0 282.7" stroke="var(--c2)" stroke-width="1.8" fill="none"/></g>
-  <g data-tip="GPT-5.6 Terra · best 516"><path d="M 90.0 408.6 L 128.7 408.6 L 128.7 394.5 L 167.3 394.5 L 167.3 387.4 L 206.0 387.4 L 206.0 367.7 L 244.7 367.7 L 244.7 365.6 L 283.3 365.6 L 283.3 365.6 L 322.0 365.6 L 322.0 365.6 L 360.7 365.6 L 360.7 365.6 L 399.3 365.6 L 399.3 352.5 L 438.0 352.5 L 438.0 287.6 L 476.7 287.6 L 476.7 287.6 L 515.3 287.6 L 515.3 287.6 L 554.0 287.6 L 554.0 287.6 L 592.7 287.6 L 592.7 287.6 L 631.3 287.6 L 631.3 287.6 L 670.0 287.6 L 670.0 287.6" stroke="transparent" stroke-width="10" fill="none"/><path d="M 90.0 408.6 L 128.7 408.6 L 128.7 394.5 L 167.3 394.5 L 167.3 387.4 L 206.0 387.4 L 206.0 367.7 L 244.7 367.7 L 244.7 365.6 L 283.3 365.6 L 283.3 365.6 L 322.0 365.6 L 322.0 365.6 L 360.7 365.6 L 360.7 365.6 L 399.3 365.6 L 399.3 352.5 L 438.0 352.5 L 438.0 287.6 L 476.7 287.6 L 476.7 287.6 L 515.3 287.6 L 515.3 287.6 L 554.0 287.6 L 554.0 287.6 L 592.7 287.6 L 592.7 287.6 L 631.3 287.6 L 631.3 287.6 L 670.0 287.6 L 670.0 287.6" stroke="var(--c3)" stroke-width="1.8" fill="none"/></g>
-  <g data-tip="GPT-5.4 xhigh · best 514"><path d="M 90.0 408.6 L 128.7 408.6 L 128.7 408.6 L 167.3 408.6 L 167.3 391.4 L 206.0 391.4 L 206.0 382.9 L 244.7 382.9 L 244.7 381.6 L 283.3 381.6 L 283.3 359.4 L 322.0 359.4 L 322.0 352.2 L 360.7 352.2 L 360.7 352.2 L 399.3 352.2 L 399.3 288.5 L 438.0 288.5 L 438.0 288.5 L 476.7 288.5 L 476.7 288.5 L 515.3 288.5 L 515.3 288.5 L 554.0 288.5 L 554.0 288.5 L 592.7 288.5 L 592.7 288.5 L 631.3 288.5 L 631.3 288.5 L 670.0 288.5 L 670.0 288.5" stroke="transparent" stroke-width="10" fill="none"/><path d="M 90.0 408.6 L 128.7 408.6 L 128.7 408.6 L 167.3 408.6 L 167.3 391.4 L 206.0 391.4 L 206.0 382.9 L 244.7 382.9 L 244.7 381.6 L 283.3 381.6 L 283.3 359.4 L 322.0 359.4 L 322.0 352.2 L 360.7 352.2 L 360.7 352.2 L 399.3 352.2 L 399.3 288.5 L 438.0 288.5 L 438.0 288.5 L 476.7 288.5 L 476.7 288.5 L 515.3 288.5 L 515.3 288.5 L 554.0 288.5 L 554.0 288.5 L 592.7 288.5 L 592.7 288.5 L 631.3 288.5 L 631.3 288.5 L 670.0 288.5 L 670.0 288.5" stroke="var(--c4)" stroke-width="1.8" fill="none"/></g>
-  <g data-tip="GPT-5.6 Luna · best 481"><path d="M 90.0 408.6 L 128.7 408.6 L 128.7 394.2 L 167.3 394.2 L 167.3 394.2 L 206.0 394.2 L 206.0 390.7 L 244.7 390.7 L 244.7 390.7 L 283.3 390.7 L 283.3 349.6 L 322.0 349.6 L 322.0 349.6 L 360.7 349.6 L 360.7 305.7 L 399.3 305.7 L 399.3 305.7 L 438.0 305.7 L 438.0 305.7 L 476.7 305.7 L 476.7 305.7 L 515.3 305.7 L 515.3 305.7 L 554.0 305.7 L 554.0 305.7 L 592.7 305.7 L 592.7 305.7 L 631.3 305.7 L 631.3 305.7 L 670.0 305.7 L 670.0 305.7" stroke="transparent" stroke-width="10" fill="none"/><path d="M 90.0 408.6 L 128.7 408.6 L 128.7 394.2 L 167.3 394.2 L 167.3 394.2 L 206.0 394.2 L 206.0 390.7 L 244.7 390.7 L 244.7 390.7 L 283.3 390.7 L 283.3 349.6 L 322.0 349.6 L 322.0 349.6 L 360.7 349.6 L 360.7 305.7 L 399.3 305.7 L 399.3 305.7 L 438.0 305.7 L 438.0 305.7 L 476.7 305.7 L 476.7 305.7 L 515.3 305.7 L 515.3 305.7 L 554.0 305.7 L 554.0 305.7 L 592.7 305.7 L 592.7 305.7 L 631.3 305.7 L 631.3 305.7 L 670.0 305.7 L 670.0 305.7" stroke="var(--c5)" stroke-width="1.8" fill="none"/></g>
-  <g data-tip="GPT-6 Astra max · best 474"><path d="M 90.0 408.6 L 128.7 408.6 L 128.7 378.8 L 167.3 378.8 L 167.3 334.3 L 206.0 334.3 L 206.0 334.3 L 244.7 334.3 L 244.7 312.7 L 283.3 312.7 L 283.3 312.7 L 322.0 312.7 L 322.0 312.7 L 360.7 312.7 L 360.7 312.7 L 399.3 312.7 L 399.3 312.7 L 438.0 312.7 L 438.0 312.7 L 476.7 312.7 L 476.7 312.7 L 515.3 312.7 L 515.3 312.7 L 554.0 312.7 L 554.0 312.7 L 592.7 312.7 L 592.7 312.7 L 631.3 312.7 L 631.3 309.1 L 670.0 309.1 L 670.0 309.1" stroke="transparent" stroke-width="10" fill="none"/><path d="M 90.0 408.6 L 128.7 408.6 L 128.7 378.8 L 167.3 378.8 L 167.3 334.3 L 206.0 334.3 L 206.0 334.3 L 244.7 334.3 L 244.7 312.7 L 283.3 312.7 L 283.3 312.7 L 322.0 312.7 L 322.0 312.7 L 360.7 312.7 L 360.7 312.7 L 399.3 312.7 L 399.3 312.7 L 438.0 312.7 L 438.0 312.7 L 476.7 312.7 L 476.7 312.7 L 515.3 312.7 L 515.3 312.7 L 554.0 312.7 L 554.0 312.7 L 592.7 312.7 L 592.7 312.7 L 631.3 312.7 L 631.3 309.1 L 670.0 309.1 L 670.0 309.1" stroke="var(--c6)" stroke-width="1.8" fill="none"/></g>
-  <g data-tip="GPT-5.6 Sol · best 471"><path d="M 90.0 408.6 L 128.7 408.6 L 128.7 345.3 L 167.3 345.3 L 167.3 345.3 L 206.0 345.3 L 206.0 344.3 L 244.7 344.3 L 244.7 331.1 L 283.3 331.1 L 283.3 331.1 L 322.0 331.1 L 322.0 331.1 L 360.7 331.1 L 360.7 331.1 L 399.3 331.1 L 399.3 314.5 L 438.0 314.5 L 438.0 314.5 L 476.7 314.5 L 476.7 314.5 L 515.3 314.5 L 515.3 314.5 L 554.0 314.5 L 554.0 314.5 L 592.7 314.5 L 592.7 312.4 L 631.3 312.4 L 631.3 312.4 L 670.0 312.4 L 670.0 310.9" stroke="transparent" stroke-width="10" fill="none"/><path d="M 90.0 408.6 L 128.7 408.6 L 128.7 345.3 L 167.3 345.3 L 167.3 345.3 L 206.0 345.3 L 206.0 344.3 L 244.7 344.3 L 244.7 331.1 L 283.3 331.1 L 283.3 331.1 L 322.0 331.1 L 322.0 331.1 L 360.7 331.1 L 360.7 331.1 L 399.3 331.1 L 399.3 314.5 L 438.0 314.5 L 438.0 314.5 L 476.7 314.5 L 476.7 314.5 L 515.3 314.5 L 515.3 314.5 L 554.0 314.5 L 554.0 314.5 L 592.7 314.5 L 592.7 312.4 L 631.3 312.4 L 631.3 312.4 L 670.0 312.4 L 670.0 310.9" stroke="var(--c1)" stroke-width="1.8" fill="none"/></g>
-  <g data-tip="GPT-5.5 high · best 462"><path d="M 90.0 408.6 L 128.7 408.6 L 128.7 379.6 L 167.3 379.6 L 167.3 379.6 L 206.0 379.6 L 206.0 371.0 L 244.7 371.0 L 244.7 371.0 L 283.3 371.0 L 283.3 371.0 L 322.0 371.0 L 322.0 371.0 L 360.7 371.0 L 360.7 371.0 L 399.3 371.0 L 399.3 365.4 L 438.0 365.4 L 438.0 337.1 L 476.7 337.1 L 476.7 337.1 L 515.3 337.1 L 515.3 337.1 L 554.0 337.1 L 554.0 328.1 L 592.7 328.1 L 592.7 328.1 L 631.3 328.1 L 631.3 315.5 L 670.0 315.5 L 670.0 315.5" stroke="transparent" stroke-width="10" fill="none"/><path d="M 90.0 408.6 L 128.7 408.6 L 128.7 379.6 L 167.3 379.6 L 167.3 379.6 L 206.0 379.6 L 206.0 371.0 L 244.7 371.0 L 244.7 371.0 L 283.3 371.0 L 283.3 371.0 L 322.0 371.0 L 322.0 371.0 L 360.7 371.0 L 360.7 371.0 L 399.3 371.0 L 399.3 365.4 L 438.0 365.4 L 438.0 337.1 L 476.7 337.1 L 476.7 337.1 L 515.3 337.1 L 515.3 337.1 L 554.0 337.1 L 554.0 328.1 L 592.7 328.1 L 592.7 328.1 L 631.3 328.1 L 631.3 315.5 L 670.0 315.5 L 670.0 315.5" stroke="var(--c2)" stroke-width="1.8" fill="none"/></g>
-  <g data-tip="GPT-6 Sol xhigh · best 435"><path d="M 90.0 408.6 L 128.7 408.6 L 128.7 374.1 L 167.3 374.1 L 167.3 367.5 L 206.0 367.5 L 206.0 367.5 L 244.7 367.5 L 244.7 351.8 L 283.3 351.8 L 283.3 351.8 L 322.0 351.8 L 322.0 343.3 L 360.7 343.3 L 360.7 343.3 L 399.3 343.3 L 399.3 343.3 L 438.0 343.3 L 438.0 343.3 L 476.7 343.3 L 476.7 343.3 L 515.3 343.3 L 515.3 343.3 L 554.0 343.3 L 554.0 343.3 L 592.7 343.3 L 592.7 343.3 L 631.3 343.3 L 631.3 329.4 L 670.0 329.4 L 670.0 329.4" stroke="transparent" stroke-width="10" fill="none"/><path d="M 90.0 408.6 L 128.7 408.6 L 128.7 374.1 L 167.3 374.1 L 167.3 367.5 L 206.0 367.5 L 206.0 367.5 L 244.7 367.5 L 244.7 351.8 L 283.3 351.8 L 283.3 351.8 L 322.0 351.8 L 322.0 343.3 L 360.7 343.3 L 360.7 343.3 L 399.3 343.3 L 399.3 343.3 L 438.0 343.3 L 438.0 343.3 L 476.7 343.3 L 476.7 343.3 L 515.3 343.3 L 515.3 343.3 L 554.0 343.3 L 554.0 343.3 L 592.7 343.3 L 592.7 343.3 L 631.3 343.3 L 631.3 329.4 L 670.0 329.4 L 670.0 329.4" stroke="var(--c3)" stroke-width="1.8" fill="none"/></g>
-  <g data-tip="GPT-5.5 medium · best 432"><path d="M 90.0 408.6 L 128.7 408.6 L 128.7 391.3 L 167.3 391.3 L 167.3 370.2 L 206.0 370.2 L 206.0 348.9 L 244.7 348.9 L 244.7 348.9 L 283.3 348.9 L 283.3 344.9 L 322.0 344.9 L 322.0 344.9 L 360.7 344.9 L 360.7 344.9 L 399.3 344.9 L 399.3 344.9 L 438.0 344.9 L 438.0 336.0 L 476.7 336.0 L 476.7 336.0 L 515.3 336.0 L 515.3 336.0 L 554.0 336.0 L 554.0 331.3 L 592.7 331.3 L 592.7 331.3 L 631.3 331.3 L 631.3 331.3 L 670.0 331.3 L 670.0 331.3" stroke="transparent" stroke-width="10" fill="none"/><path d="M 90.0 408.6 L 128.7 408.6 L 128.7 391.3 L 167.3 391.3 L 167.3 370.2 L 206.0 370.2 L 206.0 348.9 L 244.7 348.9 L 244.7 348.9 L 283.3 348.9 L 283.3 344.9 L 322.0 344.9 L 322.0 344.9 L 360.7 344.9 L 360.7 344.9 L 399.3 344.9 L 399.3 344.9 L 438.0 344.9 L 438.0 336.0 L 476.7 336.0 L 476.7 336.0 L 515.3 336.0 L 515.3 336.0 L 554.0 336.0 L 554.0 331.3 L 592.7 331.3 L 592.7 331.3 L 631.3 331.3 L 631.3 331.3 L 670.0 331.3 L 670.0 331.3" stroke="var(--c4)" stroke-width="1.8" fill="none"/></g>
-  <g data-tip="Kimi K2.6 · best 396"><path d="M 90.0 408.6 L 128.7 408.6 L 128.7 391.8 L 167.3 391.8 L 167.3 391.8 L 206.0 391.8 L 206.0 391.8 L 244.7 391.8 L 244.7 391.8 L 283.3 391.8 L 283.3 381.9 L 322.0 381.9 L 322.0 381.9 L 360.7 381.9 L 360.7 381.9 L 399.3 381.9 L 399.3 349.7 L 438.0 349.7 L 438.0 349.7 L 476.7 349.7 L 476.7 349.7 L 515.3 349.7 L 515.3 349.7 L 554.0 349.7 L 554.0 349.7 L 592.7 349.7 L 592.7 349.7 L 631.3 349.7 L 631.3 349.7 L 670.0 349.7 L 670.0 349.7" stroke="transparent" stroke-width="10" fill="none"/><path d="M 90.0 408.6 L 128.7 408.6 L 128.7 391.8 L 167.3 391.8 L 167.3 391.8 L 206.0 391.8 L 206.0 391.8 L 244.7 391.8 L 244.7 391.8 L 283.3 391.8 L 283.3 381.9 L 322.0 381.9 L 322.0 381.9 L 360.7 381.9 L 360.7 381.9 L 399.3 381.9 L 399.3 349.7 L 438.0 349.7 L 438.0 349.7 L 476.7 349.7 L 476.7 349.7 L 515.3 349.7 L 515.3 349.7 L 554.0 349.7 L 554.0 349.7 L 592.7 349.7 L 592.7 349.7 L 631.3 349.7 L 631.3 349.7 L 670.0 349.7 L 670.0 349.7" stroke="var(--c5)" stroke-width="1.8" fill="none"/></g>
-  <g data-tip="GPT-5.4 mini · best 396"><path d="M 90.0 408.6 L 128.7 408.6 L 128.7 394.0 L 167.3 394.0 L 167.3 394.0 L 206.0 394.0 L 206.0 394.0 L 244.7 394.0 L 244.7 394.0 L 283.3 394.0 L 283.3 394.0 L 322.0 394.0 L 322.0 394.0 L 360.7 394.0 L 360.7 394.0 L 399.3 394.0 L 399.3 394.0 L 438.0 394.0 L 438.0 370.0 L 476.7 370.0 L 476.7 370.0 L 515.3 370.0 L 515.3 350.5 L 554.0 350.5 L 554.0 350.5 L 592.7 350.5 L 592.7 350.5 L 631.3 350.5 L 631.3 350.5 L 670.0 350.5 L 670.0 350.0" stroke="transparent" stroke-width="10" fill="none"/><path d="M 90.0 408.6 L 128.7 408.6 L 128.7 394.0 L 167.3 394.0 L 167.3 394.0 L 206.0 394.0 L 206.0 394.0 L 244.7 394.0 L 244.7 394.0 L 283.3 394.0 L 283.3 394.0 L 322.0 394.0 L 322.0 394.0 L 360.7 394.0 L 360.7 394.0 L 399.3 394.0 L 399.3 394.0 L 438.0 394.0 L 438.0 370.0 L 476.7 370.0 L 476.7 370.0 L 515.3 370.0 L 515.3 350.5 L 554.0 350.5 L 554.0 350.5 L 592.7 350.5 L 592.7 350.5 L 631.3 350.5 L 631.3 350.5 L 670.0 350.5 L 670.0 350.0" stroke="var(--c6)" stroke-width="1.8" fill="none"/></g>
-  <g data-tip="Gemini 3.5 Flash · best 359"><path d="M 90.0 408.6 L 128.7 408.6 L 128.7 369.0 L 167.3 369.0 L 167.3 369.0 L 206.0 369.0 L 206.0 369.0 L 244.7 369.0 L 244.7 369.0 L 283.3 369.0 L 283.3 369.0 L 322.0 369.0 L 322.0 369.0 L 360.7 369.0 L 360.7 369.0 L 399.3 369.0 L 399.3 369.0 L 438.0 369.0 L 438.0 369.0 L 476.7 369.0 L 476.7 369.0 L 515.3 369.0 L 515.3 369.0 L 554.0 369.0 L 554.0 369.0 L 592.7 369.0 L 592.7 369.0 L 631.3 369.0 L 631.3 369.0 L 670.0 369.0 L 670.0 369.0" stroke="transparent" stroke-width="10" fill="none"/><path d="M 90.0 408.6 L 128.7 408.6 L 128.7 369.0 L 167.3 369.0 L 167.3 369.0 L 206.0 369.0 L 206.0 369.0 L 244.7 369.0 L 244.7 369.0 L 283.3 369.0 L 283.3 369.0 L 322.0 369.0 L 322.0 369.0 L 360.7 369.0 L 360.7 369.0 L 399.3 369.0 L 399.3 369.0 L 438.0 369.0 L 438.0 369.0 L 476.7 369.0 L 476.7 369.0 L 515.3 369.0 L 515.3 369.0 L 554.0 369.0 L 554.0 369.0 L 592.7 369.0 L 592.7 369.0 L 631.3 369.0 L 631.3 369.0 L 670.0 369.0 L 670.0 369.0" stroke="var(--c1)" stroke-width="1.8" fill="none"/></g>
-  <g data-tip="Gemini 3.1 Pro · best 355"><path d="M 90.0 408.6 L 128.7 408.6 L 128.7 408.6 L 167.3 408.6 L 167.3 408.6 L 206.0 408.6 L 206.0 408.6 L 244.7 408.6 L 244.7 408.6 L 283.3 408.6 L 283.3 371.3 L 322.0 371.3 L 322.0 371.3 L 360.7 371.3 L 360.7 371.3 L 399.3 371.3 L 399.3 371.3 L 438.0 371.3 L 438.0 371.3 L 476.7 371.3 L 476.7 371.3 L 515.3 371.3 L 515.3 371.3 L 554.0 371.3 L 554.0 371.3 L 592.7 371.3 L 592.7 371.3 L 631.3 371.3 L 631.3 371.3 L 670.0 371.3 L 670.0 371.3" stroke="transparent" stroke-width="10" fill="none"/><path d="M 90.0 408.6 L 128.7 408.6 L 128.7 408.6 L 167.3 408.6 L 167.3 408.6 L 206.0 408.6 L 206.0 408.6 L 244.7 408.6 L 244.7 408.6 L 283.3 408.6 L 283.3 371.3 L 322.0 371.3 L 322.0 371.3 L 360.7 371.3 L 360.7 371.3 L 399.3 371.3 L 399.3 371.3 L 438.0 371.3 L 438.0 371.3 L 476.7 371.3 L 476.7 371.3 L 515.3 371.3 L 515.3 371.3 L 554.0 371.3 L 554.0 371.3 L 592.7 371.3 L 592.7 371.3 L 631.3 371.3 L 631.3 371.3 L 670.0 371.3 L 670.0 371.3" stroke="var(--c2)" stroke-width="1.8" fill="none"/></g>
-  <text class="tick" x="664.0" y="357.3" text-anchor="end" paint-order="stroke" stroke="var(--bg, #faf9f7)" stroke-width="6" stroke-linejoin="round" style="fill: var(--c-human)">Human reference (VexRiscv 370)</text>
-  <polyline points="670.0,44.5 680.0,44.5 692.0,44.5" fill="none" stroke="#D97757" stroke-width="1" opacity="0.5"/>
-  <polyline points="670.0,282.7 680.0,282.7 692.0,242.0" fill="none" stroke="var(--c2)" stroke-width="1" opacity="0.5"/>
-  <polyline points="670.0,287.6 680.0,287.6 692.0,256.0" fill="none" stroke="var(--c3)" stroke-width="1" opacity="0.5"/>
-  <polyline points="670.0,288.5 680.0,288.5 692.0,270.0" fill="none" stroke="var(--c4)" stroke-width="1" opacity="0.5"/>
-  <polyline points="670.0,305.7 680.0,305.7 692.0,284.0" fill="none" stroke="var(--c5)" stroke-width="1" opacity="0.5"/>
-  <polyline points="670.0,309.1 680.0,309.1 692.0,298.0" fill="none" stroke="var(--c6)" stroke-width="1" opacity="0.5"/>
-  <polyline points="670.0,310.9 680.0,310.9 692.0,312.0" fill="none" stroke="var(--c1)" stroke-width="1" opacity="0.5"/>
-  <polyline points="670.0,315.5 680.0,315.5 692.0,326.0" fill="none" stroke="var(--c2)" stroke-width="1" opacity="0.5"/>
-  <polyline points="670.0,329.4 680.0,329.4 692.0,340.0" fill="none" stroke="var(--c3)" stroke-width="1" opacity="0.5"/>
-  <polyline points="670.0,331.3 680.0,331.3 692.0,354.0" fill="none" stroke="var(--c4)" stroke-width="1" opacity="0.5"/>
-  <polyline points="670.0,349.7 680.0,349.7 692.0,368.0" fill="none" stroke="var(--c5)" stroke-width="1" opacity="0.5"/>
-  <polyline points="670.0,350.0 680.0,350.0 692.0,382.0" fill="none" stroke="var(--c6)" stroke-width="1" opacity="0.5"/>
-  <polyline points="670.0,369.0 680.0,369.0 692.0,396.0" fill="none" stroke="var(--c1)" stroke-width="1" opacity="0.5"/>
-  <polyline points="670.0,371.3 680.0,371.3 692.0,410.0" fill="none" stroke="var(--c2)" stroke-width="1" opacity="0.5"/>
-  <circle cx="670.0" cy="44.5" r="4.5" fill="#D97757" class="point"/>
-  <circle cx="670.0" cy="282.7" r="4.5" fill="var(--c2)" class="point"/>
-  <circle cx="670.0" cy="287.6" r="4.5" fill="var(--c3)" class="point"/>
-  <circle cx="670.0" cy="288.5" r="4.5" fill="var(--c4)" class="point"/>
-  <circle cx="670.0" cy="305.7" r="4.5" fill="var(--c5)" class="point"/>
-  <circle cx="670.0" cy="309.1" r="4.5" fill="var(--c6)" class="point"/>
-  <circle cx="670.0" cy="310.9" r="4.5" fill="var(--c1)" class="point"/>
-  <circle cx="670.0" cy="315.5" r="4.5" fill="var(--c2)" class="point"/>
-  <circle cx="670.0" cy="329.4" r="4.5" fill="var(--c3)" class="point"/>
-  <circle cx="670.0" cy="331.3" r="4.5" fill="var(--c4)" class="point"/>
-  <circle cx="670.0" cy="349.7" r="4.5" fill="var(--c5)" class="point"/>
-  <circle cx="670.0" cy="350.0" r="4.5" fill="var(--c6)" class="point"/>
-  <circle cx="670.0" cy="369.0" r="4.5" fill="var(--c1)" class="point"/>
-  <circle cx="670.0" cy="371.3" r="4.5" fill="var(--c2)" class="point"/>
-  <text class="name" x="696.0" y="48.5" style="fill: #D97757">Claude Opus 5.5 xhigh <tspan class="tick" style="font-weight: 400">983 · R14</tspan></text>
-  <text class="name" x="696.0" y="246.0" style="fill: var(--c2)">GPT-5.5 xhigh <tspan class="tick" style="font-weight: 400">525 · R10</tspan></text>
-  <text class="name" x="696.0" y="260.0" style="fill: var(--c3)">GPT-5.6 Terra <tspan class="tick" style="font-weight: 400">516 · R9</tspan></text>
-  <text class="name" x="696.0" y="274.0" style="fill: var(--c4)">GPT-5.4 xhigh <tspan class="tick" style="font-weight: 400">514 · R8</tspan></text>
-  <text class="name" x="696.0" y="288.0" style="fill: var(--c5)">GPT-5.6 Luna <tspan class="tick" style="font-weight: 400">481 · R7</tspan></text>
-  <text class="name" x="696.0" y="302.0" style="fill: var(--c6)">GPT-6 Astra max <tspan class="tick" style="font-weight: 400">474 · R14</tspan></text>
-  <text class="name" x="696.0" y="316.0" style="fill: var(--c1)">GPT-5.6 Sol <tspan class="tick" style="font-weight: 400">471 · R15</tspan></text>
-  <text class="name" x="696.0" y="330.0" style="fill: var(--c2)">GPT-5.5 high <tspan class="tick" style="font-weight: 400">462 · R14</tspan></text>
-  <text class="name" x="696.0" y="344.0" style="fill: var(--c3)">GPT-6 Sol xhigh <tspan class="tick" style="font-weight: 400">435 · R14</tspan></text>
-  <text class="name" x="696.0" y="358.0" style="fill: var(--c4)">GPT-5.5 medium <tspan class="tick" style="font-weight: 400">432 · R12</tspan></text>
-  <text class="name" x="696.0" y="372.0" style="fill: var(--c5)">Kimi K2.6 <tspan class="tick" style="font-weight: 400">396 · R8</tspan></text>
-  <text class="name" x="696.0" y="386.0" style="fill: var(--c6)">GPT-5.4 mini <tspan class="tick" style="font-weight: 400">396 · R15</tspan></text>
-  <text class="name" x="696.0" y="400.0" style="fill: var(--c1)">Gemini 3.5 Flash <tspan class="tick" style="font-weight: 400">359 · R1</tspan></text>
-  <text class="name" x="696.0" y="414.0" style="fill: var(--c2)">Gemini 3.1 Pro <tspan class="tick" style="font-weight: 400">355 · R5</tspan></text>
-</svg>
-    <figcaption>
-      Running max of CoreMark fitness across the 15 hypothesis rounds for each model's
-      best-performing rep. Lines step up when a winning hypothesis lands and stay flat
-      otherwise. VexRiscv's human-reference fitness is the red dashed line; the baseline
-      V0 core is the gray dashed line.
-    </figcaption>
-  </figure>
+  <div class="eyebrow">Baselines and controls</div>
+  <h2>What the agents beat</h2>
+  <dl class="defs">
+    <dt>Textbook edit</dt>
+    <dd>V0's single-cycle divider replaced by a radix-2 iterative one, the first move most
+      agents make (34 of the 35 designs accepted in round 1 of the first six systems' runs
+      change the divider). It passes every
+      gate and scores 2,645 held-out iter/s, 8.6x V0, all of it clock frequency. Every
+      scored run beats it; system means are 1.3x (GPT-6 Luna) to 2.7x (Opus 5.5) its score.</dd>
+    <dt>Random-mutation control</dt>
+    <dd>No model: 1 to 3 random single-line edits per attempt (swapped operators, changed
+      constants), 135 attempts over 3 runs. 0 accepted:
+      117 fail formal verification, 12 fail
+      co-simulation against an instruction-set simulator, 6 pass every gate
+      but change nothing the design does. The gates do not hand out improvements to blind edits.</dd>
+    <dt>Lessons ablation</dt>
+    <dd>GPT-6.1 Sol run six more times without the lessons file (one-line notes an agent writes
+      after each attempt for later rounds). Full vs no lessons: 1.02x, 95% CI
+      0.91 to 1.14, p = 0.68. Not distinguishable; the
+      interval rules out a gain from the lessons above about 14%.</dd>
+    <dt>Human reference cores</dt>
+    <dd>Ten open-source RV32IM cores built on the same flow with the same stall model. VexRiscv
+      MaxPerf (6,216) falls between the first and second tiers; the other nine
+      score below every second-tier system.</dd>
+  </dl>
 </section>
 
+<section class="section">
+  <div class="eyebrow">Robustness</div>
+  <h2>Does the ranking hold?</h2>
+  <div class="prose">
+  <p>
+    These checks cover the first six systems' 36 runs; the GPT-6.2 runs came later and are
+    not part of them.
+  </p>
+  <p>
+    <strong>Place-and-route settings.</strong> All final designs rebuilt under the six Gowin
+    placement and routing settings that change a build: the same system order, Opus 5.5 vs
+    GPT-6.1 Sol between 1.28x and 1.33x (every p &lt; 0.001), and the same 9 of 12 separating
+    pairs under every setting.
+  </p>
+  <p>
+    <strong>Unseen programs.</strong> On 15 more Embench-IoT programs no agent saw, the system
+    order, the rank intervals and the three indistinguishable pairs are the same; all 740
+    design-program runs give correct results.
+  </p>
+  <p>
+    <strong>Another FPGA.</strong> Every design synthesized for an AMD Artix-7 with Vivado. The
+    split between their top four and bottom two holds; the order inside that top four does not
+    (Opus 5.5 vs GPT-6.1 Sol: 1.03x, p = 0.80). The agents' designs gain less
+    from the faster fabric than the human cores (Fmax ratio 1.17 vs
+    1.67), which suggests that fifteen rounds of tuning against one vendor's
+    timing report fit a design to that part. The V2 ranking is a ranking on the Gowin contract.
+  </p>
+  </div>
+  <div class="wide">
+  <table class="bench">
+    <caption>Held-out score on each FPGA, geometric means over 6 runs; Fmax ratio Artix-7 / Gowin.</caption>
+    <thead><tr><th>System</th><th class="num">Gowin GW2A-18</th><th class="num">Artix-7 200T</th>
+      <th class="num">Fmax ratio</th></tr></thead>
+    <tbody>
+    <tr><td><span class="model-name">Opus 5.5</span></td>
+      <td class="num">7,024</td><td class="num">6,724</td>
+      <td class="num">0.96</td></tr>
+    <tr><td><span class="model-name">Sonnet 5.5</span></td>
+      <td class="num">6,418</td><td class="num">7,511</td>
+      <td class="num">1.17</td></tr>
+    <tr><td><span class="model-name">GPT-6.1 Sol</span></td>
+      <td class="num">5,320</td><td class="num">6,543</td>
+      <td class="num">1.23</td></tr>
+    <tr><td><span class="model-name">GPT-6 Astra</span></td>
+      <td class="num">5,014</td><td class="num">6,236</td>
+      <td class="num">1.24</td></tr>
+    <tr><td><span class="model-name">GPT-5.5</span></td>
+      <td class="num">3,595</td><td class="num">4,385</td>
+      <td class="num">1.22</td></tr>
+    <tr><td><span class="model-name">GPT-6 Luna</span></td>
+      <td class="num">3,538</td><td class="num">4,245</td>
+      <td class="num">1.20</td></tr>
+    <tr class="human-baseline"><td><span class="model-name">VexRiscv MaxPerf</span> (human)</td>
+      <td class="num">6,216</td><td class="num">10,246</td>
+      <td class="num">1.65</td></tr>
+    <tr class="human-baseline"><td><span class="model-name">VexRiscv NoCache</span> (human)</td>
+      <td class="num">4,524</td><td class="num">8,772</td>
+      <td class="num">1.94</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section class="section">
+  <div class="eyebrow">Correctness</div>
+  <h2>What the gates missed</h2>
+  <div class="prose">
+  <p>
+    Three gaps in the correctness checks surfaced during and after scoring the first six
+    systems; none changes a scored result.
+  </p>
+  <ul>
+    <li><strong>Instruction fetch address.</strong> No gate proves that the fetch address stays
+      inside memory. A bounded formal check written after scoring (any 64-word program whose own branches stay in range,
+      arbitrary memory stalls, 20 cycles from reset) passes 36 of 44 designs and finds one
+      failure: an Opus 5.5 design fetches from below address 0 on a mispredicted path, 9 cycles
+      after reset. Its results stay correct. Seven larger designs time out without a
+      counterexample.</li>
+    <li><strong>Multiply and divide arithmetic.</strong> The per-round formal gate replaces
+      multiplier and divider results with stand-in formulas, so co-simulation checks the
+      arithmetic. The vendored formal specification for signed DIV and REM computes the
+      unsigned result, so the contract's full-arithmetic check fails every correct divider.</li>
+    <li><strong>Formal saw different code.</strong> Two final designs gave the formal tool a
+      different version of one block than synthesis and simulation got. Both pass all 53 checks
+      when formal sees the synthesized version.</li>
+  </ul>
+  </div>
+</section>
+
+<section class="section">
+  <div class="eyebrow">From V1 to V2</div>
+  <h2>What changed, and what V1 got wrong</h2>
+  <div class="wide">
+  <table class="bench">
+    <thead><tr><th>V1</th><th>V2</th></tr></thead>
+    <tbody>
+    <tr><td>Open-source timer (nextpnr): misses whole path classes, a 32-bit divider timed at
+      123 MHz that the vendor tool times at 6.9 MHz</td><td>Vendor timer (Gowin EDA) for scoring
+      and for the agents</td></tr>
+    <tr><td>Memory stalls simulated but absent from the timed circuit, so stall logic was free</td>
+      <td>The same stall generator in simulation and in the timed circuit</td></tr>
+    <tr><td>Scored on CoreMark, the program the agents optimize</td><td>Scored on five hidden
+      programs; CoreMark stays the optimization signal</td></tr>
+    <tr><td>Any improvement accepted</td><td>A 4.6% margin, set from measured placement noise</td></tr>
+    <tr><td>2 to 3 runs per model, best run reported</td><td>6 runs per system, pre-registered
+      tests, geometric means</td></tr>
+    <tr><td>Read access differed by CLI (Codex agents could read anything)</td><td>One OS account
+      per concurrent run, the same rules for every CLI, hidden programs unreadable</td></tr>
+    <tr><td>Random-mutation control: 0 of 135 accepted, but a seeding bug made it 3 draws
+      repeated 45 times</td><td>135 independent draws, 0 accepted</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="prose">
+    The <a href="v1/index.html">V1 leaderboard</a> is kept as an archive: its numbers come from
+    the open-source timer and are not comparable with these.
+  </p>
+</section>
+
+<section class="section">
+  <div class="eyebrow">Data</div>
+  <h2>Everything is in the repository</h2>
+  <div class="prose">
+  <ul>
+    <li><a href="https://github.com/FeSens/auto-arch-tournament/tree/v2/research/runs/EXP-2026-09-28-v2-main" class="ext">Pre-registration,
+      amendments and analyses</a> (index in its README)</li>
+    <li><a href="https://github.com/FeSens/auto-arch-tournament/tree/v2/bench/v2" class="ext">Every run</a>: final RTL, per-attempt log,
+      lessons file, full agent transcripts, git history</li>
+    <li><a href="https://github.com/FeSens/auto-arch-tournament/blob/v2/research/v2/NOTES.md" class="ext">Day-by-day research notes</a>,
+      including every incident that stopped a campaign</li>
+    <li><a href="https://github.com/FeSens/auto-arch-tournament/blob/v2/research/v2/V3.md" class="ext">What V2 does not fix</a></li>
+  </ul>
+  </div>
+</section>
 
 <footer class="bot">
   <div>
-    HWE Bench · methodology v1 ·
+    HWE Bench · methodology v2 ·
     <a href="https://github.com/FeSens/auto-arch-tournament" class="ext">source on GitHub</a> ·
     <a href="https://github.com/FeSens/auto-arch-tournament/blob/main/CITATION.cff" class="ext">cite</a>
   </div>
@@ -650,4 +479,3 @@
 </div>
 </body>
 </html>
-

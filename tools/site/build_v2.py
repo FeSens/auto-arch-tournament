@@ -1,8 +1,10 @@
-"""Render site/v2.html, the V2 results page, from the V2 analysis files.
+"""Render site/index.html, the V2 results page (the site's home page), from
+the V2 analysis files.
 
 The page is static output: the GitHub Pages workflow on `main` runs
-build.py (which leaves v2.html alone), and the data this generator reads
-lives on the `v2` branch. Regenerate there and copy the page to main:
+build.py (which writes the V1 pages under site/v1/ and leaves index.html
+alone), and the data this generator reads lives on the `v2` branch.
+Regenerate there and copy the page to main:
 
     python -m tools.site.build_v2 [--out site]
 """
@@ -31,9 +33,12 @@ SYSTEMS = {
     "Astra": ("gpt-6-astra_xhigh-v2", "GPT-6 Astra", "Codex CLI", "var(--c3)"),
     "GPT-5.5": ("gpt-5_5_xhigh-v2", "GPT-5.5", "Codex CLI", "var(--c5)"),
     "Luna": ("gpt-6-luna_xhigh-v2", "GPT-6 Luna", "Codex CLI", "var(--c6)"),
+    "Astra 6.2": ("gpt-6_2-astra_xhigh-v2", "GPT-6.2 Astra", "Codex CLI", "var(--c7)"),
+    "Sol 6.2": ("gpt-6_2-sol_xhigh-v2", "GPT-6.2 Sol", "Codex CLI", "var(--c8)"),
 }
+FIRST_SIX = ("Opus", "Sonnet 5.5", "Sol 6.1", "Astra", "GPT-5.5", "Luna")
 RESULTS = ["results.jsonl", "results-opus-luna.jsonl", "results-sol61.jsonl", "results-astra.jsonl",
-           "results-sonnet55.jsonl", "results-gpt55.jsonl"]
+           "results-sonnet55.jsonl", "results-gpt55.jsonl", "results-g62.jsonl"]
 
 
 def _load_json(rel: str):
@@ -42,6 +47,9 @@ def _load_json(rel: str):
 
 def gm(xs):
     return math.exp(sum(math.log(x) for x in xs) / len(xs))
+
+
+WORDS = {6: "six", 7: "seven", 8: "eight", 9: "nine"}
 
 
 def fint(x) -> str:
@@ -58,12 +66,12 @@ def scored_rows() -> dict[str, list[dict]]:
     return out
 
 
-def chart_runs(final: dict, xf: dict, refs: dict[str, float]) -> str:
+def chart_runs(ranking: list[dict], rows: dict[str, list[dict]], refs: dict[str, float]) -> str:
     """Dot plot: one row per system, one dot per scored run, a bar at the
     geometric mean; dashed verticals for VexRiscv MaxPerf, the textbook
     edit and V0."""
     W, ML, MR, MT, ROW = 960, 150, 30, 46, 46
-    order = [r["system"] for r in final["ranking"]]
+    order = [r["system"] for r in ranking]
     H = MT + ROW * len(order) + 44
     xmax = 8000.0
     pw = W - ML - MR
@@ -87,27 +95,28 @@ def chart_runs(final: dict, xf: dict, refs: dict[str, float]) -> str:
                      f'stroke-width="1" stroke-dasharray="4 3" data-tip="{name}: {fint(v)} iter/s"/>')
         parts.append(f'<text class="tick" x="{x + 4:.1f}" y="{MT - 18 - (i % 2) * 12}" fill="{color}" '
                      f'style="fill:{color}">{label} {fint(v)}</text>')
-    by_sys: dict[str, list[dict]] = {}
-    for r in xf["runs"]:
-        by_sys.setdefault(r["system"], []).append(r)
     for i, s in enumerate(order):
         _, disp, cli, color = SYSTEMS[s]
         y = MT + ROW * i + ROW / 2
         parts.append(f'<text class="axis-label" x="{ML - 12}" y="{y - 3:.1f}" text-anchor="end">{disp}</text>')
         parts.append(f'<text class="tick" x="{ML - 12}" y="{y + 11:.1f}" text-anchor="end">{cli}</text>')
-        g = next(r["geomean"] for r in final["ranking"] if r["system"] == s)
+        g = next(r["geomean"] for r in ranking if r["system"] == s)
         parts.append(f'<line x1="{X(g):.1f}" y1="{y - 13:.1f}" x2="{X(g):.1f}" y2="{y + 13:.1f}" stroke="{color}" '
                      f'stroke-width="3" data-tip="{disp}: geometric mean {fint(g)} iter/s over 6 runs"/>')
-        for r in sorted(by_sys[s], key=lambda r: r["rep"]):
-            parts.append(f'<circle class="point" cx="{X(r["gowin_heldout"]):.1f}" cy="{y:.1f}" r="6" fill="{color}" '
-                         f'fill-opacity="0.75" data-tip="{disp} run {r["rep"]}: {fint(r["gowin_heldout"])} iter/s, '
-                         f'{r["gowin_fmax"]:.1f} MHz"/>')
+        for r in sorted(rows[SYSTEMS[s][0]], key=lambda r: r["rep"]):
+            ho = r["holdout_geomean_iter_s"]
+            parts.append(f'<circle class="point" cx="{X(ho):.1f}" cy="{y:.1f}" r="6" fill="{color}" '
+                         f'fill-opacity="0.75" data-tip="{disp} run {r["rep"]}: {fint(ho)} iter/s, '
+                         f'{r["holdout_fmax_mhz"]:.1f} MHz"/>')
     parts.append("</svg>")
     return "\n".join(parts)
 
 
 def render(stars=None) -> str:
     final = json.loads((RUN / "analysis_final.json").read_text())
+    # Amendment 17 adds GPT-6.2 Astra and GPT-6.2 Sol; its family is provisional until Fable 5.2 finishes.
+    ext2 = json.loads((RUN / "analysis_ext2_provisional.json").read_text())
+    ranking = ext2["ranking"]
     abl = json.loads((RUN / "analysis_ablation.json").read_text())
     xf = _load_json("research/v2/xfpga/results/analysis.json")
     rc = _load_json("research/v2/random_control/analysis.json")
@@ -123,7 +132,7 @@ def render(stars=None) -> str:
 
     # Table 1.
     t1 = []
-    for r in final["ranking"]:
+    for r in ranking:
         model, disp, cli, _ = SYSTEMS[r["system"]]
         rs = rows[model]
         t1.append(f"""
@@ -155,6 +164,14 @@ def render(stars=None) -> str:
     p = final["primary"]
     ext = final["extension"]
     sep = sum(1 for v in ext.values() if v["p_holm"] < 0.05 and (v["ci95"][0] > 1 or v["ci95"][1] < 1))
+    e2 = ext2["extension2"]
+    n_e2 = len(e2)
+    sep2 = sum(1 for v in e2.values() if v["p_holm"] < 0.05 and (v["ci95"][0] > 1 or v["ci95"][1] < 1))
+    lower2 = ("Sol 6.1", "Astra", "GPT-5.5", "Luna")
+    up2 = [1 / e2[f"{lo} vs {new}"]["ratio"] for new in ("Astra 6.2", "Sol 6.2") for lo in lower2]
+    a62 = e2["Opus vs Astra 6.2"]
+    n_runs = sum(r["n"] for r in ranking)
+    n_sys = WORDS[len(ranking)]
     at = abl["test"]
 
     # Artix-7 table.
@@ -181,20 +198,21 @@ def render(stars=None) -> str:
     hd = head("HWE Bench · V2 results", "v2", stars)
     return hd + f"""
 <section class="hero-block">
-  <div class="hero-eyebrow">V2 · October 2026 · six agent systems · 36 scored runs</div>
+  <div class="hero-eyebrow">V2 · October to November 2026 · {n_sys} agent systems · {n_runs} scored runs</div>
   <h1 class="hero">V2 results</h1>
   <p class="hero-lede">
     V2 rebuilt the score after V1's open-source timer turned out to miss whole classes of
     circuit paths. Every design is now timed by the FPGA vendor's own tool, with memory stalls
     present in the timed circuit, and ranked on five hidden programs the agents never see.
-    Six agent systems (a model inside its vendor's command-line agent) each ran six times from
-    the same starting core, 15 rounds of 3 attempts per run.
+    {n_sys.capitalize()} agent systems (a model inside its vendor's command-line agent) each ran six
+    times from the same starting core, 15 rounds of 3 attempts per run. Fable 5.2 (Claude Code)
+    is running now.
   </p>
   <div class="hero-thesis">
     <span class="label">Result</span>
-    Three tiers: Opus 5.5 and Sonnet 5.5 (Claude Code), then GPT-6.1 Sol and GPT-6 Astra
-    (Codex CLI), then GPT-5.5 and GPT-6 Luna (Codex CLI). Pre-registered test, Opus 5.5 vs
-    GPT-6.1 Sol: {p['ratio']:.2f}x, 95% CI {p['ci95'][0]:.2f} to {p['ci95'][1]:.2f}, p = {p['p']:.4f}.
+    Three tiers: Opus 5.5, GPT-6.2 Astra, GPT-6.2 Sol and Sonnet 5.5, then GPT-6.1 Sol and
+    GPT-6 Astra, then GPT-5.5 and GPT-6 Luna. Pre-registered test, Opus 5.5 vs GPT-6.1 Sol:
+    {p['ratio']:.2f}x, 95% CI {p['ci95'][0]:.2f} to {p['ci95'][1]:.2f}, p = {p['p']:.4f}.
   </div>
 </section>
 
@@ -202,7 +220,7 @@ def render(stars=None) -> str:
   <div class="eyebrow">Every scored run</div>
   <h2>Held-out score per run</h2>
   <figure class="chart">
-    {chart_runs(final, xf, refs)}
+    {chart_runs(ranking, rows, refs)}
     <figcaption>
       One dot per scored run (six per system), the bar is the system's geometric mean.
       Held-out score = the design's maximum clock frequency (Gowin EDA, GW2A-18) times the
@@ -215,11 +233,12 @@ def render(stars=None) -> str:
 
 <section class="section">
   <div class="eyebrow">Final designs</div>
-  <h2>Six systems, six runs each</h2>
+  <h2>{n_sys.capitalize()} systems, six runs each</h2>
   <div class="wide">
   <table class="bench">
     <caption>Geometric means over 6 runs; Fmax and LUT4 are medians. Rank interval: 95% bootstrap.
-      Blank cells do not apply. Harness 2.8.2 for every scored run.</caption>
+      Blank cells do not apply. Harness 2.8.2 for the first six systems, 2.8.4 for GPT-6.2
+      Astra and Sol (the same agent setup, scoring and gates).</caption>
     <thead><tr>
       <th>System (agent CLI)</th><th class="num">Held-out iter/s</th><th class="num">Rank interval</th>
       <th class="num">CoreMark iter/s</th><th class="num">Fmax (MHz)</th><th class="num">Area (LUT4)</th>
@@ -232,10 +251,20 @@ def render(stars=None) -> str:
   <p>
     The pre-registered comparison, Opus 5.5 against GPT-6.1 Sol, separates:
     ratio {p['ratio']:.3f} [{p['ci95'][0]:.3f}, {p['ci95'][1]:.3f}], p = {p['p']:.4f}.
-    Of the 12 further pairs (Holm-corrected), {sep} separate. The three that do not are the
+    Of the 12 further pairs among the first six systems (Holm-corrected), {sep} separate. The three that do not are the
     pairs inside each tier: Opus 5.5 vs Sonnet 5.5, GPT-6.1 Sol vs GPT-6 Astra, and
     GPT-5.5 vs GPT-6 Luna. Six runs per system resolve differences of about 20%, not the
     6 to 10% gaps inside a tier.
+  </p>
+  <p>
+    GPT-6.2 Astra and GPT-6.2 Sol (Codex CLI 0.170.0) ran in November, 46 days after the
+    others, in a test family of their own (amendment 17, Holm-corrected; provisional until
+    Fable 5.2's runs finish). {sep2} of its {n_e2} pairs separate: each GPT-6.2 system ranks above
+    GPT-6.1 Sol and GPT-6 Astra ({min(up2[:2] + up2[4:6]):.2f}x to {max(up2[:2] + up2[4:6]):.2f}x) and above
+    GPT-5.5 and GPT-6 Luna ({min(up2[2:4] + up2[6:]):.2f}x to {max(up2[2:4] + up2[6:]):.2f}x). Neither separates
+    from Opus 5.5, Sonnet 5.5 or the other: Opus 5.5 vs GPT-6.2 Astra is
+    {a62['ratio']:.2f}x [{a62['ci95'][0]:.2f}, {a62['ci95'][1]:.2f}]. A comparison with an earlier
+    system also spans the gap in time and the newer Codex CLI.
   </p>
   </div>
 </section>
@@ -246,7 +275,8 @@ def render(stars=None) -> str:
   <dl class="defs">
     <dt>Textbook edit</dt>
     <dd>V0's single-cycle divider replaced by a radix-2 iterative one, the first move most
-      agents make (34 of the 35 designs accepted in round 1 change the divider). It passes every
+      agents make (34 of the 35 designs accepted in round 1 of the first six systems' runs
+      change the divider). It passes every
       gate and scores {fint(tb_ho)} held-out iter/s, 8.6x V0, all of it clock frequency. Every
       scored run beats it; system means are 1.3x (GPT-6 Luna) to 2.7x (Opus 5.5) its score.</dd>
     <dt>Random-mutation control</dt>
@@ -272,6 +302,10 @@ def render(stars=None) -> str:
   <h2>Does the ranking hold?</h2>
   <div class="prose">
   <p>
+    These checks cover the first six systems' 36 runs; the GPT-6.2 runs came later and are
+    not part of them.
+  </p>
+  <p>
     <strong>Place-and-route settings.</strong> All final designs rebuilt under the six Gowin
     placement and routing settings that change a build: the same system order, Opus 5.5 vs
     GPT-6.1 Sol between 1.28x and 1.33x (every p &lt; 0.001), and the same 9 of 12 separating
@@ -284,7 +318,7 @@ def render(stars=None) -> str:
   </p>
   <p>
     <strong>Another FPGA.</strong> Every design synthesized for an AMD Artix-7 with Vivado. The
-    split between the top four and the bottom two holds; the order inside the top four does not
+    split between their top four and bottom two holds; the order inside that top four does not
     (Opus 5.5 vs GPT-6.1 Sol: {xa['ratio']:.2f}x, p = {xa['p']:.2f}). The agents' designs gain less
     from the faster fabric than the human cores (Fmax ratio {fr['agents_gm']:.2f} vs
     {fr['refs_gm']:.2f}), which suggests that fifteen rounds of tuning against one vendor's
@@ -307,8 +341,8 @@ def render(stars=None) -> str:
   <h2>What the gates missed</h2>
   <div class="prose">
   <p>
-    Three gaps in the correctness checks surfaced during and after scoring; none changes a
-    scored result.
+    Three gaps in the correctness checks surfaced during and after scoring the first six
+    systems; none changes a scored result.
   </p>
   <ul>
     <li><strong>Instruction fetch address.</strong> No gate proves that the fetch address stays
@@ -353,8 +387,8 @@ def render(stars=None) -> str:
   </table>
   </div>
   <p class="prose">
-    The <a href="index.html">leaderboard on the home page</a> is V1's: its numbers come from the
-    open-source timer and are not comparable with these.
+    The <a href="v1/index.html">V1 leaderboard</a> is kept as an archive: its numbers come from
+    the open-source timer and are not comparable with these.
   </p>
 </section>
 
@@ -380,8 +414,8 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--out", type=Path, default=REPO / "site")
     a = ap.parse_args()
-    (a.out / "v2.html").write_text(render())
-    print(f"wrote {a.out / 'v2.html'}")
+    (a.out / "index.html").write_text(render())
+    print(f"wrote {a.out / 'index.html'}")
     return 0
 
 

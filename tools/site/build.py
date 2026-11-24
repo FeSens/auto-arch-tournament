@@ -8,6 +8,12 @@ Usage:
     python -m tools.site.build
     python -m tools.site.build --out site/
 
+Layout (2026-11): the home page site/index.html is the V2 results page,
+generated on the v2 branch by tools/site/build_v2.py and committed here as
+static HTML. This builder renders the V1 pages into site/v1/ and writes
+redirect stubs where V1 pages used to live (methodology.html, models.html,
+data.html) and for v2.html, which now redirects to the home page.
+
 The generator is intentionally simple: f-string templates, no template
 engine. If you want to change copy, edit this file. If you want to
 change layout, edit the HTML / CSS in site/. Tokens live in
@@ -56,7 +62,7 @@ DEFAULT_RESULTS = REPO / "bench" / "results.jsonl"
 DEFAULT_OUT = REPO / "site"
 
 BASELINE_FITNESS = 282.82
-SITE_VERSION = "v2 · 2026-10"
+SITE_VERSION = "v2 · 2026-11"
 
 # Models registered for the next field but not yet fully represented in
 # bench/results.jsonl. The status table is rendered on the leaderboard and
@@ -401,7 +407,22 @@ def render_scheduled_models(aggs: list[ModelAgg]) -> str:
 
 # ── shared HTML fragments ──────────────────────────────────────────
 
+V1_PAGES = (("index.html", "index", "V1 leaderboard"), ("methodology.html", "methodology", "Methodology"),
+            ("models.html", "models", "Models"), ("data.html", "data", "Data"))
+
+
 def head(title: str, current: str, stars: Optional[int] = None) -> str:
+    """Page head and nav. current == "v2" is the home page (site/index.html);
+    every other value is a V1 page under site/v1/, one level down."""
+    root = "" if current == "v2" else "../"
+    items = [(f"{root}index.html", "v2", "V2 results")]
+    if current == "v2":
+        items.append(("v1/index.html", "v1", "V1 archive"))
+    else:
+        items += list(V1_PAGES)
+    mark = ' aria-current="page"'
+    nav = "\n".join(f'    <li><a href="{href}"{mark if key == current else ""}>{label}</a></li>'
+                    for href, key, label in items)
     if stars is None:
         star_html = "github"
     else:
@@ -414,20 +435,16 @@ def head(title: str, current: str, stars: Optional[int] = None) -> str:
 <title>{title}</title>
 <meta name="description" content="HWE Bench is an unbounded benchmark for LLM hardware engineering. Models design RISC-V CPUs that are scored by how fast they actually run on a real FPGA, only after passing formal correctness proofs.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400&display=swap">
-<link rel="stylesheet" href="css/style.css">
-<link rel="stylesheet" href="css/print.css">
+<link rel="stylesheet" href="{root}css/style.css">
+<link rel="stylesheet" href="{root}css/print.css">
 </head>
 <body>
 <div class="page">
 
 <nav class="top">
-  <a href="index.html" class="wordmark">HWE <span class="alt">Bench</span></a>
+  <a href="{root}index.html" class="wordmark">HWE <span class="alt">Bench</span></a>
   <ul>
-    <li><a href="v2.html"{' aria-current="page"' if current=='v2' else ''}>V2 results</a></li>
-    <li><a href="index.html"{' aria-current="page"' if current=='index' else ''}>V1 leaderboard</a></li>
-    <li><a href="methodology.html"{' aria-current="page"' if current=='methodology' else ''}>Methodology</a></li>
-    <li><a href="models.html"{' aria-current="page"' if current=='models' else ''}>Models</a></li>
-    <li><a href="data.html"{' aria-current="page"' if current=='data' else ''}>Data</a></li>
+{nav}
   </ul>
   <div class="meta">
     <a href="https://github.com/FeSens/auto-arch-tournament" class="repo" aria-label="HWE Bench source on GitHub, click to view repo and star">{star_html}</a>
@@ -1151,14 +1168,14 @@ def render_index(aggs: list[ModelAgg], reps: list[Rep], stars: Optional[int] = N
 </section>
 
 <section class="section v2-notice">
-  <div class="eyebrow">V2 results, October 2026</div>
-  <h2>This leaderboard is V1. <a href="v2.html">See V2.</a></h2>
+  <div class="eyebrow">V2 results, October to November 2026</div>
+  <h2>This leaderboard is V1. <a href="../index.html">See V2.</a></h2>
   <p class="prose">
     V2 found that V1's open-source timer (nextpnr) misses whole classes of circuit paths, so the
     Fmax and fitness numbers below overstate many designs. V2 times every design with the FPGA
-    vendor's tool, ranks on hidden programs, and ran six agent systems six times each. Its
-    result is three tiers: Opus 5.5 and Sonnet 5.5, then GPT-6.1 Sol and GPT-6 Astra, then
-    GPT-5.5 and GPT-6 Luna. <a href="v2.html">V2 results</a>
+    vendor's tool, ranks on hidden programs, and runs every agent system six times. Its
+    result is three tiers: Opus 5.5, GPT-6.2 Astra, GPT-6.2 Sol and Sonnet 5.5, then GPT-6.1
+    Sol and GPT-6 Astra, then GPT-5.5 and GPT-6 Luna. <a href="../index.html">V2 results</a>
   </p>
 </section>
 
@@ -1595,6 +1612,26 @@ def render_data(reps: list[Rep], stars: Optional[int] = None) -> str:
 
 # ── main ──────────────────────────────────────────────────────────
 
+REDIRECTS = {"v2.html": "./", "methodology.html": "v1/methodology.html",
+             "models.html": "v1/models.html", "data.html": "v1/data.html"}
+
+
+def redirect_page(target: str) -> str:
+    return f"""<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>HWE Bench</title>
+<link rel="canonical" href="{target}">
+<meta http-equiv="refresh" content="0; url={target}">
+</head>
+<body>
+<p>This page moved: <a href="{target}">{target}</a></p>
+</body>
+</html>
+"""
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--results", type=Path, default=DEFAULT_RESULTS)
@@ -1608,16 +1645,17 @@ def main() -> int:
     aggs = aggregate(reps)
     stars = fetch_star_count()
 
-    args.out.mkdir(parents=True, exist_ok=True)
-    (args.out / "index.html").write_text(render_index(aggs, reps, stars))
-    (args.out / "methodology.html").write_text(render_methodology(stars))
-    (args.out / "models.html").write_text(render_models(aggs, stars))
-    (args.out / "data.html").write_text(render_data(reps, stars))
-
-    print(f"wrote {args.out}/index.html")
-    print(f"wrote {args.out}/methodology.html")
-    print(f"wrote {args.out}/models.html")
-    print(f"wrote {args.out}/data.html")
+    v1 = args.out / "v1"
+    v1.mkdir(parents=True, exist_ok=True)
+    pages = {"index.html": render_index(aggs, reps, stars), "methodology.html": render_methodology(stars),
+             "models.html": render_models(aggs, stars), "data.html": render_data(reps, stars)}
+    for name, html in pages.items():
+        (v1 / name).write_text(html)
+        print(f"wrote {v1}/{name}")
+    # Old addresses: the V1 pages moved to v1/, and v2.html is now the home page.
+    for name, target in REDIRECTS.items():
+        (args.out / name).write_text(redirect_page(target))
+        print(f"wrote {args.out}/{name} (redirect to {target})")
     print(f"  ({len(reps)} reps · {len(aggs)} models · github stars: {stars if stars is not None else 'n/a'})")
     return 0
 
