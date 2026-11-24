@@ -821,3 +821,23 @@ Sol rep3 pc_fwd counterexamples. Operator notes: babysit gap Nov 21 05:21Z to No
 10.6 GB causal_ch0 solver in Sol rep5 r9s2's gate, 2 minutes before that gate's 2700 s
 ceiling, outcome unchanged); the ext2 launcher
 had died (tmux pane gone), fixed to log and retry, restarted 21:57Z for the Fable smoke.
+
+## 2026-11-24: Fable 5.2 launched and paused by its usage limit; GPT-6.2 published
+
+Smoke23 failed only the plugin gate (Claude Code 2.1.327 ships cc-plugin-agents-md,
+cc-plugin-privacy and cc-plugin-plugin-authoring); the operator chose to accept the set as
+shipped (amendment 18), and the three Fable runners started 2026-11-23 23:50Z (probes
+confined). About 01:35Z every agent call hit "You've hit your Fable limit · resets Nov 25,
+10am (Europe/Berlin)": rep1 286.6, rep3 227.2 after round 4, rep5 242.3 after round 3. The
+harness waits (20-minute polls) and reruns each interrupted attempt from scratch; the pause
+does not count against the system. Fable use before the limit, smoke included: about $265
+API-equivalent, so six 15-round reps (about $300 each at this pace) likely need several
+limit windows.
+
+Published on the operator's request: the phase 1 archive (d3b1cfe; Codex session tarballs
+stay on the host because they hold account ids), the provisional amendment 17 analysis
+(analysis_ext2_provisional.md: 13 pairs without Fable, 8 separate; GPT-6.2 Astra and Sol
+rank above GPT-6.1 Sol, GPT-6 Astra, GPT-5.5 and Luna and do not separate from Opus 5.5,
+Sonnet 5.5 or each other), and the site: hwebench.com's home page is now the V2 page with
+eight systems (main d6618a5), the V1 pages moved to /v1/, and v2.html plus the old V1
+addresses redirect.
