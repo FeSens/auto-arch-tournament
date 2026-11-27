@@ -841,3 +841,22 @@ rank above GPT-6.1 Sol, GPT-6 Astra, GPT-5.5 and Luna and do not separate from O
 Sonnet 5.5 or each other), and the site: hwebench.com's home page is now the V2 page with
 eight systems (main d6618a5), the V1 pages moved to /v1/, and v2.html plus the old V1
 addresses redirect.
+
+## 2026-11-27: Fable 5.2 paused by its weekly limit; partial archive before an operator stop
+
+The Fable runs resumed 2026-11-25 09:19Z and ran until 14:43Z, when every agent call hit a
+second limit, "You've hit your Fable limit · resets Dec 2, 10am (Europe/Berlin)" (weekly).
+State after 9 of 15 rounds each (CoreMark, best so far): rep1 315.1 (5/22/0
+accepted/rejected/broken), rep3 266.1 (5/20/2), rep5 357.1 (5/19/1). The three broken slots
+are 2700 s formal timeouts reviewed as the designs' own formal difficulty (monitor_review
+ad532b3), one of them during a host memory spike that ended in a kernel OOM kill of that
+gate's own solver (Nov 25 10:59Z). Pace: about 9 rounds per runner per weekly allowance.
+
+The operator plans to stop the campaign and may resume later. The runner has no mid-rep
+resume (a restart deletes the clone and home and starts the rep from round 1), so reps 1,
+3 and 5 were archived as they stood: bench/v2/claude-fable-5_2_xhigh-v2/rep{1,3,5}/
+partial-2026-11-27/ (log.jsonl, orchestrator.log, LESSONS.md, champion RTL, every agent
+transcript, repo.bundle of the clone). Credential scan clean (the only pattern hits are
+fixture strings already in the repo and a base64 substring). These partial reps are not
+scored: if the campaign resumes, reps 1, 3 and 5 rerun from scratch under amendment 17, and
+this stop is reported as an operator stop, not a system result.
